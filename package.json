@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "displayName": "Abstract Pixel Library",
     "description": "Core engineering utilities and Save System modules.",
-    "unity": "6000.0.23f1",
+    "unity": "6000.0",
     "author": {
         "name": "Abstract Pixel",
         "email": "abstractpixelstudios@gmail.com"
