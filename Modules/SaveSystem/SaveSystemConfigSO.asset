@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eef6100df71bb3f4fb3f307199f3c8db, type: 3}
+  m_Name: SaveSystemConfigSO
+  m_EditorClassIdentifier: AbstractPixel.Utility.Save::AbstractPixel.Utility.Save.SaveSystemConfigSO
+  <UseDebugPath>k__BackingField: 0
+  <GameProfileGuidLength>k__BackingField: 6
+  <StartupPolicy>k__BackingField: 1
+  <PrimaryFileExtension>k__BackingField: 1
+  ignoredScenes: []
+  categoryDefinitionList:
+  - DisplayName: Input
+    Category: 1
+    DirectoryScope: 1
+    CustomFileName: Input
+    EncryptFile: 0
+    IsSceneSpecific: 0
+  - DisplayName: Settings
+    Category: 2
+    DirectoryScope: 1
+    CustomFileName: 
+    EncryptFile: 0
+    IsSceneSpecific: 0
+  - DisplayName: Game
+    Category: 5
+    DirectoryScope: 2
+    CustomFileName: Profile
+    EncryptFile: 0
+    IsSceneSpecific: 0
+  - DisplayName: Achievements
+    Category: 4
+    DirectoryScope: 2
+    CustomFileName: fakedData
+    EncryptFile: 0
+    IsSceneSpecific: 0

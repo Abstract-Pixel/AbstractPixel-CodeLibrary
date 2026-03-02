@@ -1,0 +1,82 @@
+/* --- SaveManagerEditor.uss --- */
+
+/* The main container box */
+.debug-container {
+    margin-top: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 5px;
+    background-color: #404040;
+    border-width: 1px;
+    border-color: #242424;
+}
+
+
+/* The Foldout Header ("Debug Controls") */
+.debug-foldout {
+}
+
+.debug-foldout .unity-base-field {
+    align-self: flex-start;
+    scale: 1.2;
+    margin-left: 20px;
+}
+
+/* Target the Content Container inside your specific Debug Foldout */
+.debug-foldout .unity-foldout__content {
+    margin-left: 0;
+    
+}
+
+/* The Section Headers ("Editor Controls", "Runtime Controls") */
+.control-label {
+    -unity-font-style: bold;
+    font-size: 12px;
+    -unity-text-align: LowerLeft;
+    padding-left: 28px;
+    padding-top: 1px;
+    background-color: #323232;
+    border-top-width: 1px;
+    border-color: #242424;
+}
+
+.editor-controls-container {
+    padding-top: 10px;
+    padding-left: 35px;
+    padding-right: 35px;
+    padding-bottom: 5px;
+    border-color: #242424;
+}
+
+.runtime-controls-container {
+    padding-top: 10px;
+    padding-left: 35px;
+    padding-right: 35px;
+}
+
+
+
+/* The "Delete All Saves" Button */
+.delete-saves-button {
+    white-space: pre-wrap;
+    background-color: #645050;
+    padding-top: 7px;
+    margin-bottom: 7px;
+    padding-bottom: 7px;
+}
+
+/* The Standard Editor Buttons ("Open Directory...") */
+.editor-control-button {
+    white-space: pre-wrap;
+    padding-top: 7px;
+    margin-bottom: 7px;
+    padding-bottom: 7px;
+}
+
+/* The Runtime Buttons ("SAVE ALL", "LOAD ALL") */
+.runtime-control-button {
+    white-space: pre-wrap;
+    padding-top: 7px;
+    margin-bottom: 7px;
+    padding-bottom: 7px;
+}
