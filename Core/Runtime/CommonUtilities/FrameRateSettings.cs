@@ -1,4 +1,3 @@
-using CustomInspector;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -10,7 +9,7 @@ public class FrameRateSettings : MonoBehaviour
     float counter;
     float startTime;
   
-    [SerializeField] [FixedValues(20,30,60,80,90,120,144,240,400)] int frameRate = 60;
+    [SerializeField]  int frameRate = 60;
 
     private void Awake()
     {

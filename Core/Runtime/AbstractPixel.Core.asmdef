@@ -2,8 +2,8 @@
     "name": "AbstractPixel.Core",
     "rootNamespace": "AbstractPixel.Core",
     "references": [
-        "GUID:962f75d2a66ca3741815080a77b41adb",
-        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:962f75d2a66ca3741815080a77b41adb"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
