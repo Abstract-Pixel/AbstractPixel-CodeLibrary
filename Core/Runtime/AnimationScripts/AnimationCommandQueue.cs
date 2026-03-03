@@ -1,11 +1,14 @@
-using System.Collections.Generic;
-using UnityEngine;
-using System.Collections;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace AbstractPixel.Core
 {
+    /// <summary> A utility class that manages a queue of animation commands, ensuring they are executed sequentially.
+    /// It uses a MonoBehaviour to run coroutines for processing the queue. The class provides methods to add commands, control execution flow,
+    /// and track whether it is currently busy executing commands. It also raises events when animations start and are in progress.</summary>
     [Serializable]
     public class AnimationCommandQueue
     {

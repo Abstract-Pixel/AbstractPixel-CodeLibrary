@@ -9,7 +9,7 @@ namespace AbstractPixel.Core
             Duration = duration;
         }
 
-        public override bool IsFinished => CurrentTime<=0;
+        public override bool IsFinished => CurrentTime <= 0;
 
         public override void Reset()
         {
@@ -32,14 +32,14 @@ namespace AbstractPixel.Core
             if (IsRunning && CurrentTime > 0)
             {
                 CurrentTime -= Time.deltaTime;
-                if(CurrentTime<0)
+                if (CurrentTime < 0)
                 {
                     CurrentTime = 0;
                 }
                 OnTimerTick.Invoke();
             }
 
-            if(IsRunning && CurrentTime<=0)
+            if (IsRunning && CurrentTime <= 0)
             {
                 Stop();
             }

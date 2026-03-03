@@ -1,26 +1,26 @@
-using System.Reflection;
 using System;
+using System.Reflection;
 using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
 {
     [Serializable]
-    public class SaveableTarget
+    public class SavableTarget
     {
-        [HideInInspector][SerializeField]public string InpsectorName;
+        [HideInInspector][SerializeField] public string InspectorName;
         public MonoBehaviour Script;
-        public SaveableIdentification Identification;
+        public SavableIdentification Identification;
 
         // Runtime Only
         public MethodInfo CaptureDataMethod;
         public MethodInfo RestoreDataMethod;
         public Type DataToSaveType;
 
-        public SaveableTarget(MonoBehaviour _script, SaveableIdentification _identification)
+        public SavableTarget(MonoBehaviour _script, SavableIdentification _identification)
         {
             Script = _script;
             Identification = _identification;
-            InpsectorName = _identification.ClassName;
+            InspectorName = _identification.ClassName;
         }
 
     }

@@ -2,6 +2,11 @@
 
 namespace AbstractPixel.Core
 {
+    /// <summary> A MonoBehaviour-based singleton that persists across scene loads. Automatically creates an instance if none exists when accessed.</summary>
+    /// <typeparam name="T">The type of the singleton component.</typeparam>
+    /// <remarks>PersistentSingleton is commonly used to implement a simple singleton pattern for MonoBehaviour components,
+    /// allowing a single instance to persist across scene loads. The instance is automatically created if it doesn't exist
+    /// and destroyed if a duplicate is found. This class is not thread-safe and should be used on the main Unity thread.</remarks> 
     public class PersistentSingleton<T> : MonoBehaviour where T : Component
     {
         public bool AutoUnparentOnAwake = true;
@@ -12,7 +17,7 @@ namespace AbstractPixel.Core
         public static bool HasInstance => instance != null;
         public static T TryGetInstance() => HasInstance ? instance : null;
 
-   
+
         static PersistentSingleton()
         {
             StaticsResetter.OnResetStatics += ResetState;

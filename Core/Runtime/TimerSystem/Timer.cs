@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace AbstractPixel.Core
 {
-    public abstract class Timer: IDisposable
+    public abstract class Timer : IDisposable
     {
         public float CurrentTime { get; protected set; }
         public bool IsRunning { get; protected set; }
@@ -24,11 +24,11 @@ namespace AbstractPixel.Core
 
         public void Start()
         {
-            if(!IsRunning)
+            if (!IsRunning)
             {
                 OnStart();
                 IsRunning = true;
-                OnTimerStart.Invoke();  
+                OnTimerStart.Invoke();
                 TimerManager.RegisterTimer(this);
             }
         }
@@ -39,7 +39,7 @@ namespace AbstractPixel.Core
 
         public void Stop()
         {
-            if(IsRunning)
+            if (IsRunning)
             {
                 IsRunning = false;
                 OnTimerStop.Invoke();
@@ -71,7 +71,7 @@ namespace AbstractPixel.Core
         {
             if (disposed) return;
 
-            if(disposing)
+            if (disposing)
             {
                 TimerManager.UnregisterTimer(this);
                 OnTimerStart = null;

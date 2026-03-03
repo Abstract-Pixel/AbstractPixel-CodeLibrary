@@ -18,7 +18,7 @@ namespace AbstractPixel.Core
         public override bool IsFinished => durationHasBeenSet && CurrentTime >= Duration;
 
         public override void Reset() => CurrentTime = 0;
- 
+
         public void Reset(float duration)
         {
             Duration = duration;

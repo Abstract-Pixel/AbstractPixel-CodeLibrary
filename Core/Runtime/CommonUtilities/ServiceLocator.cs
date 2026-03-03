@@ -2,87 +2,97 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class ServiceLocator
+namespace AbstractPixel.Core
 {
-    private static readonly Dictionary<Type, object> services = new();
-
-    /// <summary>
-    /// Registers a service instance. 
-    /// Recommended to call this in Awake().
-    /// </summary>
-    public static void Register<T>(T service)
+    /// <summary>Provides a global mechanism for registering and retrieving service instances by type. Enables decoupled access
+    /// to shared services within the application.</summary>
+    /// <remarks>ServiceLocator is commonly used to implement a simple dependency resolution pattern, allowing
+    /// components to access services without direct references. Services should be registered early in the application
+    /// lifecycle, typically in Awake, and retrieved after all registrations are complete, such as in Start. This class
+    /// is static and thread-unsafe; concurrent access may result in race conditions. All registered services are
+    /// cleared automatically when the domain reloads (e.g., when entering Play Mode in Unity).</remarks>
+    public static class ServiceLocator
     {
-        var type = typeof(T);
+        private static readonly Dictionary<Type, object> services = new();
 
-        if (services.ContainsKey(type))
+        /// <summary>
+        /// Registers a service instance. 
+        /// Recommended to call this in Awake().
+        /// </summary>
+        public static void Register<T>(T service)
         {
-            Debug.LogWarning($"ServiceLocator: A service of type {type.Name} is already registered. Overwriting with new instance.");
-            services[type] = service;
-        }
-        else
-        {
-            services.Add(type, service);
-        }
-    }
+            var type = typeof(T);
 
-    /// <summary>
-    /// Unregisters a service. 
-    /// Call this in OnDestroy() if the service is a MonoBehaviour that gets destroyed.
-    /// </summary>
-    public static void Unregister<T>(T service)
-    {
-        var type = typeof(T);
-        if (services.ContainsKey(type))
-        {
-            if (services[type] == (object)service)
+            if (services.ContainsKey(type))
             {
-                services.Remove(type);
+                Debug.LogWarning($"ServiceLocator: A service of type {type.Name} is already registered. Overwriting with new instance.");
+                services[type] = service;
+            }
+            else
+            {
+                services.Add(type, service);
             }
         }
-    }
 
-    /// <summary>
-    /// Retrieves a service. 
-    /// Recommended to call this in Start() or later (not Awake).
-    /// </summary>
-    public static T Get<T>()
-    {
-        var type = typeof(T);
-
-        if (!services.TryGetValue(type, out var service))
+        /// <summary>
+        /// Unregisters a service. 
+        /// Call this in OnDestroy() if the service is a MonoBehaviour that gets destroyed.
+        /// </summary>
+        public static void Unregister<T>(T service)
         {
-            Debug.LogError($"ServiceLocator: Critical Error! Service of type {type.Name} was requested but not found.\n" +
-                           "1. Did you forget to Register it in Awake?\n" +
-                           "2. Are you calling Get() too early (in Awake instead of Start)?\n" +
-                           "3. Is the GameObject holding the service active?");
-            return default;
+            var type = typeof(T);
+            if (services.ContainsKey(type))
+            {
+                if (services[type] == (object)service)
+                {
+                    services.Remove(type);
+                }
+            }
         }
 
-        return (T)service;
-    }
-
-    /// <summary>
-    /// Safer version of Get that doesn't log an error if missing.
-    /// </summary>
-    public static bool TryGet<T>(out T service)
-    {
-        var type = typeof(T);
-        if (services.TryGetValue(type, out var instance))
+        /// <summary>
+        /// Retrieves a service. 
+        /// Recommended to call this in Start() or later (not Awake).
+        /// </summary>
+        public static T Get<T>()
         {
-            service = (T)instance;
-            return true;
+            var type = typeof(T);
+
+            if (!services.TryGetValue(type, out var service))
+            {
+                Debug.LogError($"ServiceLocator: Critical Error! Service of type {type.Name} was requested but not found.\n" +
+                               "1. Did you forget to Register it in Awake?\n" +
+                               "2. Are you calling Get() too early (in Awake instead of Start)?\n" +
+                               "3. Is the GameObject holding the service active?");
+                return default;
+            }
+
+            return (T)service;
         }
 
-        service = default;
-        return false;
-    }
+        /// <summary>
+        /// Safer version of Get that doesn't log an error if missing.
+        /// </summary>
+        public static bool TryGet<T>(out T service)
+        {
+            var type = typeof(T);
+            if (services.TryGetValue(type, out var instance))
+            {
+                service = (T)instance;
+                return true;
+            }
 
-    /// <summary>
-    /// Clears all services. Automatically called when Domain Reloads (Play Mode starts).
-    /// </summary>
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics()
-    {
-        services.Clear();
+            service = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Clears all services. Automatically called when Domain Reloads (Play Mode starts).
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            services.Clear();
+        }
     }
 }

@@ -1,7 +1,7 @@
-using UnityEngine;
-using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
+using UnityEngine;
 
 public class ScriptBatchCreation : EditorWindow
 {
@@ -199,7 +199,7 @@ public class ScriptBatchCreation : EditorWindow
             lineStyle.alignment = TextAnchor.MiddleCenter;
             lineStyle.fontStyle = FontStyle.Bold;
             lineStyle.fontSize = 30;
-            lineStyle.normal.textColor = new Color(0.66f,0.198f,0.166f); // You can change the color if desired
+            lineStyle.normal.textColor = new Color(0.66f, 0.198f, 0.166f); // You can change the color if desired
             GUILayout.Label("-----------------------------------------------------------------------------------------------------------", lineStyle);
         }
 
@@ -208,9 +208,9 @@ public class ScriptBatchCreation : EditorWindow
         if (GUILayout.Button("Add Script Batch"))
         {
             scriptBatches.Add(new ScriptBatch());
-            scriptBatches[ scriptBatches.Count-1].scripts.Add(new ScriptEntry());
+            scriptBatches[scriptBatches.Count - 1].scripts.Add(new ScriptEntry());
         }
-                                                                                                                    
+
         if (GUILayout.Button("Create Scripts"))
         {
             CreateScripts();

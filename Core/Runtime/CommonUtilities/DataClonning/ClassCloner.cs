@@ -1,8 +1,11 @@
-using System;
 using UnityEngine;
 
 namespace AbstractPixel.Core
 {
+    /// <summary>Provides functionality to clone instances of classes that implement the ICopyable interface.</summary>
+    /// <remarks>ClassCloner is commonly used to create deep copies of objects that implement the ICopyable interface,
+    /// allowing for safe duplication of objects without affecting the original instance. This is particularly useful
+    /// in scenarios where modifications to a copy should not impact the original object.</remarks>
     public static class ClassCloner
     {
         // Constraint: T must be a class, have a default constructor, and implement ICopyable

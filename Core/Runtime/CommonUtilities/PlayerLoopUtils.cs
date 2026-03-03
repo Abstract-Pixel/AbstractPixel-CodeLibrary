@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.LowLevel;
-using UnityEngine.PlayerLoop;
 
 namespace AbstractPixel.Core
 {

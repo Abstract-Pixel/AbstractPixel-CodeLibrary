@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace AbstractPixel.SaveSystem
 {
     public enum FileExtension
@@ -8,7 +6,7 @@ namespace AbstractPixel.SaveSystem
         json = 1,
         xml = 2,
         txt = 3,
-        bak =4,
+        bak = 4,
         tmp = 5,
     }
 }

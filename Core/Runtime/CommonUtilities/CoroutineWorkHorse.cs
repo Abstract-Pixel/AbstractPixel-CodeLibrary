@@ -1,21 +1,24 @@
 using System.Collections;
 using UnityEngine;
 
-public class CoroutineWorkHorse : MonoBehaviour
+namespace AbstractPixel.Core
 {
-    public static CoroutineWorkHorse Instance;
-    private void Awake()
+    public class CoroutineWorkHorse : MonoBehaviour
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-    }
-
-    public static Coroutine StartWork(IEnumerator coroutine)
-    {
-        if (Instance == null)
+        public static CoroutineWorkHorse Instance;
+        private void Awake()
         {
-            (new GameObject("CoroutineWorkHorse")).AddComponent<CoroutineWorkHorse>();
+            if (Instance == null) Instance = this;
+            else Destroy(gameObject);
         }
-        return Instance.StartCoroutine(coroutine);
+
+        public static Coroutine StartWork(IEnumerator coroutine)
+        {
+            if (Instance == null)
+            {
+                (new GameObject("CoroutineWorkHorse")).AddComponent<CoroutineWorkHorse>();
+            }
+            return Instance.StartCoroutine(coroutine);
+        }
     }
 }

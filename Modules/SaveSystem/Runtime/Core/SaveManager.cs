@@ -1,8 +1,8 @@
-using System.Collections.Generic;
+using AbstractPixel.Core;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using AbstractPixel.Core;
 
 namespace AbstractPixel.SaveSystem
 {
@@ -29,13 +29,13 @@ namespace AbstractPixel.SaveSystem
             savableObjectsRegistry = new Dictionary<SaveCategory, Dictionary<string, ISavableBridge>>();
             ProfileManager = new SaveProfileManager(fileStorageService, saveConfig, serializer);
 
-            if(LoadSystemMetaData(out SystemMetaData metaData))
+            if (LoadSystemMetaData(out SystemMetaData metaData))
             {
-                LoadAllDataByScope(SaveScope.Global); 
+                LoadAllDataByScope(SaveScope.Global);
             }
             else
             {
-               Debug.Log("No System MetaData found. Assuming this now first launch");
+                Debug.Log("No System MetaData found. Assuming this now first launch");
             }
             ExecuteProfileStartUpPolicy(metaData);
         }
@@ -212,7 +212,7 @@ namespace AbstractPixel.SaveSystem
 
         public void UnregisterSavableObject(ISavableBridge bridge, List<SaveCategory> categories)
         {
-            if (IsInstanceNull() || savableObjectsRegistry ==null) return;
+            if (IsInstanceNull() || savableObjectsRegistry == null) return;
             if (bridge == null || categories == null) return;
 
             int separatorIndex = bridge.UniqueId.LastIndexOf(stringSeparatorIdentifier) + 1;
@@ -273,10 +273,10 @@ namespace AbstractPixel.SaveSystem
         // Only used for logic that is after core Save Manager Initialization.Should not be used for the core Save Manager initialization
         private void Start()
         {
-            if(!hasDoneInitialBootLoad)
+            if (!hasDoneInitialBootLoad)
             {
                 ManualSceneDataLoadInitialization();
-            }     
+            }
         }
 
         private void OnDisable()
@@ -296,7 +296,7 @@ namespace AbstractPixel.SaveSystem
         void ManualSceneDataLoadInitialization()
         {
             if (hasDoneInitialBootLoad) { return; }
-        
+
             hasDoneInitialBootLoad = true;
             Scene currentScene = SceneManager.GetActiveScene();
             if (saveConfig.IsSceneIgnored(currentScene.name)) { return; }

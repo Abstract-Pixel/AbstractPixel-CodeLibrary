@@ -10,7 +10,7 @@ namespace AbstractPixel.SaveSystem
         public static readonly string RootSaveFolder = "SaveFiles";
         public static readonly string DebugRootSaveFolder = "DebugSaveFiles";
         public static readonly string GlobalSavesFolder = "Global";
-        public static readonly string GlobalBackupSavesFolder = "GlobalBackups"; // Fixed typo "Name"
+        public static readonly string GlobalBackupSavesFolder = "GlobalBackups"; 
         public static readonly string GameSavesFolder = "GameSaves";
         public static readonly string ProfileSavesRootFolder = "SaveProfiles";
         public static readonly string GameProfileSavesFolder = "GameProfile";

@@ -1,6 +1,6 @@
-using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
 {
@@ -12,11 +12,11 @@ namespace AbstractPixel.SaveSystem
         public string ProfileID;
         public string FileName;
 
-        public Dictionary<string,object> DataMap;
+        public Dictionary<string, object> DataMap;
 
         public SaveFileData() { }
 
-        public SaveFileData(string _fileName,string _profileId = default)
+        public SaveFileData(string _fileName, string _profileId = default)
         {
             Version = Application.version;
             Timestamp = DateTime.UtcNow.ToString("o");

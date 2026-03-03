@@ -6,7 +6,7 @@ namespace AbstractPixel.SaveSystem
     [Serializable]
     public sealed class SaveCatgeoryDefinition
     {
-        [HideInInspector]public string DisplayName;
+        [HideInInspector] public string DisplayName;
         public SaveCategory Category;
         public SaveScope DirectoryScope;
         public string CustomFileName;

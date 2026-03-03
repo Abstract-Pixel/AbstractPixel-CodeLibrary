@@ -1,10 +1,10 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
 {
     [Serializable]
-    public struct  QuaternionData
+    public struct QuaternionData
     {
         public float x;
         public float y;

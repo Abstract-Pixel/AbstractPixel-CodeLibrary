@@ -1,11 +1,9 @@
-using UnityEngine;
-using UnityEditor.Callbacks;
-using UnityEditor;
 using System;
-
-
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
+using UnityEditor;
+using UnityEditor.Callbacks;
+using UnityEngine;
 
 namespace AbstractPixel.SaveSystem.Editor
 {
@@ -55,7 +53,7 @@ namespace AbstractPixel.SaveSystem.Editor
                     continue;
                 }
 
-                SaveableAttribute saveableAttribute = type.GetCustomAttribute<SaveableAttribute>();
+                SavableAttribute saveableAttribute = type.GetCustomAttribute<SavableAttribute>();
                 bool hasSaveInterface = ImplementsGenericInterface(type, typeof(ISavable<>));
 
                 if ((saveableAttribute != null))
@@ -66,7 +64,7 @@ namespace AbstractPixel.SaveSystem.Editor
                         UnityEngine.Object scriptAsset = GetScriptAssetFromType(type);
                         string scriptLink = GetHyperlink(scriptAsset, type.Name);
                         Debug.LogError($"<color=red>[SaveSystem Critical]</color> The script {scriptLink} has the <b>[Saveable]</b> attribute but DOES NOT implement <b>ISaveable<></b> Interface.\n" +
-                               $"You must implement the interface to ensure data Capture/Restore works.",scriptAsset);
+                               $"You must implement the interface to ensure data Capture/Restore works.", scriptAsset);
 
                     }
                 }
@@ -78,7 +76,7 @@ namespace AbstractPixel.SaveSystem.Editor
                         UnityEngine.Object scriptAsset = GetScriptAssetFromType(type);
                         string link = GetHyperlink(scriptAsset, type.Name);
                         Debug.LogError($"<color=red>[SaveSystem Critical]</color> The script {link} implements <b>ISaveable<></b> Interface but is missing the <b>[Saveable(Category)]</b> attribute.\n" +
-                           $"The Save System will ignore this script without the attribute.",scriptAsset);
+                           $"The Save System will ignore this script without the attribute.", scriptAsset);
                     }
                 }
             }
@@ -110,7 +108,7 @@ namespace AbstractPixel.SaveSystem.Editor
                 {
                     return script;
                 }
-               
+
             }
             return null;
         }

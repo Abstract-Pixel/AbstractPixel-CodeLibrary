@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace AbstractPixel.Core
 {
@@ -13,7 +12,7 @@ namespace AbstractPixel.Core
         }
         public static void UnregisterTimer(Timer timer)
         {
-           timersSet.Remove(timer);
+            timersSet.Remove(timer);
         }
 
         public static void UpdateTimers()

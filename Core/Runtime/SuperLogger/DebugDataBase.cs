@@ -23,10 +23,10 @@ namespace AbstractPixel.Core
             Dictionary<string, ScriptDebugInfo> tempDebuggableDictionary = new Dictionary<string, ScriptDebugInfo>();
             foreach (ScriptDebugInfo debugInfo in debuggableScriptsList)
             {
-                if(!tempDebuggableDictionary.ContainsKey(debugInfo.ScriptName))
+                if (!tempDebuggableDictionary.ContainsKey(debugInfo.ScriptName))
                 {
                     tempDebuggableDictionary.Add(debugInfo.ScriptName, debugInfo);
-                }        
+                }
             }
             debuggableScriptsList.Clear();
             foreach (string className in foundClassNames)

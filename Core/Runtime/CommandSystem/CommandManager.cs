@@ -1,51 +1,54 @@
 ﻿using System.Collections.Generic;
 
-public class CommandManager
+namespace AbstractPixel.Core
 {
-    private Stack<ICommand> undoStack = new Stack<ICommand>();
-    private Stack<ICommand> redoStack = new Stack<ICommand>();
-
-    public void ExecuteCommand(ICommand command)
+    public class CommandManager
     {
-        // When a new command is executed, any redo history becomes invalid.
-        redoStack.Clear();
-        command.Execute();
-        undoStack.Push(command);
-    }
+        private Stack<ICommand> undoStack = new Stack<ICommand>();
+        private Stack<ICommand> redoStack = new Stack<ICommand>();
 
-    public void UndoCommand()
-    {
-        if (undoStack.Count > 0)
+        public void ExecuteCommand(ICommand command)
         {
-            ICommand commandToUndo = undoStack.Pop();
-            commandToUndo.Undo();
-            redoStack.Push(commandToUndo);
+            // When a new command is executed, any redo history becomes invalid.
+            redoStack.Clear();
+            command.Execute();
+            undoStack.Push(command);
         }
-    }
 
-    public void RedoCommand()
-    {
-        if (redoStack.Count > 0)
+        public void UndoCommand()
         {
-            ICommand commandToRedo = redoStack.Pop();
-            commandToRedo.Execute();
-            undoStack.Push(commandToRedo);
+            if (undoStack.Count > 0)
+            {
+                ICommand commandToUndo = undoStack.Pop();
+                commandToUndo.Undo();
+                redoStack.Push(commandToUndo);
+            }
         }
-    }
 
-    public void ClearCommandHistory()
-    {
-        undoStack.Clear();
-        redoStack.Clear();
-    }
+        public void RedoCommand()
+        {
+            if (redoStack.Count > 0)
+            {
+                ICommand commandToRedo = redoStack.Pop();
+                commandToRedo.Execute();
+                undoStack.Push(commandToRedo);
+            }
+        }
 
-    public int GetUndoCommandsCount()
-    {
-        return undoStack.Count;
-    }
+        public void ClearCommandHistory()
+        {
+            undoStack.Clear();
+            redoStack.Clear();
+        }
 
-    public int GetRedoCommandsCount()
-    {
-        return redoStack.Count;
+        public int GetUndoCommandsCount()
+        {
+            return undoStack.Count;
+        }
+
+        public int GetRedoCommandsCount()
+        {
+            return redoStack.Count;
+        }
     }
 }

@@ -1,8 +1,10 @@
 using System.Collections;
-using UnityEngine;
 
-public interface IAnimationCommand
+namespace AbstractPixel.Core
 {
-    public string AnimationName {  get; set; }
-    public IEnumerator ExecuteAnimation();
+    public interface IAnimationCommand
+    {
+        public string AnimationName { get; set; }
+        public IEnumerator ExecuteAnimation();
+    }
 }

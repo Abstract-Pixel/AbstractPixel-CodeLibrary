@@ -1,6 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace AbstractPixel.Core
 {
@@ -13,7 +13,7 @@ namespace AbstractPixel.Core
         {
             isInitilized = true;
             debuggableScriptsDictionary = new Dictionary<string, ScriptDebugInfo>();
-            if(dataBase.debuggableScriptsList.Count == 0)
+            if (dataBase.debuggableScriptsList.Count == 0)
             {
                 //Debug.LogWarning("DebugDataBase contains no debuggable scripts. Please add scripts to the database to enable logging.");
                 return;

@@ -1,3 +1,4 @@
+using AbstractPixel.Core;
 using TMPro;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ public class IntSOFractionTextDisplayer : MonoBehaviour
 
     [Header("Formatting")]
     [SerializeField] private string prefix;
-    
+
     [Tooltip("The character or string to use as the separator between the numerator and denominator.")]
     [SerializeField] private string separator = " / ";
 

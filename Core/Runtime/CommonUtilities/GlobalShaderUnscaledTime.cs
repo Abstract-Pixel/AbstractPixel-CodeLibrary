@@ -1,10 +1,13 @@
 using UnityEngine;
 
-public class GlobalShaderUnscaledTime : MonoBehaviour
+namespace AbstractPixel.Core
 {
-    
-    void Update()
+    public class GlobalShaderUnscaledTime : MonoBehaviour
     {
-        Shader.SetGlobalFloat("_unscaledTime", Time.unscaledTime);
+
+        void Update()
+        {
+            Shader.SetGlobalFloat("_unscaledTime", Time.unscaledTime);
+        }
     }
 }

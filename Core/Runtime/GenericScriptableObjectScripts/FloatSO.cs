@@ -1,10 +1,13 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "FloatSO", menuName = "GenericSOLibrary/FloatSO", order = 1)]
-public class FloatSO : ValueTypeSO<float>
+namespace AbstractPixel.Core
 {
-    protected override float ClampValue(float value)
+    [CreateAssetMenu(fileName = "FloatSO", menuName = "GenericSOLibrary/FloatSO", order = 1)]
+    public class FloatSO : ValueTypeSO<float>
     {
-        return Mathf.Clamp(value, MinValue, MaxValue);
+        protected override float ClampValue(float value)
+        {
+            return Mathf.Clamp(value, MinValue, MaxValue);
+        }
     }
 }

@@ -1,36 +1,39 @@
 using UnityEngine;
 
-public class LazySingleton<T> : MonoBehaviour where T : MonoBehaviour
+namespace AbstractPixel.Core
 {
-    protected static T instance;
-
-    public static T Instance
+    public class LazySingleton<T> : MonoBehaviour where T : MonoBehaviour
     {
-        get
+        protected static T instance;
+
+        public static T Instance
         {
-            if (instance == null)
+            get
             {
-                instance = FindAnyObjectByType<T>();
-                if(instance != null) return instance;
-                instance = new GameObject(typeof(T).Name).AddComponent<T>();
+                if (instance == null)
+                {
+                    instance = FindAnyObjectByType<T>();
+                    if (instance != null) return instance;
+                    instance = new GameObject(typeof(T).Name).AddComponent<T>();
+                }
+                return instance;
             }
-            return instance;
         }
-    }
 
-    protected virtual void Awake()
-    {
-        if(instance != null && instance != this)
+        protected virtual void Awake()
         {
-            Destroy(gameObject);
-            return;
+            if (instance != null && instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            instance = this as T;
+
         }
-        instance = this as T;
 
-    }
-
-    protected virtual void OnDestroy()
-    {
-        instance = null;       
+        protected virtual void OnDestroy()
+        {
+            instance = null;
+        }
     }
 }

@@ -7,11 +7,11 @@ namespace AbstractPixel.SaveSystem
     {
         public static object Convert(object data, Type targetType)
         {
-            if(data == null) return null;
+            if (data == null) return null;
 
-            if(targetType.IsAssignableFrom(data.GetType())) return data;
+            if (targetType.IsAssignableFrom(data.GetType())) return data;
 
-            if(data is JObject jObject)
+            if (data is JObject jObject)
             {
                 return jObject.ToObject(targetType);
             }
@@ -25,7 +25,7 @@ namespace AbstractPixel.SaveSystem
             {
                 return default;
             }
-           
+
         }
 
         public static T Convert<T>(object data)

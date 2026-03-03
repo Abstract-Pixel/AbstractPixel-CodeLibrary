@@ -1,4 +1,7 @@
-public interface IInitializable<TData>
+namespace AbstractPixel.Core
 {
-    void Initialize(TData _data);
+    public interface IInitializable<TData>
+    {
+        void Initialize(TData _data);
+    }
 }

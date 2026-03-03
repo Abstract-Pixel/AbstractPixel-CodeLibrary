@@ -1,4 +1,3 @@
-using UnityEngine;
 using System;
 
 namespace AbstractPixel.Core
@@ -7,6 +6,6 @@ namespace AbstractPixel.Core
     public class DebuggableAttribute : Attribute
     {
 
-    
+
     }
 }

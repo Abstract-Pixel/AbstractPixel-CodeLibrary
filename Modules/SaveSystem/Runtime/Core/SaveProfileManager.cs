@@ -1,4 +1,3 @@
-using AbstractPixel.Core;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -12,8 +11,8 @@ namespace AbstractPixel.SaveSystem
         private SaveSystemConfigSO saveConfig;
         private string profilesRootPath;
 
-        public  string CurrentProfilePath {  get; private set; }
-        public  string CurrentProfileID { get; private set; }
+        public string CurrentProfilePath { get; private set; }
+        public string CurrentProfileID { get; private set; }
 
         public SaveProfileManager(IDataStorageService _dataStorageService, SaveSystemConfigSO _saveConfig, ISerializer _serializer)
         {
@@ -30,11 +29,11 @@ namespace AbstractPixel.SaveSystem
 
         }
 
-       /// <summary> 
-       /// Creates a new profile directory with a unique GUID.
-       /// </summary>
-       /// <param name="_profileGuid">The generated profile guid for the created profile directory</param>
-       /// <returns>The path to the created profile directory</returns>
+        /// <summary> 
+        /// Creates a new profile directory with a unique GUID.
+        /// </summary>
+        /// <param name="_profileGuid">The generated profile guid for the created profile directory</param>
+        /// <returns>The path to the created profile directory</returns>
 
         public string CreateProfileDirectory(out string _profileGuid)
         {
@@ -53,7 +52,7 @@ namespace AbstractPixel.SaveSystem
             }
         }
 
- 
+
         public string CreateNewActiveProfileDirectory()
         {
             string profilePath = CreateProfileDirectory(out string profileID);
@@ -125,7 +124,7 @@ namespace AbstractPixel.SaveSystem
                 if (manifest != null)
                 {
                     profileIds.Add(manifest.ProfileID);
-                }     
+                }
             }
             return profileIds.ToArray();
         }
@@ -133,7 +132,7 @@ namespace AbstractPixel.SaveSystem
         public bool DeleteProfileDirectory(string _profileId)
         {
             string profileName = SavePathGenerator.GameProfileSavesFolder + _profileId;
-            string profilePath = Path.Combine(SavePathGenerator.ProfileSavesRootFolder,profileName);
+            string profilePath = Path.Combine(SavePathGenerator.ProfileSavesRootFolder, profileName);
             return storageService.DeleteDirectory(profilePath);
         }
 
@@ -157,8 +156,8 @@ namespace AbstractPixel.SaveSystem
             {
                 string fileExtension = SavePathGenerator.PrimaryFileExtension;
                 string manifestPath = Path.Combine(profilePath, GameProfileManifest.ManifestFileName);
-                manifestPath =manifestPath+fileExtension;
-                storageService.SaveFile(manifestJson,manifestPath);
+                manifestPath = manifestPath + fileExtension;
+                storageService.SaveFile(manifestJson, manifestPath);
                 return manifest;
             }
             else

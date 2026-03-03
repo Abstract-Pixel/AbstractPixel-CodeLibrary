@@ -1,9 +1,9 @@
+using AbstractPixel.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using AbstractPixel.Core;
 
 
 namespace AbstractPixel.SaveSystem
@@ -21,10 +21,10 @@ namespace AbstractPixel.SaveSystem
         [SerializeField, HideInInspector] string lastKnownGlobalObjectID = "";
         [SerializeField, HideInInspector] string lastKnownGameObjectName;
 
-        [SerializeField, ReadOnly] private List<SaveableTarget> savableTargets = new List<SaveableTarget>();
+        [SerializeField, ReadOnly] private List<SavableTarget> savableTargets = new List<SavableTarget>();
         private List<SaveCategory> foundCategoriesList = new List<SaveCategory>();
 
-        private Dictionary<SaveCategory, List<SaveableTarget>> savableTargetsRegistry;
+        private Dictionary<SaveCategory, List<SavableTarget>> savableTargetsRegistry;
 
         readonly string isavableCaptureMethod = "CaptureData";
         readonly string isavableRestoreMethod = "RestoreData";
@@ -86,7 +86,7 @@ namespace AbstractPixel.SaveSystem
 
         private void SyncSavableTargets()
         {
-            if (savableTargets == null) savableTargets = new List<SaveableTarget>();
+            if (savableTargets == null) savableTargets = new List<SavableTarget>();
 
             MonoBehaviour[] allScripts = GetComponents<MonoBehaviour>();
             List<MonoBehaviour> validScripts = new List<MonoBehaviour>();
@@ -96,7 +96,7 @@ namespace AbstractPixel.SaveSystem
                 if (script == null) continue;
                 Type type = script.GetType();
                 if (type.GetInterface(typeof(ISavable<>).Name) == null) continue;
-                if (type.GetCustomAttribute<SaveableAttribute>() == null) continue;
+                if (type.GetCustomAttribute<SavableAttribute>() == null) continue;
                 validScripts.Add(script);
             }
 
@@ -113,7 +113,7 @@ namespace AbstractPixel.SaveSystem
             // Add or Update Targets
             foreach (MonoBehaviour script in validScripts)
             {
-                SaveableTarget existingTarget = savableTargets.FirstOrDefault(t => t.Script == script);
+                SavableTarget existingTarget = savableTargets.FirstOrDefault(t => t.Script == script);
 
                 if (existingTarget != null)
                 {
@@ -121,15 +121,15 @@ namespace AbstractPixel.SaveSystem
                     {
                         // This handles the case where a script was renamed. We keep the same GUID but update the class name for clarity.
                         existingTarget.Identification.ClassName = script.GetType().Name;
-                        existingTarget.InpsectorName = script.GetType().Name;
+                        existingTarget.InspectorName = script.GetType().Name;
                         UnityEditor.EditorUtility.SetDirty(this);
                     }
                 }
                 else
                 {
                     string newGuid = Guid.NewGuid().ToString();
-                    SaveableIdentification id = new SaveableIdentification(script.GetType().Name, newGuid);
-                    savableTargets.Add(new SaveableTarget(script, id));
+                    SavableIdentification id = new SavableIdentification(script.GetType().Name, newGuid);
+                    savableTargets.Add(new SavableTarget(script, id));
                     UnityEditor.EditorUtility.SetDirty(this);
                 }
             }
@@ -139,15 +139,15 @@ namespace AbstractPixel.SaveSystem
 
         private void Awake()
         {
-            savableTargetsRegistry = new Dictionary<SaveCategory, List<SaveableTarget>>();
+            savableTargetsRegistry = new Dictionary<SaveCategory, List<SavableTarget>>();
             foundCategoriesList = new List<SaveCategory>();
 
-            foreach (SaveableTarget target in savableTargets)
+            foreach (SavableTarget target in savableTargets)
             {
                 if (target == null || target.Script == null) continue;
 
                 Type componentType = target.Script.GetType();
-                SaveableAttribute attribute = componentType.GetCustomAttribute<SaveableAttribute>();
+                SavableAttribute attribute = componentType.GetCustomAttribute<SavableAttribute>();
                 if (attribute == null) continue;
 
                 Type interfaceType = componentType.GetInterface(typeof(ISavable<>).Name);
@@ -159,7 +159,7 @@ namespace AbstractPixel.SaveSystem
 
                 if (!savableTargetsRegistry.ContainsKey(attribute.Category))
                 {
-                    savableTargetsRegistry.Add(attribute.Category, new List<SaveableTarget>());
+                    savableTargetsRegistry.Add(attribute.Category, new List<SavableTarget>());
                 }
                 savableTargetsRegistry[attribute.Category].Add(target);
 
@@ -174,12 +174,12 @@ namespace AbstractPixel.SaveSystem
         {
             Dictionary<string, object> combinedCapturedDataMap = new Dictionary<string, object>();
 
-            if (!savableTargetsRegistry.TryGetValue(categoryFilter, out List<SaveableTarget> saveableTargetsList))
+            if (!savableTargetsRegistry.TryGetValue(categoryFilter, out List<SavableTarget> savableTargetsList))
             {
                 return null;
             }
 
-            foreach (SaveableTarget target in saveableTargetsList)
+            foreach (SavableTarget target in savableTargetsList)
             {
                 object capturedData = target.CaptureDataMethod.Invoke(target.Script, null);
                 if (capturedData != null)
@@ -200,13 +200,13 @@ namespace AbstractPixel.SaveSystem
             Dictionary<string, object> combinedCapturedDataMap = SaveDataConverter.Convert<Dictionary<string, object>>(data);
             if (combinedCapturedDataMap == null) return;
 
-            if (!savableTargetsRegistry.TryGetValue(categoryFilter, out List<SaveableTarget> targetsList))
+            if (!savableTargetsRegistry.TryGetValue(categoryFilter, out List<SavableTarget> targetsList))
             {
                 return;
             }
 
-            Dictionary<string, SaveableTarget> guidToTargetMap = new Dictionary<string, SaveableTarget>();
-            foreach (SaveableTarget target in targetsList)
+            Dictionary<string, SavableTarget> guidToTargetMap = new Dictionary<string, SavableTarget>();
+            foreach (SavableTarget target in targetsList)
             {
                 if (target.Identification != null && !string.IsNullOrEmpty(target.Identification.GUID))
                 {
@@ -227,7 +227,7 @@ namespace AbstractPixel.SaveSystem
 
                 string extractedGuid = (separatorIndex != -1) ? compositeKey.Substring(separatorIndex) : compositeKey;
 
-                if (guidToTargetMap.TryGetValue(extractedGuid, out SaveableTarget target))
+                if (guidToTargetMap.TryGetValue(extractedGuid, out SavableTarget target))
                 {
                     object typedData = SaveDataConverter.Convert(kvp.Value, target.DataToSaveType);
                     target.RestoreDataMethod.Invoke(target.Script, new object[] { typedData });

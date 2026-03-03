@@ -1,20 +1,21 @@
+using System.IO;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using System.IO;
 
 namespace AbstractPixel.SaveSystem.Editor
 {
     [CustomEditor(typeof(SaveManager))]
     public class SaveManagerEditor : UnityEditor.Editor
     {
-        [SerializeField] StyleSheet saveManagerUSSStyleSheet;
+        StyleSheet saveManagerUSSStyleSheet;
+        [SerializeField] string uSSStyleSheetPath = "Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Core/SaveManagerEditorUSS.uss";
         public override VisualElement CreateInspectorGUI()
         {
             VisualElement root = new VisualElement();
             InspectorElement.FillDefaultInspector(root, serializedObject, this);
-            saveManagerUSSStyleSheet=AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/AbstractPixel/Core/Modules/SaveSystem/Editor/Core/SaveManagerEditorUSS.uss");
+            saveManagerUSSStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(uSSStyleSheetPath);
             if (saveManagerUSSStyleSheet != null)
             {
                 root.styleSheets.Add(saveManagerUSSStyleSheet);
@@ -77,19 +78,19 @@ namespace AbstractPixel.SaveSystem.Editor
                 loadRuntimeDataButton.SetEnabled(false);
             }
 
-                saveRuntimeDataButton.clicked += () =>
+            saveRuntimeDataButton.clicked += () =>
+        {
+            if (Application.isPlaying)
             {
-                if (Application.isPlaying)
-                {
-                    SaveManager saveManager = (SaveManager)target;
-                    saveManager.SaveALL();
-                    Debug.Log("[Save System: FORCED] : Save all data executed.");
-                }
-                else
-                {
-                    Debug.LogWarning("Save and Load buttons only work in Play mode.");
-                }
-            };
+                SaveManager saveManager = (SaveManager)target;
+                saveManager.SaveALL();
+                Debug.Log("[Save System: FORCED] : Save all data executed.");
+            }
+            else
+            {
+                Debug.LogWarning("Save and Load buttons only work in Play mode.");
+            }
+        };
 
             loadRuntimeDataButton.clicked += () =>
             {

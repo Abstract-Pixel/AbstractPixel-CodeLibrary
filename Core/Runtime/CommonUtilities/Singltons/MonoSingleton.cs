@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace AbstractPixel.Core
 {
+    /// <summary> A MonoBehaviour-based singleton that does not persist across scene loads. Automatically finds an instance if none exists when accessed.</summary>
+    /// <typeparam name="T">The type of the singleton component.</typeparam>
+    /// <remarks>MonoSingleton is commonly used to implement a simple singleton pattern for MonoBehaviour components,
     public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
     {
         protected static T instance;

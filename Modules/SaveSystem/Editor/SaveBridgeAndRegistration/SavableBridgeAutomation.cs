@@ -1,10 +1,10 @@
 #if UNITY_EDITOR
 using System.Reflection;
 using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEditor.Build.Reporting;
-using UnityEditor.Build;
 
 namespace AbstractPixel.SaveSystem.Editor
 {
@@ -25,7 +25,7 @@ namespace AbstractPixel.SaveSystem.Editor
         }
 
         public int callbackOrder { get { return 0; } }
-        public void OnProcessScene(Scene _scene,BuildReport _report)
+        public void OnProcessScene(Scene _scene, BuildReport _report)
         {
             ProcessSceneObjects(_scene);
         }
@@ -36,16 +36,16 @@ namespace AbstractPixel.SaveSystem.Editor
             GameObject[] roots = _scene.GetRootGameObjects();
             foreach (GameObject root in roots)
             {
-                AddSaveableBridgeToRootObject(root);
+                AddSavableBridgeToRootObject(root);
             }
         }
 
-        static void AddSaveableBridgeToRootObject(GameObject _rootObject)      
+        static void AddSavableBridgeToRootObject(GameObject _rootObject)
         {
             MonoBehaviour[] scriptsOnRoot = _rootObject.GetComponentsInChildren<MonoBehaviour>();
             foreach (MonoBehaviour script in scriptsOnRoot)
             {
-                if (script.GetType().GetCustomAttribute<SaveableAttribute>() == null)
+                if (script.GetType().GetCustomAttribute<SavableAttribute>() == null)
                 {
                     continue;
                 }

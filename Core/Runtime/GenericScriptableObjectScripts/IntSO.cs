@@ -1,10 +1,13 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "IntSO", menuName = "GenericSOLibrary/IntSO", order =0)]
-public class IntSO : ValueTypeSO<int>
+namespace AbstractPixel.Core
 {
-    protected override int ClampValue(int value)
+    [CreateAssetMenu(fileName = "IntSO", menuName = "GenericSOLibrary/IntSO", order = 0)]
+    public class IntSO : ValueTypeSO<int>
     {
-        return Mathf.Clamp(value,MinValue,MaxValue);
+        protected override int ClampValue(int value)
+        {
+            return Mathf.Clamp(value, MinValue, MaxValue);
+        }
     }
 }

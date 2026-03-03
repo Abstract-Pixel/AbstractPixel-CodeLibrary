@@ -1,8 +1,6 @@
-using UnityEngine;
-
 namespace AbstractPixel.SaveSystem
 {
-    public  enum SaveScope
+    public enum SaveScope
     {
         None = 0,
         Global = 1,

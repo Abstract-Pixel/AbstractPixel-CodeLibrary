@@ -1,6 +1,6 @@
-using UnityEngine;
 using Newtonsoft.Json;
 using System;
+using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
 {
@@ -37,7 +37,7 @@ namespace AbstractPixel.SaveSystem
                 _output = null;
                 return false;
             }
-            if(_data is UnityEngine.Object)
+            if (_data is UnityEngine.Object)
             {
                 Debug.LogError("JsonSerializer: Cannot serialize UnityEngine.Object types.");
                 _output = null;
@@ -46,7 +46,7 @@ namespace AbstractPixel.SaveSystem
 
             try
             {
-                _output = JsonConvert.SerializeObject(_data,settings);
+                _output = JsonConvert.SerializeObject(_data, settings);
                 return true;
 
             }
@@ -68,7 +68,7 @@ namespace AbstractPixel.SaveSystem
             }
             try
             {
-                _output = JsonConvert.DeserializeObject<T>(_data,settings);
+                _output = JsonConvert.DeserializeObject<T>(_data, settings);
                 return true;
             }
             catch (Exception e)

@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class ListSO<T> : ScriptableObject
+namespace AbstractPixel.Core
 {
-    public List<T> Items = new List<T>();
+    public abstract class ListSO<T> : ScriptableObject
+    {
+        public List<T> Items = new List<T>();
+    }
 }

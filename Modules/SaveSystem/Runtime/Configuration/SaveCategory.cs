@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace AbstractPixel.SaveSystem
 {
     public enum SaveCategory
@@ -10,6 +8,6 @@ namespace AbstractPixel.SaveSystem
         Position,
         Achievements,
         Game
-    
+
     }
 }

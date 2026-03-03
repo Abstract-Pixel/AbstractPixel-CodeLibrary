@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace AbstractPixel.SaveSystem
 {
     public interface ISerializer

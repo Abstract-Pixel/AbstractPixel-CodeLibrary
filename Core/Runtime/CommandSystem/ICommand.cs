@@ -1,5 +1,8 @@
-public interface ICommand
+namespace AbstractPixel.Core
 {
-    void Execute();
-    void Undo();
+    public interface ICommand
+    {
+        void Execute();
+        void Undo();
+    }
 }
