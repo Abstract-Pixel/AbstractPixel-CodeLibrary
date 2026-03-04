@@ -6,7 +6,8 @@
     "unity": "6000.0",
     "author": {
         "name": "Abstract Pixel",
-        "email": "abstractpixelstudios@gmail.com"
+        "email": "abstractpixelstudios@gmail.com",
+        "url": "https://abstractpixelstudios.com/",
     },
     "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.2"
