@@ -18,6 +18,12 @@
 
 ## Changelog
 
+### [1.0.2]    
+** Better Stability For Savable Bridge Automation **
+- **Less Error Prone:** Added addtional checks before doing automation logic in (`SavableBridgeAutomation.cs`) to  prevent unessery errors that do not matter.
+- **Explicit Error Thrown** if for some reason automation process still fails in  `SavableBridgeAutomation.cs`. it shows a non crashing error, of what is the most likely issue.
+- **Small Fix** Made a brand new scriptable opject asset of `Debug Data Base` so it does not cause  `Debug Manager Refresher` to throw and error.
+
 ### [1.0.1]
 **Cleanup and Standardization**
 - **Refactor:** Added Namespaces (`AbstractPixel.Core`) to all legacy utility scripts to prevent naming collisions in production projects.

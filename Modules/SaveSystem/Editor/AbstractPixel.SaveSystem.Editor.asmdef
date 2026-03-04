@@ -2,16 +2,18 @@
     "name": "AbstractPixel.SaveSystem.Editor",
     "rootNamespace": "AbstractPixel.Modules.SaveSystem.Editor",
     "references": [
-        "GUID:b4c9b881c04893f4c8d1e595dc98dd00",
-        "GUID:0404a8ea4faa386498395a28b0b33112"
+        "AbstractPixel.Core",
+        "AbstractPixel.SaveSystem"
     ],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
