@@ -22,8 +22,8 @@ namespace AbstractPixel.Core.Editor
             string[] GUIDs = AssetDatabase.FindAssets("t:DebugDataBase");
             if (GUIDs.Length <= 0)
             {
-                Debug.LogError("No DebugManager asset found in the project." +
-                    " Please create one via Assets -> Create -> Utility -> DebugManager");
+                //Debug.LogError("No DebugManager asset found in the project." +
+                //    " Please create one via Assets -> Create -> Utility -> DebugManager");
                 return;
             }
             string debugManagerPath = AssetDatabase.GUIDToAssetPath(GUIDs[0]);
