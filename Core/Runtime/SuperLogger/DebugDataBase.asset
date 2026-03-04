@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d6a2fb776ee28a438513d893679f2c8, type: 3}
+  m_Script: {fileID: 11500000, guid: 672f501ab69fc974ab47f999772fdf6a, type: 3}
   m_Name: DebugDataBase
-  m_EditorClassIdentifier: AbstractPixel.Utility::AbstractPixel.Utility.DebugDataBase
+  m_EditorClassIdentifier: AbstractPixel.Core::AbstractPixel.Core.DebugDataBase
   debuggableScriptsList: []

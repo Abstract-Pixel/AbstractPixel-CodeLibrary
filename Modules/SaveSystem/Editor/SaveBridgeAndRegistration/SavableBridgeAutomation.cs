@@ -42,21 +42,35 @@ namespace AbstractPixel.SaveSystem.Editor
 
         static void AddSavableBridgeToRootObject(GameObject _rootObject)
         {
-            MonoBehaviour[] scriptsOnRoot = _rootObject.GetComponentsInChildren<MonoBehaviour>();
-            foreach (MonoBehaviour script in scriptsOnRoot)
+            try
             {
-                if (script.GetType().GetCustomAttribute<SavableAttribute>() == null)
+                MonoBehaviour[] scriptsOnRoot = _rootObject.GetComponentsInChildren<MonoBehaviour>();
+                if (scriptsOnRoot == null || scriptsOnRoot.Length < 0) return;
+                foreach (MonoBehaviour script in scriptsOnRoot)
                 {
-                    continue;
-                }
-                if (script.TryGetComponent(out ISavableBridge bridge))
-                {
-                    // It already contains a SaveableBridge
-                    continue;
-                }
-                script.gameObject.AddComponent<SavableBridge>();
-                Debug.Log($"Added Bridge to{script.gameObject.name}");
+                    if(script == null)
+                    {
+                        continue;
+                    }
+                    if (script.GetType().GetCustomAttribute<SavableAttribute>() == null)
+                    {
+                        continue;
+                    }
+                    if (script.TryGetComponent(out ISavableBridge bridge))
+                    {
+                        // It already contains a SavableBridge
+                        continue;
+                    }
+                    script.gameObject.AddComponent<SavableBridge>();
+                    Debug.Log($"Added Bridge to{script.gameObject.name}");
 
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Error processing root object for savable automation {_rootObject.name}: {ex.Message} \n" +
+                    $"This should not happen, Save system should still function correctly," +
+                    $" as long as savable bridge is added manually and the gameobject implements savable attribute and ISavable interface");
             }
         }
     }
