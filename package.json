@@ -10,6 +10,7 @@
         "url": "https://abstractpixelstudios.com/"
     },
     "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.2.2"
+        "com.unity.nuget.newtonsoft-json": "3.2.2",
+        "com.unity.addressables": "2.7.6"
     }
 }

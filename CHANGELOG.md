@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.3] - 2026-04-13
+**Scene Management DataTypes and Tooling**
+- **Feature:** Introduced `SceneField`, a serializable utility to reference Unity scenes safely by name while maintaining a link to the `SceneAsset` in the editor. That can work in runtime foer builds
+- **Feature:** Added `SceneReference`, a hybrid container that supports both traditional Build Settings-based scenes (`SceneField`) and Addressable Assets (`AssetReference`).
+- **UI/UX:** Implemented a custom `SceneFieldPropertyDrawer` featuring a visual validation indicator (green/red status box) to instantly show if a referenced scene is included in the project's Build Settings.
+- **Architecture:** Updated `AbstractPixel.Core` assembly definitions to include `com.unity.addressables` as a reference, enabling support for the Addressable Asset System in scene management.
+- **Tooling:** Automated name synchronization in the `SceneField` inspector, ensuring the string-based scene name updates whenever a new `SceneAsset` is assigned.
+
 ## [1.0.2] - 2026-03-04
 **Stability, Dependency Management, and Documentation**
 - **SaveSystem:** Added `com.unity.nuget.newtonsoft-json` (v3.2.2) as an explicit dependency in `package.json` to support JSON serialization in the SaveSystem module.
