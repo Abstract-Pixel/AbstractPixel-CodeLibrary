@@ -5,7 +5,7 @@ using UnityEngine.AddressableAssets;
 namespace AbstractPixel.Core
 {
     [Serializable]
-    public class SceneReference
+    public class SceneReference : IEquatable<SceneReference>
     {
         [Tooltip("Reference to the scene using Addressables,Using Addressable Asset System")]
         [field: SerializeField] public AssetReference SceneAssetReference { get; set; }
@@ -32,5 +32,16 @@ namespace AbstractPixel.Core
             }
         }
 
+        public bool Equals(SceneReference other)
+        {
+            if (other == null) return false;
+            bool isSceneNameEqual = SceneName == other.SceneName;
+            return isSceneNameEqual;
+        }
+
+        public override int GetHashCode()
+        {
+            return SceneName?.GetHashCode() ?? 0;
+        }
     }
 }

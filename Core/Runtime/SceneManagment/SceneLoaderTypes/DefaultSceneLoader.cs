@@ -8,16 +8,16 @@ namespace AbstractPixel.SceneManagement
 {
     public class DefaultSceneLoader : ISceneLoader
     {
-        public async Task LoadScene(SceneReference sceneReference, bool isAdditive, Action OnLoadedEvent = null)
+        public async Task LoadScene(SceneReference sceneReference, bool isAdditive)
         {
             LoadSceneMode loadMode = isAdditive ? LoadSceneMode.Additive : LoadSceneMode.Single;
-            UnityEngine.AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneReference.SceneName, loadMode);
-            if (asyncLoad != null)
-            {
-                asyncLoad.completed += _ => OnLoadedEvent.Invoke();
-            }
+            await SceneManager.LoadSceneAsync(sceneReference.SceneName, loadMode).AsTask();
+            
         }
 
-        
+        public async Task UnloadScene(SceneReference sceneReference)
+        {
+           await SceneManager.UnloadSceneAsync(sceneReference.SceneName).AsTask();
+        }
     }
 }
