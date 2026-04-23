@@ -1,8 +1,10 @@
+using AbstractPixel.Core;
 using System;
+using System.Threading.Tasks;
 namespace AbstractPixel.SceneManagement
 {
     public interface ISceneLoader
     {
-        void LoadScene(string sceneName, bool isAdditive, Action OnLoadedEvent = null);
+        Task LoadScene(SceneReference sceneReference, bool isAdditive, Action OnLoadedEvent = null);
     }
 }

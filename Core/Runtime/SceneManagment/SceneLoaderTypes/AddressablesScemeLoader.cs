@@ -1,10 +1,15 @@
-using AbstractPixel.SceneManagement;
+using AbstractPixel.Core;
 using System;
+using System.Threading.Tasks;
+using UnityEngine.SceneManagement;
 
-public class AddressablesSceneLoader : ISceneLoader
+namespace AbstractPixel.SceneManagement
 {
-    public void LoadScene(string sceneName, bool isAdditive, Action OnLoadedEvent = null)
+    public class AddressablesSceneLoader : ISceneLoader
     {
-        throw new NotImplementedException();
+        public async Task LoadScene(SceneReference sceneReference, bool isAdditive, Action OnLoadedEvent = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
