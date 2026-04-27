@@ -7,7 +7,12 @@ namespace AbstractPixel.SceneManagement
 {
     public class AddressablesSceneLoader : ISceneLoader
     {
-        public async Task LoadScene(SceneReference sceneReference, bool isAdditive)
+        public async Task LoadScene(SceneReference sceneReference, bool isAdditive, bool sceneActivatedByDefault = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UnloadScene(SceneReference sceneReference)
         {
             throw new NotImplementedException();
         }
