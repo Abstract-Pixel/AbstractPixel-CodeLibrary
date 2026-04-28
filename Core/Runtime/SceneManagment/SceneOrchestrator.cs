@@ -2,7 +2,6 @@ using AbstractPixel.Core;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -59,8 +58,8 @@ namespace AbstractPixel.SceneManagement
         {
             if (string.IsNullOrEmpty(activeMainScene.SceneName))
             {
-               string currentActiveSceneName = SceneManager.GetActiveScene().name;
-               _=SceneManager.UnloadSceneAsync(currentActiveSceneName);
+                string currentActiveSceneName = SceneManager.GetActiveScene().name;
+                await SceneManager.UnloadSceneAsync(currentActiveSceneName).AsTask();
 
             }
             else
@@ -68,7 +67,7 @@ namespace AbstractPixel.SceneManagement
                 await sceneLoader.UnloadScene(activeMainScene);
                 activeMainScene = null;
             }
-               
+
 
             if (_sceneGroup.ForceReloadContextualScenes)
             {
