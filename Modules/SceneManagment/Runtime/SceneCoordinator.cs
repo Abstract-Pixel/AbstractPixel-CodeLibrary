@@ -18,9 +18,13 @@ namespace AbstractPixel.SceneManagement
         [field: SerializeField, ReadOnly] public bool IsLoadingSceneGroup { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsUnloadingSceneGroup { get; private set; }
 
-        ISceneLoader sceneLoader = new DefaultSceneLoader();
+        ISceneLoader sceneLoader;
 
 
+        private void Start() => SetSceneLoader(new DefaultSceneLoader());
+
+        internal void SetSceneLoader(ISceneLoader _sceneLoader) => sceneLoader = _sceneLoader;
+      
         internal async Task TransitionToPreloadedSceneGroup()
         {
             if (preloadedSceneGroup == null || preloadedSceneGroup.IsEmpty())

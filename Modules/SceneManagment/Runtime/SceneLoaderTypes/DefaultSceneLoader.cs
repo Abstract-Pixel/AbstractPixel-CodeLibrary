@@ -9,11 +9,10 @@ namespace AbstractPixel.SceneManagement
 {
     public class DefaultSceneLoader : ISceneLoader
     {
-
-        private Dictionary<string,AsyncOperation> sceneLoadHandles = new Dictionary<string, AsyncOperation>();
+        private Dictionary<string, AsyncOperation> sceneLoadHandles = new Dictionary<string, AsyncOperation>();
         public async Task LoadScene(SceneReference sceneReference, bool isAdditive, bool sceneActivatedByDefault = true)
         {
-            if(sceneReference == null || string.IsNullOrEmpty(sceneReference.SceneName))
+            if (sceneReference == null || string.IsNullOrEmpty(sceneReference.SceneName))
             {
                 Debug.LogError(" scene reference provided to load is null.");
                 return;
@@ -48,7 +47,22 @@ namespace AbstractPixel.SceneManagement
 
         public async Task UnloadScene(SceneReference sceneReference)
         {
-            await SceneManager.UnloadSceneAsync(sceneReference.SceneName).AsTask();
+            if (sceneReference == null || string.IsNullOrEmpty(sceneReference.SceneName))
+            {
+                Debug.LogError(" scene reference provided to unload is null.");
+                return;
+            }
+            AsyncOperation sceneUnLoadHandle = SceneManager.UnloadSceneAsync(sceneReference.SceneName);
+            if (sceneUnLoadHandle == null)
+            {
+                return;
+            }
+            if (sceneLoadHandles.TryGetValue(sceneReference.SceneName, out AsyncOperation operationHandle))
+            {
+                sceneLoadHandles.Remove(sceneReference.SceneName);
+                return;
+            }
+            await sceneUnLoadHandle.AsTask();
         }
     }
 }
