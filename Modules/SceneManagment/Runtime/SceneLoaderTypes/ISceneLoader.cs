@@ -1,5 +1,4 @@
 using AbstractPixel.Core;
-using System;
 using System.Threading.Tasks;
 namespace AbstractPixel.SceneManagement
 {

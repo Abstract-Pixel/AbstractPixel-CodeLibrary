@@ -1,5 +1,5 @@
 using AbstractPixel.Core;
-using System;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
@@ -10,10 +10,16 @@ namespace AbstractPixel.SceneManagement
     public class DefaultSceneLoader : ISceneLoader
     {
 
-        private Dictionary<string, UnityEngine.AsyncOperation> sceneLoadHandles = new Dictionary<string, UnityEngine.AsyncOperation>();
+        private Dictionary<string,AsyncOperation> sceneLoadHandles = new Dictionary<string, AsyncOperation>();
         public async Task LoadScene(SceneReference sceneReference, bool isAdditive, bool sceneActivatedByDefault = true)
         {
-            if (sceneLoadHandles.TryGetValue(sceneReference.SceneName, out UnityEngine.AsyncOperation operationHandle))
+            if(sceneReference == null || string.IsNullOrEmpty(sceneReference.SceneName))
+            {
+                Debug.LogError(" scene reference provided to load is null.");
+                return;
+            }
+
+            if (sceneLoadHandles.TryGetValue(sceneReference.SceneName, out AsyncOperation operationHandle))
             {
                 if (sceneActivatedByDefault && !operationHandle.allowSceneActivation)
                 {
@@ -24,7 +30,7 @@ namespace AbstractPixel.SceneManagement
                 return;
             }
             LoadSceneMode loadMode = isAdditive ? LoadSceneMode.Additive : LoadSceneMode.Single;
-            UnityEngine.AsyncOperation sceneLoadHandle = SceneManager.LoadSceneAsync(sceneReference.SceneName, loadMode);
+            AsyncOperation sceneLoadHandle = SceneManager.LoadSceneAsync(sceneReference.SceneName, loadMode);
             sceneLoadHandle.allowSceneActivation = sceneActivatedByDefault;
             if (sceneLoadHandle.allowSceneActivation)
             {
