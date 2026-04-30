@@ -178,9 +178,7 @@ namespace AbstractPixel.SceneManagement
             }
 
             SceneReference mainScene = transitionContext.sceneGroupToTransitionTo.MainScene;
-            await SceneLoader.LoadScene(mainScene, true, doImmediateSceneActivation);
-            int buildIndex = SceneUtility.GetBuildIndexByScenePath(mainScene.SceneName);
-            SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex(buildIndex));
+            await SceneLoader.LoadScene(mainScene, true, doImmediateSceneActivation,true);
             IsLoadingSceneGroup = false;
         }
         #endregion

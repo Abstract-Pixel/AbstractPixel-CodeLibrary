@@ -28,12 +28,20 @@ namespace AbstractPixel.SceneManagement
                 }
                 return;
             }
+
             LoadSceneMode loadMode = isAdditive ? LoadSceneMode.Additive : LoadSceneMode.Single;
             AsyncOperation sceneLoadHandle = SceneManager.LoadSceneAsync(sceneReference.SceneName, loadMode);
             sceneLoadHandle.allowSceneActivation = sceneActivatedByDefault;
+
             if (sceneLoadHandle.allowSceneActivation)
             {
+   
                 await sceneLoadHandle.AsTask();
+                if(isMainScene)
+                {
+                    SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneReference.SceneName));
+                    SceneEventBus.RaiseOnMainSceneLoaded(sceneReference);
+                }
             }
             else
             {
