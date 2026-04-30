@@ -17,13 +17,22 @@ namespace AbstractPixel.SceneManagement
         [field: SerializeField, ReadOnly] internal HashSet<SceneReference> preloadedContextualScenesSet = new HashSet<SceneReference>();
         [field: SerializeField, ReadOnly] public bool IsLoadingSceneGroup { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsUnloadingSceneGroup { get; private set; }
+        [field: SerializeField, ReadOnly] public bool IsStartSceneGroupInitialized { get; private set; }
 
-        ISceneLoader sceneLoader;
+        public ISceneLoader SceneLoader { get; private set; }
 
 
         private void Start() => SetSceneLoader(new DefaultSceneLoader());
 
-        internal void SetSceneLoader(ISceneLoader _sceneLoader) => sceneLoader = _sceneLoader;
+        internal void InitializeStartSceneData(IEnumerable<SceneReference> managerialScenes, IEnumerable<SceneReference> contextualScenes, SceneReference mainScene)
+        {
+            activeManagerialScenesSet.UnionWith(managerialScenes);
+            activeContextualScenesSet.UnionWith(contextualScenes);
+            activeMainScene = mainScene;
+            IsStartSceneGroupInitialized = true;
+        }
+
+        internal void SetSceneLoader(ISceneLoader _sceneLoader) => SceneLoader = _sceneLoader;
       
         internal async Task TransitionToPreloadedSceneGroup()
         {
@@ -64,7 +73,7 @@ namespace AbstractPixel.SceneManagement
             {
                 foreach (SceneReference scene in preloadedContextualScenesSet)
                 {
-                    await sceneLoader.UnloadScene(scene);
+                    await SceneLoader.UnloadScene(scene);
 
                 }
                 preloadedContextualScenesSet.Clear();
@@ -126,7 +135,7 @@ namespace AbstractPixel.SceneManagement
             }
             else
             {
-                await sceneLoader.UnloadScene(activeMainScene);
+                await SceneLoader.UnloadScene(activeMainScene);
                 activeMainScene = null;
             }
 
@@ -137,7 +146,7 @@ namespace AbstractPixel.SceneManagement
             {
                 foreach (SceneReference scene in activeContextualScenesSet.ToList())
                 {
-                    await sceneLoader.UnloadScene(scene);
+                    await SceneLoader.UnloadScene(scene);
                 }
             }
             else
@@ -145,7 +154,7 @@ namespace AbstractPixel.SceneManagement
                 // Unload old contextual scenes
                 foreach (SceneReference scene in transitionContext.ContextualToUnload)
                 {
-                    await sceneLoader.UnloadScene(scene);
+                    await SceneLoader.UnloadScene(scene);
                 }
             }
             IsUnloadingSceneGroup = false;
@@ -155,18 +164,23 @@ namespace AbstractPixel.SceneManagement
         {
             bool doImmediateSceneActivation = transitionContext.doImmediateSceneActivation;
             IsLoadingSceneGroup = true;
-
-            foreach (SceneReference scene in transitionContext.ContextualToLoad)
+            bool forceReloadContextualScenes = transitionContext.sceneGroupToTransitionTo.ForceReloadContextualScenes;
+            HashSet<SceneReference> contextualScenesToLoad = forceReloadContextualScenes
+                                                        ? transitionContext.sceneGroupToTransitionTo.ContextualBootScenesList.ToHashSet() // If ForceReload, we load ALL of them
+                                                        : transitionContext.ContextualToLoad;
+            foreach (SceneReference scene in contextualScenesToLoad)
             {
-                await sceneLoader.LoadScene(scene, true, doImmediateSceneActivation);
+                await SceneLoader.LoadScene(scene, true, doImmediateSceneActivation);
             }
             foreach (SceneReference scene in transitionContext.ManagerialToLoad)
             {
-                await sceneLoader.LoadScene(scene, true, doImmediateSceneActivation);
+                await SceneLoader.LoadScene(scene, true, doImmediateSceneActivation);
             }
 
             SceneReference mainScene = transitionContext.sceneGroupToTransitionTo.MainScene;
-            await sceneLoader.LoadScene(mainScene, true, doImmediateSceneActivation);
+            await SceneLoader.LoadScene(mainScene, true, doImmediateSceneActivation);
+            int buildIndex = SceneUtility.GetBuildIndexByScenePath(mainScene.SceneName);
+            SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex(buildIndex));
             IsLoadingSceneGroup = false;
         }
         #endregion

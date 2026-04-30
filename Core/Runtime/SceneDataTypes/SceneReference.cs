@@ -12,6 +12,11 @@ namespace AbstractPixel.Core
         [Tooltip("Reference to the scene using the SceneField,Using Traditional Unity Scene Management")]
         [field: SerializeField] public SceneField SceneFieldReference { get; set; }
 
+        public SceneReference(string sceneName)
+        {
+           SceneFieldReference = new SceneField(sceneName);
+        }
+
         public string SceneName
         {
             get

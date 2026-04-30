@@ -10,7 +10,7 @@ namespace AbstractPixel.SceneManagement
     public class DefaultSceneLoader : ISceneLoader
     {
         private Dictionary<string, AsyncOperation> sceneLoadHandles = new Dictionary<string, AsyncOperation>();
-        public async Task LoadScene(SceneReference sceneReference, bool isAdditive, bool sceneActivatedByDefault = true)
+        public async Task LoadScene(SceneReference sceneReference, bool isAdditive, bool sceneActivatedByDefault = true, bool isMainScene = false)
         {
             if (sceneReference == null || string.IsNullOrEmpty(sceneReference.SceneName))
             {
