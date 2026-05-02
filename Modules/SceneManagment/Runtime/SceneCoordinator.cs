@@ -18,7 +18,6 @@ namespace AbstractPixel.SceneManagement
         [field: SerializeField, ReadOnly] public bool IsLoadingSceneGroup { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsUnloadingSceneGroup { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsStartSceneGroupInitialized { get; private set; }
-
         public ISceneLoader SceneLoader { get; private set; }
 
 
@@ -49,6 +48,9 @@ namespace AbstractPixel.SceneManagement
                 return;
             }
             await ExecuteTransition(preloadedSceneGroup, true);
+            SceneEventBus.RaiseOnPreloadedSceneGroupActivated(preloadedSceneGroup);
+            preloadedContextualScenesSet = null;
+            preloadedContextualScenesSet?.Clear();
         }
 
         internal async Task TransitionToSceneGroup(SceneGroup _sceneGroup)
@@ -58,7 +60,7 @@ namespace AbstractPixel.SceneManagement
                 // enforcing that main scene is the scene we want to transition rest of the scene types are dependencies
                 return;
             }
-            await ExecuteTransition(_sceneGroup, false);
+            await ExecuteTransition(_sceneGroup, false);     
         }
 
         internal async Task PreloadSceneGroup(SceneGroup _sceneGroup)
@@ -89,6 +91,7 @@ namespace AbstractPixel.SceneManagement
             preloadedContextualScenesSet.UnionWith(managerialToLoad);
             preloadedContextualScenesSet.Add(_sceneGroup.MainScene);
             preloadedSceneGroup = _sceneGroup;
+            SceneEventBus.RaiseOnSceneGroupPreloaded(_sceneGroup);
         }
 
         #region Scene Management Utiltiies
@@ -119,6 +122,7 @@ namespace AbstractPixel.SceneManagement
                 await UnloadSceneGroup(transitionContext);
                 activeContextualScenesSet.ExceptWith(activeContextualScenesToRemove);
                 await LoadSceneGroup(transitionContext);
+                SceneEventBus.RaiseOnNewSceneTransitionedTo(_sceneGroup);
             }
             activeContextualScenesSet.UnionWith(contextualToLoad);
             activeManagerialScenesSet.UnionWith(managerialToLoad);
@@ -158,6 +162,7 @@ namespace AbstractPixel.SceneManagement
                 }
             }
             IsUnloadingSceneGroup = false;
+            SceneEventBus.RaiseOnSceneGroupUnloaded(transitionContext.sceneGroupToTransitionTo);
         }
 
         private async Task LoadSceneGroup(SceneTransitionContext transitionContext)

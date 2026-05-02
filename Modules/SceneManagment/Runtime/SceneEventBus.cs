@@ -6,7 +6,7 @@ namespace AbstractPixel.SceneManagement
 {
     public static class SceneEventBus
     {
-        public static event Action<SceneGroup> OnNewSceneGroupLoaded = delegate { };
+        public static event Action<SceneGroup> OnNewSceneGroupTransitionTo = delegate { };
         public static event Action<SceneReference> OnMainSceneLoaded = delegate { };
         public static event Action<SceneGroup> OnSceneGroupPreloaded= delegate { };
         public static event Action<SceneGroup> OnSceneGroupUnloaded = delegate { };
@@ -16,18 +16,11 @@ namespace AbstractPixel.SceneManagement
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void ResetStatics()
         {
-            OnNewSceneGroupLoaded = delegate { };
+            OnNewSceneGroupTransitionTo = delegate { };
             OnSceneGroupPreloaded = delegate { };
             OnSceneGroupUnloaded = delegate { };
             OnPreloadedSceneGroupActivated = delegate { };
             OnMainSceneLoaded = delegate { };
-        }
-
-
-
-        public static void RaiseOnSceneGroupLoaded(SceneGroup newSceneGroup)
-        {
-            OnNewSceneGroupLoaded.Invoke(newSceneGroup);
         }
 
         public static void RaiseOnSceneGroupUnloaded(SceneGroup newSceneGroup)
@@ -45,9 +38,9 @@ namespace AbstractPixel.SceneManagement
             OnSceneGroupPreloaded.Invoke(newSceneGroup);
         }
 
-        public static void RaiseOnNewSceneGroupLoaded(SceneGroup newSceneGroup)
+        public static void RaiseOnNewSceneTransitionedTo(SceneGroup newSceneGroup)
         {
-            OnNewSceneGroupLoaded.Invoke(newSceneGroup);
+            OnNewSceneGroupTransitionTo.Invoke(newSceneGroup);
         }
 
         public static void RaiseOnMainSceneLoaded(SceneReference mainScene)
