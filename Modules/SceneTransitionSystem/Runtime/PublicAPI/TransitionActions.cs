@@ -1,4 +1,6 @@
+using AbstractPixel.SceneManagement;
 using System.Threading.Tasks;
+using AbstractPixel.Core;
 
 namespace AbstractPixel.SceneTransitions
 {
@@ -12,14 +14,14 @@ namespace AbstractPixel.SceneTransitions
             TransitionManager.Instance?.Initialize(_transitionInProfile, _transitionOutProfile);
         }
 
-        public static Task PlayTransitionIn()
+        public static async Task PlayTransitionIn()
         {
-            return TransitionManager.Instance?.PlayTransitionIn();
+            await TransitionManager.Instance?.PlayTransitionIn();
         }
 
         public static Task PlayTransitionOut()
         {
-            return TransitionManager.Instance?.PlayTransitionOut();
+            return TransitionManager.Instance?.PlayTransitionOut() ?? Task.CompletedTask;
         }
 
         public static void SetTransitionInProfile(TransitionProfile _transitionInProfile)
@@ -31,5 +33,21 @@ namespace AbstractPixel.SceneTransitions
         {
             TransitionManager.Instance?.SetTransitionOutProfile(_transitionOutProfile);
         }
+
+        #region Actual Scene Transition Sequences
+        public static async Task TransitionToSceneWithEffects(SceneGroup group)
+        {
+            await PlayTransitionIn();
+            await SceneActions.TransitionToSceneGroup(group);
+            await PlayTransitionOut();
+        }
+        public static async Task TransitionToPreloadedSceneWithEffects()
+        {
+            await PlayTransitionIn();
+            await SceneActions.TransitionToPreloadedSceneGroup();
+            await PlayTransitionOut();
+        }
+        #endregion
+
     }
 }

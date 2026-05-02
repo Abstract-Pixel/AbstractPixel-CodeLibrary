@@ -5,6 +5,10 @@ namespace AbstractPixel.SceneTransitions
 {
     public class RallyFadeController : MonoBehaviour, ITransitionController
     {
+        public void Initialize(TransitionProfile _transitionProfile)
+        {
+
+        }
 
         public Task PlayTransitionIn()
         {

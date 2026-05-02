@@ -8,13 +8,13 @@ namespace AbstractPixel.SceneTransitions
     {
         [SerializeField] private TransitionProfile transitionInProfile;
         [SerializeField] private TransitionProfile transitionOutProfile;
-        [SerializeField] private bool autoPlayTransitionIn = true;
+        [SerializeField] private bool autoPlayTransitionOut = true;
         private void Awake()
         {
             TransitionActions.Initialize(transitionInProfile, transitionOutProfile);
-            if (autoPlayTransitionIn)
+            if (autoPlayTransitionOut)
             {
-                TransitionActions.PlayTransitionIn().ForgetTask();
+                TransitionActions.PlayTransitionOut().ForgetTask();
             }
         }
 

@@ -1,5 +1,6 @@
 using AbstractPixel.Core;
 using UnityEngine;
+using AbstractPixel.SceneManagement;
 
 namespace AbstractPixel.SceneTransitions
 {
@@ -27,6 +28,16 @@ namespace AbstractPixel.SceneTransitions
         public void PlayTransitionOut()
         {
             TransitionActions.PlayTransitionOut().ForgetTask();
+        }
+
+        public void TransitionToSceneWithEffects(SceneGroup group)
+        {
+            TransitionActions.TransitionToSceneWithEffects(group).ForgetTask();
+        }
+
+        public void TransitionToPreloadedSceneWithEffects()
+        {
+            TransitionActions.TransitionToPreloadedSceneWithEffects().ForgetTask();
         }
     }
 }

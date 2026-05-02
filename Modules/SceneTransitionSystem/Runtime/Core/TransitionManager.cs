@@ -7,8 +7,8 @@ namespace AbstractPixel.SceneTransitions
     [DisallowMultipleComponent]
     public class TransitionManager : PersistentSingleton<TransitionManager>
     {
-        [SerializeField] private TransitionProfile transitionInProfile;
-        [SerializeField] private TransitionProfile transitionOutProfile;
+        [SerializeField,ReadOnly] private TransitionProfile transitionInProfile;
+        [SerializeField,ReadOnly] private TransitionProfile transitionOutProfile;
 
         private ITransitionController transitionInController;
         private ITransitionController transitionOutController;
@@ -40,8 +40,10 @@ namespace AbstractPixel.SceneTransitions
             }
 
             IsTransitioning = true;
+            Time.timeScale = 0;
             TransitionEventBus.RaiseTransitionInStarted();
             await transitionInController.PlayTransitionIn();
+            Time.timeScale = 1;
             TransitionEventBus.RaiseTransitionInCompleted();
             IsTransitioning = false;
         }
@@ -55,9 +57,11 @@ namespace AbstractPixel.SceneTransitions
                 return;
             }
             IsTransitioning = true;
+            Time.timeScale = 0;
             TransitionEventBus.RaiseTransitionOutStarted();
             await transitionOutController.PlayTransitionOut();
             TransitionEventBus.RaiseTransitionOutCompleted();
+            Time.timeScale = 1;
             IsTransitioning = false;
         }
 
@@ -73,7 +77,10 @@ namespace AbstractPixel.SceneTransitions
                 IsInitialized = false;
                 return;
             }
-            transitionInController = Instantiate(_transitionInProfile.TransitionControllerPrefab, transform).GetComponent<ITransitionController>();
+            transitionInProfile = _transitionInProfile;
+            transitionInController = Instantiate(_transitionInProfile.TransitionControllerPrefab, transform)
+                                                                     .GetComponentInChildren<ITransitionController>(true);
+            transitionInController.Initialize(transitionInProfile);
         }
 
         internal void SetTransitionOutProfile(TransitionProfile _transitionOutProfile)
@@ -82,12 +89,15 @@ namespace AbstractPixel.SceneTransitions
             {
                 Destroy(transitionOutController.gameObject);
             }
-            if (transitionOutProfile == null)
+            if (_transitionOutProfile == null)
             {
                 IsInitialized = false;
                 return;
             }
-            transitionOutController = Instantiate(_transitionOutProfile.TransitionControllerPrefab, transform).GetComponent<ITransitionController>();
+            transitionOutProfile = _transitionOutProfile;
+            transitionOutController = Instantiate(_transitionOutProfile.TransitionControllerPrefab, transform)
+                                                                     .GetComponentInChildren<ITransitionController>(true);
+            transitionOutController.Initialize(transitionOutProfile);
         }
     }
 }
