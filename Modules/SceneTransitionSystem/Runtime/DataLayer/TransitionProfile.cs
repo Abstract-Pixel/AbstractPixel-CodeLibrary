@@ -1,8 +1,11 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "TransitionProfile", menuName = "Utility/SceneRelated/TransitionProfile", order = 1)]
-public abstract class TransitionProfile : ScriptableObject
+namespace AbstractPixel.SceneTransitions
 {
-    [SerializeField] public GameObject TransitionControllerPrefab;
+    [CreateAssetMenu(fileName = "TransitionProfile", menuName = "Utility/SceneRelated/TransitionProfile", order = 1)]
+    public abstract class TransitionProfile : ScriptableObject
+    {
+        [SerializeField] public GameObject TransitionControllerPrefab;
 
+    }
 }

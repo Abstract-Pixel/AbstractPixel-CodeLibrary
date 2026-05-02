@@ -1,14 +1,32 @@
+using AbstractPixel.Core;
 using UnityEngine;
 
-public class MonoTransitionActions : MonoBehaviour
+namespace AbstractPixel.SceneTransitions
 {
-    void Start()
+    [DisallowMultipleComponent]
+    public class MonoTransitionActions : MonoBehaviour
     {
+        public void Initialize(TransitionProfile _transitionInProfile, TransitionProfile _transitionOutProfile)
+        {
+            TransitionActions.Initialize(_transitionInProfile, _transitionOutProfile);
+        }
+        public void SetTransitionInProfile(TransitionProfile _transitionInProfile)
+        {
+            TransitionActions.SetTransitionInProfile(_transitionInProfile);
+        }
+        public void SetTransitionOutProfile(TransitionProfile _transitionOutProfile)
+        {
+            TransitionActions.SetTransitionOutProfile(_transitionOutProfile);
+        }
 
-    }
+        public void PlayTransitionIn()
+        {
+            TransitionActions.PlayTransitionIn().ForgetTask();
+        }
 
-    void Update()
-    {
-
+        public void PlayTransitionOut()
+        {
+            TransitionActions.PlayTransitionOut().ForgetTask();
+        }
     }
 }

@@ -2,77 +2,92 @@ using UnityEngine;
 using AbstractPixel.Core;
 using System.Threading.Tasks;
 
-public class TransitionManager : PersistentSingleton<TransitionManager>
+namespace AbstractPixel.SceneTransitions
 {
-    [SerializeField] private TransitionProfile transitionInProfile;
-    [SerializeField] private TransitionProfile transitionOutProfile;
-
-    private ITransitionController transitionInController;
-    private ITransitionController transitionOutController;
-
-    internal bool IsTransitioning { get; private set; } = false;
-    internal bool IsInitialized { get; private set; } = false;
-
-    internal void Initialize(TransitionProfile _transitionInProfile, TransitionProfile _transitionOutProfile)
+    [DisallowMultipleComponent]
+    public class TransitionManager : PersistentSingleton<TransitionManager>
     {
-        transitionInProfile = _transitionInProfile;
-        transitionOutProfile = _transitionOutProfile;
+        [SerializeField] private TransitionProfile transitionInProfile;
+        [SerializeField] private TransitionProfile transitionOutProfile;
 
-        SetTransitionInProfile(transitionInProfile);
-        SetTransitionOutProfile(transitionOutProfile);
-       
-        if(transitionInController != null && transitionOutController != null)
+        private ITransitionController transitionInController;
+        private ITransitionController transitionOutController;
+
+        internal bool IsTransitioning { get; private set; } = false;
+        internal bool IsInitialized { get; private set; } = false;
+
+        internal void Initialize(TransitionProfile _transitionInProfile, TransitionProfile _transitionOutProfile)
         {
-            IsInitialized = true;
+            transitionInProfile = _transitionInProfile;
+            transitionOutProfile = _transitionOutProfile;
+
+            SetTransitionInProfile(transitionInProfile);
+            SetTransitionOutProfile(transitionOutProfile);
+
+            if (transitionInController != null && transitionOutController != null)
+            {
+                IsInitialized = true;
+            }
         }
-    }
 
-    internal async Task PlayTransitionIn()
-    {
-        if (IsTransitioning || !IsInitialized) return;
-        if (transitionInProfile == null || transitionInController == null) return;
-
-        IsTransitioning = true;
-        await transitionInController.PlayTransitionIn();
-        IsTransitioning = false;
-    }
-
-    internal async Task PlayTransitionOut()
-    {
-        if (IsTransitioning || !IsInitialized) return;
-        if (transitionOutProfile == null || transitionOutController == null) return;
-        IsTransitioning = true;
-        await transitionOutController.PlayTransitionOut();
-        IsTransitioning = false;
-    }
-
-
-    internal void SetTransitionInProfile(TransitionProfile _transitionInProfile)
-    {
-        
-        if (transitionInController != null)
+        internal async Task PlayTransitionIn()
         {
-            Destroy(transitionInController.gameObject);
-        }
-        if (_transitionInProfile == null)
-        {
-            IsInitialized = false;
-            return;
-        }
-        transitionInController = Instantiate(_transitionInProfile.TransitionControllerPrefab).GetComponent<ITransitionController>();
-    }
+            if (IsTransitioning || !IsInitialized) return;
+            if (transitionInProfile == null || transitionInController == null)
+            {
+                Debug.LogError("Transition In Profile or Controller is not set. Cannot play transition in.");
+                return;
+            }
 
-    internal void SetTransitionOutProfile(TransitionProfile _transitionOutProfile)
-    {
-        if (transitionOutController != null)
-        {
-            Destroy(transitionOutController.gameObject);
+            IsTransitioning = true;
+            TransitionEventBus.RaiseTransitionInStarted();
+            await transitionInController.PlayTransitionIn();
+            TransitionEventBus.RaiseTransitionInCompleted();
+            IsTransitioning = false;
         }
-        if(transitionOutProfile == null)
+
+        internal async Task PlayTransitionOut()
         {
-            IsInitialized = false;
-            return;
+            if (IsTransitioning || !IsInitialized) return;
+            if (transitionOutProfile == null || transitionOutController == null)
+            {
+                Debug.LogError("Transition Out Profile or Controller is not set. Cannot play transition out.");
+                return;
+            }
+            IsTransitioning = true;
+            TransitionEventBus.RaiseTransitionOutStarted();
+            await transitionOutController.PlayTransitionOut();
+            TransitionEventBus.RaiseTransitionOutCompleted();
+            IsTransitioning = false;
         }
-        transitionOutController = Instantiate(_transitionOutProfile.TransitionControllerPrefab).GetComponent<ITransitionController>();
+
+
+        internal void SetTransitionInProfile(TransitionProfile _transitionInProfile)
+        {
+            if (transitionInController != null)
+            {
+                Destroy(transitionInController.gameObject);
+            }
+            if (_transitionInProfile == null)
+            {
+                IsInitialized = false;
+                return;
+            }
+            transitionInController = Instantiate(_transitionInProfile.TransitionControllerPrefab, transform).GetComponent<ITransitionController>();
+        }
+
+        internal void SetTransitionOutProfile(TransitionProfile _transitionOutProfile)
+        {
+            if (transitionOutController != null)
+            {
+                Destroy(transitionOutController.gameObject);
+            }
+            if (transitionOutProfile == null)
+            {
+                IsInitialized = false;
+                return;
+            }
+            transitionOutController = Instantiate(_transitionOutProfile.TransitionControllerPrefab, transform).GetComponent<ITransitionController>();
+        }
     }
 }

@@ -1,4 +1,19 @@
-public class RallyFadeController : ITransitionController
+using System.Threading.Tasks;
+using UnityEngine;
+
+namespace AbstractPixel.SceneTransitions
 {
-    // Your code here
+    public class RallyFadeController : MonoBehaviour, ITransitionController
+    {
+
+        public Task PlayTransitionIn()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task PlayTransitionOut()
+        {
+            throw new System.NotImplementedException();
+        }
+    }
 }

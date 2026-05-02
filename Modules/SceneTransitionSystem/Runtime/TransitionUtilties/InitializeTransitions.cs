@@ -1,16 +1,22 @@
 using UnityEngine;
+using AbstractPixel.Core;
 
-public class InitializeTransitions : MonoBehaviour
+namespace AbstractPixel.SceneTransitions
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [DisallowMultipleComponent]
+    public class InitializeTransitions : MonoBehaviour
     {
-        
-    }
+        [SerializeField] private TransitionProfile transitionInProfile;
+        [SerializeField] private TransitionProfile transitionOutProfile;
+        [SerializeField] private bool autoPlayTransitionIn = true;
+        private void Awake()
+        {
+            TransitionActions.Initialize(transitionInProfile, transitionOutProfile);
+            if (autoPlayTransitionIn)
+            {
+                TransitionActions.PlayTransitionIn().ForgetTask();
+            }
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
