@@ -7,19 +7,15 @@ namespace AbstractPixel.SceneTransitions
     [DisallowMultipleComponent]
     public class MonoTransitionActions : MonoBehaviour
     {
-        public void Initialize(TransitionProfile _transitionInProfile, TransitionProfile _transitionOutProfile)
+        public void Initialize(TransitionProfile _transitionProfile)
         {
-            TransitionActions.Initialize(_transitionInProfile, _transitionOutProfile);
+            TransitionActions.Initialize(_transitionProfile);
         }
-        public void SetTransitionInProfile(TransitionProfile _transitionInProfile)
+        public void SetTransitionProfile(TransitionProfile _transitionProfile)
         {
-            TransitionActions.SetTransitionInProfile(_transitionInProfile);
+            TransitionActions.SetTransitionProfile(_transitionProfile);
         }
-        public void SetTransitionOutProfile(TransitionProfile _transitionOutProfile)
-        {
-            TransitionActions.SetTransitionOutProfile(_transitionOutProfile);
-        }
-
+      
         public void PlayTransitionIn()
         {
             TransitionActions.PlayTransitionIn().ForgetTask();

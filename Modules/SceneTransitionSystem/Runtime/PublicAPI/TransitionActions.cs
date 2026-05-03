@@ -9,9 +9,9 @@ namespace AbstractPixel.SceneTransitions
         public static bool IsTransitioning => TransitionManager.Instance.IsTransitioning;
         public static bool IsInitialized => TransitionManager.Instance.IsInitialized;
 
-        public static void Initialize(TransitionProfile _transitionInProfile, TransitionProfile _transitionOutProfile)
+        public static void Initialize(TransitionProfile _transitionProfile)
         {
-            TransitionManager.Instance?.Initialize(_transitionInProfile, _transitionOutProfile);
+            TransitionManager.Instance?.Initialize(_transitionProfile);
         }
 
         public static async Task PlayTransitionIn()
@@ -24,14 +24,9 @@ namespace AbstractPixel.SceneTransitions
             return TransitionManager.Instance?.PlayTransitionOut() ?? Task.CompletedTask;
         }
 
-        public static void SetTransitionInProfile(TransitionProfile _transitionInProfile)
+        public static void SetTransitionProfile(TransitionProfile _transitionProfile)
         {
-            TransitionManager.Instance?.SetTransitionInProfile(_transitionInProfile);
-        }
-
-        public static void SetTransitionOutProfile(TransitionProfile _transitionOutProfile)
-        {
-            TransitionManager.Instance?.SetTransitionOutProfile(_transitionOutProfile);
+            TransitionManager.Instance?.SetTransitionProfile(_transitionProfile);
         }
 
         #region Actual Scene Transition Sequences

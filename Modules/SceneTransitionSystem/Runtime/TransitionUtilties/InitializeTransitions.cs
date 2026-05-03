@@ -6,12 +6,11 @@ namespace AbstractPixel.SceneTransitions
     [DisallowMultipleComponent]
     public class InitializeTransitions : MonoBehaviour
     {
-        [SerializeField] private TransitionProfile transitionInProfile;
-        [SerializeField] private TransitionProfile transitionOutProfile;
+        [SerializeField] private TransitionProfile transitionProfile;
         [SerializeField] private bool autoPlayTransitionOut = true;
         private void Awake()
         {
-            TransitionActions.Initialize(transitionInProfile, transitionOutProfile);
+            TransitionActions.Initialize(transitionProfile);
             if (autoPlayTransitionOut)
             {
                 TransitionActions.PlayTransitionOut().ForgetTask();

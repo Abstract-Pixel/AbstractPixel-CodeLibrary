@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: AbstractPixel.SceneTransitions::AbstractPixel.SceneTransitions.ImageFadeProfile
   TransitionControllerPrefab: {fileID: 1542660996963985817, guid: 914df848876335946938703f0f9b6d2f, type: 3}
   FadeColor: {r: 0, g: 0, b: 0, a: 1}
+  StartDelay: 1
   Duration: 1
   FadeCurve:
     serializedVersion: 2

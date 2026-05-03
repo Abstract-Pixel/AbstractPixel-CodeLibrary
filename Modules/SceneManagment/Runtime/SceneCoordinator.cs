@@ -17,9 +17,13 @@ namespace AbstractPixel.SceneManagement
         [field: SerializeField, ReadOnly] internal HashSet<SceneReference> preloadedContextualScenesSet = new HashSet<SceneReference>();
         [field: SerializeField, ReadOnly] public bool IsLoadingSceneGroup { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsUnloadingSceneGroup { get; private set; }
-        [field: SerializeField, ReadOnly] public bool IsStartSceneGroupInitialized { get; private set; }
+        [field: SerializeField, ReadOnly] public bool IsStartSceneGroupInitialized { get; private set; } = false;
         public ISceneLoader SceneLoader { get; private set; }
 
+        private void OnDisable()
+        {
+            IsStartSceneGroupInitialized = false;
+        }
 
         private void Start() => SetSceneLoader(new DefaultSceneLoader());
 
@@ -32,7 +36,7 @@ namespace AbstractPixel.SceneManagement
         }
 
         internal void SetSceneLoader(ISceneLoader _sceneLoader) => SceneLoader = _sceneLoader;
-      
+
         internal async Task TransitionToPreloadedSceneGroup()
         {
             if (preloadedSceneGroup == null || preloadedSceneGroup.IsEmpty())
@@ -60,7 +64,7 @@ namespace AbstractPixel.SceneManagement
                 // enforcing that main scene is the scene we want to transition rest of the scene types are dependencies
                 return;
             }
-            await ExecuteTransition(_sceneGroup, false);     
+            await ExecuteTransition(_sceneGroup, false);
         }
 
         internal async Task PreloadSceneGroup(SceneGroup _sceneGroup)
@@ -120,7 +124,11 @@ namespace AbstractPixel.SceneManagement
             else
             {
                 await UnloadSceneGroup(transitionContext);
-                activeContextualScenesSet.ExceptWith(activeContextualScenesToRemove);
+                bool forceReloadContextualScenes = transitionContext.sceneGroupToTransitionTo.ForceReloadContextualScenes;
+                if (!forceReloadContextualScenes)
+                {
+                    activeContextualScenesSet.ExceptWith(activeContextualScenesToRemove);
+                }
                 await LoadSceneGroup(transitionContext);
                 SceneEventBus.RaiseOnNewSceneTransitionedTo(_sceneGroup);
             }
@@ -183,7 +191,7 @@ namespace AbstractPixel.SceneManagement
             }
 
             SceneReference mainScene = transitionContext.sceneGroupToTransitionTo.MainScene;
-            await SceneLoader.LoadScene(mainScene, true, doImmediateSceneActivation,true);
+            await SceneLoader.LoadScene(mainScene, true, doImmediateSceneActivation, true);
             IsLoadingSceneGroup = false;
         }
         #endregion

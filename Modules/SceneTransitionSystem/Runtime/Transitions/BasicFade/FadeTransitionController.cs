@@ -45,7 +45,7 @@ namespace AbstractPixel.SceneTransitions
 
             fadeImage.color = new Color(cachedProfile.FadeColor.r, cachedProfile.FadeColor.g, cachedProfile.FadeColor.b, 1f);
             fadeImage.gameObject.SetActive(true);
-
+            await Task.Delay((int)(cachedProfile.StartDelay) * 1000);
             float timer = 0f;
             while (timer < cachedProfile.Duration)
             {
@@ -75,7 +75,7 @@ namespace AbstractPixel.SceneTransitions
 
             fadeImage.color = new Color(cachedProfile.FadeColor.r, cachedProfile.FadeColor.g, cachedProfile.FadeColor.b, 0f);
             fadeImage.gameObject.SetActive(true);
-
+            await Task.Delay((int)(cachedProfile.StartDelay) * 1000);
             float timer = 0f;
             while (timer < cachedProfile.Duration)
             {
