@@ -1,14 +1,17 @@
 using UnityEngine;
 
-public class BaseLevelButton : MonoBehaviour
+namespace AbstractPixel.LevelFramework
 {
-    void Start()
+    public class BaseLevelButton<TLevelDataType> : MonoBehaviour
     {
+        void Start()
+        {
 
-    }
+        }
 
-    void Update()
-    {
+        void Update()
+        {
 
+        }
     }
 }

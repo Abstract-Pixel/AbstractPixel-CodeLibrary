@@ -1,14 +1,17 @@
 using UnityEngine;
 
-public class BaseLevelUIManager : MonoBehaviour
+namespace AbstractPixel.LevelFramework
 {
-    void Start()
+    public class BaseLevelUIManager<TLevelDataType, TSceneAssetType> : MonoBehaviour
     {
+        void Start()
+        {
 
-    }
+        }
 
-    void Update()
-    {
+        void Update()
+        {
 
+        }
     }
 }

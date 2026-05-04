@@ -1,4 +1,9 @@
-public class LevelStatus
+namespace AbstractPixel.LevelFramework
 {
-    // Your code here
+    public enum LevelStatus
+    {
+        NotStarted = 0,
+        InProgress = 1,
+        Completed = 2,
+    }
 }

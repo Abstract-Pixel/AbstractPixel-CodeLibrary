@@ -1,4 +1,12 @@
-public class BaseLevelData
+using System;
+
+namespace AbstractPixel.LevelFramework
 {
-    // Your code here
+    [Serializable]
+    public class BaseLevelData
+    {
+        public string levelGUID;
+        public bool IsUnlocked;
+        public LevelStatus LevelStatus;
+    }
 }

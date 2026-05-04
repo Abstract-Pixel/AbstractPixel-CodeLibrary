@@ -1,7 +1,19 @@
+using AbstractPixel.Core;
 using UnityEngine;
+using System;
 
-[CreateAssetMenu(fileName = "BaseLevelDefinition", menuName = "ScriptableObjects/BaseLevelDefinition", order = 1)]
-public class BaseLevelDefinition : ScriptableObject
+namespace AbstractPixel.LevelFramework
 {
-    // Your code here
+    [Serializable]
+    public abstract class BaseLevelDefinition<TSceneAssetType>
+    {
+        [field: SerializeField] public string LevelDisplayName { get; set; }
+        [field: SerializeField] public TSceneAssetType SceneAsset { get; set; }
+        [field: SerializeField,ReadOnly] public string LevelGUID { get; set; }
+
+        public BaseLevelDefinition()
+        {
+           
+        }
+    }
 }
