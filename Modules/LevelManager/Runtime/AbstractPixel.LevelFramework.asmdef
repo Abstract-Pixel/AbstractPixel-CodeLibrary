@@ -2,7 +2,8 @@
     "name": "AbstractPixel.LevelManager",
     "rootNamespace": "AbstractPixel.LevelFramework",
     "references": [
-        "GUID:0404a8ea4faa386498395a28b0b33112"
+        "GUID:0404a8ea4faa386498395a28b0b33112",
+        "GUID:a43ca4aadc95bc549a72f24b56ddd0bb"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,4 +1,9 @@
-public interface ILevelTransitionAdapter
+using System.Threading.Tasks;
+
+namespace AbstractPixel.LevelFramework
 {
-    // Define interface methods and properties here
+    public interface ILevelTransitionAdapter<TSceneAssetType>
+    {
+        public Task TransitionToLevel(TSceneAssetType sceneAssetType);
+    }
 }

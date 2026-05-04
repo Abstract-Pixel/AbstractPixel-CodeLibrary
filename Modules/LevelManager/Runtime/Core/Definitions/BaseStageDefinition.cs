@@ -2,6 +2,7 @@ using AbstractPixel.Core;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 namespace AbstractPixel.LevelFramework
 {
@@ -22,12 +23,15 @@ namespace AbstractPixel.LevelFramework
 
         private void OnValidate()
         {
-            foreach(TLevelDefinitionType levelDefinition in LevelDefinitionsList)
+            for(int i = 0; i < LevelDefinitionsList.Count; i++ )
             {
-                if(string.IsNullOrEmpty(levelDefinition.LevelGUID))
+                string currentGUID = LevelDefinitionsList[i].LevelGUID;
+                string previousGUID = i>0 ? LevelDefinitionsList[i-1].LevelGUID : "";
+                if(previousGUID == currentGUID || string.IsNullOrEmpty(currentGUID))
                 {
-                    levelDefinition.LevelGUID = Guid.NewGuid().ToString();
+                    LevelDefinitionsList[i].LevelGUID = Guid.NewGuid().ToString();
                 }
+                
             }
         }
     }
