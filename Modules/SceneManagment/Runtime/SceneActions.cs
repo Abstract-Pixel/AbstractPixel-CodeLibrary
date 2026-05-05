@@ -6,6 +6,10 @@ namespace AbstractPixel.SceneManagement
 {
     public static class SceneActions
     {
+        public static SceneGroup ActiveSceneGroup => SceneCoordinator.Instance?.activeSceneGroup;
+        public static SceneGroup PreloadedSceneGroup => SceneCoordinator.Instance?.preloadedSceneGroup;
+
+
         /// <summary>Initializes the start scene data with the specified managerial and contextual scenes, and sets the main
         /// scene.</summary>
         /// <param name="managerialScenes">A collection of scene references representing managerial scenes to be included in the initialization.</param>

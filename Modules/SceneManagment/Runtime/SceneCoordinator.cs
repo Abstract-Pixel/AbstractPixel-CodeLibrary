@@ -10,11 +10,13 @@ namespace AbstractPixel.SceneManagement
     [DisallowMultipleComponent]
     public class SceneCoordinator : PersistentSingleton<SceneCoordinator>
     {
-        [field: SerializeField, ReadOnly] internal HashSet<SceneReference> activeManagerialScenesSet = new HashSet<SceneReference>();
-        [field: SerializeField, ReadOnly] internal HashSet<SceneReference> activeContextualScenesSet = new HashSet<SceneReference>();
+        internal HashSet<SceneReference> activeManagerialScenesSet = new HashSet<SceneReference>();
+        internal HashSet<SceneReference> activeContextualScenesSet = new HashSet<SceneReference>();
+        internal HashSet<SceneReference> preloadedContextualScenesSet = new HashSet<SceneReference>();
         [field: SerializeField, ReadOnly] internal SceneReference activeMainScene = null;
         [field: SerializeField, ReadOnly] internal SceneGroup preloadedSceneGroup = null;
-        [field: SerializeField, ReadOnly] internal HashSet<SceneReference> preloadedContextualScenesSet = new HashSet<SceneReference>();
+        [field: SerializeField, ReadOnly] internal SceneGroup activeSceneGroup = null;
+
         [field: SerializeField, ReadOnly] public bool IsLoadingSceneGroup { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsUnloadingSceneGroup { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsStartSceneGroupInitialized { get; private set; } = false;
@@ -33,6 +35,10 @@ namespace AbstractPixel.SceneManagement
             activeContextualScenesSet.UnionWith(contextualScenes);
             activeMainScene = mainScene;
             IsStartSceneGroupInitialized = true;
+
+            activeSceneGroup = ScriptableObject.CreateInstance<SceneGroup>();
+            activeSceneGroup.Initialize(managerialScenes, contextualScenes, mainScene);
+            SceneEventBus.RaiseOnNewSceneTransitionedTo(activeSceneGroup);
         }
 
         internal void SetSceneLoader(ISceneLoader _sceneLoader) => SceneLoader = _sceneLoader;
@@ -135,6 +141,7 @@ namespace AbstractPixel.SceneManagement
             activeContextualScenesSet.UnionWith(contextualToLoad);
             activeManagerialScenesSet.UnionWith(managerialToLoad);
             activeMainScene = _sceneGroup.MainScene;
+            activeSceneGroup = _sceneGroup;
         }
 
         private async Task UnloadSceneGroup(SceneTransitionContext transitionContext)

@@ -1,24 +1,28 @@
+using AbstractPixel.Core;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace AbstractPixel.LevelFramework
 {
-    public abstract class CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset> : MonoBehaviour
+    public abstract class CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset> : PersistentSingleton<CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset>>
      where TStageDefinition : BaseStageDefinition<TLevelDefinition, TSceneAsset>
      where TLevelDefinition : BaseLevelDefinition<TSceneAsset>
      where TLevelSaveData : BaseLevelData
      where TSceneAsset : ScriptableObject
     {
+
         [SerializeField] protected List<TStageDefinition> stageDefinitionsList = new List<TStageDefinition>();
         protected Dictionary<TSceneAsset, TLevelDefinition> levelDefinitionsMap = new Dictionary<TSceneAsset, TLevelDefinition>();
         protected Dictionary<TSceneAsset, TLevelSaveData> levelSaveDataMap = new Dictionary<TSceneAsset, TLevelSaveData>();
 
         protected ILevelTransitionAdapter<TSceneAsset> levelTransitioner;
-        protected TStageDefinition activeStageDefinition = null;
-        protected TLevelDefinition activeLevelDefinition = null;
-        protected TSceneAsset activeSceneAsset;
-        protected int currentStageLevelIndex;
+
+        [Header("Private Debug Variables")]
+        [field:SerializeField,ReadOnly]protected TStageDefinition activeStageDefinition = null;
+        [field: SerializeField, ReadOnly] protected TLevelDefinition activeLevelDefinition = null;
+        [field: SerializeField, ReadOnly] protected TSceneAsset activeSceneAsset;
+        [field: SerializeField, ReadOnly] protected int currentStageLevelIndex;
 
         protected abstract void SyncCurrentSceneToLevel(TSceneAsset _sceneAsset);
 
@@ -62,15 +66,27 @@ namespace AbstractPixel.LevelFramework
         }
 
 
-        public virtual void MarkCurrentLevelForCompletion()
+        public virtual void MarkCurrentLevelForCompletion(TLevelSaveData newLevelSaveData)
         {
+            
             if (levelSaveDataMap.TryGetValue(activeSceneAsset, out TLevelSaveData saveData))
             {
+                if (newLevelSaveData != null)
+                {
+                    saveData = newLevelSaveData;
+                    return;
+                }
                 saveData.IsUnlocked = true;
                 saveData.LevelStatus = LevelStatus.Completed;
+
             }
             else
             {
+                if (newLevelSaveData != null)
+                {
+                    levelSaveDataMap[activeSceneAsset] = newLevelSaveData;
+                    return;
+                }
                 TLevelSaveData newSaveData = Activator.CreateInstance<TLevelSaveData>();
                 newSaveData.IsUnlocked = true;
                 newSaveData.LevelStatus = LevelStatus.Completed;
