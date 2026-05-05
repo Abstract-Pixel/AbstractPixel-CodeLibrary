@@ -111,7 +111,7 @@ namespace AbstractPixel.LevelFramework
             return null;
         }
 
-        internal TLevelDefinition GetNextLevel()
+        public TLevelDefinition GetNextLevel()
         {
             // If nothing is active, return the very first level of the game
             if (activeLevelDefinition == null)

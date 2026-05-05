@@ -21,18 +21,6 @@ namespace AbstractPixel.LevelFramework
             }
         }
 
-        private void OnValidate()
-        {
-            for(int i = 0; i < LevelDefinitionsList.Count; i++ )
-            {
-                string currentGUID = LevelDefinitionsList[i].LevelGUID;
-                string previousGUID = i>0 ? LevelDefinitionsList[i-1].LevelGUID : "";
-                if(previousGUID == currentGUID || string.IsNullOrEmpty(currentGUID))
-                {
-                    LevelDefinitionsList[i].LevelGUID = Guid.NewGuid().ToString();
-                }
-                
-            }
-        }
+      
     }
 }

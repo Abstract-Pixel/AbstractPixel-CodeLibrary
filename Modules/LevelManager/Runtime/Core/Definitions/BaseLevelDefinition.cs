@@ -9,7 +9,6 @@ namespace AbstractPixel.LevelFramework
     {
         [field: SerializeField] public string LevelDisplayName { get; set; }
         [field: SerializeField] public TSceneAssetType SceneAsset { get; set; }
-        [field: SerializeField,ReadOnly] public string LevelGUID { get; set; }
 
         public BaseLevelDefinition()
         {
