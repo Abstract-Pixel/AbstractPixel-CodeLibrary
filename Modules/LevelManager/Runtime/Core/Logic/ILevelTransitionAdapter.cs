@@ -4,6 +4,6 @@ namespace AbstractPixel.LevelFramework
 {
     public interface ILevelTransitionAdapter<TSceneAssetType>
     {
-        public Task TransitionToLevel(TSceneAssetType sceneAssetType);
+        public void TransitionTo(TSceneAssetType sceneAssetType);
     }
 }
