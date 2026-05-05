@@ -1,4 +1,3 @@
-using AbstractPixel.Core;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,26 +20,32 @@ namespace AbstractPixel.LevelFramework
         protected TSceneAsset activeSceneAsset;
         protected int currentStageLevelIndex;
 
+        protected abstract void SyncCurrentSceneToLevel(TSceneAsset _sceneAsset);
+
+        protected abstract void OnGameCompleted();
+
         public virtual void LoadNextLevel()
         {
-            activeLevelDefinition = GetNextLevel();
-            if (activeLevelDefinition == null)
+            if (IsGameCompleted())
             {
-                //TODO:
-                // Currently No Idea what to Implement
-                // SomeHow need a way to load back to mainMenu
+                LevelEventBus<TLevelDefinition>.RaiseOnGameCompleted();
+                OnGameCompleted();
                 return;
             }
+
+            TLevelDefinition nextLevel = GetNextLevel();
+            if (nextLevel == null)
+            {
+                return;
+            }
+            UpdateActiveLevelState(nextLevel);
+
+            // 3. Execute Transition
             if (levelTransitioner != null)
             {
-                activeSceneAsset = activeLevelDefinition.SceneAsset;
-                if (activeSceneAsset == null)
-                {
-                    return;
-                }
-                currentStageLevelIndex = activeStageDefinition.LevelDefinitionsList.IndexOf(activeLevelDefinition);
                 levelTransitioner.TransitionToLevel(activeSceneAsset);
-                if(levelSaveDataMap.TryGetValue(activeSceneAsset,out TLevelSaveData saveData))
+
+                if (levelSaveDataMap.TryGetValue(activeSceneAsset, out TLevelSaveData saveData))
                 {
                     saveData.IsUnlocked = true;
                     saveData.LevelStatus = LevelStatus.InProgress;
@@ -50,20 +55,12 @@ namespace AbstractPixel.LevelFramework
                     TLevelSaveData newSaveData = Activator.CreateInstance<TLevelSaveData>();
                     newSaveData.IsUnlocked = true;
                     newSaveData.LevelStatus = LevelStatus.InProgress;
-                    levelSaveDataMap.Add(activeSceneAsset, newSaveData);
+                    levelSaveDataMap[activeSceneAsset] = newSaveData;
                 }
                 LevelEventBus<TLevelDefinition>.RaiseOnLevelStarted(activeLevelDefinition);
             }
         }
 
-        public virtual TLevelSaveData GetLevelSaveData(TSceneAsset sceneAsset)
-        {
-            if(levelSaveDataMap.TryGetValue(sceneAsset,out TLevelSaveData saveData))
-            {
-                return saveData;
-            }
-            return null;
-        }
 
         public virtual void MarkCurrentLevelForCompletion()
         {
@@ -77,19 +74,28 @@ namespace AbstractPixel.LevelFramework
                 TLevelSaveData newSaveData = Activator.CreateInstance<TLevelSaveData>();
                 newSaveData.IsUnlocked = true;
                 newSaveData.LevelStatus = LevelStatus.Completed;
-                levelSaveDataMap.Add(activeSceneAsset, newSaveData);
+                levelSaveDataMap[activeSceneAsset] = newSaveData;
             }
             LevelEventBus<TLevelDefinition>.RaiseOnLevelCompleted(activeLevelDefinition);
         }
 
-        public void ResetManager()
+        public virtual void ResetManager()
         {
             activeStageDefinition = null;
             activeLevelDefinition = null;
             activeSceneAsset = null;
+            currentStageLevelIndex = 0;
+        }
+        public TLevelSaveData GetLevelSaveData(TSceneAsset sceneAsset)
+        {
+            if(levelSaveDataMap.TryGetValue(sceneAsset,out TLevelSaveData saveData))
+            {
+                return saveData;
+            }
+            return null;
         }
 
-        internal virtual TLevelDefinition GetNextLevel()
+        internal TLevelDefinition GetNextLevel()
         {
             // If nothing is active, return the very first level of the game
             if (activeLevelDefinition == null)
@@ -107,7 +113,6 @@ namespace AbstractPixel.LevelFramework
             TStageDefinition nextStage = GetNextStage();
             if (nextStage != null)
             {
-                activeStageDefinition = nextStage;
                 return nextStage.LevelDefinitionsList[0];
             }
 
@@ -115,7 +120,7 @@ namespace AbstractPixel.LevelFramework
             return null;
         }
 
-        internal void UnlockLevel(TLevelDefinition levelDefinition)
+        internal virtual void UnlockLevel(TLevelDefinition levelDefinition)
         {
             TSceneAsset sceneAsset = levelDefinition.SceneAsset;
             if (levelSaveDataMap.TryGetValue(sceneAsset, out var saveData))
@@ -125,6 +130,7 @@ namespace AbstractPixel.LevelFramework
                     saveData = Activator.CreateInstance<TLevelSaveData>();
                     saveData.IsUnlocked = true;
                     saveData.LevelStatus = LevelStatus.NotStarted;
+                    levelSaveDataMap[sceneAsset] = saveData;
                     return;
                 }
                 saveData.IsUnlocked = true;
@@ -132,12 +138,12 @@ namespace AbstractPixel.LevelFramework
                 return;
             }
             TLevelSaveData newLevelSaveData = Activator.CreateInstance<TLevelSaveData>();
-            saveData.IsUnlocked = true;
-            saveData.LevelStatus = LevelStatus.NotStarted;
-            levelSaveDataMap.Add(sceneAsset, saveData);
+            newLevelSaveData.IsUnlocked = true;
+            newLevelSaveData.LevelStatus = LevelStatus.NotStarted;
+            levelSaveDataMap[sceneAsset] = newLevelSaveData;
         }
 
-        protected virtual TStageDefinition GetNextStage()
+        internal TStageDefinition GetNextStage()
         {
             int currentIndex = stageDefinitionsList.IndexOf(activeStageDefinition);
             if (currentIndex + 1 < stageDefinitionsList.Count)
@@ -145,6 +151,40 @@ namespace AbstractPixel.LevelFramework
                 return stageDefinitionsList[currentIndex + 1];
             }
             return null;
+        }
+
+        internal virtual bool IsGameCompleted()
+        {
+            if(activeStageDefinition == null)
+            {
+                return false;
+            }
+            bool isThisTheLastStage = stageDefinitionsList.IndexOf(activeStageDefinition) >= stageDefinitionsList.Count-1;
+            bool isItLastLevelOfStage = currentStageLevelIndex >= activeStageDefinition.LevelDefinitionsList.Count-1;
+            if(isThisTheLastStage && isItLastLevelOfStage)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        protected void UpdateActiveLevelState(TLevelDefinition _newLevelDefinition)
+        {
+            if (_newLevelDefinition == null) return;
+
+            for (int i = 0; i < stageDefinitionsList.Count; i++)
+            {
+                int levelIndex = stageDefinitionsList[i].LevelDefinitionsList.IndexOf(_newLevelDefinition);
+
+                if (levelIndex >= 0) 
+                {
+                    activeStageDefinition = stageDefinitionsList[i];
+                    activeLevelDefinition = _newLevelDefinition;
+                    activeSceneAsset = _newLevelDefinition.SceneAsset;
+                    currentStageLevelIndex = levelIndex;
+                    return;
+                }
+            }
         }
 
         protected void Initialize(ILevelTransitionAdapter<TSceneAsset> adapterInstance)
@@ -157,13 +197,13 @@ namespace AbstractPixel.LevelFramework
                 for (int j = 0; j < levelDefinitionsList.Count; j++)
                 {
                     TSceneAsset sceneAsset = levelDefinitionsList[j].SceneAsset;
-                    levelDefinitionsMap.Add(sceneAsset, levelDefinitionsList[j]);
+                    levelDefinitionsMap[sceneAsset] = levelDefinitionsList[j];
 
                     if (!levelSaveDataMap.ContainsKey(sceneAsset))
                     {
-                        var newData = Activator.CreateInstance<TLevelSaveData>();
+                        TLevelSaveData newData = Activator.CreateInstance<TLevelSaveData>();
                         newData.IsUnlocked = false; // Default
-                        levelSaveDataMap.Add(sceneAsset, newData);
+                        levelSaveDataMap[sceneAsset] = newData;
                     }
                 }
                 
