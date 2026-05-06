@@ -19,8 +19,6 @@ namespace AbstractPixel.LevelFramework
             {
                 StageGUID = Guid.NewGuid().ToString();
             }
-        }
-
-      
+        } 
     }
 }
