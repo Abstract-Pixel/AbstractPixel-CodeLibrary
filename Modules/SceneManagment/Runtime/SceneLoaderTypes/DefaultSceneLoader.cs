@@ -31,6 +31,11 @@ namespace AbstractPixel.SceneManagement
 
             LoadSceneMode loadMode = isAdditive ? LoadSceneMode.Additive : LoadSceneMode.Single;
             AsyncOperation sceneLoadHandle = SceneManager.LoadSceneAsync(sceneReference.SceneName, loadMode);
+            if (sceneLoadHandle == null)
+            {
+                Debug.LogError($"Failed to load scene '{sceneReference.SceneName}'. Is it in the Build Settings?");
+                return;
+            }
             sceneLoadHandle.allowSceneActivation = sceneActivatedByDefault;
 
             if (sceneLoadHandle.allowSceneActivation)
@@ -68,7 +73,6 @@ namespace AbstractPixel.SceneManagement
             if (sceneLoadHandles.TryGetValue(sceneReference.SceneName, out AsyncOperation operationHandle))
             {
                 sceneLoadHandles.Remove(sceneReference.SceneName);
-                return;
             }
             await sceneUnLoadHandle.AsTask();
         }

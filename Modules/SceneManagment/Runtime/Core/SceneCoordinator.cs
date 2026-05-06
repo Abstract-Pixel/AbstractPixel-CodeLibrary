@@ -65,6 +65,11 @@ namespace AbstractPixel.SceneManagement
 
         internal async Task TransitionToSceneGroup(SceneGroup _sceneGroup)
         {
+            if (IsLoadingSceneGroup || IsUnloadingSceneGroup)
+            {
+                Debug.LogWarning("A scene transition is already in progress! Ignoring transition request.");
+                return;
+            }
             if (_sceneGroup.MainScene == activeMainScene)
             {
                 // enforcing that main scene is the scene we want to transition rest of the scene types are dependencies
@@ -75,6 +80,11 @@ namespace AbstractPixel.SceneManagement
 
         internal async Task PreloadSceneGroup(SceneGroup _sceneGroup)
         {
+            if (IsLoadingSceneGroup || IsUnloadingSceneGroup)
+            {
+                Debug.LogWarning("A scene transition is already in progress! Ignoring preloading request.");
+                return;
+            }
             if (_sceneGroup.MainScene == activeMainScene || _sceneGroup == preloadedSceneGroup ||
                             SceneManager.GetActiveScene().name == _sceneGroup.MainScene.SceneName)
             {
@@ -96,7 +106,18 @@ namespace AbstractPixel.SceneManagement
                                                    out HashSet<SceneReference> contextualToLoad,
                                                    out HashSet<SceneReference> managerialToLoad);
 
-            await LoadSceneGroup(transitionContext);
+            ThreadPriority defaultPriority = Application.backgroundLoadingPriority;
+            Application.backgroundLoadingPriority = ThreadPriority.Low;
+            try
+            {
+                await LoadSceneGroup(transitionContext);
+
+            }
+            finally
+            {
+                Application.backgroundLoadingPriority = defaultPriority;
+            }
+
             preloadedContextualScenesSet.UnionWith(contextualToLoad);
             preloadedContextualScenesSet.UnionWith(managerialToLoad);
             preloadedContextualScenesSet.Add(_sceneGroup.MainScene);

@@ -22,16 +22,13 @@ namespace AbstractPixel.SceneManagement
 
         public bool IsEmpty()
         {
-            if(ManagerialBootScenesList == null && ContextualBootScenesList == null && MainScene.SceneName == string.Empty)
-            {
-                return true;
-            }
+            bool isMainSceneNull = MainScene == null || string.IsNullOrEmpty(MainScene.SceneName);
 
-            if(ManagerialBootScenesList.Count == 0 && ContextualBootScenesList.Count == 0 && MainScene.SceneName == string.Empty)
-            {
-                return true;
-            }
-            return false;
+            bool isManagerialNull = ManagerialBootScenesList == null || ManagerialBootScenesList.Count == 0;
+            bool isContextualNull = ContextualBootScenesList == null || ContextualBootScenesList.Count == 0;
+
+            bool isSceneGroupNull = isContextualNull && isManagerialNull && isManagerialNull;
+            return isSceneGroupNull;
         }
     }
 }
