@@ -43,6 +43,11 @@ namespace AbstractPixel.Core
             bool isSceneNameEqual = SceneName == other.SceneName;
             return isSceneNameEqual;
         }
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as SceneReference);
+        }
+
 
         public override int GetHashCode()
         {
