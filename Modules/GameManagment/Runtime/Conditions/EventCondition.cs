@@ -1,23 +1,22 @@
+using UnityEngine;
 
 namespace AbstractPixel.GameManagement
 {
-    /// <summary>
-    /// Reacts to C# events or UnityEvents. Highly performant.
-    /// </summary>
     public abstract class EventCondition : BaseCondition
     {
-        protected virtual void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable(); // CRITICAL: Registers with the StateConditionRegistry
             SubscribeToEvents();
         }
 
-        protected virtual void OnDisable()
+        protected override void OnDisable()
         {
+            base.OnDisable(); // CRITICAL: Unregisters from the StateConditionRegistry
             UnsubscribeFromEvents();
         }
 
         protected abstract void SubscribeToEvents();
         protected abstract void UnsubscribeFromEvents();
-
     }
 }

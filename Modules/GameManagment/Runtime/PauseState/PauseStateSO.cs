@@ -1,4 +1,4 @@
-
+// --- START OF FILE PauseStateSO.cs ---
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,7 +11,8 @@ namespace AbstractPixel.GameManagement
         [Tooltip("The Input Action used to toggle pause (e.g., Keyboard 'Escape' or Gamepad 'Start').")]
         [field: SerializeField] public InputActionReference PauseToggleAction { get; private set; }
 
-       
+      
+
         internal override void RevertConfigurations()
         {
             Time.timeScale = 1f;

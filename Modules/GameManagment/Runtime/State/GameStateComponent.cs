@@ -1,55 +1,84 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AbstractPixel.GameManagement
 {
-    /// <summary>
-    /// The local executor for a Game State. Listens to conditions and communicates with the GameStateRegistry.
-    /// </summary>
     public class GameStateComponent : MonoBehaviour
     {
         [Header("State Configuration")]
         [Tooltip("The ScriptableObject defining the rules and priority of this state.")]
         [SerializeField] private StateSO stateConfig;
 
-        [Header("Triggers")]
-        [Tooltip("The condition that triggers this state. Automatically found if attached to this object or its children.")]
-        [SerializeField] private BaseCondition stateCondition;
-
         private bool isActive = false;
 
-        private void OnValidate()
-        {
-            if (stateCondition == null)
-            {
-                stateCondition = GetComponentInChildren<BaseCondition>();
-            }
-        }
+        // Tracks active subscriptions to prevent memory leaks when scenes unload
+        private HashSet<BaseCondition> trackedConditions = new HashSet<BaseCondition>();
 
         private void OnEnable()
         {
-            if (stateCondition != null)
+            if (stateConfig == null) return;
+
+            // 1. Catch up on any conditions that already exist in loaded scenes
+            List<BaseCondition> existingConditions = StateConditionRegistry.GetConditionsForState(stateConfig);
+            foreach (BaseCondition condition in existingConditions)
             {
-                stateCondition.OnConditionMet += HandleConditionMet;
+                SubscribeToCondition(condition);
             }
+
+            // 2. Listen for future conditions from scenes that haven't loaded yet
+            StateConditionRegistry.OnConditionAdded += HandleNewConditionAdded;
+            StateConditionRegistry.OnConditionRemoved += HandleConditionRemoved;
+
+            // 3. Listen to the main registry for forced evictions
+            GameStateRegistry.OnStateUnregistered += HandleStateUnregistered;
         }
 
         private void OnDisable()
         {
-            if (stateCondition != null)
+            // Clean up all dynamic subscriptions
+            foreach (BaseCondition condition in trackedConditions)
             {
-                stateCondition.OnConditionMet -= HandleConditionMet;
+                if (condition != null)
+                {
+                    condition.OnConditionMet -= HandleConditionMet;
+                }
+            }
+            trackedConditions.Clear();
+
+            StateConditionRegistry.OnConditionAdded -= HandleNewConditionAdded;
+            StateConditionRegistry.OnConditionRemoved -= HandleConditionRemoved;
+            GameStateRegistry.OnStateUnregistered -= HandleStateUnregistered;
+        }
+
+        private void SubscribeToCondition(BaseCondition _condition)
+        {
+            if (!trackedConditions.Contains(_condition))
+            {
+                _condition.OnConditionMet += HandleConditionMet;
+                trackedConditions.Add(_condition);
+            }
+        }
+
+        private void HandleNewConditionAdded(StateSO _targetState, BaseCondition _newCondition)
+        {
+            if (_targetState == stateConfig)
+            {
+                SubscribeToCondition(_newCondition);
+            }
+        }
+
+        private void HandleConditionRemoved(StateSO _targetState, BaseCondition _removedCondition)
+        {
+            if (_targetState == stateConfig && trackedConditions.Contains(_removedCondition))
+            {
+                _removedCondition.OnConditionMet -= HandleConditionMet;
+                trackedConditions.Remove(_removedCondition);
             }
         }
 
         public void ActivateState()
         {
-            if (isActive) return;
-
-            if (stateConfig == null)
-            {
-                Debug.LogError($"[{gameObject.name}] GameStateComponent cannot activate because StateSO is missing!");
-                return;
-            }
+            if (isActive || stateConfig == null) return;
 
             bool isPermissionGranted = GameStateRegistry.TryRegisterAsActiveState(stateConfig);
 
@@ -78,6 +107,14 @@ namespace AbstractPixel.GameManagement
             else
             {
                 DeactivateState();
+            }
+        }
+
+        private void HandleStateUnregistered(StateSO _unregisteredState)
+        {
+            if (_unregisteredState == stateConfig && isActive)
+            {
+                isActive = false;     
             }
         }
     }
