@@ -1,4 +1,3 @@
-// --- START OF FILE GameStateRegistry.cs ---
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,7 +6,8 @@ namespace AbstractPixel.GameManagement
 {
     public static class GameStateRegistry
     {
-        private static Dictionary<GameStateEvent, StateSO> activeStateDict = new Dictionary<GameStateEvent, StateSO>();
+        // Replaced Dictionary<GameStateEvent, StateSO> with a highly performant HashSet
+        private static HashSet<StateSO> activeStates = new HashSet<StateSO>();
 
         public static event Action<StateSO> OnStateRegistered = delegate { };
         public static event Action<StateSO> OnStateUnregistered = delegate { };
@@ -17,72 +17,80 @@ namespace AbstractPixel.GameManagement
         /// </summary>
         public static bool TryRegisterAsActiveState(StateSO _stateData)
         {
-            GameStateEvent incomingEvent = _stateData.GameStateEvent;
+            if (_stateData == null)
+            {
+                Debug.LogError("[GameStateRegistry] Attempted to register a null StateSO!");
+                return false;
+            }
+
             int incomingPriority = _stateData.Priority;
             int highestActivePriority = GetHighestActivePriority();
 
-            // Deny Entry: A higher or equal priority state is already running.
+            // Deny Entry: A higher priority state is already running.
             if (incomingPriority < highestActivePriority)
             {
                 return false;
             }
 
             // Prepare Eviction
-            List<GameStateEvent> keysToRemove = new List<GameStateEvent>();
             List<StateSO> statesToEvict = new List<StateSO>();
 
-            foreach (KeyValuePair<GameStateEvent, StateSO> kvp in activeStateDict)
+            foreach (StateSO activeState in activeStates)
             {
-                if (kvp.Value.Priority < incomingPriority)
+                if (activeState.Priority < incomingPriority)
                 {
-                    keysToRemove.Add(kvp.Key);
-                    statesToEvict.Add(kvp.Value);
+                    statesToEvict.Add(activeState);
                 }
             }
 
             // Execute Eviction
-            foreach (GameStateEvent key in keysToRemove)
-            {
-                activeStateDict.Remove(key);
-            }
-
-            // Broadcast unregistration so local MonoBehaviours can shut themselves down if they were evicted
             foreach (StateSO evictedState in statesToEvict)
             {
+                activeStates.Remove(evictedState);
                 OnStateUnregistered?.Invoke(evictedState);
             }
 
             // Register new state
-            activeStateDict[incomingEvent] = _stateData;
-            OnStateRegistered?.Invoke(_stateData);
+            bool wasAdded = activeStates.Add(_stateData);
+
+            if (wasAdded)
+            {
+                OnStateRegistered?.Invoke(_stateData);
+            }
 
             return true;
         }
 
         public static void UnregisterState(StateSO _stateData)
         {
-            if (activeStateDict.ContainsKey(_stateData.GameStateEvent))
+            if (_stateData == null) return;
+            if (activeStates.Remove(_stateData))
             {
-                activeStateDict.Remove(_stateData.GameStateEvent);
                 OnStateUnregistered?.Invoke(_stateData);
             }
         }
 
-        public static bool IsStateActive(GameStateEvent _eventType)
+        /// <summary>
+        /// Checks if a specific StateSO asset is currently active in the registry.
+        /// </summary>
+        public static bool IsStateActive(StateSO _stateData)
         {
-            return activeStateDict.ContainsKey(_eventType);
+            if (_stateData == null) return false;
+
+            return activeStates.Contains(_stateData);
         }
+
         public static StateSO GetCurrentHighestState()
         {
             StateSO highestState = null;
             int highestPriority = -1;
 
-            foreach (KeyValuePair<GameStateEvent, StateSO> kvp in activeStateDict)
+            foreach (StateSO activeState in activeStates)
             {
-                if (kvp.Value.Priority > highestPriority)
+                if (activeState.Priority > highestPriority)
                 {
-                    highestPriority = kvp.Value.Priority;
-                    highestState = kvp.Value;
+                    highestPriority = activeState.Priority;
+                    highestState = activeState;
                 }
             }
             return highestState;
@@ -91,11 +99,12 @@ namespace AbstractPixel.GameManagement
         private static int GetHighestActivePriority()
         {
             int highestPriority = -1;
-            foreach (KeyValuePair<GameStateEvent, StateSO> kvp in activeStateDict)
+
+            foreach (StateSO activeState in activeStates)
             {
-                if (kvp.Value.Priority > highestPriority)
+                if (activeState.Priority > highestPriority)
                 {
-                    highestPriority = kvp.Value.Priority;
+                    highestPriority = activeState.Priority;
                 }
             }
             return highestPriority;
@@ -104,7 +113,7 @@ namespace AbstractPixel.GameManagement
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetRegistry()
         {
-            activeStateDict = new Dictionary<GameStateEvent, StateSO>();
+            activeStates = new HashSet<StateSO>();
             OnStateRegistered = delegate { };
             OnStateUnregistered = delegate { };
         }

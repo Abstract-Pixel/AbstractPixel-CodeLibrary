@@ -47,7 +47,7 @@ namespace AbstractPixel.GameManagement.Conditions
 
         private void HandlePauseInput(InputAction.CallbackContext _context)
         {
-            bool isPauseStatePresent = !GameStateRegistry.IsStateActive(GameStateEvent.PauseGame);
+            bool isPauseStatePresent = !GameStateRegistry.IsStateActive(TargetState);
             TriggerCondition(isPauseStatePresent);
         }       
     }

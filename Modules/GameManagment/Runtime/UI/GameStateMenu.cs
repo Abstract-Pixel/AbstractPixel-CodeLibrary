@@ -11,7 +11,7 @@ namespace AbstractPixel.GameManagement
     {
         [Header("Menu Configuration")]
         [Tooltip("The specific state event that should cause this menu to appear.")]
-        [SerializeField] private GameStateEvent targetStateEvent;
+        [SerializeField] private StateSO targetState;
 
         [Tooltip("The actual UI GameObject to toggle. Do NOT assign the object this script is attached to, or it will stop listening when disabled!")]
         [SerializeField] private GameObject menuContent;
@@ -44,14 +44,14 @@ namespace AbstractPixel.GameManagement
         {
             // Initialization Sync: Check the registry the moment the scene starts.
             // Because StateComponents register in Awake(), the Registry is already populated.
-            bool isTargetStateActive = GameStateRegistry.IsStateActive(targetStateEvent);
+            bool isTargetStateActive = GameStateRegistry.IsStateActive(targetState);
             ToggleMenu(isTargetStateActive);
         }
 
         private void HandleStateRegistered(StateSO _registeredState)
         {
             // ShowMenu
-            if (_registeredState.GameStateEvent == targetStateEvent)
+            if (_registeredState == targetState)
             {
                 ToggleMenu(true);
             }
@@ -60,7 +60,7 @@ namespace AbstractPixel.GameManagement
         private void HandleStateUnregistered(StateSO _unregisteredState)
         {
             // HideMenu
-            if (_unregisteredState.GameStateEvent == targetStateEvent)
+            if (_unregisteredState== targetState)
             {
                 ToggleMenu(false);
             }

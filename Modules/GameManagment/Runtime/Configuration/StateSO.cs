@@ -6,8 +6,6 @@ namespace AbstractPixel.GameManagement
     public class StateSO : ScriptableObject
     {
         [Header("Base State Configuration")]
-        [Tooltip("The event that will be executed to trigger external systems and as identification")]
-        [field:SerializeField] public GameStateEvent GameStateEvent {  get; set; }
         [Tooltip("Higher the number allows the state to override another active state or prevent lower priority states to activate")]
         [SerializeField] public int Priority = 0;
         [Tooltip("If true, the game time will be set to zero upon execution.")]
