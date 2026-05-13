@@ -29,15 +29,13 @@ namespace AbstractPixel.SceneManagement
 
         private void Start() => SetSceneLoader(new DefaultSceneLoader());
 
-        internal void InitializeStartSceneData(IEnumerable<SceneReference> managerialScenes, IEnumerable<SceneReference> contextualScenes, SceneReference mainScene)
+        internal void InitializeStartSceneGroup(SceneGroup _startGroup)
         {
-            activeManagerialScenesSet.UnionWith(managerialScenes);
-            activeContextualScenesSet.UnionWith(contextualScenes);
-            activeMainScene = mainScene;
+            activeManagerialScenesSet.UnionWith(_startGroup.ManagerialBootScenesList);
+            activeContextualScenesSet.UnionWith(_startGroup.ContextualBootScenesList);
+            activeMainScene = _startGroup.MainScene;
+            activeSceneGroup = _startGroup;
             IsStartSceneGroupInitialized = true;
-
-            activeSceneGroup = ScriptableObject.CreateInstance<SceneGroup>();
-            activeSceneGroup.Initialize(managerialScenes, contextualScenes, mainScene);
             SceneEventBus.RaiseOnNewSceneTransitionedTo(activeSceneGroup);
         }
 
@@ -147,7 +145,8 @@ namespace AbstractPixel.SceneManagement
             IsUnloadingSceneGroup = true;
 
             try
-            {
+            {      
+
                 if (activeMainScene != null)
                 {
                     await SceneLoader.UnloadScene(activeMainScene);
@@ -165,7 +164,7 @@ namespace AbstractPixel.SceneManagement
                 {
                     foreach (SceneReference scene in activeContextualScenesSet)
                     {
-                        await SceneLoader.LoadScene(scene, true, true);
+                        await SceneLoader.LoadScene(scene, true);
                     }
                 }
 

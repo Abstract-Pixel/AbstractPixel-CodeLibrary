@@ -13,11 +13,12 @@ namespace AbstractPixel.SceneManagement
         public bool ForceReloadContextualScenes = false;
 
         // For Runtime Use for creation
-        public void Initialize(IEnumerable<SceneReference> _managerialBootScenesList, IEnumerable<SceneReference> _contextualBootScenesList, SceneReference _mainScene)
+        public void Initialize(IEnumerable<SceneReference> _managerialBootScenesList, IEnumerable<SceneReference> _contextualBootScenesList, SceneReference _mainScene,bool _forceReloadContextual=false)
         {
             ManagerialBootScenesList = new List<SceneReference>(_managerialBootScenesList);
             ContextualBootScenesList = new List<SceneReference>(_contextualBootScenesList);
             MainScene = _mainScene;
+            ForceReloadContextualScenes=_forceReloadContextual;
         }
 
         public bool IsEmpty()
