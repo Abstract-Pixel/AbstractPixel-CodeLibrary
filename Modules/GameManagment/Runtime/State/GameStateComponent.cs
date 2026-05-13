@@ -8,29 +8,37 @@ namespace AbstractPixel.GameManagement
         [Header("State Configuration")]
         [Tooltip("The ScriptableObject defining the rules and priority of this state.")]
         [SerializeField] private StateSO stateConfig;
+        [SerializeField] bool activateOnStart = false;
 
         private bool isActive = false;
-
-        // Tracks active subscriptions to prevent memory leaks when scenes unload
+        private StateSnapshot snapshotBeforeActivation;
         private HashSet<BaseCondition> trackedConditions = new HashSet<BaseCondition>();
 
         private void OnEnable()
         {
             if (stateConfig == null) return;
 
-            // 1. Catch up on any conditions that already exist in loaded scenes
+            //Catch up on any conditions that already exist in loaded scenes
             List<BaseCondition> existingConditions = StateConditionRegistry.GetConditionsForState(stateConfig);
             foreach (BaseCondition condition in existingConditions)
             {
                 SubscribeToCondition(condition);
             }
 
-            // 2. Listen for future conditions from scenes that haven't loaded yet
+            // Listen for future conditions from scenes that haven't loaded yet
             StateConditionRegistry.OnConditionAdded += HandleNewConditionAdded;
             StateConditionRegistry.OnConditionRemoved += HandleConditionRemoved;
 
-            // 3. Listen to the main registry for forced evictions
+            // Listen to the main registry for forced evictions
             GameStateRegistry.OnStateUnregistered += HandleStateUnregistered;
+        }
+
+        private void Start()
+        {
+            if (activateOnStart)
+            {
+                ActivateState();
+            }
         }
 
         private void OnDisable()
@@ -85,7 +93,7 @@ namespace AbstractPixel.GameManagement
             if (isPermissionGranted)
             {
                 isActive = true;
-                stateConfig.ApplyConfigurations();
+                snapshotBeforeActivation = stateConfig.ApplyConfigurations();
             }
         }
 
@@ -94,7 +102,7 @@ namespace AbstractPixel.GameManagement
             if (!isActive) return;
 
             isActive = false;
-            stateConfig.RevertConfigurations();
+            stateConfig.RevertConfigurations(snapshotBeforeActivation);
             GameStateRegistry.UnregisterState(stateConfig);
         }
 
@@ -114,7 +122,7 @@ namespace AbstractPixel.GameManagement
         {
             if (_unregisteredState == stateConfig && isActive)
             {
-                isActive = false;     
+                DeactivateState();
             }
         }
     }

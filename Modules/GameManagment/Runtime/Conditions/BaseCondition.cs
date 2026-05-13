@@ -10,8 +10,8 @@ namespace AbstractPixel.GameManagement
         [field: SerializeField] public StateSO TargetState { get; private set; }
 
         [Header("Trigger Settings")]
-        [Tooltip("If true, this condition activates the state when met. If false, it deactivates it.")]
-        [SerializeField] protected bool IsActivationTrigger = true;
+        [Tooltip("If true, this condition activates the state when met. If false, it deactivates it when met.")]
+        [SerializeField] protected bool activateStateOnTriggered = true;
 
         public event Action<bool> OnConditionMet = delegate { };
 
@@ -37,7 +37,7 @@ namespace AbstractPixel.GameManagement
 
         protected void TriggerCondition()
         {
-            OnConditionMet?.Invoke(IsActivationTrigger);
+            OnConditionMet?.Invoke(activateStateOnTriggered);
         }
 
         protected void TriggerCondition(bool _dynamicState)

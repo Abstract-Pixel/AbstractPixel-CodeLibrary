@@ -16,20 +16,31 @@ namespace AbstractPixel.GameManagement
         public bool IsCursorVisibleOnExecution = true;
         [Tooltip("If true, the game UI will be shown upon execution.")]
         public bool ShowGameUIOnExecution = false;
+        public bool ShowGameUIOnDeactivation = false;
 
-        internal void ApplyConfigurations()
+        internal StateSnapshot ApplyConfigurations()
         {
+            StateSnapshot snapShotBeforeChange = new StateSnapshot()
+            {
+                PreviousTimeScale = Time.timeScale,
+                PreviousCursorVisibility = Cursor.visible,
+                PreviousCursorLockMode = Cursor.lockState,
+            };
+
             Time.timeScale = IsTimeZeroOnExecution ? 0f : 1f;
             Cursor.visible = IsCursorVisibleOnExecution;
             Cursor.lockState = IsCursorLockedOnExecution ? CursorLockMode.Locked : CursorLockMode.None;
+            return snapShotBeforeChange;
         }
         /// <summary>
         /// Empty by default. Overridden by specific states (like Pause) that need to manually clean up 
         /// because they don't trigger a new state to overwrite their configurations.
         /// </summary>
-        internal virtual void RevertConfigurations()
+        internal virtual void RevertConfigurations(StateSnapshot previousSnapeShot)
         {
-            // Do nothing by default.
+            Time.timeScale = previousSnapeShot.PreviousTimeScale;
+            Cursor.visible = previousSnapeShot.PreviousCursorVisibility;
+            Cursor.lockState = previousSnapeShot.PreviousCursorLockMode;
         }
     }
 }
