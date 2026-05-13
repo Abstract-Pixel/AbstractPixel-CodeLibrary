@@ -26,6 +26,11 @@ namespace AbstractPixel.SceneTransitions
             TransitionActions.PlayTransitionOut().ForgetTask();
         }
 
+        public void ReloadActiveScenesWithEffects()
+        {
+            TransitionActions.ReloadActiveScenesWithEffects().ForgetTask();
+        }
+
         public void TransitionToSceneWithEffects(SceneGroup group)
         {
             TransitionActions.TransitionToSceneWithEffects(group).ForgetTask();

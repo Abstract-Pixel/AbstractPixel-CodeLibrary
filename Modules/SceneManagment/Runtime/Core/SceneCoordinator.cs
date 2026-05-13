@@ -125,6 +125,66 @@ namespace AbstractPixel.SceneManagement
             SceneEventBus.RaiseOnSceneGroupPreloaded(_sceneGroup);
         }
 
+        /// <summary>
+        /// Reloads the current scene group without updating the backend tracking data.
+        /// Destructive to runtime scene objects, but non-destructive to the SceneCoordinator state.
+        /// </summary>
+        internal async Task ReloadActiveSceneGroup()
+        {
+            if (activeSceneGroup == null)
+            {
+                Debug.LogWarning("[SceneCoordinator] Cannot reload: No active SceneGroup.");
+                return;
+            }
+
+            if (IsLoadingSceneGroup || IsUnloadingSceneGroup)
+            {
+                Debug.LogWarning("[SceneCoordinator] Cannot reload: Transition already in progress.");
+                return;
+            }
+
+            IsLoadingSceneGroup = true;
+            IsUnloadingSceneGroup = true;
+
+            try
+            {
+                if (activeMainScene != null)
+                {
+                    await SceneLoader.UnloadScene(activeMainScene);
+                }
+
+                if (activeSceneGroup.ForceReloadContextualScenes)
+                {
+                    foreach (SceneReference scene in activeContextualScenesSet)
+                    {
+                        await SceneLoader.UnloadScene(scene);
+                    }
+                }
+
+                if (activeSceneGroup.ForceReloadContextualScenes)
+                {
+                    foreach (SceneReference scene in activeContextualScenesSet)
+                    {
+                        await SceneLoader.LoadScene(scene, true, true);
+                    }
+                }
+
+                if (activeMainScene != null)
+                {
+                    await SceneLoader.LoadScene(activeMainScene, true, true, true);
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[SceneCoordinator] Error during scene reload: {e.Message}");
+            }
+            finally
+            {
+                IsLoadingSceneGroup = false;
+                IsUnloadingSceneGroup = false;
+            }
+        }
+
         #region Scene Management Utiltiies
 
         private async Task ExecuteTransition(SceneGroup _sceneGroup, bool isTransitioningToPreloadedSceneGroup)
@@ -222,6 +282,7 @@ namespace AbstractPixel.SceneManagement
             await SceneLoader.LoadScene(mainScene, true, doImmediateSceneActivation, true);
             IsLoadingSceneGroup = false;
         }
+
         #endregion
     }
 }

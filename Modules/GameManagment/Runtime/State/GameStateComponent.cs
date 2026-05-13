@@ -43,7 +43,6 @@ namespace AbstractPixel.GameManagement
 
         private void OnDisable()
         {
-            // Clean up all dynamic subscriptions
             foreach (BaseCondition condition in trackedConditions)
             {
                 if (condition != null)

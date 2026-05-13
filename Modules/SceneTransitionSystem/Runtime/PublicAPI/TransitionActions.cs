@@ -30,17 +30,42 @@ namespace AbstractPixel.SceneTransitions
         }
 
         #region Actual Scene Transition Sequences
+
+        public static async Task ReloadActiveScenesWithEffects()
+        {
+            await PlayTransitionIn();
+            try
+            {
+                await SceneActions.ReloadActiveSceneGroup();
+            }
+            finally
+            {
+                await PlayTransitionOut();
+            }
+        }
         public static async Task TransitionToSceneWithEffects(SceneGroup group)
         {
             await PlayTransitionIn();
-            await SceneActions.TransitionToSceneGroup(group);
-            await PlayTransitionOut();
+            try
+            {
+                await SceneActions.TransitionToSceneGroup(group);
+            }
+            finally
+            {
+                await PlayTransitionOut();
+            }
         }
         public static async Task TransitionToPreloadedSceneWithEffects()
         {
             await PlayTransitionIn();
-            await SceneActions.TransitionToPreloadedSceneGroup();
-            await PlayTransitionOut();
+            try
+            {
+                await SceneActions.TransitionToPreloadedSceneGroup();
+            }
+            finally
+            {
+                await PlayTransitionOut();
+            }
         }
         #endregion
 

@@ -48,7 +48,7 @@ namespace AbstractPixel.GameManagement
         private void HandleStateUnregistered(StateSO _unregisteredState)
         {
             // Inverse
-            ToggleUI(!_unregisteredState.ShowGameUIOnDeactivation);
+            ToggleUI(_unregisteredState.ShowGameUIOnDeactivation);
         }
 
         private void ToggleUI(bool _shouldShow)

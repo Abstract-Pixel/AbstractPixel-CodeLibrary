@@ -41,6 +41,11 @@ namespace AbstractPixel.SceneManagement
         public static Task TransitionToPreloadedSceneGroup()
         {
             return SceneCoordinator.Instance?.TransitionToPreloadedSceneGroup();
-        }    
+        }   
+        
+        public static Task ReloadActiveSceneGroup()
+        {
+            return SceneCoordinator.Instance?.ReloadActiveSceneGroup();
+        }
     }
 }

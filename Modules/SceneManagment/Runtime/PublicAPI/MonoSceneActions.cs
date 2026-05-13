@@ -20,5 +20,10 @@ namespace AbstractPixel.SceneManagement
         {
             SceneActions.TransitionToPreloadedSceneGroup().ForgetTask();
         }
+
+        public void ReloadActiveSceneGroup()
+        {
+            SceneActions.ReloadActiveSceneGroup().ForgetTask();
+        }
     }
 }
