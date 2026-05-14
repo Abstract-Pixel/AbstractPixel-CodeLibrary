@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
+using System;
 
 
 namespace AbstractPixel.SceneManagement
@@ -65,7 +66,7 @@ namespace AbstractPixel.SceneManagement
                 Debug.LogError(" scene reference provided to unload is null.");
                 return;
             }
-            AsyncOperation sceneUnLoadHandle = SceneManager.UnloadSceneAsync(sceneReference.SceneName);
+            AsyncOperation sceneUnLoadHandle = SceneManager.UnloadSceneAsync(sceneReference.SceneName, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
             if (sceneUnLoadHandle == null)
             {
                 return;
@@ -75,6 +76,8 @@ namespace AbstractPixel.SceneManagement
                 sceneLoadHandles.Remove(sceneReference.SceneName);
             }
             await sceneUnLoadHandle.AsTask();
+            GC.Collect();
+            await Resources.UnloadUnusedAssets().AsTask();
         }
     }
 }
