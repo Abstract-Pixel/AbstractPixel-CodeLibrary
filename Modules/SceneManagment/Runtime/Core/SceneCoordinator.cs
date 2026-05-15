@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System;
 
 namespace AbstractPixel.SceneManagement
 {
@@ -145,7 +146,7 @@ namespace AbstractPixel.SceneManagement
             IsUnloadingSceneGroup = true;
 
             try
-            {      
+            {
 
                 if (activeMainScene != null)
                 {
@@ -227,36 +228,46 @@ namespace AbstractPixel.SceneManagement
         private async Task UnloadSceneGroup(SceneTransitionContext transitionContext)
         {
             // Managerial scenes are never unloaded by the coordinator, it is expected to be unloaded after game exit
-            if (activeMainScene == null || string.IsNullOrEmpty(activeMainScene.SceneName))
+            try
             {
-                string currentActiveSceneName = SceneManager.GetActiveScene().name;
-                await SceneManager.UnloadSceneAsync(currentActiveSceneName).AsTask();
-            }
-            else
-            {
-                await SceneLoader.UnloadScene(activeMainScene);
-                activeMainScene = null;
-            }
-
-            bool forceReloadContextualScenes = transitionContext.sceneGroupToTransitionTo.ForceReloadContextualScenes;
-            IsUnloadingSceneGroup = true;
-
-            if (forceReloadContextualScenes)
-            {
-                foreach (SceneReference scene in activeContextualScenesSet.ToList())
+                if (activeMainScene == null || string.IsNullOrEmpty(activeMainScene.SceneName))
                 {
-                    await SceneLoader.UnloadScene(scene);
+                    string currentActiveSceneName = SceneManager.GetActiveScene().name;
+                    await SceneManager.UnloadSceneAsync(currentActiveSceneName).AsTask();
+                }
+                else
+                {
+                    await SceneLoader.UnloadScene(activeMainScene);
+                    activeMainScene = null;
+                }
+
+                bool forceReloadContextualScenes = transitionContext.sceneGroupToTransitionTo.ForceReloadContextualScenes;
+                IsUnloadingSceneGroup = true;
+
+                if (forceReloadContextualScenes)
+                {
+                    foreach (SceneReference scene in activeContextualScenesSet.ToList())
+                    {
+                        await SceneLoader.UnloadScene(scene);
+                    }
+                }
+                else
+                {
+                    // Unload old contextual scenes
+                    foreach (SceneReference scene in transitionContext.ContextualToUnload)
+                    {
+                        await SceneLoader.UnloadScene(scene);
+                    }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                // Unload old contextual scenes
-                foreach (SceneReference scene in transitionContext.ContextualToUnload)
-                {
-                    await SceneLoader.UnloadScene(scene);
-                }
+                Debug.LogException(ex);
             }
-            IsUnloadingSceneGroup = false;
+            finally
+            {
+                IsUnloadingSceneGroup = false;
+            }
             SceneEventBus.RaiseOnSceneGroupUnloaded(transitionContext.sceneGroupToTransitionTo);
         }
 
@@ -268,18 +279,28 @@ namespace AbstractPixel.SceneManagement
             HashSet<SceneReference> contextualScenesToLoad = forceReloadContextualScenes
                                                         ? transitionContext.sceneGroupToTransitionTo.ContextualBootScenesList.ToHashSet() // If ForceReload, we load ALL of them
                                                         : transitionContext.ContextualToLoad;
-            foreach (SceneReference scene in contextualScenesToLoad)
+            try
             {
-                await SceneLoader.LoadScene(scene, true, doImmediateSceneActivation);
-            }
-            foreach (SceneReference scene in transitionContext.ManagerialToLoad)
-            {
-                await SceneLoader.LoadScene(scene, true, doImmediateSceneActivation);
-            }
+                foreach (SceneReference scene in contextualScenesToLoad)
+                {
+                    await SceneLoader.LoadScene(scene, true, doImmediateSceneActivation);
+                }
+                foreach (SceneReference scene in transitionContext.ManagerialToLoad)
+                {
+                    await SceneLoader.LoadScene(scene, true, doImmediateSceneActivation);
+                }
 
-            SceneReference mainScene = transitionContext.sceneGroupToTransitionTo.MainScene;
-            await SceneLoader.LoadScene(mainScene, true, doImmediateSceneActivation, true);
-            IsLoadingSceneGroup = false;
+                SceneReference mainScene = transitionContext.sceneGroupToTransitionTo.MainScene;
+                await SceneLoader.LoadScene(mainScene, true, doImmediateSceneActivation, true);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+            finally
+            {
+                IsLoadingSceneGroup = false;
+            }         
         }
 
         #endregion
