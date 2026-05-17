@@ -79,12 +79,11 @@ namespace AbstractPixel.Core.Editor
                                             .ToArray();
             bool isNull = propertyType == null;
             int defaultIndex = 0;
-            if (propertyType != null)
+            if (property.managedReferenceValue == null && types != null && types.Count == 1)
             {
-                if (typeNames.Contains(propertyType.Name))
-                {
-                    defaultIndex = typeNames.IndexOf(propertyType.Name);
-                }
+                property.managedReferenceValue = Activator.CreateInstance(types[0]);
+                property.serializedObject.ApplyModifiedProperties();
+                propertyType = types[0];
             }
 
             Rect dropdownRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
