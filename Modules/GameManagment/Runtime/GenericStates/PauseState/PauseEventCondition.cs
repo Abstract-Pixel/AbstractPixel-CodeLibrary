@@ -1,8 +1,9 @@
 // --- START OF FILE PauseEventCondition.cs ---
 using UnityEngine;
 using UnityEngine.InputSystem;
+using AbstractPixel.Core;
 
-namespace AbstractPixel.GameManagement.Conditions
+namespace AbstractPixel.GameManagement
 {
     /// <summary>
     /// Listens to the New Input System to toggle the Pause State.
@@ -10,8 +11,7 @@ namespace AbstractPixel.GameManagement.Conditions
     /// </summary>
     public class PauseEventCondition : EventCondition
     {
-        private bool isCurrentlyPaused = false;
-
+        [SerializeField,ReadOnly(true)]protected bool canPause = true;
         protected override void SubscribeToEvents()
         {
             // Cast the inherited TargetState to our specific SO type
@@ -45,8 +45,12 @@ namespace AbstractPixel.GameManagement.Conditions
             }
         }
 
-        private void HandlePauseInput(InputAction.CallbackContext _context)
+        protected virtual void HandlePauseInput(InputAction.CallbackContext _context)
         {
+            if(!canPause)
+            {
+                return;
+            }
             bool isPauseStatePresent = !GameStateRegistry.IsStateActive(TargetState);
             TriggerCondition(isPauseStatePresent);
         }       

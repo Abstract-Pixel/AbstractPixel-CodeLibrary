@@ -109,9 +109,10 @@ namespace AbstractPixel.Core.Editor
                     property.serializedObject.ApplyModifiedProperties();
                 }
             }
+            float bodyY = dropdownRect.yMax + EditorGUIUtility.standardVerticalSpacing;
+            float bodyHeight = isNull ? (EditorGUIUtility.singleLineHeight * 2) : EditorGUI.GetPropertyHeight(property, true);
 
-            Rect bodyRect = new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing, position.width
-                                    , position.height - EditorGUIUtility.singleLineHeight);
+            Rect bodyRect = new Rect(position.x, bodyY, position.width,bodyHeight);
             string helpBoxMessage = "[Unassigned Polymorphic Type]: Please select a Type from the dropdown Above";
             if (isNull)
             {
@@ -122,13 +123,25 @@ namespace AbstractPixel.Core.Editor
                 labelName = property.displayName;
                 EditorGUI.PropertyField(bodyRect, property, new GUIContent(labelName), true);
             }
+
+            float separatorY = bodyRect.yMax + EditorGUIUtility.singleLineHeight;
+            Rect separatorRect = new Rect(position.x, separatorY, position.width,1f);
+            Color separatorColor = new Color(0.6f, 0.6f, 0.6f, 1f);
+            EditorGUI.DrawRect(separatorRect, separatorColor);
+
+            Rect endSpaceRect = new Rect(position.x, separatorRect.yMax, position.width, 2f);
+            EditorGUI.DrawRect(endSpaceRect, Color.clear);
             EditorGUI.EndProperty();
 
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
+            //1. Dropdown Height
             float totalHeight = EditorGUIUtility.singleLineHeight;
+            //2. Spacing Between polymorphic Type and dropdown
+            totalHeight += EditorGUIUtility.standardVerticalSpacing;
+
             bool isNull = PolymorphicTypeUtility.GetPropertyFromManagedReferenceFullTypeName(property) == null;
             if (isNull)
             {
@@ -136,9 +149,12 @@ namespace AbstractPixel.Core.Editor
             }
             else
             {
-
+                // Polymorphic PropertyHeight Itself
                 totalHeight += EditorGUI.GetPropertyHeight(property, true);
             }
+            totalHeight += EditorGUIUtility.singleLineHeight; // Empty space before the line
+            totalHeight += EditorGUIUtility.singleLineHeight; // The line thickness itself
+            totalHeight += EditorGUIUtility.standardVerticalSpacing; // Empty space below the line to space out the next item
             return totalHeight;
         }
 

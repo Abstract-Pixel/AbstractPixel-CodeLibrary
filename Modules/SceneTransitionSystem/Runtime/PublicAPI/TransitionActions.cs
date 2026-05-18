@@ -6,7 +6,7 @@ namespace AbstractPixel.SceneTransitions
 {
     public static class TransitionActions
     {
-        public static bool IsTransitioning => TransitionManager.Instance.IsTransitioning;
+        public static bool IsTransitioning;
         public static bool IsInitialized => TransitionManager.Instance.IsInitialized;
 
         public static void Initialize(TransitionProfile _transitionProfile)
@@ -33,6 +33,7 @@ namespace AbstractPixel.SceneTransitions
 
         public static async Task ReloadActiveScenesWithEffects()
         {
+            IsTransitioning = true;
             await PlayTransitionIn();
             try
             {
@@ -41,10 +42,12 @@ namespace AbstractPixel.SceneTransitions
             finally
             {
                 await PlayTransitionOut();
+                IsTransitioning = false;
             }
         }
         public static async Task TransitionToSceneWithEffects(SceneGroup group)
         {
+            IsTransitioning = true;
             await PlayTransitionIn();
             try
             {
@@ -53,10 +56,12 @@ namespace AbstractPixel.SceneTransitions
             finally
             {
                 await PlayTransitionOut();
+                IsTransitioning = false;
             }
         }
         public static async Task TransitionToPreloadedSceneWithEffects()
         {
+            IsTransitioning = true;
             await PlayTransitionIn();
             try
             {
@@ -65,6 +70,7 @@ namespace AbstractPixel.SceneTransitions
             finally
             {
                 await PlayTransitionOut();
+                IsTransitioning = false;
             }
         }
         #endregion
