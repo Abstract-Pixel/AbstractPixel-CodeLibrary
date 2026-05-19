@@ -125,7 +125,7 @@ namespace AbstractPixel.Core.Editor
             }
 
             float separatorY = bodyRect.yMax + EditorGUIUtility.singleLineHeight;
-            Rect separatorRect = new Rect(position.x, separatorY, position.width,1f);
+            Rect separatorRect = new Rect(position.x, separatorY, position.width,1.5f);
             Color separatorColor = new Color(0.6f, 0.6f, 0.6f, 1f);
             EditorGUI.DrawRect(separatorRect, separatorColor);
 
