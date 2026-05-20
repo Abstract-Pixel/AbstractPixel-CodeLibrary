@@ -1,3 +1,4 @@
+using AbstractPixel.Core;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ namespace AbstractPixel.SaveSystem
         [field: SerializeField] public FileExtension PrimaryFileExtension { get; private set; } = FileExtension.json;
         public FileExtension BackupFileExtension { get; private set; } = FileExtension.bak;
 
-        [SerializeField] List<string> ignoredScenes = new List<string>();
+        [SerializeField] List<SceneReference> ignoredScenes = new List<SceneReference>();
         [SerializeField] List<SaveCatgeoryDefinition> categoryDefinitionList;
 
         Dictionary<SaveCategory, SaveCatgeoryDefinition> categoryDefinitionMap = new();
@@ -60,7 +61,14 @@ namespace AbstractPixel.SaveSystem
 
         public bool IsSceneIgnored(string sceneName)
         {
-            return ignoredScenes.Contains(sceneName);
+            foreach (SceneReference scene in ignoredScenes)
+            {
+                if (scene.SceneName == sceneName)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

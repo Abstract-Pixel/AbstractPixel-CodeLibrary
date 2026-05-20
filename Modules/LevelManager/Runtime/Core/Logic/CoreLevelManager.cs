@@ -13,16 +13,18 @@ namespace AbstractPixel.LevelFramework
     /// <typeparam name="TLevelDefinition">The Class defining a single level's/ main Scene's static data.</typeparam>
     /// <typeparam name="TLevelSaveData">The mutable data class holding player progress related to the level (e.g., Unlocked, Status, Best Time).</typeparam>
     /// <typeparam name="TSceneAsset">The asset type used to load a level/scene configuration (e.g., SceneGroup, string, AssetReference).</typeparam>
-    public abstract class CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset> : PersistentSingleton<CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset>>
+    public abstract class CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset,TSaveEntry> : PersistentSingleton<CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset,TSaveEntry>>
      where TStageDefinition : BaseStageDefinition<TLevelDefinition, TSceneAsset>
      where TLevelDefinition : BaseLevelDefinition<TSceneAsset>
      where TLevelSaveData : BaseLevelData
      where TSceneAsset : ScriptableObject
+     where TSaveEntry : class
     {
         [SerializeField] protected List<TStageDefinition> stageDefinitionsList = new List<TStageDefinition>();
         protected Dictionary<TSceneAsset, TLevelDefinition> levelDefinitionsMap = new Dictionary<TSceneAsset, TLevelDefinition>();
         protected Dictionary<TSceneAsset, TLevelSaveData> levelSaveDataMap = new Dictionary<TSceneAsset, TLevelSaveData>();
         protected ILevelTransitionAdapter<TSceneAsset> levelTransitioner;
+        protected ISaveProgressionHandler<TSceneAsset, TLevelSaveData,TSaveEntry> saveProgressionHandler;
 
         [Header("Private Debug Variables")]
         [field: SerializeField, ReadOnly] protected TStageDefinition activeStageDefinition = null;
@@ -47,9 +49,10 @@ namespace AbstractPixel.LevelFramework
         #endregion
 
         #region Initialization & Reset
-        protected void Initialize(ILevelTransitionAdapter<TSceneAsset> adapterInstance)
+        protected void Initialize(ILevelTransitionAdapter<TSceneAsset> adapterInstance, ISaveProgressionHandler<TSceneAsset, TLevelSaveData, TSaveEntry> saveHandler)
         {
             levelTransitioner = adapterInstance;
+            saveProgressionHandler = saveHandler;
             if (stageDefinitionsList.Count == 0) return;
 
             for (int i = 0; i < stageDefinitionsList.Count; i++)

@@ -2,6 +2,7 @@ using AbstractPixel.Core;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace AbstractPixel.SceneManagement
 {
@@ -38,30 +39,16 @@ namespace AbstractPixel.SceneManagement
             return sceneGroupData.ToSceneGroup(sceneGroupData);
         }
 
+
         public bool Equals(SceneGroup other)
         {
-            if (other == null)
-                return false;
-            if (!Equals(MainScene, other.MainScene))
-                return false;
-            if (ForceReloadContextualScenes != other.ForceReloadContextualScenes)
-                return false;
-            if (ManagerialBootScenesList.Count != other.ManagerialBootScenesList.Count)
-                return false;
-            for (int i = 0; i < ManagerialBootScenesList.Count; i++)
-            {
-                if (!EqualityComparer<SceneReference>.Default.Equals(ManagerialBootScenesList[i], other.ManagerialBootScenesList[i]))
-                    return false;
-            }
-            if (ContextualBootScenesList.Count != other.ContextualBootScenesList.Count)
-                return false;
-            for (int i = 0; i < ContextualBootScenesList.Count; i++)
-            {
-                if (!EqualityComparer<SceneReference>.Default.Equals(ContextualBootScenesList[i], other.ContextualBootScenesList[i]))
-                    return false;
-            }
-            return true;
-
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
+            bool isContexualScenesEqual = ContextualBootScenesList.SequenceEqual(other.ContextualBootScenesList);
+            bool isManagerialScenesEqual = ManagerialBootScenesList.SequenceEqual(other.ManagerialBootScenesList);
+            bool isMainSceneEqual = Equals(MainScene, other.MainScene);
+            bool isForceReloadEqual = ForceReloadContextualScenes == other.ForceReloadContextualScenes;
+            return isManagerialScenesEqual && isMainSceneEqual && isForceReloadEqual;             
         }
 
         public override bool Equals(object obj)
@@ -73,26 +60,14 @@ namespace AbstractPixel.SceneManagement
             return false;
         }
 
+        // Override GetHashCode to ensure that SceneGroup can be used in hash-based collections like dictionaries or hash sets
         public override int GetHashCode()
         {
             int hash = 17;
             hash = hash * 23 + (MainScene != null ? MainScene.GetHashCode() : 0);
             hash = hash * 23 + ForceReloadContextualScenes.GetHashCode();
-            if (ManagerialBootScenesList != null)
-            {
-                foreach (SceneReference scene in ManagerialBootScenesList)
-                {
-                    hash = hash * 23 + (scene != null ? scene.GetHashCode() : 0);
-                }
-            }
-            if (ContextualBootScenesList != null)
-            {
-                foreach (SceneReference scene in ContextualBootScenesList)
-                {
-                    hash = hash * 23 + (scene != null ? scene.GetHashCode() : 0);
-                }
-            }
             return hash;
         }
     }
+    
 }

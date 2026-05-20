@@ -16,7 +16,25 @@ MonoBehaviour:
   <GameProfileGuidLength>k__BackingField: 6
   <StartupPolicy>k__BackingField: 1
   <PrimaryFileExtension>k__BackingField: 1
-  ignoredScenes: []
+  ignoredScenes:
+  - <SceneAssetReference>k__BackingField:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    <SceneFieldReference>k__BackingField:
+      sceneName: GameBootScene
+      sceneAsset: {fileID: 102900000, guid: 32483ecc06a6c2546933859930884576, type: 3}
+  - <SceneAssetReference>k__BackingField:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    <SceneFieldReference>k__BackingField:
+      sceneName: ManagerBootScene
+      sceneAsset: {fileID: 102900000, guid: 3a573e85cc3e7e24899412924ffb8fb5, type: 3}
   categoryDefinitionList:
   - DisplayName: Input
     Category: 1

@@ -5,15 +5,16 @@ using UnityEngine;
 
 namespace AbstractPixel.LevelFramework
 {
-    public class BaseLevelUIManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset> : MonoBehaviour
+    public class BaseLevelUIManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset,TSaveEntry> : MonoBehaviour
      where TStageDefinition : BaseStageDefinition<TLevelDefinition, TSceneAsset>
      where TLevelDefinition : BaseLevelDefinition<TSceneAsset>
      where TLevelSaveData : BaseLevelData
      where TSceneAsset : ScriptableObject
+     where TSaveEntry : class
 
     {
         [SerializeField] protected List<StageUIContainer> stageGroups;
-        CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset> coreLevelManager;
+        CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset,TSaveEntry> coreLevelManager;
 
         [Serializable]
         public struct StageUIContainer
@@ -34,7 +35,7 @@ namespace AbstractPixel.LevelFramework
 
         protected virtual void InitializeUI()
         {
-            coreLevelManager = CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset>.Instance;
+            coreLevelManager = CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset,TSaveEntry>.Instance;
             foreach (StageUIContainer group in stageGroups)
             {
                 // Bind Buttons
