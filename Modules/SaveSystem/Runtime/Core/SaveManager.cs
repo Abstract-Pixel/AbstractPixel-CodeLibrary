@@ -1,4 +1,5 @@
 using AbstractPixel.Core;
+using AbstractPixel.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -267,49 +268,34 @@ namespace AbstractPixel.SaveSystem
 
         private void OnEnable()
         {
-            SceneManager.sceneLoaded += AutomaticSceneDataLoadOnSceneLoaded;
+            SceneEventBus.OnNewSceneGroupTransitionTo += AutomaticSceneDataLoadOnSceneLoaded;
         }
 
-        // Only used for logic that is after core Save Manager Initialization.Should not be used for the core Save Manager initialization
-        private void Start()
-        {
-            if (!hasDoneInitialBootLoad)
-            {
-                ManualSceneDataLoadInitialization();
-            }
-        }
-
+        // TODO : Need to replace with Scene abstraction
         private void OnDisable()
         {
-            SceneManager.sceneLoaded -= AutomaticSceneDataLoadOnSceneLoaded;
+            SceneEventBus.OnNewSceneGroupTransitionTo -= AutomaticSceneDataLoadOnSceneLoaded;
         }
 
-        void AutomaticSceneDataLoadOnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+        // TODO : Need to replace with Scene abstraction
+        void AutomaticSceneDataLoadOnSceneLoaded(SceneGroup _sceneGroupLoaded)
         {
-            if (hasDoneInitialBootLoad) { return; }
 
-            hasDoneInitialBootLoad = true;
-            if (saveConfig.IsSceneIgnored(scene.name)) { return; }
             StartCoroutine(RestoreSceneDataRoutine());
         }
-
-        void ManualSceneDataLoadInitialization()
-        {
-            if (hasDoneInitialBootLoad) { return; }
-
-            hasDoneInitialBootLoad = true;
-            Scene currentScene = SceneManager.GetActiveScene();
-            if (saveConfig.IsSceneIgnored(currentScene.name)) { return; }
-            StartCoroutine(RestoreSceneDataRoutine());
-        }
-
+    
         IEnumerator RestoreSceneDataRoutine()
         {
             // Make sure everything in the scene is initialized before we try to restore data to objects.
             // May add an extra wait if needed, but this should be sufficient for most cases.
             yield return new WaitForEndOfFrame();
+            if (!hasDoneInitialBootLoad)
+            {
+                LoadALL();
+                hasDoneInitialBootLoad = true;
+                yield return null;
+            }
             LoadAllDataByScope(SaveScope.GameProfile);
-            //SaveDataOf(SaveCategory.Game);
         }
     }
 }

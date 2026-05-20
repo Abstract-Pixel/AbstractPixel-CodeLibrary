@@ -1,3 +1,4 @@
+using AbstractPixel.SceneManagement;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement; // Required for Scene specific logic
@@ -119,7 +120,8 @@ namespace AbstractPixel.SaveSystem
                 // Handle Scene Specificity
                 if (_definition.IsSceneSpecific)
                 {
-                    string currentSceneName = SceneManager.GetActiveScene().name;
+                    // TO DO: Replace with Scene Integration Abstratcion later
+                    string currentSceneName = SceneActions.ActiveSceneGroup.MainScene.SceneName;
                     directoryPath = Path.Combine(baseProfilePath, currentSceneName);
                 }
                 else
