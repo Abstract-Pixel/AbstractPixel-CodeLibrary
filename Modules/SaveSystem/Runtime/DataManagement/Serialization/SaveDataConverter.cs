@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using System;
+using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
 {
@@ -16,16 +17,22 @@ namespace AbstractPixel.SaveSystem
                 return jObject.ToObject(targetType);
             }
 
+            if(data is JArray jArray)
+            {
+                return jArray.ToObject(targetType);
+            }
+
             //Fallback 
             try
             {
                 return System.Convert.ChangeType(data, targetType);
             }
-            catch
+            catch(Exception ex)
             {
-                return default;
+                    Debug.LogError($"SaveDataConverter: Failed to convert data of type {data.GetType()} to target type" +
+                        $" {targetType}. Exception: {ex.Message}");
+                    return default;
             }
-
         }
 
         public static T Convert<T>(object data)

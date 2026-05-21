@@ -29,18 +29,26 @@ namespace AbstractPixel.SaveSystem
 
             savableObjectsRegistry = new Dictionary<SaveCategory, Dictionary<string, ISavableBridge>>();
             ProfileManager = new SaveProfileManager(fileStorageService, saveConfig, serializer);
-            SceneEventBus.OnNewSceneGroupTransitionTo += AutomaticSceneDataLoadOnSceneLoaded;
+            SceneEventBus.OnNewSceneGroupTransitionTo += ExecuteIntialDataLoading;
             
+        }
+
+        private void Start()
+        {
+            if(SceneActions.ActiveSceneGroup != null)
+            {
+                ExecuteIntialDataLoading(SceneActions.ActiveSceneGroup);
+            }
         }
 
         // TODO : Need to replace with Scene abstraction
         private void OnDisable()
         {
-            SceneEventBus.OnNewSceneGroupTransitionTo -= AutomaticSceneDataLoadOnSceneLoaded;
+            SceneEventBus.OnNewSceneGroupTransitionTo -= ExecuteIntialDataLoading;
         }
 
         // TODO : Need to replace with Scene abstraction
-        void AutomaticSceneDataLoadOnSceneLoaded(SceneGroup _sceneGroupLoaded)
+        void ExecuteIntialDataLoading(SceneGroup _sceneGroupLoaded)
         {
             StartCoroutine(RestoreSceneDataRoutine());
         }

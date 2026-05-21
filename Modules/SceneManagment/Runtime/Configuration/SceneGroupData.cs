@@ -14,6 +14,10 @@ namespace AbstractPixel.SceneManagement
         public string MainScene;
         public bool ForceReloadContextualScenes = false;
 
+        public SceneGroupData()
+        {
+           
+        }
         public SceneGroupData(SceneGroup sceneGroup)
         {
             ManagerialBootScenesList = sceneGroup.ManagerialBootScenesList.Select(scene => scene.SceneName).ToList();
