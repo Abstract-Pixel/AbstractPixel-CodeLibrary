@@ -29,16 +29,42 @@ namespace AbstractPixel.SaveSystem
 
             savableObjectsRegistry = new Dictionary<SaveCategory, Dictionary<string, ISavableBridge>>();
             ProfileManager = new SaveProfileManager(fileStorageService, saveConfig, serializer);
+            SceneEventBus.OnNewSceneGroupTransitionTo += AutomaticSceneDataLoadOnSceneLoaded;
+            
+        }
 
-            if (LoadSystemMetaData(out SystemMetaData metaData))
+        // TODO : Need to replace with Scene abstraction
+        private void OnDisable()
+        {
+            SceneEventBus.OnNewSceneGroupTransitionTo -= AutomaticSceneDataLoadOnSceneLoaded;
+        }
+
+        // TODO : Need to replace with Scene abstraction
+        void AutomaticSceneDataLoadOnSceneLoaded(SceneGroup _sceneGroupLoaded)
+        {
+            StartCoroutine(RestoreSceneDataRoutine());
+        }
+
+        IEnumerator RestoreSceneDataRoutine()
+        {
+            // Make sure everything in the scene is initialized before we try to restore data to objects.
+            // May add an extra wait if needed, but this should be sufficient for most cases.
+            yield return new WaitForEndOfFrame();
+            if (!hasDoneInitialBootLoad)
             {
-                LoadAllDataByScope(SaveScope.Global);
+                if (LoadSystemMetaData(out SystemMetaData metaData))
+                {
+                    LoadALL();
+                }
+                else
+                {
+                    Debug.Log("No System MetaData found. Assuming this now first launch");
+                }
+                ExecuteProfileStartUpPolicy(metaData);
+                hasDoneInitialBootLoad = true;
+                yield return null;
             }
-            else
-            {
-                Debug.Log("No System MetaData found. Assuming this now first launch");
-            }
-            ExecuteProfileStartUpPolicy(metaData);
+            LoadAllDataByScope(SaveScope.GameProfile);
         }
 
         void ExecuteProfileStartUpPolicy(SystemMetaData _metaData)
@@ -264,38 +290,6 @@ namespace AbstractPixel.SaveSystem
                 return true;
             }
             return false;
-        }
-
-        private void OnEnable()
-        {
-            SceneEventBus.OnNewSceneGroupTransitionTo += AutomaticSceneDataLoadOnSceneLoaded;
-        }
-
-        // TODO : Need to replace with Scene abstraction
-        private void OnDisable()
-        {
-            SceneEventBus.OnNewSceneGroupTransitionTo -= AutomaticSceneDataLoadOnSceneLoaded;
-        }
-
-        // TODO : Need to replace with Scene abstraction
-        void AutomaticSceneDataLoadOnSceneLoaded(SceneGroup _sceneGroupLoaded)
-        {
-
-            StartCoroutine(RestoreSceneDataRoutine());
-        }
-    
-        IEnumerator RestoreSceneDataRoutine()
-        {
-            // Make sure everything in the scene is initialized before we try to restore data to objects.
-            // May add an extra wait if needed, but this should be sufficient for most cases.
-            yield return new WaitForEndOfFrame();
-            if (!hasDoneInitialBootLoad)
-            {
-                LoadALL();
-                hasDoneInitialBootLoad = true;
-                yield return null;
-            }
-            LoadAllDataByScope(SaveScope.GameProfile);
         }
     }
 }
