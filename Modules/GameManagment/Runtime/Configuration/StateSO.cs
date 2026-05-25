@@ -14,8 +14,13 @@ namespace AbstractPixel.GameManagement
         public bool IsCursorLockedOnExecution = true;
         [Tooltip("If true, the cursor will be visible upon execution.")]
         public bool IsCursorVisibleOnExecution = true;
+        [Tooltip("If true, the state & UI will be hidden upon deactivation.")]
+        public bool DisableStateOnSceneChange = true;
+
+        [Header("UI Configuration")]
         [Tooltip("If true, the game UI will be shown upon execution.")]
         public bool ShowGameUIOnExecution = false;
+        [Tooltip("If true, the game UI will be shown upon deactivation.")]
         public bool ShowGameUIOnDeactivation = false;
 
         internal StateSnapshot ApplyConfigurations()

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace AbstractPixel.GameManagement
 {
@@ -13,6 +14,7 @@ namespace AbstractPixel.GameManagement
         private bool isActive = false;
         private StateSnapshot snapshotBeforeActivation;
         private HashSet<BaseCondition> trackedConditions = new HashSet<BaseCondition>();
+        private  string currentActiveScene;
 
         private void OnEnable()
         {
@@ -31,6 +33,8 @@ namespace AbstractPixel.GameManagement
 
             // Listen to the main registry for forced evictions
             GameStateRegistry.OnStateUnregistered += HandleStateUnregistered;
+            SceneManager.activeSceneChanged += HandleActiveSceneChanged;
+            currentActiveScene = SceneManager.GetActiveScene().name;
         }
 
         private void Start()
@@ -121,6 +125,19 @@ namespace AbstractPixel.GameManagement
         {
             if (_unregisteredState == stateConfig && isActive)
             {
+                DeactivateState();
+            }
+        }
+
+        private void HandleActiveSceneChanged(Scene _previousScene, Scene _newScene)
+        {
+            if (_newScene.name != currentActiveScene)
+            {
+                currentActiveScene = _newScene.name;
+                if (!isActive)
+                {
+                    return;
+                }
                 DeactivateState();
             }
         }

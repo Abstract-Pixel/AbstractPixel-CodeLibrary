@@ -110,6 +110,15 @@ namespace AbstractPixel.SaveSystem
             }
         }
 
+        public void SaveAllDataByScope(SaveScope _directoryScope)
+        {
+            foreach (SaveCatgeoryDefinition definition in saveConfig.GetAllCategoryDefinitions())
+            {
+                if (definition.DirectoryScope != _directoryScope) continue;
+                SaveDataOf(definition.Category);
+            }
+        }
+
         public void SaveDataOf(SaveCategory _category)
         {
             if (!savableObjectsRegistry.TryGetValue(_category, out var bridgesDataMap))
