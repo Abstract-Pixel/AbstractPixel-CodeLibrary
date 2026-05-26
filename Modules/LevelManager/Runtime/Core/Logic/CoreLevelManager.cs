@@ -31,6 +31,7 @@ namespace AbstractPixel.LevelFramework
         [field: SerializeField, ReadOnly] protected TLevelDefinition activeLevelDefinition = null;
         [field: SerializeField, ReadOnly] protected TSceneAsset activeSceneAsset;
         [field: SerializeField, ReadOnly] protected int currentStageLevelIndex;
+        public bool IsInitialized { get; protected set; }
 
 
         #region Abstract Methods
@@ -71,9 +72,9 @@ namespace AbstractPixel.LevelFramework
                     }
                 }
             }
-            // Temporary
             TLevelDefinition firstLevel = stageDefinitionsList[0].LevelDefinitionsList[0];
             InitializeSaveDataForLevel(firstLevel.SceneAsset);
+            IsInitialized = true;
             LevelEventBus<TLevelDefinition>.RaiseOnLevelManagerInitialized();
         }
 
@@ -139,6 +140,7 @@ namespace AbstractPixel.LevelFramework
             {
                 int levelIndex = stageDefinitionsList[i].LevelDefinitionsList.IndexOf(_newLevelDefinition);
 
+
                 if (levelIndex >= 0)
                 {
                     activeStageDefinition = stageDefinitionsList[i];
@@ -150,7 +152,6 @@ namespace AbstractPixel.LevelFramework
             }
         }
         #endregion
-
         #region State & Save Data Management
         public virtual void MarkCurrentLevelForCompletion(TLevelSaveData newLevelSaveData)
         {
@@ -287,6 +288,14 @@ namespace AbstractPixel.LevelFramework
         public IReadOnlyList<TStageDefinition> GetAllStages()
         {
             return stageDefinitionsList.AsReadOnly();
+        }
+
+        public void UpdateLevelData(TSceneAsset _levelDataKey, TLevelSaveData _newData)
+        {
+            if (levelSaveDataMap.ContainsKey(_levelDataKey))
+            {
+                levelSaveDataMap[_levelDataKey] = _newData;
+            }
         }
 
         internal virtual bool IsGameCompleted()

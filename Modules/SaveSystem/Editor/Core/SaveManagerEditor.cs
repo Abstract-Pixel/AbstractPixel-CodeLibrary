@@ -83,7 +83,7 @@ namespace AbstractPixel.SaveSystem.Editor
             if (Application.isPlaying)
             {
                 SaveManager saveManager = (SaveManager)target;
-                saveManager.SaveALL();
+                SaveActions.SaveAll();
                 Debug.Log("[Save System: FORCED] : Save all data executed.");
             }
             else
@@ -97,7 +97,7 @@ namespace AbstractPixel.SaveSystem.Editor
                 if (Application.isPlaying)
                 {
                     SaveManager saveManager = (SaveManager)target;
-                    saveManager.LoadALL();
+                    SaveActions.LoadAll();
                     Debug.Log("[Save System: FORCED] : Load all data executed.");
                 }
                 else

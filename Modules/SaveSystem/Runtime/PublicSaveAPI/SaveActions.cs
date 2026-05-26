@@ -4,6 +4,9 @@ namespace AbstractPixel.SaveSystem
 {
     public static class SaveActions
     {
+        public static bool IsDataSaved => SaveManager.Instance.isDataSaved;
+        public static bool IsDataLoaded => SaveManager.Instance.isDataLoaded;
+
         public static void SaveAll()
         {
             SaveManager.Instance.SaveALL();

@@ -11,6 +11,8 @@ namespace AbstractPixel.Core
         [SerializeField] private ConstraintLockMode lockMode = ConstraintLockMode.Permanent;
         [SerializeField] private float duration = 2.0f;
         [SerializeField] private bool makeItIsKinematic;
+        [SerializeField] bool canOnlyUseOnce;
+        [SerializeField] bool useDelayBeforeUnlocking;
 
         [Header("Constraints")]
         [SerializeField] private PositionConstraints positionConstraints;
@@ -20,6 +22,7 @@ namespace AbstractPixel.Core
         private RigidbodyConstraints cachedConstraints;
         private bool cachedIsKinematic;
         private Coroutine timerCoroutine;
+        bool isUsedOnce;
 
         private void Awake()
         {
@@ -32,6 +35,10 @@ namespace AbstractPixel.Core
 
         private void Start()
         {
+            if(isUsedOnce)
+            {
+                return;
+            }
             ApplyConstraints();
         }
 
@@ -52,11 +59,26 @@ namespace AbstractPixel.Core
         {
             yield return new WaitForSeconds(duration);
 
-            // Revert specifically to the cached state
             targetRigidbody.constraints = cachedConstraints;
             targetRigidbody.isKinematic = cachedIsKinematic;
+            isUsedOnce = true;
             timerCoroutine = null;
 
+        }
+
+        public void UnlockConstraints()
+        {
+            if(useDelayBeforeUnlocking)
+            {
+                StartCoroutine(TimerRoutine());
+                return;
+            }
+            if (lockMode == ConstraintLockMode.Permanent)
+            {
+                targetRigidbody.constraints = cachedConstraints;
+                targetRigidbody.isKinematic = cachedIsKinematic;
+                isUsedOnce = true;
+            }
         }
 
         private RigidbodyConstraints ConvertToRigidbodyConstraints()

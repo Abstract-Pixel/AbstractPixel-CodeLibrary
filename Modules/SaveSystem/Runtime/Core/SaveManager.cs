@@ -15,8 +15,11 @@ namespace AbstractPixel.SaveSystem
         private ISerializer serializer;
 
         private Dictionary<SaveCategory, Dictionary<string, ISavableBridge>> savableObjectsRegistry;
-        readonly string stringSeparatorIdentifier = "#";
+        private readonly string stringSeparatorIdentifier = "#";
         private bool hasDoneInitialBootLoad = false;
+
+        internal bool isDataLoaded;
+        internal bool isDataSaved;
 
         protected override void Awake()
         {
@@ -104,23 +107,30 @@ namespace AbstractPixel.SaveSystem
 
         public void SaveALL()
         {
+            isDataSaved = false;
             foreach (SaveCategory category in savableObjectsRegistry.Keys)
             {
                 SaveDataOf(category);
             }
+            isDataSaved = true;
+            SaveEventBus.RaiseOnSaveAllCompleted();
         }
 
-        public void SaveAllDataByScope(SaveScope _directoryScope)
+        internal void SaveAllDataByScope(SaveScope _directoryScope)
         {
+            isDataSaved = false;
             foreach (SaveCatgeoryDefinition definition in saveConfig.GetAllCategoryDefinitions())
             {
                 if (definition.DirectoryScope != _directoryScope) continue;
                 SaveDataOf(definition.Category);
             }
+            isDataSaved = true;
+            SaveEventBus.RaiseOnSaveScopeCompleted(_directoryScope);
         }
 
-        public void SaveDataOf(SaveCategory _category)
+        internal void SaveDataOf(SaveCategory _category)
         {
+            isDataSaved = false;
             if (!savableObjectsRegistry.TryGetValue(_category, out var bridgesDataMap))
             {
                 // No objects registered for this category. Nothing to save.
@@ -164,27 +174,36 @@ namespace AbstractPixel.SaveSystem
                     fileStorageService.SaveFile(json, fullSavePath);
                 }
             }
+            isDataSaved = true;
+            SaveEventBus.RaiseOnSaveCategoryCompleted(_category);
         }
 
-        public void LoadALL()
+        internal void LoadALL()
         {
+            isDataLoaded = false;
             foreach (SaveCatgeoryDefinition definition in saveConfig.GetAllCategoryDefinitions())
             {
                 LoadDataOf(definition.Category);
             }
+            isDataLoaded = true;
+            SaveEventBus.RaiseOnLoadAllCompleted();
         }
 
-        public void LoadAllDataByScope(SaveScope _directoryScope)
+        internal void LoadAllDataByScope(SaveScope _directoryScope)
         {
+            isDataLoaded = false;
             foreach (SaveCatgeoryDefinition definition in saveConfig.GetAllCategoryDefinitions())
             {
                 if (_directoryScope != definition.DirectoryScope) continue;
                 LoadDataOf(definition.Category);
             }
+            isDataLoaded = true;
+            SaveEventBus.RaiseOnLoadScopeCompleted(_directoryScope);
         }
 
-        public void LoadDataOf(SaveCategory _category)
+        internal void LoadDataOf(SaveCategory _category)
         {
+            isDataLoaded = false;
             string profileId = ProfileManager.CurrentProfileID;
             SaveCatgeoryDefinition definition = saveConfig.GetCategoryDefinition(_category);
 
@@ -221,9 +240,11 @@ namespace AbstractPixel.SaveSystem
                     bridge.RestoreState(objectData, _category);
                 }
             }
+            isDataLoaded = true;
+            SaveEventBus.RaiseOnLoadCategoryCompleted(_category);
         }
 
-        public void RegisterSavableObject(ISavableBridge bridge, List<SaveCategory> categories)
+        internal void RegisterSavableObject(ISavableBridge bridge, List<SaveCategory> categories)
         {
             if (IsInstanceNull()) return;
             if (bridge == null || categories == null) return;
@@ -254,7 +275,7 @@ namespace AbstractPixel.SaveSystem
             }
         }
 
-        public void UnregisterSavableObject(ISavableBridge bridge, List<SaveCategory> categories)
+        internal void UnregisterSavableObject(ISavableBridge bridge, List<SaveCategory> categories)
         {
             if (IsInstanceNull() || savableObjectsRegistry == null) return;
             if (bridge == null || categories == null) return;

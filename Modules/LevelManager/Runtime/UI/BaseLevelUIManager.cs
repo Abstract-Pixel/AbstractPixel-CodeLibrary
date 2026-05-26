@@ -23,12 +23,12 @@ namespace AbstractPixel.LevelFramework
             public List<BaseLevelButton<TLevelDefinition, TLevelSaveData,TSceneAsset>> levelButtonsList;
         }
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             LevelEventBus<TLevelDefinition>.OnLevelManagerInitialized += InitializeUI;
         }
 
-        private void OnDisable()
+        protected virtual void OnDisable()
         {
             LevelEventBus<TLevelDefinition>.OnLevelManagerInitialized -= InitializeUI;
         }
