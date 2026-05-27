@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace AbstractPixel.GhostSystem
 {
@@ -9,7 +10,13 @@ namespace AbstractPixel.GhostSystem
     public static class GhostActions
     {
         // Func returns the recorded GhostProfile. 
-        // The GhostRecorder subscribes to this. The LevelFinishTrigger invokes it.
-        public static Func<GhostProfile> RequestFinalGhostProfile;
+        public static Func<GhostProfile> RequestFinalGhostProfile = delegate { return null; };
+
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetEvents()
+        {
+            GhostActions.RequestFinalGhostProfile = delegate { return null; };
+        }
     }
 }

@@ -31,11 +31,11 @@ namespace AbstractPixel.GhostSystem
             ghostVisuals.rotation = profileToPlay.Frames[0].Rotation;
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             if (!isPlaying || profileToPlay == null) return;
 
-            playbackTime += Time.deltaTime;
+            playbackTime += Time.fixedDeltaTime;
             if (currentFrameIndex >= profileToPlay.Frames.Count - 1)
             {
                 isPlaying = false;

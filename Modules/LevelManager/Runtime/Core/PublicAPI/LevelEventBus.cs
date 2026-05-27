@@ -9,6 +9,7 @@ namespace AbstractPixel.LevelFramework
         public static event Action<TLevelDefinition> OnLevelStarted = delegate { };
         public static event Action<TLevelDefinition> OnLevelCompleted = delegate { };
         public static event Action OnGameCompleted = delegate { };
+        public static event Action OnLevelDataRestored = delegate { };
 
         public static void RaiseOnLevelManagerInitialized()
         {
@@ -28,6 +29,11 @@ namespace AbstractPixel.LevelFramework
             OnGameCompleted?.Invoke();
         }
 
+        public static void RaiseOnLevelDataRestored()
+        {
+            OnLevelDataRestored?.Invoke();
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Reset()
         {
@@ -35,6 +41,7 @@ namespace AbstractPixel.LevelFramework
             OnLevelCompleted = delegate { };
             OnGameCompleted = delegate { };
             OnLevelManagerInitialized = delegate { };
+            OnLevelDataRestored = delegate { };
         }
     }
 }
