@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace AbstractPixel.LevelFramework
 {
-    public class BaseLevelUIManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset,TSaveEntry> : MonoBehaviour
+    public class BaseLevelUIManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset, TSaveEntry> : MonoBehaviour
      where TStageDefinition : BaseStageDefinition<TLevelDefinition, TSceneAsset>
      where TLevelDefinition : BaseLevelDefinition<TSceneAsset>
      where TLevelSaveData : BaseLevelData
@@ -14,13 +14,13 @@ namespace AbstractPixel.LevelFramework
 
     {
         [SerializeField] protected List<StageUIContainer> stageGroups;
-        CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset,TSaveEntry> coreLevelManager;
+        CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset, TSaveEntry> coreLevelManager;
 
         [Serializable]
         public struct StageUIContainer
         {
             public TStageDefinition StageDefinition;
-            public List<BaseLevelButton<TLevelDefinition, TLevelSaveData,TSceneAsset>> levelButtonsList;
+            public List<BaseLevelButton<TLevelDefinition, TLevelSaveData, TSceneAsset>> levelButtonsList;
         }
 
         protected virtual void OnEnable()
@@ -35,7 +35,7 @@ namespace AbstractPixel.LevelFramework
 
         protected virtual void InitializeUI()
         {
-            coreLevelManager = CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset,TSaveEntry>.Instance;
+            coreLevelManager = CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset, TSaveEntry>.Instance;
             foreach (StageUIContainer group in stageGroups)
             {
                 if (group.StageDefinition == null || group.levelButtonsList == null) continue;
@@ -64,7 +64,8 @@ namespace AbstractPixel.LevelFramework
 
                     buttonIndex++;
                 }
+            }
         }
-    }
 
+    }
 }
