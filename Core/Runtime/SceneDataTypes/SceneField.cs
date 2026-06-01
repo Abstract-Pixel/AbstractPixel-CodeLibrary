@@ -19,6 +19,11 @@ namespace AbstractPixel.Core
 
         public SceneField(string _sceneName)
         {
+            if (string.IsNullOrEmpty(_sceneName))
+            {
+                sceneName = string.Empty;
+                return;
+            }
             // CAUTION : this will only return the index of the first scene that matches the provided name,
             // so if you have multiple scenes with the same name in different folders, this may not work as expected.
             int buildIndex = SceneUtility.GetBuildIndexByScenePath(_sceneName);
