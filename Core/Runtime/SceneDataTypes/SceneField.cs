@@ -30,7 +30,7 @@ namespace AbstractPixel.Core
 
             if (buildIndex == -1)
             {
-                Debug.LogError($"[SceneField] Validation Failed: The scene '{sceneName}' is not in the Build Settings!");
+                Debug.LogError($"[SceneField] Validation Failed: The scene '{_sceneName}' is not in the Build Settings!");
             }
             else
             {
