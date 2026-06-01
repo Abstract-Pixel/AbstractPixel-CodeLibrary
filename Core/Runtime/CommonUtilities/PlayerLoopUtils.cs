@@ -85,7 +85,7 @@ namespace AbstractPixel.Core
             {
                 PrintSubsystem(system, sb, 1);
             }
-            Debug.Log(sb.ToString());
+            //Debug.Log(sb.ToString());
         }
 
         static void PrintSubsystem(PlayerLoopSystem system, StringBuilder sb, int level)

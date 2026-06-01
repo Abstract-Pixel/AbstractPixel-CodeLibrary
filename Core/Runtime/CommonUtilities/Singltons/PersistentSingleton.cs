@@ -9,7 +9,7 @@ namespace AbstractPixel.Core
     /// and destroyed if a duplicate is found. This class is not thread-safe and should be used on the main Unity thread.</remarks> 
     public class PersistentSingleton<T> : MonoBehaviour where T : Component
     {
-        public bool AutoUnparentOnAwake = true;
+        public bool MasrkAsDontdestroyOnLoad = true;
 
         protected static T instance;
         protected static bool isApplicationQuitting = false;
@@ -58,7 +58,7 @@ namespace AbstractPixel.Core
 
         protected virtual void InitializeSingleton()
         {
-            if (AutoUnparentOnAwake)
+            if (MasrkAsDontdestroyOnLoad)
             {
                 transform.SetParent(null);
             }
@@ -66,7 +66,11 @@ namespace AbstractPixel.Core
             if (instance == null)
             {
                 instance = this as T;
-                DontDestroyOnLoad(gameObject);
+                if (MasrkAsDontdestroyOnLoad)
+                {
+                    transform.SetParent(null);
+                    DontDestroyOnLoad(instance);
+                }
             }
             else
             {

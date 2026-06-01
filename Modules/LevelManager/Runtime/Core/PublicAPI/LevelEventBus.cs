@@ -1,3 +1,4 @@
+using AbstractPixel.Core;
 using System;
 using UnityEngine;
 
@@ -10,6 +11,11 @@ namespace AbstractPixel.LevelFramework
         public static event Action<TLevelDefinition> OnLevelCompleted = delegate { };
         public static event Action OnGameCompleted = delegate { };
         public static event Action OnLevelDataRestored = delegate { };
+
+        static LevelEventBus()
+        {
+            StaticsResetter.OnResetStatics += ResetEvents;
+        }
 
         public static void RaiseOnLevelManagerInitialized()
         {
@@ -34,8 +40,7 @@ namespace AbstractPixel.LevelFramework
             OnLevelDataRestored?.Invoke();
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Reset()
+        static void ResetEvents()
         {
             OnLevelStarted = delegate { };
             OnLevelCompleted = delegate { };
