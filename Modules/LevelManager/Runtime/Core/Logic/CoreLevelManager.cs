@@ -1,6 +1,7 @@
 using AbstractPixel.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace AbstractPixel.LevelFramework
@@ -48,6 +49,10 @@ namespace AbstractPixel.LevelFramework
                 for (int j = 0; j < levelDefinitionsList.Count; j++)
                 {
                     TSceneAsset sceneAsset = levelDefinitionsList[j].SceneAsset;
+
+                    // Skip infrastructure/placeholder levels that don't have actual scene data yet
+                    if (sceneAsset == null) continue;
+
                     levelDefinitionsMap[sceneAsset] = levelDefinitionsList[j];
 
                     if (!levelSaveDataMap.ContainsKey(sceneAsset))
@@ -58,8 +63,13 @@ namespace AbstractPixel.LevelFramework
                     }
                 }
             }
-            TLevelDefinition firstLevel = stageDefinitionsList[0].LevelDefinitionsList[0];
-            InitializeSaveDataForLevel(firstLevel.SceneAsset);
+
+            if (levelDefinitionsMap.Count > 0)
+            {
+                TLevelDefinition firstLevel = levelDefinitionsMap.Values.First();
+                InitializeSaveDataForLevel(firstLevel.SceneAsset);
+            }
+
             IsInitialized = true;
             LevelEventBus<TLevelDefinition>.RaiseOnLevelManagerInitialized();
         }
@@ -83,7 +93,7 @@ namespace AbstractPixel.LevelFramework
                 return;
             }
 
-            TLevelDefinition nextLevel = GetNextLevel();
+            TLevelDefinition nextLevel = GetNextValidLevel();
             if (nextLevel == null)
             {
                 return;
@@ -170,7 +180,7 @@ namespace AbstractPixel.LevelFramework
 
         internal virtual void UnlockNextLevel()
         {
-            TLevelDefinition nextLevel = GetNextLevel();
+            TLevelDefinition nextLevel = GetNextValidLevel();
             if (nextLevel != null)
             {
                 UnlockLevel(nextLevel);
@@ -204,6 +214,10 @@ namespace AbstractPixel.LevelFramework
         #region Queries & Utilities
         internal TLevelSaveData GetLevelSaveData(TSceneAsset _sceneAsset)
         {
+            if (_sceneAsset == null)
+            {
+                return null;
+            }
             if (levelSaveDataMap.TryGetValue(_sceneAsset, out TLevelSaveData saveData))
             {
                 return saveData;
@@ -213,6 +227,10 @@ namespace AbstractPixel.LevelFramework
 
         internal void InitializeSaveDataForLevel(TSceneAsset _sceneAsset)
         {
+            if (_sceneAsset == null)
+            {
+                return;
+            }
             if (levelSaveDataMap.TryGetValue(_sceneAsset, out TLevelSaveData saveData))
             {
                 if (saveData.LevelStatus == LevelStatus.NotStarted)
@@ -230,7 +248,7 @@ namespace AbstractPixel.LevelFramework
             }
         }
 
-        internal TLevelDefinition GetNextLevel()
+        internal TLevelDefinition GetNextValidLevel()
         {
             if (stageDefinitionsList == null || stageDefinitionsList.Count == 0)
             {
@@ -238,35 +256,69 @@ namespace AbstractPixel.LevelFramework
                 return null;
             }
 
-            if (activeLevelDefinition == null)
+            // Try to find the next valid level in the CURRENT stage
+            if (activeStageDefinition != null)
             {
-                return stageDefinitionsList[0].LevelDefinitionsList[0];
+                TLevelDefinition nextInCurrentStage = GetValidLevelInStage(activeStageDefinition, currentStageLevelIndex + 1);
+                if (nextInCurrentStage != null)
+                {
+                    return nextInCurrentStage;
+                }
             }
 
-            if (currentStageLevelIndex + 1 < activeStageDefinition.LevelDefinitionsList.Count)
-            {
-                return activeStageDefinition.LevelDefinitionsList[currentStageLevelIndex + 1];
-            }
-
-            TStageDefinition nextStage = GetNextStage();
+            TStageDefinition nextStage = GetNextValidStage();
             if (nextStage != null)
             {
-                return nextStage.LevelDefinitionsList[0];
+                return GetValidLevelInStage(nextStage, 0);
             }
 
+            //No valid levels left in the entire game
             return null;
         }
 
-        internal TStageDefinition GetNextStage()
+        internal TStageDefinition GetNextValidStage()
         {
-            int currentIndex = stageDefinitionsList.IndexOf(activeStageDefinition);
-            if (currentIndex + 1 < stageDefinitionsList.Count)
+            if (stageDefinitionsList == null || stageDefinitionsList.Count == 0) return null;
+
+            int startStageIndex = 0;
+
+            // Start searching from the stage AFTER the current one
+            if (activeStageDefinition != null)
             {
-                return stageDefinitionsList[currentIndex + 1];
+                startStageIndex = stageDefinitionsList.IndexOf(activeStageDefinition) + 1;
             }
+
+            for (int i = startStageIndex; i < stageDefinitionsList.Count; i++)
+            {
+                TStageDefinition stage = stageDefinitionsList[i];
+
+                // A stage is only considered "valid" if it contains at least one valid level
+                if (GetValidLevelInStage(stage, 0) != null)
+                {
+                    return stage;
+                }
+            }
+
             return null;
         }
 
+        /// <summary>
+        /// Helper method to scan a stage starting from a specific index and return the first level that has actual SceneAsset data.
+        /// </summary>
+        private TLevelDefinition GetValidLevelInStage(TStageDefinition _stage, int _startIndex)
+        {
+            if (_stage == null || _stage.LevelDefinitionsList == null) return null;
+
+            for (int i = _startIndex; i < _stage.LevelDefinitionsList.Count; i++)
+            {
+                TLevelDefinition level = _stage.LevelDefinitionsList[i];
+                if (level != null && level.SceneAsset != null)
+                {
+                    return level;
+                }
+            }
+            return null;
+        }
         internal TLevelDefinition GetLevelDefinition(TSceneAsset _sceneAsset)
         {
             if (levelDefinitionsMap.TryGetValue(_sceneAsset, out TLevelDefinition defintion))
@@ -295,14 +347,10 @@ namespace AbstractPixel.LevelFramework
             {
                 return false;
             }
-            bool isThisTheLastStage = stageDefinitionsList.IndexOf(activeStageDefinition) >= stageDefinitionsList.Count - 1;
-            bool isItLastLevelOfStage = currentStageLevelIndex >= activeStageDefinition.LevelDefinitionsList.Count - 1;
 
-            if (isThisTheLastStage && isItLastLevelOfStage)
-            {
-                return true;
-            }
-            return false;
+            // The game is completed if there are no more valid playable levels ahead of us.
+            // This perfectly handles empty placeholder levels at the end of the game.
+            return GetNextValidLevel() == null;
         }
         #endregion
     }
