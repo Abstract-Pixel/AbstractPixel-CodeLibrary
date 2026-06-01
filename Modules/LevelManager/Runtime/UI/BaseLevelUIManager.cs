@@ -64,6 +64,13 @@ namespace AbstractPixel.LevelFramework
 
                     buttonIndex++;
                 }
+                for (int i = buttonIndex; i < group.levelButtonsList.Count; i++)
+                {
+                    if (group.levelButtonsList[i] != null)
+                    {
+                        group.levelButtonsList[i].gameObject.SetActive(false);
+                    }
+                }
             }
         }
 
