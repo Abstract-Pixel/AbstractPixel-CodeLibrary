@@ -30,8 +30,7 @@ namespace AbstractPixel.Core
                     return SceneAssetReference.AssetGUID;
                 }
                 else
-                {
-                    Debug.LogError("SceneReference: No valid scene reference assigned. Please assign either a SceneField or an AssetReference.");
+                { 
                     return string.Empty;
                 }
             }

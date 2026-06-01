@@ -26,24 +26,44 @@ namespace AbstractPixel.SceneManagement
             ForceReloadContextualScenes = sceneGroup.ForceReloadContextualScenes;
         }
 
-        public SceneGroup ToSceneGroup(SceneGroupData sceneGroupData)
+        public SceneGroup ToSceneGroup(SceneGroupData data)
         {
-            List<SceneReference> managerialScenes = new List<SceneReference>();
-            foreach (string scene in sceneGroupData.ManagerialBootScenesList)
+            SceneGroup group = ScriptableObject.CreateInstance<SceneGroup>();
+
+            string safeMainSceneName = string.IsNullOrEmpty(data.MainScene) ? string.Empty : data.MainScene;
+
+            SceneReference mainSceneRef = null;
+            if (!string.IsNullOrEmpty(safeMainSceneName))
             {
-                managerialScenes.Add(new SceneReference(scene));
+                mainSceneRef = new SceneReference(safeMainSceneName);
             }
 
-            List<SceneReference> contextualScenes = new List<SceneReference>();
-            foreach (string scene in sceneGroupData.ContextualBootScenesList)
+            List<SceneReference> managerialRefs = new List<SceneReference>();
+            if (data.ManagerialBootScenesList != null)
             {
-                contextualScenes.Add(new SceneReference(scene));
+                foreach (string sceneName in data.ManagerialBootScenesList)
+                {
+                    if (!string.IsNullOrEmpty(sceneName))
+                        managerialRefs.Add(new SceneReference(sceneName));
+                }
             }
-            SceneReference mainScene = new SceneReference(sceneGroupData.MainScene); 
 
-            SceneGroup sceneGroup = ScriptableObject.CreateInstance<SceneGroup>();
-            sceneGroup.Initialize(managerialScenes, contextualScenes, mainScene, sceneGroupData.ForceReloadContextualScenes);
-            return sceneGroup;
+            List<SceneReference> contextualRefs = new List<SceneReference>();
+            if (data.ContextualBootScenesList != null)
+            {
+                foreach (string sceneName in data.ContextualBootScenesList)
+                {
+                    if (!string.IsNullOrEmpty(sceneName))
+                        contextualRefs.Add(new SceneReference(sceneName));
+                }
+            }
+            if (string.IsNullOrEmpty(sceneGroupData.MainScene)) // (Or whatever your string variable is called)
+            {
+                Debug.LogError($"[Save System Tracker] Attempted to load a SceneGroup from save data, but the MainScene string was empty! The corrupted/empty saved group is: {sceneGroupData.MainScene}");
+            }
+            group.Initialize(managerialRefs, contextualRefs, mainSceneRef, data.ForceReloadContextualScenes);
+
+            return group;
         }
 
         public static implicit operator SceneGroupData(SceneGroup sceneGroup)

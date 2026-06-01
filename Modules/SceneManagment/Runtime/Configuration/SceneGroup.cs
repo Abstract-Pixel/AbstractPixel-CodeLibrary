@@ -64,7 +64,7 @@ namespace AbstractPixel.SceneManagement
         public override int GetHashCode()
         {
             int hash = 17;
-            hash = hash * 23 + (MainScene != null ? MainScene.GetHashCode() : 0);
+            hash = hash * 23 + (MainScene != null && !string.IsNullOrEmpty(MainScene.SceneName) ? MainScene.GetHashCode() : 0);
             hash = hash * 23 + ForceReloadContextualScenes.GetHashCode();
             return hash;
         }
