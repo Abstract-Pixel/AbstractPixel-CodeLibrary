@@ -38,18 +38,32 @@ namespace AbstractPixel.LevelFramework
             coreLevelManager = CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset,TSaveEntry>.Instance;
             foreach (StageUIContainer group in stageGroups)
             {
-                // Bind Buttons
-                for (int i = 0; i < group.levelButtonsList.Count; i++)
+                if (group.StageDefinition == null || group.levelButtonsList == null) continue;
+
+                int buttonIndex = 0;
+
+                for (int i = 0; i < group.StageDefinition.LevelDefinitionsList.Count; i++)
                 {
                     TLevelDefinition levelDefinition = group.StageDefinition.LevelDefinitionsList[i];
+
+                    // Skip empty infrastructure levels so they don't consume a UI button
+                    if (levelDefinition == null || levelDefinition.SceneAsset == null) continue;
+
+                    // If we run out of UI buttons, stop mapping for this stage
+                    if (buttonIndex >= group.levelButtonsList.Count) break;
+
                     TLevelSaveData levelSaveData = coreLevelManager.GetLevelSaveData(levelDefinition.SceneAsset);
+
                     Action LoadLevel = () =>
                     {
                         coreLevelManager.LoadToLevel(levelDefinition.SceneAsset);
                     };
-                    group.levelButtonsList[i].Initialize(levelDefinition, levelSaveData, LoadLevel);
+
+                    group.levelButtonsList[buttonIndex].Initialize(levelDefinition, levelSaveData, LoadLevel);
+                    group.levelButtonsList[buttonIndex].gameObject.SetActive(true);
+
+                    buttonIndex++;
                 }
-            }
         }
     }
 

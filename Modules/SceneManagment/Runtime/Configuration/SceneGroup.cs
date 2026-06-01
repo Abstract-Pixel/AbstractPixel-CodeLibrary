@@ -48,7 +48,7 @@ namespace AbstractPixel.SceneManagement
             bool isManagerialScenesEqual = ManagerialBootScenesList.SequenceEqual(other.ManagerialBootScenesList);
             bool isMainSceneEqual = Equals(MainScene, other.MainScene);
             bool isForceReloadEqual = ForceReloadContextualScenes == other.ForceReloadContextualScenes;
-            return isManagerialScenesEqual && isMainSceneEqual && isForceReloadEqual;             
+            return isManagerialScenesEqual && isContexualScenesEqual && isMainSceneEqual && isForceReloadEqual;             
         }
 
         public override bool Equals(object obj)
