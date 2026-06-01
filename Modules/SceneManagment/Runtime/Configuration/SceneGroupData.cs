@@ -59,7 +59,7 @@ namespace AbstractPixel.SceneManagement
             }
             if (string.IsNullOrEmpty(data.MainScene)) // (Or whatever your string variable is called)
             {
-                Debug.LogError($"[Save System Tracker] Attempted to load a SceneGroup from save data, but the MainScene string was empty! The corrupted/empty saved group is: {sceneGroupData.MainScene}");
+                Debug.LogError($"[Save System Tracker] Attempted to load a SceneGroup from save data, but the MainScene string was empty! The corrupted/empty saved group is: {data.MainScene}");
             }
             group.Initialize(managerialRefs, contextualRefs, mainSceneRef, data.ForceReloadContextualScenes);
 
