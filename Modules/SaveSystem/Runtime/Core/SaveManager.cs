@@ -14,7 +14,7 @@ namespace AbstractPixel.SaveSystem
         private IDataStorageService fileStorageService;
         private ISerializer serializer;
 
-        private Dictionary<SaveCategory, Dictionary<string, ISavableBridge>> savableObjectsRegistry;
+        private Dictionary<SaveCategory, Dictionary<string, ISavableBridge>> savableObjectsRegistry = new();
         private readonly string stringSeparatorIdentifier = "#";
         private bool hasDoneInitialBootLoad = false;
 
