@@ -5,16 +5,15 @@ using UnityEngine;
 
 namespace AbstractPixel.LevelFramework
 {
-    public class BaseLevelUIManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset, TSaveEntry> : MonoBehaviour
+    public abstract class BaseLevelUIManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset, TSaveEntry> : MonoBehaviour
      where TStageDefinition : BaseStageDefinition<TLevelDefinition, TSceneAsset>
      where TLevelDefinition : BaseLevelDefinition<TSceneAsset>
      where TLevelSaveData : BaseLevelData
      where TSceneAsset : ScriptableObject
      where TSaveEntry : class
-
     {
         [SerializeField] protected List<StageUIContainer> stageGroups;
-        CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset, TSaveEntry> coreLevelManager;
+        protected CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset, TSaveEntry> coreLevelManager;
 
         [Serializable]
         public struct StageUIContainer
@@ -46,21 +45,13 @@ namespace AbstractPixel.LevelFramework
                 {
                     TLevelDefinition levelDefinition = group.StageDefinition.LevelDefinitionsList[i];
 
-                    // Skip empty infrastructure levels so they don't consume a UI button
                     if (levelDefinition == null || levelDefinition.SceneAsset == null) continue;
-
-                    // If we run out of UI buttons, stop mapping for this stage
                     if (buttonIndex >= group.levelButtonsList.Count) break;
 
                     TLevelSaveData levelSaveData = coreLevelManager.GetLevelSaveData(levelDefinition.SceneAsset);
+                    Action clickAction = GetLevelButtonAction(levelDefinition, levelSaveData);
 
-                    Action LoadLevel = () =>
-                    {
-                        coreLevelManager.LoadToLevel(levelDefinition.SceneAsset);
-                    };
-
-                    group.levelButtonsList[buttonIndex].Initialize(levelDefinition, levelSaveData, LoadLevel);
-                    group.levelButtonsList[buttonIndex].gameObject.SetActive(true);
+                    group.levelButtonsList[buttonIndex].Initialize(levelDefinition, levelSaveData, clickAction);
 
                     buttonIndex++;
                 }
@@ -72,7 +63,25 @@ namespace AbstractPixel.LevelFramework
                     }
                 }
             }
+
+            // Hook for derived classes to execute logic after all buttons are mapped
+            OnUIInitialized();
         }
 
+        /// <summary>
+        /// Returns the action to be executed when a level button is clicked.
+        /// </summary>
+        /// <param name="_definition">The level definition associated with the button.</param>
+        /// <param name="_saveData">The save data associated with the level.</param>
+        /// <returns>An action to be executed on button click.</returns>
+        protected virtual Action GetLevelButtonAction(TLevelDefinition _definition, TLevelSaveData _saveData)
+        {
+            return () => coreLevelManager.LoadToLevel(_definition.SceneAsset);
+        }
+
+        /// <summary>
+        /// Called immediately after InitializeUI finishes mapping all buttons.
+        /// </summary>
+        protected virtual void OnUIInitialized() { }
     }
 }

@@ -142,6 +142,13 @@ namespace AbstractPixel.LevelFramework
                     activeLevelDefinition = _newLevelDefinition;
                     activeSceneAsset = _newLevelDefinition.SceneAsset;
                     currentStageLevelIndex = levelIndex;
+
+                    // Update the save bookmark whenever the active level changes
+                    if (saveProgressionHandler != null)
+                    {
+                        saveProgressionHandler.LastPlayedLevel = activeSceneAsset;
+                    }
+
                     return;
                 }
             }
@@ -246,6 +253,15 @@ namespace AbstractPixel.LevelFramework
                 newSaveData.LevelStatus = LevelStatus.InProgress;
                 levelSaveDataMap[_sceneAsset] = newSaveData;
             }
+        }
+
+        internal TSceneAsset GetLastPlayedLevel()
+        {
+            if(saveProgressionHandler != null)
+            {
+                return saveProgressionHandler.LastPlayedLevel;
+            }
+            return null;
         }
 
         internal TLevelDefinition GetNextValidLevel()
