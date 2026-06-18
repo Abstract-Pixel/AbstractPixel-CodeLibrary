@@ -42,8 +42,8 @@ namespace AbstractPixel.LevelFramework
 
         public static TSceneAsset GetLastPlayedLevel() => Manager?.GetLastPlayedLevel();
 
-        public static TLevelDefinition GetLevelDefinition(TSceneAsset _sceneAsset) => Manager?.GetLevelDefinition(_sceneAsset);
+        public static TLevelDefinition GetLevelDefinitionOf(TSceneAsset _sceneAsset) => Manager?.GetLevelDefinition(_sceneAsset);
 
-        public static TLevelSaveData GetLevelSaveData(TSceneAsset _sceneAsset) => Manager?.GetLevelSaveData(_sceneAsset);
+        public static TLevelSaveData GetLevelSaveDataOf(TSceneAsset _sceneAsset) => Manager?.GetLevelSaveData(_sceneAsset);
     }
 }

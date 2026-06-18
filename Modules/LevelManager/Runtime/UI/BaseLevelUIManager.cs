@@ -14,11 +14,15 @@ namespace AbstractPixel.LevelFramework
     {
         [SerializeField] protected List<StageUIContainer> stageGroups;
         protected CoreLevelManager<TStageDefinition, TLevelDefinition, TLevelSaveData, TSceneAsset, TSaveEntry> coreLevelManager;
+        public IReadOnlyList<StageUIContainer> StageGroups => stageGroups.AsReadOnly();
+
 
         [Serializable]
         public struct StageUIContainer
         {
             public TStageDefinition StageDefinition;
+            [Tooltip("The parent GameObject containing this stage's manually placed buttons.")]
+            public GameObject ButtonFolder;
             public List<BaseLevelButton<TLevelDefinition, TLevelSaveData, TSceneAsset>> levelButtonsList;
         }
 
