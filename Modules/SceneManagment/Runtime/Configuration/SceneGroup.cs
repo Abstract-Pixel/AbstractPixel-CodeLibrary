@@ -14,6 +14,25 @@ namespace AbstractPixel.SceneManagement
         public SceneReference MainScene;
         public bool ForceReloadContextualScenes = false;
 
+        public List<string> AllSceneNamesList
+        {
+            get
+            {
+                List<SceneReference> allSceneReferencesInGroup = new List<SceneReference>();
+                allSceneReferencesInGroup.AddRange(ManagerialBootScenesList);
+                allSceneReferencesInGroup.AddRange(ContextualBootScenesList);
+                allSceneReferencesInGroup.Add(MainScene);
+
+                List<string> sceneNames = new List<string>();
+                sceneNames.AddRange(allSceneReferencesInGroup
+                    .Where(sceneReference => sceneReference != null &&!string.IsNullOrEmpty(sceneReference.SceneName))
+                    .Select(sceneReference => sceneReference.SceneName)
+                    .ToList());
+
+                return sceneNames;
+            }
+        }
+
         // For Runtime Use for creation
         public void Initialize(IEnumerable<SceneReference> _managerialBootScenesList, IEnumerable<SceneReference> _contextualBootScenesList, SceneReference _mainScene, bool _forceReloadContextual = false)
         {

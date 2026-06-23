@@ -17,6 +17,7 @@ namespace AbstractPixel.SceneManagement
         [field: SerializeField, ReadOnly] internal SceneReference activeMainScene = null;
         [field: SerializeField, ReadOnly] internal SceneGroup preloadedSceneGroup = null;
         [field: SerializeField, ReadOnly] internal SceneGroup activeSceneGroup = null;
+        [field: SerializeField, ReadOnly] internal SceneGroup currentLoadingSceneGroup = null;
 
         [field: SerializeField, ReadOnly] public bool IsLoadingSceneGroup { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsUnloadingSceneGroup { get; private set; }
@@ -69,11 +70,12 @@ namespace AbstractPixel.SceneManagement
                 Debug.LogWarning("A scene transition is already in progress! Ignoring transition request.");
                 return;
             }
-            if (_sceneGroup.MainScene == activeMainScene)
+            if(_sceneGroup.Equals(activeSceneGroup) || _sceneGroup == activeSceneGroup|| _sceneGroup == currentLoadingSceneGroup || _sceneGroup.MainScene == activeMainScene )
             {
-                // enforcing that main scene is the scene we want to transition rest of the scene types are dependencies
+                Debug.LogWarning("The requested scene group is already active. Transition skipped.");
                 return;
             }
+            currentLoadingSceneGroup = _sceneGroup;
             await ExecuteTransition(_sceneGroup, false);
         }
 
@@ -279,6 +281,7 @@ namespace AbstractPixel.SceneManagement
             HashSet<SceneReference> contextualScenesToLoad = forceReloadContextualScenes
                                                         ? transitionContext.sceneGroupToTransitionTo.ContextualBootScenesList.ToHashSet() // If ForceReload, we load ALL of them
                                                         : transitionContext.ContextualToLoad;
+            
             try
             {
                 foreach (SceneReference scene in contextualScenesToLoad)
@@ -300,6 +303,7 @@ namespace AbstractPixel.SceneManagement
             finally
             {
                 IsLoadingSceneGroup = false;
+                currentLoadingSceneGroup = null;
             }         
         }
 

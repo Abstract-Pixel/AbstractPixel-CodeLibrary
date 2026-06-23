@@ -24,7 +24,7 @@ namespace AbstractPixel.LevelFramework
 
         public abstract void UpdateVisuals(TLevelSaveData _data, TLevelDefinition _definition);
 
-        private void OnDisable()
+        private void OnDestroy()
         {
             levelButton.onClick?.RemoveAllListeners();
         }
