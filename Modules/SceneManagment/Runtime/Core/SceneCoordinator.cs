@@ -214,7 +214,7 @@ namespace AbstractPixel.SceneManagement
             {
                 await UnloadSceneGroup(transitionContext);
                 bool forceReloadContextualScenes = transitionContext.sceneGroupToTransitionTo.ForceReloadContextualScenes;
-                if (!forceReloadContextualScenes)
+                if (forceReloadContextualScenes)
                 {
                     activeContextualScenesSet.ExceptWith(activeContextualScenesToRemove);
                 }
