@@ -30,15 +30,23 @@ namespace AbstractPixel.SaveSystem
             fileStorageService = new FileDataStorageService();
             serializer = new JsonSerializer();
 
-            savableObjectsRegistry = new Dictionary<SaveCategory, Dictionary<string, ISavableBridge>>();
+            Dictionary<SaveCategory, Dictionary<string, ISavableBridge>> registeredBridgesBeforeInitialization = null;
+
+
+            if (savableObjectsRegistry==null)
+            {
+                savableObjectsRegistry = new Dictionary<SaveCategory, Dictionary<string, ISavableBridge>>();
+            }
+            
+            
             ProfileManager = new SaveProfileManager(fileStorageService, saveConfig, serializer);
             SceneEventBus.OnNewSceneGroupTransitionTo += ExecuteIntialDataLoading;
-            
+
         }
 
         private void Start()
         {
-            if(SceneActions.ActiveSceneGroup != null)
+            if (SceneActions.ActiveSceneGroup != null)
             {
                 ExecuteIntialDataLoading(SceneActions.ActiveSceneGroup);
             }

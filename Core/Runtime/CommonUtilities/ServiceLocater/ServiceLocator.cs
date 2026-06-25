@@ -21,7 +21,7 @@ namespace AbstractPixel.Core
         /// </summary>
         public static void Register<T>(T service)
         {
-            var type = typeof(T);
+            Type type = typeof(T);
 
             if (services.ContainsKey(type))
             {
@@ -34,13 +34,32 @@ namespace AbstractPixel.Core
             }
         }
 
-        /// <summary>
-        /// Unregisters a service. 
-        /// Call this in OnDestroy() if the service is a MonoBehaviour that gets destroyed.
+        /// <summary></summary>
+        /// Registers a service instance by its type.
         /// </summary>
+        /// <param name="type">The type of the service.</param>
+        /// <param name="service">The service instance.</param>
+        public static void Register(Type type, object service)
+        {
+            if (services.ContainsKey(type))
+            {
+                Debug.LogWarning($"ServiceLocator: A service of type {type.Name} is already registered. Overwriting with new instance.");
+                services[type] = service;
+            }
+            else
+            {
+                services.Add(type, service);
+            }
+        }
+
+        /// <summary>
+        /// Unregisters a service instance.
+        /// </summary>
+        /// <typeparam name="T">The type of the service.</typeparam>
+        /// <param name="service">The service instance to unregister.</param>
         public static void Unregister<T>(T service)
         {
-            var type = typeof(T);
+            Type type = typeof(T);
             if (services.ContainsKey(type))
             {
                 if (services[type] == (object)service)
@@ -51,14 +70,32 @@ namespace AbstractPixel.Core
         }
 
         /// <summary>
+        /// Unregisters a service by its type.
+        /// </summary>
+        /// <param name="type">The type of the service to unregister.</param>
+        public static void Unregister(Type type)
+        {
+            if (services.ContainsKey(type))
+            {
+                services.Remove(type);
+                Debug.Log($"ServiceLocator: Successfully unregistered service of type {type.Name}.");
+            }
+            else
+            {
+                Debug.LogWarning($"ServiceLocator: Attempted to unregister {type.Name}, but it was not found.");
+            }
+        }
+
+
+        /// <summary>
         /// Retrieves a service. 
         /// Recommended to call this in Start() or later (not Awake).
         /// </summary>
         public static T Get<T>()
         {
-            var type = typeof(T);
+            Type type = typeof(T);
 
-            if (!services.TryGetValue(type, out var service))
+            if (!services.TryGetValue(type, out object service))
             {
                 Debug.LogError($"ServiceLocator: Critical Error! Service of type {type.Name} was requested but not found.\n" +
                                "1. Did you forget to Register it in Awake?\n" +
@@ -75,8 +112,8 @@ namespace AbstractPixel.Core
         /// </summary>
         public static bool TryGet<T>(out T service)
         {
-            var type = typeof(T);
-            if (services.TryGetValue(type, out var instance))
+            Type type = typeof(T);
+            if (services.TryGetValue(type, out object instance))
             {
                 service = (T)instance;
                 return true;

@@ -9,13 +9,13 @@ namespace AbstractPixel.LevelFramework
         where TLevelDefinition : BaseLevelDefinition<TSceneAssetType>
         where TLevelSaveData : BaseLevelData
     {
-        [SerializeField] protected Button levelButton;
+        [field:SerializeField] public Button LevelButton {  get; private set; }
         [SerializeField] protected TMP_Text buttonText;
 
         public virtual void Initialize(TLevelDefinition _definition, TLevelSaveData _saveData, Action _onClick)
         {
-            levelButton.onClick.RemoveAllListeners();
-            levelButton.onClick.AddListener(() => _onClick?.Invoke());
+            LevelButton.onClick.RemoveAllListeners();
+            LevelButton.onClick.AddListener(() => _onClick?.Invoke());
 
             buttonText.text = _definition.LevelDisplayName;
 
@@ -26,7 +26,7 @@ namespace AbstractPixel.LevelFramework
 
         private void OnDestroy()
         {
-            levelButton.onClick?.RemoveAllListeners();
+            LevelButton.onClick?.RemoveAllListeners();
         }
     }
 }

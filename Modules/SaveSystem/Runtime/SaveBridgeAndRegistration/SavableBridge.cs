@@ -22,7 +22,7 @@ namespace AbstractPixel.SaveSystem
         [SerializeField, HideInInspector] string lastKnownGameObjectName;
 
         [SerializeField, ReadOnly] private List<SavableTarget> savableTargets = new List<SavableTarget>();
-        private List<SaveCategory> foundCategoriesList = new List<SaveCategory>();
+        private List<SaveCategory> foundSaveCategoriesOnObjectList = new List<SaveCategory>();
 
         private Dictionary<SaveCategory, List<SavableTarget>> savableTargetsRegistry;
 
@@ -140,7 +140,7 @@ namespace AbstractPixel.SaveSystem
         private void Awake()
         {
             savableTargetsRegistry = new Dictionary<SaveCategory, List<SavableTarget>>();
-            foundCategoriesList = new List<SaveCategory>();
+            foundSaveCategoriesOnObjectList = new List<SaveCategory>();
 
             foreach (SavableTarget target in savableTargets)
             {
@@ -163,9 +163,9 @@ namespace AbstractPixel.SaveSystem
                 }
                 savableTargetsRegistry[attribute.Category].Add(target);
 
-                if (!foundCategoriesList.Contains(attribute.Category))
+                if (!foundSaveCategoriesOnObjectList.Contains(attribute.Category))
                 {
-                    foundCategoriesList.Add(attribute.Category);
+                    foundSaveCategoriesOnObjectList.Add(attribute.Category);
                 }
             }
         }
@@ -237,17 +237,17 @@ namespace AbstractPixel.SaveSystem
 
         private void OnEnable()
         {
-            if (foundCategoriesList.Count > 0)
+            if (foundSaveCategoriesOnObjectList.Count > 0)
             {
-                SaveManager.Instance.RegisterSavableObject(this, foundCategoriesList);
+                SaveManager.Instance.RegisterSavableObject(this, foundSaveCategoriesOnObjectList);
             }
         }
 
         private void OnDisable()
         {
-            if (SaveManager.Instance != null && foundCategoriesList.Count > 0)
+            if (SaveManager.Instance != null && foundSaveCategoriesOnObjectList.Count > 0)
             {
-                SaveManager.Instance.UnregisterSavableObject(this, foundCategoriesList);
+                SaveManager.Instance.UnregisterSavableObject(this, foundSaveCategoriesOnObjectList);
             }
         }
     }
