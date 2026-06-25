@@ -1,6 +1,6 @@
 {
     "name": "com.abstractpixel.library",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "displayName": "Abstract Pixel Library",
     "description": "Core engineering utilities and Save System modules.",
     "unity": "6000.0",
