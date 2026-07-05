@@ -3,23 +3,23 @@ using UnityEngine;
 
 namespace AbstractPixel.Core
 {
-    public class EntityFactory<TData, TResult>
+    public class MonoEntityFactory<TData, TResult> : MonoSingleton<MonoEntityFactory<TData, TResult>> , IFactory<TData, TResult>
+        where TData : class
         where TResult : MonoBehaviour, IInitializable<TData>
     {
 
         [Header("Configuration")]
         [SerializeField] private TResult prefab;
 
-        
 
         public TResult Create(TResult customPrefab, TData _providedData, Vector3 _spawnPosition = default, Transform _parentTransform = null)
         {
             if (_providedData == null)
             {
-                Debug.LogError($"{_providedData.GetType().Name}: Data provided is null.");
+                Debug.LogError($"{name}: Data provided is null.");
                 return null;
             }
-            TResult newInstance = Object.Instantiate(customPrefab, _parentTransform);
+            TResult newInstance = Instantiate(customPrefab, _parentTransform);
             newInstance.transform.localPosition = _spawnPosition;
             newInstance.Initialize(_providedData);
             return newInstance;
@@ -42,7 +42,7 @@ namespace AbstractPixel.Core
         }
         public List<TResult> CreateMultiple(IEnumerable<TData> _allDataProvided, Transform _parentTransform = null, Vector3 _spawnPosition = default)
         {
-            List<TResult> results = CreateMultiple(prefab, _allDataProvided, _parentTransform, _spawnPosition);
+            List<TResult> results =  CreateMultiple(prefab,_allDataProvided,_parentTransform,_spawnPosition);
             return results;
         }
     }

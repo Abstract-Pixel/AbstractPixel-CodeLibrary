@@ -6,7 +6,6 @@ namespace AbstractPixel.Core
     [System.Serializable]
     public class PoolFactory<TResult, TData> : ObjectPool<TResult>
         where TResult : Component, IInitializable<TData>
-        where TData : class
     {
         // Constructor just passes arguments up to your ObjectPool logic
         public PoolFactory(GameObject prefab, int amount, bool canExpand, int maxCapacity, Transform parent = null)

@@ -4,6 +4,8 @@ namespace AbstractPixel.Tooltip
 {
     public abstract class TooltipFeedback : MonoBehaviour
     {
-        // Add abstract methods and properties here
+        public abstract void Initialize(TooltipView _tooltipView);
+        public abstract void ExecuteShowFeedback();
+        public abstract void ExecuteHideFeedback();
     }
 }
