@@ -2,6 +2,13 @@ namespace AbstractPixel.Tooltip
 {
     public static class TooltipManager
     {
-        // Your code here
+        internal static void ShowTooltip(TooltipData _tooltipData)
+        {
+           
+        }
+        internal static void HideTooltip(TooltipConfig _tooltipConfiguration)
+        {
+            
+        }
     }
 }
