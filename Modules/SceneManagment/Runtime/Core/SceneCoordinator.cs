@@ -185,6 +185,7 @@ namespace AbstractPixel.SceneManagement
                 IsLoadingSceneGroup = false;
                 IsUnloadingSceneGroup = false;
             }
+            SceneEventBus.RaiseOnNewSceneTransitionedTo(activeSceneGroup);
         }
 
         #region Scene Management Utiltiies
@@ -214,14 +215,17 @@ namespace AbstractPixel.SceneManagement
             {
                 await UnloadSceneGroup(transitionContext);
                 bool forceReloadContextualScenes = transitionContext.sceneGroupToTransitionTo.ForceReloadContextualScenes;
-                if (forceReloadContextualScenes)
+                if (_sceneGroup.ForceReloadContextualScenes)
                 {
-                    activeContextualScenesSet.ExceptWith(activeContextualScenesToRemove);
+                    activeContextualScenesSet = new HashSet<SceneReference>(_sceneGroup.ContextualBootScenesList);
+                }
+                else
+                {
+                    activeContextualScenesSet.UnionWith(transitionContext.ContextualToLoad);
                 }
                 await LoadSceneGroup(transitionContext);
                 SceneEventBus.RaiseOnNewSceneTransitionedTo(_sceneGroup);
             }
-            activeContextualScenesSet.UnionWith(contextualToLoad);
             activeManagerialScenesSet.UnionWith(managerialToLoad);
             activeMainScene = _sceneGroup.MainScene;
             activeSceneGroup = _sceneGroup;
