@@ -15,6 +15,7 @@ MonoBehaviour:
   Priority: 10
   IsTimeZeroOnExecution: 1
   IsCursorLockedOnExecution: 0
-  IsCursorVisibleOnExecution: 0
+  IsCursorVisibleOnExecution: 1
+  DisableStateOnSceneChange: 1
   ShowGameUIOnExecution: 0
   ShowGameUIOnDeactivation: 1
