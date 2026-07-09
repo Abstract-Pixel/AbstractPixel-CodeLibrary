@@ -12,7 +12,9 @@ namespace AbstractPixel.Core
 
         [Header("Events")]
         [SerializeField] UnityEvent onTriggeredEvent;
+        [SerializeField] UnityEvent onTriggeredExitEvent;
         public Action OnTriggered;
+        public Action OnTriggeredExit;
 
         GameObject lastTriggeredGameObject;
         bool isTriggered = false;
@@ -44,6 +46,8 @@ namespace AbstractPixel.Core
             if (lastTriggeredGameObject == other.gameObject)
             {
                 lastTriggeredGameObject = null;
+                onTriggeredExitEvent?.Invoke();
+                OnTriggeredExit?.Invoke();
                 if (!triggerOnce)
                 {
                     isTriggered = false;
@@ -79,6 +83,8 @@ namespace AbstractPixel.Core
             if (lastTriggeredGameObject == collision.gameObject)
             {
                 lastTriggeredGameObject = null;
+                onTriggeredExitEvent?.Invoke();
+                OnTriggered?.Invoke();
                 if (!triggerOnce)
                 {
                     isTriggered = false;
