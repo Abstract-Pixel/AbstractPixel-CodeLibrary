@@ -20,7 +20,7 @@ namespace AbstractPixel.Tooltip
             Body = _body;
             Icon = _icon;
             Config = _config;
-            this.transform = _transform;
+            transform = _transform;
         }
     }
 }
