@@ -1,0 +1,17 @@
+{
+    "name": "AbstractPixel.Settings",
+    "rootNamespace": "AbstractPixel.Settings",
+    "references": [
+        "GUID:0404a8ea4faa386498395a28b0b33112",
+        "GUID:b4c9b881c04893f4c8d1e595dc98dd00"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
