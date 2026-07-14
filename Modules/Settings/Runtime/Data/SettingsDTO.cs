@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace AbstractPixel.Settings
 {
+    /// <summary>
+    ///  Various Settings Data values that is stored and written to this Object
+    /// </summary>
     [Serializable]
     public class SettingsDTO
     {
