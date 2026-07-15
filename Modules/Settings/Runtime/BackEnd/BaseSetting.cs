@@ -1,5 +1,4 @@
 using AbstractPixel.Core;
-using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +9,8 @@ namespace AbstractPixel.Settings
     {
         [field: SerializeField] public SettingCategory Category { get; private set; }
         [field: SerializeField] public TValue DefaultValue { get; private set; }
-        [SerializeField, Polymorphic] private List<ISettingDependencyRule> dependencyRulesList = new List<ISettingDependencyRule>();
+
+        [SerializeReference, Polymorphic] private List<ISettingDependencyRule> dependencyRulesList = new List<ISettingDependencyRule>();
 
         [Header("Saved Data")]
         [field: SerializeField, ReadOnly(true)] public TValue CurrentValue { get; private set; }
@@ -36,6 +36,7 @@ namespace AbstractPixel.Settings
         public bool EvaluateDependencies()
         {
             bool previousAvailability = isAvailable;
+            bool isCurrentlyAvailable = true;
 
             foreach (ISettingDependencyRule dependencyRule in dependencyRulesList)
             {
@@ -43,20 +44,23 @@ namespace AbstractPixel.Settings
                 {
                     continue;
                 }
+
                 bool ruleResult = dependencyRule.Evaluate();
-                if (!ruleResult)
+                if (ruleResult == false)
                 {
-                    isAvailable = ruleResult;
-                    return false;
+                    isCurrentlyAvailable = false;
+                    break;
                 }
-                isAvailable = ruleResult;
-                if (isAvailable != previousAvailability)
-                {
-                    OnAvailabilityChanged?.Invoke(previousAvailability);
-                }
-                return true;
             }
-            return false;
+
+            isAvailable = isCurrentlyAvailable;
+
+            if (isAvailable != previousAvailability)
+            {
+                OnAvailabilityChanged?.Invoke(isAvailable);
+            }
+
+            return isAvailable;
         }
 
         public virtual void Deconstruct()
@@ -65,7 +69,6 @@ namespace AbstractPixel.Settings
             OnAvailabilityChanged = delegate { };
         }
 
-
         public void SaveToDataTransferObject(SettingsDTO dataTransferObject)
         {
             string className = GetType().Name;
@@ -73,22 +76,22 @@ namespace AbstractPixel.Settings
 
             if (genericType == typeof(int))
             {
-                int integerValue = Convert.ToInt32(CurrentValue);
+                int integerValue = (int)(object)CurrentValue;
                 dataTransferObject.IntegerSettings[className] = integerValue;
             }
             else if (genericType == typeof(float))
             {
-                float floatValue = Convert.ToSingle(CurrentValue);
+                float floatValue = (float)(object)CurrentValue;
                 dataTransferObject.FloatSettings[className] = floatValue;
             }
             else if (genericType == typeof(bool))
             {
-                bool booleanValue = Convert.ToBoolean(CurrentValue);
+                bool booleanValue = (bool)(object)CurrentValue;
                 dataTransferObject.BooleanSettings[className] = booleanValue;
             }
             else if (genericType == typeof(string))
             {
-                string stringValue = Convert.ToString(CurrentValue);
+                string stringValue = (string)(object)CurrentValue;
                 dataTransferObject.StringSettings[className] = stringValue;
             }
         }
@@ -128,7 +131,11 @@ namespace AbstractPixel.Settings
             }
         }
 
-
-
+#if UNITY_EDITOR
+        public virtual void ValidateInEditor()
+        {
+           
+        }
+#endif
     }
 }

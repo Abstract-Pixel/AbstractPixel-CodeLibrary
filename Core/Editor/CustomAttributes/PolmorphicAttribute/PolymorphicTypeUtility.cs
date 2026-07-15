@@ -12,6 +12,11 @@ namespace AbstractPixel.Core.Editor
         public static List<Type> GetPropertyCompatibleTypes(SerializedProperty _property)
         {
             Type propertyType = GetPropertyTypeFromManagedReferenceFieldTypeName(_property);
+            return GetCompatibleTypesFromABaseType(propertyType);
+        }
+
+        public static List<Type> GetCompatibleTypesFromABaseType(Type propertyType)
+        {
             TypeCache.TypeCollection potentialTypes = TypeCache.GetTypesDerivedFrom(propertyType);
             List<Type> filteredTypes = potentialTypes.Where(x => !x.IsAbstract && !x.IsInterface && !x.IsGenericType && x.IsSerializable)
                                                       .Where(x => x.GetCustomAttribute<SerializableAttribute>() != null)
