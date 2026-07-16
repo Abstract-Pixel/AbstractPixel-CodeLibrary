@@ -8,12 +8,19 @@ namespace AbstractPixel.Settings
     public interface ISettingBackend
     {
         SettingCategory Category { get; }
-        
+
         void Initialize();
         void ApplyLogic();
         bool EvaluateDependencies();
 
         void SaveToDataTransferObject(SettingsDTO _dataTransferObject);
         void LoadFromDataTransferObject(SettingsDTO _dataTransferObject);
+
+#if UNITY_EDITOR
+        void ValidateInEditor(bool _forceRevalidation = false)
+        {
+
+        }
+#endif
     }
 }

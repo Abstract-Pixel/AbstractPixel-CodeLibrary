@@ -70,13 +70,13 @@ namespace AbstractPixel.Settings
         }
 
 #if UNITY_EDITOR
-        public override void ValidateInEditor()
+        public override void ValidateInEditor(bool _forceRevalidation=false)
         {
             base.ValidateInEditor();
-            
-            // This forces the Inspector to populate the arrays using your developer monitor
-            // so you can see them and test them in the Editor!
-            GenerateResolutions();
+            if(CanProceedWithValidation(_forceRevalidation))
+            {
+                GenerateResolutions();
+            }
         }
 #endif
     }

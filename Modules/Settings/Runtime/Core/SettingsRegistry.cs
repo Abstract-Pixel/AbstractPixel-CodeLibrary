@@ -9,5 +9,12 @@ namespace AbstractPixel.Settings
     {
         [SerializeReference, Polymorphic] 
         public List<ISettingBackend> AllSettings = new List<ISettingBackend>();
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            AllSettings.ForEach(setting => setting.ValidateInEditor());
+        }
+#endif
     }
 }

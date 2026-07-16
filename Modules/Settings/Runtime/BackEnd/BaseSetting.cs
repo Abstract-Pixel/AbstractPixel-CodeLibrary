@@ -10,15 +10,16 @@ namespace AbstractPixel.Settings
         [field: SerializeField] public SettingCategory Category { get; private set; }
         [field: SerializeField] public TValue DefaultValue { get; private set; }
 
-        [SerializeReference, Polymorphic] private List<ISettingDependencyRule> dependencyRulesList = new List<ISettingDependencyRule>();
-
-        [Header("Saved Data")]
+        [field: Header("Saved Data")]
         [field: SerializeField, ReadOnly(true)] public TValue CurrentValue { get; private set; }
         [field: SerializeField, ReadOnly(true)] public bool isAvailable { get; private set; } = true;
 
+        [SerializeReference, Polymorphic] private List<ISettingDependencyRule> dependencyRulesList = new List<ISettingDependencyRule>();
         // Events
         public event Action<TValue> OnValueChanged = delegate { };
         public event Action<bool> OnAvailabilityChanged = delegate { };
+
+        bool isDefaultValuesPreGenerated;
 
         public virtual void Initialize()
         {
@@ -132,9 +133,19 @@ namespace AbstractPixel.Settings
         }
 
 #if UNITY_EDITOR
-        public virtual void ValidateInEditor()
+        public virtual void ValidateInEditor(bool _forceRevalidation = false)
         {
            
+        }
+
+        protected bool CanProceedWithValidation(bool _forceRevalidation)
+        {
+            if (!isDefaultValuesPreGenerated && !_forceRevalidation)
+            {
+                isDefaultValuesPreGenerated = true;
+                return true;
+            }
+            return false;
         }
 #endif
     }
