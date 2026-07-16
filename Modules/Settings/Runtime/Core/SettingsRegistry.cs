@@ -14,6 +14,11 @@ namespace AbstractPixel.Settings
         private void OnValidate()
         {
             AllSettings.ForEach(setting => setting.ValidateInEditor());
+
+            if(Application.isPlaying)
+            {
+                AllSettings.ForEach(setting => setting.ApplySettingLogic());
+            }
         }
 #endif
     }

@@ -1,4 +1,3 @@
-using NUnit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +24,7 @@ namespace AbstractPixel.Core.Editor
         private static GUIStyle s_richTextHelpBox;
 
         // =========================================================
-        // IMGUI APPROACH (Used by Reorderable Lists)
+        // IMGUI APPROACH (Used by Reorderable Lists & Custom Inspectors)
         // =========================================================
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -33,221 +32,285 @@ namespace AbstractPixel.Core.Editor
             position.y += verticalMargin;
             position.height -= (verticalMargin * 2);
 
+            // 1. Cache the starting indentation level at the very beginning
+            int originalIndent = EditorGUI.indentLevel;
+
             EditorGUI.BeginProperty(position, label, property);
 
-            if (s_richTextLabel == null) s_richTextLabel = new GUIStyle(EditorStyles.label) { richText = true };
-
-            Type baseType = GetFieldBaseType();
-            string baseTypeName = baseType != null ? baseType.FullName : property.type;
-
-            Type propertyType = GetAssignedType(property);
-            List<Type> types = GetCachedCompatibleTypes(property, baseTypeName);
-            string[] filteredTypeNames = GetCachedTypeNames(types, baseTypeName);
-
-            int defaultIndex = 0;
-            if (propertyType != null)
+            try // 2. Wrap GUI calls to ensure state is ALWAYS restored
             {
-                int index = types.FindIndex(t => t.Name == propertyType.Name);
-                if (index >= 0) defaultIndex = index + 1;
-            }
-
-            if (property.managedReferenceValue == null && types.Count == 1)
-            {
-                property.managedReferenceValue = Activator.CreateInstance(types[0]);
-                property.serializedObject.ApplyModifiedProperties();
-                propertyType = types[0];
-                defaultIndex = 1;
-            }
-
-            bool isNull = propertyType == null;
-            bool hasNoTypes = types.Count == 0;
-            bool isElement = property.propertyPath.Contains(".Array.data[");
-
-            // --- VISUAL STYLING SETTINGS ---
-            float borderThickness = 1f;
-            float headerTopPad = 6f;
-            float headerMidPad = 4f;
-            float headerBotPad = 8f;
-            float contentTopSpacing = 8f;
-            float contentBotSpacing = 8f;
-            float singleLine = EditorGUIUtility.singleLineHeight;
-
-            Color borderColor = EditorGUIUtility.isProSkin ? new Color(0.1f, 0.1f, 0.1f, 1f) : new Color(0.6f, 0.6f, 0.6f, 1f);
-            Color headerBgColor = EditorGUIUtility.isProSkin ? new Color(0.35f, 0.35f, 0.35f, 1f) : new Color(0.65f, 0.65f, 0.65f, 1f);
-            Color contentBgColor = EditorGUIUtility.isProSkin ? new Color(0.28f, 0.28f, 0.28f, 1f) : new Color(0.85f, 0.85f, 0.85f, 1f);
-
-            // Calculate heights
-            float dropDownOrWarningHeight = hasNoTypes ? (singleLine * 2.5f) : singleLine;
-            float headerInnerHeight = headerTopPad + singleLine + headerMidPad + dropDownOrWarningHeight + headerBotPad;
-            float headerOuterHeight = headerInnerHeight + (borderThickness * 2);
-
-            // --- INDENTATION HANDLING ---
-            float indentOffset = EditorGUI.indentLevel * 15f;
-            int originalIndent = EditorGUI.indentLevel;
-            EditorGUI.indentLevel = 0;
-
-            // Fill the empty gap on the left when inside a list
-            float listLeftExpansion = isElement ? 8f : 0f;
-
-            // 1. Draw Header Outer Box
-            Rect headerOuterRect = new Rect(position.x + indentOffset - listLeftExpansion, position.y, position.width - indentOffset + listLeftExpansion, headerOuterHeight);
-            EditorGUI.DrawRect(headerOuterRect, borderColor);
-
-            // 2. Draw Header Inner Box
-            Rect headerInnerRect = new Rect(headerOuterRect.x + borderThickness, headerOuterRect.y + borderThickness, headerOuterRect.width - (borderThickness * 2), headerInnerHeight);
-            EditorGUI.DrawRect(headerInnerRect, headerBgColor);
-
-            // 3. Draw Foldout Arrow 
-            // Using GUI.Toggle forces the arrow to stay exactly inside foldoutRect without Unity's hidden negative margins.
-            Rect foldoutRect = new Rect(headerInnerRect.x + 4f, headerInnerRect.y + headerTopPad, 14f, singleLine);
-            if (!hasNoTypes)
-            {
-                property.isExpanded = GUI.Toggle(foldoutRect, property.isExpanded, GUIContent.none, EditorStyles.foldout);
-            }
-
-            // 3a. Draw Prefix Label (Tight against the arrow, 0 gap)
-            float currentX = foldoutRect.xMax;
-            GUIContent prefixContent = new GUIContent($"{label.text} ");
-            Vector2 prefixSize = s_richTextLabel.CalcSize(prefixContent);
-            Rect prefixRect = new Rect(currentX, headerInnerRect.y + headerTopPad, prefixSize.x, singleLine);
-            EditorGUI.LabelField(prefixRect, prefixContent, s_richTextLabel);
-            currentX = prefixRect.xMax;
-
-            // 3b. Draw Custom Highlight Box for TYPE (Whitish Outline, Transparent Fill)
-            string typeDisplayName = propertyType != null ? ObjectNames.NicifyVariableName(propertyType.Name) : "Unassigned";
-            string richBoxText = $"TYPE : <b>{typeDisplayName}</b>";
-            GUIContent richBoxContent = new GUIContent(richBoxText);
-            Vector2 boxContentSize = s_richTextLabel.CalcSize(richBoxContent);
-
-            Rect typeBoxRect = new Rect(currentX, headerInnerRect.y + headerTopPad - 1f, boxContentSize.x + 8f, singleLine + 2f);
-            Color typeBoxBorder = EditorGUIUtility.isProSkin ? new Color(0.8f, 0.8f, 0.8f, 0.5f) : new Color(0.3f, 0.3f, 0.3f, 0.5f);
-
-            // Draw Outline Manually (Leaves inside completely transparent)
-            EditorGUI.DrawRect(new Rect(typeBoxRect.x, typeBoxRect.y, typeBoxRect.width, 1), typeBoxBorder); // Top
-            EditorGUI.DrawRect(new Rect(typeBoxRect.x, typeBoxRect.yMax - 1, typeBoxRect.width, 1), typeBoxBorder); // Bottom
-            EditorGUI.DrawRect(new Rect(typeBoxRect.x, typeBoxRect.y, 1, typeBoxRect.height), typeBoxBorder); // Left
-            EditorGUI.DrawRect(new Rect(typeBoxRect.xMax - 1, typeBoxRect.y, 1, typeBoxRect.height), typeBoxBorder); // Right
-
-            Rect typeLabelRect = new Rect(typeBoxRect.x + 4f, typeBoxRect.y + 1f, boxContentSize.x, singleLine);
-            EditorGUI.LabelField(typeLabelRect, richBoxContent, s_richTextLabel);
-
-            // 3c. Draw Header Utility Buttons (Copy & Remove)
-            float btnWidth = 24f;
-            float btnHeight = 18f;
-            float buttonSpacing = 4f;
-
-            Rect removeBtnRect = new Rect(headerInnerRect.xMax - btnWidth - 6f, headerInnerRect.y + headerTopPad, btnWidth, btnHeight);
-            Rect copyBtnRect = new Rect(removeBtnRect.x - btnWidth - buttonSpacing, headerInnerRect.y + headerTopPad, btnWidth, btnHeight);
-
-            if (!isElement) copyBtnRect = removeBtnRect;
-
-            if (GUI.Button(copyBtnRect, new GUIContent("❐", "Copy JSON"), EditorStyles.miniButton))
-            {
-                if (property.managedReferenceValue != null)
+                if (s_richTextLabel == null)
                 {
-                    GUIUtility.systemCopyBuffer = JsonUtility.ToJson(property.managedReferenceValue, true);
-                    Debug.Log("Copied Polymorphic Data to Clipboard.");
-                }
-            }
-
-            if (isElement)
-            {
-                Color oldBg = GUI.backgroundColor;
-                GUI.backgroundColor = new Color(0.85f, 0.4f, 0.4f, 1f); // Desaturated red
-                if (GUI.Button(removeBtnRect, new GUIContent("X", "Remove Element"), EditorStyles.miniButton))
-                {
-                    GUI.backgroundColor = oldBg;
-                    RemoveElementFromList(property);
-                    return;
-                }
-                GUI.backgroundColor = oldBg;
-            }
-
-            // 4. Draw Dropdown Button OR Warning Box (Perfectly aligned with foldout arrow)
-            Rect controlRect = new Rect(headerInnerRect.x + 4f, foldoutRect.yMax + headerMidPad, headerInnerRect.width - 10f, dropDownOrWarningHeight);
-            if (hasNoTypes)
-            {
-                DrawWarningBox(controlRect, baseType);
-            }
-            else
-            {
-                string buttonText = propertyType != null ? filteredTypeNames[defaultIndex] : "Choose a suitable polymorphic type";
-
-                if (EditorGUI.DropdownButton(controlRect, new GUIContent(buttonText), FocusType.Keyboard, EditorStyles.popup))
-                {
-                    GenericMenu menu = new GenericMenu();
-                    string propPath = property.propertyPath;
-
-                    menu.AddItem(new GUIContent(filteredTypeNames[0]), propertyType == null, () => ApplyTypeSelection(property.serializedObject, propPath, null));
-
-                    for (int i = 0; i < types.Count; i++)
+                    s_richTextLabel = new GUIStyle(EditorStyles.label)
                     {
-                        Type t = types[i];
-                        string mName = filteredTypeNames[i + 1];
-                        menu.AddItem(new GUIContent(mName), propertyType == t, () => ApplyTypeSelection(property.serializedObject, propPath, t));
-                    }
-                    menu.DropDown(controlRect);
+                        richText = true,
+                        clipping = TextClipping.Clip,
+                        wordWrap = false
+                    };
                 }
-            }
 
-            EditorGUI.indentLevel = originalIndent;
+                Type baseType = GetFieldBaseType();
+                string baseTypeName = baseType != null ? baseType.FullName : property.type;
 
-            // 5. Draw Content Area Box (If Expanded)
-            if (property.isExpanded && !hasNoTypes)
-            {
-                float contentInnerHeight = isNull ? (singleLine * 2) + contentTopSpacing + contentBotSpacing : GetChildrenHeight(property) + contentTopSpacing + contentBotSpacing;
+                Type propertyType = GetAssignedType(property);
+                List<Type> types = GetCachedCompatibleTypes(property, baseTypeName);
+                string[] filteredTypeNames = GetCachedTypeNames(types, baseTypeName);
 
-                EditorGUI.indentLevel = 0;
-                Rect contentOuterRect = new Rect(position.x + indentOffset - listLeftExpansion, headerOuterRect.yMax - borderThickness, position.width - indentOffset + listLeftExpansion, contentInnerHeight + (borderThickness * 2));
-                EditorGUI.DrawRect(contentOuterRect, borderColor);
-
-                Rect contentInnerRect = new Rect(contentOuterRect.x + borderThickness, contentOuterRect.y + borderThickness, contentOuterRect.width - (borderThickness * 2), contentInnerHeight);
-                EditorGUI.DrawRect(contentInnerRect, contentBgColor);
-
-                if (isNull)
+                int defaultIndex = 0;
+                if (propertyType != null)
                 {
-                    Rect helpBox = new Rect(contentInnerRect.x + 4f, contentInnerRect.y + contentTopSpacing, contentInnerRect.width - 8f, singleLine * 2);
-                    EditorGUI.HelpBox(helpBox, "[Unassigned]: Please select a Type.", MessageType.Error);
+                    int index = types.FindIndex(t => t.Name == propertyType.Name);
+                    if (index >= 0) defaultIndex = index + 1;
+                }
+
+                if (property.managedReferenceValue == null && types.Count == 1)
+                {
+                    property.managedReferenceValue = Activator.CreateInstance(types[0]);
+                    property.serializedObject.ApplyModifiedProperties();
+                    propertyType = types[0];
+                    defaultIndex = 1;
+                }
+
+                bool isNull = propertyType == null;
+                bool hasNoTypes = types.Count == 0;
+                bool isElement = property.propertyPath.Contains(".Array.data[");
+
+                // --- VISUAL STYLING SETTINGS ---
+                float borderThickness = 1f;
+                float headerTopPad = 6f;
+                float headerMidPad = 4f;
+                float headerBotPad = 8f;
+                float contentTopSpacing = 8f;
+                float contentBotSpacing = 8f;
+                float singleLine = EditorGUIUtility.singleLineHeight;
+
+                Color borderColor = EditorGUIUtility.isProSkin ? new Color(0.1f, 0.1f, 0.1f, 1f) : new Color(0.6f, 0.6f, 0.6f, 1f);
+                Color headerBgColor = EditorGUIUtility.isProSkin ? new Color(0.35f, 0.35f, 0.35f, 1f) : new Color(0.65f, 0.65f, 0.65f, 1f);
+                Color contentBgColor = EditorGUIUtility.isProSkin ? new Color(0.28f, 0.28f, 0.28f, 1f) : new Color(0.85f, 0.85f, 0.85f, 1f);
+
+                // Calculate heights
+                float dropDownOrWarningHeight = hasNoTypes ? (singleLine * 2.5f) : singleLine;
+                float headerInnerHeight = headerTopPad + singleLine + headerMidPad + dropDownOrWarningHeight + headerBotPad;
+                float headerOuterHeight = headerInnerHeight + (borderThickness * 2);
+
+                // --- INDENTATION HANDLING ---
+                float indentOffset = originalIndent * 15f; // Use originalIndent here
+                EditorGUI.indentLevel = 0; // Temporarily strip indent to handle bounding boxes manually
+
+                // Fill the empty gap on the left when inside a list
+                float listLeftExpansion = isElement ? 8f : 0f;
+
+                // 1. Draw Header Outer Box
+                Rect headerOuterRect = new Rect(position.x + indentOffset - listLeftExpansion, position.y, position.width - indentOffset + listLeftExpansion, headerOuterHeight);
+                EditorGUI.DrawRect(headerOuterRect, borderColor);
+
+                // 2. Draw Header Inner Box
+                Rect headerInnerRect = new Rect(headerOuterRect.x + borderThickness, headerOuterRect.y + borderThickness, headerOuterRect.width - (borderThickness * 2), headerInnerHeight);
+                EditorGUI.DrawRect(headerInnerRect, headerBgColor);
+
+                // 3. Draw Foldout Arrow 
+                Rect foldoutRect = new Rect(headerInnerRect.x + 4f, headerInnerRect.y + headerTopPad, 14f, singleLine);
+                if (!hasNoTypes)
+                {
+                    property.isExpanded = GUI.Toggle(foldoutRect, property.isExpanded, GUIContent.none, EditorStyles.foldout);
+                }
+
+                // 3a. Draw Prefix Label
+                float currentX = foldoutRect.xMax;
+                GUIContent prefixContent = new GUIContent($"{label.text} ");
+                Vector2 prefixSize = s_richTextLabel.CalcSize(prefixContent);
+                Rect prefixRect = new Rect(currentX, headerInnerRect.y + headerTopPad, prefixSize.x, singleLine);
+                EditorGUI.LabelField(prefixRect, prefixContent, s_richTextLabel);
+                currentX = prefixRect.xMax;
+
+                // --- CALCULATE MAXIMUM AVAILABLE SPACE ---
+                float btnWidth = 24f;
+                float btnHeight = 18f;
+                float buttonSpacing = 4f;
+                float rightButtonsWidth = isElement ? (btnWidth * 2 + buttonSpacing + 6f) : (btnWidth + 6f);
+
+                float maxTypeBoxWidth = headerInnerRect.width - (currentX - headerInnerRect.x) - rightButtonsWidth - 4f;
+
+                // 3b. Draw Custom Highlight Box for TYPE 
+                string typeDisplayName = propertyType != null ? ObjectNames.NicifyVariableName(propertyType.Name) : "Unassigned";
+
+                float staticPrefixWidth = s_richTextLabel.CalcSize(new GUIContent("TYPE : ")).x;
+                float availableNameWidth = maxTypeBoxWidth - staticPrefixWidth - 12f;
+
+                string truncatedDisplayName = TruncateText(typeDisplayName, EditorStyles.boldLabel, availableNameWidth);
+
+                string richBoxText = $"TYPE : <b>{truncatedDisplayName}</b>";
+                GUIContent richBoxContent = new GUIContent(richBoxText);
+                Vector2 boxContentSize = s_richTextLabel.CalcSize(richBoxContent);
+
+                float actualBoxWidth = Mathf.Max(10f, Mathf.Min(boxContentSize.x + 8f, maxTypeBoxWidth));
+                Rect typeBoxRect = new Rect(currentX, headerInnerRect.y + headerTopPad - 1f, actualBoxWidth, singleLine + 2f);
+                Color typeBoxBorder = EditorGUIUtility.isProSkin ? new Color(0.8f, 0.8f, 0.8f, 0.5f) : new Color(0.3f, 0.3f, 0.3f, 0.5f);
+
+                EditorGUI.DrawRect(new Rect(typeBoxRect.x, typeBoxRect.y, typeBoxRect.width, 1), typeBoxBorder);
+                EditorGUI.DrawRect(new Rect(typeBoxRect.x, typeBoxRect.yMax - 1, typeBoxRect.width, 1), typeBoxBorder);
+                EditorGUI.DrawRect(new Rect(typeBoxRect.x, typeBoxRect.y, 1, typeBoxRect.height), typeBoxBorder);
+                EditorGUI.DrawRect(new Rect(typeBoxRect.xMax - 1, typeBoxRect.y, 1, typeBoxRect.height), typeBoxBorder);
+
+                Rect typeLabelRect = new Rect(typeBoxRect.x + 4f, typeBoxRect.y + 1f, actualBoxWidth - 8f, singleLine);
+                EditorGUI.LabelField(typeLabelRect, richBoxContent, s_richTextLabel);
+
+                // 3c. Draw Header Utility Buttons
+                Rect removeBtnRect = new Rect(headerInnerRect.xMax - btnWidth - 6f, headerInnerRect.y + headerTopPad, btnWidth, btnHeight);
+                Rect copyBtnRect = new Rect(removeBtnRect.x - btnWidth - buttonSpacing, headerInnerRect.y + headerTopPad, btnWidth, btnHeight);
+
+                if (!isElement) copyBtnRect = removeBtnRect;
+
+                if (GUI.Button(copyBtnRect, new GUIContent("❐", "Copy JSON"), EditorStyles.miniButton))
+                {
+                    if (property.managedReferenceValue != null)
+                    {
+                        GUIUtility.systemCopyBuffer = JsonUtility.ToJson(property.managedReferenceValue, true);
+                        Debug.Log("Copied Polymorphic Data to Clipboard.");
+                    }
+                }
+
+                if (isElement)
+                {
+                    Color oldBg = GUI.backgroundColor;
+                    GUI.backgroundColor = new Color(0.85f, 0.4f, 0.4f, 1f);
+                    if (GUI.Button(removeBtnRect, new GUIContent("X", "Remove Element"), EditorStyles.miniButton))
+                    {
+                        GUI.backgroundColor = oldBg;
+                        RemoveElementFromList(property);
+                        return; // Early return is now completely safe due to the `finally` block
+                    }
+                    GUI.backgroundColor = oldBg;
+                }
+
+                // 4. Draw Dropdown Button OR Warning Box 
+                Rect controlRect = new Rect(headerInnerRect.x + 4f, foldoutRect.yMax + headerMidPad, headerInnerRect.width - 10f, dropDownOrWarningHeight);
+                if (hasNoTypes)
+                {
+                    DrawWarningBox(controlRect, baseType);
                 }
                 else
                 {
-                    float currentY = contentInnerRect.y + contentTopSpacing;
+                    string buttonText = propertyType != null ? filteredTypeNames[defaultIndex] : "Choose a suitable polymorphic type";
+                    string truncatedButtonText = TruncateText(buttonText, EditorStyles.popup, controlRect.width - 24f);
 
-                    SerializedProperty iterator = property.Copy();
-                    SerializedProperty endProperty = iterator.GetEndProperty();
-                    bool enterChildren = true;
-
-                    while (iterator.NextVisible(enterChildren))
+                    if (EditorGUI.DropdownButton(controlRect, new GUIContent(truncatedButtonText), FocusType.Keyboard, EditorStyles.popup))
                     {
-                        if (SerializedProperty.EqualContents(iterator, endProperty)) break;
+                        GenericMenu menu = new GenericMenu();
+                        string propPath = property.propertyPath;
 
-                        float propHeight = EditorGUI.GetPropertyHeight(iterator, true);
-                        bool isNestedList = iterator.isArray && iterator.propertyType != SerializedPropertyType.String;
+                        menu.AddItem(new GUIContent(filteredTypeNames[0]), propertyType == null, () => ApplyTypeSelection(property.serializedObject, propPath, null));
 
-                        if (isNestedList)
+                        for (int i = 0; i < types.Count; i++)
                         {
-                            // NEW: If standalone, add an extra indent level (+2) so it doesn't encroach on the border. 
-                            // If in a list, keep it at +1 (which is perfectly aligned).
-                            EditorGUI.indentLevel = originalIndent + (isElement ? 1 : 2);
-                            Rect propRect = new Rect(position.x, currentY, position.width - 6f, propHeight);
-                            EditorGUI.PropertyField(propRect, iterator, true);
+                            Type t = types[i];
+                            string mName = filteredTypeNames[i + 1];
+                            menu.AddItem(new GUIContent(mName), propertyType == t, () => ApplyTypeSelection(property.serializedObject, propPath, t));
                         }
-                        else
-                        {
-                            // Normal child variables keep the exact 10px shift you liked
-                            EditorGUI.indentLevel = originalIndent;
-                            float normalVarIndent = 10f;
-                            Rect propRect = new Rect(position.x + normalVarIndent, currentY, position.width - normalVarIndent - 6f, propHeight);
-                            EditorGUI.PropertyField(propRect, iterator, true);
-                        }
+                        menu.DropDown(controlRect);
+                    }
+                }
 
-                        currentY += propHeight + EditorGUIUtility.standardVerticalSpacing;
-                        enterChildren = false;
+                EditorGUI.indentLevel = originalIndent;
+
+                // 5. Draw Content Area Box (If Expanded)
+                if (property.isExpanded && !hasNoTypes)
+                {
+                    float contentInnerHeight = isNull ? (singleLine * 2) + contentTopSpacing + contentBotSpacing : GetChildrenHeight(property) + contentTopSpacing + contentBotSpacing;
+
+                    EditorGUI.indentLevel = 0;
+                    Rect contentOuterRect = new Rect(position.x + indentOffset - listLeftExpansion, headerOuterRect.yMax - borderThickness, position.width - indentOffset + listLeftExpansion, contentInnerHeight + (borderThickness * 2));
+                    EditorGUI.DrawRect(contentOuterRect, borderColor);
+
+                    Rect contentInnerRect = new Rect(contentOuterRect.x + borderThickness, contentOuterRect.y + borderThickness, contentOuterRect.width - (borderThickness * 2), contentInnerHeight);
+                    EditorGUI.DrawRect(contentInnerRect, contentBgColor);
+
+                    if (isNull)
+                    {
+                        Rect helpBox = new Rect(contentInnerRect.x + 4f, contentInnerRect.y + contentTopSpacing, contentInnerRect.width - 8f, singleLine * 2);
+                        EditorGUI.HelpBox(helpBox, "[Unassigned]: Please select a Type.", MessageType.Error);
+                    }
+                    else
+                    {
+                        float currentY = contentInnerRect.y + contentTopSpacing;
+
+                        SerializedProperty iterator = property.Copy();
+                        SerializedProperty endProperty = iterator.GetEndProperty();
+                        bool enterChildren = true;
+
+                        while (iterator.NextVisible(enterChildren))
+                        {
+                            if (SerializedProperty.EqualContents(iterator, endProperty)) break;
+
+                            float propHeight = EditorGUI.GetPropertyHeight(iterator, true);
+                            bool isNestedList = iterator.isArray && iterator.propertyType != SerializedPropertyType.String;
+
+                            if (isNestedList)
+                            {
+                                EditorGUI.indentLevel = originalIndent + (isElement ? 1 : 2);
+                                Rect propRect = new Rect(position.x, currentY, position.width - 6f, propHeight);
+                                EditorGUI.PropertyField(propRect, iterator, true);
+                            }
+                            else
+                            {
+                                EditorGUI.indentLevel = originalIndent;
+                                float normalVarIndent = 10f;
+                                Rect propRect = new Rect(position.x + normalVarIndent, currentY, position.width - normalVarIndent - 6f, propHeight);
+                                EditorGUI.PropertyField(propRect, iterator, true);
+                            }
+
+                            currentY += propHeight + EditorGUIUtility.standardVerticalSpacing;
+                            enterChildren = false;
+                        }
                     }
                 }
             }
+            finally
+            {
+                // 3. Guarantee that indentation and EndProperty are ALWAYS executed to prevent leaking
+                EditorGUI.indentLevel = originalIndent;
+                EditorGUI.EndProperty();
+            }
+        }
 
-            EditorGUI.EndProperty();
+        // =========================================================
+        // HELPER METHOD TO TRUNCATE LONG STRINGS (Protects Layout)
+        // =========================================================
+        private static string TruncateText(string text, GUIStyle style, float maxWidth)
+        {
+            if (string.IsNullOrEmpty(text) || maxWidth <= 0f) return string.Empty;
+
+            GUIContent content = new GUIContent(text);
+            if (style.CalcSize(content).x <= maxWidth) return text;
+
+            string ellipsis = "...";
+            float ellipsisWidth = style.CalcSize(new GUIContent(ellipsis)).x;
+
+            if (maxWidth <= ellipsisWidth) return ellipsis;
+
+            // Binary search to find the longest substring that fits
+            int lower = 0;
+            int upper = text.Length;
+            string bestFit = ellipsis;
+
+            while (lower <= upper)
+            {
+                int mid = lower + (upper - lower) / 2;
+                string attempt = text.Substring(0, mid) + ellipsis;
+                content.text = attempt;
+
+                if (style.CalcSize(content).x <= maxWidth)
+                {
+                    bestFit = attempt;
+                    lower = mid + 1;
+                }
+                else
+                {
+                    upper = mid - 1;
+                }
+            }
+
+            return bestFit;
         }
 
         private void RemoveElementFromList(SerializedProperty property)
@@ -376,7 +439,6 @@ namespace AbstractPixel.Core.Editor
             Color borderColor = EditorGUIUtility.isProSkin ? new Color(0.1f, 0.1f, 0.1f, 1f) : new Color(0.6f, 0.6f, 0.6f, 1f);
             Color headerBgColor = EditorGUIUtility.isProSkin ? new Color(0.35f, 0.35f, 0.35f, 1f) : new Color(0.65f, 0.65f, 0.65f, 1f);
             Color contentBgColor = EditorGUIUtility.isProSkin ? new Color(0.28f, 0.28f, 0.28f, 1f) : new Color(0.85f, 0.85f, 0.85f, 1f);
-
             Color typeBoxBorder = EditorGUIUtility.isProSkin ? new Color(0.8f, 0.8f, 0.8f, 0.5f) : new Color(0.3f, 0.3f, 0.3f, 0.5f);
 
             Type baseType = GetFieldBaseType();
@@ -446,37 +508,42 @@ namespace AbstractPixel.Core.Editor
 
             Toggle toggle = headerFoldout.Q<Toggle>();
 
-            // Strip Unity's default negative margins to strictly left-align the arrow
             if (toggle != null)
             {
                 toggle.style.marginLeft = 0;
-                toggle.style.marginRight = 0;
+                toggle.style.marginRight = isElement ? 58 : 30; // Protect absolute util buttons
                 toggle.style.paddingLeft = 0;
                 toggle.style.paddingRight = 0;
+                toggle.style.flexShrink = 1;
 
                 var input = toggle.Q<VisualElement>(className: "unity-toggle__input");
                 if (input != null)
                 {
                     input.style.marginLeft = 0;
                     input.style.marginRight = 0;
+                    input.style.flexShrink = 0;
                 }
 
                 VisualElement checkmark = toggle.Q<VisualElement>(className: "unity-checkmark");
                 if (checkmark != null)
                 {
                     checkmark.style.marginLeft = 0;
-                    checkmark.style.marginRight = 0; // 0 gap
+                    checkmark.style.marginRight = 0;
+                    checkmark.style.flexShrink = 0;
                 }
             }
 
             VisualElement customHeaderRow = new VisualElement();
             customHeaderRow.style.flexDirection = FlexDirection.Row;
             customHeaderRow.style.alignItems = Align.Center;
+            customHeaderRow.style.flexShrink = 1;
+            customHeaderRow.style.overflow = Overflow.Hidden;
 
             // Always add the prefix label (Variable name or Element index)
             Label prefixLabel = new Label($"{_property.displayName} ");
             prefixLabel.style.marginLeft = 0;
             prefixLabel.style.paddingLeft = 0;
+            prefixLabel.style.flexShrink = 0;
             customHeaderRow.Add(prefixLabel);
 
             // Transparent type box with outline
@@ -495,9 +562,14 @@ namespace AbstractPixel.Core.Editor
             typeBox.style.paddingTop = 1;
             typeBox.style.paddingBottom = 1;
             typeBox.style.marginLeft = 0;
+            typeBox.style.flexShrink = 1;
+            typeBox.style.overflow = Overflow.Hidden;
 
             Label typeLabel = new Label($"TYPE : <b>{typeDisplayName}</b>");
             typeLabel.enableRichText = true;
+            typeLabel.style.flexShrink = 1;
+            typeLabel.style.overflow = Overflow.Hidden;
+            typeLabel.style.textOverflow = TextOverflow.Ellipsis;
             typeBox.Add(typeLabel);
             customHeaderRow.Add(typeBox);
 
@@ -550,9 +622,9 @@ namespace AbstractPixel.Core.Editor
             {
                 DropdownField typesDropDown = new DropdownField(string.Empty, filteredTypeNames.ToList(), defaultValue);
                 typesDropDown.style.flexGrow = 1;
+                typesDropDown.style.flexShrink = 1; // Explicitly allowed to truncate properly
                 typesDropDown.style.marginTop = 4;
 
-                // Strip margins to align perfectly with the foldout toggle above
                 typesDropDown.style.marginLeft = 0;
                 typesDropDown.style.marginRight = 0;
                 typesDropDown.style.paddingLeft = 0;
@@ -588,7 +660,7 @@ namespace AbstractPixel.Core.Editor
                     string newName = updatedType != null ? ObjectNames.NicifyVariableName(updatedType.Name) : "Unassigned";
                     typeLabel.text = $"TYPE : <b>{newName}</b>";
 
-                    RebuildBody(bodyBox, _property,true);
+                    RebuildBody(bodyBox, _property, true);
                     _property.isExpanded = true;
                     headerFoldout.value = true;
                 });
@@ -631,11 +703,11 @@ namespace AbstractPixel.Core.Editor
 
                 if (!isNestedList)
                 {
-                    pf.style.paddingLeft = 10; // Match the +10px increase for normal fields
+                    pf.style.paddingLeft = 10;
                 }
                 else if (!isElement)
                 {
-                    pf.style.paddingLeft = 15; // NEW: Standalone nested lists need extra indentation (+1 level)
+                    pf.style.paddingLeft = 15;
                 }
 
                 body.Add(pf);

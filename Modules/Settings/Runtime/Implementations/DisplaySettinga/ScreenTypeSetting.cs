@@ -29,7 +29,7 @@ namespace AbstractPixel.Settings
             base.Initialize();
         }
 
-        public override void ApplyLogic()
+        public override void ApplySettingLogic()
         {
             // We cast the integer back to the Unity enum
             FullScreenMode selectedMode = (FullScreenMode)CurrentValue;

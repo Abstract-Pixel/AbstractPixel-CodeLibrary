@@ -7,12 +7,19 @@ namespace AbstractPixel.Settings
 {
     public abstract class BaseSetting<TValue> : ISettingBackend
     {
-        [field: SerializeField] public SettingCategory Category { get; private set; }
-        [field: SerializeField] public TValue DefaultValue { get; private set; }
 
-        [field: Header("Saved Data")]
+#if UNITY_EDITOR
+        [Header("Editor Debug Controls")]
+        [SerializeField, SettingDebugToolbar]
+        private bool editorDebugToolbar; // This dummy variable acts as the anchor for our custom buttons!
+#endif
+        [field: Header("Saved/Current Data")]
         [field: SerializeField, ReadOnly(true)] public TValue CurrentValue { get; private set; }
         [field: SerializeField, ReadOnly(true)] public bool isAvailable { get; private set; } = true;
+
+        [field: Header("Configuration Data")]
+        [field: SerializeField] public SettingCategory Category { get; private set; }
+        [field: SerializeField] public TValue DefaultValue { get; protected set; }
 
         [SerializeReference, Polymorphic] private List<ISettingDependencyRule> dependencyRulesList = new List<ISettingDependencyRule>();
         // Events
@@ -32,7 +39,7 @@ namespace AbstractPixel.Settings
             OnValueChanged?.Invoke(CurrentValue);
         }
 
-        public abstract void ApplyLogic();
+        public abstract void ApplySettingLogic();
 
         public bool EvaluateDependencies()
         {
@@ -132,6 +139,17 @@ namespace AbstractPixel.Settings
             }
         }
 
+        public void RemoveFromDataTransferObject(SettingsDTO dataTransferObject)
+        {
+            string className = GetType().Name;
+
+            // We just brutally remove the key from all dictionaries to guarantee it is nullified
+            dataTransferObject.IntegerSettings.Remove(className);
+            dataTransferObject.FloatSettings.Remove(className);
+            dataTransferObject.BooleanSettings.Remove(className);
+            dataTransferObject.StringSettings.Remove(className);
+        }
+
 #if UNITY_EDITOR
         public virtual void ValidateInEditor(bool _forceRevalidation = false)
         {
@@ -140,7 +158,11 @@ namespace AbstractPixel.Settings
 
         protected bool CanProceedWithValidation(bool _forceRevalidation)
         {
-            if (!isDefaultValuesPreGenerated && !_forceRevalidation)
+            if(_forceRevalidation)
+            {
+                return true;
+            }
+            if (!isDefaultValuesPreGenerated)
             {
                 isDefaultValuesPreGenerated = true;
                 return true;

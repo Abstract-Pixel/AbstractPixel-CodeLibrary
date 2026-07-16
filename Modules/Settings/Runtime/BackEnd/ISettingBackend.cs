@@ -10,11 +10,12 @@ namespace AbstractPixel.Settings
         SettingCategory Category { get; }
 
         void Initialize();
-        void ApplyLogic();
+        void ApplySettingLogic();
         bool EvaluateDependencies();
 
         void SaveToDataTransferObject(SettingsDTO _dataTransferObject);
         void LoadFromDataTransferObject(SettingsDTO _dataTransferObject);
+        void RemoveFromDataTransferObject(SettingsDTO dataTransferObject);
 
 #if UNITY_EDITOR
         void ValidateInEditor(bool _forceRevalidation = false)

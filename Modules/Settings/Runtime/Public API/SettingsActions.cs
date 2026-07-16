@@ -58,7 +58,7 @@ namespace AbstractPixel.Settings
                 return;
             }
 
-            setting.ApplyLogic();
+            setting.ApplySettingLogic();
         }
     }
 }

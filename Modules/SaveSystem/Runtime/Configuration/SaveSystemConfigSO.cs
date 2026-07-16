@@ -1,5 +1,6 @@
 using AbstractPixel.Core;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
@@ -46,9 +47,15 @@ namespace AbstractPixel.SaveSystem
 
         public SaveCatgeoryDefinition GetCategoryDefinition(SaveCategory category)
         {
+            
             if (categoryDefinitionMap.TryGetValue(category, out SaveCatgeoryDefinition definition))
             {
                 return definition;
+            }
+            // fallback mainly for editor support
+            if (categoryDefinitionMap.Count <= 0 && categoryDefinitionList.Count > 0)
+            {
+                return categoryDefinitionList.Find(item => item.Category == category);
             }
             Debug.LogWarning($"[SaveSystemConfigSO] - No definition found for category: {category}");
             return null;

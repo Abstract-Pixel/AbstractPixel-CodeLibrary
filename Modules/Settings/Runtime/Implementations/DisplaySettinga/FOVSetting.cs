@@ -11,7 +11,7 @@ namespace AbstractPixel.Settings
             base.Initialize();
         }
 
-        public override void ApplyLogic()
+        public override void ApplySettingLogic()
         {
             if (Camera.main != null)
             {

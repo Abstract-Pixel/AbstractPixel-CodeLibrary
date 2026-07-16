@@ -54,7 +54,7 @@ namespace AbstractPixel.Settings
         {
             foreach (KeyValuePair<Type, ISettingBackend> keyValuePair in settingsDictionary)
             {
-                keyValuePair.Value.ApplyLogic();
+                keyValuePair.Value.ApplySettingLogic();
             }
         }
 
@@ -91,7 +91,7 @@ namespace AbstractPixel.Settings
             {
                 // Inject saved values into the ScriptableObject instances
                 keyValuePair.Value.LoadFromDataTransferObject(_loadedData);
-                keyValuePair.Value.ApplyLogic();
+                keyValuePair.Value.ApplySettingLogic();
             }
             ReevaluateAllDependencies();
         }
