@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace AbstractPixel.Tooltip
 {
-    [RequireComponent(typeof(TooltipPositioner))]
+    [RequireComponent(typeof(TooltipPositioner),typeof(DynamicPanelWidthController))]
     public class TooltipView : MonoBehaviour, IInitializable<TooltipData>
     {
         [field: SerializeField] public RectTransform tooltipHolder { get; private set; }
@@ -14,7 +14,7 @@ namespace AbstractPixel.Tooltip
         [field:SerializeField] public Image iconHolder {  get; private set; }
 
         [SerializeField] TooltipFeedback tooltipFeedback;
-        [SerializeField] TooltipPositioner tooltipPositioner;
+        [SerializeField,ReadOnly] TooltipPositioner tooltipPositioner;
 
         private void OnValidate()
         {
@@ -23,10 +23,20 @@ namespace AbstractPixel.Tooltip
                 tooltipPositioner = GetComponent<TooltipPositioner>();
             }
         }
+
+        private void Awake()
+        {
+            if(tooltipPositioner == null)
+            {
+                tooltipPositioner= GetComponent<TooltipPositioner>();
+            }
+        }
         public void Initialize(TooltipData _hoveredData)
         {
             tooltipFeedback.Initialize(this);
+            tooltipHolder.gameObject.SetActive(true);
             tooltipPositioner.Setup(tooltipHolder,_hoveredData.Config, _hoveredData.transform);
+            tooltipPositioner.ForcePositionUpdate();
             if(_hoveredData.Header != null && headerText!=null)
             {
                 headerText.text = _hoveredData.Header;
