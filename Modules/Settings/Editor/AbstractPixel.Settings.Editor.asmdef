@@ -1,0 +1,20 @@
+{
+    "name": "AbstractPixel.Settings.Editor",
+    "rootNamespace": "AbstractPixel.Settings.Editor",
+    "references": [
+        "GUID:fbb5b4c19b08cc041a75264390b641b6",
+        "GUID:b4c9b881c04893f4c8d1e595dc98dd00",
+        "GUID:0404a8ea4faa386498395a28b0b33112"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

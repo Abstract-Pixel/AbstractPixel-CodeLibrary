@@ -29,13 +29,13 @@ namespace AbstractPixel.SaveSystem
                     Directory.CreateDirectory(directoryPath);
                 }
                 string tempFilePath = _fullpath + temporaryFileExtension;
-                if (!DeleteFile(tempFilePath))
+                if (!TryDeleteFile(tempFilePath))
                 {
                     return false;
                 }
                 File.WriteAllText(tempFilePath, _data);
 
-                if (!DeleteFile(_fullpath))
+                if (!TryDeleteFile(_fullpath))
                 {
                     return false;
                 }
@@ -168,7 +168,7 @@ namespace AbstractPixel.SaveSystem
 
         }
 
-        public bool DeleteFile(string _filePath)
+        public bool TryDeleteFile(string _filePath)
         {
             if (string.IsNullOrEmpty(_filePath))
             {
