@@ -7,6 +7,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+
 namespace AbstractPixel.Core.Editor
 {
     [CustomPropertyDrawer(typeof(PolymorphicAttribute), true)]
@@ -19,9 +20,18 @@ namespace AbstractPixel.Core.Editor
         private static Dictionary<string, List<Type>> s_compatibleTypesCache = new Dictionary<string, List<Type>>();
         private static Dictionary<string, string[]> s_typeNamesCache = new Dictionary<string, string[]>();
 
-        // Cached GUI Styles for Rich Text
+        // Cached GUI Styles
         private static GUIStyle s_richTextLabel;
         private static GUIStyle s_richTextHelpBox;
+        private static GUIStyle s_dotsButtonStyle;
+
+        // Clipboard Wrapper for Type-Safe Deep Copying
+        [Serializable]
+        private class PolymorphicClipboard
+        {
+            public string typeName;
+            public string json;
+        }
 
         // =========================================================
         // IMGUI APPROACH (Used by Reorderable Lists & Custom Inspectors)
@@ -46,6 +56,16 @@ namespace AbstractPixel.Core.Editor
                         richText = true,
                         clipping = TextClipping.Clip,
                         wordWrap = false
+                    };
+                }
+
+                if (s_dotsButtonStyle == null)
+                {
+                    s_dotsButtonStyle = new GUIStyle(EditorStyles.label)
+                    {
+                        alignment = TextAnchor.MiddleCenter,
+                        fontSize = 18, // Increased from 14
+                        fontStyle = FontStyle.Bold
                     };
                 }
 
@@ -94,8 +114,8 @@ namespace AbstractPixel.Core.Editor
                 float headerOuterHeight = headerInnerHeight + (borderThickness * 2);
 
                 // --- INDENTATION HANDLING ---
-                float indentOffset = originalIndent * 15f; // Use originalIndent here
-                EditorGUI.indentLevel = 0; // Temporarily strip indent to handle bounding boxes manually
+                float indentOffset = originalIndent * 15f;
+                EditorGUI.indentLevel = 0;
 
                 // Fill the empty gap on the left when inside a list
                 float listLeftExpansion = isElement ? 8f : 0f;
@@ -124,10 +144,11 @@ namespace AbstractPixel.Core.Editor
                 currentX = prefixRect.xMax;
 
                 // --- CALCULATE MAXIMUM AVAILABLE SPACE ---
-                float btnWidth = 24f;
+                float removeBtnWidth = 24f;
+                float dotsBtnWidth = 20f; // Slightly wider to hold the larger font
                 float btnHeight = 18f;
-                float buttonSpacing = 4f;
-                float rightButtonsWidth = isElement ? (btnWidth * 2 + buttonSpacing + 6f) : (btnWidth + 6f);
+                float buttonSpacing = 2f; // Reduced from 4f
+                float rightButtonsWidth = isElement ? (removeBtnWidth + dotsBtnWidth + buttonSpacing + 6f) : (dotsBtnWidth + 6f);
 
                 float maxTypeBoxWidth = headerInnerRect.width - (currentX - headerInnerRect.x) - rightButtonsWidth - 4f;
 
@@ -156,18 +177,16 @@ namespace AbstractPixel.Core.Editor
                 EditorGUI.LabelField(typeLabelRect, richBoxContent, s_richTextLabel);
 
                 // 3c. Draw Header Utility Buttons
-                Rect removeBtnRect = new Rect(headerInnerRect.xMax - btnWidth - 6f, headerInnerRect.y + headerTopPad, btnWidth, btnHeight);
-                Rect copyBtnRect = new Rect(removeBtnRect.x - btnWidth - buttonSpacing, headerInnerRect.y + headerTopPad, btnWidth, btnHeight);
+                Rect removeBtnRect = new Rect(headerInnerRect.xMax - removeBtnWidth - 6f, headerInnerRect.y + headerTopPad, removeBtnWidth, btnHeight);
+                Rect dotsBtnRect = new Rect(removeBtnRect.x - dotsBtnWidth - buttonSpacing, headerInnerRect.y + headerTopPad, dotsBtnWidth, btnHeight);
 
-                if (!isElement) copyBtnRect = removeBtnRect;
+                if (!isElement)
+                    dotsBtnRect = new Rect(headerInnerRect.xMax - dotsBtnWidth - 6f, headerInnerRect.y + headerTopPad, dotsBtnWidth, btnHeight);
 
-                if (GUI.Button(copyBtnRect, new GUIContent("❐", "Copy JSON"), EditorStyles.miniButton))
+                // Context Menu (Vertical 3 dots)
+                if (GUI.Button(dotsBtnRect, new GUIContent("\u22EE", "Options"), s_dotsButtonStyle))
                 {
-                    if (property.managedReferenceValue != null)
-                    {
-                        GUIUtility.systemCopyBuffer = JsonUtility.ToJson(property.managedReferenceValue, true);
-                        Debug.Log("Copied Polymorphic Data to Clipboard.");
-                    }
+                    ShowContextMenu(dotsBtnRect, property, baseType);
                 }
 
                 if (isElement)
@@ -178,7 +197,7 @@ namespace AbstractPixel.Core.Editor
                     {
                         GUI.backgroundColor = oldBg;
                         RemoveElementFromList(property);
-                        return; // Early return is now completely safe due to the `finally` block
+                        return; // Early return is safe due to the `finally` block
                     }
                     GUI.backgroundColor = oldBg;
                 }
@@ -271,6 +290,84 @@ namespace AbstractPixel.Core.Editor
                 EditorGUI.indentLevel = originalIndent;
                 EditorGUI.EndProperty();
             }
+        }
+
+        // =========================================================
+        // HELPER METHOD FOR CONTEXT MENU (COPY/PASTE DEEP)
+        // =========================================================
+        private void ShowContextMenu(Rect position, SerializedProperty property, Type baseType, Action onPasteCallback = null)
+        {
+            GenericMenu menu = new GenericMenu();
+
+            // 1. Setup Copy Command
+            if (property.managedReferenceValue != null)
+            {
+                menu.AddItem(new GUIContent("Copy"), false, () =>
+                {
+                    var clipboard = new PolymorphicClipboard
+                    {
+                        typeName = property.managedReferenceValue.GetType().AssemblyQualifiedName,
+                        json = JsonUtility.ToJson(property.managedReferenceValue, true)
+                    };
+                    GUIUtility.systemCopyBuffer = JsonUtility.ToJson(clipboard);
+                    Debug.Log($"Copied {property.managedReferenceValue.GetType().Name} to clipboard.");
+                });
+            }
+            else
+            {
+                menu.AddDisabledItem(new GUIContent("Copy"));
+            }
+
+            // 2. Setup Paste Command
+            string sysCopy = GUIUtility.systemCopyBuffer;
+            PolymorphicClipboard copiedData = null;
+            try
+            {
+                if (!string.IsNullOrEmpty(sysCopy) && sysCopy.TrimStart().StartsWith("{"))
+                {
+                    copiedData = JsonUtility.FromJson<PolymorphicClipboard>(sysCopy);
+                }
+            }
+            catch { /* Ignore invalid formats */ }
+
+            if (copiedData != null && !string.IsNullOrEmpty(copiedData.typeName))
+            {
+                Type copiedType = Type.GetType(copiedData.typeName);
+                string shortName = copiedType != null ? ObjectNames.NicifyVariableName(copiedType.Name) : copiedData.typeName.Split(',')[0].Split('.').LastOrDefault();
+
+                if (copiedType != null && baseType != null && baseType.IsAssignableFrom(copiedType))
+                {
+                    menu.AddItem(new GUIContent($"Paste ({shortName})"), false, () =>
+                    {
+                        property.serializedObject.Update();
+
+                        // Deep Copy: Create a completely fresh instance and deserialize into it
+                        object newInstance = Activator.CreateInstance(copiedType);
+                        JsonUtility.FromJsonOverwrite(copiedData.json, newInstance);
+
+                        property.managedReferenceValue = newInstance;
+                        property.isExpanded = true;
+                        property.serializedObject.ApplyModifiedProperties();
+
+                        onPasteCallback?.Invoke();
+                    });
+                }
+                else
+                {
+                    // If it's the wrong type entirely or not assignable to this list/field
+                    menu.AddDisabledItem(new GUIContent($"Paste (Invalid: {shortName})"));
+                }
+            }
+            else
+            {
+                // Clipboard empty or not matching our polymorphic signature
+                menu.AddDisabledItem(new GUIContent("Paste"));
+            }
+
+            if (position != Rect.zero)
+                menu.DropDown(position);
+            else
+                menu.ShowAsContext();
         }
 
         // =========================================================
@@ -575,24 +672,50 @@ namespace AbstractPixel.Core.Editor
 
             if (toggle != null) toggle.Add(customHeaderRow);
 
-            // Utility Buttons (Copy & Remove)
+            // Forward-declare the dropdown reference so it can be updated by the paste action
+            DropdownField typesDropDown = null;
+
+            // Utility Buttons Area
             VisualElement btnContainer = new VisualElement();
             btnContainer.style.flexDirection = FlexDirection.Row;
             btnContainer.style.position = Position.Absolute;
             btnContainer.style.right = 6;
             btnContainer.style.top = 6;
 
-            Button copyBtn = new Button(() => {
-                if (_property.managedReferenceValue != null)
+            // 3-dots Context Menu Button
+            Button dotsBtn = new Button() { text = "\u22EE", tooltip = "Options" };
+            dotsBtn.style.width = 20; // Increased width to hold the larger font
+            dotsBtn.style.height = 18;
+            dotsBtn.style.backgroundColor = new Color(0, 0, 0, 0); // Look like plain text
+            dotsBtn.style.borderTopWidth = 0;
+            dotsBtn.style.borderBottomWidth = 0;
+            dotsBtn.style.borderLeftWidth = 0;
+            dotsBtn.style.borderRightWidth = 0;
+            dotsBtn.style.fontSize = 18; // Increased from 14
+            dotsBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
+            dotsBtn.style.paddingLeft = 0;
+            dotsBtn.style.paddingRight = 0;
+            dotsBtn.style.paddingTop = 0;
+            dotsBtn.style.paddingBottom = 0;
+
+            dotsBtn.clicked += () =>
+            {
+                ShowContextMenu(dotsBtn.worldBound, _property, baseType, () =>
                 {
-                    GUIUtility.systemCopyBuffer = JsonUtility.ToJson(_property.managedReferenceValue, true);
-                    Debug.Log("Copied Polymorphic Data to Clipboard.");
-                }
-            })
-            { text = "❐", tooltip = "Copy JSON" };
-            copyBtn.style.width = 24; copyBtn.style.height = 18;
-            copyBtn.style.paddingLeft = 0; copyBtn.style.paddingRight = 0; copyBtn.style.paddingTop = 0; copyBtn.style.paddingBottom = 0;
-            btnContainer.Add(copyBtn);
+                    // Refresh UI Toolkit structural layout after external property paste
+                    Type updatedType = GetAssignedType(_property);
+                    string newName = updatedType != null ? ObjectNames.NicifyVariableName(updatedType.Name) : "Unassigned";
+                    typeLabel.text = $"TYPE : <b>{newName}</b>";
+
+                    if (typesDropDown != null)
+                        typesDropDown.SetValueWithoutNotify(newName);
+
+                    RebuildBody(bodyBox, _property, isElement);
+                    _property.isExpanded = true;
+                    headerFoldout.value = true;
+                });
+            };
+            btnContainer.Add(dotsBtn);
 
             if (isElement)
             {
@@ -603,6 +726,7 @@ namespace AbstractPixel.Core.Editor
                 removeBtn.style.width = 24; removeBtn.style.height = 18;
                 removeBtn.style.backgroundColor = new Color(0.85f, 0.4f, 0.4f, 1f);
                 removeBtn.style.paddingLeft = 0; removeBtn.style.paddingRight = 0; removeBtn.style.paddingTop = 0; removeBtn.style.paddingBottom = 0;
+                removeBtn.style.marginLeft = 2; // Reduced gap from 4 to 2
                 btnContainer.Add(removeBtn);
             }
             headerBox.Add(btnContainer);
@@ -620,7 +744,7 @@ namespace AbstractPixel.Core.Editor
             }
             else
             {
-                DropdownField typesDropDown = new DropdownField(string.Empty, filteredTypeNames.ToList(), defaultValue);
+                typesDropDown = new DropdownField(string.Empty, filteredTypeNames.ToList(), defaultValue);
                 typesDropDown.style.flexGrow = 1;
                 typesDropDown.style.flexShrink = 1; // Explicitly allowed to truncate properly
                 typesDropDown.style.marginTop = 4;
