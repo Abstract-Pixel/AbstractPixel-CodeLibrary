@@ -22,11 +22,22 @@ namespace AbstractPixel.Tooltip
             targetTransform = _hoveredTarget;
             currentStrategy = _toolTipConfig.PositioningStrategy.Clone();
         }
+        public void ForcePositionUpdate()
+        {
+            if (currentStrategy == null || rectTransform == null) return;
+            currentStrategy.ExecutePositioning(rectTransform, targetTransform);
+        }
 
-        public void EnablePositioning() => isPositioning = true;
-        public void DisablePositioning() => isPositioning = false;
+        public void EnablePositioning()
+        {
+            isPositioning = true;
+        }
+        public void DisablePositioning()
+        {
+            isPositioning = false;
+        }
 
-        private void LateUpdate()
+        private void Update()
         {
             if (!isPositioning || currentStrategy == null)
             {
