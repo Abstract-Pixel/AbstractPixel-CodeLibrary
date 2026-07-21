@@ -28,8 +28,10 @@ namespace AbstractPixel.Settings
 
         bool isDefaultValuesPreGenerated;
 
-        public virtual void Initialize()
+        public void Initialize()
         {
+            // Set Data First Before Setting Default current value
+            OnInitialize();
             CurrentValue = DefaultValue;
         }
 
@@ -38,6 +40,8 @@ namespace AbstractPixel.Settings
             CurrentValue = _newValue;
             OnValueChanged?.Invoke(CurrentValue);
         }
+
+        protected abstract void OnInitialize();
 
         public abstract void ApplySettingLogic();
 
@@ -151,14 +155,20 @@ namespace AbstractPixel.Settings
         }
 
 #if UNITY_EDITOR
-        public virtual void ValidateInEditor(bool _forceRevalidation = false)
+        public void ValidateInEditor(bool _forceRevalidation = false)
         {
-           
+            bool canValidate = CanProceedWithValidation(_forceRevalidation);
+            if (canValidate)
+            {
+                OnValidateInEditor();
+            }
         }
 
-        protected bool CanProceedWithValidation(bool _forceRevalidation)
+        protected abstract void OnValidateInEditor();
+
+        private bool CanProceedWithValidation(bool _forceRevalidation)
         {
-            if(_forceRevalidation)
+            if (_forceRevalidation)
             {
                 return true;
             }

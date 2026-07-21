@@ -1,6 +1,7 @@
 using UnityEngine;
 using AbstractPixel.Core;
 using System;
+using AbstractPixel.SaveSystem;
 
 namespace AbstractPixel.Settings
 {
@@ -13,10 +14,13 @@ namespace AbstractPixel.Settings
         // The live reference to our backend setting
         protected BaseSetting<TValue> liveBindedSetting;
 
-        protected virtual void Start()
+        protected void Start()
         {
             BindToBackendSetting();
+            OnStart();
         }
+
+        abstract protected void OnStart();       
 
         private void BindToBackendSetting()
         {
@@ -38,8 +42,9 @@ namespace AbstractPixel.Settings
             RefreshUI();
         }
 
-        protected virtual void OnDestroy()
+        protected void OnDestroy()
         {
+            WhenOnDestroy();
             if (liveBindedSetting != null)
             {
                 liveBindedSetting.OnValueChanged -= HandleBackendValueChanged;
@@ -47,6 +52,8 @@ namespace AbstractPixel.Settings
             }
         }
 
+        protected abstract void WhenOnDestroy();
+      
         // =========================================================
         // DATA FLOW: BACKEND -> FRONTEND
         // =========================================================
@@ -89,6 +96,8 @@ namespace AbstractPixel.Settings
                 
                 // Tell the Manager to re-check all rules (e.g. grey out Frame Rate if VSync changed)
                 SettingsManager.Instance.ReevaluateAllDependencies();
+                SaveSettingsToFile();
+
             }
         }
 
@@ -110,5 +119,10 @@ namespace AbstractPixel.Settings
         /// (Optional) Update text labels using the setting's Display Name/Description.
         /// </summary>
         protected virtual void UpdateMetadataVisuals(SettingMetadata metadata) { }
+
+        protected virtual void SaveSettingsToFile()
+        {
+            SaveActions.SaveDataOf(SaveCategory.Settings);
+        }
     }
 }

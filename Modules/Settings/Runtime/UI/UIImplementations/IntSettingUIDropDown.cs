@@ -9,11 +9,9 @@ namespace AbstractPixel.Settings
         [SerializeField] private TMP_Text settingTextName;
         [SerializeField] private TMP_Dropdown targetDropDown;
 
-        protected override void Start()
+        protected override void OnStart()
         {
             targetDropDown.onValueChanged.AddListener(OnUserChangedDropdown);
-            base.Start();
-
             if (liveBindedSetting is IntOptionsSetting optionsSetting)
             {
                 targetDropDown.ClearOptions();
@@ -24,9 +22,8 @@ namespace AbstractPixel.Settings
             }
         }
 
-        protected override void OnDestroy()
+        protected override void WhenOnDestroy()
         {
-            base.OnDestroy(); // Don't forget to call base so it cleans up the backend events!
             targetDropDown.onValueChanged.RemoveListener(OnUserChangedDropdown);
         }
 
@@ -44,7 +41,6 @@ namespace AbstractPixel.Settings
 
         protected override void UpdateUIToMatchBackendSetting(int backendValue)
         {
-            // The backend changed (maybe we clicked "Set to Default"). Update the dropdown UI!
             // We use SetValueWithoutNotify so it doesn't accidentally trigger OnUserChangedDropdown in an infinite loop.
             targetDropDown.SetValueWithoutNotify(backendValue);
         }
@@ -58,7 +54,6 @@ namespace AbstractPixel.Settings
 
         protected override void UpdateMetadataVisuals(SettingMetadata metadata)
         {
-            // Set the Display Name (e.g., "Resolution" or "VSync")
             if (settingTextName != null)
             {
                 settingTextName.text = metadata.DisplayName;

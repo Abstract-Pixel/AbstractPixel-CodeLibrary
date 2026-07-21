@@ -6,9 +6,10 @@ namespace AbstractPixel.Settings
     [Serializable]
     public class FOVSetting : FloatSliderSetting
     {
-        public override void Initialize()
+        
+        protected override void OnInitialize()
         {
-            base.Initialize();
+            
         }
 
         public override void ApplySettingLogic()
@@ -21,6 +22,11 @@ namespace AbstractPixel.Settings
             {
                 Debug.LogWarning("[FOVSetting] Could not find Camera.main to apply Field of View.");
             }
+        }
+
+        protected override void OnValidateInEditor()
+        {
+            
         }
     }
 }

@@ -16,34 +16,23 @@ MonoBehaviour:
   - GroupName: All Graphucs Settings
     Category: 2
     Settings:
-    - rid: 9005701083947335788
+    - rid: 9005701104183804011
   - GroupName: All Display Settings
     Category: 1
     Settings:
     - rid: 9005701083947335790
     - rid: 9005701083947335792
     - rid: 9005701087733219328
+    - rid: 9005701104183804009
+    - rid: 9005701104183804010
   references:
     version: 2
     RefIds:
-    - rid: 9005701083947335788
-      type: {class: FOVSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
-      data:
-        editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
-        <IsActive>k__BackingField: 1
-        <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
-        <DefaultValue>k__BackingField: 0
-        dependencyRulesList: []
-        <MinValue>k__BackingField: 0
-        <MaxValue>k__BackingField: 1
     - rid: 9005701083947335790
       type: {class: ResolutionSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Resolution
@@ -76,12 +65,12 @@ MonoBehaviour:
       type: {class: FrameRateLimitSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: FrameRate
           Description: 
-        <DefaultValue>k__BackingField: 60
+        <DefaultValue>k__BackingField: 0
         dependencyRulesList:
         - rid: 9005701083947335793
         <OptionValues>k__BackingField: 140000001e000000280000003c0000005a00000078000000f0000000ffffffff
@@ -102,11 +91,13 @@ MonoBehaviour:
           selectedClassAssemblyQualifiedName: AbstractPixel.Settings.VSyncSetting,
             AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
           compatibleClassAssemblyQualifiedNames:
+          - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
           - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
             Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
           - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.ScreenTypeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+          - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null
           - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null
@@ -118,9 +109,56 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
+          DisplayName: V Sync
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <OptionValues>k__BackingField: 00000000010000000200000003000000
+        <OptionDisplayNames>k__BackingField:
+        - Off
+        - Every V Blank
+        - Every Second V Blank
+        - Every Third V Blank
+    - rid: 9005701104183804009
+      type: {class: ScreenModeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Screen Mode
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <OptionValues>k__BackingField: 000000000100000003000000
+        <OptionDisplayNames>k__BackingField:
+        - Exclusive Fullscreen
+        - Borderless Window
+        - Windowed
+    - rid: 9005701104183804010
+      type: {class: DisplayOutputSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Display Output
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <OptionValues>k__BackingField: 00000000
+        <OptionDisplayNames>k__BackingField:
+        - Display 0
+    - rid: 9005701104183804011
+      type: {class: FOVSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
           DisplayName: 
           Description: 
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
-        <OptionValues>k__BackingField: 
-        <OptionDisplayNames>k__BackingField: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1

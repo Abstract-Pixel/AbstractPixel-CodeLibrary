@@ -9,10 +9,9 @@ namespace AbstractPixel.Settings
     {
         private Resolution[] availableResolutions;
 
-        public override void Initialize()
+        protected override void OnInitialize()
         {
             GenerateResolutions();
-            base.Initialize();
         }
 
         private void GenerateResolutions()
@@ -80,19 +79,11 @@ namespace AbstractPixel.Settings
             }
 
             Resolution targetResolution = availableResolutions[CurrentValue];
-
             Screen.SetResolution(targetResolution.width, targetResolution.height, Screen.fullScreenMode);
         }
 
 #if UNITY_EDITOR
-        public override void ValidateInEditor(bool _forceRevalidation = false)
-        {
-            base.ValidateInEditor();
-            if (CanProceedWithValidation(_forceRevalidation) == true)
-            {
-                GenerateResolutions();
-            }
-        }
+        protected override void OnValidateInEditor() => GenerateResolutions();
 #endif
     }
 }
