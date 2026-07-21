@@ -15,16 +15,16 @@ namespace AbstractPixel.Settings
 #endif
         [field: Header("Saved/Current Data")]
         [field: SerializeField, ReadOnly(true)] public TValue CurrentValue { get; private set; }
-        [field: SerializeField, ReadOnly(true)] public bool isAvailable { get; private set; } = true;
+        [field: SerializeField, ReadOnly(true)] public bool IsActive { get; private set; } = true;
 
         [field: Header("Configuration Data")]
-        [field: SerializeField] public SettingCategory Category { get; private set; }
+        [field: SerializeField] public SettingMetadata Metadata { get; private set; }
         [field: SerializeField] public TValue DefaultValue { get; protected set; }
 
         [SerializeReference, Polymorphic] private List<ISettingDependencyRule> dependencyRulesList = new List<ISettingDependencyRule>();
         // Events
         public event Action<TValue> OnValueChanged = delegate { };
-        public event Action<bool> OnAvailabilityChanged = delegate { };
+        public event Action<bool> OnActiveStatusChanged = delegate { };
 
         bool isDefaultValuesPreGenerated;
 
@@ -43,7 +43,7 @@ namespace AbstractPixel.Settings
 
         public bool EvaluateDependencies()
         {
-            bool previousAvailability = isAvailable;
+            bool previousAvailability = IsActive;
             bool isCurrentlyAvailable = true;
 
             foreach (ISettingDependencyRule dependencyRule in dependencyRulesList)
@@ -61,20 +61,20 @@ namespace AbstractPixel.Settings
                 }
             }
 
-            isAvailable = isCurrentlyAvailable;
+            IsActive = isCurrentlyAvailable;
 
-            if (isAvailable != previousAvailability)
+            if (IsActive != previousAvailability)
             {
-                OnAvailabilityChanged?.Invoke(isAvailable);
+                OnActiveStatusChanged?.Invoke(IsActive);
             }
 
-            return isAvailable;
+            return IsActive;
         }
 
         public virtual void Deconstruct()
         {
             OnValueChanged = delegate { };
-            OnAvailabilityChanged = delegate { };
+            OnActiveStatusChanged = delegate { };
         }
 
         public void SaveToDataTransferObject(SettingsDTO dataTransferObject)

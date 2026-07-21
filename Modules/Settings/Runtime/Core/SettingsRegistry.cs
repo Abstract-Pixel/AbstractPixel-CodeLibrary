@@ -1,23 +1,36 @@
 using System.Collections.Generic;
 using UnityEngine;
-using AbstractPixel.Core; // Assuming this is where [Polymorphic] lives
+using AbstractPixel.Core;
 
-namespace AbstractPixel.Settings 
+namespace AbstractPixel.Settings
 {
     [CreateAssetMenu(fileName = "SettingsRegistry", menuName = "Settings/Settings Registry")]
     public class SettingsRegistry : ScriptableObject
     {
-        [SerializeReference, Polymorphic] 
-        public List<ISettingBackend> AllSettings = new List<ISettingBackend>();
+        public List<SettingsCategoryGroup> AllSettingsList = new List<SettingsCategoryGroup>();
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            AllSettings.ForEach(setting => setting.ValidateInEditor());
-
-            if(Application.isPlaying)
+            if (AllSettingsList == null)
             {
-                AllSettings.ForEach(setting => setting.ApplySettingLogic());
+                return;
+            }
+
+            foreach (SettingsCategoryGroup group in AllSettingsList)
+            {
+                if (group.Settings == null)
+                {
+                    continue;
+                }
+
+                foreach (ISettingBackend setting in group.Settings)
+                {
+                    if (setting != null)
+                    {
+                        setting.ValidateInEditor(false);
+                    }
+                }
             }
         }
 #endif

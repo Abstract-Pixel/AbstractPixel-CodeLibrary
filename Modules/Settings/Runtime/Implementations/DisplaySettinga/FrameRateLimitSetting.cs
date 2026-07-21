@@ -31,7 +31,7 @@ namespace AbstractPixel.Settings
 
         public override void ApplySettingLogic()
         {
-            Application.targetFrameRate = CurrentValue;
+            Application.targetFrameRate = OptionValues[CurrentValue];
         }
 
 #if UNITY_EDITOR
