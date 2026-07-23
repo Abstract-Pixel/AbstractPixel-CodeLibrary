@@ -58,7 +58,8 @@ namespace AbstractPixel.Core.Editor
                 float dropDownHeight = EditorGUIUtility.singleLineHeight;
                 Rect dropDownRect = new Rect(position.x, contentY, position.width, dropDownHeight);
 
-                DrawDropdownField(dropDownRect, selectedClassNameProperty, selectedAssemblyProperty, compatibleBaseTypes);
+                // Pass the baseType here so we can map out our inheritance logic
+                DrawDropdownField(dropDownRect, selectedClassNameProperty, selectedAssemblyProperty, compatibleBaseTypes, baseType);
             }
 
             EditorGUI.EndProperty();
@@ -109,7 +110,7 @@ namespace AbstractPixel.Core.Editor
             GUI.Label(iconRect, warningIcon);
         }
 
-        private void DrawDropdownField(Rect dropDownRect, SerializedProperty selectedClassNameProperty, SerializedProperty selectedAssemblyProperty, Type[] compatibleBaseTypes)
+        private void DrawDropdownField(Rect dropDownRect, SerializedProperty selectedClassNameProperty, SerializedProperty selectedAssemblyProperty, Type[] compatibleBaseTypes, Type baseType)
         {
             string currentlySelectedName = selectedClassNameProperty.stringValue;
             string buttonDisplayName = "Choose a suitable type";
@@ -122,29 +123,42 @@ namespace AbstractPixel.Core.Editor
             // Using EditorStyles.popup forces native Unity dropdown arrow visuals
             if (EditorGUI.DropdownButton(dropDownRect, new GUIContent(buttonDisplayName), FocusType.Passive, EditorStyles.popup) == true)
             {
-                GenericMenu genericMenu = new GenericMenu();
-
-                for (int i = 0; i < compatibleBaseTypes.Length; i++)
-                {
-                    Type compatibleType = compatibleBaseTypes[i];
-                    string compatibleTypeName = compatibleType.Name;
-                    string assemblyName = compatibleType.AssemblyQualifiedName;
-
-                    bool isSelected = (currentlySelectedName == compatibleTypeName);
-
-                    string capturedName = compatibleTypeName;
-                    string capturedAssembly = assemblyName;
-
-                    genericMenu.AddItem(new GUIContent(compatibleTypeName), isSelected, () =>
+                // Instantiate our generic Search Window Component here
+                var dropdown = new SearchableDropdown<Type>(
+                    items: compatibleBaseTypes,
+                    nameSelector: type => type.Name,
+                    pathSelector: type => GetInheritancePath(type, baseType),
+                    onItemSelected: selectedType =>
                     {
-                        selectedClassNameProperty.stringValue = capturedName;
-                        selectedAssemblyProperty.stringValue = capturedAssembly;
+                        selectedClassNameProperty.stringValue = selectedType.Name;
+                        selectedAssemblyProperty.stringValue = selectedType.AssemblyQualifiedName;
                         selectedClassNameProperty.serializedObject.ApplyModifiedProperties();
-                    });
-                }
+                    },
+                    title: $"Select {baseType.Name}"
+                );
 
-                genericMenu.DropDown(dropDownRect);
+                // Attach and open it exactly anchored to our DropDown button size
+                dropdown.Show(dropDownRect);
             }
+        }
+
+        // Walks backward through the inheritance chain to establish sub-folders
+        // Example: Base = Car | Class = Civic
+        // Trace = Civic -> HondaCar -> Car 
+        // Path mapped as "HondaCar/" for our search window!
+        private string GetInheritancePath(Type type, Type baseType)
+        {
+            List<string> pathParts = new List<string>();
+            Type current = type.BaseType;
+
+            // Traverse upwards stopping when we hit raw objects or the highest root base class
+            while (current != null && current != typeof(object) && current != baseType)
+            {
+                pathParts.Insert(0, current.Name);
+                current = current.BaseType;
+            }
+
+            return string.Join("/", pathParts);
         }
 
         private void SynchronizeCompatibleTypes(SerializedProperty compatibleTypesProperty, Type[] compatibleBaseTypes, SerializedObject serializedObject)

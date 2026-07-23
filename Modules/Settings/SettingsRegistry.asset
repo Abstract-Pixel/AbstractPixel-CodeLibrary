@@ -25,6 +25,14 @@ MonoBehaviour:
     - rid: 9005701087733219328
     - rid: 9005701104183804009
     - rid: 9005701104183804010
+  - GroupName: All Audio Settings
+    Category: 3
+    Settings:
+    - rid: 9005701151339577344
+    - rid: 9005701151339577345
+    - rid: 9005701151339577346
+    - rid: 9005701151339577347
+    - rid: 9005701151339577348
   references:
     version: 2
     RefIds:
@@ -65,12 +73,12 @@ MonoBehaviour:
       type: {class: FrameRateLimitSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
-        <IsActive>k__BackingField: 1
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 0
         <Metadata>k__BackingField:
           DisplayName: FrameRate
           Description: 
-        <DefaultValue>k__BackingField: 0
+        <DefaultValue>k__BackingField: 3
         dependencyRulesList:
         - rid: 9005701083947335793
         <OptionValues>k__BackingField: 140000001e000000280000003c0000005a00000078000000f0000000ffffffff
@@ -106,7 +114,7 @@ MonoBehaviour:
       type: {class: VSyncSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: V Sync
@@ -123,7 +131,7 @@ MonoBehaviour:
       type: {class: ScreenModeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Screen Mode
@@ -162,3 +170,101 @@ MonoBehaviour:
         dependencyRulesList: []
         <MinValue>k__BackingField: 0
         <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+    - rid: 9005701151339577344
+      type: {class: MasterVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Master Volume
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        targetBroAudioType: 31
+        exposedParameterName: Master
+        targetMixerGroups: []
+        volumeFadeDuration: 1
+    - rid: 9005701151339577345
+      type: {class: MusicVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Music Volume
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        targetBroAudioType: 1
+        exposedParameterName: Master
+        targetMixerGroups: []
+        volumeFadeDuration: 1
+    - rid: 9005701151339577346
+      type: {class: SFXVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: SFX Volume
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        targetBroAudioType: 8
+        exposedParameterName: Car
+        targetMixerGroups:
+        - {fileID: 4788075751451039525, guid: 861ab5778322a8f42ada9413dc6c9f01, type: 2}
+        volumeFadeDuration: 1
+    - rid: 9005701151339577347
+      type: {class: AmbienceVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Ambience Volume
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        targetBroAudioType: 4
+        exposedParameterName: Master
+        targetMixerGroups: []
+        volumeFadeDuration: 1
+    - rid: 9005701151339577348
+      type: {class: UIVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Ui Volume
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        targetBroAudioType: 2
+        exposedParameterName: Master
+        targetMixerGroups: []
+        volumeFadeDuration: 1
