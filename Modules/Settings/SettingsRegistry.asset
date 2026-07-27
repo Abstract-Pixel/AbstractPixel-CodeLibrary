@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SettingsRegistry
   m_EditorClassIdentifier: AbstractPixel.Settings::AbstractPixel.Settings.SettingsRegistry
   AllSettingsList:
-  - GroupName: All Graphucs Settings
+  - GroupName: All Graphics Settings
     Category: 2
     Settings:
     - rid: 9005701104183804011
@@ -25,6 +25,7 @@ MonoBehaviour:
     - rid: 9005701087733219328
     - rid: 9005701104183804009
     - rid: 9005701104183804010
+    - rid: 9005701240483479659
   - GroupName: All Audio Settings
     Category: 3
     Settings:
@@ -73,7 +74,7 @@ MonoBehaviour:
       type: {class: FrameRateLimitSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 7
         <IsActive>k__BackingField: 0
         <Metadata>k__BackingField:
           DisplayName: FrameRate
@@ -114,7 +115,7 @@ MonoBehaviour:
       type: {class: VSyncSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: V Sync
@@ -161,17 +162,18 @@ MonoBehaviour:
       type: {class: FOVSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 100
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: 
           Description: 
-        <DefaultValue>k__BackingField: 0
+        <DefaultValue>k__BackingField: 60
         dependencyRulesList: []
         <MinValue>k__BackingField: 0
         <MaxValue>k__BackingField: 1
         <DisplayMinValue>k__BackingField: 0
         <DisplayMaxValue>k__BackingField: 100
+        targetType: 1
     - rid: 9005701151339577344
       type: {class: MasterVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -268,3 +270,19 @@ MonoBehaviour:
         exposedParameterName: Master
         targetMixerGroups: []
         volumeFadeDuration: 1
+    - rid: 9005701240483479659
+      type: {class: FOVSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 60
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Field Of View
+          Description: 
+        <DefaultValue>k__BackingField: 60
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 40
+        <MaxValue>k__BackingField: 120
+        <DisplayMinValue>k__BackingField: 40
+        <DisplayMaxValue>k__BackingField: 120
+        targetType: 2
