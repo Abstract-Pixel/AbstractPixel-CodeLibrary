@@ -19,14 +19,15 @@ namespace AbstractPixel.Settings
 
         protected virtual void OnDisable()
         {
+            SettingsActions.OnSettingsLoaded -= BindToBackendSetting;
             UnbindFromBackendSetting();
         }
 
         private void BindToBackendSetting()
         {
             if (targetSetting == null || targetSetting.TBaseType == null)
-            {
-                return;
+            {          
+                return;       
             }
 
             ISettingBackend resolvedBackend = SettingsManager.Instance.GetSetting(targetSetting.TBaseType);
@@ -34,12 +35,13 @@ namespace AbstractPixel.Settings
 
             if (liveBoundSetting == null)
             {
+                SettingsActions.OnSettingsLoaded += BindToBackendSetting;
                 return;
             }
 
             liveBoundSetting.OnValueChanged += HandleValueChanged;
             SettingsActions.OnSettingsLoaded += RefreshApplier;
-            OnSettingBound(liveBoundSetting);
+            OnLiveSettingBinded(liveBoundSetting);
 
             // Initial refresh
             RefreshApplier();
@@ -52,7 +54,7 @@ namespace AbstractPixel.Settings
                 liveBoundSetting.OnValueChanged -= HandleValueChanged;
                 
                 // Execute specific cleanup in child class
-                OnSettingUnbound(liveBoundSetting);
+                OnLiveSettingUnbinded(liveBoundSetting);
             }
 
             SettingsActions.OnSettingsLoaded -= RefreshApplier;
@@ -72,7 +74,7 @@ namespace AbstractPixel.Settings
         }
 
         // Child classes override these to inject references or handle specific setup
-        protected abstract void OnSettingBound(BaseSetting<TValue> setting);
-        protected abstract void OnSettingUnbound(BaseSetting<TValue> setting);
+        protected abstract void OnLiveSettingBinded(BaseSetting<TValue> setting);
+        protected abstract void OnLiveSettingUnbinded(BaseSetting<TValue> setting);
     }
 }

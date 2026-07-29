@@ -5,12 +5,11 @@ using UnityEngine;
 namespace AbstractPixel.Settings
 {
     [Serializable]
-    public class ResolutionSetting : IntOptionsSetting
+    public class ResolutionSetting : BaseOptionsSetting<int, Resolution>
     {
-        private Resolution[] availableResolutions;
-
         protected override void OnInitialize()
         {
+            // Hardware resolutions must always be generated on boot to query the local monitor!
             GenerateResolutions();
         }
 
@@ -22,8 +21,7 @@ namespace AbstractPixel.Settings
             List<int> resolutionIndicesList = new List<int>();
             List<string> resolutionNamesList = new List<string>();
 
-            // We iterate BACKWARDS through the raw resolutions array 
-            // so higher resolutions are added first in our list!
+            // Iterate backwards so high resolutions are listed first
             for (int i = rawHardwareResolutions.Length - 1; i >= 0; i--)
             {
                 Resolution hardwareResolution = rawHardwareResolutions[i];
@@ -45,16 +43,15 @@ namespace AbstractPixel.Settings
                 }
             }
 
-            // Now we build our Option arrays from the reversed list
             int currentIndex = 0;
-            int defaultResolutionIndex = 0; // Default fallback to highest resolution (index 0)
+            int defaultResolutionIndex = 0;
 
             foreach (Resolution resolution in uniqueResolutionsList)
             {
                 resolutionIndicesList.Add(currentIndex);
                 resolutionNamesList.Add($"{resolution.width} x {resolution.height}");
 
-                // Check if this specific element is 1920x1080
+                // Find 1920x1080 as default
                 if (resolution.width == 1920 && resolution.height == 1080)
                 {
                     defaultResolutionIndex = currentIndex;
@@ -63,27 +60,28 @@ namespace AbstractPixel.Settings
                 currentIndex++;
             }
 
-            availableResolutions = uniqueResolutionsList.ToArray();
-            OptionValues = resolutionIndicesList.ToArray();
+            OptionValues = uniqueResolutionsList.ToArray();
             OptionDisplayNames = resolutionNamesList.ToArray();
 
-            // Set the dynamic default index
             DefaultValue = defaultResolutionIndex;
         }
 
-        public override void ApplySettingLogic()
+        protected override void OnApplySettingLogic()
         {
-            if (availableResolutions == null || CurrentValue < 0 || CurrentValue >= availableResolutions.Length)
+            if (OptionValues == null || CurrentValue < 0 || CurrentValue >= OptionValues.Length)
             {
                 return;
             }
 
-            Resolution targetResolution = availableResolutions[CurrentValue];
+            Resolution targetResolution = OptionValues[CurrentValue];
             Screen.SetResolution(targetResolution.width, targetResolution.height, Screen.fullScreenMode);
         }
 
 #if UNITY_EDITOR
-        protected override void OnValidateInEditor() => GenerateResolutions();
+        protected override void OnValidateInEditor()
+        {
+            GenerateResolutions();
+        }
 #endif
     }
 }

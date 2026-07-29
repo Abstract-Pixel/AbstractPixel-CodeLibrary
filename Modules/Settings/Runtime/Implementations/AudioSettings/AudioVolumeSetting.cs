@@ -26,7 +26,7 @@ namespace AbstractPixel.Settings
         private const float DEFAULT_LINEAR_VOLUME = 1.0f; // 1.0 = Max Volume (0 dB)
         private const float MINIMUM_DECIBELS = -80.0f;
 
-        public override void ApplySettingLogic()
+        protected override void OnApplySettingLogic()
         {
             SetVolumeForAllGroups(CurrentValue);
         }
@@ -54,10 +54,7 @@ namespace AbstractPixel.Settings
 
         protected override void OnInitialize()
         {
-            // Set slider limits (Linear 0 to 1)
-            MinValue = 0.0f;
-            MaxValue = 1.0f;
-            DefaultValue = DEFAULT_LINEAR_VOLUME;
+            
         }
 
 #if UNITY_EDITOR

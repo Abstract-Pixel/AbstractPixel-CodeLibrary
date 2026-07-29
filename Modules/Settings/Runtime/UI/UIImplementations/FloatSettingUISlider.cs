@@ -10,7 +10,8 @@ namespace AbstractPixel.Settings
         [SerializeField] private TMP_Text settingTextName;
         [SerializeField] private Slider targetSlider;
         [SerializeField] private TMP_Text settingValueText;
-        const string DISPLAY_TEXT_PREFIX = "%";
+        [SerializeField] string DISPLAY_TEXT_PREFIX = "%";
+        [SerializeField] bool showValueTextAsInt = true;
 
         protected override void OnStart()
         {
@@ -19,7 +20,7 @@ namespace AbstractPixel.Settings
             {
                 targetSlider.minValue = sliderSetting.MinValue;
                 targetSlider.maxValue = sliderSetting.MaxValue;
-   
+
                 targetSlider.SetValueWithoutNotify(liveBindedSetting.CurrentValue);
                 UpdateSliderDisplayValueText(liveBindedSetting.CurrentValue);
             }
@@ -83,9 +84,12 @@ namespace AbstractPixel.Settings
                 // Step 2: Apply that percentage to the Display limits.
                 float displayValue = Mathf.Lerp(sliderSetting.DisplayMinValue, sliderSetting.DisplayMaxValue, percentage);
 
-                // Step 3: Round the number so it looks clean (no decimals), and apply it to the text.
-                int roundedDisplayValue = Mathf.RoundToInt(displayValue);
-                settingValueText.text = roundedDisplayValue.ToString()+ DISPLAY_TEXT_PREFIX;
+                string formattedText = showValueTextAsInt
+                                                   ? displayValue.ToString("0")   // Formats as an int (no decimals)
+                                                   : displayValue.ToString("0.0");  // Formats to one decimal digit
+
+
+                settingValueText.text = formattedText + DISPLAY_TEXT_PREFIX;
             }
         }
     }

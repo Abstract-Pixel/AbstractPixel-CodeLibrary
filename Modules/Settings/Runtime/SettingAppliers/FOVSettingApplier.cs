@@ -14,7 +14,7 @@ namespace AbstractPixel.Settings.Gameplay
             TryGetComponent(out targetVirtualCamera);
         }
 
-        protected override void OnSettingBound(BaseSetting<float> setting)
+        protected override void OnLiveSettingBinded(BaseSetting<float> setting)
         {
             FOVSetting fovSetting = setting as FOVSetting;
 
@@ -36,7 +36,7 @@ namespace AbstractPixel.Settings.Gameplay
             }
         }
 
-        protected override void OnSettingUnbound(BaseSetting<float> setting)
+        protected override void OnLiveSettingUnbinded(BaseSetting<float> setting)
         {
             FOVSetting fovSetting = setting as FOVSetting;
 

@@ -9,6 +9,7 @@ namespace AbstractPixel.Settings
         [field: SerializeField] 
         public int[] OptionValues { get; protected set; } = Array.Empty<int>();
 
+
         [field: SerializeField] 
         public string[] OptionDisplayNames { get; protected set; } = Array.Empty<string>();
     }

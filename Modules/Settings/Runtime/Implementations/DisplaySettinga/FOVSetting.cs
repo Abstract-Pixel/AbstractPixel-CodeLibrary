@@ -5,20 +5,23 @@ using UnityEngine;
 
 namespace AbstractPixel.Settings
 {
+    public enum FOVTargetType
+    {
+        Camera,
+        MainCamera,
+        Cinemachine
+    }
+
     [Serializable]
     public class FOVSetting : FloatSliderSetting
     {
         [Header("FOV Configuration")]
         [SerializeField] private FOVTargetType targetType = FOVTargetType.MainCamera;
-        // Runtime lists holding injected references from the scene
+
         private List<Camera> registeredCameras = new List<Camera>();
         private List<CinemachineCamera> registeredVirtualCameras = new List<CinemachineCamera>();
 
-        private const int DEFAULT_FOV_ON_RESET = 60;
-
-        // =========================================================
-        // REGISTRATION API
-        // =========================================================
+        private const float DEFAULT_FOV_ON_RESET = 60.0f;
 
         public void RegisterCamera(Camera cameraToRegister)
         {
@@ -71,49 +74,60 @@ namespace AbstractPixel.Settings
                 registeredVirtualCameras.Remove(virtualCameraToRemove);
             }
         }
+
         protected override void OnInitialize()
         {
-
+            if(MinValue ==0 || MaxValue ==0f || DefaultValue ==0f )
+            {
+                ConfigureSliderLimits();
+            }
         }
 
-        public override void ApplySettingLogic()
+        private void ConfigureSliderLimits()
         {
-            // Mode 1: Automatically find and apply to Camera.main (No Applier needed in scene)
+            MinValue = 40.0f;
+            MaxValue = 120.0f;
+            DisplayMinValue = 30.0f;
+            DisplayMaxValue = 120.0f;
+            DefaultValue = DEFAULT_FOV_ON_RESET;
+        }
+
+        protected override void OnApplySettingLogic()
+        {
             if (targetType == FOVTargetType.MainCamera)
             {
-                if (Camera.main == null) { return; }
-                Camera.main.fieldOfView = CurrentValue;
+                if (Camera.main != null)
+                {
+                    Camera.main.fieldOfView = CurrentValue;
+                }
             }
-            // Mode 2: Apply to specific registered Standard Cameras
             else if (targetType == FOVTargetType.Camera)
             {
                 foreach (Camera cameraInstance in registeredCameras)
                 {
-                    if (cameraInstance == null) { continue; }
-                    cameraInstance.fieldOfView = CurrentValue;
+                    if (cameraInstance != null)
+                    {
+                        cameraInstance.fieldOfView = CurrentValue;
+                    }
                 }
             }
-            // Mode 3: Apply to specific registered Cinemachine Virtual Cameras
             else if (targetType == FOVTargetType.Cinemachine)
             {
                 foreach (CinemachineCamera virtualCameraInstance in registeredVirtualCameras)
                 {
-                    if (virtualCameraInstance == null) { continue; }
-                    virtualCameraInstance.Lens.FieldOfView = CurrentValue;
+                    if (virtualCameraInstance != null)
+                    {
+                        virtualCameraInstance.Lens.FieldOfView = CurrentValue;
+                    }
                 }
             }
         }
 
+#if UNITY_EDITOR
         protected override void OnValidateInEditor()
         {
-            DefaultValue = DEFAULT_FOV_ON_RESET;
+            ConfigureSliderLimits();
         }
-
-        public enum FOVTargetType
-        {
-            Camera,
-            MainCamera,
-            Cinemachine
-        }
+#endif
     }
 }

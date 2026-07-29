@@ -4,13 +4,17 @@ using UnityEngine;
 namespace AbstractPixel.Settings
 {
     [Serializable]
-    public class FrameRateLimitSetting : IntOptionsSetting
+    public class FrameRateLimitSetting : BaseOptionsSetting<int, int>
     {
-        const int FRAME_RATE_ON_DEFAULT = 3;
+        private const int DEFAULT_FRAMERATE_INDEX = 3; // Index 3 = 60 FPS
 
         protected override void OnInitialize()
         {
-            GenerateFrameRateOptions();
+            // Runtime safety check: Only generate if missing from the Inspector
+            if (OptionValues == null || OptionValues.Length == 0)
+            {
+                GenerateFrameRateOptions();
+            }
         }
 
         private void GenerateFrameRateOptions()
@@ -18,15 +22,25 @@ namespace AbstractPixel.Settings
             OptionValues = new int[] { 20, 30, 40, 60, 90, 120, 240, -1 };
             OptionDisplayNames = new string[]
             {
-                    "20 FPS", "30 FPS", "40 FPS", "60 FPS", "90 FPS", "120 FPS", "240 FPS", "Unlimited"
+                "20 FPS", "30 FPS", "40 FPS", "60 FPS", "90 FPS", "120 FPS", "240 FPS", "Unlimited"
             };
-            DefaultValue = FRAME_RATE_ON_DEFAULT;
+
+            DefaultValue = DEFAULT_FRAMERATE_INDEX;
         }
 
-        public override void ApplySettingLogic() => Application.targetFrameRate = OptionValues[CurrentValue];
+        protected override void OnApplySettingLogic()
+        {
+            if (OptionValues != null && CurrentValue >= 0 && CurrentValue < OptionValues.Length)
+            {
+                Application.targetFrameRate = OptionValues[CurrentValue];
+            }
+        }
 
 #if UNITY_EDITOR
-        protected override void OnValidateInEditor() => GenerateFrameRateOptions();
+        protected override void OnValidateInEditor()
+        {
+            GenerateFrameRateOptions();
+        }
 #endif
     }
 }

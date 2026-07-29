@@ -7,43 +7,63 @@ namespace AbstractPixel.Settings
 {
     public abstract class BaseSetting<TValue> : ISettingBackend
     {
+        [field: SerializeField]
+        public bool IsEnabled { get; protected set; } = true;
 
 #if UNITY_EDITOR
         [Header("Editor Debug Controls")]
         [SerializeField, SettingDebugToolbar]
-        private bool editorDebugToolbar; // This dummy variable acts as the anchor for our custom buttons!
+        private bool editorDebugToolbar;
 #endif
+
         [field: Header("Saved/Current Data")]
-        [field: SerializeField, ReadOnly(true)] public TValue CurrentValue { get; private set; }
-        [field: SerializeField, ReadOnly(true)] public bool IsActive { get; private set; } = true;
+        [field: SerializeField, ReadOnly(true)]
+        public TValue CurrentValue { get; protected set; }
+
+        [field: SerializeField, ReadOnly(true)]
+        public bool IsActive { get; private set; } = true;
 
         [field: Header("Configuration Data")]
-        [field: SerializeField] public SettingMetadata Metadata { get; private set; }
-        [field: SerializeField] public TValue DefaultValue { get; protected set; }
+        [field: SerializeField]
+        public SettingMetadata Metadata { get; protected set; }
 
-        [SerializeReference, Polymorphic] private List<ISettingDependencyRule> dependencyRulesList = new List<ISettingDependencyRule>();
+        [field: SerializeField]
+        public TValue DefaultValue { get; protected set; }
+
+        [SerializeReference, Polymorphic]
+        private List<ISettingDependencyRule> dependencyRulesList = new List<ISettingDependencyRule>();
+
         // Events
         public event Action<TValue> OnValueChanged = delegate { };
         public event Action<bool> OnActiveStatusChanged = delegate { };
 
-        bool isDefaultValuesPreGenerated;
+        private bool isDefaultValuesPreGenerated = false;
 
         public void Initialize()
         {
-            // Set Data First Before Setting Default current value
             OnInitialize();
             CurrentValue = DefaultValue;
         }
 
-        public void SetValue(TValue _newValue)
+        protected abstract void OnInitialize();
+
+        public void SetValue(TValue newValue)
         {
-            CurrentValue = _newValue;
+            CurrentValue = newValue;
             OnValueChanged?.Invoke(CurrentValue);
         }
 
-        protected abstract void OnInitialize();
+        public void ApplySettingLogic()
+        {
+            if (IsEnabled == false)
+            {
+                return;
+            }
 
-        public abstract void ApplySettingLogic();
+            OnApplySettingLogic();
+        }
+
+        protected abstract void OnApplySettingLogic();
 
         public bool EvaluateDependencies()
         {
@@ -147,7 +167,6 @@ namespace AbstractPixel.Settings
         {
             string className = GetType().Name;
 
-            // We just brutally remove the key from all dictionaries to guarantee it is nullified
             dataTransferObject.IntegerSettings.Remove(className);
             dataTransferObject.FloatSettings.Remove(className);
             dataTransferObject.BooleanSettings.Remove(className);
@@ -155,10 +174,10 @@ namespace AbstractPixel.Settings
         }
 
 #if UNITY_EDITOR
-        public void ValidateInEditor(bool _forceRevalidation = false)
+        public void ValidateInEditor(bool forceRevalidation = false)
         {
-            bool canValidate = CanProceedWithValidation(_forceRevalidation);
-            if (canValidate)
+            bool canValidate = CanProceedWithValidation(forceRevalidation);
+            if (canValidate == true)
             {
                 OnValidateInEditor();
             }
@@ -166,17 +185,19 @@ namespace AbstractPixel.Settings
 
         protected abstract void OnValidateInEditor();
 
-        private bool CanProceedWithValidation(bool _forceRevalidation)
+        private bool CanProceedWithValidation(bool forceRevalidation)
         {
-            if (_forceRevalidation)
+            if (forceRevalidation == true)
             {
                 return true;
             }
-            if (!isDefaultValuesPreGenerated)
+
+            if (isDefaultValuesPreGenerated == false)
             {
                 isDefaultValuesPreGenerated = true;
                 return true;
             }
+
             return false;
         }
 #endif

@@ -1,6 +1,6 @@
 using UnityEngine;
 using AbstractPixel.Core;
-using System;
+
 using AbstractPixel.SaveSystem;
 
 namespace AbstractPixel.Settings

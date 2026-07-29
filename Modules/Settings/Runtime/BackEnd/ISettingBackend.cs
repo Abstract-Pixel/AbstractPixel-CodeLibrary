@@ -7,6 +7,7 @@ namespace AbstractPixel.Settings
     /// </summary>
     public interface ISettingBackend
     {
+        bool IsEnabled { get; }
         void Initialize();
         void ApplySettingLogic();
         bool EvaluateDependencies();

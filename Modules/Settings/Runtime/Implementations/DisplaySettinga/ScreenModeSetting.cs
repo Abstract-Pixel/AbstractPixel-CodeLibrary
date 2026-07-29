@@ -4,42 +4,49 @@ using UnityEngine;
 namespace AbstractPixel.Settings
 {
     [Serializable]
-    public class ScreenModeSetting : IntOptionsSetting
+    public class ScreenModeSetting : BaseOptionsSetting<int, FullScreenMode>
     {
         protected override void OnInitialize()
         {
-            GenerateScreenModeTypesData();
+            // Runtime safety check
+            if (OptionValues == null || OptionValues.Length == 0)
+            {
+                GenerateScreenModeTypesData();
+            }
         }
 
         private void GenerateScreenModeTypesData()
         {
-            if (OptionValues == null || OptionValues.Length == 0)
+            OptionValues = new FullScreenMode[]
             {
-                // We map directly to Unity's native FullScreenMode enum integers
-                OptionValues = new int[]
-                {
-                    (int)FullScreenMode.ExclusiveFullScreen,
-                    (int)FullScreenMode.FullScreenWindow,
-                    (int)FullScreenMode.Windowed
-                };
+                FullScreenMode.ExclusiveFullScreen,
+                FullScreenMode.FullScreenWindow,
+                FullScreenMode.Windowed
+            };
 
-                OptionDisplayNames = new string[]
-                {
-                    "Exclusive Fullscreen",
-                    "Borderless Window",
-                    "Windowed"
-                };
+            OptionDisplayNames = new string[]
+            {
+                "Exclusive Fullscreen",
+                "Borderless Window",
+                "Windowed"
+            };
+
+            DefaultValue = 0;
+        }
+
+        protected override void OnApplySettingLogic()
+        {
+            if (OptionValues != null && CurrentValue >= 0 && CurrentValue < OptionValues.Length)
+            {
+                Screen.fullScreenMode = OptionValues[CurrentValue];
             }
         }
 
-        public override void ApplySettingLogic()
-        {
-            // We cast the integer back to the Unity enum
-            FullScreenMode selectedMode = (FullScreenMode)CurrentValue;           
-            Screen.fullScreenMode = selectedMode;
-        }
 #if UNITY_EDITOR
-        protected override void OnValidateInEditor()=> GenerateScreenModeTypesData();
+        protected override void OnValidateInEditor()
+        {
+            GenerateScreenModeTypesData();
+        }
 #endif
     }
 }

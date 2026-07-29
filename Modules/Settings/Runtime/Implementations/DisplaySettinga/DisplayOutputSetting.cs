@@ -4,35 +4,46 @@ using UnityEngine;
 namespace AbstractPixel.Settings
 {
     [Serializable]
-    public class DisplayOutputSetting : IntOptionsSetting
+    public class DisplayOutputSetting : BaseOptionsSetting<int, int>
     {
-        const string PREFIX_TEXT = "Display ";
-        public override void ApplySettingLogic()
-        {
-            Display.displays[CurrentValue].Activate();
-        }
+        private const string PREFIX_TEXT = "Display ";
 
         protected override void OnInitialize()
         {
-            GenerateDisplayData();
+            if (OptionValues == null || OptionValues.Length == 0)
+            {
+                GenerateDisplayData();
+            }
         }
 
-        void GenerateDisplayData()
+        private void GenerateDisplayData()
         {
             int displaysLength = Display.displays.Length;
             OptionValues = new int[displaysLength];
-            OptionDisplayNames  = new string[displaysLength];
+            OptionDisplayNames = new string[displaysLength];
+
             for (int i = 0; i < displaysLength; i++)
             {
-                OptionValues[i] = 0;
-                OptionDisplayNames[i]= PREFIX_TEXT +i;
+                OptionValues[i] = i;
+                OptionDisplayNames[i] = PREFIX_TEXT + i;
             }
+
             DefaultValue = 0;
         }
 
+        protected override void OnApplySettingLogic()
+        {
+            if (OptionValues != null && CurrentValue >= 0 && CurrentValue < OptionValues.Length)
+            {
+                Display.displays[CurrentValue].Activate();
+            }
+        }
+
+#if UNITY_EDITOR
         protected override void OnValidateInEditor()
         {
             GenerateDisplayData();
-        }   
+        }
+#endif
     }
 }
