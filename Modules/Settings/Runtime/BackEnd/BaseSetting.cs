@@ -55,7 +55,7 @@ namespace AbstractPixel.Settings
 
         public void ApplySettingLogic()
         {
-            if (IsEnabled == false)
+            if (IsEnabled == false || IsActive == false)
             {
                 return;
             }
@@ -89,10 +89,16 @@ namespace AbstractPixel.Settings
 
             if (IsActive != previousAvailability)
             {
+                OnBackendActiveStatusChanged(IsActive);
                 OnActiveStatusChanged?.Invoke(IsActive);
             }
 
             return IsActive;
+        }
+
+        protected virtual void OnBackendActiveStatusChanged(bool isNowActive)
+        {
+
         }
 
         public virtual void Deconstruct()

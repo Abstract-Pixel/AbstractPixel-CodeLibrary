@@ -62,7 +62,7 @@ namespace AbstractPixel.Settings
 
         private void HandleValueChanged(TValue newValue)
         {
-            liveBoundSetting.ApplySettingLogic();
+           // liveBoundSetting.ApplySettingLogic();
         }
 
         private void RefreshApplier()

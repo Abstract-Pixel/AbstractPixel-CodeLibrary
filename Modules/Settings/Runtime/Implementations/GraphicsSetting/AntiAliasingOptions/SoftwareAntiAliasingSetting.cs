@@ -17,7 +17,7 @@ namespace AbstractPixel.Settings
             if (registeredCameras.Contains(cameraToRegister) == false)
             {
                 registeredCameras.Add(cameraToRegister);
-                
+
                 if (OptionValues != null && CurrentValue >= 0 && CurrentValue < OptionValues.Length)
                 {
                     ApplyAntiAliasingToCamera(cameraToRegister, OptionValues[CurrentValue]);
@@ -50,7 +50,9 @@ namespace AbstractPixel.Settings
                 "SMAA (Low)",
                 "SMAA (Medium)",
                 "SMAA (High)",
-                "TAA"
+                "TAA (Low)",
+                "TAA (Medium)",
+                "TAA (High)"
             };
 
             DefaultValue = 0; // Default to "Disabled"
@@ -61,37 +63,57 @@ namespace AbstractPixel.Settings
                 new SoftwareAntiAliasingOptionData
                 {
                     Mode = AntialiasingMode.None,
-                    Quality = AntialiasingQuality.Low
+                    Quality = AntialiasingQuality.Low,
+                    TaaSharpening = 0.0f
                 },
                 // Index 1: FXAA
                 new SoftwareAntiAliasingOptionData
                 {
                     Mode = AntialiasingMode.FastApproximateAntialiasing,
-                    Quality = AntialiasingQuality.Low
+                    Quality = AntialiasingQuality.Low,
+                    TaaSharpening = 0.0f
                 },
                 // Index 2: SMAA (Low)
                 new SoftwareAntiAliasingOptionData
                 {
                     Mode = AntialiasingMode.SubpixelMorphologicalAntiAliasing,
-                    Quality = AntialiasingQuality.Low
+                    Quality = AntialiasingQuality.Low,
+                    TaaSharpening = 0.0f
                 },
                 // Index 3: SMAA (Medium)
                 new SoftwareAntiAliasingOptionData
                 {
                     Mode = AntialiasingMode.SubpixelMorphologicalAntiAliasing,
-                    Quality = AntialiasingQuality.Medium
+                    Quality = AntialiasingQuality.Medium,
+                    TaaSharpening = 0.0f
                 },
                 // Index 4: SMAA (High)
                 new SoftwareAntiAliasingOptionData
                 {
                     Mode = AntialiasingMode.SubpixelMorphologicalAntiAliasing,
-                    Quality = AntialiasingQuality.High
+                    Quality = AntialiasingQuality.High,
+                    TaaSharpening = 0.0f
                 },
-                // Index 5: TAA (Quality is ignored by URP for TAA)
+                // Index 5: TAA (Low)
                 new SoftwareAntiAliasingOptionData
                 {
                     Mode = AntialiasingMode.TemporalAntiAliasing,
-                    Quality = AntialiasingQuality.Low
+                    Quality = AntialiasingQuality.Low, // Ignored by TAA
+                    TaaSharpening = 0.25f
+                },
+                // Index 6: TAA (Medium)
+                new SoftwareAntiAliasingOptionData
+                {
+                    Mode = AntialiasingMode.TemporalAntiAliasing,
+                    Quality = AntialiasingQuality.Medium, // Ignored by TAA
+                    TaaSharpening = 0.60f
+                },
+                // Index 7: TAA (High)
+                new SoftwareAntiAliasingOptionData
+                {
+                    Mode = AntialiasingMode.TemporalAntiAliasing,
+                    Quality = AntialiasingQuality.High, // Ignored by TAA
+                    TaaSharpening = 1.0f
                 }
             };
         }
@@ -129,10 +151,16 @@ namespace AbstractPixel.Settings
         {
             if (cameraInstance.TryGetComponent(out UniversalAdditionalCameraData cameraData))
             {
-                // Setting antialiasing mode automatically disables all other software AA types 
-                // on this camera while leaving hardware MSAA completely untouched!
+                // 1. Set the AA Mode and SMAA Quality
                 cameraData.antialiasing = option.Mode;
                 cameraData.antialiasingQuality = option.Quality;
+                if(option.Mode is not AntialiasingMode.TemporalAntiAliasing)
+                {
+                    return;
+                }
+                // 2. Set the TAA Contrast Adaptive Sharpening (CAS)
+                // Note: taaSettings is a 'ref struct' property in modern URP, so modifying it here directly modifies the camera!
+                cameraData.taaSettings.contrastAdaptiveSharpening = option.TaaSharpening;
             }
         }
 

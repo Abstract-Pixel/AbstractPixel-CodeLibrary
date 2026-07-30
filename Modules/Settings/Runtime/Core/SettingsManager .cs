@@ -74,7 +74,10 @@ namespace AbstractPixel.Settings
         {
             foreach (KeyValuePair<Type, ISettingBackend> keyValuePair in settingsDictionary)
             {
-                keyValuePair.Value.EvaluateDependencies();
+                keyValuePair.Value.
+                    
+                    
+                    EvaluateDependencies();
             }
         }
 
