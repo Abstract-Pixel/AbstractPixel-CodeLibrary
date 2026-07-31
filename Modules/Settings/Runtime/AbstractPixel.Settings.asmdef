@@ -3,7 +3,9 @@
     "rootNamespace": "AbstractPixel.Settings",
     "references": [
         "GUID:0404a8ea4faa386498395a28b0b33112",
-        "GUID:b4c9b881c04893f4c8d1e595dc98dd00"
+        "GUID:b4c9b881c04893f4c8d1e595dc98dd00",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:111d4e39aeddad44898002abada9c174"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

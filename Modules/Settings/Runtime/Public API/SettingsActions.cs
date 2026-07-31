@@ -1,9 +1,24 @@
 using System;
+using UnityEditor;
+using UnityEngine;
 
 namespace AbstractPixel.Settings
 {
     public static class SettingsActions
     {
+        internal static event Action OnSettingsLoaded = delegate { };
+        internal static void RaiseSettingsLoaded()
+        {
+            OnSettingsLoaded?.Invoke();
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetEvents()
+        {
+            OnSettingsLoaded = delegate { };
+        }
+
+
         /// <summary>
         /// Retrieves the base setting object by its class type.
         /// </summary>

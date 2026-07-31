@@ -7,7 +7,6 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-
 namespace AbstractPixel.Core.Editor
 {
     [CustomPropertyDrawer(typeof(PolymorphicAttribute), true)]
@@ -210,23 +209,12 @@ namespace AbstractPixel.Core.Editor
                 }
                 else
                 {
-                    string buttonText = propertyType != null ? filteredTypeNames[defaultIndex] : "Choose a suitable polymorphic type";
+                    string buttonText = propertyType != null ? ObjectNames.NicifyVariableName(propertyType.Name) : "Choose a suitable polymorphic type";
                     string truncatedButtonText = TruncateText(buttonText, EditorStyles.popup, controlRect.width - 24f);
 
                     if (EditorGUI.DropdownButton(controlRect, new GUIContent(truncatedButtonText), FocusType.Keyboard, EditorStyles.popup))
                     {
-                        GenericMenu menu = new GenericMenu();
-                        string propPath = property.propertyPath;
-
-                        menu.AddItem(new GUIContent(filteredTypeNames[0]), propertyType == null, () => ApplyTypeSelection(property.serializedObject, propPath, null));
-
-                        for (int i = 0; i < types.Count; i++)
-                        {
-                            Type t = types[i];
-                            string mName = filteredTypeNames[i + 1];
-                            menu.AddItem(new GUIContent(mName), propertyType == t, () => ApplyTypeSelection(property.serializedObject, propPath, t));
-                        }
-                        menu.DropDown(controlRect);
+                        ShowSearchableDropdown(controlRect, property, types, baseType);
                     }
                 }
 
@@ -290,6 +278,323 @@ namespace AbstractPixel.Core.Editor
                 EditorGUI.indentLevel = originalIndent;
                 EditorGUI.EndProperty();
             }
+        }
+
+        // =========================================================
+        // UI TOOLKIT (UIELEMENTS) APPROACH
+        // =========================================================
+        public override VisualElement CreatePropertyGUI(SerializedProperty _property)
+        {
+            VisualElement root = new VisualElement();
+            root.style.marginTop = 8;
+            root.style.marginBottom = 8;
+
+            Color borderColor = EditorGUIUtility.isProSkin ? new Color(0.1f, 0.1f, 0.1f, 1f) : new Color(0.6f, 0.6f, 0.6f, 1f);
+            Color headerBgColor = EditorGUIUtility.isProSkin ? new Color(0.35f, 0.35f, 0.35f, 1f) : new Color(0.65f, 0.65f, 0.65f, 1f);
+            Color contentBgColor = EditorGUIUtility.isProSkin ? new Color(0.28f, 0.28f, 0.28f, 1f) : new Color(0.85f, 0.85f, 0.85f, 1f);
+            Color typeBoxBorder = EditorGUIUtility.isProSkin ? new Color(0.8f, 0.8f, 0.8f, 0.5f) : new Color(0.3f, 0.3f, 0.3f, 0.5f);
+
+            Type baseType = GetFieldBaseType();
+            string baseTypeName = baseType != null ? baseType.FullName : _property.type;
+
+            Type propertyType = GetAssignedType(_property);
+            List<Type> types = GetCachedCompatibleTypes(_property, baseTypeName);
+
+            bool hasNoTypes = types.Count == 0;
+            bool isElement = _property.propertyPath.Contains(".Array.data[");
+
+            string defaultValue = propertyType != null ? ObjectNames.NicifyVariableName(propertyType.Name) : "Choose a suitable polymorphic type";
+            string typeDisplayName = propertyType != null ? ObjectNames.NicifyVariableName(propertyType.Name) : "Unassigned";
+
+            // Header Box Border Simulation
+            VisualElement headerBox = new VisualElement();
+            headerBox.style.borderTopWidth = 1;
+            headerBox.style.borderBottomWidth = 1;
+            headerBox.style.borderLeftWidth = 1;
+            headerBox.style.borderRightWidth = 1;
+            headerBox.style.borderBottomColor = borderColor;
+            headerBox.style.borderTopColor = borderColor;
+            headerBox.style.borderRightColor = borderColor;
+            headerBox.style.borderLeftColor = borderColor;
+            headerBox.style.backgroundColor = headerBgColor;
+            headerBox.style.paddingTop = 6;
+            headerBox.style.paddingBottom = 8;
+            headerBox.style.paddingLeft = 4; // Tightly left-aligned
+            headerBox.style.paddingRight = 12;
+
+            // Content Box Container
+            VisualElement bodyBox = new VisualElement();
+            bodyBox.style.borderBottomWidth = 1;
+            bodyBox.style.borderLeftWidth = 1;
+            bodyBox.style.borderRightWidth = 1;
+            bodyBox.style.borderTopWidth = 0;
+            bodyBox.style.borderBottomColor = borderColor;
+            bodyBox.style.borderTopColor = borderColor;
+            bodyBox.style.borderRightColor = borderColor;
+            bodyBox.style.borderLeftColor = borderColor;
+            bodyBox.style.backgroundColor = contentBgColor;
+            bodyBox.style.paddingTop = 8;
+            bodyBox.style.paddingBottom = 8;
+            bodyBox.style.paddingRight = 12;
+            bodyBox.style.paddingLeft = isElement ? 14 : 4;
+            bodyBox.style.display = _property.isExpanded && !hasNoTypes ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (isElement)
+            {
+                headerBox.style.marginLeft = -8;
+                bodyBox.style.marginLeft = -8;
+            }
+
+            // Custom Foldout Construction
+            Foldout headerFoldout = new Foldout();
+            headerFoldout.text = "";
+            headerFoldout.value = _property.isExpanded;
+            headerBox.Add(headerFoldout);
+
+            Toggle toggle = headerFoldout.Q<Toggle>();
+
+            if (toggle != null)
+            {
+                toggle.style.marginLeft = 0;
+                toggle.style.marginRight = isElement ? 58 : 30; // Protect absolute util buttons
+                toggle.style.paddingLeft = 0;
+                toggle.style.paddingRight = 0;
+                toggle.style.flexShrink = 1;
+
+                var input = toggle.Q<VisualElement>(className: "unity-toggle__input");
+                if (input != null)
+                {
+                    input.style.marginLeft = 0;
+                    input.style.marginRight = 0;
+                    input.style.flexShrink = 0;
+                }
+
+                VisualElement checkmark = toggle.Q<VisualElement>(className: "unity-checkmark");
+                if (checkmark != null)
+                {
+                    checkmark.style.marginLeft = 0;
+                    checkmark.style.marginRight = 0;
+                    checkmark.style.flexShrink = 0;
+                }
+            }
+
+            VisualElement customHeaderRow = new VisualElement();
+            customHeaderRow.style.flexDirection = FlexDirection.Row;
+            customHeaderRow.style.alignItems = Align.Center;
+            customHeaderRow.style.flexShrink = 1;
+            customHeaderRow.style.overflow = Overflow.Hidden;
+
+            // Always add the prefix label (Variable name or Element index)
+            Label prefixLabel = new Label($"{_property.displayName} ");
+            prefixLabel.style.marginLeft = 0;
+            prefixLabel.style.paddingLeft = 0;
+            prefixLabel.style.flexShrink = 0;
+            customHeaderRow.Add(prefixLabel);
+
+            // Transparent type box with outline
+            VisualElement typeBox = new VisualElement();
+            typeBox.style.backgroundColor = new Color(0, 0, 0, 0); // Transparent
+            typeBox.style.borderTopColor = typeBoxBorder;
+            typeBox.style.borderBottomColor = typeBoxBorder;
+            typeBox.style.borderLeftColor = typeBoxBorder;
+            typeBox.style.borderRightColor = typeBoxBorder;
+            typeBox.style.borderTopWidth = 1;
+            typeBox.style.borderBottomWidth = 1;
+            typeBox.style.borderLeftWidth = 1;
+            typeBox.style.borderRightWidth = 1;
+            typeBox.style.paddingLeft = 4;
+            typeBox.style.paddingRight = 4;
+            typeBox.style.paddingTop = 1;
+            typeBox.style.paddingBottom = 1;
+            typeBox.style.marginLeft = 0;
+            typeBox.style.flexShrink = 1;
+            typeBox.style.overflow = Overflow.Hidden;
+
+            Label typeLabel = new Label($"TYPE : <b>{typeDisplayName}</b>");
+            typeLabel.enableRichText = true;
+            typeLabel.style.flexShrink = 1;
+            typeLabel.style.overflow = Overflow.Hidden;
+            typeLabel.style.textOverflow = TextOverflow.Ellipsis;
+            typeBox.Add(typeLabel);
+            customHeaderRow.Add(typeBox);
+
+            if (toggle != null) toggle.Add(customHeaderRow);
+
+            // Forward-declare the dropdown button reference so it can be updated by the paste action
+            Button typesDropDownBtn = null;
+
+            // Utility Buttons Area
+            VisualElement btnContainer = new VisualElement();
+            btnContainer.style.flexDirection = FlexDirection.Row;
+            btnContainer.style.position = Position.Absolute;
+            btnContainer.style.right = 6;
+            btnContainer.style.top = 6;
+
+            // 3-dots Context Menu Button
+            Button dotsBtn = new Button() { text = "\u22EE", tooltip = "Options" };
+            dotsBtn.style.width = 20; // Increased width to hold the larger font
+            dotsBtn.style.height = 18;
+            dotsBtn.style.backgroundColor = new Color(0, 0, 0, 0); // Look like plain text
+            dotsBtn.style.borderTopWidth = 0;
+            dotsBtn.style.borderBottomWidth = 0;
+            dotsBtn.style.borderLeftWidth = 0;
+            dotsBtn.style.borderRightWidth = 0;
+            dotsBtn.style.fontSize = 18; // Increased from 14
+            dotsBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
+            dotsBtn.style.paddingLeft = 0;
+            dotsBtn.style.paddingRight = 0;
+            dotsBtn.style.paddingTop = 0;
+            dotsBtn.style.paddingBottom = 0;
+
+            dotsBtn.clicked += () =>
+            {
+                ShowContextMenu(dotsBtn.worldBound, _property, baseType, () =>
+                {
+                    // Refresh UI Toolkit structural layout after external property paste
+                    Type updatedType = GetAssignedType(_property);
+                    string newName = updatedType != null ? ObjectNames.NicifyVariableName(updatedType.Name) : "Unassigned";
+                    typeLabel.text = $"TYPE : <b>{newName}</b>";
+
+                    if (typesDropDownBtn != null)
+                        typesDropDownBtn.text = newName == "Unassigned" ? "Choose a suitable polymorphic type" : newName;
+
+                    RebuildBody(bodyBox, _property, isElement);
+                    _property.isExpanded = true;
+                    headerFoldout.value = true;
+                });
+            };
+            btnContainer.Add(dotsBtn);
+
+            if (isElement)
+            {
+                Button removeBtn = new Button(() => {
+                    RemoveElementFromList(_property);
+                })
+                { text = "X", tooltip = "Remove Element" };
+                removeBtn.style.width = 24; removeBtn.style.height = 18;
+                removeBtn.style.backgroundColor = new Color(0.85f, 0.4f, 0.4f, 1f);
+                removeBtn.style.paddingLeft = 0; removeBtn.style.paddingRight = 0; removeBtn.style.paddingTop = 0; removeBtn.style.paddingBottom = 0;
+                removeBtn.style.marginLeft = 2; // Reduced gap from 4 to 2
+                btnContainer.Add(removeBtn);
+            }
+            headerBox.Add(btnContainer);
+
+            // Dropdown OR Warning Box
+            if (hasNoTypes)
+            {
+                IMGUIContainer warningContainer = new IMGUIContainer(() =>
+                {
+                    Rect r = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight * 2.5f);
+                    DrawWarningBox(r, baseType);
+                });
+                warningContainer.style.marginTop = 4;
+                headerBox.Add(warningContainer);
+            }
+            else
+            {
+                // Bridge Searchable Dropdown to UI Toolkit using a Button designed to look like a Popup Field
+                typesDropDownBtn = new Button();
+                typesDropDownBtn.text = defaultValue;
+                typesDropDownBtn.style.flexGrow = 1;
+                typesDropDownBtn.style.flexShrink = 1;
+                typesDropDownBtn.style.marginTop = 4;
+                typesDropDownBtn.style.marginLeft = 0;
+                typesDropDownBtn.style.marginRight = 0;
+                typesDropDownBtn.style.paddingLeft = 4;
+                typesDropDownBtn.style.paddingRight = 4;
+                typesDropDownBtn.style.unityTextAlign = TextAnchor.MiddleLeft;
+
+                // Adds native dropdown styling in UI Toolkit (adds the arrow on the right)
+                typesDropDownBtn.AddToClassList("unity-popup-field__input");
+
+                typesDropDownBtn.clicked += () =>
+                {
+                    // Note: Action wrapper for UI Toolkit callback to keep everything in sync
+                    Action<Type> onSelected = (selectedType) =>
+                    {
+                        ApplyTypeSelection(_property.serializedObject, _property.propertyPath, selectedType);
+
+                        Type updatedType = GetAssignedType(_property);
+                        string newName = updatedType != null ? ObjectNames.NicifyVariableName(updatedType.Name) : "Unassigned";
+                        typeLabel.text = $"TYPE : <b>{newName}</b>";
+                        typesDropDownBtn.text = newName == "Unassigned" ? "Choose a suitable polymorphic type" : newName;
+
+                        RebuildBody(bodyBox, _property, true);
+                        _property.isExpanded = true;
+                        headerFoldout.value = true;
+                    };
+
+                    ShowSearchableDropdown(typesDropDownBtn.worldBound, _property, types, baseType, onSelected);
+                };
+
+                headerBox.Add(typesDropDownBtn);
+            }
+
+            headerFoldout.RegisterValueChangedCallback(evt =>
+            {
+                _property.isExpanded = evt.newValue;
+                bodyBox.style.display = evt.newValue && !hasNoTypes ? DisplayStyle.Flex : DisplayStyle.None;
+            });
+
+            RebuildBody(bodyBox, _property, isElement);
+
+            root.Add(headerBox);
+            root.Add(bodyBox);
+
+            return root;
+        }
+
+        // =========================================================
+        // SHARED SEARCHABLE DROPDOWN LOGIC
+        // =========================================================
+
+        private void ShowSearchableDropdown(Rect triggerRect, SerializedProperty property, List<Type> types, Type baseType, Action<Type> customCallback = null)
+        {
+            // We use typeof(void) as a clever sentinel value for "Unassigned" 
+            // to avoid passing 'null' into the SearchableDropdown which would cause a GetHashCode Exception.
+            var allTypes = new List<Type> { typeof(void) };
+            allTypes.AddRange(types);
+
+            string titleName = baseType != null ? baseType.Name : "Item";
+
+            var dropdown = new SearchableDropdown<Type>(
+                items: allTypes,
+                nameSelector: t => t == typeof(void) ? "Unassigned" : ObjectNames.NicifyVariableName(t.Name),
+                pathSelector: t => t == typeof(void) ? "" : GetInheritancePath(t, baseType),
+                onItemSelected: selectedType =>
+                {
+                    Type actualType = selectedType == typeof(void) ? null : selectedType;
+
+                    if (customCallback != null)
+                    {
+                        customCallback.Invoke(actualType);
+                    }
+                    else
+                    {
+                        ApplyTypeSelection(property.serializedObject, property.propertyPath, actualType);
+                    }
+                },
+                title: $"Select {titleName}"
+            );
+
+            dropdown.Show(triggerRect);
+        }
+
+        private string GetInheritancePath(Type type, Type baseType)
+        {
+            if (type == null) return "";
+
+            List<string> pathParts = new List<string>();
+            Type current = type.BaseType;
+
+            // Traverse upwards stopping when we hit raw objects or the highest root base class
+            while (current != null && current != typeof(object) && current != baseType)
+            {
+                pathParts.Insert(0, current.Name);
+                current = current.BaseType;
+            }
+
+            return string.Join("/", pathParts);
         }
 
         // =========================================================
@@ -474,6 +779,41 @@ namespace AbstractPixel.Core.Editor
             }
         }
 
+        private void RebuildBody(VisualElement body, SerializedProperty _property, bool isElement)
+        {
+            body.Clear();
+            if (GetAssignedType(_property) == null)
+            {
+                HelpBox unassignedErrorBox = new HelpBox("[Unassigned]: Please select a Type.", HelpBoxMessageType.Error);
+                body.Add(unassignedErrorBox);
+                return;
+            }
+
+            SerializedProperty iterator = _property.Copy();
+            SerializedProperty endProperty = iterator.GetEndProperty();
+            bool enterChildren = true;
+            while (iterator.NextVisible(enterChildren))
+            {
+                if (SerializedProperty.EqualContents(iterator, endProperty)) break;
+
+                bool isNestedList = iterator.isArray && iterator.propertyType != SerializedPropertyType.String;
+                PropertyField pf = new PropertyField(iterator.Copy());
+                pf.Bind(_property.serializedObject);
+
+                if (!isNestedList)
+                {
+                    pf.style.paddingLeft = 10;
+                }
+                else if (!isElement)
+                {
+                    pf.style.paddingLeft = 15;
+                }
+
+                body.Add(pf);
+                enterChildren = false;
+            }
+        }
+
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             Type baseType = GetFieldBaseType();
@@ -522,321 +862,6 @@ namespace AbstractPixel.Core.Editor
             }
             if (height > 0) height -= EditorGUIUtility.standardVerticalSpacing;
             return height;
-        }
-
-        // =========================================================
-        // UI TOOLKIT (UIELEMENTS) APPROACH
-        // =========================================================
-        public override VisualElement CreatePropertyGUI(SerializedProperty _property)
-        {
-            VisualElement root = new VisualElement();
-            root.style.marginTop = 8;
-            root.style.marginBottom = 8;
-
-            Color borderColor = EditorGUIUtility.isProSkin ? new Color(0.1f, 0.1f, 0.1f, 1f) : new Color(0.6f, 0.6f, 0.6f, 1f);
-            Color headerBgColor = EditorGUIUtility.isProSkin ? new Color(0.35f, 0.35f, 0.35f, 1f) : new Color(0.65f, 0.65f, 0.65f, 1f);
-            Color contentBgColor = EditorGUIUtility.isProSkin ? new Color(0.28f, 0.28f, 0.28f, 1f) : new Color(0.85f, 0.85f, 0.85f, 1f);
-            Color typeBoxBorder = EditorGUIUtility.isProSkin ? new Color(0.8f, 0.8f, 0.8f, 0.5f) : new Color(0.3f, 0.3f, 0.3f, 0.5f);
-
-            Type baseType = GetFieldBaseType();
-            string baseTypeName = baseType != null ? baseType.FullName : _property.type;
-
-            Type propertyType = GetAssignedType(_property);
-            List<Type> types = GetCachedCompatibleTypes(_property, baseTypeName);
-            string[] filteredTypeNames = GetCachedTypeNames(types, baseTypeName);
-
-            bool hasNoTypes = types.Count == 0;
-            bool isElement = _property.propertyPath.Contains(".Array.data[");
-
-            int defaultIndex = 0;
-            if (propertyType != null)
-            {
-                int index = types.FindIndex(t => t.Name == propertyType.Name);
-                if (index >= 0) defaultIndex = index + 1;
-            }
-
-            string defaultValue = filteredTypeNames.Length > 0 ? filteredTypeNames[defaultIndex] : filteredTypeNames[0];
-            string typeDisplayName = propertyType != null ? ObjectNames.NicifyVariableName(propertyType.Name) : "Unassigned";
-
-            // Header Box Border Simulation
-            VisualElement headerBox = new VisualElement();
-            headerBox.style.borderTopWidth = 1;
-            headerBox.style.borderBottomWidth = 1;
-            headerBox.style.borderLeftWidth = 1;
-            headerBox.style.borderRightWidth = 1;
-            headerBox.style.borderBottomColor = borderColor;
-            headerBox.style.borderTopColor = borderColor;
-            headerBox.style.borderRightColor = borderColor;
-            headerBox.style.borderLeftColor = borderColor;
-            headerBox.style.backgroundColor = headerBgColor;
-            headerBox.style.paddingTop = 6;
-            headerBox.style.paddingBottom = 8;
-            headerBox.style.paddingLeft = 4; // Tightly left-aligned
-            headerBox.style.paddingRight = 12;
-
-            // Content Box Container
-            VisualElement bodyBox = new VisualElement();
-            bodyBox.style.borderBottomWidth = 1;
-            bodyBox.style.borderLeftWidth = 1;
-            bodyBox.style.borderRightWidth = 1;
-            bodyBox.style.borderTopWidth = 0;
-            bodyBox.style.borderBottomColor = borderColor;
-            bodyBox.style.borderTopColor = borderColor;
-            bodyBox.style.borderRightColor = borderColor;
-            bodyBox.style.borderLeftColor = borderColor;
-            bodyBox.style.backgroundColor = contentBgColor;
-            bodyBox.style.paddingTop = 8;
-            bodyBox.style.paddingBottom = 8;
-            bodyBox.style.paddingRight = 12;
-            bodyBox.style.paddingLeft = isElement ? 14 : 4;
-            bodyBox.style.display = _property.isExpanded && !hasNoTypes ? DisplayStyle.Flex : DisplayStyle.None;
-
-            if (isElement)
-            {
-                headerBox.style.marginLeft = -8;
-                bodyBox.style.marginLeft = -8;
-            }
-
-            // Custom Foldout Construction
-            Foldout headerFoldout = new Foldout();
-            headerFoldout.text = "";
-            headerFoldout.value = _property.isExpanded;
-            headerBox.Add(headerFoldout);
-
-            Toggle toggle = headerFoldout.Q<Toggle>();
-
-            if (toggle != null)
-            {
-                toggle.style.marginLeft = 0;
-                toggle.style.marginRight = isElement ? 58 : 30; // Protect absolute util buttons
-                toggle.style.paddingLeft = 0;
-                toggle.style.paddingRight = 0;
-                toggle.style.flexShrink = 1;
-
-                var input = toggle.Q<VisualElement>(className: "unity-toggle__input");
-                if (input != null)
-                {
-                    input.style.marginLeft = 0;
-                    input.style.marginRight = 0;
-                    input.style.flexShrink = 0;
-                }
-
-                VisualElement checkmark = toggle.Q<VisualElement>(className: "unity-checkmark");
-                if (checkmark != null)
-                {
-                    checkmark.style.marginLeft = 0;
-                    checkmark.style.marginRight = 0;
-                    checkmark.style.flexShrink = 0;
-                }
-            }
-
-            VisualElement customHeaderRow = new VisualElement();
-            customHeaderRow.style.flexDirection = FlexDirection.Row;
-            customHeaderRow.style.alignItems = Align.Center;
-            customHeaderRow.style.flexShrink = 1;
-            customHeaderRow.style.overflow = Overflow.Hidden;
-
-            // Always add the prefix label (Variable name or Element index)
-            Label prefixLabel = new Label($"{_property.displayName} ");
-            prefixLabel.style.marginLeft = 0;
-            prefixLabel.style.paddingLeft = 0;
-            prefixLabel.style.flexShrink = 0;
-            customHeaderRow.Add(prefixLabel);
-
-            // Transparent type box with outline
-            VisualElement typeBox = new VisualElement();
-            typeBox.style.backgroundColor = new Color(0, 0, 0, 0); // Transparent
-            typeBox.style.borderTopColor = typeBoxBorder;
-            typeBox.style.borderBottomColor = typeBoxBorder;
-            typeBox.style.borderLeftColor = typeBoxBorder;
-            typeBox.style.borderRightColor = typeBoxBorder;
-            typeBox.style.borderTopWidth = 1;
-            typeBox.style.borderBottomWidth = 1;
-            typeBox.style.borderLeftWidth = 1;
-            typeBox.style.borderRightWidth = 1;
-            typeBox.style.paddingLeft = 4;
-            typeBox.style.paddingRight = 4;
-            typeBox.style.paddingTop = 1;
-            typeBox.style.paddingBottom = 1;
-            typeBox.style.marginLeft = 0;
-            typeBox.style.flexShrink = 1;
-            typeBox.style.overflow = Overflow.Hidden;
-
-            Label typeLabel = new Label($"TYPE : <b>{typeDisplayName}</b>");
-            typeLabel.enableRichText = true;
-            typeLabel.style.flexShrink = 1;
-            typeLabel.style.overflow = Overflow.Hidden;
-            typeLabel.style.textOverflow = TextOverflow.Ellipsis;
-            typeBox.Add(typeLabel);
-            customHeaderRow.Add(typeBox);
-
-            if (toggle != null) toggle.Add(customHeaderRow);
-
-            // Forward-declare the dropdown reference so it can be updated by the paste action
-            DropdownField typesDropDown = null;
-
-            // Utility Buttons Area
-            VisualElement btnContainer = new VisualElement();
-            btnContainer.style.flexDirection = FlexDirection.Row;
-            btnContainer.style.position = Position.Absolute;
-            btnContainer.style.right = 6;
-            btnContainer.style.top = 6;
-
-            // 3-dots Context Menu Button
-            Button dotsBtn = new Button() { text = "\u22EE", tooltip = "Options" };
-            dotsBtn.style.width = 20; // Increased width to hold the larger font
-            dotsBtn.style.height = 18;
-            dotsBtn.style.backgroundColor = new Color(0, 0, 0, 0); // Look like plain text
-            dotsBtn.style.borderTopWidth = 0;
-            dotsBtn.style.borderBottomWidth = 0;
-            dotsBtn.style.borderLeftWidth = 0;
-            dotsBtn.style.borderRightWidth = 0;
-            dotsBtn.style.fontSize = 18; // Increased from 14
-            dotsBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
-            dotsBtn.style.paddingLeft = 0;
-            dotsBtn.style.paddingRight = 0;
-            dotsBtn.style.paddingTop = 0;
-            dotsBtn.style.paddingBottom = 0;
-
-            dotsBtn.clicked += () =>
-            {
-                ShowContextMenu(dotsBtn.worldBound, _property, baseType, () =>
-                {
-                    // Refresh UI Toolkit structural layout after external property paste
-                    Type updatedType = GetAssignedType(_property);
-                    string newName = updatedType != null ? ObjectNames.NicifyVariableName(updatedType.Name) : "Unassigned";
-                    typeLabel.text = $"TYPE : <b>{newName}</b>";
-
-                    if (typesDropDown != null)
-                        typesDropDown.SetValueWithoutNotify(newName);
-
-                    RebuildBody(bodyBox, _property, isElement);
-                    _property.isExpanded = true;
-                    headerFoldout.value = true;
-                });
-            };
-            btnContainer.Add(dotsBtn);
-
-            if (isElement)
-            {
-                Button removeBtn = new Button(() => {
-                    RemoveElementFromList(_property);
-                })
-                { text = "X", tooltip = "Remove Element" };
-                removeBtn.style.width = 24; removeBtn.style.height = 18;
-                removeBtn.style.backgroundColor = new Color(0.85f, 0.4f, 0.4f, 1f);
-                removeBtn.style.paddingLeft = 0; removeBtn.style.paddingRight = 0; removeBtn.style.paddingTop = 0; removeBtn.style.paddingBottom = 0;
-                removeBtn.style.marginLeft = 2; // Reduced gap from 4 to 2
-                btnContainer.Add(removeBtn);
-            }
-            headerBox.Add(btnContainer);
-
-            // Dropdown OR Warning Box
-            if (hasNoTypes)
-            {
-                IMGUIContainer warningContainer = new IMGUIContainer(() =>
-                {
-                    Rect r = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight * 2.5f);
-                    DrawWarningBox(r, baseType);
-                });
-                warningContainer.style.marginTop = 4;
-                headerBox.Add(warningContainer);
-            }
-            else
-            {
-                typesDropDown = new DropdownField(string.Empty, filteredTypeNames.ToList(), defaultValue);
-                typesDropDown.style.flexGrow = 1;
-                typesDropDown.style.flexShrink = 1; // Explicitly allowed to truncate properly
-                typesDropDown.style.marginTop = 4;
-
-                typesDropDown.style.marginLeft = 0;
-                typesDropDown.style.marginRight = 0;
-                typesDropDown.style.paddingLeft = 0;
-                typesDropDown.style.paddingRight = 0;
-
-                typesDropDown.formatSelectedValueCallback = (val) => val == "Unassigned" ? "Choose a suitable polymorphic type" : val;
-
-                headerBox.Add(typesDropDown);
-
-                typesDropDown.RegisterValueChangedCallback(evt =>
-                {
-                    if (string.IsNullOrEmpty(evt.newValue)) return;
-                    int newIndex = Array.IndexOf(filteredTypeNames, evt.newValue);
-
-                    if (newIndex == 0)
-                    {
-                        _property.serializedObject.Update();
-                        _property.managedReferenceValue = null;
-                        _property.serializedObject.ApplyModifiedProperties();
-                    }
-                    else if (newIndex > 0 && newIndex <= types.Count)
-                    {
-                        Type resultType = types[newIndex - 1];
-                        if (resultType != null)
-                        {
-                            _property.serializedObject.Update();
-                            _property.managedReferenceValue = Activator.CreateInstance(resultType);
-                            _property.serializedObject.ApplyModifiedProperties();
-                        }
-                    }
-
-                    Type updatedType = GetAssignedType(_property);
-                    string newName = updatedType != null ? ObjectNames.NicifyVariableName(updatedType.Name) : "Unassigned";
-                    typeLabel.text = $"TYPE : <b>{newName}</b>";
-
-                    RebuildBody(bodyBox, _property, true);
-                    _property.isExpanded = true;
-                    headerFoldout.value = true;
-                });
-            }
-
-            headerFoldout.RegisterValueChangedCallback(evt =>
-            {
-                _property.isExpanded = evt.newValue;
-                bodyBox.style.display = evt.newValue && !hasNoTypes ? DisplayStyle.Flex : DisplayStyle.None;
-            });
-
-            RebuildBody(bodyBox, _property, isElement);
-
-            root.Add(headerBox);
-            root.Add(bodyBox);
-
-            return root;
-        }
-
-        private void RebuildBody(VisualElement body, SerializedProperty _property, bool isElement)
-        {
-            body.Clear();
-            if (GetAssignedType(_property) == null)
-            {
-                HelpBox unassignedErrorBox = new HelpBox("[Unassigned]: Please select a Type.", HelpBoxMessageType.Error);
-                body.Add(unassignedErrorBox);
-                return;
-            }
-
-            SerializedProperty iterator = _property.Copy();
-            SerializedProperty endProperty = iterator.GetEndProperty();
-            bool enterChildren = true;
-            while (iterator.NextVisible(enterChildren))
-            {
-                if (SerializedProperty.EqualContents(iterator, endProperty)) break;
-
-                bool isNestedList = iterator.isArray && iterator.propertyType != SerializedPropertyType.String;
-                PropertyField pf = new PropertyField(iterator.Copy());
-                pf.Bind(_property.serializedObject);
-
-                if (!isNestedList)
-                {
-                    pf.style.paddingLeft = 10;
-                }
-                else if (!isElement)
-                {
-                    pf.style.paddingLeft = 15;
-                }
-
-                body.Add(pf);
-                enterChildren = false;
-            }
         }
 
         // =========================================================

@@ -23,19 +23,31 @@ namespace AbstractPixel.Settings
         private void InitializeSettingsDictionary()
         {
 
-            foreach (ISettingBackend setting in activeRegistry.AllSettings)
+            foreach (SettingsCategoryGroup group in activeRegistry.AllSettingsList)
             {
-                if (setting == null)
+                if (group.Settings == null)
                 {
                     continue;
                 }
 
-                Type settingType = setting.GetType();
+                foreach (ISettingBackend setting in group.Settings)
+                {
+                    if (setting == null)
+                    {
+                        continue;
+                    }
+                    Type settingType = setting.GetType();
+                    setting.Initialize();
 
-                // We call Initialize to set everything to its DefaultValue initially
-                setting.Initialize();
-
-                settingsDictionary.Add(settingType, setting);
+                    if (settingsDictionary.ContainsKey(settingType) == false)
+                    {
+                        settingsDictionary.Add(settingType, setting);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[SettingsManager] Duplicate setting detected in Registry: {settingType.Name}");
+                    }
+                }
             }
         }
 
@@ -94,6 +106,7 @@ namespace AbstractPixel.Settings
                 keyValuePair.Value.ApplySettingLogic();
             }
             ReevaluateAllDependencies();
+            SettingsActions.RaiseSettingsLoaded();
         }
     }
 }

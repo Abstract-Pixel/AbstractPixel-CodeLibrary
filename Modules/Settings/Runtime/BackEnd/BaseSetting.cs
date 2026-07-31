@@ -15,21 +15,23 @@ namespace AbstractPixel.Settings
 #endif
         [field: Header("Saved/Current Data")]
         [field: SerializeField, ReadOnly(true)] public TValue CurrentValue { get; private set; }
-        [field: SerializeField, ReadOnly(true)] public bool isAvailable { get; private set; } = true;
+        [field: SerializeField, ReadOnly(true)] public bool IsActive { get; private set; } = true;
 
         [field: Header("Configuration Data")]
-        [field: SerializeField] public SettingCategory Category { get; private set; }
+        [field: SerializeField] public SettingMetadata Metadata { get; private set; }
         [field: SerializeField] public TValue DefaultValue { get; protected set; }
 
         [SerializeReference, Polymorphic] private List<ISettingDependencyRule> dependencyRulesList = new List<ISettingDependencyRule>();
         // Events
         public event Action<TValue> OnValueChanged = delegate { };
-        public event Action<bool> OnAvailabilityChanged = delegate { };
+        public event Action<bool> OnActiveStatusChanged = delegate { };
 
         bool isDefaultValuesPreGenerated;
 
-        public virtual void Initialize()
+        public void Initialize()
         {
+            // Set Data First Before Setting Default current value
+            OnInitialize();
             CurrentValue = DefaultValue;
         }
 
@@ -39,11 +41,13 @@ namespace AbstractPixel.Settings
             OnValueChanged?.Invoke(CurrentValue);
         }
 
+        protected abstract void OnInitialize();
+
         public abstract void ApplySettingLogic();
 
         public bool EvaluateDependencies()
         {
-            bool previousAvailability = isAvailable;
+            bool previousAvailability = IsActive;
             bool isCurrentlyAvailable = true;
 
             foreach (ISettingDependencyRule dependencyRule in dependencyRulesList)
@@ -61,20 +65,20 @@ namespace AbstractPixel.Settings
                 }
             }
 
-            isAvailable = isCurrentlyAvailable;
+            IsActive = isCurrentlyAvailable;
 
-            if (isAvailable != previousAvailability)
+            if (IsActive != previousAvailability)
             {
-                OnAvailabilityChanged?.Invoke(isAvailable);
+                OnActiveStatusChanged?.Invoke(IsActive);
             }
 
-            return isAvailable;
+            return IsActive;
         }
 
         public virtual void Deconstruct()
         {
             OnValueChanged = delegate { };
-            OnAvailabilityChanged = delegate { };
+            OnActiveStatusChanged = delegate { };
         }
 
         public void SaveToDataTransferObject(SettingsDTO dataTransferObject)
@@ -151,14 +155,20 @@ namespace AbstractPixel.Settings
         }
 
 #if UNITY_EDITOR
-        public virtual void ValidateInEditor(bool _forceRevalidation = false)
+        public void ValidateInEditor(bool _forceRevalidation = false)
         {
-           
+            bool canValidate = CanProceedWithValidation(_forceRevalidation);
+            if (canValidate)
+            {
+                OnValidateInEditor();
+            }
         }
 
-        protected bool CanProceedWithValidation(bool _forceRevalidation)
+        protected abstract void OnValidateInEditor();
+
+        private bool CanProceedWithValidation(bool _forceRevalidation)
         {
-            if(_forceRevalidation)
+            if (_forceRevalidation)
             {
                 return true;
             }

@@ -18,22 +18,27 @@ namespace AbstractPixel.Settings.Editor
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            // We disable these buttons completely if the game is playing.
-            // These are strict Editor-Time tools for managing the save files and defaults.
-            EditorGUI.BeginDisabledGroup(Application.isPlaying == true);
 
-            float buttonWidth = position.width / 3f;
+            float buttonWidth = position.width / 4f;
             float buttonHeight = EditorGUIUtility.singleLineHeight;
             float yPosition = position.y + 2f;
 
             Rect applyButtonRect = new Rect(position.x, yPosition, buttonWidth, buttonHeight);
-            Rect defaultButtonRect = new Rect(applyButtonRect.xMax, yPosition, buttonWidth, buttonHeight);
+            Rect saveButtonRect = new Rect(applyButtonRect.xMax, yPosition, buttonWidth, buttonHeight);
+            Rect defaultButtonRect = new Rect(saveButtonRect.xMax, yPosition, buttonWidth, buttonHeight);
             Rect resetButtonRect = new Rect(defaultButtonRect.xMax, yPosition, buttonWidth, buttonHeight);
 
+
+            if(GUI.Button(applyButtonRect, "Apply Setting") == true)
+            {
+                ISettingBackend setting = GetSettingInstance(property);
+                setting.ApplySettingLogic();
+               
+            }
             // ---------------------------------------------------------
             // BUTTON 1: APPLY (Save to File)
             // ---------------------------------------------------------
-            if (GUI.Button(applyButtonRect, "Save Setting") == true)
+            if (GUI.Button(saveButtonRect, "Save Setting") == true)
             {
                 ExecuteFileAction(property, (setting, dataTransferObject) =>
                 {
@@ -75,8 +80,6 @@ namespace AbstractPixel.Settings.Editor
                     Debug.Log($"[Settings System] Editor Time: Wiped '{setting.GetType().Name}' from the Settings file.");
                 });
             }
-
-            EditorGUI.EndDisabledGroup();
         }
 
         // =========================================================
@@ -92,19 +95,32 @@ namespace AbstractPixel.Settings.Editor
                 return null;
             }
 
-            // Find the exact index of this setting in the Polymorphic List
-            int startIndex = property.propertyPath.IndexOf('[') + 1;
-            int endIndex = property.propertyPath.IndexOf(']');
+            string path = property.propertyPath;
 
-            if (startIndex > 0 && endIndex > startIndex)
+            // Find the First Index (The Category Group Index)
+            int groupStartIndex = path.IndexOf('[') + 1;
+            int groupEndIndex = path.IndexOf(']', groupStartIndex);
+
+            // Find the Second Index (The Setting Index inside the Group)
+            int settingStartIndex = path.IndexOf('[', groupEndIndex) + 1;
+            int settingEndIndex = path.IndexOf(']', settingStartIndex);
+
+            if (groupStartIndex > 0 && groupEndIndex > groupStartIndex && settingStartIndex > 0 && settingEndIndex > settingStartIndex)
             {
-                string indexString = property.propertyPath.Substring(startIndex, endIndex - startIndex);
+                string groupIndexString = path.Substring(groupStartIndex, groupEndIndex - groupStartIndex);
+                string settingIndexString = path.Substring(settingStartIndex, settingEndIndex - settingStartIndex);
 
-                if (int.TryParse(indexString, out int index) == true)
+                if (int.TryParse(groupIndexString, out int groupIndex) == true &&
+                    int.TryParse(settingIndexString, out int settingIndex) == true)
                 {
-                    if (index >= 0 && index < registry.AllSettings.Count)
+                    if (groupIndex >= 0 && groupIndex < registry.AllSettingsList.Count)
                     {
-                        return registry.AllSettings[index];
+                        SettingsCategoryGroup targetGroup = registry.AllSettingsList[groupIndex];
+
+                        if (targetGroup != null && settingIndex >= 0 && settingIndex < targetGroup.Settings.Count)
+                        {
+                            return targetGroup.Settings[settingIndex];
+                        }
                     }
                 }
             }

@@ -7,8 +7,6 @@ namespace AbstractPixel.Settings
     /// </summary>
     public interface ISettingBackend
     {
-        SettingCategory Category { get; }
-
         void Initialize();
         void ApplySettingLogic();
         bool EvaluateDependencies();
