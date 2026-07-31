@@ -7,8 +7,8 @@ namespace AbstractPixel.Tooltip
     [CreateAssetMenu(fileName = "TooltipConfig", menuName = "Utility/TooltipConfig", order = 1)]
     public class TooltipConfig : ScriptableObject
     {
-        [SerializeField] internal TooltipView TooltipPrefab;
-        [SerializeField] internal bool isWorldSpace;
+        [field:SerializeField] public TooltipView TooltipPrefab {  get; private set; }
+        [field:SerializeField] public bool isWorldSpace { get; private set; }
 
         [Header("Input Settings")]
         [Tooltip("External Time to wait before showing tooltip.Used if no Input Action is assigned.")]
@@ -19,7 +19,7 @@ namespace AbstractPixel.Tooltip
         [SerializeField] internal bool DeactivateOnInputCancelled = false;
 
         [Header("Positioning Settings")]
-        [Polymorphic, SerializeReference]
+        [SerializeReference]
         [Tooltip("The strategy used to position the tooltip relative to its target.")]
         public TooltipPositioningStrategy PositioningStrategy = new FixedTargetStrategy();
 

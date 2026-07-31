@@ -7,7 +7,6 @@ namespace AbstractPixel.Tooltip
 {
     public static class TooltipManager
     {
-        // Maps a Config to its SINGLE instantiated UI TooltipView.
         private static Dictionary<TooltipConfig, TooltipView> spawnedTooltipViewsDict = new Dictionary<TooltipConfig, TooltipView>();
 
         private static Transform screenSpaceCanvas;
@@ -18,7 +17,7 @@ namespace AbstractPixel.Tooltip
         {
             TooltipConfig config = _tooltipData.Config;
 
-            if(spawnedTooltipViewsDict.TryGetValue(config, out TooltipView _tooltipView))
+            if (spawnedTooltipViewsDict.TryGetValue(config, out TooltipView _tooltipView))
             {
                 _tooltipView.Initialize(_tooltipData);
                 _tooltipView.Show();
@@ -51,12 +50,11 @@ namespace AbstractPixel.Tooltip
             tooltipFactory = new TooltipFactory();
             SceneManager.sceneLoaded -= ResetDataOnSceneLoad;
             SceneManager.sceneLoaded += ResetDataOnSceneLoad;
-
         }
 
         private static void ResetDataOnSceneLoad(Scene _scene, LoadSceneMode _mode)
         {
-            if(spawnedTooltipViewsDict.Count > 0)
+            if (spawnedTooltipViewsDict.Count > 0)
             {
                 foreach (TooltipView tooltipView in spawnedTooltipViewsDict.Values)
                 {
@@ -91,15 +89,19 @@ namespace AbstractPixel.Tooltip
                 screenSpaceCanvas = newCanvas.transform;
             }
 
-            if(worldSpaceCanvas == null)
+            if (worldSpaceCanvas == null)
             {
                 GameObject newWorldCanvas = new GameObject("[Tooltip_World_Canvas]");
                 Object.DontDestroyOnLoad(newWorldCanvas);
+
                 Canvas canvas = newWorldCanvas.AddComponent<Canvas>();
                 canvas.renderMode = RenderMode.WorldSpace;
                 canvas.sortingOrder = 30000;
-                CanvasScaler scaler = newWorldCanvas.AddComponent<CanvasScaler>();
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
+
+                // Architectural Fix: Removed the CanvasScaler entirely (it does nothing in World Space).
+                // Shrunk the canvas scale drastically so UI isn't thousands of meters wide in the 3D scene.
+                newWorldCanvas.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+
                 worldSpaceCanvas = newWorldCanvas.transform;
             }
         }
