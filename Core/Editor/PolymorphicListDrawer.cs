@@ -20,7 +20,7 @@ namespace AbstractPixel.Core.Editor
         private static GUIStyle s_dragHandleStyle;
         private static GUIStyle s_headerTitleStyle;
         private static GUIStyle s_countBadgeStyle;
-        private static GUIStyle s_headerPlusMinusStyle;
+        private static GUIStyle s_flatFooterBtnStyle;
 
         private static string s_activeListPath = null;
         private static int s_draggedIndex = -1;
@@ -66,7 +66,11 @@ namespace AbstractPixel.Core.Editor
             string baseTypeName = elementType != null ? elementType.FullName : typeof(object).FullName;
             List<Type> compatibleTypes = GetCachedCompatibleTypes(elementType, baseTypeName);
 
-            // Native Unity ProSkin & Personal Skin Palette
+            // FIX 1: Outside Vertical Margins (4px top, 4px bottom)
+            float outerVerticalMargin = 4f;
+            Rect outerPosition = new Rect(_position.x, _position.y + outerVerticalMargin, _position.width, _position.height - (outerVerticalMargin * 2f));
+
+            // Native Unity ProSkin & Personal Palette
             Color borderColor = EditorGUIUtility.isProSkin ? new Color(0.12f, 0.12f, 0.12f, 1f) : new Color(0.6f, 0.6f, 0.6f, 1f);
             Color masterHeaderBg = EditorGUIUtility.isProSkin ? new Color(0.28f, 0.28f, 0.28f, 1f) : new Color(0.78f, 0.78f, 0.78f, 1f);
             Color masterBodyBg = EditorGUIUtility.isProSkin ? new Color(0.24f, 0.24f, 0.24f, 1f) : new Color(0.82f, 0.82f, 0.82f, 1f);
@@ -76,14 +80,13 @@ namespace AbstractPixel.Core.Editor
 
             float singleLine = EditorGUIUtility.singleLineHeight;
             float borderThickness = 1f;
-            float masterHeaderHeight = singleLine + 10f;
+            float masterHeaderHeight = singleLine + 8f; // 26px header height
 
-            // Calculate exact list container rect
-            float calculatedHeight = GetPropertyHeight(_property, _label);
+            float calculatedHeight = GetPropertyHeight(_property, _label) - (outerVerticalMargin * 2f);
             bool isExpanded = _property.isExpanded;
             float footerTabHeight = isExpanded ? 20f : 0f;
 
-            Rect containerRect = new Rect(_position.x, _position.y, _position.width, calculatedHeight - footerTabHeight);
+            Rect containerRect = new Rect(outerPosition.x, outerPosition.y, outerPosition.width, calculatedHeight - footerTabHeight);
 
             // 1. Draw Master Outer Box
             EditorGUI.DrawRect(containerRect, borderColor);
@@ -94,26 +97,32 @@ namespace AbstractPixel.Core.Editor
             // 2. Draw Master List Header
             Rect masterHeaderRect = new Rect(masterInnerRect.x, masterInnerRect.y, masterInnerRect.width, masterHeaderHeight);
             EditorGUI.DrawRect(masterHeaderRect, masterHeaderBg);
-            EditorGUI.DrawRect(new Rect(masterHeaderRect.x, masterHeaderRect.yMax - borderThickness, masterHeaderRect.width, borderThickness), borderColor);
+
+            if (isExpanded)
+            {
+                EditorGUI.DrawRect(new Rect(masterHeaderRect.x, masterHeaderRect.yMax - borderThickness, masterHeaderRect.width, borderThickness), borderColor);
+            }
 
             // Title Foldout & Label
-            Rect foldoutRect = new Rect(masterHeaderRect.x + 6f, masterHeaderRect.y + 5f, 14f, singleLine);
+            Rect foldoutRect = new Rect(masterHeaderRect.x + 6f, masterHeaderRect.y + 4f, 14f, singleLine);
             _property.isExpanded = GUI.Toggle(foldoutRect, _property.isExpanded, GUIContent.none, EditorStyles.foldout);
 
             GUIContent titleContent = new GUIContent(_label.text);
             Vector2 titleSize = s_headerTitleStyle.CalcSize(titleContent);
-            Rect titleRect = new Rect(foldoutRect.xMax + 2f, masterHeaderRect.y + 4f, titleSize.x + 4f, singleLine);
+            Rect titleRect = new Rect(foldoutRect.xMax + 2f, masterHeaderRect.y + 3f, titleSize.x + 4f, singleLine);
             EditorGUI.LabelField(titleRect, titleContent, s_headerTitleStyle);
 
-            // Left-Aligned Count Badge (Immediately following the title)
-            Rect countBadgeRect = new Rect(titleRect.xMax + 6f, masterHeaderRect.y + 5f, 68f, singleLine);
+            // FIX 3: Native Rounded Count Badge (Non-Bold Text)
+            Rect countBadgeRect = new Rect(titleRect.xMax + 6f, masterHeaderRect.y + 4f, 62f, 18f);
             GUI.Box(countBadgeRect, $"Count  {listProp.arraySize}", s_countBadgeStyle);
 
-            // Master Header Top (+ / -) Buttons (30% Larger, Prominent)
-            float topBtnWidth = 32f;
-            float topBtnHeight = 22f;
-            Rect topAddBtnRect = new Rect(masterHeaderRect.xMax - (topBtnWidth * 2f) - 6f, masterHeaderRect.y + 2f, topBtnWidth, topBtnHeight);
-            Rect topRemoveBtnRect = new Rect(masterHeaderRect.xMax - topBtnWidth - 4f, masterHeaderRect.y + 2f, topBtnWidth, topBtnHeight);
+            // FIX 2: Vertically Centered Master Header Buttons (Symmetrical 3px Top / 3px Bottom Padding)
+            float topBtnWidth = 30f;
+            float topBtnHeight = 20f;
+            float topBtnY = masterHeaderRect.y + ((masterHeaderRect.height - topBtnHeight) * 0.5f);
+
+            Rect topAddBtnRect = new Rect(masterHeaderRect.xMax - (topBtnWidth * 2f) - 6f, topBtnY, topBtnWidth, topBtnHeight);
+            Rect topRemoveBtnRect = new Rect(masterHeaderRect.xMax - topBtnWidth - 4f, topBtnY, topBtnWidth, topBtnHeight);
 
             if (GUI.Button(topAddBtnRect, "+", EditorStyles.miniButtonLeft))
             {
@@ -126,7 +135,7 @@ namespace AbstractPixel.Core.Editor
 
             float currentY = masterHeaderRect.yMax + 4f;
 
-            // 3. Draw Elements Loop OR Empty State (Only if Expanded)
+            // 3. Draw Elements Loop OR Empty State (Only when Expanded)
             if (_property.isExpanded)
             {
                 Event currentEvent = Event.current;
@@ -153,7 +162,7 @@ namespace AbstractPixel.Core.Editor
                         float elemContentInnerHeight = 0f;
                         if (elementProp.isExpanded && !hasNoTypes)
                         {
-                            elemContentInnerHeight = isNull ? (singleLine * 2f) + 16f : GetChildrenHeight(elementProp) + 16f;
+                            elemContentInnerHeight = isNull ? (singleLine * 1.5f) + 12f : GetChildrenHeight(elementProp) + 16f;
                         }
 
                         float totalElemHeight = elemHeaderOuterHeight + (elementProp.isExpanded && !hasNoTypes ? elemContentInnerHeight + borderThickness : 0f);
@@ -194,7 +203,7 @@ namespace AbstractPixel.Core.Editor
                             elementProp.isExpanded = GUI.Toggle(elemFoldoutRect, elementProp.isExpanded, GUIContent.none, EditorStyles.foldout);
                         }
 
-                        // Element Index / Prefix Label
+                        // Element Index Label
                         float elemCurrentX = elemFoldoutRect.xMax + 2f;
                         GUIContent prefixContent = new GUIContent($"Element {i}");
                         Vector2 prefixSize = s_richTextLabel.CalcSize(prefixContent);
@@ -202,13 +211,13 @@ namespace AbstractPixel.Core.Editor
                         EditorGUI.LabelField(prefixRect, prefixContent, s_richTextLabel);
                         elemCurrentX = prefixRect.xMax + 6f;
 
-                        // Header Utility Buttons (Right-Anchored)
+                        // Header Utility Buttons
                         float removeBtnWidth = 22f;
                         float dotsBtnWidth = 18f;
                         Rect removeBtnRect = new Rect(elemHeaderInnerRect.xMax - removeBtnWidth - 4f, elemHeaderInnerRect.y + 6f, removeBtnWidth, 18f);
                         Rect dotsBtnRect = new Rect(removeBtnRect.x - dotsBtnWidth - 2f, elemHeaderInnerRect.y + 6f, dotsBtnWidth, 18f);
 
-                        // Calculate available space for TYPE Box dynamically to avoid text cutoff
+                        // Dynamic TYPE Box Width
                         float maxTypeBoxWidth = dotsBtnRect.x - elemCurrentX - 8f;
 
                         string typeDisplayName = elementAssignedType != null ? ObjectNames.NicifyVariableName(elementAssignedType.Name) : "Unassigned";
@@ -218,7 +227,6 @@ namespace AbstractPixel.Core.Editor
 
                         float actualBoxWidth = Mathf.Max(10f, Mathf.Min(boxContentSize.x + 10f, maxTypeBoxWidth));
 
-                        // Truncate text cleanly ONLY if available space is strictly constrained
                         if (actualBoxWidth >= maxTypeBoxWidth)
                         {
                             float staticPrefixWidth = s_richTextLabel.CalcSize(new GUIContent("TYPE : ")).x;
@@ -281,10 +289,15 @@ namespace AbstractPixel.Core.Editor
                             EditorGUI.DrawRect(elemContentInnerRect, contentBgColor);
                             EditorGUI.DrawRect(new Rect(elemOuterRect.x, elemHeaderInnerRect.yMax + borderThickness, elemOuterRect.width, 1f), borderColor);
 
+                            // Unassigned Error Rendering
                             if (isNull)
                             {
-                                Rect helpBox = new Rect(elemContentInnerRect.x + 4f, elemContentInnerRect.y + 8f, elemContentInnerRect.width - 8f, singleLine * 2f);
-                                EditorGUI.HelpBox(helpBox, "[Unassigned]: Please select a Type.", MessageType.Error);
+                                float iconSize = 18f;
+                                Rect iconRect = new Rect(elemContentInnerRect.x + 8f, elemContentInnerRect.y + ((elemContentInnerHeight - iconSize) * 0.5f), iconSize, iconSize);
+                                GUI.Label(iconRect, EditorGUIUtility.IconContent("console.erroricon"));
+
+                                Rect errTextRect = new Rect(iconRect.xMax + 6f, elemContentInnerRect.y + ((elemContentInnerHeight - singleLine) * 0.5f), elemContentInnerRect.width - iconSize - 20f, singleLine);
+                                EditorGUI.LabelField(errTextRect, "<color=#FF5555><b>[Unassigned]:</b> Please select a Type.</color>", s_richTextLabel);
                             }
                             else
                             {
@@ -342,21 +355,23 @@ namespace AbstractPixel.Core.Editor
                     }
                 }
 
-                // 4. Draw Native Unity Footer Tab (ONLY when List is Expanded)
+                // Native Unity Flat Split-Box Footer Tab (ONLY when List is Expanded)
                 Rect footerTabRect = new Rect(containerRect.xMax - 60f, containerRect.yMax, 60f, footerTabHeight);
 
-                // Tab Outline & Background
-                EditorGUI.DrawRect(new Rect(footerTabRect.x, footerTabRect.y, footerTabRect.width, footerTabRect.height), borderColor);
+                EditorGUI.DrawRect(footerTabRect, borderColor);
                 EditorGUI.DrawRect(new Rect(footerTabRect.x + borderThickness, footerTabRect.y, footerTabRect.width - (borderThickness * 2f), footerTabRect.height - borderThickness), masterHeaderBg);
 
-                Rect btmAddBtnRect = new Rect(footerTabRect.x + 4f, footerTabRect.y + 1f, 26f, 17f);
-                Rect btmRemoveBtnRect = new Rect(btmAddBtnRect.xMax, footerTabRect.y + 1f, 26f, 17f);
+                float btnHalfWidth = (footerTabRect.width - (borderThickness * 2f)) * 0.5f;
+                Rect btmAddBtnRect = new Rect(footerTabRect.x + borderThickness, footerTabRect.y, btnHalfWidth, footerTabRect.height - borderThickness);
+                Rect btmRemoveBtnRect = new Rect(btmAddBtnRect.xMax, footerTabRect.y, btnHalfWidth, footerTabRect.height - borderThickness);
 
-                if (GUI.Button(btmAddBtnRect, "+", EditorStyles.miniButtonLeft))
+                EditorGUI.DrawRect(new Rect(btmAddBtnRect.xMax - 0.5f, footerTabRect.y, 1f, footerTabRect.height - borderThickness), borderColor);
+
+                if (GUI.Button(btmAddBtnRect, "+", s_flatFooterBtnStyle))
                 {
                     AddElementToList(listProp, _property);
                 }
-                if (GUI.Button(btmRemoveBtnRect, "-", EditorStyles.miniButtonRight))
+                if (GUI.Button(btmRemoveBtnRect, "-", s_flatFooterBtnStyle))
                 {
                     RemoveLastElementFromList(listProp, _property);
                 }
@@ -391,12 +406,13 @@ namespace AbstractPixel.Core.Editor
         {
             float singleLine = EditorGUIUtility.singleLineHeight;
             float borderThickness = 1f;
-            float masterHeaderHeight = singleLine + 10f;
+            float masterHeaderHeight = singleLine + 8f;
+            float outerVerticalMargin = 4f;
 
-            // Height when collapsed: Header ONLY (No Footer, No Body)
+            // Height when collapsed: Header ONLY + Vertical Margins
             if (!_property.isExpanded)
             {
-                return borderThickness + masterHeaderHeight + borderThickness;
+                return borderThickness + masterHeaderHeight + borderThickness + (outerVerticalMargin * 2f);
             }
 
             float footerTabHeight = 20f;
@@ -406,7 +422,7 @@ namespace AbstractPixel.Core.Editor
             {
                 if (_listProp.arraySize == 0)
                 {
-                    totalHeight += singleLine + 16f; // Empty state padding
+                    totalHeight += singleLine + 16f;
                 }
                 else
                 {
@@ -428,7 +444,7 @@ namespace AbstractPixel.Core.Editor
                         float elemContentInnerHeight = 0f;
                         if (elementProp.isExpanded && !hasNoTypes)
                         {
-                            elemContentInnerHeight = isNull ? (singleLine * 2f) + 16f : GetChildrenHeight(elementProp) + 16f;
+                            elemContentInnerHeight = isNull ? (singleLine * 1.5f) + 12f : GetChildrenHeight(elementProp) + 16f;
                         }
 
                         totalHeight += elemHeaderOuterHeight + (elementProp.isExpanded && !hasNoTypes ? elemContentInnerHeight + borderThickness : 0f) + 6f;
@@ -436,7 +452,7 @@ namespace AbstractPixel.Core.Editor
                 }
             }
 
-            return totalHeight + footerTabHeight;
+            return totalHeight + footerTabHeight + (outerVerticalMargin * 2f);
         }
 
         private float GetChildrenHeight(SerializedProperty _property)
@@ -472,7 +488,9 @@ namespace AbstractPixel.Core.Editor
             if (s_headerTitleStyle == null)
                 s_headerTitleStyle = new GUIStyle(EditorStyles.boldLabel) { fontSize = 12 };
             if (s_countBadgeStyle == null)
-                s_countBadgeStyle = new GUIStyle(EditorStyles.textField) { alignment = TextAnchor.MiddleCenter, fontSize = 10, fontStyle = FontStyle.Bold };
+                s_countBadgeStyle = new GUIStyle(EditorStyles.miniButton) { alignment = TextAnchor.MiddleCenter, fontSize = 10, fontStyle = FontStyle.Normal, normal = { textColor = EditorGUIUtility.isProSkin ? new Color(0.9f, 0.9f, 0.9f, 1f) : Color.black } };
+            if (s_flatFooterBtnStyle == null)
+                s_flatFooterBtnStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter, fontSize = 14, fontStyle = FontStyle.Bold, normal = { textColor = EditorGUIUtility.isProSkin ? new Color(0.85f, 0.85f, 0.85f, 1f) : Color.black } };
         }
 
         private void AddElementToList(SerializedProperty _listProp, SerializedProperty _parentProp)

@@ -18,21 +18,37 @@ MonoBehaviour:
     Settings:
       List:
       - rid: 8789862167657578613
-      - rid: 8789862167657578614
-      - rid: -2
+      - rid: 8789862167657578621
+      - rid: 8789862167657578622
+      - rid: 8789862167657578623
+      - rid: 8789862167657578618
+      - rid: 8789862167657578619
+      - rid: 8789862167657578620
+      - rid: 8789862167657578624
+      - rid: 8789862167657578625
   - GroupName: All Display Settings
     Category: 1
     Settings:
-      List: []
+      List:
+      - rid: 8789862167657578615
+      - rid: 8789862167657578629
+      - rid: 8789862167657578626
+      - rid: 8789862167657578627
+      - rid: 8789862167657578628
+      - rid: 8789862167657578630
+      - rid: 8789862167657578631
   - GroupName: All Audio Settings
     Category: 3
     Settings:
-      List: []
+      List:
+      - rid: 8789862167657578632
+      - rid: 8789862167657578635
+      - rid: 8789862167657578633
+      - rid: 8789862167657578634
+      - rid: 8789862167657578636
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
     - rid: 8789862167657578613
       type: {class: GraphicsPresetSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -64,7 +80,108 @@ MonoBehaviour:
         - High
         - Custom
         customTierIndex: 3
-    - rid: 8789862167657578614
+    - rid: 8789862167657578615
+      type: {class: ResolutionSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList:
+        - rid: 8789862167657578617
+        <OptionDisplayNames>k__BackingField:
+        - 1920 x 1080
+        - 1680 x 1050
+        - 1600 x 1024
+        - 1600 x 900
+        - 1440 x 1080
+        - 1440 x 900
+        - 1366 x 768
+        - 1360 x 768
+        - 1280 x 1024
+        - 1280 x 960
+        - 1280 x 800
+        - 1280 x 768
+        - 1280 x 720
+        - 1176 x 664
+        - 1152 x 864
+        - 1024 x 768
+        - 800 x 600
+        - 720 x 576
+        - 720 x 480
+        - 640 x 480
+    - rid: 8789862167657578617
+      type: {class: DependencyRule_IntComparison, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        targetSettingToCheck:
+          selectedClassName: 
+          selectedClassAssemblyQualifiedName: 
+          compatibleClassAssemblyQualifiedNames:
+          - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        comparisonOperator: 0
+        compareValue: 0
+    - rid: 8789862167657578618
+      type: {class: RenderScaleSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0.1
+        <MaxValue>k__BackingField: 1.5
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 1.5
+    - rid: 8789862167657578619
+      type: {class: HardwareAntiAliasingSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <OptionValues>k__BackingField: 01000000020000000400000008000000
+        <OptionDisplayNames>k__BackingField:
+        - Disabled
+        - 2x
+        - 4x
+        - 8x
+    - rid: 8789862167657578620
       type: {class: SoftwareAntiAliasingSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         <IsEnabled>k__BackingField: 1
@@ -110,3 +227,340 @@ MonoBehaviour:
         - TAA (Low)
         - TAA (Medium)
         - TAA (High)
+    - rid: 8789862167657578621
+      type: {class: LightingQualitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <OptionValues>k__BackingField:
+        - MaxAdditionalLightsPerObject: 2
+        - MaxAdditionalLightsPerObject: 4
+        - MaxAdditionalLightsPerObject: 8
+        <OptionDisplayNames>k__BackingField:
+        - Low
+        - Medium
+        - High
+    - rid: 8789862167657578622
+      type: {class: ShadowQualitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <OptionValues>k__BackingField:
+        - MaxShadowDistance: 30
+          ShadowCascadeCount: 1
+          ShadowDepthBias: 1
+          ShadowNormalBias: 1
+          MainLightShadowResolution: 512
+          AdditionalLightShadowAtlasResolution: 512
+        - MaxShadowDistance: 75
+          ShadowCascadeCount: 2
+          ShadowDepthBias: 1
+          ShadowNormalBias: 1
+          MainLightShadowResolution: 1024
+          AdditionalLightShadowAtlasResolution: 1024
+        - MaxShadowDistance: 150
+          ShadowCascadeCount: 4
+          ShadowDepthBias: 1
+          ShadowNormalBias: 1
+          MainLightShadowResolution: 2048
+          AdditionalLightShadowAtlasResolution: 2048
+        <OptionDisplayNames>k__BackingField:
+        - Low
+        - Medium
+        - High
+    - rid: 8789862167657578623
+      type: {class: TextureQualitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <OptionValues>k__BackingField: 00000000010000000200000003000000
+        <OptionDisplayNames>k__BackingField:
+        - Full
+        - Half
+        - Quarter
+        - Eighth
+    - rid: 8789862167657578624
+      type: {class: TerrainQualitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <OptionValues>k__BackingField:
+        - PixelError: 10
+          BaseMapDistance: 500
+          DetailDensityScale: 0.25
+          DetailDistance: 40
+          TreeDistance: 1000
+          BillboardStart: 30
+          FadeLength: 5
+          MaxMeshTrees: 20
+        - PixelError: 5
+          BaseMapDistance: 1000
+          DetailDensityScale: 0.5
+          DetailDistance: 80
+          TreeDistance: 2500
+          BillboardStart: 50
+          FadeLength: 10
+          MaxMeshTrees: 50
+        - PixelError: 1
+          BaseMapDistance: 2000
+          DetailDensityScale: 1
+          DetailDistance: 150
+          TreeDistance: 5000
+          BillboardStart: 100
+          FadeLength: 20
+          MaxMeshTrees: 100
+        <OptionDisplayNames>k__BackingField:
+        - Low
+        - Medium
+        - High
+    - rid: 8789862167657578625
+      type: {class: MotionBlurSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        lowQualityMaxThreshold: 0.3
+        mediumQualityMaxThreshold: 0.6
+    - rid: 8789862167657578626
+      type: {class: DisplayOutputSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <OptionValues>k__BackingField: 00000000
+        <OptionDisplayNames>k__BackingField:
+        - Display 0
+    - rid: 8789862167657578627
+      type: {class: FrameRateLimitSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 3
+        dependencyRulesList: []
+        <OptionValues>k__BackingField: 140000001e000000280000003c0000005a00000078000000f0000000ffffffff
+        <OptionDisplayNames>k__BackingField:
+        - 20 FPS
+        - 30 FPS
+        - 40 FPS
+        - 60 FPS
+        - 90 FPS
+        - 120 FPS
+        - 240 FPS
+        - Unlimited
+    - rid: 8789862167657578628
+      type: {class: VSyncSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <OptionValues>k__BackingField: 00000000010000000200000003000000
+        <OptionDisplayNames>k__BackingField:
+        - Off
+        - Every V Blank
+        - Every Second V Blank
+        - Every Third V Blank
+    - rid: 8789862167657578629
+      type: {class: ScreenModeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <OptionValues>k__BackingField: 000000000100000003000000
+        <OptionDisplayNames>k__BackingField:
+        - Exclusive Fullscreen
+        - Borderless Window
+        - Windowed
+    - rid: 8789862167657578630
+      type: {class: FOVSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 60
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 40
+        <MaxValue>k__BackingField: 120
+        <DisplayMinValue>k__BackingField: 30
+        <DisplayMaxValue>k__BackingField: 120
+        targetType: 1
+    - rid: 8789862167657578631
+      type: {class: BrightnessSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <MinValue>k__BackingField: -4
+        <MaxValue>k__BackingField: 2
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 2
+    - rid: 8789862167657578632
+      type: {class: MasterVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        targetBroAudioType: 31
+        exposedParameterName: Master
+        targetMixerGroups: []
+        volumeFadeDuration: 1
+    - rid: 8789862167657578633
+      type: {class: MusicVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        targetBroAudioType: 1
+        exposedParameterName: Master
+        targetMixerGroups: []
+        volumeFadeDuration: 1
+    - rid: 8789862167657578634
+      type: {class: SFXVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        targetBroAudioType: 8
+        exposedParameterName: Master
+        targetMixerGroups: []
+        volumeFadeDuration: 1
+    - rid: 8789862167657578635
+      type: {class: AmbienceVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        targetBroAudioType: 4
+        exposedParameterName: Master
+        targetMixerGroups: []
+        volumeFadeDuration: 1
+    - rid: 8789862167657578636
+      type: {class: UIVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+        targetBroAudioType: 2
+        exposedParameterName: Master
+        targetMixerGroups: []
+        volumeFadeDuration: 1
