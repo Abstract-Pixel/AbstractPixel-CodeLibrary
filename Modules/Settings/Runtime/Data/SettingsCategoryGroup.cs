@@ -10,8 +10,6 @@ namespace AbstractPixel.Settings
     {
         [ReadOnly(true)]public string GroupName;
         public SettingCategory Category;
-
-        [SerializeReference, Polymorphic] 
-        public List<ISettingBackend> Settings = new List<ISettingBackend>();
+        public PolymorphicList<ISettingBackend> Settings = new PolymorphicList<ISettingBackend>();
     }
 }

@@ -12340,6 +12340,8 @@ MonoBehaviour:
       Culture=neutral, PublicKeyToken=null
     - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
       Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
     - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
