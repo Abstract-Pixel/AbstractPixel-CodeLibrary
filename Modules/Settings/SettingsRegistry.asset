@@ -24,6 +24,7 @@ MonoBehaviour:
     - rid: 9005701308798206066
     - rid: 9005701308798206067
     - rid: 9005701308798206076
+    - rid: 8789862167657578607
   - GroupName: All Display Settings
     Category: 1
     Settings:
@@ -45,6 +46,47 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: 8789862167657578607
+      type: {class: TerrainQualitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 2
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: 
+          Description: 
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <OptionValues>k__BackingField:
+        - PixelError: 10
+          BaseMapDistance: 500
+          DetailDensityScale: 0.25
+          DetailDistance: 40
+          TreeDistance: 1000
+          BillboardStart: 30
+          FadeLength: 5
+          MaxMeshTrees: 20
+        - PixelError: 5
+          BaseMapDistance: 1000
+          DetailDensityScale: 0.5
+          DetailDistance: 80
+          TreeDistance: 2500
+          BillboardStart: 50
+          FadeLength: 10
+          MaxMeshTrees: 50
+        - PixelError: 1
+          BaseMapDistance: 2000
+          DetailDensityScale: 1
+          DetailDistance: 150
+          TreeDistance: 5000
+          BillboardStart: 100
+          FadeLength: 20
+          MaxMeshTrees: 100
+        <OptionDisplayNames>k__BackingField:
+        - Low
+        - Medium
+        - High
     - rid: 9005701083947335790
       type: {class: ResolutionSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -539,7 +581,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0.4
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Motion Blur
