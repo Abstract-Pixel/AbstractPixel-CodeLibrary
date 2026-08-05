@@ -25,6 +25,7 @@ namespace AbstractPixel.Settings
 
         private void BindToBackendSetting()
         {
+            
             if (targetSetting == null || targetSetting.TBaseType == null)
             {          
                 return;       

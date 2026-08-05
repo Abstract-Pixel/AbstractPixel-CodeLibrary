@@ -64,6 +64,8 @@ namespace AbstractPixel.Core.Editor
 
                 bool isNull = propertyType == null;
                 bool hasNoTypes = types.Count == 0;
+
+                // CRITICAL EDGE CASE FIX: Safely detect if we are inside a list.
                 bool isElement = _property.propertyPath.Contains(".Array.data[");
 
                 float borderThickness = 1f;
@@ -82,12 +84,15 @@ namespace AbstractPixel.Core.Editor
                 float headerInnerHeight = headerTopPad + singleLine + headerMidPad + dropDownOrWarningHeight + headerBotPad;
                 float headerOuterHeight = headerInnerHeight + (borderThickness * 2f);
 
-                float indentOffset = originalIndent * 15f;
+                // CRITICAL EDGE CASE FIX: 
+                // Unity's ReorderableList ALREADY shifts `_position.x` when `isElement` is true.
+                // Adding originalIndent * 15f causes explosive double-indentation.
+                float indentOffset = isElement ? 0f : (originalIndent * 15f);
+
+                // Reset GUI indent to prevent Unity from artificially squishing our manual Rects
                 EditorGUI.indentLevel = 0;
 
-                float listLeftExpansion = isElement ? 8f : 0f;
-
-                Rect headerOuterRect = new Rect(_position.x + indentOffset - listLeftExpansion, _position.y, _position.width - indentOffset + listLeftExpansion, headerOuterHeight);
+                Rect headerOuterRect = new Rect(_position.x + indentOffset, _position.y, _position.width - indentOffset, headerOuterHeight);
                 EditorGUI.DrawRect(headerOuterRect, borderColor);
 
                 Rect headerInnerRect = new Rect(headerOuterRect.x + borderThickness, headerOuterRect.y + borderThickness, headerOuterRect.width - (borderThickness * 2f), headerInnerHeight);
@@ -100,7 +105,23 @@ namespace AbstractPixel.Core.Editor
                 }
 
                 float currentX = foldoutRect.xMax;
-                GUIContent prefixContent = new GUIContent($"{_label.text} ");
+
+                // CRITICAL EDGE CASE FIX: 
+                // Unity overrides `_label.text` with the class name when SerializeReference is expanded.
+                // We bypass it completely and parse the immutable property path to retain the Element ID.
+                string displayLabel = _label.text;
+                if (isElement)
+                {
+                    int bracketIdx = _property.propertyPath.LastIndexOf('[');
+                    int closeBracketIdx = _property.propertyPath.LastIndexOf(']');
+                    if (bracketIdx >= 0 && closeBracketIdx > bracketIdx)
+                    {
+                        string indexStr = _property.propertyPath.Substring(bracketIdx + 1, closeBracketIdx - bracketIdx - 1);
+                        displayLabel = $"Element {indexStr}";
+                    }
+                }
+
+                GUIContent prefixContent = new GUIContent($"{displayLabel} ");
                 Vector2 prefixSize = s_richTextLabel.CalcSize(prefixContent);
                 Rect prefixRect = new Rect(currentX, headerInnerRect.y + headerTopPad, prefixSize.x, singleLine);
                 EditorGUI.LabelField(prefixRect, prefixContent, s_richTextLabel);
@@ -112,11 +133,13 @@ namespace AbstractPixel.Core.Editor
                 float buttonSpacing = 2f;
                 float rightButtonsWidth = isElement ? (removeBtnWidth + dotsBtnWidth + buttonSpacing + 6f) : (dotsBtnWidth + 6f);
 
-                float maxTypeBoxWidth = headerInnerRect.width - (currentX - headerInnerRect.x) - rightButtonsWidth - 4f;
+                // Protected Bounds Check: Clamp to minimum 10f to prevent catastrophic truncation loop on narrow layouts
+                float rawAvailableWidth = headerInnerRect.width - (currentX - headerInnerRect.x) - rightButtonsWidth - 4f;
+                float maxTypeBoxWidth = Mathf.Max(10f, rawAvailableWidth);
 
                 string typeDisplayName = propertyType != null ? ObjectNames.NicifyVariableName(propertyType.Name) : "Unassigned";
                 float staticPrefixWidth = s_richTextLabel.CalcSize(new GUIContent("TYPE : ")).x;
-                float availableNameWidth = maxTypeBoxWidth - staticPrefixWidth - 12f;
+                float availableNameWidth = Mathf.Max(5f, maxTypeBoxWidth - staticPrefixWidth - 12f);
                 string truncatedDisplayName = TruncateText(typeDisplayName, EditorStyles.boldLabel, availableNameWidth);
 
                 string richBoxText = $"TYPE : <b>{truncatedDisplayName}</b>";
@@ -139,7 +162,9 @@ namespace AbstractPixel.Core.Editor
                 Rect dotsBtnRect = new Rect(removeBtnRect.x - dotsBtnWidth - buttonSpacing, headerInnerRect.y + headerTopPad, dotsBtnWidth, btnHeight);
 
                 if (!isElement)
+                {
                     dotsBtnRect = new Rect(headerInnerRect.xMax - dotsBtnWidth - 6f, headerInnerRect.y + headerTopPad, dotsBtnWidth, btnHeight);
+                }
 
                 if (GUI.Button(dotsBtnRect, new GUIContent("\u22EE", "Options"), s_dotsButtonStyle))
                 {
@@ -167,7 +192,7 @@ namespace AbstractPixel.Core.Editor
                 else
                 {
                     string buttonText = propertyType != null ? ObjectNames.NicifyVariableName(propertyType.Name) : "Choose a suitable polymorphic type";
-                    string truncatedButtonText = TruncateText(buttonText, EditorStyles.popup, controlRect.width - 24f);
+                    string truncatedButtonText = TruncateText(buttonText, EditorStyles.popup, Mathf.Max(10f, controlRect.width - 24f));
 
                     if (EditorGUI.DropdownButton(controlRect, new GUIContent(truncatedButtonText), FocusType.Keyboard, EditorStyles.popup))
                     {
@@ -175,14 +200,14 @@ namespace AbstractPixel.Core.Editor
                     }
                 }
 
-                EditorGUI.indentLevel = originalIndent;
-
+                // =========================================================
+                // DRAW CHILDREN (EXPANDED BODY)
+                // =========================================================
                 if (_property.isExpanded && !hasNoTypes)
                 {
                     float contentInnerHeight = isNull ? (singleLine * 2f) + contentTopSpacing + contentBotSpacing : GetChildrenHeight(_property) + contentTopSpacing + contentBotSpacing;
 
-                    EditorGUI.indentLevel = 0;
-                    Rect contentOuterRect = new Rect(_position.x + indentOffset - listLeftExpansion, headerOuterRect.yMax - borderThickness, _position.width - indentOffset + listLeftExpansion, contentInnerHeight + (borderThickness * 2f));
+                    Rect contentOuterRect = new Rect(_position.x + indentOffset, headerOuterRect.yMax - borderThickness, _position.width - indentOffset, contentInnerHeight + (borderThickness * 2f));
                     EditorGUI.DrawRect(contentOuterRect, borderColor);
 
                     Rect contentInnerRect = new Rect(contentOuterRect.x + borderThickness, contentOuterRect.y + borderThickness, contentOuterRect.width - (borderThickness * 2f), contentInnerHeight);
@@ -206,21 +231,13 @@ namespace AbstractPixel.Core.Editor
                             if (SerializedProperty.EqualContents(iterator, endProperty)) break;
 
                             float propHeight = EditorGUI.GetPropertyHeight(iterator, true);
-                            bool isNestedList = iterator.isArray && iterator.propertyType != SerializedPropertyType.String;
 
-                            if (isNestedList)
-                            {
-                                EditorGUI.indentLevel = originalIndent + (isElement ? 1 : 2);
-                                Rect propRect = new Rect(_position.x, currentY, _position.width - 6f, propHeight);
-                                EditorGUI.PropertyField(propRect, iterator, true);
-                            }
-                            else
-                            {
-                                EditorGUI.indentLevel = originalIndent;
-                                float normalVarIndent = 10f;
-                                Rect propRect = new Rect(_position.x + normalVarIndent, currentY, _position.width - normalVarIndent - 6f, propHeight);
-                                EditorGUI.PropertyField(propRect, iterator, true);
-                            }
+                            // CRITICAL EDGE CASE FIX: Let Unity natively handle inner property indentation.
+                            // We give it a perfectly bound box, and restore the indentLevel slightly so standard PropertyDrawers behave.
+                            EditorGUI.indentLevel = originalIndent + 1;
+
+                            Rect propRect = new Rect(contentInnerRect.x + 4f, currentY, contentInnerRect.width - 8f, propHeight);
+                            EditorGUI.PropertyField(propRect, iterator, true);
 
                             currentY += propHeight + EditorGUIUtility.standardVerticalSpacing;
                             enterChildren = false;
@@ -234,6 +251,7 @@ namespace AbstractPixel.Core.Editor
                 {
                     s_heightCache.Remove(GetCompositeCacheKey(_property));
                 }
+                // Always strictly reset the indentLevel to its starting state to prevent global UI corruption.
                 EditorGUI.indentLevel = originalIndent;
                 EditorGUI.EndProperty();
             }
@@ -528,7 +546,6 @@ namespace AbstractPixel.Core.Editor
                 return type.GetElementType();
             }
 
-            // Quiet fallback for PolymorphicList<T> or custom wrappers
             while (type != null && type != typeof(object))
             {
                 if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(PolymorphicList<>))

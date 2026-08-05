@@ -70,7 +70,7 @@ namespace AbstractPixel.Settings
 
         protected override void UpdateMetadataVisuals(SettingMetadata metadata)
         {
-            if (settingTextName != null)
+            if (settingTextName != null && !string.IsNullOrEmpty(metadata.DisplayName))
             {
                 settingTextName.text = metadata.DisplayName;
             }

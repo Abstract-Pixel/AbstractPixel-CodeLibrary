@@ -57,8 +57,9 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Graphics Preset Quality
+          Description: Adjusts all visual settings at once. Choose a higher preset
+            for better visuals, or lower for a smoother frame rate.
         <DefaultValue>k__BackingField: 2
         dependencyRulesList: []
         <OptionValues>k__BackingField:
@@ -85,11 +86,12 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 4
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Screen Resolution
+          Description: Adjusts the pixel count of the game. Higher is sharper, lower
+            runs smoother.
         <DefaultValue>k__BackingField: 0
         dependencyRulesList:
         - rid: 8789862167657578617
@@ -152,11 +154,14 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1.0128839
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Render Scale
+          Description: "Changes the game's internal rendering resolution, which is
+            completely separate from your screen resolution.\r\n\r\n\u26A0\uFE0F
+            <b>Note:</b> Be cautious setting values above 1, as this will cause a
+            heavy performance hit!"
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <MinValue>k__BackingField: 0.1
@@ -171,8 +176,10 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Hardware Anti Aliasing
+          Description: "Uses MSAA to smooth out jagged edges. It looks very crisp
+            but comes with a high performance cost.\r\n\r\n\u26A0\uFE0F <b>Note:</b>
+            This setting is disabled if Software Anti-aliasing is turned on!"
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
         <OptionValues>k__BackingField: 01000000020000000400000008000000
@@ -186,11 +193,22 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 7
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Software Anti Aliasing
+          Description: 'Smooths jagged edges using fast post-processing.
+
+            
+
+            1.
+            <b>FXAA:</b> Fastest, best for older hardware.
+
+            2. <b>SMAA:</b>
+            Great balance of quality and performance.
+
+            3. <b>TAA:</b>
+            Smoothest overall image, best for modern hardware.'
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
         <OptionValues>k__BackingField:
@@ -235,8 +253,8 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Lighting Quality
+          Description: Adjusts the detail and accuracy of lights in the game world.
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <OptionValues>k__BackingField:
@@ -255,8 +273,8 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: ShadowQuality
+          Description: Changes the sharpness and detail of shadows cast by objects.
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <OptionValues>k__BackingField:
@@ -287,11 +305,16 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Texture Quality
+          Description: 'Adjusts the resolution of game surfaces to manage video memory.
+
+            
+
+            Options
+            include <b>Full</b>, <b>Half</b>, <b>Quarter</b>, and <b>Eighth</b>.'
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
         <OptionValues>k__BackingField: 00000000010000000200000003000000
@@ -305,11 +328,12 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Terrain Quality
+          Description: Adjusts the level of detail and 3D geometry of the ground
+            and landscapes.
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <OptionValues>k__BackingField:
@@ -346,11 +370,17 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Motion Blur Quality
+          Description: 'Adds a blur effect during fast movement to simulate speed.
+
+            
+
+            Higher
+            values increase both the amount and visual quality of the blur, while
+            lower values reduce the amount and quality.'
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
         <MinValue>k__BackingField: 0
@@ -367,8 +397,8 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Monitor Display Output
+          Description: Choose which monitor you want the game to play on.
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
         <OptionValues>k__BackingField: 00000000
@@ -379,11 +409,12 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 3
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Frame Rate
+          Description: "Sets a max cap on your Frames Per Second. \r\n\r\n\u26A0\uFE0F
+            <b>Note:</b> This setting is locked if V-Sync is enabled!"
         <DefaultValue>k__BackingField: 3
         dependencyRulesList: []
         <OptionValues>k__BackingField: 140000001e000000280000003c0000005a00000078000000f0000000ffffffff
@@ -404,8 +435,13 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: VSync Quality
+          Description: "Stops screen tearing by syncing the game\u2019s frame rate
+            to your monitor's refresh rate.\r\n\r\n1. <b>Off:</b> Gives the fastest
+            response time, but the screen might tear.\r\n2. <b>Every V-Blank:</b>
+            Matches your monitor's  refresh rate \r\n3. <b>Every 2nd V-Blank:</b>
+            Cuts the speed in half (e.g., 30 FPS on  60Hz monitor).\r\n4. <b>Every
+            3rd V-Blank:</b> Cuts the speed to one-third (e.g., 20 FPS on  60Hz monitor)."
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
         <OptionValues>k__BackingField: 00000000010000000200000003000000
@@ -419,11 +455,23 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Screen Mode Type
+          Description: 'Choose how the game fits on your screen.
+
+            
+
+            1.
+            <b>Exclusive Fullscreen:</b> Locks the game to your screen for maximum
+            performance.
+
+            2. <b>Fullscreen Window:</b> Looks like fullscreen,
+            but lets you easily Alt-Tab to other apps.
+
+            3. <b>Windowed:</b>
+            Runs the game in a standard, movable window.'
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
         <OptionValues>k__BackingField: 000000000100000003000000
@@ -436,11 +484,12 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 70
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Field Of View
+          Description: Changes how much of the world you can see at once. Higher
+            is wider, lower is more zoomed in
         <DefaultValue>k__BackingField: 60
         dependencyRulesList: []
         <MinValue>k__BackingField: 40
@@ -453,11 +502,13 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: -1.072706
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Game Brightness
+          Description: "Adjusts how bright or dark the game world looks.\r\n\r\n\u26A0\uFE0F
+            <b>Note:</b> This only changes the outside world. It does not affect
+            the UI menus or the car interior!"
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
         <MinValue>k__BackingField: -4
@@ -469,11 +520,11 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Master Volume
+          Description: Adjusts the loudness of the in-game music and soundtracks.
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <MinValue>k__BackingField: 0
@@ -489,11 +540,11 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Music Volume
+          Description: Adjusts the loudness of the in-game music and soundtracks.
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <MinValue>k__BackingField: 0
@@ -509,11 +560,12 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: SFX Volume
+          Description: Adjusts the volume of in-game sound effects, like engines,
+            tires, and impacts.
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <MinValue>k__BackingField: 0
@@ -529,11 +581,12 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: Ambience Volume
+          Description: Adjusts the background environmental sounds, like wind and
+            weather.
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <MinValue>k__BackingField: 0
@@ -549,11 +602,12 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: 
-          Description: 
+          DisplayName: UI Volume
+          Description: Adjusts the sound effects for navigating menus and interface
+            buttons.
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <MinValue>k__BackingField: 0

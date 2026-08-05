@@ -26,12 +26,13 @@ namespace AbstractPixel.Settings
 
         public void ShowPanel()
         {
+            gameObject.SetActive(true);
             if (activeFadeRoutine != null) StopCoroutine(activeFadeRoutine);
             activeFadeRoutine = StartCoroutine(FadeRoutine(1.0f, true));
             SetFirstElementSelected();
         }
 
-        public void HidePanel()
+        public void HidePanel(bool _disableGameObject)
         {
             if (activeFadeRoutine != null) StopCoroutine(activeFadeRoutine);
             activeFadeRoutine = StartCoroutine(FadeRoutine(0.0f, false));
