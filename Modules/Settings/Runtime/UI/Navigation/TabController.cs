@@ -41,9 +41,7 @@ namespace AbstractPixel.Settings
             {
                 TabData tabData = tab;
                 tab.TabButton.SetTabButtonActionOnSelected(() => OnTabSelected(tabData));
-
-                tab.TabPanel.GetComponent<CanvasGroup>().alpha = 0;
-                tab.TabPanel.HidePanel(true);
+                tab.TabPanel.HidePanelImmediate(true);
                 tab.TabButton.SetVisualState(false);
             }
 
@@ -58,7 +56,7 @@ namespace AbstractPixel.Settings
 
             if (currentTabData != null)
             {
-                currentTabData.TabPanel.HidePanel(false);
+                currentTabData.TabPanel.HidePanel(true);
                 currentTabData.TabButton.SetVisualState(false);
             }
 

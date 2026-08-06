@@ -1,12 +1,17 @@
-using UnityEngine;
 using AbstractPixel.Core;
 using AbstractPixel.SaveSystem;
+using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
 
 namespace AbstractPixel.Settings
 {
     [RequireComponent(typeof(PointerSettingDescriptionTrigger))]
     public abstract class AbstractSettingUI<TValue> : MonoBehaviour, ISettingUIBinding
     {
+        [SerializeField, ReadOnly(true)] bool renameAutomatically = true;
         [Header("Backend Connection")]
         [Tooltip("Select the exact setting this UI element controls (e.g., MasterVolumeSetting)")]
         [SerializeField]
@@ -16,6 +21,20 @@ namespace AbstractPixel.Settings
 
         // Assembly-Internal interface implementation
         public ISettingBackend BoundSetting => liveBindedSetting;
+
+        private void OnValidate()
+        {
+#if UNITY_EDITOR
+            if (PrefabStageUtility.GetCurrentPrefabStage() == null)
+            {
+                if (targetSetting.TBaseType != null && renameAutomatically)
+                {
+                    gameObject.name = $"[{targetSetting.TClassName}]";
+                }
+            }
+#endif
+        }
+
 
         protected void Start()
         {

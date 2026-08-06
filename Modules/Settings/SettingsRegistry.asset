@@ -86,7 +86,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 4
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Screen Resolution
@@ -154,7 +154,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1.0128839
+        <CurrentValue>k__BackingField: 0.8808245
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Render Scale
@@ -193,13 +193,13 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 7
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Software Anti Aliasing
           Description: 'Smooths jagged edges using fast post-processing.
 
-            
+
 
             1.
             <b>FXAA:</b> Fastest, best for older hardware.
@@ -250,7 +250,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Lighting Quality
@@ -270,7 +270,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: ShadowQuality
@@ -305,13 +305,13 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Texture Quality
           Description: 'Adjusts the resolution of game surfaces to manage video memory.
 
-            
+
 
             Options
             include <b>Full</b>, <b>Half</b>, <b>Quarter</b>, and <b>Eighth</b>.'
@@ -370,13 +370,13 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Motion Blur Quality
           Description: 'Adds a blur effect during fast movement to simulate speed.
 
-            
+
 
             Higher
             values increase both the amount and visual quality of the blur, while
@@ -455,13 +455,13 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Screen Mode Type
           Description: 'Choose how the game fits on your screen.
 
-            
+
 
             1.
             <b>Exclusive Fullscreen:</b> Locks the game to your screen for maximum
@@ -484,7 +484,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 70
+        <CurrentValue>k__BackingField: 40
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Field Of View
@@ -502,7 +502,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: -1.072706
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Game Brightness
@@ -524,7 +524,7 @@ MonoBehaviour:
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Master Volume
-          Description: Adjusts the loudness of the in-game music and soundtracks.
+          Description: Adjusts the loudness of all game audio
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <MinValue>k__BackingField: 0

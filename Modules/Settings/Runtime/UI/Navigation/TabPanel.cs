@@ -28,17 +28,24 @@ namespace AbstractPixel.Settings
         {
             gameObject.SetActive(true);
             if (activeFadeRoutine != null) StopCoroutine(activeFadeRoutine);
-            activeFadeRoutine = StartCoroutine(FadeRoutine(1.0f, true));
+            activeFadeRoutine = StartCoroutine(FadeRoutine(1.0f, true, false));
             SetFirstElementSelected();
         }
 
         public void HidePanel(bool _disableGameObject)
         {
             if (activeFadeRoutine != null) StopCoroutine(activeFadeRoutine);
-            activeFadeRoutine = StartCoroutine(FadeRoutine(0.0f, false));
+            activeFadeRoutine = StartCoroutine(FadeRoutine(0.0f, false, _disableGameObject));
         }
 
-        private IEnumerator FadeRoutine(float targetAlpha, bool makeInteractable)
+        public void HidePanelImmediate(bool _disableGameObject)
+        {
+            if (activeFadeRoutine != null) StopCoroutine(activeFadeRoutine);
+            panelCanvasGroup.alpha = 0.0f;
+            gameObject.SetActive(!_disableGameObject);
+        }
+
+        private IEnumerator FadeRoutine(float targetAlpha, bool makeInteractable, bool _disableGameObjectAfterFade)
         {
             panelCanvasGroup.interactable = makeInteractable;
             panelCanvasGroup.blocksRaycasts = makeInteractable;
@@ -60,6 +67,7 @@ namespace AbstractPixel.Settings
 
             panelCanvasGroup.alpha = targetAlpha;
             activeFadeRoutine = null;
+            gameObject.SetActive(!_disableGameObjectAfterFade);
         }
 
         public void SetFirstElementSelected()

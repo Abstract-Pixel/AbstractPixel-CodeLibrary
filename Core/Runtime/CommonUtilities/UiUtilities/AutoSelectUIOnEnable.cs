@@ -17,7 +17,7 @@ namespace AbstractPixel.Core
             }
             else
             {
-                EventSystem.current.SetSelectedGameObject(null);
+                EventSystem.current?.SetSelectedGameObject(null);
             }
 
             InputDeviceTracker.OnCurrentInputDeviceChanged += SelectSelectableOnDeviceChangedToController;
