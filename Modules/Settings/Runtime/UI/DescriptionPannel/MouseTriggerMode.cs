@@ -1,9 +1,12 @@
+using System;
+
 namespace AbstractPixel.Settings
 {
+    [Flags]
     public enum MouseTriggerMode
     {
-        OnHover = 0,
-        OnClick = 1,
-        Disabled = 2
+        Disabled = 0,
+        OnHover = 1<<0,
+        OnClick = 1<<1
     }
 }

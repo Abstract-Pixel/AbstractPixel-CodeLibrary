@@ -4,6 +4,7 @@ using AbstractPixel.SaveSystem;
 
 namespace AbstractPixel.Settings
 {
+    [RequireComponent(typeof(PointerSettingDescriptionTrigger))]
     public abstract class AbstractSettingUI<TValue> : MonoBehaviour, ISettingUIBinding
     {
         [Header("Backend Connection")]

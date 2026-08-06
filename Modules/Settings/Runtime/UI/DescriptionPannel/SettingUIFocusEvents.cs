@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace AbstractPixel.Settings
 {
-    public static class SettingFocusEvents
+    public static class SettingUIFocusEvents
     {
         public static event Action<SettingFocusPayload> OnFocusGained = delegate { };
         public static event Action OnFocusCleared = delegate { };

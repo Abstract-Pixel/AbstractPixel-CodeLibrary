@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace AbstractPixel.Settings
 {
+    [RequireComponent(typeof(GlobalSelectionDescriptionSettingTrigger))]
     public class SettingDescriptionPanel : MonoBehaviour
     {
         public static MouseTriggerMode CurrentMouseTriggerMode { get; private set; } = MouseTriggerMode.OnHover;
@@ -28,15 +29,15 @@ namespace AbstractPixel.Settings
 
         private void OnEnable()
         {
-            SettingFocusEvents.OnFocusGained += HandleFocusGained;
-            SettingFocusEvents.OnFocusCleared += HandleFocusCleared;
+            SettingUIFocusEvents.OnFocusGained += HandleFocusGained;
+            SettingUIFocusEvents.OnFocusCleared += HandleFocusCleared;
             ShowFallbackState();
         }
 
         private void OnDisable()
         {
-            SettingFocusEvents.OnFocusGained -= HandleFocusGained;
-            SettingFocusEvents.OnFocusCleared -= HandleFocusCleared;
+            SettingUIFocusEvents.OnFocusGained -= HandleFocusGained;
+            SettingUIFocusEvents.OnFocusCleared -= HandleFocusCleared;
         }
 
         private void HandleFocusGained(SettingFocusPayload _payload)

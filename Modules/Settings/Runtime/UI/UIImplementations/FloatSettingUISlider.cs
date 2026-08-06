@@ -10,6 +10,8 @@ namespace AbstractPixel.Settings
         [SerializeField] private TMP_Text settingTextName;
         [SerializeField] private Slider targetSlider;
         [SerializeField] private TMP_Text settingValueText;
+
+        [Header("Text Formatting")]
         [SerializeField] string DISPLAY_TEXT_PREFIX = "%";
         [SerializeField] bool showValueTextAsInt = true;
 
