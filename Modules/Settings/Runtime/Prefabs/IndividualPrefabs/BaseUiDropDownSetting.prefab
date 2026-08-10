@@ -766,7 +766,7 @@ GameObject:
   - component: {fileID: 2350841616836622818}
   - component: {fileID: 4680669747864992871}
   m_Layer: 0
-  m_Name: BaseUiDropDownSetting
+  m_Name: '[ResolutionSetting]'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

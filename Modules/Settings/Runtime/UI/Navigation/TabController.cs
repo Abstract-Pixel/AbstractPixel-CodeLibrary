@@ -17,7 +17,7 @@ namespace AbstractPixel.Settings
         [Tooltip("Configure the binding for the Previous Tab (e.g., <Gamepad>/leftShoulder)")]
         [SerializeField] private InputActionReference previousTabControllerAction;
         [SerializeField] private InputActionReference nextTabControllerAction;
-
+        bool isInitialized;
         private void OnEnable()
         {
             previousTabControllerAction.action.Enable();
@@ -25,22 +25,17 @@ namespace AbstractPixel.Settings
 
             previousTabControllerAction.action.performed += HandlePreviousTab;
             nextTabControllerAction.action.performed += HandleNextTab;
-        }
 
-        private void OnDisable()
-        {
-            previousTabControllerAction.action.performed -= HandlePreviousTab;
-            nextTabControllerAction.action.performed -= HandleNextTab;
-        }
-
-        private void Start()
-        {
             if (allTabsList.Count == 0) return;
 
             foreach (TabData tab in allTabsList)
             {
                 TabData tabData = tab;
-                tab.TabButton.SetTabButtonActionOnSelected(() => OnTabSelected(tabData));
+                if (!isInitialized)
+                {
+                    tab.TabButton.SetTabButtonActionOnSelected(() => OnTabSelected(tabData));
+                }
+
                 tab.TabPanel.HidePanelImmediate(true);
                 tab.TabButton.SetVisualState(false);
             }
@@ -48,6 +43,13 @@ namespace AbstractPixel.Settings
             currentTabData = allTabsList[startTabIndex];
             currentTabData.TabPanel.ShowPanel();
             currentTabData.TabButton.SetVisualState(true);
+            isInitialized = true;
+        }
+
+        private void OnDisable()
+        {
+            previousTabControllerAction.action.performed -= HandlePreviousTab;
+            nextTabControllerAction.action.performed -= HandleNextTab;
         }
 
         public void OnTabSelected(TabData _selectedTabData)

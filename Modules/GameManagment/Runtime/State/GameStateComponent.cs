@@ -9,30 +9,31 @@ namespace AbstractPixel.GameManagement
         [Header("State Configuration")]
         [Tooltip("The ScriptableObject defining the rules and priority of this state.")]
         [SerializeField] private StateSO stateConfig;
-        [SerializeField] bool activateOnStart = false;
+        [SerializeField] private bool activateOnStart = false;
 
         private bool isActive = false;
         private StateSnapshot snapshotBeforeActivation;
         private HashSet<BaseCondition> trackedConditions = new HashSet<BaseCondition>();
-        private  string currentActiveScene;
+        private string currentActiveScene;
 
         private void OnEnable()
         {
-            if (stateConfig == null) return;
+            if (stateConfig == null)
+            {
+                return;
+            }
 
-            //Catch up on any conditions that already exist in loaded scenes
             List<BaseCondition> existingConditions = StateConditionRegistry.GetConditionsForState(stateConfig);
             foreach (BaseCondition condition in existingConditions)
             {
                 SubscribeToCondition(condition);
             }
 
-            // Listen for future conditions from scenes that haven't loaded yet
             StateConditionRegistry.OnConditionAdded += HandleNewConditionAdded;
             StateConditionRegistry.OnConditionRemoved += HandleConditionRemoved;
-
-            // Listen to the main registry for forced evictions
             GameStateRegistry.OnStateUnregistered += HandleStateUnregistered;
+            GameStateRegistry.OnStateRestored += HandleStateRestored;
+
             SceneManager.activeSceneChanged += HandleActiveSceneChanged;
             currentActiveScene = SceneManager.GetActiveScene().name;
         }
@@ -59,6 +60,9 @@ namespace AbstractPixel.GameManagement
             StateConditionRegistry.OnConditionAdded -= HandleNewConditionAdded;
             StateConditionRegistry.OnConditionRemoved -= HandleConditionRemoved;
             GameStateRegistry.OnStateUnregistered -= HandleStateUnregistered;
+            GameStateRegistry.OnStateRestored -= HandleStateRestored;
+
+            SceneManager.activeSceneChanged -= HandleActiveSceneChanged;
         }
 
         private void SubscribeToCondition(BaseCondition _condition)
@@ -89,7 +93,10 @@ namespace AbstractPixel.GameManagement
 
         public void ActivateState()
         {
-            if (isActive || stateConfig == null) return;
+            if (isActive || stateConfig == null)
+            {
+                return;
+            }
 
             bool isPermissionGranted = GameStateRegistry.TryRegisterAsActiveState(stateConfig);
 
@@ -102,7 +109,10 @@ namespace AbstractPixel.GameManagement
 
         public void DeactivateState()
         {
-            if (!isActive) return;
+            if (!isActive)
+            {
+                return;
+            }
 
             isActive = false;
             stateConfig.RevertConfigurations(snapshotBeforeActivation);
@@ -125,7 +135,16 @@ namespace AbstractPixel.GameManagement
         {
             if (_unregisteredState == stateConfig && isActive)
             {
-                DeactivateState();
+                isActive = false;
+                stateConfig.RevertConfigurations(snapshotBeforeActivation);
+            }
+        }
+
+        private void HandleStateRestored(StateSO _restoredState)
+        {
+            if (_restoredState == stateConfig && !isActive)
+            {
+                ActivateState();
             }
         }
 
@@ -134,7 +153,7 @@ namespace AbstractPixel.GameManagement
             if (_newScene.name != currentActiveScene)
             {
                 currentActiveScene = _newScene.name;
-                if (!isActive)
+                if (!isActive || !stateConfig.DisableStateOnSceneChange)
                 {
                     return;
                 }

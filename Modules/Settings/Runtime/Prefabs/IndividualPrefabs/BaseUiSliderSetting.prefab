@@ -150,7 +150,7 @@ GameObject:
   - component: {fileID: 1558865097765394573}
   - component: {fileID: 4358935585398442229}
   m_Layer: 5
-  m_Name: BaseUiSliderSetting
+  m_Name: '[BrightnessSetting]'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

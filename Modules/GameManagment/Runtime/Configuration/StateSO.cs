@@ -8,6 +8,12 @@ namespace AbstractPixel.GameManagement
         [Header("Base State Configuration")]
         [Tooltip("Higher the number allows the state to override another active state or prevent lower priority states to activate")]
         [SerializeField] public int Priority = 0;
+
+        [Header("Menu Stacking")]
+        [Tooltip("If true, activating this state will save the current highest state to a history stack. When this deactivates, the previous state is restored.")]
+        public bool IsSubState = false;
+
+        [Header("Execution Settings")]
         [Tooltip("If true, the game time will be set to zero upon execution.")]
         public bool IsTimeZeroOnExecution = true;
         [Tooltip("If true, the cursor will be locked upon execution.")]
@@ -37,15 +43,12 @@ namespace AbstractPixel.GameManagement
             Cursor.lockState = IsCursorLockedOnExecution ? CursorLockMode.Locked : CursorLockMode.None;
             return snapShotBeforeChange;
         }
-        /// <summary>
-        /// Empty by default. Overridden by specific states (like Pause) that need to manually clean up 
-        /// because they don't trigger a new state to overwrite their configurations.
-        /// </summary>
-        internal virtual void RevertConfigurations(StateSnapshot previousSnapeShot)
+
+        internal virtual void RevertConfigurations(StateSnapshot _previousSnapShot)
         {
-            Time.timeScale = previousSnapeShot.PreviousTimeScale;
-            Cursor.visible = previousSnapeShot.PreviousCursorVisibility;
-            Cursor.lockState = previousSnapeShot.PreviousCursorLockMode;
+            Time.timeScale = _previousSnapShot.PreviousTimeScale;
+            Cursor.visible = _previousSnapShot.PreviousCursorVisibility;
+            Cursor.lockState = _previousSnapShot.PreviousCursorLockMode;
         }
     }
 }
