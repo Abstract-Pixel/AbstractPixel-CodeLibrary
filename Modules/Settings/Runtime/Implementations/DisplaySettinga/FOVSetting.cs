@@ -24,9 +24,11 @@ namespace AbstractPixel.Settings
             }
         }
 
+#if UNITY_EDITOR
         protected override void OnValidateInEditor()
         {
             
         }
+#endif
     }
 }

@@ -30,9 +30,11 @@ namespace AbstractPixel.Settings
             DefaultValue = 0;
         }
 
+#if UNITY_EDITOR
         protected override void OnValidateInEditor()
         {
             GenerateDisplayData();
-        }   
+        }
+#endif
     }
 }
