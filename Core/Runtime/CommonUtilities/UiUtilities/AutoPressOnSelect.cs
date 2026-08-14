@@ -14,6 +14,19 @@ namespace AbstractPixel.Core
             targetButton = GetComponent<Button>();
         }
 
+        private void OnEnable()
+        {
+            if(targetButton == null)
+            {
+                targetButton = GetComponent<Button>();
+            }
+        }
+
+        private void OnValidate()
+        {
+            TryGetComponent(out targetButton);
+        }
+
         public void OnSelect(BaseEventData eventData)
         {
             // Block mouse/pointer events from triggering the auto-press
