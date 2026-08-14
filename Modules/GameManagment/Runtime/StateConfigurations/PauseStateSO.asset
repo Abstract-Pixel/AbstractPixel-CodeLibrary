@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d5d7c2e72aa28b4c885fa0aa4188b71, type: 3}
   m_Name: PauseStateSO
   m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.PauseStateSO
-  <GameStateEvent>k__BackingField: 2
-  Priority: 0
+  Priority: 1
+  IsSubState: 0
   IsTimeZeroOnExecution: 1
   IsCursorLockedOnExecution: 0
   IsCursorVisibleOnExecution: 1
+  DisableStateOnSceneChange: 1
   ShowGameUIOnExecution: 0
+  ShowGameUIOnDeactivation: 0
   <PauseToggleAction>k__BackingField: {fileID: 9088539751836441449, guid: 052faaac586de48259a63d0c4782560b, type: 3}

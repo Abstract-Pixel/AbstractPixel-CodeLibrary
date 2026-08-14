@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc10e849e03ea1140a6e82e628f8caa7, type: 3}
   m_Name: StartStateSO
   m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.StateSO
-  Priority: 1
+  Priority: 2
+  IsSubState: 0
   IsTimeZeroOnExecution: 0
   IsCursorLockedOnExecution: 0
   IsCursorVisibleOnExecution: 1
