@@ -21,7 +21,7 @@ namespace AbstractPixel.Settings
 
         // Assembly-Internal interface implementation
         public ISettingBackend BoundSetting => liveBindedSetting;
-
+        bool isInitialized;
         private void OnValidate()
         {
 #if UNITY_EDITOR
@@ -40,6 +40,7 @@ namespace AbstractPixel.Settings
         {
             BindToBackendSetting();
             OnStart();
+            isInitialized = true;
         }
 
         protected abstract void OnStart();
@@ -126,6 +127,7 @@ namespace AbstractPixel.Settings
 
         protected virtual void SaveSettingsToFile()
         {
+            if(!isInitialized) return;
             SaveActions.SaveDataOf(SaveCategory.Settings);
         }
     }

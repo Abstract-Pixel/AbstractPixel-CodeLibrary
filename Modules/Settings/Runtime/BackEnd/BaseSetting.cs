@@ -167,6 +167,7 @@ namespace AbstractPixel.Settings
                     CurrentValue = (TValue)(object)loadedString;
                 }
             }
+            OnValueChanged(CurrentValue);
         }
 
         public void RemoveFromDataTransferObject(SettingsDTO dataTransferObject)
