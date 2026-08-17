@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -9,203 +10,196 @@ namespace AbstractPixel.GameManagement.Audio
         [Header("State Mappings")]
         [SerializeField] private List<StateVolumeConfig> stateConfigurations = new List<StateVolumeConfig>();
 
-        // Key: Tuple of the specific AudioMixer AND the string parameter. 
-        private Dictionary<(AudioMixer, string), VolumeTransition> activeTransitions = new Dictionary<(AudioMixer, string), VolumeTransition>();
+        // Tracks the original, untouched volume before any state modified it
+        // Key: (AudioMixer, parameterName)
+        private Dictionary<(AudioMixer, string), float> baseVolumes = new Dictionary<(AudioMixer, string), float>();
 
-        // Caching lists to prevent Garbage Collection allocations during Update
-        private List<(AudioMixer, string)> keysToProcess = new List<(AudioMixer, string)>();
-        private List<(AudioMixer, string)> completedTransitions = new List<(AudioMixer, string)>();
+        // Tracks running fade routines so overlapping fades can be cancelled cleanly
+        private Dictionary<(AudioMixer, string), Coroutine> activeFades = new Dictionary<(AudioMixer, string), Coroutine>();
 
-        private struct VolumeTransition
-        {
-            public AudioMixer TargetMixer;
-            public string ParameterName;
-            public float StartVolumeDecibels;
-            public float TargetVolumeDecibels;
-            public float ElapsedTime;
-            public float Duration;
-        }
+        #region Unity Lifecycle & Event Subscriptions
 
         private void OnEnable()
         {
             GameStateRegistry.OnStateRegistered += HandleStateRegistered;
             GameStateRegistry.OnStateUnregistered += HandleStateUnregistered;
+            GameStateRegistry.OnStateRestored += HandleStateRestored;
         }
 
         private void OnDisable()
         {
             GameStateRegistry.OnStateRegistered -= HandleStateRegistered;
             GameStateRegistry.OnStateUnregistered -= HandleStateUnregistered;
+            GameStateRegistry.OnStateRestored -= HandleStateRestored;
+
+            StopAllCoroutines();
+            activeFades.Clear();
+            baseVolumes.Clear();
         }
 
-        private void Update()
+        #endregion
+
+        #region State Event Handlers
+
+        private void HandleStateRegistered(StateSO stateData)
         {
-            if (activeTransitions.Count == 0) return;
-
-            ProcessActiveTransitions();
-            CleanupCompletedTransitions();
-        }
-
-        private void ProcessActiveTransitions()
-        {
-            completedTransitions.Clear();
-            keysToProcess.Clear();
-
-            //Extract keys safely to prevent "Collection was modified" exceptions
-            foreach ((AudioMixer, string) key in activeTransitions.Keys)
+            StateVolumeConfig config = FindConfig(stateData);
+            if (config != null)
             {
-                keysToProcess.Add(key);
+                ApplyVolumeConfig(config);
             }
+        }
 
-            foreach ((AudioMixer, string) key in keysToProcess)
+        private void HandleStateUnregistered(StateSO stateData)
+        {
+            StateVolumeConfig config = FindConfig(stateData);
+            if (config != null && config.RevertOnUnregister)
             {
-                VolumeTransition transitionData = activeTransitions[key];
+                RevertVolumeConfig(config);
+            }
+        }
 
-                transitionData.ElapsedTime += Time.unscaledDeltaTime;
+        private void HandleStateRestored(StateSO stateData)
+        {
+            // When returning from Settings back to Pause, re-apply Pause volume
+            StateVolumeConfig config = FindConfig(stateData);
+            if (config != null)
+            {
+                ApplyVolumeConfig(config);
+            }
+        }
 
-                float progress = transitionData.ElapsedTime / transitionData.Duration;
-                float clampedProgress = Mathf.Clamp01(progress);
+        #endregion
 
-                float newVolumeDecibels = Mathf.Lerp(transitionData.StartVolumeDecibels, transitionData.TargetVolumeDecibels, clampedProgress);
+        #region Volume Logic
 
-                transitionData.TargetMixer.SetFloat(transitionData.ParameterName, newVolumeDecibels);
+        private void ApplyVolumeConfig(StateVolumeConfig config)
+        {
+            foreach (MixerVolumeTarget target in config.VolumeTargets)
+            {
+                if (target.TargetGroup == null) continue;
 
-                if (clampedProgress >= 1f)
+                AudioMixer mixer = target.TargetGroup.audioMixer;
+                string parameter = target.ExposedVolumeParameter;
+                var key = (mixer, parameter);
+
+                // 1. Capture the true baseline volume only if we haven't stored it yet
+                if (!baseVolumes.ContainsKey(key))
                 {
-                    completedTransitions.Add(key);
-                }
-                else
-                {
-                    activeTransitions[key] = transitionData;
-                }
-            }
-        }
-
-        private void CleanupCompletedTransitions()
-        {
-            foreach ((AudioMixer, string) completedKey in completedTransitions)
-            {
-                activeTransitions.Remove(completedKey);
-            }
-        }
-
-        private void HandleStateRegistered(StateSO _stateData)
-        {
-            StateVolumeConfig activeConfig = FindConfigForState(_stateData);
-            if (activeConfig != null)
-            {
-                ApplyVolumeConfig(activeConfig);
-            }
-        }
-
-        private void HandleStateUnregistered(StateSO _stateData)
-        {
-            StateVolumeConfig activeConfig = FindConfigForState(_stateData);
-            if (activeConfig != null && activeConfig.RevertOnUnregister)
-            {
-                RevertVolumeConfig(activeConfig);
-            }
-        }
-
-
-        private void ApplyVolumeConfig(StateVolumeConfig _config)
-        {
-            foreach (MixerVolumeTarget volumeTarget in _config.VolumeTargets)
-            {
-                if (volumeTarget.TargetGroup == null) continue;
-
-                AudioMixer targetMixer = volumeTarget.TargetGroup.audioMixer;
-                string parameterName = volumeTarget.ExposedVolumeParameter;
-                (AudioMixer, string) compositeKey = (targetMixer, parameterName);
-
-                if (!targetMixer.GetFloat(parameterName, out float currentDecibels)) continue;
-
-                if (!_config.CachedOriginalVolumes.ContainsKey(compositeKey))
-                {
-                    _config.CachedOriginalVolumes[compositeKey] = currentDecibels;
-                }
-
-                float targetDecibels = CalculateTargetDecibels(currentDecibels, volumeTarget.TargetVolumeMultiplier);
-
-                StartTransition(targetMixer, parameterName, currentDecibels, targetDecibels, volumeTarget.LerpDuration);
-            }
-        }
-
-        private void RevertVolumeConfig(StateVolumeConfig _config)
-        {
-            foreach (MixerVolumeTarget volumeTarget in _config.VolumeTargets)
-            {
-                if (volumeTarget.TargetGroup == null) continue;
-
-                AudioMixer targetMixer = volumeTarget.TargetGroup.audioMixer;
-                string parameterName = volumeTarget.ExposedVolumeParameter;
-                (AudioMixer, string) compositeKey = (targetMixer, parameterName);
-
-                if (_config.CachedOriginalVolumes.TryGetValue(compositeKey, out float cachedOriginalDecibels))
-                {
-                    if (targetMixer.GetFloat(parameterName, out float currentDecibels))
+                    if (mixer.GetFloat(parameter, out float originalDb))
                     {
-                        StartTransition(targetMixer, parameterName, currentDecibels, cachedOriginalDecibels, volumeTarget.LerpDuration);
+                        baseVolumes[key] = originalDb;
                     }
+                    else
+                    {
+                        continue;
+                    }
+                }
 
-                    _config.CachedOriginalVolumes.Remove(compositeKey);
+                // 2. Target is ALWAYS calculated from the BASELINE (never from the live ducked volume)
+                float pristineBaseDb = baseVolumes[key];
+                float targetDb = CalculateTargetDecibels(pristineBaseDb, target.TargetVolumeMultiplier);
+
+                // 3. Smoothly fade to the target
+                StartFade(mixer, parameter, targetDb, target.LerpDuration);
+            }
+        }
+
+        private void RevertVolumeConfig(StateVolumeConfig config)
+        {
+            foreach (MixerVolumeTarget target in config.VolumeTargets)
+            {
+                if (target.TargetGroup == null) continue;
+
+                AudioMixer mixer = target.TargetGroup.audioMixer;
+                string parameter = target.ExposedVolumeParameter;
+                var key = (mixer, parameter);
+
+                // If we have a saved baseline, fade back to it and clear the baseline
+                if (baseVolumes.TryGetValue(key, out float originalDb))
+                {
+                    StartFade(mixer, parameter, originalDb, target.LerpDuration);
+                    baseVolumes.Remove(key);
                 }
             }
         }
 
-        // ====================================================================
-        // UTILITIES & AUDIO MATH
-        // ====================================================================
+        #endregion
 
-        private StateVolumeConfig FindConfigForState(StateSO _stateData)
+        #region Fade Engine (Unscaled Time)
+
+        private void StartFade(AudioMixer mixer, string parameter, float targetDb, float duration)
         {
-            foreach (StateVolumeConfig config in stateConfigurations)
+            var key = (mixer, parameter);
+
+            // Stop any existing fade on this specific parameter
+            if (activeFades.TryGetValue(key, out Coroutine runningFade) && runningFade != null)
             {
-                if (config.TargetState == _stateData) return config;
+                StopCoroutine(runningFade);
+            }
+
+            // Snap immediately if duration is zero
+            if (duration <= 0f)
+            {
+                mixer.SetFloat(parameter, targetDb);
+                activeFades.Remove(key);
+                return;
+            }
+
+            activeFades[key] = StartCoroutine(FadeRoutine(mixer, parameter, targetDb, duration));
+        }
+
+        private IEnumerator FadeRoutine(AudioMixer mixer, string parameter, float targetDb, float duration)
+        {
+            mixer.GetFloat(parameter, out float startDb);
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime; // Works even when paused (Time.timeScale == 0)
+                float progress = Mathf.Clamp01(elapsed / duration);
+
+                float currentDb = Mathf.Lerp(startDb, targetDb, progress);
+                mixer.SetFloat(parameter, currentDb);
+
+                yield return null;
+            }
+
+            mixer.SetFloat(parameter, targetDb);
+            activeFades.Remove((mixer, parameter));
+        }
+
+        #endregion
+
+        #region Helpers & Audio Math
+
+        private StateVolumeConfig FindConfig(StateSO stateData)
+        {
+            for (int i = 0; i < stateConfigurations.Count; i++)
+            {
+                if (stateConfigurations[i].TargetState == stateData)
+                {
+                    return stateConfigurations[i];
+                }
             }
             return null;
         }
 
-        private void StartTransition(AudioMixer _mixer, string _parameterName, float _startDb, float _targetDb, float _duration)
+        private float CalculateTargetDecibels(float baseDecibels, float multiplier)
         {
-            (AudioMixer, string) compositeKey = (_mixer, _parameterName);
-
-            if (_duration <= 0f)
-            {
-                _mixer.SetFloat(_parameterName, _targetDb);
-                activeTransitions.Remove(compositeKey);
-                return;
-            }
-
-            VolumeTransition newTransition = new VolumeTransition
-            {
-                TargetMixer = _mixer,
-                ParameterName = _parameterName,
-                StartVolumeDecibels = _startDb,
-                TargetVolumeDecibels = _targetDb,
-                ElapsedTime = 0f,
-                Duration = _duration
-            };
-
-            activeTransitions[compositeKey] = newTransition;
-        }
-
-        /// <summary>
-        /// Converts the current Decibels to a Linear format, applies the multiplier, and converts back to Decibels.
-        /// </summary>
-        private float CalculateTargetDecibels(float _currentDecibels, float _multiplier)
-        {
-            // Convert current DB to a linear 0 to 1 scale
-            float currentLinear = Mathf.Pow(10f, _currentDecibels / 20f);
+            // Convert baseline decibels to linear (0..1)
+            float baseLinear = Mathf.Pow(10f, baseDecibels / 20f);
 
             // Apply multiplier
-            float targetLinear = currentLinear * _multiplier;
+            float targetLinear = baseLinear * multiplier;
 
-            // Clamp to a tiny fraction to prevent Mathf.Log10(0) returning Negative Infinity
-            float clampedLinear = Mathf.Max(0.0001f, targetLinear);
+            // Clamp to avoid -Infinity from Log10(0)
+            float safeLinear = Mathf.Max(0.0001f, targetLinear);
 
-            // Convert back to Decibels
-            return 20f * Mathf.Log10(clampedLinear);
+            // Convert back to decibels
+            return 20f * Mathf.Log10(safeLinear);
         }
+
+        #endregion
     }
 }
