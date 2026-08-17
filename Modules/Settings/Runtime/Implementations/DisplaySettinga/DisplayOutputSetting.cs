@@ -9,11 +9,8 @@ namespace AbstractPixel.Settings
         private const string PREFIX_TEXT = "Display ";
 
         protected override void OnInitialize()
-        {
-            if (OptionValues == null || OptionValues.Length == 0)
-            {
+        {       
                 GenerateDisplayData();
-            }
         }
 
         private void GenerateDisplayData()
@@ -28,7 +25,7 @@ namespace AbstractPixel.Settings
                 OptionDisplayNames[i] = PREFIX_TEXT + i;
             }
 
-            DefaultValue = 0;
+
         }
 
         protected override void OnApplySettingLogic()
@@ -43,6 +40,7 @@ namespace AbstractPixel.Settings
         protected override void OnValidateInEditor()
         {
             GenerateDisplayData();
+            DefaultValue = 0;
         }
 #endif
     }
