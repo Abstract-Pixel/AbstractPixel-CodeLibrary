@@ -60,19 +60,27 @@ MonoBehaviour:
           DisplayName: Graphics Preset Quality
           Description: Adjusts all visual settings at once. Choose a higher preset
             for better visuals, or lower for a smoother frame rate.
-        <DefaultValue>k__BackingField: 0
+        <DefaultValue>k__BackingField: 2
         dependencyRulesList: []
         <OptionValues>k__BackingField:
-        - TierName: PC
+        - TierName: Low
           UnityQualityIndex: 0
+          Mappings: []
+        - TierName: Meduim
+          UnityQualityIndex: 1
+          Mappings: []
+        - TierName: High
+          UnityQualityIndex: 2
           Mappings: []
         - TierName: Custom
-          UnityQualityIndex: 0
+          UnityQualityIndex: 2
           Mappings: []
         <OptionDisplayNames>k__BackingField:
-        - PC
+        - Low
+        - Meduim
+        - High
         - Custom
-        customTierIndex: 1
+        customTierIndex: 3
     - rid: 8789862167657578615
       type: {class: ResolutionSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -172,7 +180,7 @@ MonoBehaviour:
           Description: "Uses MSAA to smooth out jagged edges. It looks very crisp
             but comes with a high performance cost.\r\n\r\n\u26A0\uFE0F <b>Note:</b>
             This setting is disabled if Software Anti-aliasing is turned on!"
-        <DefaultValue>k__BackingField: 0
+        <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <OptionValues>k__BackingField: 01000000020000000400000008000000
         <OptionDisplayNames>k__BackingField:
@@ -477,13 +485,13 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 80.3554
+        <CurrentValue>k__BackingField: 70
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Field Of View
           Description: Changes how much of the world you can see at once. Higher
             is wider, lower is more zoomed in
-        <DefaultValue>k__BackingField: 60
+        <DefaultValue>k__BackingField: 70
         dependencyRulesList: []
         <MinValue>k__BackingField: 40
         <MaxValue>k__BackingField: 120
