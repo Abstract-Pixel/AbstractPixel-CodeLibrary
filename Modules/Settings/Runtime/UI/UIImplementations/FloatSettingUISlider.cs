@@ -17,7 +17,6 @@ namespace AbstractPixel.Settings
 
         protected override void OnStart()
         {
-            targetSlider.onValueChanged.AddListener(OnUserChangedSlider);
             if (liveBindedSetting is FloatSliderSetting sliderSetting)
             {
                 targetSlider.minValue = sliderSetting.MinValue;
@@ -25,6 +24,7 @@ namespace AbstractPixel.Settings
 
                 targetSlider.SetValueWithoutNotify(liveBindedSetting.CurrentValue);
                 UpdateSliderDisplayValueText(liveBindedSetting.CurrentValue);
+                targetSlider.onValueChanged.AddListener(OnUserChangedSlider);
             }
         }
 

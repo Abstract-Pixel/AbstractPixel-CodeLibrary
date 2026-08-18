@@ -38,7 +38,13 @@ namespace AbstractPixel.Settings
         {
             if (OptionValues != null && CurrentValue >= 0 && CurrentValue < OptionValues.Length)
             {
-                Screen.fullScreenMode = OptionValues[CurrentValue];
+                FullScreenMode targetMode = OptionValues[CurrentValue];
+                if (Screen.fullScreenMode == targetMode)
+                {
+                    return;
+                }
+
+                Screen.fullScreenMode = targetMode;
             }
         }
 

@@ -60,19 +60,27 @@ MonoBehaviour:
           DisplayName: Graphics Preset Quality
           Description: Adjusts all visual settings at once. Choose a higher preset
             for better visuals, or lower for a smoother frame rate.
-        <DefaultValue>k__BackingField: 0
+        <DefaultValue>k__BackingField: 2
         dependencyRulesList: []
         <OptionValues>k__BackingField:
-        - TierName: PC
+        - TierName: Low
           UnityQualityIndex: 0
+          Mappings: []
+        - TierName: Meduim
+          UnityQualityIndex: 1
+          Mappings: []
+        - TierName: High
+          UnityQualityIndex: 2
           Mappings: []
         - TierName: Custom
-          UnityQualityIndex: 0
+          UnityQualityIndex: 2
           Mappings: []
         <OptionDisplayNames>k__BackingField:
-        - PC
+        - Low
+        - Meduim
+        - High
         - Custom
-        customTierIndex: 1
+        customTierIndex: 3
     - rid: 8789862167657578615
       type: {class: ResolutionSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -85,8 +93,7 @@ MonoBehaviour:
           Description: Adjusts the pixel count of the game. Higher is sharper, lower
             runs smoother.
         <DefaultValue>k__BackingField: 0
-        dependencyRulesList:
-        - rid: 8789862167657578617
+        dependencyRulesList: []
         <OptionDisplayNames>k__BackingField:
         - 1920 x 1080
         - 1680 x 1050
@@ -108,39 +115,6 @@ MonoBehaviour:
         - 720 x 576
         - 720 x 480
         - 640 x 480
-    - rid: 8789862167657578617
-      type: {class: DependencyRule_IntComparison, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
-      data:
-        targetSettingToCheck:
-          selectedClassName: 
-          selectedClassAssemblyQualifiedName: 
-          compatibleClassAssemblyQualifiedNames:
-          - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-          - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
-        comparisonOperator: 0
-        compareValue: 0
     - rid: 8789862167657578618
       type: {class: RenderScaleSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -165,7 +139,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Hardware Anti Aliasing
@@ -242,7 +216,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Lighting Quality
@@ -262,7 +236,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: ShadowQuality
@@ -320,7 +294,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Terrain Quality
@@ -393,15 +367,16 @@ MonoBehaviour:
           Description: Choose which monitor you want the game to play on.
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
-        <OptionValues>k__BackingField: 00000000
+        <OptionValues>k__BackingField: 0000000001000000
         <OptionDisplayNames>k__BackingField:
         - Display 0
+        - Display 1
     - rid: 8789862167657578627
       type: {class: FrameRateLimitSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 3
+        <CurrentValue>k__BackingField: 6
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Frame Rate
@@ -448,7 +423,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Screen Mode Type
@@ -465,7 +440,7 @@ MonoBehaviour:
 
             3. <b>Windowed:</b>
             Runs the game in a standard, movable window.'
-        <DefaultValue>k__BackingField: 0
+        <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <OptionValues>k__BackingField: 000000000100000003000000
         <OptionDisplayNames>k__BackingField:
@@ -477,7 +452,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 80.3554
+        <CurrentValue>k__BackingField: 75.58545
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Field Of View

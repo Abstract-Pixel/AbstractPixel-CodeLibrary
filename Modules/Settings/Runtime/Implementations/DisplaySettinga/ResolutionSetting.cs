@@ -74,6 +74,13 @@ namespace AbstractPixel.Settings
             }
 
             Resolution targetResolution = OptionValues[CurrentValue];
+
+            // FIX: If the screen is already running at this exact width and height, skip!
+            if (Screen.width == targetResolution.width && Screen.height == targetResolution.height)
+            {
+                return;
+            }
+
             Screen.SetResolution(targetResolution.width, targetResolution.height, Screen.fullScreenMode);
         }
 

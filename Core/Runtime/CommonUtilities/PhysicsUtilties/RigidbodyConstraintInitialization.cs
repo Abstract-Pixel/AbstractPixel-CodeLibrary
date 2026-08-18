@@ -11,8 +11,8 @@ namespace AbstractPixel.Core
         [SerializeField] private ConstraintLockMode lockMode = ConstraintLockMode.Permanent;
         [SerializeField] private float duration = 2.0f;
         [SerializeField] private bool makeItIsKinematic;
-        [SerializeField] bool canOnlyUseOnce;
-        [SerializeField] bool useDelayBeforeUnlocking;
+        [SerializeField] private bool canOnlyUseOnce;
+        [SerializeField] private bool useDelayBeforeUnlocking;
 
         [Header("Constraints")]
         [SerializeField] private PositionConstraints positionConstraints;
@@ -22,33 +22,23 @@ namespace AbstractPixel.Core
         private RigidbodyConstraints cachedConstraints;
         private bool cachedIsKinematic;
         private Coroutine timerCoroutine;
-        bool isUsedOnce;
+        private bool isUsedOnce; // Persists if the scene manager retains this object state
 
         private void Awake()
         {
             targetRigidbody = GetComponent<Rigidbody>();
-
-            // Cache the state existing before this script modifies it
             cachedConstraints = targetRigidbody.constraints;
             cachedIsKinematic = targetRigidbody.isKinematic;
-        }
-
-        private void Start()
-        {
-            if(isUsedOnce)
-            {
-                return;
-            }
+            if (canOnlyUseOnce && isUsedOnce) return;
             ApplyConstraints();
         }
 
         private void ApplyConstraints()
         {
-            RigidbodyConstraints newConstraints = ConvertToRigidbodyConstraints();
             targetRigidbody.isKinematic = makeItIsKinematic;
-
-            // Apply new constraints
-            targetRigidbody.constraints = newConstraints;
+            targetRigidbody.constraints = ConvertToRigidbodyConstraints();
+            targetRigidbody.linearVelocity = Vector3.zero;
+            targetRigidbody.angularVelocity = Vector3.zero;
             if (lockMode == ConstraintLockMode.Timed)
             {
                 timerCoroutine = StartCoroutine(TimerRoutine());
@@ -58,27 +48,31 @@ namespace AbstractPixel.Core
         private IEnumerator TimerRoutine()
         {
             yield return new WaitForSeconds(duration);
-
-            targetRigidbody.constraints = cachedConstraints;
-            targetRigidbody.isKinematic = cachedIsKinematic;
-            isUsedOnce = true;
-            timerCoroutine = null;
-
+            PerformUnlock();
         }
 
         public void UnlockConstraints()
         {
-            if(useDelayBeforeUnlocking)
+            if (canOnlyUseOnce && isUsedOnce) return;
+
+            if (useDelayBeforeUnlocking)
             {
-                StartCoroutine(TimerRoutine());
+                if (timerCoroutine == null) timerCoroutine = StartCoroutine(TimerRoutine());
                 return;
             }
+
             if (lockMode == ConstraintLockMode.Permanent)
             {
-                targetRigidbody.constraints = cachedConstraints;
-                targetRigidbody.isKinematic = cachedIsKinematic;
-                isUsedOnce = true;
+                PerformUnlock();
             }
+        }
+
+        private void PerformUnlock()
+        {
+            targetRigidbody.constraints = cachedConstraints;
+            targetRigidbody.isKinematic = cachedIsKinematic;
+            isUsedOnce = true;
+            timerCoroutine = null;
         }
 
         private RigidbodyConstraints ConvertToRigidbodyConstraints()
@@ -98,11 +92,10 @@ namespace AbstractPixel.Core
 
         private void OnDisable()
         {
-            // Safety: Ensure we don't leave the object in a locked state if it's disabled/destroyed
             if (timerCoroutine != null)
             {
                 StopCoroutine(timerCoroutine);
-                targetRigidbody.constraints = cachedConstraints;
+                PerformUnlock(); // Safely reset state if disabled prematurely during a load
             }
         }
     }
