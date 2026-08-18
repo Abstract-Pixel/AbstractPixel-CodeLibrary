@@ -37,7 +37,7 @@ namespace AbstractPixel.SceneTransitions
             TransitionEventBus.RaiseTransitionInStarted();
             await transitionController.PlayTransitionIn();
             Time.timeScale = 1;
-            //TransitionEventBus.RaiseTransitionInCompleted();
+            TransitionEventBus.RaiseTransitionInCompleted();
             IsTransitioning = false;
         }
 
@@ -51,9 +51,9 @@ namespace AbstractPixel.SceneTransitions
             }
 
             IsTransitioning = true;
-            TransitionEventBus.RaiseTransitionInStarted();
+            TransitionEventBus.RaiseTransitionOutStarted();
             await transitionController.PlayTransitionOut();
-            TransitionEventBus.RaiseTransitionInCompleted();
+            TransitionEventBus.RaiseTransitionOutCompleted();
             IsTransitioning = false;
         }
 
