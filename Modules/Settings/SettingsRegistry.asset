@@ -146,7 +146,7 @@ MonoBehaviour:
           Description: "Uses MSAA to smooth out jagged edges. It looks very crisp
             but comes with a high performance cost.\r\n\r\n\u26A0\uFE0F <b>Note:</b>
             This setting is disabled if Software Anti-aliasing is turned on!"
-        <DefaultValue>k__BackingField: 0
+        <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <OptionValues>k__BackingField: 01000000020000000400000008000000
         <OptionDisplayNames>k__BackingField:
@@ -458,7 +458,7 @@ MonoBehaviour:
           DisplayName: Field Of View
           Description: Changes how much of the world you can see at once. Higher
             is wider, lower is more zoomed in
-        <DefaultValue>k__BackingField: 60
+        <DefaultValue>k__BackingField: 70
         dependencyRulesList: []
         <MinValue>k__BackingField: 40
         <MaxValue>k__BackingField: 120
