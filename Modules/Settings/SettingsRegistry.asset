@@ -54,7 +54,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 3
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Graphics Preset Quality
@@ -65,13 +65,1237 @@ MonoBehaviour:
         <OptionValues>k__BackingField:
         - TierName: Low
           UnityQualityIndex: 0
-          Mappings: []
+          Mappings:
+          - TargetSettingType:
+              selectedClassName: LightingQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.LightingQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: ShadowQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.ShadowQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: TextureQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.TextureQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 3
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: RenderScaleSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.RenderScaleSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0.5
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: HardwareAntiAliasingSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.HardwareAntiAliasingSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: SoftwareAntiAliasingSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.SoftwareAntiAliasingSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: TerrainQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.TerrainQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: MotionBlurSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.MotionBlurSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0.29
+            BoolValue: 0
+            StringValue: 
         - TierName: Meduim
           UnityQualityIndex: 1
-          Mappings: []
+          Mappings:
+          - TargetSettingType:
+              selectedClassName: LightingQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.LightingQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 1
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: ShadowQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.ShadowQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 1
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: TextureQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.TextureQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 2
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: RenderScaleSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.RenderScaleSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0.8
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: HardwareAntiAliasingSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.HardwareAntiAliasingSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: SoftwareAntiAliasingSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.SoftwareAntiAliasingSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 1
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: TerrainQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.TerrainQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 1
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: MotionBlurSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.MotionBlurSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 1
+            FloatValue: 0.61
+            BoolValue: 0
+            StringValue: 
         - TierName: High
           UnityQualityIndex: 2
-          Mappings: []
+          Mappings:
+          - TargetSettingType:
+              selectedClassName: LightingQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.LightingQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 2
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: ShadowQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.ShadowQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 2
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: TextureQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.TextureQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: RenderScaleSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.RenderScaleSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 1
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: HardwareAntiAliasingSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.HardwareAntiAliasingSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 0
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: SoftwareAntiAliasingSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.SoftwareAntiAliasingSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 7
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: TerrainQualitySetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.TerrainQualitySetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 2
+            FloatValue: 0
+            BoolValue: 0
+            StringValue: 
+          - TargetSettingType:
+              selectedClassName: MotionBlurSetting
+              selectedClassAssemblyQualifiedName: AbstractPixel.Settings.MotionBlurSetting,
+                AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              compatibleClassAssemblyQualifiedNames:
+              - AbstractPixel.Settings.AmbienceVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.BrightnessSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FOVSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MasterVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MotionBlurSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.MusicVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.RenderScaleSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SFXVolumeSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+                Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.UIVolumeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+              - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+                Culture=neutral, PublicKeyToken=null
+            IntValue: 1
+            FloatValue: 0.7
+            BoolValue: 0
+            StringValue: 
         - TierName: Custom
           UnityQualityIndex: 2
           Mappings: []
@@ -120,7 +1344,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 1.0170102
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Render Scale
@@ -139,7 +1363,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Hardware Anti Aliasing
@@ -159,7 +1383,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 7
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Software Anti Aliasing
@@ -176,7 +1400,8 @@ MonoBehaviour:
             3. <b>TAA:</b>
             Smoothest overall image, best for modern hardware.'
         <DefaultValue>k__BackingField: 0
-        dependencyRulesList: []
+        dependencyRulesList:
+        - rid: 8789862546533777409
         <OptionValues>k__BackingField:
         - Mode: 0
           Quality: 0
@@ -257,7 +1482,7 @@ MonoBehaviour:
           MainLightShadowResolution: 1024
           AdditionalLightShadowAtlasResolution: 1024
         - MaxShadowDistance: 150
-          ShadowCascadeCount: 4
+          ShadowCascadeCount: 3
           ShadowDepthBias: 1
           ShadowNormalBias: 1
           MainLightShadowResolution: 2048
@@ -336,7 +1561,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 0.7
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Motion Blur Quality
@@ -440,7 +1665,7 @@ MonoBehaviour:
 
             3. <b>Windowed:</b>
             Runs the game in a standard, movable window.'
-        <DefaultValue>k__BackingField: 1
+        <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
         <OptionValues>k__BackingField: 000000000100000003000000
         <OptionDisplayNames>k__BackingField:
@@ -458,7 +1683,7 @@ MonoBehaviour:
           DisplayName: Field Of View
           Description: Changes how much of the world you can see at once. Higher
             is wider, lower is more zoomed in
-        <DefaultValue>k__BackingField: 70
+        <DefaultValue>k__BackingField: 60
         dependencyRulesList: []
         <MinValue>k__BackingField: 40
         <MaxValue>k__BackingField: 120
@@ -488,7 +1713,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Master Volume
@@ -592,6 +1817,40 @@ MonoBehaviour:
         targetSettingToCheck:
           selectedClassName: VSyncSetting
           selectedClassAssemblyQualifiedName: AbstractPixel.Settings.VSyncSetting,
+            AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          compatibleClassAssemblyQualifiedNames:
+          - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.FrameRateLimitSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.GraphicsPresetSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.HardwareAntiAliasingSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.LightingQualitySetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.ResolutionSetting, AbstractPixel.Settings, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.ScreenModeSetting, AbstractPixel.Settings, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.ShadowQualitySetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.SoftwareAntiAliasingSetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.TerrainQualitySetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.TextureQualitySetting, AbstractPixel.Settings,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        comparisonOperator: 0
+        compareValue: 0
+    - rid: 8789862546533777409
+      type: {class: DependencyRule_IntComparison, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        targetSettingToCheck:
+          selectedClassName: HardwareAntiAliasingSetting
+          selectedClassAssemblyQualifiedName: AbstractPixel.Settings.HardwareAntiAliasingSetting,
             AbstractPixel.Settings, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
           compatibleClassAssemblyQualifiedNames:
           - AbstractPixel.Settings.DisplayOutputSetting, AbstractPixel.Settings,
