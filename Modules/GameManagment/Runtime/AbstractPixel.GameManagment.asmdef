@@ -3,7 +3,8 @@
     "rootNamespace": "AbstractPixel.GameManagement",
     "references": [
         "AbstractPixel.Core",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "BroAudio"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

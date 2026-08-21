@@ -1,7 +1,7 @@
-// --- START OF FILE MixerVolumeTarget.cs ---
 using System;
 using UnityEngine;
 using UnityEngine.Audio;
+using Ami.BroAudio;
 
 namespace AbstractPixel.GameManagement.Audio
 {
@@ -13,6 +13,9 @@ namespace AbstractPixel.GameManagement.Audio
 
         [Tooltip("UNITY LIMITATION: You cannot modify group volume directly via C#. You MUST right-click the group's volume in the Mixer, expose it, and type that exact string name here.")]
         public string ExposedVolumeParameter;
+
+        [Tooltip("The BroAudio category to duck alongside the Unity Mixer. Set to 'All' or the specific category being modified.")]
+        public BroAudioType TargetBroAudioType = BroAudioType.All;
 
         [Range(0f, 1f)]
         [Tooltip("Multiplier applied to the CURRENT volume. \n1.0 = 100% (No change) \n0.5 = 50% volume \n0.0 = Muted")]

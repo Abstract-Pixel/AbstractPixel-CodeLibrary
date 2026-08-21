@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using Ami.BroAudio;
 
 namespace AbstractPixel.GameManagement.Audio
 {
@@ -10,12 +12,64 @@ namespace AbstractPixel.GameManagement.Audio
         [Header("State Mappings")]
         [SerializeField] private List<StateVolumeConfig> stateConfigurations = new List<StateVolumeConfig>();
 
-        // Tracks the original, untouched volume before any state modified it
-        // Key: (AudioMixer, parameterName)
-        private Dictionary<(AudioMixer, string), float> baseVolumes = new Dictionary<(AudioMixer, string), float>();
+        private Dictionary<AudioChannelIdentifier, ChannelStateTracker> activeChannels = new Dictionary<AudioChannelIdentifier, ChannelStateTracker>();
 
-        // Tracks running fade routines so overlapping fades can be cancelled cleanly
-        private Dictionary<(AudioMixer, string), Coroutine> activeFades = new Dictionary<(AudioMixer, string), Coroutine>();
+        // Substate Preservation Tracking
+        private HashSet<StateSO> pendingUnregisters = new HashSet<StateSO>();
+        private HashSet<StateSO> preservedParentStates = new HashSet<StateSO>();
+        private bool isUnregisterRoutineRunning = false;
+
+        private const float EXTERNAL_MUTATION_TOLERANCE = 0.01f;
+        private const float MINIMUM_LINEAR_VOLUME = 0.0001f;
+        private const float INSTANT_SNAP_SPEED = 1000f;
+
+        #region Internal Data Structures
+
+        private struct AudioChannelIdentifier : IEquatable<AudioChannelIdentifier>
+        {
+            public AudioMixer Mixer;
+            public string Parameter;
+            public BroAudioType BroType;
+
+            public AudioChannelIdentifier(AudioMixer _mixer, string _parameter, BroAudioType _broType)
+            {
+                Mixer = _mixer;
+                Parameter = _parameter;
+                BroType = _broType;
+            }
+
+            public bool Equals(AudioChannelIdentifier _other)
+            {
+                return Mixer == _other.Mixer && Parameter == _other.Parameter && BroType == _other.BroType;
+            }
+
+            public override bool Equals(object _obj)
+            {
+                return _obj is AudioChannelIdentifier other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    int hash = 17;
+                    hash = hash * 23 + (Mixer != null ? Mixer.GetHashCode() : 0);
+                    hash = hash * 23 + (Parameter != null ? Parameter.GetHashCode() : 0);
+                    hash = hash * 23 + BroType.GetHashCode();
+                    return hash;
+                }
+            }
+        }
+
+        private class ChannelStateTracker
+        {
+            public Dictionary<StateSO, MixerVolumeTarget> ActiveStates = new Dictionary<StateSO, MixerVolumeTarget>();
+            public Coroutine MonitorRoutine;
+            public float CurrentAppliedMultiplier = 1f;
+            public float ExpectedLinearVolume = -1f;
+        }
+
+        #endregion
 
         #region Unity Lifecycle & Event Subscriptions
 
@@ -33,151 +87,232 @@ namespace AbstractPixel.GameManagement.Audio
             GameStateRegistry.OnStateRestored -= HandleStateRestored;
 
             StopAllCoroutines();
-            activeFades.Clear();
-            baseVolumes.Clear();
-        }
+            isUnregisterRoutineRunning = false;
 
-        #endregion
-
-        #region State Event Handlers
-
-        private void HandleStateRegistered(StateSO stateData)
-        {
-            StateVolumeConfig config = FindConfig(stateData);
-            if (config != null)
+            foreach (KeyValuePair<AudioChannelIdentifier, ChannelStateTracker> keyValuePair in activeChannels)
             {
-                ApplyVolumeConfig(config);
-            }
-        }
+                AudioChannelIdentifier channel = keyValuePair.Key;
+                ChannelStateTracker tracker = keyValuePair.Value;
 
-        private void HandleStateUnregistered(StateSO stateData)
-        {
-            StateVolumeConfig config = FindConfig(stateData);
-            if (config != null && config.RevertOnUnregister)
-            {
-                RevertVolumeConfig(config);
-            }
-        }
-
-        private void HandleStateRestored(StateSO stateData)
-        {
-            // When returning from Settings back to Pause, re-apply Pause volume
-            StateVolumeConfig config = FindConfig(stateData);
-            if (config != null)
-            {
-                ApplyVolumeConfig(config);
-            }
-        }
-
-        #endregion
-
-        #region Volume Logic
-
-        private void ApplyVolumeConfig(StateVolumeConfig config)
-        {
-            foreach (MixerVolumeTarget target in config.VolumeTargets)
-            {
-                if (target.TargetGroup == null) continue;
-
-                AudioMixer mixer = target.TargetGroup.audioMixer;
-                string parameter = target.ExposedVolumeParameter;
-                var key = (mixer, parameter);
-
-                // 1. Capture the true baseline volume only if we haven't stored it yet
-                if (!baseVolumes.ContainsKey(key))
+                float baselineLinear = 1f;
+                if (tracker.CurrentAppliedMultiplier > MINIMUM_LINEAR_VOLUME)
                 {
-                    if (mixer.GetFloat(parameter, out float originalDb))
+                    baselineLinear = tracker.ExpectedLinearVolume / tracker.CurrentAppliedMultiplier;
+                }
+
+                ApplyVolume(channel.Mixer, channel.Parameter, channel.BroType, baselineLinear);
+            }
+
+            activeChannels.Clear();
+            pendingUnregisters.Clear();
+            preservedParentStates.Clear();
+        }
+
+        #endregion
+
+        #region State Event Handlers & Substate Logic
+
+        private void HandleStateRegistered(StateSO _stateData)
+        {
+            if (_stateData == null) return;
+
+            if (_stateData.IsSubState)
+            {
+                // The Registry pushes the highest priority active state to history before registering a substate.
+                // We perfectly mirror that logic here by finding the highest priority state in our unregister buffer
+                // and locking it in as a preserved parent state.
+                StateSO highestPriorityPending = null;
+                int maxPriority = -1;
+
+                foreach (StateSO pendingState in pendingUnregisters)
+                {
+                    if (pendingState.Priority > maxPriority)
                     {
-                        baseVolumes[key] = originalDb;
-                    }
-                    else
-                    {
-                        continue;
+                        maxPriority = pendingState.Priority;
+                        highestPriorityPending = pendingState;
                     }
                 }
 
-                // 2. Target is ALWAYS calculated from the BASELINE (never from the live ducked volume)
-                float pristineBaseDb = baseVolumes[key];
-                float targetDb = CalculateTargetDecibels(pristineBaseDb, target.TargetVolumeMultiplier);
+                if (highestPriorityPending != null)
+                {
+                    preservedParentStates.Add(highestPriorityPending);
+                    pendingUnregisters.Remove(highestPriorityPending);
+                }
+            }
+            else
+            {
+                // Quick toggle prevention: if a state is unregistered and re-registered instantly, cancel the unregister.
+                pendingUnregisters.Remove(_stateData);
+            }
 
-                // 3. Smoothly fade to the target
-                StartFade(mixer, parameter, targetDb, target.LerpDuration);
+            RegisterVolumeTargets(_stateData);
+        }
+
+        private void HandleStateUnregistered(StateSO _stateData)
+        {
+            if (_stateData == null) return;
+
+            pendingUnregisters.Add(_stateData);
+
+            if (isUnregisterRoutineRunning == false)
+            {
+                StartCoroutine(ProcessPendingUnregistersRoutine());
             }
         }
 
-        private void RevertVolumeConfig(StateVolumeConfig config)
+        private void HandleStateRestored(StateSO _stateData)
         {
+            if (_stateData == null) return;
+
+            // The state is returning from the background history stack, it is no longer just preserved.
+            preservedParentStates.Remove(_stateData);
+
+            RegisterVolumeTargets(_stateData);
+        }
+
+        private IEnumerator ProcessPendingUnregistersRoutine()
+        {
+            isUnregisterRoutineRunning = true;
+
+            // Wait until the absolute end of the frame to ensure all synchronous Registry events have fired.
+            yield return new WaitForEndOfFrame();
+
+            foreach (StateSO stateToRemove in pendingUnregisters)
+            {
+                if (preservedParentStates.Contains(stateToRemove))
+                {
+                    continue; // State was pushed into the history stack, do not revert audio.
+                }
+
+                UnregisterVolumeTargets(stateToRemove);
+            }
+
+            pendingUnregisters.Clear();
+            isUnregisterRoutineRunning = false;
+        }
+
+        #endregion
+
+        #region Volume Target Registration
+
+        private void RegisterVolumeTargets(StateSO _stateData)
+        {
+            StateVolumeConfig config = FindConfig(_stateData);
+            if (config == null) return;
+
             foreach (MixerVolumeTarget target in config.VolumeTargets)
             {
-                if (target.TargetGroup == null) continue;
+                if (target.TargetGroup == null || target.TargetGroup.audioMixer == null) continue;
 
-                AudioMixer mixer = target.TargetGroup.audioMixer;
-                string parameter = target.ExposedVolumeParameter;
-                var key = (mixer, parameter);
+                AudioChannelIdentifier channelId = new AudioChannelIdentifier(target.TargetGroup.audioMixer, target.ExposedVolumeParameter, target.TargetBroAudioType);
 
-                // If we have a saved baseline, fade back to it and clear the baseline
-                if (baseVolumes.TryGetValue(key, out float originalDb))
+                if (activeChannels.ContainsKey(channelId) == false)
                 {
-                    StartFade(mixer, parameter, originalDb, target.LerpDuration);
-                    baseVolumes.Remove(key);
+                    activeChannels[channelId] = new ChannelStateTracker();
+                }
+
+                ChannelStateTracker tracker = activeChannels[channelId];
+                tracker.ActiveStates[_stateData] = target;
+
+                if (tracker.MonitorRoutine == null)
+                {
+                    tracker.MonitorRoutine = StartCoroutine(VolumeMonitorRoutine(channelId, tracker));
+                }
+            }
+        }
+
+        private void UnregisterVolumeTargets(StateSO _stateData)
+        {
+            StateVolumeConfig config = FindConfig(_stateData);
+            if (config == null || config.RevertOnUnregister == false) return;
+
+            foreach (MixerVolumeTarget target in config.VolumeTargets)
+            {
+                if (target.TargetGroup == null || target.TargetGroup.audioMixer == null) continue;
+
+                AudioChannelIdentifier channelId = new AudioChannelIdentifier(target.TargetGroup.audioMixer, target.ExposedVolumeParameter, target.TargetBroAudioType);
+
+                if (activeChannels.TryGetValue(channelId, out ChannelStateTracker tracker))
+                {
+                    tracker.ActiveStates.Remove(_stateData);
                 }
             }
         }
 
         #endregion
 
-        #region Fade Engine (Unscaled Time)
+        #region Thermostat Monitoring Engine (Unscaled Time)
 
-        private void StartFade(AudioMixer mixer, string parameter, float targetDb, float duration)
+        private IEnumerator VolumeMonitorRoutine(AudioChannelIdentifier _channelId, ChannelStateTracker _tracker)
         {
-            var key = (mixer, parameter);
+            float actualLinear = GetLinearFromMixer(_channelId.Mixer, _channelId.Parameter);
+            float baselineLinear = actualLinear;
 
-            // Stop any existing fade on this specific parameter
-            if (activeFades.TryGetValue(key, out Coroutine runningFade) && runningFade != null)
+            _tracker.ExpectedLinearVolume = actualLinear;
+            _tracker.CurrentAppliedMultiplier = 1f;
+
+            float currentLerpSpeed = INSTANT_SNAP_SPEED;
+
+            while (_tracker.ActiveStates.Count > 0 || Mathf.Abs(_tracker.CurrentAppliedMultiplier - 1f) > 0.001f)
             {
-                StopCoroutine(runningFade);
-            }
+                actualLinear = GetLinearFromMixer(_channelId.Mixer, _channelId.Parameter);
 
-            // Snap immediately if duration is zero
-            if (duration <= 0f)
-            {
-                mixer.SetFloat(parameter, targetDb);
-                activeFades.Remove(key);
-                return;
-            }
+                // EXTERNAL MUTATION DETECTION
+                if (Mathf.Abs(actualLinear - _tracker.ExpectedLinearVolume) > EXTERNAL_MUTATION_TOLERANCE)
+                {
+                    baselineLinear = actualLinear;
+                }
 
-            activeFades[key] = StartCoroutine(FadeRoutine(mixer, parameter, targetDb, duration));
-        }
+                // CALCULATE TARGET MULTIPLIER & SPEED
+                float targetMultiplier = 1f;
 
-        private IEnumerator FadeRoutine(AudioMixer mixer, string parameter, float targetDb, float duration)
-        {
-            mixer.GetFloat(parameter, out float startDb);
-            float elapsed = 0f;
+                if (_tracker.ActiveStates.Count > 0)
+                {
+                    float maxLerpDuration = 0f;
+                    foreach (KeyValuePair<StateSO, MixerVolumeTarget> keyValuePair in _tracker.ActiveStates)
+                    {
+                        targetMultiplier *= keyValuePair.Value.TargetVolumeMultiplier;
+                        if (keyValuePair.Value.LerpDuration > maxLerpDuration)
+                        {
+                            maxLerpDuration = keyValuePair.Value.LerpDuration;
+                        }
+                    }
+                    currentLerpSpeed = maxLerpDuration > 0f ? 1f / maxLerpDuration : INSTANT_SNAP_SPEED;
+                }
 
-            while (elapsed < duration)
-            {
-                elapsed += Time.unscaledDeltaTime; // Works even when paused (Time.timeScale == 0)
-                float progress = Mathf.Clamp01(elapsed / duration);
+                // APPLY SMOOTH MULTIPLIER
+                if (currentLerpSpeed >= INSTANT_SNAP_SPEED)
+                {
+                    _tracker.CurrentAppliedMultiplier = targetMultiplier;
+                }
+                else
+                {
+                    _tracker.CurrentAppliedMultiplier = Mathf.MoveTowards(_tracker.CurrentAppliedMultiplier, targetMultiplier, Time.unscaledDeltaTime * currentLerpSpeed);
+                }
 
-                float currentDb = Mathf.Lerp(startDb, targetDb, progress);
-                mixer.SetFloat(parameter, currentDb);
+                // CALCULATE & APPLY EXPECTED VOLUME
+                _tracker.ExpectedLinearVolume = baselineLinear * _tracker.CurrentAppliedMultiplier;
+                ApplyVolume(_channelId.Mixer, _channelId.Parameter, _channelId.BroType, _tracker.ExpectedLinearVolume);
 
                 yield return null;
             }
 
-            mixer.SetFloat(parameter, targetDb);
-            activeFades.Remove((mixer, parameter));
+            // FINAL RESTORE
+            ApplyVolume(_channelId.Mixer, _channelId.Parameter, _channelId.BroType, baselineLinear);
+
+            _tracker.MonitorRoutine = null;
+            activeChannels.Remove(_channelId);
         }
 
         #endregion
 
         #region Helpers & Audio Math
 
-        private StateVolumeConfig FindConfig(StateSO stateData)
+        private StateVolumeConfig FindConfig(StateSO _stateData)
         {
             for (int i = 0; i < stateConfigurations.Count; i++)
             {
-                if (stateConfigurations[i].TargetState == stateData)
+                if (stateConfigurations[i].TargetState == _stateData)
                 {
                     return stateConfigurations[i];
                 }
@@ -185,19 +320,26 @@ namespace AbstractPixel.GameManagement.Audio
             return null;
         }
 
-        private float CalculateTargetDecibels(float baseDecibels, float multiplier)
+        private float GetLinearFromMixer(AudioMixer _mixer, string _parameter)
         {
-            // Convert baseline decibels to linear (0..1)
-            float baseLinear = Mathf.Pow(10f, baseDecibels / 20f);
+            if (_mixer.GetFloat(_parameter, out float decibels))
+            {
+                return Mathf.Pow(10f, decibels / 20f);
+            }
+            return 1f;
+        }
 
-            // Apply multiplier
-            float targetLinear = baseLinear * multiplier;
+        private void ApplyVolume(AudioMixer _mixer, string _parameter, BroAudioType _broType, float _linearVolume)
+        {
+            float safeLinear = Mathf.Max(MINIMUM_LINEAR_VOLUME, _linearVolume);
+            float decibels = 20f * Mathf.Log10(safeLinear);
 
-            // Clamp to avoid -Infinity from Log10(0)
-            float safeLinear = Mathf.Max(0.0001f, targetLinear);
+            _mixer.SetFloat(_parameter, decibels);
 
-            // Convert back to decibels
-            return 20f * Mathf.Log10(safeLinear);
+            if ((int)_broType != 0)
+            {
+                BroAudio.SetVolume(_broType, safeLinear, 0f);
+            }
         }
 
         #endregion
