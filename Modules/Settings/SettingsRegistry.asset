@@ -54,7 +54,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Graphics Preset Quality
@@ -120,7 +120,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1.5
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Render Scale
@@ -139,7 +139,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 3
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Hardware Anti Aliasing
@@ -217,7 +217,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Lighting Quality
@@ -237,7 +237,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: ShadowQuality
@@ -295,7 +295,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Terrain Quality
@@ -377,7 +377,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 6
+        <CurrentValue>k__BackingField: 3
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Frame Rate
@@ -424,7 +424,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Screen Mode Type
@@ -453,7 +453,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 75.58545
+        <CurrentValue>k__BackingField: 70
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Field Of View
@@ -511,7 +511,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Music Volume

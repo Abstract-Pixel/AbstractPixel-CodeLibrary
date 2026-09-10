@@ -36,7 +36,7 @@ namespace AbstractPixel.Settings
             {
                 List<DisplayInfo> displayLayout = new List<DisplayInfo>();
                 Screen.GetDisplayLayout(displayLayout);
-
+                   
                 if (CurrentValue < displayLayout.Count)
                 {
                     DisplayInfo targetDisplay = displayLayout[CurrentValue];
@@ -44,8 +44,7 @@ namespace AbstractPixel.Settings
 
                     // FIX: If the game window is ALREADY on this monitor, DO NOT call MoveMainWindowTo!
                     // Calling this when already on the monitor causes Windows to minimize the game.
-                    if (currentDisplay.name == targetDisplay.name ||
-                       (currentDisplay.width == targetDisplay.width && currentDisplay.height == targetDisplay.height && currentDisplay.workArea == targetDisplay.workArea))
+                    if (currentDisplay.name == targetDisplay.name)
                     {
                         return;
                     }
