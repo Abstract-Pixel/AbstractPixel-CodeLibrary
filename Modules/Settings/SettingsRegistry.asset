@@ -54,7 +54,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Graphics Preset Quality
@@ -361,7 +361,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Monitor Display Output
@@ -459,7 +459,7 @@ MonoBehaviour:
           DisplayName: Field Of View
           Description: Changes how much of the world you can see at once. Higher
             is wider, lower is more zoomed in
-        <DefaultValue>k__BackingField: 60
+        <DefaultValue>k__BackingField: 70
         dependencyRulesList: []
         <MinValue>k__BackingField: 40
         <MaxValue>k__BackingField: 120

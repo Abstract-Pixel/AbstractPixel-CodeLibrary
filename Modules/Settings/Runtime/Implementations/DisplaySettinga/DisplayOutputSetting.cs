@@ -32,25 +32,36 @@ namespace AbstractPixel.Settings
 
         protected override void OnApplySettingLogic()
         {
-            if (OptionValues != null && CurrentValue >= 0 && CurrentValue < OptionValues.Length)
+            if (OptionValues == null || CurrentValue < 0 || CurrentValue >= OptionValues.Length)
             {
-                List<DisplayInfo> displayLayout = new List<DisplayInfo>();
-                Screen.GetDisplayLayout(displayLayout);
-                   
-                if (CurrentValue < displayLayout.Count)
+                return;
+            }
+
+            List<DisplayInfo> displayLayoutList = new List<DisplayInfo>();
+            Screen.GetDisplayLayout(displayLayoutList);
+
+            if (CurrentValue < displayLayoutList.Count)
+            {
+                DisplayInfo targetDisplay = displayLayoutList[CurrentValue];
+                DisplayInfo currentDisplay = Screen.mainWindowDisplayInfo;
+
+                // Check if the target index matches our current layout index
+                int currentMonitorIndex = -1;
+                for (int i = 0; i < displayLayoutList.Count; i++)
                 {
-                    DisplayInfo targetDisplay = displayLayout[CurrentValue];
-                    DisplayInfo currentDisplay = Screen.mainWindowDisplayInfo;
-
-                    // FIX: If the game window is ALREADY on this monitor, DO NOT call MoveMainWindowTo!
-                    // Calling this when already on the monitor causes Windows to minimize the game.
-                    if (currentDisplay.name == targetDisplay.name)
+                    if (displayLayoutList[i].Equals(currentDisplay))
                     {
-                        return;
+                        currentMonitorIndex = i;
+                        break;
                     }
-
-                    Screen.MoveMainWindowTo(targetDisplay, new Vector2Int(0, 0));
                 }
+
+                // FIX: Verify if we are already displaying on this monitor
+                if (CurrentValue == currentMonitorIndex)
+                {
+                    return;
+                }
+                Screen.MoveMainWindowTo( targetDisplay, new Vector2Int(0, 0));
             }
         }
 
