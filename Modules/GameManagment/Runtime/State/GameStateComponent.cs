@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -16,12 +17,16 @@ namespace AbstractPixel.GameManagement
         private HashSet<BaseCondition> trackedConditions = new HashSet<BaseCondition>();
         private string currentActiveScene;
 
+        private WaitForSeconds executionDelay = null;
+        private Coroutine stateActivationCoroutine = null;
         private void OnEnable()
         {
             if (stateConfig == null)
             {
                 return;
             }
+
+            executionDelay = new WaitForSeconds(stateConfig.StateExecutionDelay);
 
             List<BaseCondition> existingConditions = StateConditionRegistry.GetConditionsForState(stateConfig);
             foreach (BaseCondition condition in existingConditions)
@@ -47,7 +52,10 @@ namespace AbstractPixel.GameManagement
         }
 
         private void OnDisable()
+
         {
+            StopCoroutine(stateActivationCoroutine);
+            stateActivationCoroutine = null;
             foreach (BaseCondition condition in trackedConditions)
             {
                 if (condition != null)
@@ -97,14 +105,23 @@ namespace AbstractPixel.GameManagement
             {
                 return;
             }
-
+            if(stateActivationCoroutine != null)
+            {
+                StopCoroutine(stateActivationCoroutine);
+            }
             bool isPermissionGranted = GameStateRegistry.TryRegisterAsActiveState(stateConfig);
 
             if (isPermissionGranted)
             {
                 isActive = true;
-                snapshotBeforeActivation = stateConfig.ApplyConfigurations();
+                stateActivationCoroutine = StartCoroutine(ApplyStateConfigurationsAfterDelay());
             }
+        }
+
+        IEnumerator ApplyStateConfigurationsAfterDelay()
+        {
+            yield return executionDelay;
+            snapshotBeforeActivation = stateConfig.ApplyConfigurations();
         }
 
         public void DeactivateState()
@@ -113,6 +130,9 @@ namespace AbstractPixel.GameManagement
             {
                 return;
             }
+
+            StopCoroutine(stateActivationCoroutine);
+            stateActivationCoroutine = null;
 
             isActive = false;
             stateConfig.RevertConfigurations(snapshotBeforeActivation);

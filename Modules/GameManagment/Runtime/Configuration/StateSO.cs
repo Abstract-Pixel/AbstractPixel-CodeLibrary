@@ -14,6 +14,9 @@ namespace AbstractPixel.GameManagement
         public bool IsSubState = false;
 
         [Header("Execution Settings")]
+
+        [Tooltip("The delay in seconds before the state is executed.")]
+        public float StateExecutionDelay = 0f;
         [Tooltip("If true, the game time will be set to zero upon execution.")]
         public bool IsTimeZeroOnExecution = true;
         [Tooltip("If true, the cursor will be locked upon execution.")]
