@@ -37,6 +37,8 @@ namespace AbstractPixel.Settings
         public event Action<TValue> OnValueChanged = delegate { };
         public event Action<bool> OnActiveStatusChanged = delegate { };
 
+        // CRITICAL FIX: Serialize this field so it persists across Domain Reloads and Git checkouts!
+        [SerializeField, HideInInspector]
         private bool isDefaultValuesPreGenerated = false;
 
         public void Initialize()
