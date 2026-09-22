@@ -383,7 +383,10 @@ namespace AbstractPixel.Settings
 #if UNITY_EDITOR
         protected override void OnValidateInEditor()
         {
-            GenerateDefaultTiers();
+            if (OptionValues == null || OptionValues.Length == 0)
+            {
+                GenerateDefaultTiers();
+            }
         }
 #endif
     }
