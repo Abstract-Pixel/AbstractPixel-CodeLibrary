@@ -64,7 +64,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 0.1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Horizontal Sensetivity
@@ -80,7 +80,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 0.1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Vertical Sensetivity
@@ -126,7 +126,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 4
+        <CurrentValue>k__BackingField: 1.09
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Horizontal Sensetivity
@@ -134,15 +134,15 @@ MonoBehaviour:
         <DefaultValue>k__BackingField: 4
         dependencyRulesList: []
         <MinValue>k__BackingField: 0.1
-        <MaxValue>k__BackingField: 10
-        <DisplayMinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 5
+        <DisplayMinValue>k__BackingField: 1
         <DisplayMaxValue>k__BackingField: 10
     - rid: 3582977949081796729
       type: {class: GamepadYSensitivitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 1.09
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Vertical Sensetivity
@@ -150,15 +150,15 @@ MonoBehaviour:
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         <MinValue>k__BackingField: 0.1
-        <MaxValue>k__BackingField: 10
-        <DisplayMinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 5
+        <DisplayMinValue>k__BackingField: 1
         <DisplayMaxValue>k__BackingField: 10
     - rid: 8789862167657578613
       type: {class: GraphicsPresetSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Graphics Preset Quality
@@ -482,7 +482,7 @@ MonoBehaviour:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
         <CurrentValue>k__BackingField: 3
-        <IsActive>k__BackingField: 0
+        <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Frame Rate
           Description: "Sets a max cap on your Frames Per Second. \r\n\r\n\u26A0\uFE0F

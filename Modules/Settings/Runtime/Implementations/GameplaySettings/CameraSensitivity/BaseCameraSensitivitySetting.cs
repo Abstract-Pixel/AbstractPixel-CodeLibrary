@@ -31,6 +31,7 @@ namespace AbstractPixel.Settings
 
         protected override void OnInitialize()
         {
+
             ConfigureDefaults();
         }
 
