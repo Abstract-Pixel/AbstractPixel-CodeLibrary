@@ -46,15 +46,119 @@ MonoBehaviour:
       - rid: 8789862167657578633
       - rid: 8789862167657578634
       - rid: 8789862167657578636
+  - GroupName: All Gameplay Settings
+    Category: 4
+    Settings:
+      List:
+      - rid: 3582977949081796726
+      - rid: 3582977949081796727
+      - rid: 3582977949081796724
+      - rid: 3582977949081796725
+      - rid: 3582977949081796728
+      - rid: 3582977949081796729
   references:
     version: 2
     RefIds:
+    - rid: 3582977949081796724
+      type: {class: MouseXSensitivitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 2
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Horizontal Sensetivity
+          Description: 'Controls The Horizontal  Camera Sensitivity for the mouse '
+        <DefaultValue>k__BackingField: 2
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0.1
+        <MaxValue>k__BackingField: 5
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 10
+    - rid: 3582977949081796725
+      type: {class: MouseYSensitivitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Vertical Sensetivity
+          Description: 'Controls The Vertical Camera Sensitivity for the mouse '
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0.1
+        <MaxValue>k__BackingField: 5
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 10
+    - rid: 3582977949081796726
+      type: {class: HorizontalCameraInversionSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Invert Camera Horizontally
+          Description: This WIll dictate camers's direction of movment horizontally
+            when mving the input device from left to right
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <InvertMouseByDefault>k__BackingField: 0
+        <InvertGamepadByDefault>k__BackingField: 0
+    - rid: 3582977949081796727
+      type: {class: VerticalCameraInversionSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 0
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Invert Camera Vertically
+          Description: This WIll dictate camers's direction of movment vertically
+            when mving the input device from up to down
+        <DefaultValue>k__BackingField: 0
+        dependencyRulesList: []
+        <InvertMouseByDefault>k__BackingField: 1
+        <InvertGamepadByDefault>k__BackingField: 1
+    - rid: 3582977949081796728
+      type: {class: GamepadXSensitivitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 4
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Horizontal Sensetivity
+          Description: 'Controls The Horizontal Camera Sensitivity for the Gamepad '
+        <DefaultValue>k__BackingField: 4
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0.1
+        <MaxValue>k__BackingField: 10
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 10
+    - rid: 3582977949081796729
+      type: {class: GamepadYSensitivitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Vertical Sensetivity
+          Description: Controls The Vertical Camera Sensitivity for the  GamePad
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        <MinValue>k__BackingField: 0.1
+        <MaxValue>k__BackingField: 10
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 10
     - rid: 8789862167657578613
       type: {class: GraphicsPresetSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 0
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Graphics Preset Quality
@@ -361,7 +465,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Monitor Display Output
@@ -378,7 +482,7 @@ MonoBehaviour:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
         <CurrentValue>k__BackingField: 3
-        <IsActive>k__BackingField: 1
+        <IsActive>k__BackingField: 0
         <Metadata>k__BackingField:
           DisplayName: Frame Rate
           Description: "Sets a max cap on your Frames Per Second. \r\n\r\n\u26A0\uFE0F
@@ -453,13 +557,13 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 70
+        <CurrentValue>k__BackingField: 60
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Field Of View
           Description: Changes how much of the world you can see at once. Higher
             is wider, lower is more zoomed in
-        <DefaultValue>k__BackingField: 70
+        <DefaultValue>k__BackingField: 60
         dependencyRulesList: []
         <MinValue>k__BackingField: 40
         <MaxValue>k__BackingField: 120
