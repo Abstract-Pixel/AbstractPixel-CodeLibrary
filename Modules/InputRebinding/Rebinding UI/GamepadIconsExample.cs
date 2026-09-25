@@ -40,7 +40,7 @@ namespace AbstractPixel.InputRebinding
             else if (InputSystem.IsFirstLayoutBasedOnSecond(deviceLayoutName, "Gamepad"))
                 icon = xbox.GetSprite(controlPath);
 
-            var textComponent = component.bindingText;
+            var textComponent = component.BindingText;
 
             // Grab Image component.
             var imageGO = textComponent.transform.parent.Find("ActionBindingIcon");

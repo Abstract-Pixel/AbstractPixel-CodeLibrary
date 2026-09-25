@@ -4,14 +4,15 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using RebindOperation = UnityEngine.InputSystem.InputActionRebindingExtensions.RebindingOperation;
 
 namespace AbstractPixel.InputRebinding
 {
     public class RebindActionUI : MonoBehaviour
     {
-        public static Func<InputActionAsset> RuntimeAssetProvider { get; set; }
+        public static Func<InputActionAsset> RuntimeInputAssetProvider { get; set; }
 
-        public InputActionReference actionReference
+        public InputActionReference ActionReference
         {
             get => m_Action;
             set
@@ -22,7 +23,7 @@ namespace AbstractPixel.InputRebinding
             }
         }
 
-        public string bindingId
+        public string BindingId
         {
             get => m_BindingId;
             set
@@ -32,7 +33,7 @@ namespace AbstractPixel.InputRebinding
             }
         }
 
-        public InputBinding.DisplayStringOptions displayStringOptions
+        public InputBinding.DisplayStringOptions DisplayStringOptions
         {
             get => m_DisplayStringOptions;
             set
@@ -42,19 +43,19 @@ namespace AbstractPixel.InputRebinding
             }
         }
 
-        public TMP_Text actionLabel
+        public TMP_Text ActionLabel
         {
             get => m_ActionLabel;
             set => m_ActionLabel = value;
         }
 
-        public TMP_Text bindingText
+        public TMP_Text BindingText
         {
             get => m_BindingText;
             set => m_BindingText = value;
         }
 
-        public TMP_Text rebindText
+        public TMP_Text RebindText
         {
             get => m_RebindText;
             set => m_RebindText = value;
@@ -88,7 +89,7 @@ namespace AbstractPixel.InputRebinding
         public InteractiveRebindEvent startRebindEvent => m_RebindStartEvent;
         public InteractiveRebindEvent stopRebindEvent => m_RebindStopEvent;
 
-        public InputActionRebindingExtensions.RebindingOperation ongoingRebind => m_RebindOperation;
+        public RebindOperation ongoingRebind => m_RebindOperation;
 
         [Header("Action & Binding References")]
         [Tooltip("Reference to action that is to be rebound from the UI.")]
@@ -125,13 +126,13 @@ namespace AbstractPixel.InputRebinding
         [SerializeField] private InteractiveRebindEvent m_RebindStartEvent;
         [SerializeField] private InteractiveRebindEvent m_RebindStopEvent;
 
-        private InputActionRebindingExtensions.RebindingOperation m_RebindOperation;
+        private RebindOperation m_RebindOperation;
 
         [Serializable]
         public class UpdateBindingUIEvent : UnityEvent<RebindActionUI, string, string, string> { }
 
         [Serializable]
-        public class InteractiveRebindEvent : UnityEvent<RebindActionUI, InputActionRebindingExtensions.RebindingOperation> { }
+        public class InteractiveRebindEvent : UnityEvent<RebindActionUI, RebindOperation> { }
 
         private void OnEnable()
         {
@@ -152,7 +153,7 @@ namespace AbstractPixel.InputRebinding
             if (m_Action == null || m_Action.action == null)
                 return null;
 
-            InputActionAsset liveAsset = RuntimeAssetProvider?.Invoke();
+            InputActionAsset liveAsset = RuntimeInputAssetProvider?.Invoke();
 
             InputAction action = liveAsset != null
                 ? liveAsset.FindAction(m_Action.action.id)
@@ -172,7 +173,7 @@ namespace AbstractPixel.InputRebinding
 
         public void ResetToDefault()
         {
-            var action = ResolveActionAndBinding(out var bindingIndex);
+            InputAction action = ResolveActionAndBinding(out var bindingIndex);
             if (action == null)
                 return;
 
@@ -194,7 +195,7 @@ namespace AbstractPixel.InputRebinding
 
         public void StartInteractiveRebind()
         {
-            var action = ResolveActionAndBinding(out var bindingIndex);
+            InputAction action = ResolveActionAndBinding(out var bindingIndex);
             if (action == null)
                 return;
 
@@ -218,7 +219,7 @@ namespace AbstractPixel.InputRebinding
 
         private void PerformInteractiveRebinding(InputAction action, int bindingIndex, bool allCompositeParts = false)
         {
-            m_RebindOperation?.Cancel();
+            m_RebindOperation?.Cancel(); // Will null out m_RebindOperation and call CleanUp() via OnCancel callback.
             m_RebindOperation?.Dispose();
             m_RebindOperation = null;
 
@@ -229,7 +230,7 @@ namespace AbstractPixel.InputRebinding
 
             if (m_RebindText != null)
             {
-                var partName = default(string);
+                string partName = default(string);
                 if (action.bindings[bindingIndex].isPartOfComposite)
                     partName = $"Binding '{action.bindings[bindingIndex].name}'. ";
 
@@ -246,7 +247,7 @@ namespace AbstractPixel.InputRebinding
                 m_RebindCancelButton.onClick.AddListener(CancelRebind);
             }
 
-            var rebindConfig = action.PerformInteractiveRebinding(bindingIndex)
+            RebindOperation rebindConfig = action.PerformInteractiveRebinding(bindingIndex)
                 .WithCancelingThrough("<Keyboard>/escape")
                 .OnMatchWaitForAnother(0.1f);
 
@@ -272,6 +273,14 @@ namespace AbstractPixel.InputRebinding
                     if (m_RebindOverlay != null)
                         m_RebindOverlay.SetActive(false);
 
+                    if(CheckDuplicateBindings(action, bindingIndex, allCompositeParts))
+                    {
+                        action.RemoveBindingOverride(bindingIndex);
+                        CleanUp();
+                        PerformInteractiveRebinding(action, bindingIndex, allCompositeParts);
+                        return;
+                    }
+
                     if (allCompositeParts)
                     {
                         var nextBindingIndex = bindingIndex + 1;
@@ -290,6 +299,39 @@ namespace AbstractPixel.InputRebinding
             m_RebindOperation.Start();
         }
 
+        private bool CheckDuplicateBindings(InputAction _action, int _bindingIndex, bool _allCompositeParts = false)
+        {
+            InputBinding newBinding = _action.bindings[_bindingIndex];
+
+            for (int i = 0; i < _action.actionMap.bindings.Count; i++)
+            {
+                if (_action.actionMap.bindings[i].action == newBinding.action)
+                {
+                    continue;
+                }
+    
+                InputBinding existingBinding = _action.actionMap.bindings[i];
+                if (existingBinding.effectivePath == newBinding.effectivePath)
+                {
+                    Debug.LogWarning($"Duplicate binding detected: {_action.name} has multiple bindings for {newBinding.effectivePath}");
+                    return true;
+                }
+            }
+
+            if(_allCompositeParts)
+            {
+                for(int i =1; i < _bindingIndex; i++)
+                {
+                    if (_action.bindings[i].effectivePath == newBinding.overridePath)
+                    {
+                        Debug.LogWarning($"Duplicate binding detected: {_action.name} has multiple bindings for {newBinding.overridePath}");
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         private void CancelRebind()
         {
             m_RebindOperation?.Cancel();
@@ -297,11 +339,11 @@ namespace AbstractPixel.InputRebinding
 
         public void UpdateBindingDisplay()
         {
-            var displayString = string.Empty;
-            var deviceLayoutName = default(string);
-            var controlPath = default(string);
+            string displayString = string.Empty;
+            string deviceLayoutName = default(string);
+            string controlPath = default(string);
 
-            var action = ResolveActionAndBinding(out var bindingIndex);
+            InputAction action = ResolveActionAndBinding(out var bindingIndex);
             if (action != null && bindingIndex >= 0)
             {
                 displayString = action.GetBindingDisplayString(bindingIndex, out deviceLayoutName, out controlPath, m_DisplayStringOptions);
@@ -317,18 +359,13 @@ namespace AbstractPixel.InputRebinding
         {
             if (m_ActionLabel != null)
             {
-                var action = ResolveActionAndBinding(out _);
+                InputAction  action = ResolveActionAndBinding(out _);
                 m_ActionLabel.text = action != null ? action.name : string.Empty;
             }
         }
 
         private void CleanUp()
         {
-            if (m_RebindCancelButton != null)
-            {
-                m_RebindCancelButton.onClick.RemoveListener(CancelRebind);
-            }
-
             m_RebindOperation?.Dispose();
             m_RebindOperation = null;
         }
