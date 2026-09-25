@@ -9,7 +9,7 @@ namespace AbstractPixel.InputRebinding
 {
     /// <summary>
     /// This is an example for how to override the default display behavior of bindings. The component
-    /// hooks into <see cref="RebindActionUI.updateBindingUIEvent"/> which is triggered when UI display
+    /// hooks into <see cref="RebindActionUIDEPRECATED.updateBindingUIEvent"/> which is triggered when UI display
     /// of a binding should be refreshed. It then checks whether we have an icon for the current binding
     /// and if so, replaces the default text display with an icon.
     /// </summary>
@@ -21,7 +21,7 @@ namespace AbstractPixel.InputRebinding
         protected void OnEnable()
         {
             // Hook into all updateBindingUIEvents on all RebindActionUI components in our hierarchy.
-            var rebindUIComponents = transform.GetComponentsInChildren<RebindActionUI>();
+            var rebindUIComponents = transform.GetComponentsInChildren<RebindActionUIDEPRECATED>();
             foreach (var component in rebindUIComponents)
             {
                 component.updateBindingUIEvent.AddListener(OnUpdateBindingDisplay);
@@ -29,7 +29,7 @@ namespace AbstractPixel.InputRebinding
             }
         }
 
-        protected void OnUpdateBindingDisplay(RebindActionUI component, string bindingDisplayString, string deviceLayoutName, string controlPath)
+        protected void OnUpdateBindingDisplay(RebindActionUIDEPRECATED component, string bindingDisplayString, string deviceLayoutName, string controlPath)
         {
             if (string.IsNullOrEmpty(deviceLayoutName) || string.IsNullOrEmpty(controlPath))
                 return;

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace AbstractPixel.Core
 {
     [ExecuteAlways]
-    [RequireComponent(typeof(LayoutElement), typeof(ContentSizeFitter))]
+    [RequireComponent(typeof(LayoutElement))]
     public class DynamicPanelWidthController : MonoBehaviour
     {
         [Tooltip("The maximum horizontal width (in pixels) this panel can expand to before child texts begin to wrap.\"")]

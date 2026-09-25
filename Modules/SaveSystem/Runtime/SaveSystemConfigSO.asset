@@ -45,7 +45,7 @@ MonoBehaviour:
   - DisplayName: Settings
     Category: 2
     DirectoryScope: 1
-    CustomFileName: 
+    CustomFileName: Settings
     EncryptFile: 0
     IsSceneSpecific: 0
   - DisplayName: Game
