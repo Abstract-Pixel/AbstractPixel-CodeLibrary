@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 using AbstractPixel.Core;
 using UnityEngine;
@@ -25,14 +24,47 @@ namespace AbstractPixel.InputRebinding
         [Tooltip("Optional timeout in seconds for interactive rebinding.")]
         [SerializeField] private float rebindTimeout = 0.0f;
 
-        public static Func<InputActionAsset> RuntimeInputAssetProvider { get; set; }
-        public static Func<InputActionAsset> RuntimeAssetProvider
+        [Header("Control Mode Configuration")]
+        [Tooltip("Specifies how this rebind slot processes inputs. 'Automatic' detects 2D vectors versus digital buttons.")]
+        [SerializeField] private RebindControlMode controlMode = RebindControlMode.Automatic;
+
+        public static InputActionAsset RuntimeAsset { get; private set; }
+        public static event Action OnAnyBindingChanged;
+
+        private static readonly HashSet<RebindAction> activeSlots = new HashSet<RebindAction>();
+
+        public static void SetRuntimeAsset(InputActionAsset _asset)
         {
-            get => RuntimeInputAssetProvider;
-            set => RuntimeInputAssetProvider = value;
+            RuntimeAsset = _asset;
+            RefreshAllActiveSlots();
         }
 
-        public static event Action OnAnyBindingChanged;
+        public static void RegisterActiveSlot(RebindAction _slot)
+        {
+            if (_slot != null)
+            {
+                activeSlots.Add(_slot);
+            }
+        }
+
+        public static void UnregisterActiveSlot(RebindAction _slot)
+        {
+            if (_slot != null)
+            {
+                activeSlots.Remove(_slot);
+            }
+        }
+
+        public static void RefreshAllActiveSlots()
+        {
+            foreach (RebindAction slot in activeSlots)
+            {
+                if (slot != null && slot.isActiveAndEnabled)
+                {
+                    slot.ResolveAndRefreshForActiveDevice();
+                }
+            }
+        }
 
         public static void BroadcastBindingChanged()
         {
@@ -58,11 +90,10 @@ namespace AbstractPixel.InputRebinding
         private string activeSwapHeader = string.Empty;
         private string activeSwapDetails = string.Empty;
 
-        private static InputActionAsset cachedDiscoveredRuntimeAsset;
-        private List<InputActionMap> silencedUiActionMaps = new List<InputActionMap>();
+        private List<InputActionMap> silencedActionMaps = new List<InputActionMap>();
+        private EventSystem cachedEventSystem;
+        private BaseInputModule cachedInputModule;
 
-        private const string KEYBOARD_MATCH_PATH = "<Keyboard>";
-        private const string MOUSE_MATCH_PATH = "<Mouse>";
         private const string GAMEPAD_MATCH_PATH = "<Gamepad>";
         private const string KEYBOARD_CANCEL_PATH = "<Keyboard>/escape";
         private const string GAMEPAD_CANCEL_PATH = "<Gamepad>/start";
@@ -75,19 +106,21 @@ namespace AbstractPixel.InputRebinding
         private const float TRIGGER_ACTUATION_THRESHOLD = 0.5f;
         private const float CONTROL_RELEASE_THRESHOLD = 0.15f;
         private const float REBIND_COOLDOWN_DURATION = 0.25f;
-        private const float COMPOSITE_SETTLE_SAFETY_DELAY = 0.2f;
+        private const float COMPOSITE_SETTLE_SAFETY_DELAY = 0.10f;
         private const float CONFIRMATION_NORMAL_DISPLAY_DURATION = 0.35f;
         private const float CONFIRMATION_SWAP_DISPLAY_DURATION = 0.85f;
         private const float RELEASE_WAIT_TIMEOUT_SECONDS = 5.0f;
 
         private void OnEnable()
         {
+            RegisterActiveSlot(this);
             InputDeviceTracker.OnDeviceFamilyChanged += HandleDeviceFamilyChanged;
             ResolveAndRefreshForActiveDevice();
         }
 
         private void OnDisable()
         {
+            UnregisterActiveSlot(this);
             InputDeviceTracker.OnDeviceFamilyChanged -= HandleDeviceFamilyChanged;
             StopActiveRebindRoutine();
             CleanUpRebindOperation();
@@ -133,7 +166,7 @@ namespace AbstractPixel.InputRebinding
             currentLockedInputDevice = InputDeviceTracker.LastUsedDevice;
 
             InputDeviceTracker.OnDeviceFamilyChanged -= HandleDeviceFamilyChanged;
-            SilenceAllUiMapsAcrossEngine();
+            SilenceAllInputAndUiAcrossEngine();
 
             hasActiveSwapNotification = false;
             activeSwapHeader = string.Empty;
@@ -144,9 +177,9 @@ namespace AbstractPixel.InputRebinding
             InputBinding targetBinding = resolvedAction.bindings[currentActiveBindingIndex];
             if (targetBinding.isComposite)
             {
-                for (int i = currentActiveBindingIndex + 1; i < resolvedAction.bindings.Count && resolvedAction.bindings[i].isPartOfComposite; ++i)
+                for (int index = currentActiveBindingIndex + 1; index < resolvedAction.bindings.Count && resolvedAction.bindings[index].isPartOfComposite; ++index)
                 {
-                    preRebindBackupPaths[i] = resolvedAction.bindings[i].effectivePath;
+                    preRebindBackupPaths[index] = resolvedAction.bindings[index].effectivePath;
                 }
 
                 int firstPartIndex = currentActiveBindingIndex + 1;
@@ -191,13 +224,13 @@ namespace AbstractPixel.InputRebinding
                 for (int index = bindingIndexToReset + 1; index < resolvedAction.bindings.Count && resolvedAction.bindings[index].isPartOfComposite; ++index)
                 {
                     ResolveResetConflicts(resolvedAction, index);
-                    ApplyOverrideSafelyToAllInstances(resolvedAction, index, string.Empty, true);
+                    ApplyOverrideSafely(resolvedAction, index, string.Empty, true);
                 }
             }
             else
             {
                 ResolveResetConflicts(resolvedAction, bindingIndexToReset);
-                ApplyOverrideSafelyToAllInstances(resolvedAction, bindingIndexToReset, string.Empty, true);
+                ApplyOverrideSafely(resolvedAction, bindingIndexToReset, string.Empty, true);
             }
 
             CommitActionMapReboot(resolvedAction);
@@ -215,12 +248,13 @@ namespace AbstractPixel.InputRebinding
             _action.Disable();
 
             bool isGamepadLocked = currentLockedDeviceFamily != DeviceFamily.KeyboardMouse;
-            string matchPath = isGamepadLocked ? GAMEPAD_MATCH_PATH : KEYBOARD_MATCH_PATH;
             string cancelPath = isGamepadLocked ? GAMEPAD_CANCEL_PATH : KEYBOARD_CANCEL_PATH;
+
+            RebindControlMode effectiveMode = ResolveEffectiveControlMode(_action, _bindingIndex);
 
             string friendlyDeviceName = ResolveDeviceFamilyFriendlyName(currentLockedDeviceFamily);
             string actionDisplayName = BuildActionDisplayName(_action, _bindingIndex);
-            string statusPrompt = BuildStatusPrompt(_action, _bindingIndex, _allCompositeParts, _compositeRootIndex);
+            string statusPrompt = BuildStatusPrompt(_action, _bindingIndex, _allCompositeParts, _compositeRootIndex, effectiveMode);
             string initialProgressPreview = _allCompositeParts ? BuildCompositeProgressString(_action, _compositeRootIndex, _bindingIndex, string.Empty) : string.Empty;
 
             PublishOverlayPayload(
@@ -233,21 +267,54 @@ namespace AbstractPixel.InputRebinding
                 activeSwapHeader,
                 activeSwapDetails);
 
-            RebindOperation operationBuilder = _action.PerformInteractiveRebinding(_bindingIndex)
-                .WithMatchingEventsBeingSuppressed(false)
+            float actuationMagnitude = isGamepadLocked ? TRIGGER_ACTUATION_THRESHOLD : (effectiveMode == RebindControlMode.Button ? 0.2f : 0.15f);
+
+            RebindOperation operationBuilder = new RebindOperation()
+                .WithAction(_action);
+
+            if (_bindingIndex >= 0)
+            {
+                operationBuilder.WithTargetBinding(_bindingIndex);
+            }
+
+            if (effectiveMode == RebindControlMode.Button)
+            {
+                operationBuilder.WithExpectedControlType("Button");
+            }
+            else if (effectiveMode == RebindControlMode.Vector2Continuous)
+            {
+                operationBuilder.WithExpectedControlType("Vector2");
+            }
+            else if (effectiveMode == RebindControlMode.Axis1D)
+            {
+                operationBuilder.WithExpectedControlType("Axis");
+            }
+
+            operationBuilder
+                .WithMatchingEventsBeingSuppressed(true)
                 .WithCancelingThrough(cancelPath)
-                .WithControlsHavingToMatchPath(matchPath)
-                .WithMagnitudeHavingToBeGreaterThan(isGamepadLocked ? TRIGGER_ACTUATION_THRESHOLD : 0.2f)
+                .WithMagnitudeHavingToBeGreaterThan(actuationMagnitude)
                 .OnMatchWaitForAnother(0.1f);
 
             operationBuilder.OnApplyBinding((_operation, _path) => { });
 
-            if (!isGamepadLocked)
+            if (isGamepadLocked)
             {
-                operationBuilder.WithControlsHavingToMatchPath(MOUSE_MATCH_PATH);
+                operationBuilder.WithControlsHavingToMatchPath(GAMEPAD_MATCH_PATH);
+            }
+            else
+            {
                 operationBuilder.WithControlsExcluding(EXCLUDE_POINTER_POSITION);
-                operationBuilder.WithControlsExcluding(EXCLUDE_MOUSE_DELTA);
-                operationBuilder.WithControlsExcluding(EXCLUDE_MOUSE_SCROLL);
+
+                if (effectiveMode == RebindControlMode.Button)
+                {
+                    operationBuilder.WithControlsExcluding(EXCLUDE_MOUSE_DELTA);
+                    operationBuilder.WithControlsExcluding(EXCLUDE_MOUSE_SCROLL);
+                }
+                else if (effectiveMode == RebindControlMode.Vector2Continuous)
+                {
+                    operationBuilder.WithoutIgnoringNoisyControls();
+                }
             }
 
             if (rebindTimeout > 0.0f)
@@ -282,24 +349,29 @@ namespace AbstractPixel.InputRebinding
                     }
                     else
                     {
-                        if (!(candidateDevice is Keyboard || candidateDevice is Mouse))
+                        if (!(candidateDevice is Keyboard || candidateDevice is Mouse || candidateDevice is Pointer))
                         {
                             _operation.RemoveCandidate(candidateRawControl);
                             return;
                         }
                     }
 
-                    InputControl candidateSpecificControl = ResolveSpecificControl(candidateRawControl);
+                    InputControl candidateSpecificControl = ResolveSpecificControl(candidateRawControl, effectiveMode);
                     if (candidateSpecificControl == null)
                     {
                         return;
                     }
 
-                    hasActiveSwapNotification = false;
-                    activeSwapHeader = string.Empty;
-                    activeSwapDetails = string.Empty;
+                    if (effectiveMode == RebindControlMode.Vector2Continuous)
+                    {
+                        if (!(candidateSpecificControl is Vector2Control || candidateSpecificControl is DeltaControl || candidateSpecificControl is StickControl))
+                        {
+                            _operation.RemoveCandidate(candidateRawControl);
+                            return;
+                        }
+                    }
 
-                    string canonicalPreviewPath = ConvertToCanonicalPath(candidateSpecificControl);
+                    string canonicalPreviewPath = ConvertToCanonicalPath(candidateSpecificControl, effectiveMode);
                     string humanControlName = InputControlPath.ToHumanReadableString(canonicalPreviewPath, InputControlPath.HumanReadableStringOptions.OmitDevice);
 
                     string progressPreview = _allCompositeParts
@@ -310,13 +382,13 @@ namespace AbstractPixel.InputRebinding
                     string previewHeader = string.Empty;
                     string previewDetails = string.Empty;
 
-                    if (_allCompositeParts && CheckInternalCompositeConflict(_action, _bindingIndex, _compositeRootIndex, candidateSpecificControl, canonicalPreviewPath, out string internalPartName))
+                    if (_allCompositeParts && CheckInternalCompositeConflict(_action, _bindingIndex, _compositeRootIndex, candidateSpecificControl, canonicalPreviewPath, effectiveMode, out string internalPartName))
                     {
                         hasConflictWarning = true;
                         previewHeader = "<color=#FF5555>DUPLICATE BLOCKED</color>";
                         previewDetails = $"[{humanControlName}] is already assigned to {internalPartName}!";
                     }
-                    else if (DetectCrossActionConflict(_action, candidateSpecificControl, canonicalPreviewPath, out string conflictingActionName))
+                    else if (DetectCrossActionConflict(_action, candidateSpecificControl, canonicalPreviewPath, effectiveMode, out string conflictingActionName))
                     {
                         hasConflictWarning = true;
                         previewHeader = "<color=#FFCC00>CONFLICT DETECTED</color>";
@@ -352,12 +424,13 @@ namespace AbstractPixel.InputRebinding
                         CleanUpRebindOperation();
                         _action.Enable();
                         RevertAllBindingsToPreRebindBackup(_action);
+                        RestoreGlobalInputAndUi();
                         RestoreDeviceTrackingAndCloseOverlay();
                         return;
                     }
 
-                    InputControl specificCapturedControl = ResolveSpecificControl(rawCapturedControl);
-                    string resolvedCanonicalPath = ConvertToCanonicalPath(specificCapturedControl);
+                    InputControl specificCapturedControl = ResolveSpecificControl(rawCapturedControl, effectiveMode);
+                    string resolvedCanonicalPath = ConvertToCanonicalPath(specificCapturedControl, effectiveMode);
 
                     CleanUpRebindOperation();
                     StopActiveRebindRoutine();
@@ -368,7 +441,8 @@ namespace AbstractPixel.InputRebinding
                         _allCompositeParts,
                         _compositeRootIndex,
                         specificCapturedControl,
-                        resolvedCanonicalPath));
+                        resolvedCanonicalPath,
+                        effectiveMode));
                 });
 
             ongoingRebindOperation.Start();
@@ -380,8 +454,32 @@ namespace AbstractPixel.InputRebinding
             bool _allCompositeParts,
             int _compositeRootIndex,
             InputControl _capturedControl,
-            string _canonicalPath)
+            string _canonicalPath,
+            RebindControlMode _effectiveMode)
         {
+            string humanControlName = InputControlPath.ToHumanReadableString(_canonicalPath, InputControlPath.HumanReadableStringOptions.OmitDevice);
+            string friendlyDeviceName = ResolveDeviceFamilyFriendlyName(currentLockedDeviceFamily);
+            string actionDisplayName = BuildActionDisplayName(_action, _bindingIndex);
+
+            bool hasPendingConflict = DetectCrossActionConflict(_action, _capturedControl, _canonicalPath, _effectiveMode, out string pendingConflictActionName);
+            if (hasPendingConflict)
+            {
+                string preRebindPathForConflict = GetPreRebindPathForPart(_action, _bindingIndex);
+                string oldKeyHumanForConflict = InputControlPath.ToHumanReadableString(preRebindPathForConflict, InputControlPath.HumanReadableStringOptions.OmitDevice);
+                string holdHeader = "<color=#FFCC00>CONFLICT DETECTED</color>";
+                string holdDetails = $"[{humanControlName}] is currently used by '{pendingConflictActionName}'. Release to swap '{pendingConflictActionName}' to [{oldKeyHumanForConflict}].";
+
+                PublishOverlayPayload(
+                    true,
+                    friendlyDeviceName,
+                    actionDisplayName,
+                    "Release to Confirm Swap",
+                    humanControlName,
+                    true,
+                    holdHeader,
+                    holdDetails);
+            }
+
             if (_capturedControl != null)
             {
                 float timeoutTimestamp = Time.unscaledTime + RELEASE_WAIT_TIMEOUT_SECONDS;
@@ -391,11 +489,7 @@ namespace AbstractPixel.InputRebinding
                 }
             }
 
-            string humanControlName = InputControlPath.ToHumanReadableString(_canonicalPath, InputControlPath.HumanReadableStringOptions.OmitDevice);
-            string friendlyDeviceName = ResolveDeviceFamilyFriendlyName(currentLockedDeviceFamily);
-            string actionDisplayName = BuildActionDisplayName(_action, _bindingIndex);
-
-            if (_allCompositeParts && CheckInternalCompositeConflict(_action, _bindingIndex, _compositeRootIndex, _capturedControl, _canonicalPath, out string conflictingPartName))
+            if (_allCompositeParts && CheckInternalCompositeConflict(_action, _bindingIndex, _compositeRootIndex, _capturedControl, _canonicalPath, _effectiveMode, out string conflictingPartName))
             {
                 string currentBreadcrumb = BuildCompositeProgressString(_action, _compositeRootIndex, _bindingIndex, string.Empty);
                 hasActiveSwapNotification = true;
@@ -417,10 +511,43 @@ namespace AbstractPixel.InputRebinding
                 yield break;
             }
 
-            ApplyOverrideSafelyToAllInstances(_action, _bindingIndex, _canonicalPath, false);
+            string preRebindOriginalPath = GetPreRebindPathForPart(_action, _bindingIndex);
 
-            string preRebindPath = GetPreRebindPathForPart(_action, _bindingIndex);
-            bool hasSwapped = CheckCrossActionConflictAndSwap(_action, _bindingIndex, _capturedControl, preRebindPath, _canonicalPath, out string conflictDescription);
+            ApplyOverrideSafely(_action, _bindingIndex, _canonicalPath, false);
+
+            bool hasSwapped = CheckCrossActionConflictAndSwap(_action, _bindingIndex, _capturedControl, preRebindOriginalPath, _canonicalPath, _effectiveMode, out string conflictDescription);
+
+            if (_allCompositeParts)
+            {
+                int nextPartIndex = _bindingIndex + 1;
+                if (nextPartIndex < _action.bindings.Count && _action.bindings[nextPartIndex].isPartOfComposite)
+                {
+                    if (hasSwapped)
+                    {
+                        hasActiveSwapNotification = true;
+                        activeSwapHeader = "<color=#00FF88>SWAP APPLIED</color>";
+                        activeSwapDetails = conflictDescription;
+                    }
+                    else
+                    {
+                        hasActiveSwapNotification = false;
+                        activeSwapHeader = string.Empty;
+                        activeSwapDetails = string.Empty;
+                    }
+
+                    yield return new WaitForSecondsRealtime(COMPOSITE_SETTLE_SAFETY_DELAY);
+                    ExecuteRebindPipeline(_action, nextPartIndex, true, _compositeRootIndex);
+                    yield break;
+                }
+
+                if (!ValidateCompleteCompositeIntegrity(_action, _compositeRootIndex, out int duplicatePartIndex))
+                {
+                    ApplyOverrideSafely(_action, duplicatePartIndex, string.Empty, true);
+                    yield return new WaitForSecondsRealtime(COMPOSITE_SETTLE_SAFETY_DELAY);
+                    ExecuteRebindPipeline(_action, duplicatePartIndex, true, _compositeRootIndex);
+                    yield break;
+                }
+            }
 
             if (hasSwapped)
             {
@@ -451,25 +578,6 @@ namespace AbstractPixel.InputRebinding
                     string.Empty);
             }
 
-            if (_allCompositeParts)
-            {
-                int nextPartIndex = _bindingIndex + 1;
-                if (nextPartIndex < _action.bindings.Count && _action.bindings[nextPartIndex].isPartOfComposite)
-                {
-                    yield return new WaitForSecondsRealtime(COMPOSITE_SETTLE_SAFETY_DELAY);
-                    ExecuteRebindPipeline(_action, nextPartIndex, true, _compositeRootIndex);
-                    yield break;
-                }
-
-                if (!ValidateCompleteCompositeIntegrity(_action, _compositeRootIndex, out int duplicatePartIndex))
-                {
-                    ApplyOverrideSafelyToAllInstances(_action, duplicatePartIndex, string.Empty, true);
-                    yield return new WaitForSecondsRealtime(COMPOSITE_SETTLE_SAFETY_DELAY);
-                    ExecuteRebindPipeline(_action, duplicatePartIndex, true, _compositeRootIndex);
-                    yield break;
-                }
-            }
-
             float settleDwellDuration = hasSwapped ? CONFIRMATION_SWAP_DISPLAY_DURATION : CONFIRMATION_NORMAL_DISPLAY_DURATION;
             yield return new WaitForSecondsRealtime(settleDwellDuration);
 
@@ -478,11 +586,131 @@ namespace AbstractPixel.InputRebinding
             activeRebindRoutine = StartCoroutine(FinalizeRebindRoutine(_action, _capturedControl, true));
         }
 
-        private InputControl ResolveSpecificControl(InputControl _control)
+        private RebindControlMode ResolveEffectiveControlMode(InputAction _action, int _bindingIndex)
+        {
+            if (controlMode != RebindControlMode.Automatic)
+            {
+                return controlMode;
+            }
+
+            if (_action == null)
+            {
+                return RebindControlMode.Button;
+            }
+
+            if (_bindingIndex >= 0 && _bindingIndex < _action.bindings.Count)
+            {
+                InputBinding binding = _action.bindings[_bindingIndex];
+                if (binding.isComposite || binding.isPartOfComposite)
+                {
+                    return RebindControlMode.Button;
+                }
+
+                string currentPath = binding.effectivePath;
+                if (!string.IsNullOrEmpty(currentPath))
+                {
+                    if (currentPath.IndexOf("rightStick", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        currentPath.IndexOf("leftStick", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        currentPath.IndexOf("delta", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        if (currentPath.EndsWith("/x", StringComparison.OrdinalIgnoreCase) ||
+                            currentPath.EndsWith("/y", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return RebindControlMode.Axis1D;
+                        }
+
+                        return RebindControlMode.Vector2Continuous;
+                    }
+
+                    if (currentPath.IndexOf("scroll", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        return RebindControlMode.Axis1D;
+                    }
+                }
+            }
+
+            string expected = _action.expectedControlType;
+            if (string.Equals(expected, "Vector2", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(expected, "Delta", StringComparison.OrdinalIgnoreCase))
+            {
+                return RebindControlMode.Vector2Continuous;
+            }
+
+            if (string.Equals(expected, "Axis", StringComparison.OrdinalIgnoreCase))
+            {
+                return RebindControlMode.Axis1D;
+            }
+
+            return RebindControlMode.Button;
+        }
+
+        private InputControl ResolveSpecificControl(InputControl _control, RebindControlMode _mode)
         {
             if (_control == null)
             {
                 return null;
+            }
+
+            if (_mode == RebindControlMode.Vector2Continuous)
+            {
+                if (_control is StickControl)
+                {
+                    return _control;
+                }
+                if (_control.parent is StickControl parentStick)
+                {
+                    return parentStick;
+                }
+
+                if (_control is DeltaControl)
+                {
+                    return _control;
+                }
+                if (_control.parent is DeltaControl parentDelta)
+                {
+                    return parentDelta;
+                }
+                if (string.Equals(_control.name, "delta", StringComparison.OrdinalIgnoreCase))
+                {
+                    return _control;
+                }
+                if (_control.parent != null && string.Equals(_control.parent.name, "delta", StringComparison.OrdinalIgnoreCase))
+                {
+                    return _control.parent;
+                }
+
+                if (_control is DpadControl)
+                {
+                    return _control;
+                }
+                if (_control.parent is DpadControl parentDpad)
+                {
+                    return parentDpad;
+                }
+
+                return _control;
+            }
+
+            if (_mode == RebindControlMode.Axis1D)
+            {
+                if (_control is AxisControl)
+                {
+                    return _control;
+                }
+
+                if (_control is StickControl stick)
+                {
+                    Vector2 val = stick.ReadValue();
+                    return Mathf.Abs(val.x) > Mathf.Abs(val.y) ? stick.x : stick.y;
+                }
+
+                if (_control is Vector2Control vec2)
+                {
+                    Vector2 val = vec2.ReadValue();
+                    return Mathf.Abs(val.x) > Mathf.Abs(val.y) ? vec2.x : vec2.y;
+                }
+
+                return _control;
             }
 
             if (_control is DpadControl dpadControl)
@@ -612,7 +840,7 @@ namespace AbstractPixel.InputRebinding
         {
             foreach (KeyValuePair<int, string> pair in preRebindBackupPaths)
             {
-                ApplyOverrideSafelyToAllInstances(_action, pair.Key, pair.Value, false);
+                ApplyOverrideSafely(_action, pair.Key, pair.Value, false);
             }
 
             foreach (KeyValuePair<string, string> swapPair in crossActionSwappedBackups)
@@ -624,7 +852,7 @@ namespace AbstractPixel.InputRebinding
                     int targetIndex = FindMatchingBindingIndex(target, isGamepad);
                     if (targetIndex >= 0)
                     {
-                        ApplyOverrideSafelyToAllInstances(target, targetIndex, swapPair.Value, false);
+                        ApplyOverrideSafely(target, targetIndex, swapPair.Value, false);
                     }
                 }
             }
@@ -646,16 +874,21 @@ namespace AbstractPixel.InputRebinding
                 return path;
             }
 
-            return _action.bindings[_bindingIndex].effectivePath;
+            if (_bindingIndex >= 0 && _bindingIndex < _action.bindings.Count)
+            {
+                return _action.bindings[_bindingIndex].effectivePath;
+            }
+
+            return string.Empty;
         }
 
-        private void ApplyOverrideSafelyToAllInstances(
+        private void ApplyOverrideSafely(
             InputAction _sourceAction,
             int _sourceBindingIndex,
             string _overridePath,
             bool _isReset)
         {
-            if (_sourceBindingIndex < 0 || _sourceBindingIndex >= _sourceAction.bindings.Count)
+            if (_sourceAction == null || _sourceBindingIndex < 0 || _sourceBindingIndex >= _sourceAction.bindings.Count)
             {
                 return;
             }
@@ -667,95 +900,97 @@ namespace AbstractPixel.InputRebinding
             }
 
             Guid targetBindingId = sourceBinding.id;
-            Guid actionId = _sourceAction.id;
+            bool wasActionEnabled = _sourceAction.enabled;
 
-            InputActionAsset[] allAssets = Resources.FindObjectsOfTypeAll<InputActionAsset>();
-            for (int i = 0; i < allAssets.Length; ++i)
+            if (wasActionEnabled)
             {
-                InputAction targetAction = allAssets[i].FindAction(actionId);
-                if (targetAction != null)
+                _sourceAction.Disable();
+            }
+
+            InputActionAsset liveAsset = RuntimeAsset != null ? RuntimeAsset : _sourceAction.actionMap?.asset;
+            if (liveAsset != null)
+            {
+                InputAction liveTargetAction = liveAsset.FindAction(_sourceAction.id);
+                if (liveTargetAction != null)
                 {
-                    int matchIndex = -1;
-                    for (int b = 0; b < targetAction.bindings.Count; ++b)
-                    {
-                        if (targetAction.bindings[b].id == targetBindingId)
-                        {
-                            matchIndex = b;
-                            break;
-                        }
-                    }
-
-                    if (matchIndex < 0 && _sourceBindingIndex < targetAction.bindings.Count)
-                    {
-                        if (!targetAction.bindings[_sourceBindingIndex].isComposite)
-                        {
-                            matchIndex = _sourceBindingIndex;
-                        }
-                    }
-
-                    if (matchIndex >= 0 && !targetAction.bindings[matchIndex].isComposite)
+                    int matchIndex = FindBindingIndexById(liveTargetAction, targetBindingId, _sourceBindingIndex);
+                    if (matchIndex >= 0 && !liveTargetAction.bindings[matchIndex].isComposite)
                     {
                         if (_isReset)
                         {
-                            targetAction.RemoveBindingOverride(matchIndex);
+                            liveTargetAction.RemoveBindingOverride(matchIndex);
                         }
                         else
                         {
-                            targetAction.ApplyBindingOverride(matchIndex, _overridePath);
+                            liveTargetAction.ApplyBindingOverride(matchIndex, _overridePath);
                         }
                     }
                 }
             }
 
-            if (actionReference != null && actionReference.action != null)
+            if (actionReference != null && actionReference.action != null && actionReference.action.id == _sourceAction.id)
             {
-                int refIndex = -1;
-                for (int b = 0; b < actionReference.action.bindings.Count; ++b)
+                bool isDistinctFromLive = liveAsset == null || liveAsset.FindAction(_sourceAction.id) != actionReference.action;
+                if (isDistinctFromLive)
                 {
-                    if (actionReference.action.bindings[b].id == targetBindingId)
+                    int refIndex = FindBindingIndexById(actionReference.action, targetBindingId, _sourceBindingIndex);
+                    if (refIndex >= 0 && !actionReference.action.bindings[refIndex].isComposite)
                     {
-                        refIndex = b;
-                        break;
-                    }
-                }
-
-                if (refIndex < 0 && _sourceBindingIndex < actionReference.action.bindings.Count)
-                {
-                    if (!actionReference.action.bindings[_sourceBindingIndex].isComposite)
-                    {
-                        refIndex = _sourceBindingIndex;
-                    }
-                }
-
-                if (refIndex >= 0 && !actionReference.action.bindings[refIndex].isComposite)
-                {
-                    if (_isReset)
-                    {
-                        actionReference.action.RemoveBindingOverride(refIndex);
-                    }
-                    else
-                    {
-                        actionReference.action.ApplyBindingOverride(refIndex, _overridePath);
+                        if (_isReset)
+                        {
+                            actionReference.action.RemoveBindingOverride(refIndex);
+                        }
+                        else
+                        {
+                            actionReference.action.ApplyBindingOverride(refIndex, _overridePath);
+                        }
                     }
                 }
             }
+
+            if (wasActionEnabled)
+            {
+                _sourceAction.Enable();
+            }
+        }
+
+        private int FindBindingIndexById(InputAction _action, Guid _bindingId, int _fallbackIndex)
+        {
+            for (int b = 0; b < _action.bindings.Count; ++b)
+            {
+                if (_action.bindings[b].id == _bindingId)
+                {
+                    return b;
+                }
+            }
+
+            if (_fallbackIndex >= 0 && _fallbackIndex < _action.bindings.Count)
+            {
+                if (!_action.bindings[_fallbackIndex].isComposite)
+                {
+                    return _fallbackIndex;
+                }
+            }
+
+            return -1;
         }
 
         private bool DetectCrossActionConflict(
             InputAction _sourceAction,
             InputControl _candidateControl,
             string _candidatePath,
+            RebindControlMode _mode,
             out string _conflictingActionName)
         {
             _conflictingActionName = string.Empty;
-            if (_sourceAction.actionMap == null)
+            if (_sourceAction == null || _sourceAction.actionMap == null)
             {
                 return false;
             }
 
             foreach (InputAction adjacentAction in _sourceAction.actionMap.actions)
             {
-                if (adjacentAction == _sourceAction)
+                if (adjacentAction.id == _sourceAction.id)
                 {
                     continue;
                 }
@@ -770,7 +1005,7 @@ namespace AbstractPixel.InputRebinding
                     }
 
                     bool isConflict = false;
-                    if (_candidateControl != null && DoesControlMatchBindingPath(existingBinding.effectivePath, _candidateControl))
+                    if (_candidateControl != null && DoesControlMatchBindingPath(existingBinding.effectivePath, _candidateControl, _mode))
                     {
                         isConflict = true;
                     }
@@ -796,10 +1031,11 @@ namespace AbstractPixel.InputRebinding
             InputControl _capturedControl,
             string _originalPathBeforeRebind,
             string _canonicalNewPath,
+            RebindControlMode _mode,
             out string _conflictSummary)
         {
             _conflictSummary = string.Empty;
-            if (_sourceAction.actionMap == null)
+            if (_sourceAction == null || _sourceAction.actionMap == null)
             {
                 return false;
             }
@@ -809,7 +1045,7 @@ namespace AbstractPixel.InputRebinding
 
             foreach (InputAction adjacentAction in _sourceAction.actionMap.actions)
             {
-                if (adjacentAction == _sourceAction)
+                if (adjacentAction.id == _sourceAction.id)
                 {
                     continue;
                 }
@@ -824,7 +1060,7 @@ namespace AbstractPixel.InputRebinding
                     }
 
                     bool isConflict = false;
-                    if (_capturedControl != null && DoesControlMatchBindingPath(existingBinding.effectivePath, _capturedControl))
+                    if (_capturedControl != null && DoesControlMatchBindingPath(existingBinding.effectivePath, _capturedControl, _mode))
                     {
                         isConflict = true;
                     }
@@ -840,7 +1076,7 @@ namespace AbstractPixel.InputRebinding
                             crossActionSwappedBackups[adjacentAction.name] = existingBinding.effectivePath;
                         }
 
-                        ApplyOverrideSafelyToAllInstances(adjacentAction, index, _originalPathBeforeRebind, false);
+                        ApplyOverrideSafely(adjacentAction, index, _originalPathBeforeRebind, false);
                         hasSwappedAny = true;
 
                         string newControlDisplay = InputControlPath.ToHumanReadableString(_canonicalNewPath, InputControlPath.HumanReadableStringOptions.OmitDevice);
@@ -861,6 +1097,7 @@ namespace AbstractPixel.InputRebinding
             int _compositeRootIndex,
             InputControl _candidateControl,
             string _candidatePath,
+            RebindControlMode _mode,
             out string _conflictingPartName)
         {
             _conflictingPartName = string.Empty;
@@ -876,7 +1113,7 @@ namespace AbstractPixel.InputRebinding
                 }
 
                 bool isConflict = false;
-                if (_candidateControl != null && DoesControlMatchBindingPath(existingPath, _candidateControl))
+                if (_candidateControl != null && DoesControlMatchBindingPath(existingPath, _candidateControl, _mode))
                 {
                     isConflict = true;
                 }
@@ -895,14 +1132,14 @@ namespace AbstractPixel.InputRebinding
             return false;
         }
 
-        private bool DoesControlMatchBindingPath(string _bindingPath, InputControl _control)
+        private bool DoesControlMatchBindingPath(string _bindingPath, InputControl _control, RebindControlMode _mode)
         {
             if (string.IsNullOrEmpty(_bindingPath) || _control == null)
             {
                 return false;
             }
 
-            InputControl specificControl = ResolveSpecificControl(_control);
+            InputControl specificControl = ResolveSpecificControl(_control, _mode);
             if (specificControl == null)
             {
                 return false;
@@ -1039,8 +1276,8 @@ namespace AbstractPixel.InputRebinding
                 return true;
             }
 
-            bool isMouseA = _layoutA.IndexOf("Mouse", StringComparison.OrdinalIgnoreCase) >= 0;
-            bool isMouseB = _layoutB.IndexOf("Mouse", StringComparison.OrdinalIgnoreCase) >= 0;
+            bool isMouseA = _layoutA.IndexOf("Mouse", StringComparison.OrdinalIgnoreCase) >= 0 || _layoutA.IndexOf("Pointer", StringComparison.OrdinalIgnoreCase) >= 0;
+            bool isMouseB = _layoutB.IndexOf("Mouse", StringComparison.OrdinalIgnoreCase) >= 0 || _layoutB.IndexOf("Pointer", StringComparison.OrdinalIgnoreCase) >= 0;
             if (isMouseA && isMouseB)
             {
                 return true;
@@ -1064,14 +1301,14 @@ namespace AbstractPixel.InputRebinding
                    _layout.IndexOf("SwitchPro", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        private string ConvertToCanonicalPath(InputControl _control)
+        private string ConvertToCanonicalPath(InputControl _control, RebindControlMode _mode)
         {
             if (_control == null)
             {
                 return string.Empty;
             }
 
-            InputControl specificControl = ResolveSpecificControl(_control);
+            InputControl specificControl = ResolveSpecificControl(_control, _mode);
             if (specificControl == null)
             {
                 return string.Empty;
@@ -1089,7 +1326,7 @@ namespace AbstractPixel.InputRebinding
                 return $"<Keyboard>/{controlPart}";
             }
 
-            if (specificControl.device is Mouse)
+            if (specificControl.device is Mouse || specificControl.device is Pointer)
             {
                 string controlPart = specificControl.path.Substring(specificControl.device.path.Length).TrimStart('/');
                 return $"<Mouse>/{controlPart}";
@@ -1121,54 +1358,126 @@ namespace AbstractPixel.InputRebinding
 
         private void CommitActionMapReboot(InputAction _action)
         {
-            InputActionAsset[] allAssets = Resources.FindObjectsOfTypeAll<InputActionAsset>();
-            for (int i = 0; i < allAssets.Length; ++i)
+            if (_action == null)
             {
-                InputAction liveAction = allAssets[i].FindAction(_action.id);
+                return;
+            }
+
+            if (RuntimeAsset != null)
+            {
+                InputAction liveAction = RuntimeAsset.FindAction(_action.id);
                 if (liveAction != null && liveAction.actionMap != null)
                 {
                     liveAction.actionMap.Disable();
                     liveAction.actionMap.Enable();
+                    return;
                 }
+            }
+
+            if (_action.actionMap != null)
+            {
+                _action.actionMap.Disable();
+                _action.actionMap.Enable();
             }
         }
 
-        private void SilenceAllUiMapsAcrossEngine()
+        private EventSystem FindActiveEventSystem()
         {
             if (EventSystem.current != null)
             {
-                EventSystem.current.SetSelectedGameObject(null);
+                return EventSystem.current;
             }
 
-            silencedUiActionMaps.Clear();
+#if UNITY_2023_1_OR_NEWER
+            return FindFirstObjectByType<EventSystem>();
+#else
+            return FindObjectOfType<EventSystem>();
+#endif
+        }
 
-            InputActionAsset[] allAssets = Resources.FindObjectsOfTypeAll<InputActionAsset>();
-            for (int i = 0; i < allAssets.Length; ++i)
+        private void SilenceAllInputAndUiAcrossEngine()
+        {
+            cachedEventSystem = FindActiveEventSystem();
+
+            if (cachedEventSystem != null)
             {
-                InputActionMap uiMap = allAssets[i].FindActionMap("UI");
-                if (uiMap != null && uiMap.enabled)
+                cachedInputModule = cachedEventSystem.currentInputModule;
+                if (cachedInputModule == null)
                 {
-                    uiMap.Disable();
-                    silencedUiActionMaps.Add(uiMap);
+                    cachedInputModule = cachedEventSystem.GetComponent<BaseInputModule>();
+                }
+
+                cachedEventSystem.SetSelectedGameObject(null);
+                cachedEventSystem.enabled = false;
+
+                if (cachedInputModule != null)
+                {
+                    cachedInputModule.enabled = false;
+                }
+            }
+
+            silencedActionMaps.Clear();
+
+            SilenceMapsInAsset(RuntimeAsset);
+
+            if (actionReference != null && actionReference.action != null && actionReference.action.actionMap != null)
+            {
+                SilenceMapsInAsset(actionReference.action.actionMap.asset);
+            }
+        }
+
+        private void SilenceMapsInAsset(InputActionAsset _asset)
+        {
+            if (_asset == null)
+            {
+                return;
+            }
+
+            foreach (InputActionMap map in _asset.actionMaps)
+            {
+                if (map != null && map.enabled)
+                {
+                    map.Disable();
+                    if (!silencedActionMaps.Contains(map))
+                    {
+                        silencedActionMaps.Add(map);
+                    }
                 }
             }
         }
 
         private void RestoreGlobalInputAndUi()
         {
-            for (int i = 0; i < silencedUiActionMaps.Count; ++i)
+            for (int i = 0; i < silencedActionMaps.Count; ++i)
             {
-                if (silencedUiActionMaps[i] != null && !silencedUiActionMaps[i].enabled)
+                if (silencedActionMaps[i] != null && !silencedActionMaps[i].enabled)
                 {
-                    silencedUiActionMaps[i].Enable();
+                    silencedActionMaps[i].Enable();
                 }
             }
 
-            silencedUiActionMaps.Clear();
+            silencedActionMaps.Clear();
 
-            if (EventSystem.current != null)
+            if (cachedEventSystem == null)
             {
-                EventSystem.current.SetSelectedGameObject(null);
+                cachedEventSystem = FindActiveEventSystem();
+            }
+
+            if (cachedEventSystem != null)
+            {
+                cachedEventSystem.enabled = true;
+
+                if (cachedInputModule == null)
+                {
+                    cachedInputModule = cachedEventSystem.GetComponent<BaseInputModule>();
+                }
+
+                if (cachedInputModule != null)
+                {
+                    cachedInputModule.enabled = true;
+                }
+
+                cachedEventSystem.SetSelectedGameObject(null);
             }
         }
 
@@ -1264,8 +1573,19 @@ namespace AbstractPixel.InputRebinding
             InputAction _action,
             int _bindingIndex,
             bool _allCompositeParts,
-            int _compositeRootIndex)
+            int _compositeRootIndex,
+            RebindControlMode _mode)
         {
+            if (_mode == RebindControlMode.Vector2Continuous)
+            {
+                return "Move Stick or Mouse to Rebind...";
+            }
+
+            if (_mode == RebindControlMode.Axis1D)
+            {
+                return "Move Stick Axis or Scroll to Rebind...";
+            }
+
             if (!_allCompositeParts)
             {
                 return "Waiting for input...";
@@ -1284,7 +1604,7 @@ namespace AbstractPixel.InputRebinding
 
         private void ResolveResetConflicts(InputAction _targetAction, int _bindingIndexToReset)
         {
-            if (_targetAction.actionMap == null)
+            if (_targetAction == null || _targetAction.actionMap == null)
             {
                 return;
             }
@@ -1300,7 +1620,7 @@ namespace AbstractPixel.InputRebinding
 
             foreach (InputAction adjacentAction in _targetAction.actionMap.actions)
             {
-                if (adjacentAction == _targetAction)
+                if (adjacentAction.id == _targetAction.id)
                 {
                     continue;
                 }
@@ -1316,7 +1636,7 @@ namespace AbstractPixel.InputRebinding
 
                     if (AreControlPathsMatching(existingBinding.overridePath, defaultPath))
                     {
-                        ApplyOverrideSafelyToAllInstances(adjacentAction, index, currentPath, false);
+                        ApplyOverrideSafely(adjacentAction, index, currentPath, false);
                     }
                 }
             }
@@ -1324,6 +1644,11 @@ namespace AbstractPixel.InputRebinding
 
         private int FindMatchingBindingIndex(InputAction _action, bool _isGamepad)
         {
+            if (_action == null)
+            {
+                return -1;
+            }
+
             for (int index = 0; index < _action.bindings.Count; ++index)
             {
                 InputBinding binding = _action.bindings[index];
@@ -1381,14 +1706,16 @@ namespace AbstractPixel.InputRebinding
             }
 
             if (path.IndexOf("Keyboard", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                path.IndexOf("Mouse", StringComparison.OrdinalIgnoreCase) >= 0)
+                path.IndexOf("Mouse", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                path.IndexOf("Pointer", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 return true;
             }
 
             if (!string.IsNullOrEmpty(_binding.groups) &&
                 (_binding.groups.IndexOf("Keyboard", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                 _binding.groups.IndexOf("Mouse", StringComparison.OrdinalIgnoreCase) >= 0))
+                 _binding.groups.IndexOf("Mouse", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 _binding.groups.IndexOf("Pointer", StringComparison.OrdinalIgnoreCase) >= 0))
             {
                 return true;
             }
@@ -1398,6 +1725,11 @@ namespace AbstractPixel.InputRebinding
 
         private string BuildActionDisplayName(InputAction _action, int _bindingIndex)
         {
+            if (_action == null)
+            {
+                return string.Empty;
+            }
+
             if (_bindingIndex >= 0 && _bindingIndex < _action.bindings.Count)
             {
                 InputBinding binding = _action.bindings[_bindingIndex];
@@ -1431,72 +1763,6 @@ namespace AbstractPixel.InputRebinding
             }
         }
 
-        private InputActionAsset GetRuntimeAsset()
-        {
-            if (RuntimeInputAssetProvider != null)
-            {
-                InputActionAsset providedAsset = RuntimeInputAssetProvider.Invoke();
-                if (providedAsset != null)
-                {
-                    return providedAsset;
-                }
-            }
-
-            if (cachedDiscoveredRuntimeAsset != null)
-            {
-                return cachedDiscoveredRuntimeAsset;
-            }
-
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            for (int i = 0; i < assemblies.Length; ++i)
-            {
-                Type[] types = null;
-                try
-                {
-                    types = assemblies[i].GetTypes();
-                }
-                catch
-                {
-                    continue;
-                }
-
-                for (int t = 0; t < types.Length; ++t)
-                {
-                    if (string.Equals(types[t].Name, "GlobalInput", StringComparison.OrdinalIgnoreCase))
-                    {
-                        PropertyInfo property = types[t].GetProperty("PlayerInputActions", BindingFlags.Public | BindingFlags.Static);
-                        if (property != null)
-                        {
-                            object actionsInstance = property.GetValue(null);
-                            if (actionsInstance != null)
-                            {
-                                PropertyInfo assetProperty = actionsInstance.GetType().GetProperty("asset", BindingFlags.Public | BindingFlags.Instance);
-                                if (assetProperty != null)
-                                {
-                                    cachedDiscoveredRuntimeAsset = assetProperty.GetValue(actionsInstance) as InputActionAsset;
-                                    if (cachedDiscoveredRuntimeAsset != null)
-                                    {
-                                        return cachedDiscoveredRuntimeAsset;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            InputActionAsset[] allAssets = Resources.FindObjectsOfTypeAll<InputActionAsset>();
-            for (int i = 0; i < allAssets.Length; ++i)
-            {
-                if (allAssets[i].FindActionMap("Player") != null && allAssets[i].FindActionMap("UI") != null)
-                {
-                    return allAssets[i];
-                }
-            }
-
-            return null;
-        }
-
         private InputAction ResolveRuntimeAction()
         {
             if (actionReference == null || actionReference.action == null)
@@ -1504,10 +1770,15 @@ namespace AbstractPixel.InputRebinding
                 return null;
             }
 
-            InputActionAsset runtimeAsset = GetRuntimeAsset();
-            if (runtimeAsset != null)
+            if (RuntimeAsset != null)
             {
-                InputAction matchedAction = runtimeAsset.FindAction(actionReference.action.id);
+                InputAction matchedAction = RuntimeAsset.FindAction(actionReference.action.id);
+                if (matchedAction != null)
+                {
+                    return matchedAction;
+                }
+
+                matchedAction = RuntimeAsset.FindAction(actionReference.action.name);
                 if (matchedAction != null)
                 {
                     return matchedAction;
@@ -1523,7 +1794,7 @@ namespace AbstractPixel.InputRebinding
             string deviceLayoutName = string.Empty;
             string controlPath = string.Empty;
 
-            if (_bindingIndex >= 0 && _bindingIndex < _action.bindings.Count)
+            if (_action != null && _bindingIndex >= 0 && _bindingIndex < _action.bindings.Count)
             {
                 InputBinding binding = _action.bindings[_bindingIndex];
                 if (binding.isComposite)
@@ -1552,8 +1823,10 @@ namespace AbstractPixel.InputRebinding
                 }
             }
 
+            string actionName = _action != null ? _action.name : string.Empty;
+
             BindingDisplayPayload payload = new BindingDisplayPayload(
-                _action.name,
+                actionName,
                 displayString,
                 deviceLayoutName,
                 controlPath,
