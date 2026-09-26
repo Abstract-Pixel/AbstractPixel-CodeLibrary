@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.Switch;
 using UnityEngine.InputSystem.XInput;
@@ -22,6 +23,32 @@ namespace AbstractPixel.Core
         {
             InputSystem.onActionChange -= ChangeLastUsedDeviceIfChanged;
             InputSystem.onActionChange += ChangeLastUsedDeviceIfChanged;
+
+            if (LastUsedDevice == null)
+            {
+                if (Gamepad.current != null)
+                {
+                    SetActiveDevice(Gamepad.current);
+                }
+                else if (Keyboard.current != null)
+                {
+                    SetActiveDevice(Keyboard.current);
+                }
+            }
+        }
+
+        public static void SetActiveDevice(InputDevice _device)
+        {
+            if (_device == null)
+            {
+                return;
+            }
+
+            LastUsedDevice = _device;
+            CurrentDeviceFamily = EvaluateDeviceFamily(_device);
+
+            OnCurrentInputDeviceChanged?.Invoke(LastUsedDevice);
+            OnDeviceFamilyChanged?.Invoke(CurrentDeviceFamily);
         }
 
         private static void ChangeLastUsedDeviceIfChanged(object _obj, InputActionChange _change)
@@ -37,62 +64,83 @@ namespace AbstractPixel.Core
                 return;
             }
 
-            if (action.activeValueType == typeof(Vector2))
-            {
-                Vector2 inputValue = action.ReadValue<Vector2>();
-                if (inputValue.sqrMagnitude < MINIMUM_COMPOSITE_INPUT_REQUIRED)
-                {
-                    return;
-                }
-            }
-
             InputControl control = action.activeControl;
             if (control == null)
             {
                 return;
             }
 
-            // Double check: Is the specific key/stick actually being pushed by a human right now?
-            // This stops Unity from reporting the arrow keys or DualSense if they are sitting at 0.0 magnitude.
-            if (control.EvaluateMagnitude() <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
+            if (string.Equals(control.name, "position", StringComparison.OrdinalIgnoreCase) ||
+                control.path.IndexOf("/position", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 return;
             }
 
-            InputDevice device = action.activeControl?.device;
+            if (control.device is Mouse)
+            {
+                if (control is DeltaControl || string.Equals(control.name, "delta", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (control.EvaluateMagnitude() <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
+                    {
+                        return;
+                    }
+                }
+                else if (control is ButtonControl buttonControl)
+                {
+                    if (!buttonControl.isPressed && buttonControl.ReadValue() <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
+                    {
+                        return;
+                    }
+                }
+                else if (control.EvaluateMagnitude() <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                if (action.activeValueType == typeof(Vector2))
+                {
+                    Vector2 inputValue = action.ReadValue<Vector2>();
+                    if (inputValue.sqrMagnitude < MINIMUM_COMPOSITE_INPUT_REQUIRED)
+                    {
+                        return;
+                    }
+                }
+
+                if (control.EvaluateMagnitude() <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
+                {
+                    return;
+                }
+            }
+
+            InputDevice device = control.device;
             if (device != null && device != LastUsedDevice)
             {
-                LastUsedDevice = device;
-                CurrentDeviceFamily = EvaluateDeviceFamily(device);
-
-                OnCurrentInputDeviceChanged?.Invoke(LastUsedDevice);
-                OnDeviceFamilyChanged?.Invoke(CurrentDeviceFamily);
+                SetActiveDevice(device);
             }
         }
 
         private static DeviceFamily EvaluateDeviceFamily(InputDevice _device)
         {
-            // part of the same device family
+            if (_device == null)
+            {
+                return DeviceFamily.Unknown;
+            }
+
             if (_device is Keyboard || _device is Mouse)
             {
                 return DeviceFamily.KeyboardMouse;
             }
 
-            // We convert the hardware description strings to lowercase using .ToLower().
-            // This normalizes the text, making our matching logic completely case-insensitive.
-            // It ensures we safely catch unpredictable driver naming variations like "Steam", "STEAM", or "steam".
-            string productName = _device.description.product?.ToLower() ?? string.Empty;
-            string manufacturerName = _device.description.manufacturer?.ToLower() ?? string.Empty;
+            string productName = _device.description.product?.ToLowerInvariant() ?? string.Empty;
+            string manufacturerName = _device.description.manufacturer?.ToLowerInvariant() ?? string.Empty;
 
-            // 1. STEAM DECK CHECK
-            // Steam OS natively intercepts inputs and spoofs them as generic XInput devices to ensure game compatibility.
-            // We MUST check these strings for "valve" or "steam" BEFORE we check if the controller is an Xbox controller.
             if (productName.Contains("steam") || productName.Contains("valve") || manufacturerName.Contains("valve"))
             {
                 return DeviceFamily.SteamDevice;
             }
 
-            // 2. NATIVE CLASS CHECKS (Unity's built-in identification)
             if (_device is DualShockGamepad)
             {
                 return DeviceFamily.PlayStation;
@@ -108,8 +156,6 @@ namespace AbstractPixel.Core
                 return DeviceFamily.Nintendo;
             }
 
-            // 3. STRING FALLBACK CHECKS
-            // For 3rd party controllers or Bluetooth connections where Unity fails to map to the native classes above.
             if (productName.Contains("playstation") || productName.Contains("dualshock") || productName.Contains("dualsense") || manufacturerName.Contains("sony"))
             {
                 return DeviceFamily.PlayStation;
@@ -125,7 +171,6 @@ namespace AbstractPixel.Core
                 return DeviceFamily.Nintendo;
             }
 
-            // 4. GENERIC FALLBACK
             if (_device is Gamepad || _device is Joystick)
             {
                 return DeviceFamily.GenericGamepad;
@@ -137,7 +182,12 @@ namespace AbstractPixel.Core
         #region Public Device Checking Utility Methods
         public static bool IsLastUsedDeviceGamepadOrJoystick()
         {
-            return LastUsedDevice is Gamepad || LastUsedDevice is Joystick;
+            if (LastUsedDevice is Gamepad || LastUsedDevice is Joystick)
+            {
+                return true;
+            }
+
+            return CurrentDeviceFamily != DeviceFamily.KeyboardMouse && CurrentDeviceFamily != DeviceFamily.Unknown;
         }
 
         public static bool IsLastUsedDeviceOnlyGamepad()

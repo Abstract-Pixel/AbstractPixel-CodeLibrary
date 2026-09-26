@@ -1630,6 +1630,12 @@ namespace AbstractPixel.InputRebinding
             activeSwapDetails = string.Empty;
 
             RestoreGlobalInputAndUi();
+
+            if (currentLockedInputDevice != null)
+            {
+                InputDeviceTracker.SetActiveDevice(currentLockedInputDevice);
+            }
+
             RestoreDeviceTrackingAndCloseOverlay();
             ResolveAndRefreshForActiveDevice();
 
