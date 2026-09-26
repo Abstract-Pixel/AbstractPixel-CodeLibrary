@@ -36,6 +36,7 @@ namespace AbstractPixel.InputRebinding
         public static void SetRuntimeAsset(InputActionAsset _asset)
         {
             RuntimeAsset = _asset;
+            SanitizeCompositePartOverrides(RuntimeAsset);
             RefreshAllActiveSlots();
         }
 
@@ -104,7 +105,7 @@ namespace AbstractPixel.InputRebinding
 
         private const string TRIGGER_BUTTON_SUFFIX = "Button";
         private const float TRIGGER_ACTUATION_THRESHOLD = 0.5f;
-        private const float CONTROL_RELEASE_THRESHOLD = 0.15f;
+        private const float CONTROL_RELEASE_THRESHOLD = 0.20f;
         private const float REBIND_COOLDOWN_DURATION = 0.25f;
         private const float COMPOSITE_SETTLE_SAFETY_DELAY = 0.10f;
         private const float CONFIRMATION_NORMAL_DISPLAY_DURATION = 0.35f;
@@ -305,11 +306,11 @@ namespace AbstractPixel.InputRebinding
             else
             {
                 operationBuilder.WithControlsExcluding(EXCLUDE_POINTER_POSITION);
+                operationBuilder.WithControlsExcluding(EXCLUDE_MOUSE_SCROLL);
 
                 if (effectiveMode == RebindControlMode.Button)
                 {
                     operationBuilder.WithControlsExcluding(EXCLUDE_MOUSE_DELTA);
-                    operationBuilder.WithControlsExcluding(EXCLUDE_MOUSE_SCROLL);
                 }
                 else if (effectiveMode == RebindControlMode.Vector2Continuous)
                 {
@@ -332,6 +333,13 @@ namespace AbstractPixel.InputRebinding
 
                     InputControl candidateRawControl = _operation.selectedControl;
                     InputDevice candidateDevice = candidateRawControl.device;
+
+                    if (candidateRawControl.name.IndexOf("scroll", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        candidateRawControl.path.IndexOf("scroll", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        _operation.RemoveCandidate(candidateRawControl);
+                        return;
+                    }
 
                     if (isGamepadLocked)
                     {
@@ -359,10 +367,19 @@ namespace AbstractPixel.InputRebinding
                     InputControl candidateSpecificControl = ResolveSpecificControl(candidateRawControl, effectiveMode);
                     if (candidateSpecificControl == null)
                     {
+                        _operation.RemoveCandidate(candidateRawControl);
                         return;
                     }
 
-                    if (effectiveMode == RebindControlMode.Vector2Continuous)
+                    if (effectiveMode == RebindControlMode.Button)
+                    {
+                        if (candidateSpecificControl is Vector2Control && !(candidateSpecificControl is AxisControl))
+                        {
+                            _operation.RemoveCandidate(candidateRawControl);
+                            return;
+                        }
+                    }
+                    else if (effectiveMode == RebindControlMode.Vector2Continuous)
                     {
                         if (!(candidateSpecificControl is Vector2Control || candidateSpecificControl is DeltaControl || candidateSpecificControl is StickControl))
                         {
@@ -430,6 +447,26 @@ namespace AbstractPixel.InputRebinding
                     }
 
                     InputControl specificCapturedControl = ResolveSpecificControl(rawCapturedControl, effectiveMode);
+                    if (specificCapturedControl == null)
+                    {
+                        CleanUpRebindOperation();
+                        _action.Enable();
+                        RevertAllBindingsToPreRebindBackup(_action);
+                        RestoreGlobalInputAndUi();
+                        RestoreDeviceTrackingAndCloseOverlay();
+                        return;
+                    }
+
+                    if (effectiveMode == RebindControlMode.Button && specificCapturedControl is Vector2Control && !(specificCapturedControl is AxisControl))
+                    {
+                        CleanUpRebindOperation();
+                        _action.Enable();
+                        RevertAllBindingsToPreRebindBackup(_action);
+                        RestoreGlobalInputAndUi();
+                        RestoreDeviceTrackingAndCloseOverlay();
+                        return;
+                    }
+
                     string resolvedCanonicalPath = ConvertToCanonicalPath(specificCapturedControl, effectiveMode);
 
                     CleanUpRebindOperation();
@@ -588,11 +625,6 @@ namespace AbstractPixel.InputRebinding
 
         private RebindControlMode ResolveEffectiveControlMode(InputAction _action, int _bindingIndex)
         {
-            if (controlMode != RebindControlMode.Automatic)
-            {
-                return controlMode;
-            }
-
             if (_action == null)
             {
                 return RebindControlMode.Button;
@@ -605,8 +637,17 @@ namespace AbstractPixel.InputRebinding
                 {
                     return RebindControlMode.Button;
                 }
+            }
 
-                string currentPath = binding.effectivePath;
+            if (controlMode != RebindControlMode.Automatic)
+            {
+                return controlMode;
+            }
+
+            if (_bindingIndex >= 0 && _bindingIndex < _action.bindings.Count)
+            {
+                InputBinding nonCompositeBinding = _action.bindings[_bindingIndex];
+                string currentPath = nonCompositeBinding.effectivePath;
                 if (!string.IsNullOrEmpty(currentPath))
                 {
                     if (currentPath.IndexOf("rightStick", StringComparison.OrdinalIgnoreCase) >= 0 ||
@@ -620,11 +661,6 @@ namespace AbstractPixel.InputRebinding
                         }
 
                         return RebindControlMode.Vector2Continuous;
-                    }
-
-                    if (currentPath.IndexOf("scroll", StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        return RebindControlMode.Axis1D;
                     }
                 }
             }
@@ -688,7 +724,7 @@ namespace AbstractPixel.InputRebinding
                     return parentDpad;
                 }
 
-                return _control;
+                return null;
             }
 
             if (_mode == RebindControlMode.Axis1D)
@@ -700,17 +736,25 @@ namespace AbstractPixel.InputRebinding
 
                 if (_control is StickControl stick)
                 {
-                    Vector2 val = stick.ReadValue();
-                    return Mathf.Abs(val.x) > Mathf.Abs(val.y) ? stick.x : stick.y;
+                    Vector2 stickValue = stick.ReadValue();
+                    if (Mathf.Abs(stickValue.x) > Mathf.Abs(stickValue.y))
+                    {
+                        return stick.x;
+                    }
+                    return stick.y;
                 }
 
-                if (_control is Vector2Control vec2)
+                if (_control is Vector2Control vector2Control)
                 {
-                    Vector2 val = vec2.ReadValue();
-                    return Mathf.Abs(val.x) > Mathf.Abs(val.y) ? vec2.x : vec2.y;
+                    Vector2 vectorValue = vector2Control.ReadValue();
+                    if (Mathf.Abs(vectorValue.x) > Mathf.Abs(vectorValue.y))
+                    {
+                        return vector2Control.x;
+                    }
+                    return vector2Control.y;
                 }
 
-                return _control;
+                return null;
             }
 
             if (_control is DpadControl dpadControl)
@@ -724,6 +768,7 @@ namespace AbstractPixel.InputRebinding
                 {
                     return dpadVector.y > 0.0f ? dpadControl.up : dpadControl.down;
                 }
+                return null;
             }
 
             if (string.Equals(_control.name, "x", StringComparison.OrdinalIgnoreCase) && _control.parent is DpadControl parentDpadX)
@@ -749,6 +794,7 @@ namespace AbstractPixel.InputRebinding
                 {
                     return stickVector.y > 0.0f ? stickControl.up : stickControl.down;
                 }
+                return null;
             }
 
             if (string.Equals(_control.name, "x", StringComparison.OrdinalIgnoreCase) && _control.parent is StickControl parentStickX)
@@ -763,7 +809,17 @@ namespace AbstractPixel.InputRebinding
                 return yVal > 0.0f ? parentStickY.up : parentStickY.down;
             }
 
-            return _control;
+            if (_control is ButtonControl)
+            {
+                return _control;
+            }
+
+            if (_control is AxisControl)
+            {
+                return _control;
+            }
+
+            return null;
         }
 
         private bool IsControlActuated(InputControl _control)
@@ -807,25 +863,6 @@ namespace AbstractPixel.InputRebinding
                 if (_control.IsPressed(CONTROL_RELEASE_THRESHOLD))
                 {
                     return true;
-                }
-
-                object valueObject = _control.ReadValueAsObject();
-                if (valueObject is float floatValue && Mathf.Abs(floatValue) > CONTROL_RELEASE_THRESHOLD)
-                {
-                    return true;
-                }
-
-                if (valueObject is Vector2 vectorValue && vectorValue.sqrMagnitude > CONTROL_RELEASE_THRESHOLD * CONTROL_RELEASE_THRESHOLD)
-                {
-                    return true;
-                }
-
-                if (_control.parent != null && !(_control.parent is InputDevice))
-                {
-                    if (_control.parent.EvaluateMagnitude() > CONTROL_RELEASE_THRESHOLD)
-                    {
-                        return true;
-                    }
                 }
             }
             catch
@@ -897,6 +934,14 @@ namespace AbstractPixel.InputRebinding
             if (sourceBinding.isComposite)
             {
                 return;
+            }
+
+            if (sourceBinding.isPartOfComposite && !string.IsNullOrEmpty(_overridePath))
+            {
+                if (IsInvalidCompositePartPath(_overridePath))
+                {
+                    return;
+                }
             }
 
             Guid targetBindingId = sourceBinding.id;
@@ -1379,6 +1424,63 @@ namespace AbstractPixel.InputRebinding
                 _action.actionMap.Disable();
                 _action.actionMap.Enable();
             }
+        }
+
+        private static void SanitizeCompositePartOverrides(InputActionAsset _asset)
+        {
+            if (_asset == null)
+            {
+                return;
+            }
+
+            foreach (InputActionMap actionMap in _asset.actionMaps)
+            {
+                foreach (InputAction action in actionMap.actions)
+                {
+                    for (int index = 0; index < action.bindings.Count; ++index)
+                    {
+                        InputBinding binding = action.bindings[index];
+                        if (binding.isPartOfComposite && !string.IsNullOrEmpty(binding.overridePath))
+                        {
+                            if (IsInvalidCompositePartPath(binding.overridePath))
+                            {
+                                action.RemoveBindingOverride(index);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static bool IsInvalidCompositePartPath(string _path)
+        {
+            if (string.IsNullOrEmpty(_path))
+            {
+                return false;
+            }
+
+            string clean = _path.Trim().ToLowerInvariant();
+            if (clean.EndsWith("rightstick") || clean.EndsWith("leftstick") || clean.EndsWith("dpad"))
+            {
+                return true;
+            }
+
+            if (clean.Contains("/rightstick") && !clean.Contains("/rightstick/"))
+            {
+                return true;
+            }
+
+            if (clean.Contains("/leftstick") && !clean.Contains("/leftstick/"))
+            {
+                return true;
+            }
+
+            if (clean.Contains("/dpad") && !clean.Contains("/dpad/"))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private EventSystem FindActiveEventSystem()
