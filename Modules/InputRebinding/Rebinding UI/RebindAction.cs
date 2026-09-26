@@ -116,6 +116,7 @@ namespace AbstractPixel.InputRebinding
         {
             RegisterActiveSlot(this);
             InputDeviceTracker.OnDeviceFamilyChanged += HandleDeviceFamilyChanged;
+            ResetRuntimeBinding.OnResetCompleted += HandleResetCompleted;
             ResolveAndRefreshForActiveDevice();
         }
 
@@ -123,9 +124,15 @@ namespace AbstractPixel.InputRebinding
         {
             UnregisterActiveSlot(this);
             InputDeviceTracker.OnDeviceFamilyChanged -= HandleDeviceFamilyChanged;
+            ResetRuntimeBinding.OnResetCompleted -= HandleResetCompleted;
             StopActiveRebindRoutine();
             CleanUpRebindOperation();
             RestoreGlobalInputAndUi();
+        }
+
+        private void HandleResetCompleted()
+        {
+            ResolveAndRefreshForActiveDevice();
         }
 
         public void ResolveAndRefreshForActiveDevice()
