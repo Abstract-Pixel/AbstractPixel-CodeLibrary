@@ -93,13 +93,17 @@ namespace AbstractPixel.LevelFramework
                 return;
             }
 
-            TLevelDefinition nextLevel = GetNextValidLevel();
-            if (nextLevel == null)
+            TLevelDefinition nextLevelDefinition = GetNextValidLevel();
+            if (nextLevelDefinition == null)
             {
                 return;
             }
-
-            UpdateActiveLevelState(nextLevel);
+            if (nextLevelDefinition == activeLevelDefinition)
+            {
+                // We Are already in the next current level
+                return;
+            }
+            UpdateActiveLevelState(nextLevelDefinition);
 
             if (levelTransitioner == null)
             {
@@ -113,9 +117,14 @@ namespace AbstractPixel.LevelFramework
 
         internal virtual void LoadToLevel(TSceneAsset _sceneAsset)
         {
-            if (levelDefinitionsMap.TryGetValue(_sceneAsset, out TLevelDefinition level))
+            if (levelDefinitionsMap.TryGetValue(_sceneAsset, out TLevelDefinition newLevelDefinition))
             {
-                UpdateActiveLevelState(level);
+                if(newLevelDefinition == activeLevelDefinition)
+                {
+                    // We Are already in the next current level
+                    return;
+                }
+                UpdateActiveLevelState(newLevelDefinition);
 
                 if (levelTransitioner == null)
                 {

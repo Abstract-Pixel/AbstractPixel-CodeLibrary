@@ -1,6 +1,5 @@
 using AbstractPixel.SceneManagement;
 using System.Threading.Tasks;
-using AbstractPixel.Core;
 
 namespace AbstractPixel.SceneTransitions
 {
