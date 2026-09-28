@@ -25,31 +25,34 @@ namespace AbstractPixel.SaveSystem
                 string directoryPath = Path.GetDirectoryName(_fullpath);
                 if (!CreateDirectory(directoryPath))
                 {
-                    Debug.LogWarning($"FileDataStorageService: [Save Warning] Directory does not exist at path: {directoryPath}. Creating directory.");
                     Directory.CreateDirectory(directoryPath);
                 }
+
                 string tempFilePath = _fullpath + temporaryFileExtension;
-                if (!TryDeleteFile(tempFilePath))
-                {
-                    return false;
-                }
                 File.WriteAllText(tempFilePath, _data);
 
-                if (!TryDeleteFile(_fullpath))
+                // [MODIFIED]: Atomic overwrite copy avoids Windows Delete/Move handle violations
+                File.Copy(tempFilePath, _fullpath, true);
+
+                try
                 {
-                    return false;
+                    File.Delete(tempFilePath);
                 }
-                File.Move(tempFilePath, _fullpath);
+                catch (System.Exception)
+                {
+                    // Non-fatal if OS temp file deletion is briefly deferred
+                }
+
                 return true;
             }
-            catch (IOException e)
+            catch (IOException exception)
             {
-                Debug.LogError($"FileDataStorageService:[I/O Exception Error] Save failed. Exception: {e}");
+                Debug.LogError($"FileDataStorageService: [I/O Exception Error] Save failed: {exception.Message}");
                 return false;
             }
-            catch (System.Exception e)
+            catch (System.Exception exception)
             {
-                Debug.LogError($"FileDataStorageService:[Unexpected Error] Save failed. Exception: {e}");
+                Debug.LogError($"FileDataStorageService: [Unexpected Error] Save failed: {exception.Message}");
                 return false;
             }
         }

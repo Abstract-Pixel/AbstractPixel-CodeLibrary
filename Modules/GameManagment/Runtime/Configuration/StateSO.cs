@@ -25,6 +25,8 @@ namespace AbstractPixel.GameManagement
         public bool IsCursorVisibleOnExecution = true;
         [Tooltip("If true, the state & UI will be hidden upon deactivation.")]
         public bool DisableStateOnSceneChange = true;
+        [Tooltip("If true, the state will revert to previous configurations upon deactivation.")]
+        public bool RevertConfigurationsOnDeactivation = true;
 
         [Header("UI Configuration")]
         [Tooltip("If true, the game UI will be shown upon execution.")]

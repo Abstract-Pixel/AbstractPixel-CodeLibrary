@@ -167,6 +167,13 @@ namespace AbstractPixel.LevelFramework
         #region State & Save Data Management
         internal virtual void MarkCurrentLevelForCompletion(TLevelSaveData _newLevelSaveData)
         {
+            // [MODIFIED]: Null guard prevents ArgumentNullException in Dictionary.TryGetValue
+            if (activeSceneAsset == null)
+            {
+                Debug.LogWarning("[CoreLevelManager] Cannot mark completion: activeSceneAsset is null.");
+                return;
+            }
+
             if (levelSaveDataMap.TryGetValue(activeSceneAsset, out TLevelSaveData saveData))
             {
                 if (_newLevelSaveData != null)
@@ -205,7 +212,12 @@ namespace AbstractPixel.LevelFramework
 
         internal virtual void UnlockLevel(TLevelDefinition _levelDefinition)
         {
+            if (_levelDefinition == null) return;
+
             TSceneAsset sceneAsset = _levelDefinition.SceneAsset;
+            // [MODIFIED]: Guard against null scene asset in placeholder levels
+            if (sceneAsset == null) return;
+
             if (levelSaveDataMap.TryGetValue(sceneAsset, out TLevelSaveData saveData))
             {
                 if (saveData == null)

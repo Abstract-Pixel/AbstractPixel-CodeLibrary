@@ -8,6 +8,7 @@ namespace AbstractPixel.GameManagement
     {
         private static HashSet<StateSO> activeStates = new HashSet<StateSO>();
         private static Stack<StateSO> stateHistory = new Stack<StateSO>();
+        private static bool isProcessingStateChange = false;
 
         public static event Action<StateSO> OnStateRegistered = delegate { };
         public static event Action<StateSO> OnStateUnregistered = delegate { };
@@ -16,6 +17,12 @@ namespace AbstractPixel.GameManagement
         public static bool TryRegisterAsActiveState(StateSO _stateData)
         {
             if (_stateData == null)
+            {
+                return false;
+            }
+
+            // [MODIFIED]: Guard against recursive event loops during eviction
+            if (isProcessingStateChange)
             {
                 return false;
             }
@@ -33,42 +40,46 @@ namespace AbstractPixel.GameManagement
                 return false;
             }
 
-            if (_stateData.IsSubState)
+            isProcessingStateChange = true;
+            try
             {
-                StateSO currentHighest = GetCurrentHighestState();
-                if (currentHighest != null)
+                if (_stateData.IsSubState)
                 {
-                    stateHistory.Push(currentHighest);
+                    StateSO currentHighest = GetCurrentHighestState();
+                    if (currentHighest != null)
+                    {
+                        stateHistory.Push(currentHighest);
+                    }
+                }
+                else
+                {
+                    stateHistory.Clear();
+                }
+
+                List<StateSO> statesToEvict = new List<StateSO>();
+                foreach (StateSO activeState in activeStates)
+                {
+                    if (activeState.Priority < incomingPriority)
+                    {
+                        statesToEvict.Add(activeState);
+                    }
+                }
+
+                activeStates.Add(_stateData);
+
+                foreach (StateSO evictedState in statesToEvict)
+                {
+                    activeStates.Remove(evictedState);
+                    OnStateUnregistered?.Invoke(evictedState);
                 }
             }
-            else
+            finally
             {
-                stateHistory.Clear();
+                // [MODIFIED]: Release lock BEFORE notifying registered so valid downstream sub-states can enter
+                isProcessingStateChange = false;
             }
 
-            List<StateSO> statesToEvict = new List<StateSO>();
-
-            foreach (StateSO activeState in activeStates)
-            {
-                if (activeState.Priority < incomingPriority)
-                {
-                    statesToEvict.Add(activeState);
-                }
-            }
-
-            foreach (StateSO evictedState in statesToEvict)
-            {
-                activeStates.Remove(evictedState);
-                OnStateUnregistered?.Invoke(evictedState);
-            }
-
-            bool wasNewStateAdded = activeStates.Add(_stateData);
-
-            if (wasNewStateAdded)
-            {
-                OnStateRegistered?.Invoke(_stateData);
-            }
-
+            OnStateRegistered?.Invoke(_stateData);
             return true;
         }
 
@@ -97,7 +108,6 @@ namespace AbstractPixel.GameManagement
             {
                 return false;
             }
-
             return activeStates.Contains(_stateData);
         }
 
@@ -136,6 +146,7 @@ namespace AbstractPixel.GameManagement
         {
             activeStates = new HashSet<StateSO>();
             stateHistory = new Stack<StateSO>();
+            isProcessingStateChange = false;
             OnStateRegistered = delegate { };
             OnStateUnregistered = delegate { };
             OnStateRestored = delegate { };

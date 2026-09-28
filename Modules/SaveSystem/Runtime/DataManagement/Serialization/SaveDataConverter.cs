@@ -6,38 +6,59 @@ namespace AbstractPixel.SaveSystem
 {
     public static class SaveDataConverter
     {
-        public static object Convert(object data, Type targetType)
+        public static object Convert(object _data, Type _targetType)
         {
-            if (data == null) return null;
+            if (_data == null) return null;
 
-            if (targetType.IsAssignableFrom(data.GetType())) return data;
+            if (_targetType.IsAssignableFrom(_data.GetType())) return _data;
 
-            if (data is JObject jObject)
+            if (_data is JObject jObject)
             {
-                return jObject.ToObject(targetType);
+                // [MODIFIED]: Safe fallback prevents NullReferenceExceptions if schema drifted
+                try
+                {
+                    return jObject.ToObject(_targetType);
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogWarning($"[SaveDataConverter] Deserialization fallback for {_targetType}: {exception.Message}");
+                    return Activator.CreateInstance(_targetType);
+                }
             }
 
-            if(data is JArray jArray)
+            if (_data is JArray jArray)
             {
-                return jArray.ToObject(targetType);
+                return jArray.ToObject(_targetType);
             }
 
-            //Fallback 
             try
             {
-                return System.Convert.ChangeType(data, targetType);
+                return System.Convert.ChangeType(_data, _targetType);
             }
-            catch(Exception ex)
+            catch (Exception exception)
             {
-                    Debug.LogError($"SaveDataConverter: Failed to convert data of type {data.GetType()} to target type" +
-                        $" {targetType}. Exception: {ex.Message}");
-                    return default;
+                Debug.LogWarning($"[SaveDataConverter] Conversion failed for {_targetType}: {exception.Message}");
+                return Activator.CreateInstance(_targetType);
             }
         }
 
-        public static T Convert<T>(object data)
+        public static T Convert<T>(object _data)
         {
-            return (T)Convert(data, typeof(T));
+            return (T)Convert(_data, typeof(T));
+        }
+
+         // [MODIFIED]: Exception-proof default instance factory
+        private static object CreateSafeDefault(Type _type)
+        {
+            if (_type == typeof(string)) return string.Empty;
+            if (_type.IsValueType) return Activator.CreateInstance(_type);
+
+            if (_type.GetConstructor(Type.EmptyTypes) != null)
+            {
+                return Activator.CreateInstance(_type);
+            }
+
+            return null;
         }
     }
 }

@@ -71,15 +71,19 @@ namespace AbstractPixel.SaveSystem
             yield return new WaitForEndOfFrame();
             if (!hasDoneInitialBootLoad)
             {
+                // [MODIFIED]: Establish Profile ID FIRST before attempting to load data
                 if (LoadSystemMetaData(out SystemMetaData metaData))
                 {
-                    LoadALL();
+                    ExecuteProfileStartUpPolicy(metaData);
                 }
                 else
                 {
-                    Debug.Log("No System MetaData found. Assuming this now first launch");
+                    Debug.Log("[SaveManager] No System MetaData found. Assuming first launch.");
+                    ExecuteProfileStartUpPolicy(null);
                 }
-                ExecuteProfileStartUpPolicy(metaData);
+
+                // [MODIFIED]: Now load all data safely with valid profile path
+                LoadALL();
                 hasDoneInitialBootLoad = true;
                 yield return null;
             }
@@ -170,7 +174,7 @@ namespace AbstractPixel.SaveSystem
                 object capturedData = bridge.CaptureState(_category);
                 if (capturedData != null)
                 {
-                    categorizedSaveFileData.DataMap.Add(bridge.UniqueId, capturedData);
+                    categorizedSaveFileData.DataMap[bridge.UniqueId] = capturedData;
                     hasData = true;
                 }
             }

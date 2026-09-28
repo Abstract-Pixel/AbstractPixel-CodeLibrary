@@ -3,14 +3,11 @@ using UnityEngine;
 
 namespace AbstractPixel.GhostSystem
 {
-    /// <summary>
-    /// A lightweight struct representing a single snapshot in time.
-    /// Structs are used to prevent Garbage Collection spikes when recording thousands of frames.
-    /// </summary>
     [Serializable]
     public struct GhostFrame
     {
         public float Timestamp;
+        // [MODIFIED]: Native Unity math types work directly with zero wrappers
         public Vector3 Position;
         public Quaternion Rotation;
 

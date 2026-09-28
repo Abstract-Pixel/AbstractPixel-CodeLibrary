@@ -19,6 +19,7 @@ namespace AbstractPixel.GameManagement
 
         private WaitForSeconds executionDelay = null;
         private Coroutine stateActivationCoroutine = null;
+
         private void OnEnable()
         {
             if (stateConfig == null)
@@ -53,11 +54,11 @@ namespace AbstractPixel.GameManagement
 
         private void OnDisable()
         {
-            if(stateActivationCoroutine!=null)
+            if (stateActivationCoroutine != null)
             {
                 StopCoroutine(stateActivationCoroutine);
                 stateActivationCoroutine = null;
-            }       
+            }
             foreach (BaseCondition condition in trackedConditions)
             {
                 if (condition != null)
@@ -107,7 +108,7 @@ namespace AbstractPixel.GameManagement
             {
                 return;
             }
-            if(stateActivationCoroutine != null)
+            if (stateActivationCoroutine != null)
             {
                 StopCoroutine(stateActivationCoroutine);
                 stateActivationCoroutine = null;
@@ -117,14 +118,26 @@ namespace AbstractPixel.GameManagement
             if (isPermissionGranted)
             {
                 isActive = true;
+                // [MODIFIED]: Immediate snapshot prevents zeroed time-scale bug if evicted during delay
+                snapshotBeforeActivation = new StateSnapshot()
+                {
+                    PreviousTimeScale = Time.timeScale,
+                    PreviousCursorVisibility = Cursor.visible,
+                    PreviousCursorLockMode = Cursor.lockState
+                };
+
                 stateActivationCoroutine = StartCoroutine(ApplyStateConfigurationsAfterDelay());
             }
         }
 
-        IEnumerator ApplyStateConfigurationsAfterDelay()
+        private IEnumerator ApplyStateConfigurationsAfterDelay()
         {
-            yield return executionDelay;
-            snapshotBeforeActivation = stateConfig.ApplyConfigurations();
+            if (stateConfig.StateExecutionDelay > 0f)
+            {
+                // [MODIFIED]: Unscaled seconds prevents permanent lock if Time.timeScale is already 0
+                yield return new WaitForSecondsRealtime(stateConfig.StateExecutionDelay);
+            }
+            stateConfig.ApplyConfigurations();
         }
 
         public void DeactivateState()
@@ -141,7 +154,10 @@ namespace AbstractPixel.GameManagement
             }
 
             isActive = false;
-            stateConfig.RevertConfigurations(snapshotBeforeActivation);
+            if (stateConfig.RevertConfigurationsOnDeactivation)
+            {
+                stateConfig.RevertConfigurations(snapshotBeforeActivation);
+            }
             GameStateRegistry.UnregisterState(stateConfig);
         }
 

@@ -19,5 +19,6 @@ MonoBehaviour:
   IsCursorLockedOnExecution: 0
   IsCursorVisibleOnExecution: 1
   DisableStateOnSceneChange: 1
+  RevertConfigurationsOnDeactivation: 0
   ShowGameUIOnExecution: 0
   ShowGameUIOnDeactivation: 1

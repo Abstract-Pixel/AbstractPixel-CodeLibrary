@@ -26,8 +26,16 @@ namespace AbstractPixel.SaveSystem
 
                 // TYPE HANDLING (The "Bridge" Strategy)
                 // NONE because SaveDataConverter + SaveableBridge is used
-                TypeNameHandling = TypeNameHandling.None
+                TypeNameHandling = TypeNameHandling.None,
+                // [MODIFIED]: Gracefully ignore fields if variables are renamed between builds
+                MissingMemberHandling = MissingMemberHandling.Ignore
             };
+            // [MODIFIED]: Register native Unity math converters for zero-boilerplate serialization
+            settings.Converters.Add(new UnityVector3Converter());
+            settings.Converters.Add(new UnityQuaternionConverter());
+            // [MODIFIED]: Ensure all JObject.ToObject calls use these converters globally
+            JsonConvert.DefaultSettings = () => settings;
+
         }
         public bool TrySerialize<T>(T _data, out string _output)
         {

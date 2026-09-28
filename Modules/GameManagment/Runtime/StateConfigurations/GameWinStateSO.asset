@@ -13,8 +13,12 @@ MonoBehaviour:
   m_Name: GameWinStateSO
   m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.StateSO
   Priority: 15
+  IsSubState: 0
+  StateExecutionDelay: 0
   IsTimeZeroOnExecution: 1
   IsCursorLockedOnExecution: 0
   IsCursorVisibleOnExecution: 1
+  DisableStateOnSceneChange: 1
+  RevertConfigurationsOnDeactivation: 0
   ShowGameUIOnExecution: 0
   ShowGameUIOnDeactivation: 0

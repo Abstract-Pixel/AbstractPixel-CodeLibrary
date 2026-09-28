@@ -81,14 +81,21 @@ namespace AbstractPixel.SaveSystem
             return Path.Combine(profilesRootPath, profileName);
         }
 
-        public GameProfileManifest LoadProfileManifestByPath(string profilePath)
+        public GameProfileManifest LoadProfileManifestByPath(string _profilePath)
         {
-            GameProfileManifest manifest = null;
-            string manifestPath = Path.Combine(profilePath, GameProfileManifest.ManifestFileName);
+            string fileExtension = SavePathGenerator.PrimaryFileExtension;
+            string manifestPath = Path.Combine(_profilePath, GameProfileManifest.ManifestFileName + fileExtension);
+
+            // [MODIFIED]: Check with extension first, then fallback to extensionless for backward compatibility
+            if (!storageService.FileExists(manifestPath))
+            {
+                manifestPath = Path.Combine(_profilePath, GameProfileManifest.ManifestFileName);
+            }
+
             if (storageService.FileExists(manifestPath))
             {
                 string manifestJson = storageService.LoadFile(manifestPath);
-                if (serializer.TryDeserialize<GameProfileManifest>(manifestJson, out manifest))
+                if (serializer.TryDeserialize<GameProfileManifest>(manifestJson, out GameProfileManifest manifest))
                 {
                     return manifest;
                 }
@@ -98,11 +105,8 @@ namespace AbstractPixel.SaveSystem
                     return null;
                 }
             }
-            else
-            {
-                Debug.LogError($"GameProfileManifest file does not exist at path: {manifestPath}");
-                return null;
-            }
+
+            return null;
         }
 
         public GameProfileManifest LoadProfileManifestByID(string _profileId)
