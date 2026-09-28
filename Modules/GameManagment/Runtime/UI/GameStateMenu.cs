@@ -1,4 +1,3 @@
-// --- START OF FILE GameStateMenu.cs ---
 using UnityEngine;
 
 namespace AbstractPixel.GameManagement
@@ -28,8 +27,6 @@ namespace AbstractPixel.GameManagement
 
         private void OnEnable()
         {
-            // C# Standard for preventing double-subscription: 
-            // We strictly subscribe in OnEnable and unsubscribe in OnDisable.
             GameStateRegistry.OnStateRegistered += HandleStateRegistered;
             GameStateRegistry.OnStateUnregistered += HandleStateUnregistered;
         }

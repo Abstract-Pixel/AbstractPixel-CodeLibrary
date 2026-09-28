@@ -52,10 +52,12 @@ namespace AbstractPixel.GameManagement
         }
 
         private void OnDisable()
-
         {
-            StopCoroutine(stateActivationCoroutine);
-            stateActivationCoroutine = null;
+            if(stateActivationCoroutine!=null)
+            {
+                StopCoroutine(stateActivationCoroutine);
+                stateActivationCoroutine = null;
+            }       
             foreach (BaseCondition condition in trackedConditions)
             {
                 if (condition != null)
@@ -108,6 +110,7 @@ namespace AbstractPixel.GameManagement
             if(stateActivationCoroutine != null)
             {
                 StopCoroutine(stateActivationCoroutine);
+                stateActivationCoroutine = null;
             }
             bool isPermissionGranted = GameStateRegistry.TryRegisterAsActiveState(stateConfig);
 
@@ -131,8 +134,11 @@ namespace AbstractPixel.GameManagement
                 return;
             }
 
-            StopCoroutine(stateActivationCoroutine);
-            stateActivationCoroutine = null;
+            if (stateActivationCoroutine != null)
+            {
+                StopCoroutine(stateActivationCoroutine);
+                stateActivationCoroutine = null;
+            }
 
             isActive = false;
             stateConfig.RevertConfigurations(snapshotBeforeActivation);

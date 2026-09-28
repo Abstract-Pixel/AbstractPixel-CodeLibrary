@@ -9,8 +9,9 @@ namespace AbstractPixel.Settings
     [Savable(SaveCategory.Settings)]
     public class SettingsManager : PersistentSingleton<SettingsManager>, ISavable<SettingsDTO>
     {
-        [SerializeField]
-        private SettingsRegistry activeRegistry;
+
+        [SerializeField] private SettingsRegistry activeRegistry;
+        [SerializeField] private bool ShowDebugLogs;
 
         private Dictionary<Type, ISettingBackend> settingsDictionary = new Dictionary<Type, ISettingBackend>();
 
@@ -45,6 +46,7 @@ namespace AbstractPixel.Settings
                     }
                     else
                     {
+                        if (!ShowDebugLogs) return;
                         Debug.LogWarning($"[SettingsManager] Duplicate setting detected in Registry: {settingType.Name}");
                     }
                 }
@@ -57,7 +59,7 @@ namespace AbstractPixel.Settings
             {
                 return foundSetting;
             }
-
+            if (!ShowDebugLogs) return null;
             Debug.LogError($"[SettingsManager] Could not find a setting of type: {requestedType.Name}");
             return null;
         }

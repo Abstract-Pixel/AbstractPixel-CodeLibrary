@@ -2410,7 +2410,7 @@ MonoBehaviour:
           DisplayName: Field Of View
           Description: Changes how much of the world you can see at once. Higher
             is wider, lower is more zoomed in
-        <DefaultValue>k__BackingField: 60
+        <DefaultValue>k__BackingField: 70
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
         <MinValue>k__BackingField: 40
