@@ -14,9 +14,9 @@ namespace ScreenshotTool.Editor
     {
         private const int BYTES_PER_PIXEL_RGBA32 = 4;
         private const int FILE_STREAM_BUFFER_SIZE = 65536;
-        private const int JPEG_ENCODE_QUALITY = 92;
+        private const int MAXIMUM_JPEG_QUALITY = 98;
 
-        public static async Task SaveImageAsync(
+        public static async Task<string> SaveImageAsync(
             NativeArray<byte> _pixelBuffer,
             int _width,
             int _height,
@@ -25,14 +25,16 @@ namespace ScreenshotTool.Editor
         {
             if (_cancellationToken.IsCancellationRequested)
             {
-                return;
+                return string.Empty;
             }
 
             ProcessAndFlipBuffer(_pixelBuffer, _width, _height);
 
             NativeArray<byte> encodedData = _configuration.FileFormat == ScreenshotFileFormat.PNG
                 ? ImageConversion.EncodeNativeArrayToPNG(_pixelBuffer, GraphicsFormat.R8G8B8A8_SRGB, (uint)_width, (uint)_height, 0)
-                : ImageConversion.EncodeNativeArrayToJPG(_pixelBuffer, GraphicsFormat.R8G8B8A8_SRGB, (uint)_width, (uint)_height, 0, JPEG_ENCODE_QUALITY);
+                : ImageConversion.EncodeNativeArrayToJPG(_pixelBuffer, GraphicsFormat.R8G8B8A8_SRGB, (uint)_width, (uint)_height, 0, MAXIMUM_JPEG_QUALITY);
+
+            string destinationPath = string.Empty;
 
             try
             {
@@ -44,7 +46,7 @@ namespace ScreenshotTool.Editor
                 string fileExtension = _configuration.FileFormat == ScreenshotFileFormat.PNG ? "png" : "jpg";
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff");
                 string fileName = $"Shot_{timestamp}_{_width}x{_height}.{fileExtension}";
-                string destinationPath = Path.Combine(_configuration.SaveDirectoryPath, fileName);
+                destinationPath = Path.Combine(_configuration.SaveDirectoryPath, fileName);
 
                 byte[] managedOutputArray = encodedData.ToArray();
 
@@ -65,6 +67,8 @@ namespace ScreenshotTool.Editor
                     encodedData.Dispose();
                 }
             }
+
+            return destinationPath;
         }
 
         private static void ProcessAndFlipBuffer(NativeArray<byte> _buffer, int _width, int _height)

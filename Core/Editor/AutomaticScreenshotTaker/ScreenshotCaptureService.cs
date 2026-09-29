@@ -25,6 +25,9 @@ namespace ScreenshotTool.Editor
 
         public bool IsCapturing => isCapturing;
         public int SavedScreenshotCount { get; private set; }
+        public bool HadActiveCaptureSession { get; private set; }
+
+        public event Action<string> OnScreenshotSaved;
 
         public void StartCapture(ScreenshotConfiguration _configuration)
         {
@@ -39,6 +42,7 @@ namespace ScreenshotTool.Editor
             lastTimestamp = EditorApplication.timeSinceStartup;
             isGpuReadbackPending = false;
             shouldCaptureNextFrame = false;
+            HadActiveCaptureSession = true;
 
             serviceCancellationTokenSource = new CancellationTokenSource();
             backgroundTaskLimiter = new SemaphoreSlim(MAXIMUM_CONCURRENT_SAVING_TASKS, MAXIMUM_CONCURRENT_SAVING_TASKS);
@@ -100,6 +104,12 @@ namespace ScreenshotTool.Editor
                 UnityEngine.Object.DestroyImmediate(pooledRenderTexture);
                 pooledRenderTexture = null;
             }
+        }
+
+        public void ResetSessionFlag()
+        {
+            HadActiveCaptureSession = false;
+            SavedScreenshotCount = 0;
         }
 
         private void HandleEditorUpdate()
@@ -221,7 +231,7 @@ namespace ScreenshotTool.Editor
 
                 try
                 {
-                    await AsyncScreenshotDiskWriter.SaveImageAsync(
+                    string savedFilePath = await AsyncScreenshotDiskWriter.SaveImageAsync(
                         persistentBuffer,
                         imageWidth,
                         imageHeight,
@@ -229,6 +239,14 @@ namespace ScreenshotTool.Editor
                         token);
 
                     SavedScreenshotCount++;
+
+                    if (!string.IsNullOrEmpty(savedFilePath))
+                    {
+                        EditorApplication.delayCall += () =>
+                        {
+                            OnScreenshotSaved?.Invoke(savedFilePath);
+                        };
+                    }
                 }
                 catch (OperationCanceledException)
                 {

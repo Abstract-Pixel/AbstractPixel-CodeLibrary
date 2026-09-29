@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -36,6 +37,8 @@ namespace ScreenshotTool.Editor
         private Button toggleCaptureButton;
 
         private ScreenshotCaptureService captureService;
+        private ScreenshotSessionTracker sessionTracker;
+        private ScreenshotSessionView sessionView;
         private bool isCapturingActive;
         private bool isPathUnlockedForEditing;
 
@@ -43,25 +46,48 @@ namespace ScreenshotTool.Editor
         public static void OpenWindow()
         {
             ScreenshotToolWindow toolWindow = GetWindow<ScreenshotToolWindow>("Screenshot Deck");
-            toolWindow.minSize = new Vector2(400f, 540f);
+            toolWindow.minSize = new Vector2(280f, 400f);
             toolWindow.Show();
         }
 
         private void OnEnable()
         {
+            sessionTracker = new ScreenshotSessionTracker();
             captureService = new ScreenshotCaptureService();
+            captureService.OnScreenshotSaved += HandleScreenshotSaved;
+
             EditorApplication.playModeStateChanged += HandlePlayModeStateChanged;
+            EditorApplication.quitting += HandleEditorQuitting;
+            PrefabStage.prefabStageOpened += HandlePrefabStageOpened;
         }
 
         private void OnDisable()
         {
             EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
+            EditorApplication.quitting -= HandleEditorQuitting;
+            PrefabStage.prefabStageOpened -= HandlePrefabStageOpened;
+
             HaltCaptureRoutine();
+
+            if (sessionTracker != null)
+            {
+                sessionTracker.FinalizeAndPurgeUnmarked();
+                sessionTracker.ClearSession();
+            }
 
             if (captureService != null)
             {
+                captureService.OnScreenshotSaved -= HandleScreenshotSaved;
                 captureService.StopCapture();
                 captureService = null;
+            }
+        }
+
+        private void OnLostFocus()
+        {
+            if (sessionTracker != null && sessionTracker.HasSessionData && !EditorApplication.isPlaying)
+            {
+                sessionTracker.CommitRenamesOnly();
             }
         }
 
@@ -73,11 +99,15 @@ namespace ScreenshotTool.Editor
             rootContainer.style.paddingTop = 14;
             rootContainer.style.paddingBottom = 14;
 
+            ScrollView mainContentScrollView = new ScrollView();
+            mainContentScrollView.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            rootContainer.Add(mainContentScrollView);
+
             Label headerLabel = new Label("AUTOMATED SCREENSHOT DECK");
             headerLabel.style.fontSize = 16;
             headerLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             headerLabel.style.marginBottom = 12;
-            rootContainer.Add(headerLabel);
+            mainContentScrollView.Add(headerLabel);
 
             VisualElement folderSection = new VisualElement();
             folderSection.style.marginBottom = 14;
@@ -142,12 +172,12 @@ namespace ScreenshotTool.Editor
             folderButtonsRow.Add(openDirectoryButton);
 
             folderSection.Add(folderButtonsRow);
-            rootContainer.Add(folderSection);
+            mainContentScrollView.Add(folderSection);
 
             ScreenshotAspectRatio savedAspect = (ScreenshotAspectRatio)EditorPrefs.GetInt(PREF_KEY_ASPECT, (int)ScreenshotAspectRatio.Landscape16x9);
             aspectRatioEnumField = new EnumField("Aspect Ratio", savedAspect);
             aspectRatioEnumField.RegisterValueChangedCallback(_ => RefreshResolutionPreview());
-            rootContainer.Add(aspectRatioEnumField);
+            mainContentScrollView.Add(aspectRatioEnumField);
 
             ScreenshotResolutionTier savedTier = (ScreenshotResolutionTier)EditorPrefs.GetInt(PREF_KEY_RESOLUTION, (int)ScreenshotResolutionTier.FullHD1080p);
             resolutionTierEnumField = new EnumField("Resolution Tier", savedTier);
@@ -156,44 +186,47 @@ namespace ScreenshotTool.Editor
                 UpdateCustomFieldsVisibility();
                 RefreshResolutionPreview();
             });
-            rootContainer.Add(resolutionTierEnumField);
+            mainContentScrollView.Add(resolutionTierEnumField);
 
             int savedWidth = EditorPrefs.GetInt(PREF_KEY_CUSTOM_WIDTH, 1920);
             customWidthField = new IntegerField("Custom Width") { value = savedWidth };
             customWidthField.RegisterValueChangedCallback(_ => RefreshResolutionPreview());
-            rootContainer.Add(customWidthField);
+            mainContentScrollView.Add(customWidthField);
 
             int savedHeight = EditorPrefs.GetInt(PREF_KEY_CUSTOM_HEIGHT, 1080);
             customHeightField = new IntegerField("Custom Height") { value = savedHeight };
             customHeightField.RegisterValueChangedCallback(_ => RefreshResolutionPreview());
-            rootContainer.Add(customHeightField);
+            mainContentScrollView.Add(customHeightField);
 
             ScreenshotFileFormat savedFormat = (ScreenshotFileFormat)EditorPrefs.GetInt(PREF_KEY_FORMAT, (int)ScreenshotFileFormat.PNG);
             fileFormatEnumField = new EnumField("Image Format", savedFormat);
-            rootContainer.Add(fileFormatEnumField);
+            mainContentScrollView.Add(fileFormatEnumField);
 
-            float savedInterval = EditorPrefs.GetFloat(PREF_KEY_INTERVAL, 3.0f);
+            float savedInterval = EditorPrefs.GetFloat(PREF_KEY_INTERVAL, 1.0f);
             intervalSlider = new Slider("Capture Interval (s)", 0.5f, 30.0f) { value = savedInterval, showInputField = true };
-            rootContainer.Add(intervalSlider);
+            mainContentScrollView.Add(intervalSlider);
 
             resolutionPreviewLabel = new Label("Target Dimensions: 1920 x 1080 px");
             resolutionPreviewLabel.style.marginTop = 10;
             resolutionPreviewLabel.style.marginBottom = 12;
             resolutionPreviewLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             resolutionPreviewLabel.style.color = COLOR_ACCENT_BLUE;
-            rootContainer.Add(resolutionPreviewLabel);
+            mainContentScrollView.Add(resolutionPreviewLabel);
 
             statusStateLabel = new Label("Status: Ready (Enter Play Mode to capture)");
             statusStateLabel.style.marginBottom = 14;
             statusStateLabel.style.color = new Color(0.85f, 0.85f, 0.85f);
-            rootContainer.Add(statusStateLabel);
+            mainContentScrollView.Add(statusStateLabel);
 
             toggleCaptureButton = new Button(OnToggleCaptureButtonClicked) { text = "START AUTOMATIC CAPTURE" };
             toggleCaptureButton.style.height = 44;
             toggleCaptureButton.style.unityFontStyleAndWeight = FontStyle.Bold;
             toggleCaptureButton.style.backgroundColor = COLOR_START_GREEN;
             toggleCaptureButton.style.color = Color.white;
-            rootContainer.Add(toggleCaptureButton);
+            mainContentScrollView.Add(toggleCaptureButton);
+
+            sessionView = new ScreenshotSessionView();
+            mainContentScrollView.Add(sessionView.RootElement);
 
             UpdateCustomFieldsVisibility();
             RefreshResolutionPreview();
@@ -205,6 +238,14 @@ namespace ScreenshotTool.Editor
             if (isCapturingActive && captureService != null && captureService.IsCapturing)
             {
                 statusStateLabel.text = $"Status: Active | Saved: {captureService.SavedScreenshotCount} screenshots";
+            }
+        }
+
+        private void HandleScreenshotSaved(string _filePath)
+        {
+            if (sessionTracker != null)
+            {
+                sessionTracker.RegisterCapturedFile(_filePath);
             }
         }
 
@@ -320,9 +361,15 @@ namespace ScreenshotTool.Editor
             if (captureService == null)
             {
                 captureService = new ScreenshotCaptureService();
+                captureService.OnScreenshotSaved += HandleScreenshotSaved;
             }
 
             captureService.StartCapture(config);
+
+            if (sessionView != null)
+            {
+                sessionView.HideSession();
+            }
 
             isCapturingActive = true;
             toggleCaptureButton.text = "STOP AUTOMATIC CAPTURE";
@@ -353,9 +400,68 @@ namespace ScreenshotTool.Editor
 
         private void HandlePlayModeStateChanged(PlayModeStateChange _stateChange)
         {
-            if (_stateChange == PlayModeStateChange.ExitingPlayMode || _stateChange == PlayModeStateChange.EnteredEditMode)
+            if (_stateChange == PlayModeStateChange.ExitingEditMode)
+            {
+                if (sessionTracker != null)
+                {
+                    sessionTracker.FinalizeAndPurgeUnmarked();
+                    sessionTracker.ClearSession();
+                }
+
+                if (sessionView != null)
+                {
+                    sessionView.HideSession();
+                }
+
+                if (captureService != null)
+                {
+                    captureService.ResetSessionFlag();
+                }
+            }
+            else if (_stateChange == PlayModeStateChange.ExitingPlayMode)
             {
                 HaltCaptureRoutine();
+            }
+            else if (_stateChange == PlayModeStateChange.EnteredEditMode)
+            {
+                if (sessionTracker != null && sessionTracker.HasSessionData)
+                {
+                    Focus();
+
+                    if (sessionView != null)
+                    {
+                        sessionView.PopulateSession(sessionTracker, () => { });
+                    }
+                }
+                else
+                {
+                    if (sessionView != null)
+                    {
+                        sessionView.HideSession();
+                    }
+                }
+            }
+        }
+
+        private void HandlePrefabStageOpened(PrefabStage _stage)
+        {
+            if (!EditorApplication.isPlaying && sessionTracker != null && sessionTracker.HasSessionData)
+            {
+                sessionTracker.FinalizeAndPurgeUnmarked();
+                sessionTracker.ClearSession();
+
+                if (sessionView != null)
+                {
+                    sessionView.HideSession();
+                }
+            }
+        }
+
+        private void HandleEditorQuitting()
+        {
+            if (sessionTracker != null)
+            {
+                sessionTracker.FinalizeAndPurgeUnmarked();
             }
         }
 
