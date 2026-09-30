@@ -23,6 +23,9 @@ namespace ScreenshotTool.Editor
         private readonly Color COLOR_STOP_RED = new Color(0.75f, 0.22f, 0.17f);
         private readonly Color COLOR_UNLOCK_ORANGE = new Color(1f, 0.65f, 0.2f);
 
+        private static ScreenshotCaptureService staticCaptureService;
+        private static ScreenshotSessionTracker staticSessionTracker;
+
         private TextField directoryPathTextField;
         private Button lockToggleButton;
         private Button openDirectoryButton;
@@ -36,10 +39,7 @@ namespace ScreenshotTool.Editor
         private Label statusStateLabel;
         private Button toggleCaptureButton;
 
-        private ScreenshotCaptureService captureService;
-        private ScreenshotSessionTracker sessionTracker;
         private ScreenshotSessionView sessionView;
-        private bool isCapturingActive;
         private bool isPathUnlockedForEditing;
 
         [MenuItem("Tools/Screenshot Deck")]
@@ -52,12 +52,15 @@ namespace ScreenshotTool.Editor
 
         private void OnEnable()
         {
-            sessionTracker = new ScreenshotSessionTracker();
-            captureService = new ScreenshotCaptureService();
-            captureService.OnScreenshotSaved += HandleScreenshotSaved;
+            InitializeStaticServices();
 
+            EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
             EditorApplication.playModeStateChanged += HandlePlayModeStateChanged;
+
+            EditorApplication.quitting -= HandleEditorQuitting;
             EditorApplication.quitting += HandleEditorQuitting;
+
+            PrefabStage.prefabStageOpened -= HandlePrefabStageOpened;
             PrefabStage.prefabStageOpened += HandlePrefabStageOpened;
         }
 
@@ -67,32 +70,24 @@ namespace ScreenshotTool.Editor
             EditorApplication.quitting -= HandleEditorQuitting;
             PrefabStage.prefabStageOpened -= HandlePrefabStageOpened;
 
-            HaltCaptureRoutine();
-
-            if (sessionTracker != null)
+            if (!EditorApplication.isPlaying)
             {
-                sessionTracker.FinalizeAndPurgeUnmarked();
-                sessionTracker.ClearSession();
-            }
-
-            if (captureService != null)
-            {
-                captureService.OnScreenshotSaved -= HandleScreenshotSaved;
-                captureService.StopCapture();
-                captureService = null;
+                HaltCaptureRoutine();
             }
         }
 
         private void OnLostFocus()
         {
-            if (sessionTracker != null && sessionTracker.HasSessionData && !EditorApplication.isPlaying)
+            if (staticSessionTracker != null && staticSessionTracker.HasSessionData && !EditorApplication.isPlaying)
             {
-                sessionTracker.CommitRenamesOnly();
+                staticSessionTracker.CommitRenamesOnly();
             }
         }
 
         public void CreateGUI()
         {
+            InitializeStaticServices();
+
             VisualElement rootContainer = rootVisualElement;
             rootContainer.style.paddingLeft = 14;
             rootContainer.style.paddingRight = 14;
@@ -231,21 +226,62 @@ namespace ScreenshotTool.Editor
             UpdateCustomFieldsVisibility();
             RefreshResolutionPreview();
             ValidateSaveDirectoryPath();
+
+            if (staticSessionTracker != null && staticSessionTracker.HasSessionData && !EditorApplication.isPlaying)
+            {
+                sessionView.PopulateSession(staticSessionTracker, () => { });
+            }
         }
 
         private void Update()
         {
-            if (isCapturingActive && captureService != null && captureService.IsCapturing)
+            if (staticCaptureService != null && staticCaptureService.IsCapturing)
             {
-                statusStateLabel.text = $"Status: Active | Saved: {captureService.SavedScreenshotCount} screenshots";
+                if (statusStateLabel != null)
+                {
+                    statusStateLabel.text = $"Status: Active | Saved: {staticCaptureService.SavedScreenshotCount} screenshots";
+                }
+
+                if (toggleCaptureButton != null && toggleCaptureButton.text != "STOP AUTOMATIC CAPTURE")
+                {
+                    toggleCaptureButton.text = "STOP AUTOMATIC CAPTURE";
+                    toggleCaptureButton.style.backgroundColor = COLOR_STOP_RED;
+                }
+            }
+            else
+            {
+                if (toggleCaptureButton != null && toggleCaptureButton.text != "START AUTOMATIC CAPTURE")
+                {
+                    toggleCaptureButton.text = "START AUTOMATIC CAPTURE";
+                    toggleCaptureButton.style.backgroundColor = COLOR_START_GREEN;
+
+                    if (statusStateLabel != null)
+                    {
+                        statusStateLabel.text = "Status: Stopped";
+                    }
+                }
             }
         }
 
-        private void HandleScreenshotSaved(string _filePath)
+        private void InitializeStaticServices()
         {
-            if (sessionTracker != null)
+            if (staticSessionTracker == null)
             {
-                sessionTracker.RegisterCapturedFile(_filePath);
+                staticSessionTracker = new ScreenshotSessionTracker();
+            }
+
+            if (staticCaptureService == null)
+            {
+                staticCaptureService = new ScreenshotCaptureService();
+                staticCaptureService.OnScreenshotSaved += HandleScreenshotSavedStatic;
+            }
+        }
+
+        private static void HandleScreenshotSavedStatic(string _filePath)
+        {
+            if (staticSessionTracker != null)
+            {
+                staticSessionTracker.RegisterCapturedFile(_filePath);
             }
         }
 
@@ -331,7 +367,9 @@ namespace ScreenshotTool.Editor
 
         private void OnToggleCaptureButtonClicked()
         {
-            if (isCapturingActive)
+            InitializeStaticServices();
+
+            if (staticCaptureService != null && staticCaptureService.IsCapturing)
             {
                 HaltCaptureRoutine();
             }
@@ -358,32 +396,31 @@ namespace ScreenshotTool.Editor
             SaveUserPreferences();
             ScreenshotConfiguration config = BuildConfigurationFromInterface();
 
-            if (captureService == null)
-            {
-                captureService = new ScreenshotCaptureService();
-                captureService.OnScreenshotSaved += HandleScreenshotSaved;
-            }
-
-            captureService.StartCapture(config);
+            InitializeStaticServices();
+            staticCaptureService.StartCapture(config);
 
             if (sessionView != null)
             {
                 sessionView.HideSession();
             }
 
-            isCapturingActive = true;
-            toggleCaptureButton.text = "STOP AUTOMATIC CAPTURE";
-            toggleCaptureButton.style.backgroundColor = COLOR_STOP_RED;
-            statusStateLabel.text = "Status: Active | Recording frames...";
+            if (toggleCaptureButton != null)
+            {
+                toggleCaptureButton.text = "STOP AUTOMATIC CAPTURE";
+                toggleCaptureButton.style.backgroundColor = COLOR_STOP_RED;
+            }
+
+            if (statusStateLabel != null)
+            {
+                statusStateLabel.text = "Status: Active | Recording frames...";
+            }
         }
 
         private void HaltCaptureRoutine()
         {
-            isCapturingActive = false;
-
-            if (captureService != null)
+            if (staticCaptureService != null)
             {
-                captureService.StopCapture();
+                staticCaptureService.StopCapture();
             }
 
             if (toggleCaptureButton != null)
@@ -400,12 +437,14 @@ namespace ScreenshotTool.Editor
 
         private void HandlePlayModeStateChanged(PlayModeStateChange _stateChange)
         {
+            InitializeStaticServices();
+
             if (_stateChange == PlayModeStateChange.ExitingEditMode)
             {
-                if (sessionTracker != null)
+                if (staticSessionTracker != null)
                 {
-                    sessionTracker.FinalizeAndPurgeUnmarked();
-                    sessionTracker.ClearSession();
+                    staticSessionTracker.FinalizeAndPurgeUnmarked();
+                    staticSessionTracker.ClearSession();
                 }
 
                 if (sessionView != null)
@@ -413,9 +452,9 @@ namespace ScreenshotTool.Editor
                     sessionView.HideSession();
                 }
 
-                if (captureService != null)
+                if (staticCaptureService != null)
                 {
-                    captureService.ResetSessionFlag();
+                    staticCaptureService.ResetSessionFlag();
                 }
             }
             else if (_stateChange == PlayModeStateChange.ExitingPlayMode)
@@ -424,13 +463,13 @@ namespace ScreenshotTool.Editor
             }
             else if (_stateChange == PlayModeStateChange.EnteredEditMode)
             {
-                if (sessionTracker != null && sessionTracker.HasSessionData)
+                if (staticSessionTracker != null && staticSessionTracker.HasSessionData)
                 {
                     Focus();
 
                     if (sessionView != null)
                     {
-                        sessionView.PopulateSession(sessionTracker, () => { });
+                        sessionView.PopulateSession(staticSessionTracker, () => { });
                     }
                 }
                 else
@@ -445,10 +484,10 @@ namespace ScreenshotTool.Editor
 
         private void HandlePrefabStageOpened(PrefabStage _stage)
         {
-            if (!EditorApplication.isPlaying && sessionTracker != null && sessionTracker.HasSessionData)
+            if (!EditorApplication.isPlaying && staticSessionTracker != null && staticSessionTracker.HasSessionData)
             {
-                sessionTracker.FinalizeAndPurgeUnmarked();
-                sessionTracker.ClearSession();
+                staticSessionTracker.FinalizeAndPurgeUnmarked();
+                staticSessionTracker.ClearSession();
 
                 if (sessionView != null)
                 {
@@ -459,9 +498,9 @@ namespace ScreenshotTool.Editor
 
         private void HandleEditorQuitting()
         {
-            if (sessionTracker != null)
+            if (staticSessionTracker != null)
             {
-                sessionTracker.FinalizeAndPurgeUnmarked();
+                staticSessionTracker.FinalizeAndPurgeUnmarked();
             }
         }
 

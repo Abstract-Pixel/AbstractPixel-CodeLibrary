@@ -18,7 +18,8 @@ namespace ScreenshotTool.Editor
 
         private readonly Color COLOR_THUMBNAIL_BORDER_NORMAL = new Color(0.92f, 0.92f, 0.92f, 0.85f);
         private readonly Color COLOR_THUMBNAIL_BORDER_KEEP = new Color(0.38f, 0.78f, 0.46f, 1f);
-        private readonly Color COLOR_THUMBNAIL_BORDER_HOVER = new Color(0.35f, 0.75f, 1f, 1f);
+        private readonly Color COLOR_THUMBNAIL_BORDER_HOVER = new Color(0.45f, 0.85f, 1f, 1f);
+        private readonly Color COLOR_THUMBNAIL_BORDER_ACTIVE_INSPECTED = new Color(0f, 0.55f, 1f, 1f);
 
         private readonly Color COLOR_INDEX_PILL_BACKGROUND = new Color(0.15f, 0.15f, 0.15f, 1f);
         private readonly Color COLOR_DIVIDER_LINE = new Color(0.32f, 0.32f, 0.32f, 0.5f);
@@ -31,6 +32,9 @@ namespace ScreenshotTool.Editor
         private readonly ScrollView itemsScrollView;
         private readonly VisualElement topToolbar;
         private Button deleteUnmarkedButton;
+
+        private ScreenshotSessionItem currentlyInspectedItem;
+        private Action onClearActiveInspectedBorder;
 
         public VisualElement RootElement => sessionContainer;
 
@@ -77,6 +81,7 @@ namespace ScreenshotTool.Editor
         {
             itemsScrollView.Clear();
             topToolbar.Clear();
+            ClearActiveInspectedHighlight();
 
             if (_sessionTracker == null || !_sessionTracker.HasSessionData)
             {
@@ -89,8 +94,8 @@ namespace ScreenshotTool.Editor
 
             Button keepAllButton = new Button(() =>
             {
-                _sessionTracker.MarkAllToKeep(true);
-                PopulateSession(_sessionTracker, _onDataModified);
+                _sessionTracker.KeepAllAndFinalizeSession();
+                HideSession();
                 _onDataModified?.Invoke();
             })
             {
@@ -154,6 +159,7 @@ namespace ScreenshotTool.Editor
 
         public void HideSession()
         {
+            ClearActiveInspectedHighlight();
             sessionContainer.style.display = DisplayStyle.None;
             itemsScrollView.Clear();
         }
@@ -238,7 +244,16 @@ namespace ScreenshotTool.Editor
 
             Action applyThumbnailBorder = () =>
             {
-                Color targetBorderColor = _item.IsMarkedToKeep ? COLOR_THUMBNAIL_BORDER_KEEP : COLOR_THUMBNAIL_BORDER_NORMAL;
+                Color targetBorderColor;
+                if (currentlyInspectedItem == _item)
+                {
+                    targetBorderColor = COLOR_THUMBNAIL_BORDER_ACTIVE_INSPECTED;
+                }
+                else
+                {
+                    targetBorderColor = _item.IsMarkedToKeep ? COLOR_THUMBNAIL_BORDER_KEEP : COLOR_THUMBNAIL_BORDER_NORMAL;
+                }
+
                 thumbnailContainer.style.borderLeftColor = targetBorderColor;
                 thumbnailContainer.style.borderRightColor = targetBorderColor;
                 thumbnailContainer.style.borderTopColor = targetBorderColor;
@@ -249,11 +264,19 @@ namespace ScreenshotTool.Editor
 
             thumbnailContainer.RegisterCallback<MouseEnterEvent>(_ =>
             {
-                Color hoverColor = _item.IsMarkedToKeep ? new Color(0.55f, 0.95f, 0.65f, 1f) : COLOR_THUMBNAIL_BORDER_HOVER;
-                thumbnailContainer.style.borderLeftColor = hoverColor;
-                thumbnailContainer.style.borderRightColor = hoverColor;
-                thumbnailContainer.style.borderTopColor = hoverColor;
-                thumbnailContainer.style.borderBottomColor = hoverColor;
+                if (currentlyInspectedItem != null && currentlyInspectedItem != _item)
+                {
+                    ClearActiveInspectedHighlight();
+                }
+
+                if (currentlyInspectedItem != _item)
+                {
+                    Color hoverColor = _item.IsMarkedToKeep ? new Color(0.55f, 0.95f, 0.65f, 1f) : COLOR_THUMBNAIL_BORDER_HOVER;
+                    thumbnailContainer.style.borderLeftColor = hoverColor;
+                    thumbnailContainer.style.borderRightColor = hoverColor;
+                    thumbnailContainer.style.borderTopColor = hoverColor;
+                    thumbnailContainer.style.borderBottomColor = hoverColor;
+                }
             });
 
             thumbnailContainer.RegisterCallback<MouseLeaveEvent>(_ =>
@@ -265,6 +288,15 @@ namespace ScreenshotTool.Editor
             {
                 if (_clickEvent.clickCount == 2)
                 {
+                    if (currentlyInspectedItem != null && currentlyInspectedItem != _item)
+                    {
+                        ClearActiveInspectedHighlight();
+                    }
+
+                    currentlyInspectedItem = _item;
+                    onClearActiveInspectedBorder = applyThumbnailBorder;
+                    applyThumbnailBorder();
+
                     _tracker.OpenInDefaultViewer(_item);
                 }
             });
@@ -338,7 +370,19 @@ namespace ScreenshotTool.Editor
             revealInExplorerButton.style.marginBottom = 4;
             actionButtonsRow.Add(revealInExplorerButton);
 
-            Button openInViewerButton = new Button(() => _tracker.OpenInDefaultViewer(_item))
+            Button openInViewerButton = new Button(() =>
+            {
+                if (currentlyInspectedItem != null && currentlyInspectedItem != _item)
+                {
+                    ClearActiveInspectedHighlight();
+                }
+
+                currentlyInspectedItem = _item;
+                onClearActiveInspectedBorder = applyThumbnailBorder;
+                applyThumbnailBorder();
+
+                _tracker.OpenInDefaultViewer(_item);
+            })
             {
                 text = "🖼️ Open in Photos"
             };
@@ -463,6 +507,16 @@ namespace ScreenshotTool.Editor
             });
 
             return cardContainer;
+        }
+
+        private void ClearActiveInspectedHighlight()
+        {
+            if (currentlyInspectedItem != null)
+            {
+                onClearActiveInspectedBorder?.Invoke();
+                currentlyInspectedItem = null;
+                onClearActiveInspectedBorder = null;
+            }
         }
 
         private void UpdateSummaryText(ScreenshotSessionTracker _sessionTracker)

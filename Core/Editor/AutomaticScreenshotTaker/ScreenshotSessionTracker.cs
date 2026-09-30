@@ -50,6 +50,12 @@ namespace ScreenshotTool.Editor
             }
         }
 
+        public void KeepAllAndFinalizeSession()
+        {
+            CommitRenamesOnly();
+            ClearSession();
+        }
+
         public void ClearSession()
         {
             for (int itemIndex = 0; itemIndex < trackedItems.Count; itemIndex++)
