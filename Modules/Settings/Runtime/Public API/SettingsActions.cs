@@ -6,7 +6,7 @@ namespace AbstractPixel.Settings
 {
     public static class SettingsActions
     {
-        internal static event Action OnSettingsLoaded = delegate { };
+        public static event Action OnSettingsLoaded = delegate { };
         internal static void RaiseSettingsLoaded()
         {
             OnSettingsLoaded?.Invoke();
