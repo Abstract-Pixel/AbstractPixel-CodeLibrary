@@ -15,6 +15,18 @@ namespace AbstractPixel.Settings
 
         private Dictionary<Type, ISettingBackend> settingsDictionary = new Dictionary<Type, ISettingBackend>();
 
+        public new static SettingsManager Instance
+        {
+            get
+            {
+                if (instance == null && !isApplicationQuitting)
+                {
+                    instance = FindAnyObjectByType<SettingsManager>(FindObjectsInactive.Include);
+                }
+                return instance;
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();

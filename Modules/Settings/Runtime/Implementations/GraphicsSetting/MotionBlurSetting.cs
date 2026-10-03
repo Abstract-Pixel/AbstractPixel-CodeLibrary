@@ -18,11 +18,27 @@ namespace AbstractPixel.Settings
         [SerializeField]
         private float mediumQualityMaxThreshold = 0.6f;
 
+        [Header("Motion Blur Clamp Limits")]
+        [Tooltip("Maximum velocity clamp applied when evaluated at Low Quality (in fraction of screen width).")]
+        [SerializeField]
+        private float lowQualityClampValue = DEFAULT_LOW_CLAMP_VALUE;
+
+        [Tooltip("Maximum velocity clamp applied when evaluated at Medium Quality (in fraction of screen width).")]
+        [SerializeField]
+        private float mediumQualityClampValue = DEFAULT_MEDIUM_CLAMP_VALUE;
+
+        [Tooltip("Maximum velocity clamp applied when evaluated at High Quality (in fraction of screen width).")]
+        [SerializeField]
+        private float highQualityClampValue = DEFAULT_HIGH_CLAMP_VALUE;
+
         private List<VolumeProfile> registeredProfiles = new List<VolumeProfile>();
         private List<MotionBlur> motionBlurComponentsList = new List<MotionBlur>();
 
         private const float DISABLE_EPSILON_THRESHOLD = 0.001f;
         private const float DEFAULT_MOTION_BLUR_INTENSITY = 0.0f;
+        private const float DEFAULT_LOW_CLAMP_VALUE = 0.02f;
+        private const float DEFAULT_MEDIUM_CLAMP_VALUE = 0.05f;
+        private const float DEFAULT_HIGH_CLAMP_VALUE = 0.10f;
 
         public void RegisterProfile(VolumeProfile _profile)
         {
@@ -109,24 +125,34 @@ namespace AbstractPixel.Settings
             if (CurrentValue <= DISABLE_EPSILON_THRESHOLD)
             {
                 _motionBlurComponent.active = false;
+                _motionBlurComponent.intensity.overrideState = true;
                 _motionBlurComponent.intensity.value = 0.0f;
+                _motionBlurComponent.clamp.overrideState = true;
+                _motionBlurComponent.clamp.value = 0.0f;
                 return;
             }
 
             _motionBlurComponent.active = true;
+            _motionBlurComponent.intensity.overrideState = true;
             _motionBlurComponent.intensity.value = CurrentValue;
+
+            _motionBlurComponent.quality.overrideState = true;
+            _motionBlurComponent.clamp.overrideState = true;
 
             if (CurrentValue <= lowQualityMaxThreshold)
             {
                 _motionBlurComponent.quality.value = MotionBlurQuality.Low;
+                _motionBlurComponent.clamp.value = lowQualityClampValue;
             }
             else if (CurrentValue <= mediumQualityMaxThreshold)
             {
                 _motionBlurComponent.quality.value = MotionBlurQuality.Medium;
+                _motionBlurComponent.clamp.value = mediumQualityClampValue;
             }
             else
             {
                 _motionBlurComponent.quality.value = MotionBlurQuality.High;
+                _motionBlurComponent.clamp.value = highQualityClampValue;
             }
         }
 
@@ -134,10 +160,22 @@ namespace AbstractPixel.Settings
         protected override void OnValidateInEditor()
         {
             ConfigureSliderLimits();
+
+            if (lowQualityClampValue < 0.0f)
+            {
+                lowQualityClampValue = 0.0f;
+            }
+
+            if (mediumQualityClampValue < lowQualityClampValue)
+            {
+                mediumQualityClampValue = lowQualityClampValue;
+            }
+
+            if (highQualityClampValue < mediumQualityClampValue)
+            {
+                highQualityClampValue = mediumQualityClampValue;
+            }
         }
 #endif
     }
 }
-
-
-

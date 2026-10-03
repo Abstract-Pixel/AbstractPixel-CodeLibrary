@@ -288,11 +288,11 @@ namespace AbstractPixel.SceneManagement
             
             try
             {
-                foreach (SceneReference scene in contextualScenesToLoad)
+                foreach (SceneReference scene in transitionContext.ManagerialToLoad)
                 {
                     await SceneLoader.LoadScene(scene, true, doImmediateSceneActivation);
                 }
-                foreach (SceneReference scene in transitionContext.ManagerialToLoad)
+                foreach (SceneReference scene in contextualScenesToLoad)
                 {
                     await SceneLoader.LoadScene(scene, true, doImmediateSceneActivation);
                 }
