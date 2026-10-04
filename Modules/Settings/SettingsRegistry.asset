@@ -164,7 +164,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 3
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Graphics Preset Quality
@@ -300,7 +300,7 @@ MonoBehaviour:
               - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
                 Culture=neutral, PublicKeyToken=null
             IntValue: 0
-            FloatValue: 0.25
+            FloatValue: 0
             BoolValue: 0
             StringValue: 
           - TargetSettingType:
@@ -933,7 +933,7 @@ MonoBehaviour:
               - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
                 Culture=neutral, PublicKeyToken=null
             IntValue: 0
-            FloatValue: 0.5
+            FloatValue: 0
             BoolValue: 0
             StringValue: 
           - TargetSettingType:
@@ -1566,7 +1566,7 @@ MonoBehaviour:
               - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
                 Culture=neutral, PublicKeyToken=null
             IntValue: 0
-            FloatValue: 0.7
+            FloatValue: 0
             BoolValue: 0
             StringValue: 
           - TargetSettingType:
@@ -1943,7 +1943,7 @@ MonoBehaviour:
                 Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
               - AbstractPixel.Settings.VSyncSetting, AbstractPixel.Settings, Version=0.0.0.0,
                 Culture=neutral, PublicKeyToken=null
-            IntValue: 1
+            IntValue: 2
             FloatValue: 0
             BoolValue: 0
             StringValue: 
@@ -2059,7 +2059,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 1.1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Render Scale
@@ -2079,7 +2079,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Hardware Anti Aliasing
@@ -2159,7 +2159,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Lighting Quality
@@ -2180,7 +2180,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: ShadowQuality
@@ -2240,7 +2240,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Terrain Quality
@@ -2283,7 +2283,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Motion Blur Quality
@@ -2328,7 +2328,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 3
+        <CurrentValue>k__BackingField: 4
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Frame Rate
@@ -2426,7 +2426,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: -0.11493969
+        <CurrentValue>k__BackingField: -0.04515958
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Game Brightness
@@ -2436,9 +2436,9 @@ MonoBehaviour:
         <DefaultValue>k__BackingField: 0
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
-        <MinValue>k__BackingField: -4
+        <MinValue>k__BackingField: -2
         <MaxValue>k__BackingField: 2
-        <DisplayMinValue>k__BackingField: 0
+        <DisplayMinValue>k__BackingField: -2
         <DisplayMaxValue>k__BackingField: 2
         minimumPostExposure: -2
         maximumPostExposure: 2

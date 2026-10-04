@@ -16,43 +16,50 @@ namespace AbstractPixelCore
     {
         [Header("Target Image")]
         [Tooltip("The Image component whose sprite will be swapped. If left empty, it will search this GameObject.")]
-        [SerializeField] Image targetImage;
+        [SerializeField] private Image targetImage;
 
         [Header("Pointer Event Sprites")]
-        [SerializeField] Sprite onPointerEnterSprite;
-        [SerializeField] Sprite onPointerExitSprite;
-        [SerializeField] Sprite onPointerDownSprite;
-        [SerializeField] Sprite onPointerUpSprite;
-        [SerializeField] Sprite onPointerClickSprite;
+        [SerializeField] private Sprite onPointerEnterSprite;
+        [SerializeField] private Sprite onPointerExitSprite;
+        [SerializeField] private Sprite onPointerDownSprite;
+        [SerializeField] private Sprite onPointerUpSprite;
+        [SerializeField] private Sprite onPointerClickSprite;
 
         [Header("Selection Event Sprites (Gamepad / Keyboard)")]
-        [SerializeField] Sprite onSelectSprite;
-        [SerializeField] Sprite onDeselectSprite;
-        [SerializeField] Sprite onSubmitSprite;
+        [SerializeField] private Sprite onSelectSprite;
+        [SerializeField] private Sprite onDeselectSprite;
+        [SerializeField] private Sprite onSubmitSprite;
 
         [Header("Settings")]
         [Tooltip("If an event's sprite is unassigned (null), fallback to the original default sprite.")]
-        [SerializeField] bool fallbackToOriginalIfNull = false;
+        [SerializeField] private bool fallbackToOriginalIfNull = false;
 
         [Tooltip("Reverts the image back to its original startup sprite when disabled.")]
-        [SerializeField] bool restoreOriginalOnDisable = true;
+        [SerializeField] private bool restoreOriginalOnDisable = true;
 
-        [Tooltip("Prevents Pointer Exit from swapping the sprite if this object is still selected via keyboard/gamepad.")]
-        [SerializeField] bool keepSelectionOnPointerExit = true;
-
-        Sprite originalSprite;
-        bool isInitialized = false;
+        private Sprite originalSprite;
+        private bool isInitialized = false;
+        private IButtonStateProvider linkedHoverStateProvider;
 
         private void Awake()
         {
+            TryGetComponent(out linkedHoverStateProvider);
             Initialize();
         }
 
         private void OnEnable()
         {
             Initialize();
-            // bad code remove later or change later 
-            if(EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
+
+            if (linkedHoverStateProvider != null)
+            {
+                linkedHoverStateProvider.OnHoverStateChanged += HandleHoverStateChanged;
+                linkedHoverStateProvider.OnSelectStateChanged += HandleSelectStateChanged;
+                linkedHoverStateProvider.OnClicked += HandleClicked;
+                linkedHoverStateProvider.OnSubmitted += HandleSubmitted;
+            }
+
+            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
             {
                 SwapSprite(onSelectSprite);
             }
@@ -60,6 +67,14 @@ namespace AbstractPixelCore
 
         private void OnDisable()
         {
+            if (linkedHoverStateProvider != null)
+            {
+                linkedHoverStateProvider.OnHoverStateChanged -= HandleHoverStateChanged;
+                linkedHoverStateProvider.OnSelectStateChanged -= HandleSelectStateChanged;
+                linkedHoverStateProvider.OnClicked -= HandleClicked;
+                linkedHoverStateProvider.OnSubmitted -= HandleSubmitted;
+            }
+
             if (restoreOriginalOnDisable && targetImage != null && originalSprite != null)
             {
                 targetImage.sprite = originalSprite;
@@ -68,9 +83,11 @@ namespace AbstractPixelCore
 
         private void Initialize()
         {
-            if (isInitialized) return;
+            if (isInitialized)
+            {
+                return;
+            }
 
-            // Fallback to Image on this GameObject if not assigned in Inspector
             if (targetImage == null)
             {
                 targetImage = GetComponent<Image>();
@@ -83,13 +100,60 @@ namespace AbstractPixelCore
             }
         }
 
-        private void SwapSprite(Sprite newSprite)
+        private void HandleHoverStateChanged(bool _isHovered)
         {
-            if (targetImage == null) return;
-
-            if (newSprite != null)
+            if (_isHovered)
             {
-                targetImage.sprite = newSprite;
+                SwapSprite(onPointerEnterSprite);
+            }
+            else
+            {
+                if (linkedHoverStateProvider != null && linkedHoverStateProvider.IsSelected)
+                {
+                    return;
+                }
+
+                SwapSprite(onPointerExitSprite);
+            }
+        }
+
+        private void HandleSelectStateChanged(bool _isSelected)
+        {
+            if (_isSelected)
+            {
+                SwapSprite(onSelectSprite);
+            }
+            else
+            {
+                if (linkedHoverStateProvider != null && linkedHoverStateProvider.IsHovered)
+                {
+                    return;
+                }
+
+                SwapSprite(onDeselectSprite);
+            }
+        }
+
+        private void HandleClicked()
+        {
+            SwapSprite(onPointerClickSprite);
+        }
+
+        private void HandleSubmitted()
+        {
+            SwapSprite(onSubmitSprite);
+        }
+
+        private void SwapSprite(Sprite _newSprite)
+        {
+            if (targetImage == null)
+            {
+                return;
+            }
+
+            if (_newSprite != null)
+            {
+                targetImage.sprite = _newSprite;
             }
             else if (fallbackToOriginalIfNull && originalSprite != null)
             {
@@ -97,52 +161,51 @@ namespace AbstractPixelCore
             }
         }
 
-        // --- Pointer Event Handlers ---
+        // --- Standalone Fallbacks (Used only if ButtonFeedback is NOT attached) ---
 
-        public void OnPointerEnter(PointerEventData eventData)
+        public void OnPointerEnter(PointerEventData _eventData)
         {
+            if (linkedHoverStateProvider != null) return;
             SwapSprite(onPointerEnterSprite);
         }
 
-        public void OnPointerExit(PointerEventData eventData)
+        public void OnPointerExit(PointerEventData _eventData)
         {
-            if (keepSelectionOnPointerExit && EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
-            {
-                return;
-            }
-
+            if (linkedHoverStateProvider != null) return;
             SwapSprite(onPointerExitSprite);
         }
 
-        public void OnPointerDown(PointerEventData eventData)
+        public void OnPointerDown(PointerEventData _eventData)
         {
             SwapSprite(onPointerDownSprite);
         }
 
-        public void OnPointerUp(PointerEventData eventData)
+        public void OnPointerUp(PointerEventData _eventData)
         {
             SwapSprite(onPointerUpSprite);
         }
 
-        public void OnPointerClick(PointerEventData eventData)
+        public void OnPointerClick(PointerEventData _eventData)
         {
+            if (linkedHoverStateProvider != null) return;
             SwapSprite(onPointerClickSprite);
         }
 
-        // --- Selection Event Handlers (Gamepad / Keyboard) ---
-
-        public void OnSelect(BaseEventData eventData)
+        public void OnSelect(BaseEventData _eventData)
         {
+            if (linkedHoverStateProvider != null) return;
             SwapSprite(onSelectSprite);
         }
 
-        public void OnDeselect(BaseEventData eventData)
+        public void OnDeselect(BaseEventData _eventData)
         {
+            if (linkedHoverStateProvider != null) return;
             SwapSprite(onDeselectSprite);
         }
 
-        public void OnSubmit(BaseEventData eventData)
+        public void OnSubmit(BaseEventData _eventData)
         {
+            if (linkedHoverStateProvider != null) return;
             SwapSprite(onSubmitSprite);
         }
     }
