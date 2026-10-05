@@ -113,18 +113,18 @@ namespace AbstractPixel.GameManagement
                 StopCoroutine(stateActivationCoroutine);
                 stateActivationCoroutine = null;
             }
-            snapshotBeforeActivation = new StateSnapshot()
-            {
-                PreviousTimeScale = Time.timeScale,
-                PreviousCursorVisibility = Cursor.visible,
-                PreviousCursorLockMode = Cursor.lockState
-            };
             bool isPermissionGranted = GameStateRegistry.TryRegisterAsActiveState(stateConfig);
+
             if (isPermissionGranted)
             {
                 isActive = true;
                 // [MODIFIED]: Immediate snapshot prevents zeroed time-scale bug if evicted during delay
-               
+                snapshotBeforeActivation = new StateSnapshot()
+                {
+                    PreviousTimeScale = Time.timeScale,
+                    PreviousCursorVisibility = Cursor.visible,
+                    PreviousCursorLockMode = Cursor.lockState
+                };
 
                 stateActivationCoroutine = StartCoroutine(ApplyStateConfigurationsAfterDelay());
             }
