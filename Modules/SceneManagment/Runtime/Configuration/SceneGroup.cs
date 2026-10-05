@@ -63,29 +63,35 @@ namespace AbstractPixel.SceneManagement
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
-            bool isContexualScenesEqual = ContextualBootScenesList.SequenceEqual(other.ContextualBootScenesList);
-            bool isManagerialScenesEqual = ManagerialBootScenesList.SequenceEqual(other.ManagerialBootScenesList);
-            bool isMainSceneEqual = Equals(MainScene, other.MainScene);
-            bool isForceReloadEqual = ForceReloadContextualScenes == other.ForceReloadContextualScenes;
-            return isManagerialScenesEqual && isContexualScenesEqual && isMainSceneEqual && isForceReloadEqual;             
+
+            // If both have a valid MainScene, match by MainScene name (case-insensitive)
+            string myMainScene = MainScene?.SceneName;
+            string otherMainScene = other.MainScene?.SceneName;
+
+            if (!string.IsNullOrEmpty(myMainScene) && !string.IsNullOrEmpty(otherMainScene))
+            {
+                return string.Equals(myMainScene, otherMainScene, StringComparison.OrdinalIgnoreCase);
+            }
+
+            // Fallback: If neither has a MainScene, compare object identity
+            return false;
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is SceneGroup other)
-            {
-                return Equals(other);
-            }
-            return false;
+            return Equals(obj as SceneGroup);
         }
 
-        // Override GetHashCode to ensure that SceneGroup can be used in hash-based collections like dictionaries or hash sets
         public override int GetHashCode()
         {
-            int hash = 17;
-            hash = hash * 23 + (MainScene != null && !string.IsNullOrEmpty(MainScene.SceneName) ? MainScene.GetHashCode() : 0);
-            hash = hash * 23 + ForceReloadContextualScenes.GetHashCode();
-            return hash;
+            // Hash based on the MainScene name so replica and project asset share the exact same bucket
+            string mainName = MainScene?.SceneName;
+            if (!string.IsNullOrEmpty(mainName))
+            {
+                return StringComparer.OrdinalIgnoreCase.GetHashCode(mainName);
+            }
+
+            return base.GetHashCode();
         }
     }
     

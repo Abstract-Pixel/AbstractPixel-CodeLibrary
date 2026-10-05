@@ -27,15 +27,7 @@ namespace AbstractPixel.Core
             // CAUTION : this will only return the index of the first scene that matches the provided name,
             // so if you have multiple scenes with the same name in different folders, this may not work as expected.
             int buildIndex = SceneUtility.GetBuildIndexByScenePath(_sceneName);
-
-            if (buildIndex == -1)
-            {
-                Debug.LogError($"[SceneField] Validation Failed: The scene '{_sceneName}' is not in the Build Settings!");
-            }
-            else
-            {
-                sceneName = _sceneName;
-            }
+            sceneName = _sceneName;
         }
         public string SceneName => sceneName;
     }

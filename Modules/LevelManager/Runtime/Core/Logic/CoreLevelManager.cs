@@ -358,10 +358,14 @@ namespace AbstractPixel.LevelFramework
         }
         internal TLevelDefinition GetLevelDefinition(TSceneAsset _sceneAsset)
         {
-            if (levelDefinitionsMap.TryGetValue(_sceneAsset, out TLevelDefinition defintion))
+            if (_sceneAsset == null) return null;
+
+            // 1. Fast O(1) Lookup
+            if (levelDefinitionsMap.TryGetValue(_sceneAsset, out TLevelDefinition definition))
             {
-                return defintion;
+                return definition;
             }
+
             return null;
         }
 

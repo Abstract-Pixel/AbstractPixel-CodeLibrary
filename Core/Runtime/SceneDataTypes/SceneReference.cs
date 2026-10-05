@@ -38,19 +38,21 @@ namespace AbstractPixel.Core
 
         public bool Equals(SceneReference other)
         {
-            if (other == null) return false;
-            bool isSceneNameEqual = SceneName == other.SceneName;
-            return isSceneNameEqual;
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return string.Equals(SceneName, other.SceneName, StringComparison.OrdinalIgnoreCase);
         }
+
         public override bool Equals(object obj)
         {
             return Equals(obj as SceneReference);
         }
 
-
         public override int GetHashCode()
         {
-            return SceneName?.GetHashCode() ?? 0;
+            return !string.IsNullOrEmpty(SceneName)
+                ? StringComparer.OrdinalIgnoreCase.GetHashCode(SceneName)
+                : 0;
         }
     }
 }
