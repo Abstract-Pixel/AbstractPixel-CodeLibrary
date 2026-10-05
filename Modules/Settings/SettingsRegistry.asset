@@ -67,7 +67,7 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: Horizontal Sensetivity
+          DisplayName: Horizontal Sensitivity
           Description: 'Controls The Horizontal  Camera Sensitivity for the mouse '
         <DefaultValue>k__BackingField: 2
         dependencyRulesList: []
@@ -84,7 +84,7 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: Vertical Sensetivity
+          DisplayName: Vertical Sensitivity
           Description: 'Controls The Vertical Camera Sensitivity for the mouse '
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
@@ -133,7 +133,7 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: Horizontal Sensetivity
+          DisplayName: Horizontal Sensitivity
           Description: 'Controls The Horizontal Camera Sensitivity for the Gamepad '
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
@@ -150,7 +150,7 @@ MonoBehaviour:
         <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: Vertical Sensetivity
+          DisplayName: Vertical Sensitivity
           Description: Controls The Vertical Camera Sensitivity for the  GamePad
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
@@ -2059,7 +2059,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1.1
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Render Scale
@@ -2079,7 +2079,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Hardware Anti Aliasing
@@ -2159,7 +2159,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Lighting Quality
@@ -2180,10 +2180,10 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
-          DisplayName: ShadowQuality
+          DisplayName: Shadow Quality
           Description: Changes the sharpness and detail of shadows cast by objects.
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
@@ -2240,7 +2240,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Terrain Quality
@@ -2328,7 +2328,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 4
+        <CurrentValue>k__BackingField: 3
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Frame Rate
@@ -2426,7 +2426,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: -0.04515958
+        <CurrentValue>k__BackingField: 0
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Game Brightness
