@@ -12,11 +12,17 @@ namespace AbstractPixel.Core.UI
     public class AutoSpatialNavigation : MonoBehaviour
     {
         [Header("Auto Selection")]
-        [Tooltip("If true, automatically selects the primary (top-leftmost) button when enabled on a gamepad or joystick.")]
+        [Tooltip("If true, automatically selects the primary or override button when enabled.")]
         [SerializeField] private bool autoSelectOnEnable = true;
+
+        [Tooltip("If true, auto-selection on enable only occurs if the active device is a Gamepad or Joystick. If false, always selects on enable so controller navigation is immediately available.")]
+        [SerializeField] private bool requireGamepadForAutoSelect = false;
 
         [Tooltip("Optional explicit button to highlight first. If unassigned, automatically finds the top-leftmost button.")]
         [SerializeField] private Selectable firstSelectedOverride;
+
+        [Tooltip("Maximum time in seconds to retry selecting the target button if it is waiting on layout calculation or an entrance animation.")]
+        [SerializeField] private float selectionTimeout = 1.0f;
 
         [Header("Navigation Rules")]
         [Tooltip("If true, pressing Right on the rightmost element loops to the left, and pressing Down on the bottom element loops to the top.")]
@@ -39,6 +45,7 @@ namespace AbstractPixel.Core.UI
         private List<Selectable> trackedSelectables = new List<Selectable>();
         private List<bool> trackedInteractableStates = new List<bool>();
         private List<bool> trackedActiveStates = new List<bool>();
+        private List<Vector2> trackedPositions = new List<Vector2>();
         private int cachedSelectableCount = -1;
 
         private Canvas cachedCanvas;
@@ -49,6 +56,7 @@ namespace AbstractPixel.Core.UI
 
         private const float ALIGNMENT_EPSILON = 1.0f;
         private const float PERPENDICULAR_WEIGHT = 2.5f;
+        private const float STICK_NAV_THRESHOLD = 0.35f;
 
         private void Awake()
         {
@@ -58,16 +66,14 @@ namespace AbstractPixel.Core.UI
         private void OnEnable()
         {
             ResolveCanvasAndCamera();
+            ForceRebuildAllLayouts();
             InitializeStateTracking();
-
-            // 1. Immediate build
-            Canvas.ForceUpdateCanvases();
             BuildNavigation();
 
             InputDeviceTracker.OnCurrentInputDeviceChanged -= HandleDeviceChanged;
             InputDeviceTracker.OnCurrentInputDeviceChanged += HandleDeviceChanged;
 
-            if (autoSelectOnEnable && InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick())
+            if (autoSelectOnEnable && ShouldAutoSelectOnEnable())
             {
                 TriggerAutoSelect();
             }
@@ -78,7 +84,6 @@ namespace AbstractPixel.Core.UI
             }
             evaluationCoroutine = StartCoroutine(StateEvaluationRoutine());
 
-            // 2. Deferred build for elements dynamically created or laid out on Frame 0
             if (deferredInitCoroutine != null)
             {
                 StopCoroutine(deferredInitCoroutine);
@@ -109,18 +114,92 @@ namespace AbstractPixel.Core.UI
             }
         }
 
+        private void Update()
+        {
+            EventSystem currentEventSystem = EventSystem.current;
+            if (currentEventSystem == null)
+            {
+                return;
+            }
+
+            if (currentEventSystem.currentSelectedGameObject == null)
+            {
+                if (WasNavigationInputTriggered())
+                {
+                    TriggerAutoSelect();
+                }
+            }
+        }
+
+        private bool ShouldAutoSelectOnEnable()
+        {
+            if (!requireGamepadForAutoSelect)
+            {
+                return true;
+            }
+
+            if (InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick())
+            {
+                return true;
+            }
+
+            return Gamepad.current != null;
+        }
+
+        private bool WasNavigationInputTriggered()
+        {
+            Gamepad currentGamepad = Gamepad.current;
+            if (currentGamepad != null)
+            {
+                if (currentGamepad.dpad.up.wasPressedThisFrame ||
+                    currentGamepad.dpad.down.wasPressedThisFrame ||
+                    currentGamepad.dpad.left.wasPressedThisFrame ||
+                    currentGamepad.dpad.right.wasPressedThisFrame ||
+                    currentGamepad.buttonSouth.wasPressedThisFrame)
+                {
+                    return true;
+                }
+
+                Vector2 leftStickValue = currentGamepad.leftStick.ReadValue();
+                if (leftStickValue.sqrMagnitude >= STICK_NAV_THRESHOLD * STICK_NAV_THRESHOLD)
+                {
+                    return true;
+                }
+            }
+
+            Keyboard currentKeyboard = Keyboard.current;
+            if (currentKeyboard != null)
+            {
+                if (currentKeyboard.upArrowKey.wasPressedThisFrame ||
+                    currentKeyboard.downArrowKey.wasPressedThisFrame ||
+                    currentKeyboard.leftArrowKey.wasPressedThisFrame ||
+                    currentKeyboard.rightArrowKey.wasPressedThisFrame ||
+                    currentKeyboard.wKey.wasPressedThisFrame ||
+                    currentKeyboard.sKey.wasPressedThisFrame ||
+                    currentKeyboard.aKey.wasPressedThisFrame ||
+                    currentKeyboard.dKey.wasPressedThisFrame ||
+                    currentKeyboard.enterKey.wasPressedThisFrame ||
+                    currentKeyboard.spaceKey.wasPressedThisFrame)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private IEnumerator DeferredInitialBuildRoutine()
         {
             yield return null;
 
-            Canvas.ForceUpdateCanvases();
+            ForceRebuildAllLayouts();
             InitializeStateTracking();
             BuildNavigation();
 
-            if (autoSelectOnEnable && InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick())
+            EventSystem currentEventSystem = EventSystem.current;
+            if (autoSelectOnEnable && currentEventSystem != null && currentEventSystem.currentSelectedGameObject == null)
             {
-                EventSystem eventSystem = EventSystem.current;
-                if (eventSystem != null && eventSystem.currentSelectedGameObject == null)
+                if (ShouldAutoSelectOnEnable())
                 {
                     TriggerAutoSelect();
                 }
@@ -146,6 +225,21 @@ namespace AbstractPixel.Core.UI
             }
         }
 
+        private void ForceRebuildAllLayouts()
+        {
+            LayoutGroup[] childLayoutGroups = GetComponentsInChildren<LayoutGroup>(false);
+            for (int layoutIndex = 0; layoutIndex < childLayoutGroups.Length; ++layoutIndex)
+            {
+                RectTransform layoutRect = childLayoutGroups[layoutIndex].transform as RectTransform;
+                if (layoutRect != null)
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(layoutRect);
+                }
+            }
+
+            Canvas.ForceUpdateCanvases();
+        }
+
         private void HandleDeviceChanged(InputDevice _device)
         {
             if (!autoSelectOnEnable)
@@ -161,7 +255,7 @@ namespace AbstractPixel.Core.UI
                     TriggerAutoSelect();
                 }
             }
-            else
+            else if (_device is Mouse)
             {
                 EventSystem currentEventSystem = EventSystem.current;
                 if (currentEventSystem != null)
@@ -171,7 +265,7 @@ namespace AbstractPixel.Core.UI
             }
         }
 
-        private void TriggerAutoSelect()
+        public void TriggerAutoSelect()
         {
             if (deferredSelectCoroutine != null)
             {
@@ -182,42 +276,53 @@ namespace AbstractPixel.Core.UI
 
         private IEnumerator DeferredSelectRoutine()
         {
-            yield return null;
+            float elapsedTime = 0f;
 
-            EventSystem eventSystem = EventSystem.current;
-            if (eventSystem == null)
+            while (elapsedTime < selectionTimeout)
             {
-                yield break;
-            }
-
-            if (firstSelectedOverride != null && firstSelectedOverride.gameObject.activeInHierarchy && firstSelectedOverride.interactable)
-            {
-                eventSystem.SetSelectedGameObject(firstSelectedOverride.gameObject);
-                deferredSelectCoroutine = null;
-                yield break;
-            }
-
-            List<Selectable> validSelectables = GetValidSelectables();
-            if (validSelectables.Count == 0)
-            {
-                deferredSelectCoroutine = null;
-                yield break;
-            }
-
-            validSelectables.Sort((_first, _second) =>
-            {
-                Vector2 posA = GetScreenCenter(_first.transform as RectTransform);
-                Vector2 posB = GetScreenCenter(_second.transform as RectTransform);
-
-                if (Mathf.Abs(posA.y - posB.y) <= 20.0f)
+                EventSystem currentEventSystem = EventSystem.current;
+                if (currentEventSystem != null)
                 {
-                    return posA.x.CompareTo(posB.x);
+                    if (firstSelectedOverride != null &&
+                        firstSelectedOverride.gameObject.activeInHierarchy &&
+                        firstSelectedOverride.IsInteractable())
+                    {
+                        currentEventSystem.SetSelectedGameObject(null);
+                        currentEventSystem.SetSelectedGameObject(firstSelectedOverride.gameObject);
+                        deferredSelectCoroutine = null;
+                        yield break;
+                    }
+
+                    if (firstSelectedOverride == null)
+                    {
+                        List<Selectable> validSelectables = GetValidSelectables();
+                        if (validSelectables.Count > 0)
+                        {
+                            validSelectables.Sort((_first, _second) =>
+                            {
+                                Vector2 posA = GetScreenCenter(_first.transform as RectTransform);
+                                Vector2 posB = GetScreenCenter(_second.transform as RectTransform);
+
+                                if (Mathf.Abs(posA.y - posB.y) <= 20.0f)
+                                {
+                                    return posA.x.CompareTo(posB.x);
+                                }
+
+                                return posB.y.CompareTo(posA.y);
+                            });
+
+                            currentEventSystem.SetSelectedGameObject(null);
+                            currentEventSystem.SetSelectedGameObject(validSelectables[0].gameObject);
+                            deferredSelectCoroutine = null;
+                            yield break;
+                        }
+                    }
                 }
 
-                return posB.y.CompareTo(posA.y);
-            });
+                yield return null;
+                elapsedTime += Time.unscaledDeltaTime;
+            }
 
-            eventSystem.SetSelectedGameObject(validSelectables[0].gameObject);
             deferredSelectCoroutine = null;
         }
 
@@ -229,6 +334,7 @@ namespace AbstractPixel.Core.UI
             trackedSelectables.Clear();
             trackedInteractableStates.Clear();
             trackedActiveStates.Clear();
+            trackedPositions.Clear();
 
             for (int index = 0; index < allChildSelectables.Length; ++index)
             {
@@ -236,8 +342,9 @@ namespace AbstractPixel.Core.UI
                 if (selectable != null)
                 {
                     trackedSelectables.Add(selectable);
-                    trackedInteractableStates.Add(selectable.interactable);
+                    trackedInteractableStates.Add(selectable.IsInteractable());
                     trackedActiveStates.Add(selectable.gameObject.activeInHierarchy);
+                    trackedPositions.Add(GetScreenCenter(selectable.transform as RectTransform));
                 }
             }
         }
@@ -255,7 +362,7 @@ namespace AbstractPixel.Core.UI
 
                 if (structureChanged)
                 {
-                    Canvas.ForceUpdateCanvases();
+                    ForceRebuildAllLayouts();
                     InitializeStateTracking();
                     BuildNavigation();
                     continue;
@@ -271,20 +378,24 @@ namespace AbstractPixel.Core.UI
                         break;
                     }
 
-                    bool currentInteractable = selectable.interactable;
+                    bool currentInteractable = selectable.IsInteractable();
                     bool currentActive = selectable.gameObject.activeInHierarchy;
+                    Vector2 currentPos = GetScreenCenter(selectable.transform as RectTransform);
 
-                    if (currentInteractable != trackedInteractableStates[index] || currentActive != trackedActiveStates[index])
+                    if (currentInteractable != trackedInteractableStates[index] ||
+                        currentActive != trackedActiveStates[index] ||
+                        Vector2.Distance(currentPos, trackedPositions[index]) > ALIGNMENT_EPSILON)
                     {
                         trackedInteractableStates[index] = currentInteractable;
                         trackedActiveStates[index] = currentActive;
+                        trackedPositions[index] = currentPos;
                         statesChanged = true;
                     }
                 }
 
                 if (statesChanged)
                 {
-                    Canvas.ForceUpdateCanvases();
+                    ForceRebuildAllLayouts();
                     BuildNavigation();
                 }
             }
@@ -302,19 +413,16 @@ namespace AbstractPixel.Core.UI
                 return;
             }
 
-            Canvas.ForceUpdateCanvases();
-
-            // Precompute screen rects for all elements to avoid repeated WorldToScreenPoint calculations
             List<UIElementInfo> elementInfos = new List<UIElementInfo>(count);
             Vector3[] corners = new Vector3[4];
 
-            for (int i = 0; i < count; ++i)
+            for (int index = 0; index < count; ++index)
             {
-                Selectable sel = validSelectables[i];
-                RectTransform rt = sel.transform as RectTransform;
-                if (rt == null) continue;
+                Selectable currentSelectable = validSelectables[index];
+                RectTransform rectTransform = currentSelectable.transform as RectTransform;
+                if (rectTransform == null) continue;
 
-                rt.GetWorldCorners(corners);
+                rectTransform.GetWorldCorners(corners);
                 Vector2 p0 = RectTransformUtility.WorldToScreenPoint(targetCamera, corners[0]);
                 Vector2 p2 = RectTransformUtility.WorldToScreenPoint(targetCamera, corners[2]);
 
@@ -325,7 +433,7 @@ namespace AbstractPixel.Core.UI
 
                 elementInfos.Add(new UIElementInfo
                 {
-                    selectable = sel,
+                    selectable = currentSelectable,
                     screenRect = new Rect(xMin, yMin, Mathf.Max(1.0f, xMax - xMin), Mathf.Max(1.0f, yMax - yMin))
                 });
             }
@@ -356,50 +464,46 @@ namespace AbstractPixel.Core.UI
         {
             bool isHorizontal = Mathf.Abs(_direction.x) > 0.5f;
 
-            // -------------------------------------------------------------
-            // HORIZONTAL ROW LOGIC (Left / Right)
-            // -------------------------------------------------------------
             if (isHorizontal)
             {
                 List<UIElementInfo> sameRowElements = new List<UIElementInfo>();
-                for (int i = 0; i < _candidates.Count; ++i)
+                for (int index = 0; index < _candidates.Count; ++index)
                 {
-                    if (_candidates[i].selectable == _source.selectable) continue;
+                    if (_candidates[index].selectable == _source.selectable) continue;
 
-                    if (IsSameRow(_source.screenRect, _candidates[i].screenRect))
+                    if (IsSameRow(_source.screenRect, _candidates[index].screenRect))
                     {
-                        sameRowElements.Add(_candidates[i]);
+                        sameRowElements.Add(_candidates[index]);
                     }
                 }
 
-                // If other elements share this row, navigate strictly along this row
                 if (sameRowElements.Count > 0)
                 {
                     UIElementInfo bestRowCandidate = default;
                     float bestDistance = float.MaxValue;
                     bool foundInDirection = false;
 
-                    for (int i = 0; i < sameRowElements.Count; ++i)
+                    for (int index = 0; index < sameRowElements.Count; ++index)
                     {
-                        UIElementInfo cand = sameRowElements[i];
-                        float deltaX = cand.center.x - _source.center.x;
+                        UIElementInfo candidateInfo = sameRowElements[index];
+                        float deltaX = candidateInfo.center.x - _source.center.x;
 
-                        if (_direction.x > 0 && deltaX > ALIGNMENT_EPSILON) // Moving Right
+                        if (_direction.x > 0 && deltaX > ALIGNMENT_EPSILON)
                         {
                             if (deltaX < bestDistance)
                             {
                                 bestDistance = deltaX;
-                                bestRowCandidate = cand;
+                                bestRowCandidate = candidateInfo;
                                 foundInDirection = true;
                             }
                         }
-                        else if (_direction.x < 0 && deltaX < -ALIGNMENT_EPSILON) // Moving Left
+                        else if (_direction.x < 0 && deltaX < -ALIGNMENT_EPSILON)
                         {
-                            float dist = -deltaX;
-                            if (dist < bestDistance)
+                            float distance = -deltaX;
+                            if (distance < bestDistance)
                             {
-                                bestDistance = dist;
-                                bestRowCandidate = cand;
+                                bestDistance = distance;
+                                bestRowCandidate = candidateInfo;
                                 foundInDirection = true;
                             }
                         }
@@ -410,29 +514,28 @@ namespace AbstractPixel.Core.UI
                         return bestRowCandidate.selectable;
                     }
 
-                    // At edge of row: Loop to the opposite end of the SAME row
                     if (loopNavigation)
                     {
                         UIElementInfo wrapCandidate = default;
                         float extremeX = _direction.x > 0 ? float.MaxValue : float.MinValue;
 
-                        for (int i = 0; i < sameRowElements.Count; ++i)
+                        for (int index = 0; index < sameRowElements.Count; ++index)
                         {
-                            UIElementInfo cand = sameRowElements[i];
-                            if (_direction.x > 0) // Moving Right wraps to leftmost button on this row
+                            UIElementInfo candidateInfo = sameRowElements[index];
+                            if (_direction.x > 0)
                             {
-                                if (cand.center.x < extremeX)
+                                if (candidateInfo.center.x < extremeX)
                                 {
-                                    extremeX = cand.center.x;
-                                    wrapCandidate = cand;
+                                    extremeX = candidateInfo.center.x;
+                                    wrapCandidate = candidateInfo;
                                 }
                             }
-                            else // Moving Left wraps to rightmost button on this row
+                            else
                             {
-                                if (cand.center.x > extremeX)
+                                if (candidateInfo.center.x > extremeX)
                                 {
-                                    extremeX = cand.center.x;
-                                    wrapCandidate = cand;
+                                    extremeX = candidateInfo.center.x;
+                                    wrapCandidate = candidateInfo;
                                 }
                             }
                         }
@@ -443,14 +546,10 @@ namespace AbstractPixel.Core.UI
                         }
                     }
 
-                    // Reached edge of a multi-button row without looping; do not jump to other rows
                     return null;
                 }
             }
 
-            // -------------------------------------------------------------
-            // GENERAL / VERTICAL CONE SEARCH (Up / Down / Isolated buttons)
-            // -------------------------------------------------------------
             Selectable bestCandidate = null;
             float bestScore = float.MaxValue;
 
@@ -520,9 +619,8 @@ namespace AbstractPixel.Core.UI
                 }
 
                 float perpendicularDistance = Mathf.Abs(delta.x * _direction.y - delta.y * _direction.x);
-
-                // Prioritize candidate furthest in the opposite direction while penalizing perpendicular misalignment
                 float score = oppositeProjection - (perpendicularDistance * PERPENDICULAR_WEIGHT);
+
                 if (score > bestScore)
                 {
                     bestScore = score;
@@ -535,14 +633,12 @@ namespace AbstractPixel.Core.UI
 
         private bool IsSameRow(Rect _a, Rect _b)
         {
-            // 1. Direct vertical overlap between element rects
             float verticalOverlap = Mathf.Min(_a.yMax, _b.yMax) - Mathf.Max(_a.yMin, _b.yMin);
             if (verticalOverlap > 0.0f)
             {
                 return true;
             }
 
-            // 2. Tolerance for slight visual misalignment
             float centerDiffY = Mathf.Abs(_a.center.y - _b.center.y);
             float minHeight = Mathf.Min(_a.height, _b.height);
             float tolerance = Mathf.Max(15.0f, minHeight * 0.4f);
@@ -557,7 +653,7 @@ namespace AbstractPixel.Core.UI
             for (int index = 0; index < allSelectables.Length; ++index)
             {
                 Selectable selectable = allSelectables[index];
-                if (selectable != null && selectable.gameObject.activeInHierarchy && selectable.interactable)
+                if (selectable != null && selectable.gameObject.activeInHierarchy && selectable.IsInteractable())
                 {
                     validList.Add(selectable);
                 }
