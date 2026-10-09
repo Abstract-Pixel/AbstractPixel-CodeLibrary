@@ -12,17 +12,14 @@ namespace AbstractPixel.Core.UI
     public class AutoSpatialNavigation : MonoBehaviour
     {
         [Header("Auto Selection")]
-        [Tooltip("If true, automatically selects the primary or override button when enabled.")]
+        [Tooltip("If true, automatically selects a button on enable ONLY when the last used device was a controller.")]
         [SerializeField] private bool autoSelectOnEnable = true;
 
-        [Tooltip("If true, auto-selection on enable only occurs if the active device is a Gamepad or Joystick. If false, always selects on enable so controller navigation is immediately available.")]
-        [SerializeField] private bool requireGamepadForAutoSelect = false;
-
-        [Tooltip("Optional explicit button to highlight first. If unassigned, automatically finds the top-leftmost button.")]
+        [Tooltip("Optional explicit button to highlight first when using a controller. If unassigned, selects the top-leftmost button.")]
         [SerializeField] private Selectable firstSelectedOverride;
 
-        [Tooltip("Maximum time in seconds to retry selecting the target button if it is waiting on layout calculation or an entrance animation.")]
-        [SerializeField] private float selectionTimeout = 1.0f;
+        [Tooltip("Maximum duration in seconds to wait for layout groups or animations before completing initial selection.")]
+        [SerializeField] private float selectionTimeout = 0.8f;
 
         [Header("Navigation Rules")]
         [Tooltip("If true, pressing Right on the rightmost element loops to the left, and pressing Down on the bottom element loops to the top.")]
@@ -54,9 +51,12 @@ namespace AbstractPixel.Core.UI
         private Coroutine deferredSelectCoroutine;
         private Coroutine deferredInitCoroutine;
 
+        private Vector2 lastPointerScreenPosition = new Vector2(-1f, -1f);
+
         private const float ALIGNMENT_EPSILON = 1.0f;
         private const float PERPENDICULAR_WEIGHT = 2.5f;
-        private const float STICK_NAV_THRESHOLD = 0.35f;
+        private const float STICK_NAV_THRESHOLD_SQR = 0.16f;
+        private const float MOUSE_MOVE_THRESHOLD_SQR = 4.0f;
 
         private void Awake()
         {
@@ -73,9 +73,17 @@ namespace AbstractPixel.Core.UI
             InputDeviceTracker.OnCurrentInputDeviceChanged -= HandleDeviceChanged;
             InputDeviceTracker.OnCurrentInputDeviceChanged += HandleDeviceChanged;
 
-            if (autoSelectOnEnable && ShouldAutoSelectOnEnable())
+            if (autoSelectOnEnable && InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick())
             {
                 TriggerAutoSelect();
+            }
+            else
+            {
+                EventSystem currentEventSystem = EventSystem.current;
+                if (currentEventSystem != null)
+                {
+                    currentEventSystem.SetSelectedGameObject(null);
+                }
             }
 
             if (evaluationCoroutine != null)
@@ -116,37 +124,57 @@ namespace AbstractPixel.Core.UI
 
         private void Update()
         {
-            EventSystem currentEventSystem = EventSystem.current;
-            if (currentEventSystem == null)
+            DetectMouseMovementAndDeselect();
+            DetectControllerInputAndAdaptSelection();
+        }
+
+        private void DetectMouseMovementAndDeselect()
+        {
+            Mouse currentMouse = Mouse.current;
+            if (currentMouse == null)
             {
                 return;
             }
 
-            if (currentEventSystem.currentSelectedGameObject == null)
+            Vector2 mouseDelta = currentMouse.delta.ReadValue();
+            if (mouseDelta.sqrMagnitude > MOUSE_MOVE_THRESHOLD_SQR)
             {
-                if (WasNavigationInputTriggered())
+                lastPointerScreenPosition = currentMouse.position.ReadValue();
+
+                if (InputDeviceTracker.LastUsedDevice != currentMouse)
                 {
-                    TriggerAutoSelect();
+                    InputDeviceTracker.SetActiveDevice(currentMouse);
+                }
+
+                EventSystem currentEventSystem = EventSystem.current;
+                if (currentEventSystem != null && currentEventSystem.currentSelectedGameObject != null)
+                {
+                    currentEventSystem.SetSelectedGameObject(null);
                 }
             }
         }
 
-        private bool ShouldAutoSelectOnEnable()
+        private void DetectControllerInputAndAdaptSelection()
         {
-            if (!requireGamepadForAutoSelect)
+            if (!WasControllerNavigationTriggered())
             {
-                return true;
+                return;
             }
 
-            if (InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick())
+            Gamepad currentGamepad = Gamepad.current;
+            if (currentGamepad != null && InputDeviceTracker.LastUsedDevice != currentGamepad)
             {
-                return true;
+                InputDeviceTracker.SetActiveDevice(currentGamepad);
             }
 
-            return Gamepad.current != null;
+            EventSystem currentEventSystem = EventSystem.current;
+            if (currentEventSystem != null && currentEventSystem.currentSelectedGameObject == null)
+            {
+                SelectClosestButtonToLastPointerPosition();
+            }
         }
 
-        private bool WasNavigationInputTriggered()
+        private bool WasControllerNavigationTriggered()
         {
             Gamepad currentGamepad = Gamepad.current;
             if (currentGamepad != null)
@@ -155,37 +183,91 @@ namespace AbstractPixel.Core.UI
                     currentGamepad.dpad.down.wasPressedThisFrame ||
                     currentGamepad.dpad.left.wasPressedThisFrame ||
                     currentGamepad.dpad.right.wasPressedThisFrame ||
-                    currentGamepad.buttonSouth.wasPressedThisFrame)
+                    currentGamepad.buttonSouth.wasPressedThisFrame ||
+                    currentGamepad.buttonEast.wasPressedThisFrame)
                 {
                     return true;
                 }
 
-                Vector2 leftStickValue = currentGamepad.leftStick.ReadValue();
-                if (leftStickValue.sqrMagnitude >= STICK_NAV_THRESHOLD * STICK_NAV_THRESHOLD)
-                {
-                    return true;
-                }
-            }
-
-            Keyboard currentKeyboard = Keyboard.current;
-            if (currentKeyboard != null)
-            {
-                if (currentKeyboard.upArrowKey.wasPressedThisFrame ||
-                    currentKeyboard.downArrowKey.wasPressedThisFrame ||
-                    currentKeyboard.leftArrowKey.wasPressedThisFrame ||
-                    currentKeyboard.rightArrowKey.wasPressedThisFrame ||
-                    currentKeyboard.wKey.wasPressedThisFrame ||
-                    currentKeyboard.sKey.wasPressedThisFrame ||
-                    currentKeyboard.aKey.wasPressedThisFrame ||
-                    currentKeyboard.dKey.wasPressedThisFrame ||
-                    currentKeyboard.enterKey.wasPressedThisFrame ||
-                    currentKeyboard.spaceKey.wasPressedThisFrame)
+                Vector2 leftStick = currentGamepad.leftStick.ReadValue();
+                if (leftStick.sqrMagnitude >= STICK_NAV_THRESHOLD_SQR)
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        public void SelectClosestButtonToLastPointerPosition()
+        {
+            List<Selectable> validSelectables = GetValidSelectables();
+            if (validSelectables.Count == 0)
+            {
+                return;
+            }
+
+            Selectable targetToSelect = null;
+
+            if (lastPointerScreenPosition.x >= 0f && lastPointerScreenPosition.y >= 0f)
+            {
+                for (int index = 0; index < validSelectables.Count; ++index)
+                {
+                    RectTransform rectTransform = validSelectables[index].transform as RectTransform;
+                    if (rectTransform != null && RectTransformUtility.RectangleContainsScreenPoint(rectTransform, lastPointerScreenPosition, targetCamera))
+                    {
+                        targetToSelect = validSelectables[index];
+                        break;
+                    }
+                }
+
+                if (targetToSelect == null)
+                {
+                    float shortestDistanceSqr = float.MaxValue;
+                    for (int index = 0; index < validSelectables.Count; ++index)
+                    {
+                        Vector2 buttonCenter = GetScreenCenter(validSelectables[index].transform as RectTransform);
+                        float distanceSqr = (buttonCenter - lastPointerScreenPosition).sqrMagnitude;
+                        if (distanceSqr < shortestDistanceSqr)
+                        {
+                            shortestDistanceSqr = distanceSqr;
+                            targetToSelect = validSelectables[index];
+                        }
+                    }
+                }
+            }
+
+            if (targetToSelect == null)
+            {
+                if (firstSelectedOverride != null && firstSelectedOverride.gameObject.activeInHierarchy && firstSelectedOverride.IsInteractable())
+                {
+                    targetToSelect = firstSelectedOverride;
+                }
+                else
+                {
+                    validSelectables.Sort((_first, _second) =>
+                    {
+                        Vector2 posA = GetScreenCenter(_first.transform as RectTransform);
+                        Vector2 posB = GetScreenCenter(_second.transform as RectTransform);
+
+                        if (Mathf.Abs(posA.y - posB.y) <= 20.0f)
+                        {
+                            return posA.x.CompareTo(posB.x);
+                        }
+
+                        return posB.y.CompareTo(posA.y);
+                    });
+
+                    targetToSelect = validSelectables[0];
+                }
+            }
+
+            EventSystem currentEventSystem = EventSystem.current;
+            if (currentEventSystem != null && targetToSelect != null)
+            {
+                currentEventSystem.SetSelectedGameObject(null);
+                currentEventSystem.SetSelectedGameObject(targetToSelect.gameObject);
+            }
         }
 
         private IEnumerator DeferredInitialBuildRoutine()
@@ -195,15 +277,6 @@ namespace AbstractPixel.Core.UI
             ForceRebuildAllLayouts();
             InitializeStateTracking();
             BuildNavigation();
-
-            EventSystem currentEventSystem = EventSystem.current;
-            if (autoSelectOnEnable && currentEventSystem != null && currentEventSystem.currentSelectedGameObject == null)
-            {
-                if (ShouldAutoSelectOnEnable())
-                {
-                    TriggerAutoSelect();
-                }
-            }
 
             deferredInitCoroutine = null;
         }
@@ -242,23 +315,18 @@ namespace AbstractPixel.Core.UI
 
         private void HandleDeviceChanged(InputDevice _device)
         {
-            if (!autoSelectOnEnable)
-            {
-                return;
-            }
-
             if (_device is Gamepad || _device is Joystick)
             {
                 EventSystem currentEventSystem = EventSystem.current;
                 if (currentEventSystem != null && currentEventSystem.currentSelectedGameObject == null)
                 {
-                    TriggerAutoSelect();
+                    SelectClosestButtonToLastPointerPosition();
                 }
             }
             else if (_device is Mouse)
             {
                 EventSystem currentEventSystem = EventSystem.current;
-                if (currentEventSystem != null)
+                if (currentEventSystem != null && currentEventSystem.currentSelectedGameObject != null)
                 {
                     currentEventSystem.SetSelectedGameObject(null);
                 }
@@ -280,6 +348,12 @@ namespace AbstractPixel.Core.UI
 
             while (elapsedTime < selectionTimeout)
             {
+                if (!InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick())
+                {
+                    deferredSelectCoroutine = null;
+                    yield break;
+                }
+
                 EventSystem currentEventSystem = EventSystem.current;
                 if (currentEventSystem != null)
                 {
