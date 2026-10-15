@@ -64,12 +64,12 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 1
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Horizontal Sensitivity
           Description: 'Controls The Horizontal  Camera Sensitivity for the mouse '
-        <DefaultValue>k__BackingField: 2
+        <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
         <MinValue>k__BackingField: 0.1
@@ -130,16 +130,16 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 1.8700001
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Horizontal Sensitivity
           Description: 'Controls The Horizontal Camera Sensitivity for the Gamepad '
-        <DefaultValue>k__BackingField: 1
+        <DefaultValue>k__BackingField: 2
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
         <MinValue>k__BackingField: 0.1
-        <MaxValue>k__BackingField: 5
+        <MaxValue>k__BackingField: 6
         <DisplayMinValue>k__BackingField: 1
         <DisplayMaxValue>k__BackingField: 10
     - rid: 3582977949081796729
@@ -147,16 +147,16 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Vertical Sensitivity
           Description: Controls The Vertical Camera Sensitivity for the  GamePad
-        <DefaultValue>k__BackingField: 1
+        <DefaultValue>k__BackingField: 2
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
         <MinValue>k__BackingField: 0.1
-        <MaxValue>k__BackingField: 5
+        <MaxValue>k__BackingField: 6
         <DisplayMinValue>k__BackingField: 1
         <DisplayMaxValue>k__BackingField: 10
     - rid: 8789862167657578613
