@@ -44,6 +44,28 @@ namespace AbstractPixel.GhostSystem
         }
 
 
+        /// <summary>
+        /// At runtime, fade only the renderers that are actually drawing. Other components (e.g. a mesh merger) may have
+        /// replaced the renderers listed at edit time with merged ones by the time Start runs.
+        /// </summary>
+        private void RefreshRenderersFromVisualRoot()
+        {
+            if (parentTransformVisual == null)
+            {
+                return;
+            }
+
+            var enabledRenderers = new System.Collections.Generic.List<Renderer>();
+            foreach (Renderer candidate in parentTransformVisual.GetComponentsInChildren<Renderer>(true))
+            {
+                if (candidate.enabled)
+                {
+                    enabledRenderers.Add(candidate);
+                }
+            }
+            targetRenderers = enabledRenderers.ToArray();
+        }
+
         private void Awake()
         {
             propertyBlock = new MaterialPropertyBlock();
@@ -52,6 +74,11 @@ namespace AbstractPixel.GhostSystem
 
         private void Start()
         {
+            // The base colour comes from the first renderer listed at edit time, before the list is refreshed,
+            // so it stays the same whichever renderers end up drawing.
+            Renderer colorSourceRenderer = targetRenderers != null && targetRenderers.Length > 0 ? targetRenderers[0] : null;
+            RefreshRenderersFromVisualRoot();
+
             if (targetRenderers == null || targetRenderers.Length == 0)
             {
                 Debug.LogWarning("[SimpleProximityVisualFader] No renderers assigned. Disabling fader.", this);
@@ -59,8 +86,13 @@ namespace AbstractPixel.GhostSystem
                 return;
             }
 
+            if (colorSourceRenderer == null)
+            {
+                colorSourceRenderer = targetRenderers[0];
+            }
+
             // CRITICAL: Read from sharedMaterial to prevent Unity from silently creating a duplicate material instance.
-            Material baseMat = targetRenderers[0].sharedMaterial;
+            Material baseMat = colorSourceRenderer.sharedMaterial;
             if (baseMat != null && baseMat.HasProperty(colorPropertyID))
             {
                 cachedBaseColor = baseMat.GetColor(colorPropertyID);
