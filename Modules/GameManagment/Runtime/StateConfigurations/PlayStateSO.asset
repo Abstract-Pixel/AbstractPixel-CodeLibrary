@@ -18,7 +18,7 @@ MonoBehaviour:
   IsTimeZeroOnExecution: 0
   IsCursorLockedOnExecution: 0
   IsCursorVisibleOnExecution: 0
-  DisableStateOnSceneChange: 1
+  DisableStateOnSceneChange: 0
   RevertConfigurationsOnDeactivation: 1
   ShowGameUIOnExecution: 1
   ShowGameUIOnDeactivation: 0
