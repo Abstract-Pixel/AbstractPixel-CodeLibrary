@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 namespace AbstractPixel.Settings
 {
@@ -7,6 +8,7 @@ namespace AbstractPixel.Settings
     public class MotionBlurSettingApplier : AbstractSettingApplier<float>
     {
         private Volume postProcessingVolume;
+        private VolumeProfile settingsProfile;
 
         private void Awake()
         {
@@ -17,9 +19,10 @@ namespace AbstractPixel.Settings
         {
             MotionBlurSetting motionBlurSetting = _bindedSetting as MotionBlurSetting;
 
-            if (motionBlurSetting != null && postProcessingVolume != null && postProcessingVolume.profile != null)
+            if (motionBlurSetting != null)
             {
-                motionBlurSetting.RegisterProfile(postProcessingVolume.profile);
+                settingsProfile = SettingsOverlayVolume.GetProfileForOverride<MotionBlur>(postProcessingVolume);
+                motionBlurSetting.RegisterProfile(settingsProfile);
             }
         }
 
@@ -27,9 +30,9 @@ namespace AbstractPixel.Settings
         {
             MotionBlurSetting motionBlurSetting = _unbindedSetting as MotionBlurSetting;
 
-            if (motionBlurSetting != null && postProcessingVolume != null && postProcessingVolume.profile != null)
+            if (motionBlurSetting != null)
             {
-                motionBlurSetting.UnRegisterProfile(postProcessingVolume.profile);
+                motionBlurSetting.UnRegisterProfile(settingsProfile);
             }
         }
     }
