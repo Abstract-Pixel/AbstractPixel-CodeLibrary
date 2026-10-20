@@ -546,15 +546,18 @@ namespace AbstractPixel.Core.Editor
                 return type.GetElementType();
             }
 
-            while (type != null && type != typeof(object))
+            Type currentType = type;
+            while (currentType != null && currentType != typeof(object))
             {
-                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(PolymorphicList<>))
+                if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == typeof(PolymorphicList<>))
                 {
-                    return type.GetGenericArguments()[0];
+                    return currentType.GetGenericArguments()[0];
                 }
-                type = type.BaseType;
+                currentType = currentType.BaseType;
             }
 
+            // A plain single field: its own declared type is the base type.
+            // (Previously this returned System.Object, so every single-field property shared one type cache entry.)
             return type;
         }
     }
