@@ -108,7 +108,11 @@ namespace AbstractPixel.Core
                     }
                 }
 
-                if (control.EvaluateMagnitude() <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
+                // Use the action's magnitude, not activeControl's. Composite parts that share state memory
+                // (stick up/down share the Y axis, a HID hat D-pad shares one field) can report the wrong part
+                // as activeControl, e.g. "leftStick/up" with magnitude 0 on a down push.
+                float actionMagnitude = action.GetControlMagnitude();
+                if (actionMagnitude <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
                 {
                     return;
                 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -32,7 +33,10 @@ namespace AbstractPixel.Core
         {
             if (_device is Gamepad || _device is Joystick)
             {
-                EventSystem.current.SetSelectedGameObject(selectableToSelect?.gameObject);
+                // The input that switched the device is also processed as UI navigation this frame.
+                // Selecting at the end of the frame stops that first press from moving off the first selectable.
+                StopAllCoroutines();
+                StartCoroutine(SelectSelectableAtEndOfFrame());
             }
             else
             {
@@ -40,6 +44,15 @@ namespace AbstractPixel.Core
             }
         }
 
-        
+        private IEnumerator SelectSelectableAtEndOfFrame()
+        {
+            yield return new WaitForEndOfFrame();
+
+            bool isControllerStillInControl = InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick();
+            if (isControllerStillInControl && EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(selectableToSelect?.gameObject);
+            }
+        }
     }
 }
