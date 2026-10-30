@@ -119,11 +119,6 @@ namespace AbstractPixel.LevelFramework
         {
             if (levelDefinitionsMap.TryGetValue(_sceneAsset, out TLevelDefinition newLevelDefinition))
             {
-                if(newLevelDefinition == activeLevelDefinition)
-                {
-                    // We Are already in the next current level
-                    return;
-                }
                 UpdateActiveLevelState(newLevelDefinition);
 
                 if (levelTransitioner == null)

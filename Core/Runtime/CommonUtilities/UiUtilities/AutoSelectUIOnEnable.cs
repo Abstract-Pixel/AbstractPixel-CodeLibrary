@@ -14,7 +14,7 @@ namespace AbstractPixel.Core
         {
             if(InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick())
             {
-                EventSystem.current.SetSelectedGameObject(selectableToSelect?.gameObject);
+                EventSystem.current?.SetSelectedGameObject(selectableToSelect?.gameObject);
             }
             else
             {
@@ -40,7 +40,7 @@ namespace AbstractPixel.Core
             }
             else
             {
-                EventSystem.current.SetSelectedGameObject(null);
+                EventSystem.current?.SetSelectedGameObject(null);
             }
         }
 
@@ -51,7 +51,7 @@ namespace AbstractPixel.Core
             bool isControllerStillInControl = InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick();
             if (isControllerStillInControl && EventSystem.current != null)
             {
-                EventSystem.current.SetSelectedGameObject(selectableToSelect?.gameObject);
+                EventSystem.current?.SetSelectedGameObject(selectableToSelect?.gameObject);
             }
         }
     }
