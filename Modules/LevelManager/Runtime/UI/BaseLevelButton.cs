@@ -11,11 +11,13 @@ namespace AbstractPixel.LevelFramework
     {
         [field:SerializeField] public Button LevelButton {  get; private set; }
         [SerializeField] protected TMP_Text buttonText;
+        private Action onClick;
 
         public virtual void Initialize(TLevelDefinition _definition, TLevelSaveData _saveData, Action _onClick)
         {
-            LevelButton.onClick.RemoveAllListeners();
-            LevelButton.onClick.AddListener(() => _onClick?.Invoke());
+            onClick = _onClick;
+            LevelButton.onClick.RemoveListener(InvokeClick);
+            LevelButton.onClick.AddListener(InvokeClick);
 
             buttonText.text = _definition.LevelDisplayName;
 
@@ -24,9 +26,11 @@ namespace AbstractPixel.LevelFramework
 
         public abstract void UpdateVisuals(TLevelSaveData _data, TLevelDefinition _definition);
 
+        private void InvokeClick() => onClick?.Invoke();
+
         private void OnDestroy()
         {
-            LevelButton.onClick?.RemoveAllListeners();
+            if (LevelButton != null) LevelButton.onClick.RemoveListener(InvokeClick);
         }
     }
 }
