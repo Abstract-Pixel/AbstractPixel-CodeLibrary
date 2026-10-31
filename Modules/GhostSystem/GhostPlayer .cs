@@ -31,11 +31,13 @@ namespace AbstractPixel.GhostSystem
             ghostVisuals.rotation = profileToPlay.Frames[0].Rotation;
         }
 
-        private void FixedUpdate()
+        // Per rendered frame (game time, like GhostRecorder), so the ghost moves every frame. Stepping it on physics
+        // ticks made it judder next to an interpolated player car.
+        private void Update()
         {
             if (!isPlaying || profileToPlay == null) return;
 
-            playbackTime += Time.fixedDeltaTime;
+            playbackTime += Time.deltaTime;
             if (currentFrameIndex >= profileToPlay.Frames.Count - 1)
             {
                 isPlaying = false;

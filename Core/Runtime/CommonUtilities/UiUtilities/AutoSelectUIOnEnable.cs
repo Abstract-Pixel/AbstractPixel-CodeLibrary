@@ -9,8 +9,37 @@ namespace AbstractPixel.Core
     public class AutoSelectUIOnEnable : MonoBehaviour
     {
         [SerializeField] private Selectable selectableToSelect;
+        [Tooltip("If true, selection waits (realtime) until the selectable is interactable and active, e.g. after an entrance animation.")]
+        [SerializeField] private bool waitUntilInteractable = false;
+
+        private Coroutine waitForInteractableCoroutine = null;
+        private WaitForEndOfFrame endOfFrameWait = null;
 
         private void OnEnable()
+        {
+            if (waitUntilInteractable)
+            {
+                waitForInteractableCoroutine = StartCoroutine(SelectWhenInteractable());
+            }
+            else
+            {
+                ApplySelectionForCurrentDevice();
+            }
+
+            InputDeviceTracker.OnCurrentInputDeviceChanged += SelectSelectableOnDeviceChangedToController;
+        }
+
+        private void OnDisable()
+        {
+            InputDeviceTracker.OnCurrentInputDeviceChanged -= SelectSelectableOnDeviceChangedToController;
+            if (waitForInteractableCoroutine != null)
+            {
+                StopCoroutine(waitForInteractableCoroutine);
+                waitForInteractableCoroutine = null;
+            }
+        }
+
+        private void ApplySelectionForCurrentDevice()
         {
             if(InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick())
             {
@@ -20,13 +49,26 @@ namespace AbstractPixel.Core
             {
                 EventSystem.current?.SetSelectedGameObject(null);
             }
-
-            InputDeviceTracker.OnCurrentInputDeviceChanged += SelectSelectableOnDeviceChangedToController;
         }
 
-        private void OnDisable()
+        private bool IsSelectableReady()
         {
-            InputDeviceTracker.OnCurrentInputDeviceChanged -= SelectSelectableOnDeviceChangedToController;
+            if (selectableToSelect == null)
+            {
+                return true;
+            }
+            return selectableToSelect.IsInteractable() && selectableToSelect.gameObject.activeInHierarchy;
+        }
+
+        private IEnumerator SelectWhenInteractable()
+        {
+            while (!IsSelectableReady())
+            {
+                // yield null runs every rendered frame and does not depend on Time.timeScale.
+                yield return null;
+            }
+            waitForInteractableCoroutine = null;
+            ApplySelectionForCurrentDevice();
         }
 
         void SelectSelectableOnDeviceChangedToController(InputDevice _device)
@@ -35,6 +77,11 @@ namespace AbstractPixel.Core
             {
                 // The input that switched the device is also processed as UI navigation this frame.
                 // Selecting at the end of the frame stops that first press from moving off the first selectable.
+                if (waitForInteractableCoroutine != null)
+                {
+                    // Still waiting for the entrance: that coroutine selects for the gamepad when ready.
+                    return;
+                }
                 StopAllCoroutines();
                 StartCoroutine(SelectSelectableAtEndOfFrame());
             }
@@ -46,7 +93,11 @@ namespace AbstractPixel.Core
 
         private IEnumerator SelectSelectableAtEndOfFrame()
         {
-            yield return new WaitForEndOfFrame();
+            if (endOfFrameWait == null)
+            {
+                endOfFrameWait = new WaitForEndOfFrame();
+            }
+            yield return endOfFrameWait;
 
             bool isControllerStillInControl = InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick();
             if (isControllerStillInControl && EventSystem.current != null)

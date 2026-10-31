@@ -25,8 +25,9 @@ namespace AbstractPixel.GameManagement
         private void OnDisable()
         {
             GameStateRegistry.OnStateRegistered -= HandleStateRegistered;
-            OnStateRegistered = delegate { };
-            OnStateUnregistered = delegate { };
+            GameStateRegistry.OnStateUnregistered -= HandleStateUnregistered;
+            OnStateRegistered = null;
+            OnStateUnregistered = null;
         }
 
         private void HandleStateRegistered(StateSO state)

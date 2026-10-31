@@ -105,7 +105,9 @@ namespace AbstractPixel.GhostSystem
             }
         }
 
-        private void FixedUpdate()
+        // Per rendered frame, after the ghost and the (interpolated) target have moved, so the fade follows the
+        // distance smoothly instead of stepping on physics ticks.
+        private void LateUpdate()
         {
             if (!isInitialized || targetTransform == null) return;
             float distance = Vector3.Distance(transform.position, targetTransform.position);

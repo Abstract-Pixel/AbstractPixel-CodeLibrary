@@ -8,11 +8,37 @@ namespace AbstractPixel.GameManagement
     {
         private static HashSet<StateSO> activeStates = new HashSet<StateSO>();
         private static Stack<StateSO> stateHistory = new Stack<StateSO>();
+        private static HashSet<StateSO> statesWithAppliedConfigurations = new HashSet<StateSO>();
         private static bool isProcessingStateChange = false;
 
         public static event Action<StateSO> OnStateRegistered = delegate { };
         public static event Action<StateSO> OnStateUnregistered = delegate { };
         public static event Action<StateSO> OnStateRestored = delegate { };
+        // Raised when a registered state has finished its execution delay and applied its configurations.
+        public static event Action<StateSO> OnStateConfigurationsApplied = delegate { };
+
+        internal static void NotifyConfigurationsApplied(StateSO _stateData)
+        {
+            if (_stateData == null || !activeStates.Contains(_stateData))
+            {
+                return;
+            }
+
+            statesWithAppliedConfigurations.Add(_stateData);
+            OnStateConfigurationsApplied?.Invoke(_stateData);
+        }
+
+        /// <summary>
+        /// True once an active state has finished its execution delay and applied its configurations.
+        /// </summary>
+        public static bool AreConfigurationsApplied(StateSO _stateData)
+        {
+            if (_stateData == null)
+            {
+                return false;
+            }
+            return statesWithAppliedConfigurations.Contains(_stateData);
+        }
 
         public static bool TryRegisterAsActiveState(StateSO _stateData)
         {
@@ -70,6 +96,7 @@ namespace AbstractPixel.GameManagement
                 foreach (StateSO evictedState in statesToEvict)
                 {
                     activeStates.Remove(evictedState);
+                    statesWithAppliedConfigurations.Remove(evictedState);
                     OnStateUnregistered?.Invoke(evictedState);
                 }
             }
@@ -92,6 +119,7 @@ namespace AbstractPixel.GameManagement
 
             if (activeStates.Remove(_stateData))
             {
+                statesWithAppliedConfigurations.Remove(_stateData);
                 OnStateUnregistered?.Invoke(_stateData);
 
                 if (_stateData.IsSubState && stateHistory.Count > 0)
@@ -146,10 +174,12 @@ namespace AbstractPixel.GameManagement
         {
             activeStates = new HashSet<StateSO>();
             stateHistory = new Stack<StateSO>();
+            statesWithAppliedConfigurations = new HashSet<StateSO>();
             isProcessingStateChange = false;
             OnStateRegistered = delegate { };
             OnStateUnregistered = delegate { };
             OnStateRestored = delegate { };
+            OnStateConfigurationsApplied = delegate { };
         }
     }
 }

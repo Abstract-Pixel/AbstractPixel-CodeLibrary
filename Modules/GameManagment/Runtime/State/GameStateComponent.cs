@@ -11,6 +11,8 @@ namespace AbstractPixel.GameManagement
         [Tooltip("The ScriptableObject defining the rules and priority of this state.")]
         [SerializeField] private StateSO stateConfig;
         [SerializeField] private bool activateOnStart = false;
+        [Tooltip("If true, this state tries to activate again whenever the active scene changes while it is inactive (priority rules still apply).")]
+        [SerializeField] private bool reactivateOnActiveSceneChange = false;
 
         private bool isActive = false;
         private StateSnapshot snapshotBeforeActivation;
@@ -19,6 +21,12 @@ namespace AbstractPixel.GameManagement
 
         private WaitForSeconds executionDelay = null;
         private Coroutine stateActivationCoroutine = null;
+        private Coroutine timeScaleEaseCoroutine = null;
+        private Coroutine reactivationCoroutine = null;
+        private bool areConfigurationsApplied = false;
+
+        public bool IsActive => isActive;
+        public StateSO StateConfig => stateConfig;
 
         private void OnEnable()
         {
@@ -54,10 +62,11 @@ namespace AbstractPixel.GameManagement
 
         private void OnDisable()
         {
-            if (stateActivationCoroutine != null)
+            StopActivationCoroutines();
+            if (reactivationCoroutine != null)
             {
-                StopCoroutine(stateActivationCoroutine);
-                stateActivationCoroutine = null;
+                StopCoroutine(reactivationCoroutine);
+                reactivationCoroutine = null;
             }
             foreach (BaseCondition condition in trackedConditions)
             {
@@ -108,16 +117,13 @@ namespace AbstractPixel.GameManagement
             {
                 return;
             }
-            if (stateActivationCoroutine != null)
-            {
-                StopCoroutine(stateActivationCoroutine);
-                stateActivationCoroutine = null;
-            }
+            StopActivationCoroutines();
             bool isPermissionGranted = GameStateRegistry.TryRegisterAsActiveState(stateConfig);
 
             if (isPermissionGranted)
             {
                 isActive = true;
+                areConfigurationsApplied = false;
                 // [MODIFIED]: Immediate snapshot prevents zeroed time-scale bug if evicted during delay
                 snapshotBeforeActivation = new StateSnapshot()
                 {
@@ -137,12 +143,17 @@ namespace AbstractPixel.GameManagement
                 // [MODIFIED]: Unscaled seconds prevents permanent lock if Time.timeScale is already 0
                 yield return new WaitForSecondsRealtime(stateConfig.StateExecutionDelay);
             }
-            stateConfig.ApplyConfigurations();
+            stateActivationCoroutine = null;
+            ApplyConfigurationsNow();
         }
 
-        public void DeactivateState()
+        /// <summary>
+        /// Ends the execution delay early and applies the configurations now.
+        /// Does nothing if the state is not active or has already applied them.
+        /// </summary>
+        public void SkipExecutionDelay()
         {
-            if (!isActive)
+            if (!isActive || areConfigurationsApplied)
             {
                 return;
             }
@@ -152,8 +163,89 @@ namespace AbstractPixel.GameManagement
                 StopCoroutine(stateActivationCoroutine);
                 stateActivationCoroutine = null;
             }
+            ApplyConfigurationsNow();
+        }
+
+        private void ApplyConfigurationsNow()
+        {
+            if (areConfigurationsApplied)
+            {
+                return;
+            }
+            areConfigurationsApplied = true;
+
+            bool shouldEaseTimeScale = stateConfig.TimeScaleEaseDuration > 0f;
+            if (shouldEaseTimeScale)
+            {
+                stateConfig.ApplyCursorConfigurations();
+                timeScaleEaseCoroutine = StartCoroutine(EaseTimeScale(stateConfig.GetExecutionTimeScaleTarget()));
+            }
+            else
+            {
+                stateConfig.ApplyConfigurations();
+            }
+
+            GameStateRegistry.NotifyConfigurationsApplied(stateConfig);
+        }
+
+        private IEnumerator EaseTimeScale(float _targetTimeScale)
+        {
+            float startTimeScale = Time.timeScale;
+            float duration = stateConfig.TimeScaleEaseDuration;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float normalizedTime = Mathf.Clamp01(elapsed / duration);
+                float progress = normalizedTime;
+                if (stateConfig.TimeScaleEaseCurve != null && stateConfig.TimeScaleEaseCurve.length > 0)
+                {
+                    progress = stateConfig.TimeScaleEaseCurve.Evaluate(normalizedTime);
+                }
+                Time.timeScale = Mathf.Max(0f, Mathf.LerpUnclamped(startTimeScale, _targetTimeScale, progress));
+                yield return null;
+            }
+
+            Time.timeScale = _targetTimeScale;
+            timeScaleEaseCoroutine = null;
+        }
+
+        private IEnumerator ReactivateAfterSceneChange()
+        {
+            yield return null;
+            reactivationCoroutine = null;
+            if (!isActive)
+            {
+                ActivateState();
+            }
+        }
+
+        private void StopActivationCoroutines()
+        {
+            if (stateActivationCoroutine != null)
+            {
+                StopCoroutine(stateActivationCoroutine);
+                stateActivationCoroutine = null;
+            }
+            if (timeScaleEaseCoroutine != null)
+            {
+                StopCoroutine(timeScaleEaseCoroutine);
+                timeScaleEaseCoroutine = null;
+            }
+        }
+
+        public void DeactivateState()
+        {
+            if (!isActive)
+            {
+                return;
+            }
+
+            StopActivationCoroutines();
 
             isActive = false;
+            areConfigurationsApplied = false;
             if (stateConfig.RevertConfigurationsOnDeactivation)
             {
                 stateConfig.RevertConfigurations(snapshotBeforeActivation);
@@ -177,7 +269,10 @@ namespace AbstractPixel.GameManagement
         {
             if (_unregisteredState == stateConfig && isActive)
             {
+                // Stops a pending delayed apply (or ease) so an evicted state never applies late.
+                StopActivationCoroutines();
                 isActive = false;
+                areConfigurationsApplied = false;
                 stateConfig.RevertConfigurations(snapshotBeforeActivation);
             }
         }
@@ -195,11 +290,21 @@ namespace AbstractPixel.GameManagement
             if (_newScene.name != currentActiveScene)
             {
                 currentActiveScene = _newScene.name;
-                if (!isActive || !stateConfig.DisableStateOnSceneChange)
+                if (isActive && stateConfig.DisableStateOnSceneChange)
                 {
-                    return;
+                    DeactivateState();
                 }
-                DeactivateState();
+
+                if (reactivateOnActiveSceneChange)
+                {
+                    // Wait a frame so states that leave on this scene change (and the new scene's own
+                    // activateOnStart states) are settled before priority is checked.
+                    if (reactivationCoroutine != null)
+                    {
+                        StopCoroutine(reactivationCoroutine);
+                    }
+                    reactivationCoroutine = StartCoroutine(ReactivateAfterSceneChange());
+                }
             }
         }
     }
