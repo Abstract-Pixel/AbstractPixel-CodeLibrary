@@ -26,6 +26,7 @@ The project folder also holds its own copies of `IAnimationCommand`, `AnimationC
 |---|---|---|
 | `ParallelAnimationCommandGroup(runner, cmds…)` | proj | Run several commands at once. Cancel before reusing. |
 | `DelayedAnimationCommand(cmd, delay, unscaled=true)` | proj | Start a command after a delay. |
+| `FloatTweenCommand(setter, from, to, duration, curve, unscaled=true)` | proj | Tween any float through a setter (shader value, mesh-effect progress). Duration 0 = one-shot action step. |
 
 ## Transform / image / layout
 | Command | Source | Use |
