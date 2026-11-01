@@ -5,9 +5,9 @@ namespace AbstractPixel.SaveSystem
         None,
         Input,
         Settings,
-        Position,
         Achievements,
-        Game
+        Game,
+        Ghosts
 
     }
 }

@@ -4,24 +4,30 @@ using AbstractPixel.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
 using UnityEngine.UI;
 
 namespace AbstractPixel.Core.UI
 {
+    // Updates before the EventSystem (order 0), so navigation rebuilt and selection made this frame
+    // are already in place when the EventSystem processes this frame's D-pad press.
+    [DefaultExecutionOrder(-1100)]
     [DisallowMultipleComponent]
     public class AutoSpatialNavigation : MonoBehaviour
     {
         [Header("Auto Selection")]
-        [Tooltip("If true, automatically selects a button on enable ONLY when the last used device was a controller.")]
+        [Tooltip("If true, selects the first button on enable while a controller is the last used device. " +
+                 "The selection waits (with no time limit) until that button is active and interactable, " +
+                 "so entrance animations that disable buttons can take as long as they need.")]
         [SerializeField] private bool autoSelectOnEnable = true;
 
         [Tooltip("Optional explicit button to highlight first when using a controller. If unassigned, selects the top-leftmost button.")]
         [SerializeField] private Selectable firstSelectedOverride;
 
-        [Tooltip("Maximum duration in seconds to wait for layout groups or animations before completing initial selection.")]
-        [SerializeField] private float selectionTimeout = 0.8f;
-
         [Header("Navigation Rules")]
+        [Tooltip("Both: free 2D search. VerticalList: Up/Down only, ordered top to bottom. HorizontalList: Left/Right only, ordered left to right.")]
+        [SerializeField] private SpatialNavigationAxis navigationAxis = SpatialNavigationAxis.Both;
+
         [Tooltip("If true, pressing Right on the rightmost element loops to the left, and pressing Down on the bottom element loops to the top.")]
         [SerializeField] private bool loopNavigation = true;
 
@@ -48,10 +54,13 @@ namespace AbstractPixel.Core.UI
         private Canvas cachedCanvas;
         private Camera targetCamera;
         private Coroutine evaluationCoroutine;
-        private Coroutine deferredSelectCoroutine;
         private Coroutine deferredInitCoroutine;
 
-        private Vector2 lastPointerScreenPosition = new Vector2(-1f, -1f);
+        // True from enable until the first button has been selected for a controller.
+        private bool isInitialSelectionPending = false;
+
+        private static readonly Vector2 NO_POINTER_POSITION = new Vector2(-1f, -1f);
+        private Vector2 lastPointerScreenPosition = NO_POINTER_POSITION;
 
         private const float ALIGNMENT_EPSILON = 1.0f;
         private const float PERPENDICULAR_WEIGHT = 2.5f;
@@ -73,17 +82,17 @@ namespace AbstractPixel.Core.UI
             InputDeviceTracker.OnCurrentInputDeviceChanged -= HandleDeviceChanged;
             InputDeviceTracker.OnCurrentInputDeviceChanged += HandleDeviceChanged;
 
-            if (autoSelectOnEnable && InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick())
+            // A pointer position from a previous time this menu was open must not pick the first button.
+            lastPointerScreenPosition = NO_POINTER_POSITION;
+
+            // Whatever is selected now belongs to an earlier screen, or to this menu's last visit (and is hidden).
+            // Leaving it would block the first selection and send the first D-pad presses to a hidden button.
+            ClearSelection();
+
+            isInitialSelectionPending = false;
+            if (autoSelectOnEnable)
             {
                 TriggerAutoSelect();
-            }
-            else
-            {
-                EventSystem currentEventSystem = EventSystem.current;
-                if (currentEventSystem != null)
-                {
-                    currentEventSystem.SetSelectedGameObject(null);
-                }
             }
 
             if (evaluationCoroutine != null)
@@ -103,16 +112,13 @@ namespace AbstractPixel.Core.UI
         {
             InputDeviceTracker.OnCurrentInputDeviceChanged -= HandleDeviceChanged;
 
+            isInitialSelectionPending = false;
+            ClearSelectionIfInsideThisMenu();
+
             if (evaluationCoroutine != null)
             {
                 StopCoroutine(evaluationCoroutine);
                 evaluationCoroutine = null;
-            }
-
-            if (deferredSelectCoroutine != null)
-            {
-                StopCoroutine(deferredSelectCoroutine);
-                deferredSelectCoroutine = null;
             }
 
             if (deferredInitCoroutine != null)
@@ -124,8 +130,203 @@ namespace AbstractPixel.Core.UI
 
         private void Update()
         {
+            RebuildNavigationIfInteractabilityChanged();
             DetectMouseMovementAndDeselect();
             DetectControllerInputAndAdaptSelection();
+            TryCompleteInitialSelection();
+        }
+
+        // Entrance animations switch buttons interactable one by one. Rebuilding as soon as that happens
+        // (instead of on the next poll) means the D-pad reaches each button the frame it becomes usable.
+        // Reads cached state only, so it does not allocate.
+        private void RebuildNavigationIfInteractabilityChanged()
+        {
+            bool statesChanged = false;
+
+            for (int index = 0; index < trackedSelectables.Count; ++index)
+            {
+                Selectable selectable = trackedSelectables[index];
+                if (selectable == null)
+                {
+                    continue;
+                }
+
+                bool currentInteractable = selectable.IsInteractable();
+                bool currentActive = selectable.gameObject.activeInHierarchy;
+
+                if (currentInteractable != trackedInteractableStates[index] || currentActive != trackedActiveStates[index])
+                {
+                    trackedInteractableStates[index] = currentInteractable;
+                    trackedActiveStates[index] = currentActive;
+                    statesChanged = true;
+                }
+            }
+
+            if (statesChanged)
+            {
+                BuildNavigation();
+            }
+        }
+
+        // Keeps the first button selected until the player navigates with the controller. It has no time
+        // limit: an entrance animation can keep the buttons non-interactable for as long as it needs.
+        // It also reselects when Unity drops the selection, which happens whenever an animation sets the
+        // selected button's interactable to false (for example when its OnEnable runs after this one).
+        private void TryCompleteInitialSelection()
+        {
+            if (!isInitialSelectionPending)
+            {
+                return;
+            }
+
+            bool isControllerInUse = InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick();
+            if (!isControllerInUse)
+            {
+                // Stay pending: if the player picks up the controller during the entrance, the first button is still chosen.
+                return;
+            }
+
+            EventSystem currentEventSystem = EventSystem.current;
+            if (currentEventSystem == null)
+            {
+                return;
+            }
+
+            if (HasUsableSelection(currentEventSystem))
+            {
+                return;
+            }
+
+            Selectable initialTarget = FindInitialSelectionTarget();
+            if (initialTarget == null)
+            {
+                return;
+            }
+
+            SelectNow(initialTarget);
+        }
+
+        // The player pressed a controller button while something in this menu is selected: from now on
+        // the selection is theirs, so the initial selection stops reselecting the first button.
+        private void EndInitialSelectionIfPlayerTookOver()
+        {
+            EventSystem currentEventSystem = EventSystem.current;
+            if (currentEventSystem == null)
+            {
+                return;
+            }
+
+            GameObject currentSelection = currentEventSystem.currentSelectedGameObject;
+            if (currentSelection == null)
+            {
+                return;
+            }
+
+            bool isSelectionInsideThisMenu = currentSelection.transform.IsChildOf(transform);
+            if (isSelectionInsideThisMenu)
+            {
+                isInitialSelectionPending = false;
+            }
+        }
+
+        // The configured first button when it is usable, otherwise the top-left usable button
+        // (only when no first button is configured). Returns null when nothing is usable yet.
+        private Selectable FindInitialSelectionTarget()
+        {
+            if (firstSelectedOverride != null)
+            {
+                bool isOverrideUsable = firstSelectedOverride.gameObject.activeInHierarchy && firstSelectedOverride.IsInteractable();
+                if (isOverrideUsable)
+                {
+                    return firstSelectedOverride;
+                }
+
+                return null;
+            }
+
+            List<Selectable> validSelectables = GetValidSelectables();
+            if (validSelectables.Count == 0)
+            {
+                return null;
+            }
+
+            SortTopLeftFirst(validSelectables);
+            return validSelectables[0];
+        }
+
+        private void SelectNow(Selectable _target)
+        {
+            EventSystem currentEventSystem = EventSystem.current;
+            if (currentEventSystem == null || _target == null)
+            {
+                return;
+            }
+
+            // Make sure the explicit navigation already includes the target before the next D-pad press.
+            BuildNavigation();
+
+            currentEventSystem.SetSelectedGameObject(null);
+            currentEventSystem.SetSelectedGameObject(_target.gameObject);
+        }
+
+        private void ClearSelection()
+        {
+            EventSystem currentEventSystem = EventSystem.current;
+            if (currentEventSystem == null)
+            {
+                return;
+            }
+
+            if (currentEventSystem.currentSelectedGameObject != null)
+            {
+                currentEventSystem.SetSelectedGameObject(null);
+            }
+        }
+
+        // Called when the menu closes: the EventSystem would otherwise keep pointing at a hidden button.
+        private void ClearSelectionIfInsideThisMenu()
+        {
+            EventSystem currentEventSystem = EventSystem.current;
+            if (currentEventSystem == null)
+            {
+                return;
+            }
+
+            GameObject currentSelection = currentEventSystem.currentSelectedGameObject;
+            if (currentSelection == null)
+            {
+                return;
+            }
+
+            bool isSelectionInsideThisMenu = currentSelection.transform.IsChildOf(transform);
+            if (isSelectionInsideThisMenu)
+            {
+                currentEventSystem.SetSelectedGameObject(null);
+            }
+        }
+
+        // A selection counts only while its object is visible and usable. A hidden or disabled one
+        // receives the D-pad presses but nothing visible happens.
+        private bool HasUsableSelection(EventSystem _eventSystem)
+        {
+            GameObject currentSelection = _eventSystem.currentSelectedGameObject;
+            if (currentSelection == null)
+            {
+                return false;
+            }
+
+            if (!currentSelection.activeInHierarchy)
+            {
+                return false;
+            }
+
+            Selectable selectedSelectable = currentSelection.GetComponent<Selectable>();
+            if (selectedSelectable != null && !selectedSelectable.IsInteractable())
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private void DetectMouseMovementAndDeselect()
@@ -156,44 +357,65 @@ namespace AbstractPixel.Core.UI
 
         private void DetectControllerInputAndAdaptSelection()
         {
-            if (!WasControllerNavigationTriggered())
+            Gamepad navigatingGamepad = FindGamepadThatNavigatedThisFrame();
+            if (navigatingGamepad == null)
             {
                 return;
             }
 
-            Gamepad currentGamepad = Gamepad.current;
-            if (currentGamepad != null && InputDeviceTracker.LastUsedDevice != currentGamepad)
+            if (InputDeviceTracker.LastUsedDevice != navigatingGamepad)
             {
-                InputDeviceTracker.SetActiveDevice(currentGamepad);
+                InputDeviceTracker.SetActiveDevice(navigatingGamepad);
+            }
+
+            if (isInitialSelectionPending)
+            {
+                // The first button is selected by TryCompleteInitialSelection as soon as it is usable.
+                EndInitialSelectionIfPlayerTookOver();
+                return;
             }
 
             EventSystem currentEventSystem = EventSystem.current;
-            if (currentEventSystem != null && currentEventSystem.currentSelectedGameObject == null)
+            if (currentEventSystem != null && !HasUsableSelection(currentEventSystem))
             {
                 SelectClosestButtonToLastPointerPosition();
             }
         }
 
-        private bool WasControllerNavigationTriggered()
+        // Checks every connected gamepad, not only Gamepad.current: with two pads connected (or a Steam Deck
+        // plus a controller) Gamepad.current can be the idle one and the presses would go unnoticed.
+        private Gamepad FindGamepadThatNavigatedThisFrame()
         {
-            Gamepad currentGamepad = Gamepad.current;
-            if (currentGamepad != null)
-            {
-                if (currentGamepad.dpad.up.wasPressedThisFrame ||
-                    currentGamepad.dpad.down.wasPressedThisFrame ||
-                    currentGamepad.dpad.left.wasPressedThisFrame ||
-                    currentGamepad.dpad.right.wasPressedThisFrame ||
-                    currentGamepad.buttonSouth.wasPressedThisFrame ||
-                    currentGamepad.buttonEast.wasPressedThisFrame)
-                {
-                    return true;
-                }
+            ReadOnlyArray<Gamepad> connectedGamepads = Gamepad.all;
 
-                Vector2 leftStick = currentGamepad.leftStick.ReadValue();
-                if (leftStick.sqrMagnitude >= STICK_NAV_THRESHOLD_SQR)
+            for (int index = 0; index < connectedGamepads.Count; ++index)
+            {
+                Gamepad gamepad = connectedGamepads[index];
+                if (WasNavigationTriggered(gamepad))
                 {
-                    return true;
+                    return gamepad;
                 }
+            }
+
+            return null;
+        }
+
+        private bool WasNavigationTriggered(Gamepad _gamepad)
+        {
+            if (_gamepad.dpad.up.wasPressedThisFrame ||
+                _gamepad.dpad.down.wasPressedThisFrame ||
+                _gamepad.dpad.left.wasPressedThisFrame ||
+                _gamepad.dpad.right.wasPressedThisFrame ||
+                _gamepad.buttonSouth.wasPressedThisFrame ||
+                _gamepad.buttonEast.wasPressedThisFrame)
+            {
+                return true;
+            }
+
+            Vector2 leftStick = _gamepad.leftStick.ReadValue();
+            if (leftStick.sqrMagnitude >= STICK_NAV_THRESHOLD_SQR)
+            {
+                return true;
             }
 
             return false;
@@ -245,29 +467,29 @@ namespace AbstractPixel.Core.UI
                 }
                 else
                 {
-                    validSelectables.Sort((_first, _second) =>
-                    {
-                        Vector2 posA = GetScreenCenter(_first.transform as RectTransform);
-                        Vector2 posB = GetScreenCenter(_second.transform as RectTransform);
-
-                        if (Mathf.Abs(posA.y - posB.y) <= 20.0f)
-                        {
-                            return posA.x.CompareTo(posB.x);
-                        }
-
-                        return posB.y.CompareTo(posA.y);
-                    });
-
+                    SortTopLeftFirst(validSelectables);
                     targetToSelect = validSelectables[0];
                 }
             }
 
-            EventSystem currentEventSystem = EventSystem.current;
-            if (currentEventSystem != null && targetToSelect != null)
+            SelectNow(targetToSelect);
+        }
+
+        private void SortTopLeftFirst(List<Selectable> _selectables)
+        {
+            _selectables.Sort((_first, _second) =>
             {
-                currentEventSystem.SetSelectedGameObject(null);
-                currentEventSystem.SetSelectedGameObject(targetToSelect.gameObject);
-            }
+                Vector2 firstCenter = GetScreenCenter(_first.transform as RectTransform);
+                Vector2 secondCenter = GetScreenCenter(_second.transform as RectTransform);
+
+                bool isSameRow = Mathf.Abs(firstCenter.y - secondCenter.y) <= 20.0f;
+                if (isSameRow)
+                {
+                    return firstCenter.x.CompareTo(secondCenter.x);
+                }
+
+                return secondCenter.y.CompareTo(firstCenter.y);
+            });
         }
 
         private IEnumerator DeferredInitialBuildRoutine()
@@ -317,8 +539,14 @@ namespace AbstractPixel.Core.UI
         {
             if (_device is Gamepad || _device is Joystick)
             {
+                if (isInitialSelectionPending)
+                {
+                    // TryCompleteInitialSelection picks the configured first button this frame or once it is usable.
+                    return;
+                }
+
                 EventSystem currentEventSystem = EventSystem.current;
-                if (currentEventSystem != null && currentEventSystem.currentSelectedGameObject == null)
+                if (currentEventSystem != null && !HasUsableSelection(currentEventSystem))
                 {
                     SelectClosestButtonToLastPointerPosition();
                 }
@@ -333,71 +561,11 @@ namespace AbstractPixel.Core.UI
             }
         }
 
+        // Selects the first button for a controller as soon as it is usable (see TryCompleteInitialSelection).
         public void TriggerAutoSelect()
         {
-            if (deferredSelectCoroutine != null)
-            {
-                StopCoroutine(deferredSelectCoroutine);
-            }
-            deferredSelectCoroutine = StartCoroutine(DeferredSelectRoutine());
-        }
-
-        private IEnumerator DeferredSelectRoutine()
-        {
-            float elapsedTime = 0f;
-
-            while (elapsedTime < selectionTimeout)
-            {
-                if (!InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick())
-                {
-                    deferredSelectCoroutine = null;
-                    yield break;
-                }
-
-                EventSystem currentEventSystem = EventSystem.current;
-                if (currentEventSystem != null)
-                {
-                    if (firstSelectedOverride != null &&
-                        firstSelectedOverride.gameObject.activeInHierarchy &&
-                        firstSelectedOverride.IsInteractable())
-                    {
-                        currentEventSystem.SetSelectedGameObject(null);
-                        currentEventSystem.SetSelectedGameObject(firstSelectedOverride.gameObject);
-                        deferredSelectCoroutine = null;
-                        yield break;
-                    }
-
-                    if (firstSelectedOverride == null)
-                    {
-                        List<Selectable> validSelectables = GetValidSelectables();
-                        if (validSelectables.Count > 0)
-                        {
-                            validSelectables.Sort((_first, _second) =>
-                            {
-                                Vector2 posA = GetScreenCenter(_first.transform as RectTransform);
-                                Vector2 posB = GetScreenCenter(_second.transform as RectTransform);
-
-                                if (Mathf.Abs(posA.y - posB.y) <= 20.0f)
-                                {
-                                    return posA.x.CompareTo(posB.x);
-                                }
-
-                                return posB.y.CompareTo(posA.y);
-                            });
-
-                            currentEventSystem.SetSelectedGameObject(null);
-                            currentEventSystem.SetSelectedGameObject(validSelectables[0].gameObject);
-                            deferredSelectCoroutine = null;
-                            yield break;
-                        }
-                    }
-                }
-
-                yield return null;
-                elapsedTime += Time.unscaledDeltaTime;
-            }
-
-            deferredSelectCoroutine = null;
+            isInitialSelectionPending = true;
+            TryCompleteInitialSelection();
         }
 
         private void InitializeStateTracking()
@@ -482,8 +650,27 @@ namespace AbstractPixel.Core.UI
             List<Selectable> validSelectables = GetValidSelectables();
             int count = validSelectables.Count;
 
-            if (count <= 1)
+            if (count == 1)
             {
+                // Clear navigation left from a previous build, which may point at buttons that are not usable yet.
+                ClearExplicitNavigation(validSelectables[0]);
+                return;
+            }
+
+            if (count == 0)
+            {
+                return;
+            }
+
+            if (navigationAxis == SpatialNavigationAxis.VerticalList)
+            {
+                BuildListNavigation(validSelectables, true);
+                return;
+            }
+
+            if (navigationAxis == SpatialNavigationAxis.HorizontalList)
+            {
+                BuildListNavigation(validSelectables, false);
                 return;
             }
 
@@ -528,6 +715,81 @@ namespace AbstractPixel.Core.UI
 
                 current.selectable.navigation = customNavigation;
             }
+        }
+
+        // Links the buttons as one ordered list on a single axis. Staggered or diagonal layouts still step
+        // one button at a time, and the other axis stays unlinked.
+        private void BuildListNavigation(List<Selectable> _selectables, bool _isVertical)
+        {
+            if (_isVertical)
+            {
+                // Top of the screen first.
+                _selectables.Sort((_first, _second) =>
+                {
+                    float firstY = GetScreenCenter(_first.transform as RectTransform).y;
+                    float secondY = GetScreenCenter(_second.transform as RectTransform).y;
+                    return secondY.CompareTo(firstY);
+                });
+            }
+            else
+            {
+                // Left of the screen first.
+                _selectables.Sort((_first, _second) =>
+                {
+                    float firstX = GetScreenCenter(_first.transform as RectTransform).x;
+                    float secondX = GetScreenCenter(_second.transform as RectTransform).x;
+                    return firstX.CompareTo(secondX);
+                });
+            }
+
+            int count = _selectables.Count;
+            for (int index = 0; index < count; ++index)
+            {
+                Selectable previous = GetListNeighbour(_selectables, index - 1);
+                Selectable next = GetListNeighbour(_selectables, index + 1);
+
+                Navigation listNavigation = new Navigation();
+                listNavigation.mode = Navigation.Mode.Explicit;
+
+                if (_isVertical)
+                {
+                    listNavigation.selectOnUp = previous;
+                    listNavigation.selectOnDown = next;
+                }
+                else
+                {
+                    listNavigation.selectOnLeft = previous;
+                    listNavigation.selectOnRight = next;
+                }
+
+                _selectables[index].navigation = listNavigation;
+            }
+        }
+
+        // The list entry at _index, wrapping around the ends when loopNavigation is on.
+        private Selectable GetListNeighbour(List<Selectable> _selectables, int _index)
+        {
+            int count = _selectables.Count;
+
+            if (_index >= 0 && _index < count)
+            {
+                return _selectables[_index];
+            }
+
+            if (!loopNavigation)
+            {
+                return null;
+            }
+
+            int wrappedIndex = (_index + count) % count;
+            return _selectables[wrappedIndex];
+        }
+
+        private void ClearExplicitNavigation(Selectable _selectable)
+        {
+            Navigation emptyNavigation = new Navigation();
+            emptyNavigation.mode = Navigation.Mode.Explicit;
+            _selectable.navigation = emptyNavigation;
         }
 
         private Selectable FindBestCandidate(

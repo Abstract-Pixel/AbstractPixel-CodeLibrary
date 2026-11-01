@@ -26,9 +26,16 @@ namespace AbstractPixel.Settings
         private const float DEFAULT_LINEAR_VOLUME = 1.0f; // 1.0 = Max Volume (0 dB)
         private const float MINIMUM_DECIBELS = -80.0f;
 
+        /// <summary>
+        /// Raised after this volume is pushed to BroAudio and the mixers, including applies that do not change the value.
+        /// Lets volume controllers re-apply their own multipliers only when this setting overwrote them.
+        /// </summary>
+        public event Action OnVolumeApplied;
+
         protected override void OnApplySettingLogic()
         {
             SetVolumeForAllGroups(CurrentValue);
+            OnVolumeApplied?.Invoke();
         }
 
         private void SetVolumeForAllGroups(float linearVolume)
