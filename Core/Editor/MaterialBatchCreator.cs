@@ -29,7 +29,7 @@ namespace AbstractPixel.Core.Editor
             public Color emissionColor = Color.black;
         }
 
-        [MenuItem("Tools/Material Batch Creator")]
+        [MenuItem("Tools/Asset Automation/Material Batch Creator")]
         public static void ShowWindow()
         {
             GetWindow<MaterialBatchCreator>("Material Batch Creator");

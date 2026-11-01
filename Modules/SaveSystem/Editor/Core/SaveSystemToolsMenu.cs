@@ -6,7 +6,7 @@ namespace AbstractPixel.SaveSystem.Editor
 {
     public static class SaveSystemToolsMenu
     {
-        [MenuItem("Tools/Save System/Open Release Folder")]
+        [MenuItem("Tools/External Project Tools/Save System/Open Release Folder")]
         public static void OpenReleaseFolderFromMenu()
         {
             if (TryInitializeGenerator())
@@ -15,7 +15,7 @@ namespace AbstractPixel.SaveSystem.Editor
             }
         }
 
-        [MenuItem("Tools/Save System/Open Debug Folder")]
+        [MenuItem("Tools/External Project Tools/Save System/Open Debug Folder")]
         public static void OpenDebugFolderFromMenu()
         {
             if (TryInitializeGenerator())
@@ -23,7 +23,7 @@ namespace AbstractPixel.SaveSystem.Editor
                 OpenDirectory(SavePathGenerator.DebugRootPath);
             }
         }
-        [MenuItem("Tools/Save System/Delete All Save Files")]
+        [MenuItem("Tools/External Project Tools/Save System/Delete All Save Files")]
         public static void DeleteAllSavesFromMenu()
         {
 

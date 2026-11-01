@@ -42,7 +42,7 @@ namespace ScreenshotTool.Editor
         private ScreenshotSessionView sessionView;
         private bool isPathUnlockedForEditing;
 
-        [MenuItem("Tools/Screenshot Deck")]
+        [MenuItem("Tools/External Project Tools/Screenshot Deck")]
         public static void OpenWindow()
         {
             ScreenshotToolWindow toolWindow = GetWindow<ScreenshotToolWindow>("Screenshot Deck");

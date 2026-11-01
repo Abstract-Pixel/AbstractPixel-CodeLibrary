@@ -72,7 +72,7 @@ public class ScriptBatchCreation : EditorWindow
     // Header Color
     private readonly Color colorHeader = new Color(0.18f, 0.18f, 0.18f, 1f);
 
-    [MenuItem("Tools/Script Batch Creation")]
+    [MenuItem("Tools/Asset Automation/Script Batch Creation")]
     public static void ShowWindow()
     {
         GetWindow<ScriptBatchCreation>("Script Batch Creation");
