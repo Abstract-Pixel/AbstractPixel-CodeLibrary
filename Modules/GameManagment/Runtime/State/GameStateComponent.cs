@@ -15,7 +15,8 @@ namespace AbstractPixel.GameManagement
         [SerializeField] private bool reactivateOnActiveSceneChange = false;
 
         private bool isActive = false;
-        private StateSnapshot snapshotBeforeActivation;
+        // Time is the only thing this component sets itself; everything else listens to the registry.
+        private float timeScaleBeforeActivation = 1f;
         private HashSet<BaseCondition> trackedConditions = new HashSet<BaseCondition>();
         private string currentActiveScene;
 
@@ -124,13 +125,8 @@ namespace AbstractPixel.GameManagement
             {
                 isActive = true;
                 areConfigurationsApplied = false;
-                // [MODIFIED]: Immediate snapshot prevents zeroed time-scale bug if evicted during delay
-                snapshotBeforeActivation = new StateSnapshot()
-                {
-                    PreviousTimeScale = Time.timeScale,
-                    PreviousCursorVisibility = Cursor.visible,
-                    PreviousCursorLockMode = Cursor.lockState
-                };
+                // Saved now, not at apply time, so a state evicted during its delay still restores the right value.
+                timeScaleBeforeActivation = Time.timeScale;
 
                 stateActivationCoroutine = StartCoroutine(ApplyStateConfigurationsAfterDelay());
             }
@@ -177,12 +173,11 @@ namespace AbstractPixel.GameManagement
             bool shouldEaseTimeScale = stateConfig.TimeScaleEaseDuration > 0f;
             if (shouldEaseTimeScale)
             {
-                stateConfig.ApplyCursorConfigurations();
                 timeScaleEaseCoroutine = StartCoroutine(EaseTimeScale(stateConfig.GetExecutionTimeScaleTarget()));
             }
             else
             {
-                stateConfig.ApplyConfigurations();
+                Time.timeScale = stateConfig.GetExecutionTimeScaleTarget();
             }
 
             GameStateRegistry.NotifyConfigurationsApplied(stateConfig);
@@ -248,7 +243,7 @@ namespace AbstractPixel.GameManagement
             areConfigurationsApplied = false;
             if (stateConfig.RevertConfigurationsOnDeactivation)
             {
-                stateConfig.RevertConfigurations(snapshotBeforeActivation);
+                Time.timeScale = timeScaleBeforeActivation;
             }
             GameStateRegistry.UnregisterState(stateConfig);
         }
@@ -273,7 +268,7 @@ namespace AbstractPixel.GameManagement
                 StopActivationCoroutines();
                 isActive = false;
                 areConfigurationsApplied = false;
-                stateConfig.RevertConfigurations(snapshotBeforeActivation);
+                Time.timeScale = timeScaleBeforeActivation;
             }
         }
 

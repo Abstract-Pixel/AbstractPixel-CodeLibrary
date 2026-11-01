@@ -27,9 +27,9 @@ namespace AbstractPixel.GameManagement
         [Min(0f)] public float TimeScaleEaseDuration = 0f;
         [Tooltip("Ease curve used when TimeScaleEaseDuration is above 0. X = normalized time, Y = normalized progress.")]
         public AnimationCurve TimeScaleEaseCurve = new AnimationCurve(new Keyframe(0f, 0f, 2f, 2f), new Keyframe(1f, 1f, 0f, 0f));
-        [Tooltip("If true, the cursor will be locked upon execution.")]
+        [Tooltip("If true, the cursor is locked while this is the highest active state (mouse and keyboard only; GameCursorController always hides and locks it for a controller).")]
         public bool IsCursorLockedOnExecution = true;
-        [Tooltip("If true, the cursor will be visible upon execution.")]
+        [Tooltip("If true, the cursor is visible while this is the highest active state (mouse and keyboard only; GameCursorController always hides and locks it for a controller).")]
         public bool IsCursorVisibleOnExecution = true;
         [Tooltip("If true, the state & UI will be hidden upon deactivation.")]
         public bool DisableStateOnSceneChange = true;
@@ -41,20 +41,6 @@ namespace AbstractPixel.GameManagement
         public bool ShowGameUIOnExecution = false;
         [Tooltip("If true, the game UI will be shown upon deactivation.")]
         public bool ShowGameUIOnDeactivation = false;
-
-        internal StateSnapshot ApplyConfigurations()
-        {
-            StateSnapshot snapShotBeforeChange = new StateSnapshot()
-            {
-                PreviousTimeScale = Time.timeScale,
-                PreviousCursorVisibility = Cursor.visible,
-                PreviousCursorLockMode = Cursor.lockState,
-            };
-
-            Time.timeScale = GetExecutionTimeScaleTarget();
-            ApplyCursorConfigurations();
-            return snapShotBeforeChange;
-        }
 
         /// <summary>
         /// The time scale this state wants once it has executed.
@@ -71,19 +57,6 @@ namespace AbstractPixel.GameManagement
                 return 0f;
             }
             return 1f;
-        }
-
-        internal void ApplyCursorConfigurations()
-        {
-            Cursor.visible = IsCursorVisibleOnExecution;
-            Cursor.lockState = IsCursorLockedOnExecution ? CursorLockMode.Locked : CursorLockMode.None;
-        }
-
-        internal virtual void RevertConfigurations(StateSnapshot _previousSnapShot)
-        {
-            Time.timeScale = _previousSnapShot.PreviousTimeScale;
-            Cursor.visible = _previousSnapShot.PreviousCursorVisibility;
-            Cursor.lockState = _previousSnapShot.PreviousCursorLockMode;
         }
     }
 }
