@@ -56,9 +56,47 @@ MonoBehaviour:
       - rid: 3582977949081796725
       - rid: 3582977949081796728
       - rid: 3582977949081796729
+  - GroupName: Controller
+    Category: 5
+    Settings:
+      List:
+      - rid: 1052282140875555002
+      - rid: 1052282140875555003
   references:
     version: 2
     RefIds:
+    - rid: 1052282140875555002
+      type: {class: ControllerVibrationSetting, ns: AbstractPixel.Rumble, asm: AbstractPixel.Rumble}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Controller Vibration
+          Description: How strongly the controller rumbles. 0 turns rumble and trigger
+            effects off.
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        isDefaultValuesPreGenerated: 1
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 1
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 100
+    - rid: 1052282140875555003
+      type: {class: AdaptiveTriggersSetting, ns: AbstractPixel.Rumble, asm: AbstractPixel.Rumble}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Adaptive Triggers
+          Description: 'PS5 DualSense only: trigger resistance, brake shudder and
+            the bomb buzz. Off keeps the triggers loose.'
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        isDefaultValuesPreGenerated: 1
     - rid: 3582977949081796724
       type: {class: MouseXSensitivitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -130,7 +168,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 1.8700001
+        <CurrentValue>k__BackingField: 2
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Horizontal Sensitivity
@@ -164,7 +202,7 @@ MonoBehaviour:
       data:
         <IsEnabled>k__BackingField: 1
         editorDebugToolbar: 0
-        <CurrentValue>k__BackingField: 2
+        <CurrentValue>k__BackingField: 3
         <IsActive>k__BackingField: 1
         <Metadata>k__BackingField:
           DisplayName: Graphics Preset Quality
