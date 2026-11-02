@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AbstractPixel.Core;
 using Unity.Profiling;
 using UnityEngine;
@@ -42,6 +43,8 @@ namespace AbstractPixel.Rumble
         private RumbleBackendSelector selector;
         private RumblePatternMixer patternMixer;
         private RumbleHardwareWriter writer;
+
+        private readonly List<IRumbleDebugSource> debugSources = new List<IRumbleDebugSource>(4);
 
         private bool isGameSilenced;
         private bool isFocusSilenced;
@@ -148,6 +151,57 @@ namespace AbstractPixel.Rumble
             isGameSilenced = _isSilenced;
             debugSilenced = IsSilenced;
         }
+
+        // ---------- Debug (read only; used by RumbleDebugOverlay) ----------
+
+        /// <summary>Show a non-pattern rumble feeder (e.g. the car) in the debug overlay. Safe to call every frame.</summary>
+        public void RegisterDebugSource(IRumbleDebugSource _source)
+        {
+            if (_source == null)
+            {
+                return;
+            }
+
+            if (debugSources.Contains(_source))
+            {
+                return;
+            }
+
+            debugSources.Add(_source);
+        }
+
+        public void UnregisterDebugSource(IRumbleDebugSource _source)
+        {
+            debugSources.Remove(_source);
+        }
+
+        public int DebugSourceCount => debugSources.Count;
+
+        public IRumbleDebugSource GetDebugSource(int _index)
+        {
+            return debugSources[_index];
+        }
+
+        public int PatternSlotCount => patternMixer.SlotCountForDebug;
+
+        public bool TryReadPattern(int _slot, out RumbleActivePattern _active)
+        {
+            return patternMixer.TryReadSlot(_slot, out _active);
+        }
+
+        public string DebugBackend => debugBackend;
+        public string DebugDevice => debugDevice;
+        public bool IsGameSilenced => isGameSilenced;
+        public bool IsFocusSilenced => isFocusSilenced;
+        public float RequestedContinuousLow => continuousLow;
+        public float RequestedContinuousHigh => continuousHigh;
+        public float MixedLow => debugLow;
+        public float MixedHigh => debugHigh;
+        public float PatternDuckAmount => patternMixer.DuckAmount;
+        public TriggerEffect RequestedBrake => requestedBrake;
+        public TriggerEffect RequestedThrottle => requestedThrottle;
+        public float SentLow => writer.LastSentLow;
+        public float SentHigh => writer.LastSentHigh;
 
         // ---------- Tick ----------
 

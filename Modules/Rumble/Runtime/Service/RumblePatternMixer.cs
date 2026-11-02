@@ -40,6 +40,34 @@ namespace AbstractPixel.Rumble
             }
         }
 
+        public int SlotCountForDebug => SlotCount;
+
+        /// <summary>Debug only: the pattern in one slot, if one is playing there. Allocation-free.</summary>
+        public bool TryReadSlot(int _slot, out RumbleActivePattern _active)
+        {
+            _active = new RumbleActivePattern();
+            if (_slot < 0 || _slot >= SlotCount)
+            {
+                return false;
+            }
+
+            RumblePattern pattern = slotPatterns[_slot];
+            if (pattern == null)
+            {
+                return false;
+            }
+
+            float elapsed = ReadClock(pattern) - slotStartTimes[_slot];
+            float timeShare = Mathf.Clamp01(elapsed / pattern.Duration);
+            float strength = slotStrengths[_slot];
+            _active.Pattern = pattern;
+            _active.Strength = strength;
+            _active.Elapsed = elapsed;
+            _active.CurrentLow = pattern.EvaluateLow(timeShare) * strength;
+            _active.CurrentHigh = pattern.EvaluateHigh(timeShare) * strength;
+            return true;
+        }
+
         public void Play(RumblePattern _pattern, float _strength)
         {
             if (_pattern == null || _strength <= 0f)
