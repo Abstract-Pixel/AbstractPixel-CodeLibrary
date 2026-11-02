@@ -20,7 +20,10 @@ namespace AbstractPixel.Rumble
         private readonly bool hasLaunchOverride;
         private readonly RumbleBackendMode launchOverrideMode;
 
+        private readonly RumbleBluetoothHealth bluetoothHealth = new RumbleBluetoothHealth();
+
         private RumbleBackendMode appliedMode;
+        private RumblePadIdentity padIdentity = RumblePadIdentity.None;
         private bool isReleased;
         private float nextSteamCheckTime;
 
@@ -31,6 +34,25 @@ namespace AbstractPixel.Rumble
             profile = _profile;
             hasLaunchOverride = RumbleLaunchArguments.TryReadBackendOverride(out launchOverrideMode);
         }
+
+        /// <summary>The backend mode in use (profile, launch argument, or Auto resolved to Unity in the Editor).</summary>
+        public RumbleBackendMode AppliedMode => appliedMode;
+
+        /// <summary>True in the Editor when the profile says Auto and it was turned into Unity.</summary>
+        public bool IsAutoResolvedForEditor
+        {
+            get
+            {
+                bool isProfileAuto = hasLaunchOverride == false && profile.BackendMode == RumbleBackendMode.Auto;
+                return isProfileAuto && appliedMode != RumbleBackendMode.Auto;
+            }
+        }
+
+        /// <summary>What the bound pad is (type, model, connection). Rebuilt on every bind.</summary>
+        public RumblePadIdentity PadIdentity => padIdentity;
+
+        /// <summary>Bluetooth drops and input silence of the bound pad (debug panel).</summary>
+        public RumbleBluetoothHealth BluetoothHealth => bluetoothHealth;
 
         /// <summary>Raised after the bound device or backend changed (for the service's debug fields).</summary>
         public event Action BindingChanged;
@@ -50,7 +72,7 @@ namespace AbstractPixel.Rumble
             RebindDevice(InputDeviceTracker.LastUsedDevice);
         }
 
-        /// <summary>Per frame: the dev toggle (one enum compare) and, once a second in Auto mode, the Steam check.</summary>
+        /// <summary>Per frame: the dev toggle (one enum compare) and, once a second in Auto / Steam mode, the Steam checks.</summary>
         public void Tick()
         {
             CheckDevToggle();
@@ -91,10 +113,12 @@ namespace AbstractPixel.Rumble
 
         public void HandleDeviceRemoved(InputDevice _device)
         {
+            bluetoothHealth.HandleRemoved(_device);
             if (_device == selector.BoundDevice)
             {
                 // Never write to a pad that is gone.
                 selector.DropWithoutWriting();
+                padIdentity = RumblePadIdentity.None;
                 BindingChanged?.Invoke();
                 return;
             }
@@ -145,10 +169,17 @@ namespace AbstractPixel.Rumble
             RebindDevice(InputDeviceTracker.LastUsedDevice);
         }
 
-        /// <summary>Once a second in Auto mode: if Unity serves the pad but Steam can see it now, switch to Steam.</summary>
+        /// <summary>
+        /// Once a second in Auto or Steam mode:
+        /// - Steam serves the pad but its handle is gone (reconnect, USB to Bluetooth) or, in Auto, the player turned
+        ///   Steam Input off: rebind, so the pad is served again (the full output state is re-sent).
+        /// - Unity serves the pad but Steam can serve it now (and the rules allow it): switch to Steam.
+        /// Never runs in Unity mode, so Steam is not touched there.
+        /// </summary>
         private void CheckForSteam()
         {
-            if (appliedMode != RumbleBackendMode.Auto)
+            bool isSteamMode = appliedMode == RumbleBackendMode.Auto || appliedMode == RumbleBackendMode.SteamInputOnly;
+            if (isSteamMode == false)
             {
                 return;
             }
@@ -164,7 +195,15 @@ namespace AbstractPixel.Rumble
             }
 
             nextSteamCheckTime = Time.unscaledTime + SteamCheckInterval;
-            bool isUpgraded = selector.TryUpgradeToSteam();
+            bool isSteamStillValid = selector.IsSteamBindingStillValid(appliedMode);
+            if (isSteamStillValid == false)
+            {
+                Debug.Log("[Rumble] Steam no longer serves the pad (handle gone or Steam Input turned off); rebinding.");
+                RebindDevice(InputDeviceTracker.LastUsedDevice);
+                return;
+            }
+
+            bool isUpgraded = selector.TryUpgradeToSteam(appliedMode);
             if (isUpgraded == false)
             {
                 return;
@@ -195,7 +234,11 @@ namespace AbstractPixel.Rumble
         /// </summary>
         private InputDevice PickRumbleDevice(InputDevice _device)
         {
-            if (_device is Gamepad)
+            // The last used device can be a pad that was unplugged (the tracker keeps it). Never bind a removed pad:
+            // fall through so a replugged or newly connected pad is used at once.
+            Gamepad usedPad = _device as Gamepad;
+            bool isLivePad = usedPad != null && usedPad.added;
+            if (isLivePad)
             {
                 return _device;
             }
@@ -208,12 +251,18 @@ namespace AbstractPixel.Rumble
             }
 
             Gamepad connectedPad = Gamepad.current;
-            if (connectedPad == null)
+            if (connectedPad != null && connectedPad.added)
             {
-                return _device;
+                return connectedPad;
             }
 
-            return connectedPad;
+            // Gamepad.all only lists connected pads. Runs on device events only, never per frame.
+            if (Gamepad.all.Count > 0)
+            {
+                return Gamepad.all[0];
+            }
+
+            return _device;
         }
 
         private RumbleBackendMode ReadDesiredMode()
@@ -247,7 +296,10 @@ namespace AbstractPixel.Rumble
             string deviceName = "none";
             if (_device != null)
             {
-                deviceName = _device.displayName;
+                // Layout + product + interface tell a real pad from a virtual one (Steam's virtual Xbox pad,
+                // DS4Windows / DSX), which is the first thing to check in a player's log.
+                deviceName = _device.displayName + " [layout " + _device.layout + ", product '" + _device.description.product
+                    + "', interface " + _device.description.interfaceName + "]";
             }
 
             RumbleCapabilities capabilities = RumbleCapabilities.None;
@@ -256,8 +308,18 @@ namespace AbstractPixel.Rumble
                 capabilities = selector.ActiveOutput.Capabilities;
             }
 
+            bool hasNoLightBarFeature = (profile.EnabledFeatures & RumbleCapabilities.LightBar) == 0;
+            if (hasNoLightBarFeature)
+            {
+                Debug.LogWarning("[Rumble] The light bar is switched off in RumbleOutputProfile (features).");
+            }
+
+            padIdentity = RumblePadIdentity.Read(_device, selector.DescribeActiveOutput());
+            bluetoothHealth.HandleBound(_device, padIdentity);
+            Debug.Log("[Rumble] Controller: " + padIdentity.LogLine);
             Debug.Log("[Rumble] Device: " + deviceName + " -> Backend: " + selector.DescribeActiveOutput()
-                + " -> Caps: " + capabilities + " (mode " + appliedMode + ")");
+                + " -> Caps: " + capabilities + " (mode " + appliedMode + ", " + selector.BackendReason
+                + ") Steam: " + selector.PreferredStatusLine);
         }
     }
 }

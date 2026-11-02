@@ -111,6 +111,14 @@ namespace AbstractPixel.Rumble
                     continue;
                 }
 
+                // A game-time pattern is frozen while Time.timeScale is 0 (pause): stay silent instead of holding its
+                // current value on the motors, and carry on from the same point when the game resumes.
+                bool isFrozenByPause = pattern.UseUnscaledTime == false && Time.timeScale <= 0f;
+                if (isFrozenByPause)
+                {
+                    continue;
+                }
+
                 float timeShare = elapsed / pattern.Duration;
                 AddPatternSample(pattern, timeShare, slotStrengths[slot]);
             }

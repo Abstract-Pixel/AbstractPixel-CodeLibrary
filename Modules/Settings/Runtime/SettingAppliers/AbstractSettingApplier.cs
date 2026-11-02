@@ -31,7 +31,17 @@ namespace AbstractPixel.Settings
                 return;       
             }
 
-            ISettingBackend resolvedBackend = SettingsManager.Instance.GetSetting(targetSetting.TBaseType);
+            // SettingsManager.Instance is null while the app is quitting or leaving Play mode. Wait for the next
+            // settings load instead of throwing (same as when the setting is not found yet, below).
+            SettingsManager settingsManager = SettingsManager.Instance;
+            if (settingsManager == null)
+            {
+                SettingsActions.OnSettingsLoaded -= BindToBackendSetting;
+                SettingsActions.OnSettingsLoaded += BindToBackendSetting;
+                return;
+            }
+
+            ISettingBackend resolvedBackend = settingsManager.GetSetting(targetSetting.TBaseType);
             liveBoundSetting = resolvedBackend as BaseSetting<TValue>;
 
             if (liveBoundSetting == null)

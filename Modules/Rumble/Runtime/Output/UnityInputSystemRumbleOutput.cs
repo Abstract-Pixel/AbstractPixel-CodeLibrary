@@ -8,34 +8,39 @@ namespace AbstractPixel.Rumble
 {
     /// <summary>
     /// Backend through the Unity Input System. Rumble on any IDualMotorRumble pad, light bar on raw-HID PlayStation
-    /// pads, and adaptive triggers on a USB DualSense through a raw HID report (works in the Editor and in builds).
+    /// pads, and on a DualSense (USB or Bluetooth) one raw report with motors, light bar, player LEDs and adaptive
+    /// triggers (DualSenseRawWriter). Works the same in the Editor and in builds.
     /// </summary>
     public class UnityInputSystemRumbleOutput : IRumbleOutput
     {
+        private const int MaxRefusedSendsInARow = 30;
+
         private readonly Func<Color> getRestColor;
+        private readonly DualSenseRawWriter rawWriter = new DualSenseRawWriter();
 
         private IDualMotorRumble boundRumble;
         private DualShockGamepad boundDualShock;
-        private const int MaxRefusedSendsInARow = 30;
-
-        // A DualSense also refuses while a command is in flight, so only many refusals in a row mean "unsupported".
-        // Lower than MaxRefusedSendsInARow, so the fallback starts before rumble would be turned off.
-        private const int MaxRefusedRawReportsInARow = 15;
-        private int refusedRawReportsInARow;
-
         private string displayName = "Unity (none)";
         private bool hasPendingSend;
         private int refusedSendsInARow;
+        // Set once the pad has refused too many sends: stop writing (no per-frame retries) until the next bind.
+        private bool hasGivenUp;
+        // One warning per bind when a write throws, instead of one per frame.
+        private bool hasLoggedWriteException;
+        // From the pad's HID descriptor at bind: Bluetooth PlayStation pads declare output reports of 78 bytes or more.
+        private bool isBoundPadOnBluetooth;
+        private bool hasLoggedBluetoothSkip;
         private RumbleCapabilities capabilities = RumbleCapabilities.None;
 
-        // The DualShock HID command sends motors and colour together, so all three are remembered.
+        // One command carries everything on PlayStation pads, so the whole state is remembered.
         private float lastLow;
         private float lastHigh;
         private Color lastColor;
+        private byte lastPlayerLeds;
         private TriggerEffect lastBrake = TriggerEffect.Off;
         private TriggerEffect lastThrottle = TriggerEffect.Off;
 
-        // A DualSense gets the raw report (motors + light + triggers). Turned off if the pad refuses it (Bluetooth).
+        // A DualSense gets the raw report. Turned off only if the pad refuses both USB and Bluetooth formats.
         private bool isRawDualSenseReportUsable;
 
         public UnityInputSystemRumbleOutput(Func<Color> _getRestColor)
@@ -45,6 +50,36 @@ namespace AbstractPixel.Rumble
 
         public string DisplayName => displayName;
         public RumbleCapabilities Capabilities => capabilities;
+
+        /// <summary>Debug: the pad refused too many sends in a row, so output to it stopped until it reconnects.</summary>
+        public bool HasGivenUp => hasGivenUp;
+
+        /// <summary>
+        /// Debug: a PlayStation pad on Bluetooth without the game's raw report. Nothing is sent to it, because Unity's
+        /// own PlayStation call is USB-only.
+        /// </summary>
+        public bool IsSkippingBluetoothPad
+        {
+            get
+            {
+                bool isPlayStationOnBluetooth = boundDualShock != null && isBoundPadOnBluetooth;
+                return isPlayStationOnBluetooth && isRawDualSenseReportUsable == false;
+            }
+        }
+
+        /// <summary>Diagnostics for the debug overlay. Null when the bound pad is not a DualSense.</summary>
+        public DualSenseRawWriter DualSenseDiagnostics
+        {
+            get
+            {
+                if (boundDualShock is DualSenseGamepadHID)
+                {
+                    return rawWriter;
+                }
+
+                return null;
+            }
+        }
 
         public bool TryBind(InputDevice _activeDevice)
         {
@@ -62,24 +97,36 @@ namespace AbstractPixel.Rumble
             lastLow = 0f;
             lastHigh = 0f;
             lastColor = ReadRestColor();
+            lastPlayerLeds = 0;
             lastBrake = TriggerEffect.Off;
             lastThrottle = TriggerEffect.Off;
-            hasPendingSend = false;
             refusedSendsInARow = 0;
+            hasGivenUp = false;
+            hasLoggedWriteException = false;
+            hasLoggedBluetoothSkip = false;
+            isBoundPadOnBluetooth = false;
+            if (boundDualShock != null)
+            {
+                int outputReportSize = DualSenseRawWriter.ReadDescriptorOutputReportSize(_activeDevice);
+                isBoundPadOnBluetooth = outputReportSize >= DualSenseBluetoothOutputCommand.ReportSize;
+            }
 
             if (boundDualShock != null)
             {
                 capabilities |= RumbleCapabilities.LightBar;
             }
 
-            refusedRawReportsInARow = 0;
             isRawDualSenseReportUsable = _activeDevice is DualSenseGamepadHID;
+            displayName = "Unity (" + _activeDevice.GetType().Name + ")";
             if (isRawDualSenseReportUsable)
             {
-                capabilities |= RumbleCapabilities.AdaptiveTriggers;
+                rawWriter.Bind(_activeDevice);
+                capabilities |= RumbleCapabilities.AdaptiveTriggers | RumbleCapabilities.PlayerLeds;
+                displayName = "Unity (DualSense " + rawWriter.GuessedTransport + ")";
             }
 
-            displayName = "Unity (" + _activeDevice.GetType().Name + ")";
+            // Send the rest state at once, so the first report also takes the LEDs back from the pad.
+            hasPendingSend = true;
             return true;
         }
 
@@ -108,27 +155,16 @@ namespace AbstractPixel.Rumble
             return true;
         }
 
-        /// <summary>
-        /// Sends motors + colour as ONE command, once per frame. PlayStation pads refuse a command while another is
-        /// in flight, so a refusal is retried next frame and only counts as a failure after many misses in a row.
-        /// </summary>
-        public bool Flush()
+        public bool SetPlayerLeds(byte _litMask)
         {
-            if (hasPendingSend == false || boundRumble == null)
+            if (isRawDualSenseReportUsable == false)
             {
-                return true;
+                return false;
             }
 
-            bool isSent = SendCurrentState();
-            if (isSent)
-            {
-                hasPendingSend = false;
-                refusedSendsInARow = 0;
-                return true;
-            }
-
-            refusedSendsInARow++;
-            return refusedSendsInARow < MaxRefusedSendsInARow;
+            lastPlayerLeds = _litMask;
+            hasPendingSend = true;
+            return true;
         }
 
         public bool SetTriggers(TriggerEffect _brake, TriggerEffect _throttle)
@@ -144,6 +180,46 @@ namespace AbstractPixel.Rumble
             return true;
         }
 
+        /// <summary>
+        /// Sends the whole state as ONE command, once per frame. PlayStation pads refuse a command while another is
+        /// in flight, so a refusal is retried next frame and only counts as a failure after many misses in a row.
+        /// </summary>
+        public bool Flush()
+        {
+            // Bluetooth DualSense: the light hand-over is due after the connection animation even if nothing changed.
+            if (isRawDualSenseReportUsable && rawWriter.IsLightHandOverDue)
+            {
+                hasPendingSend = true;
+            }
+
+            if (hasPendingSend == false || boundRumble == null)
+            {
+                return true;
+            }
+
+            if (hasGivenUp)
+            {
+                return false;
+            }
+
+            bool isSent = SendCurrentState();
+            if (isSent)
+            {
+                hasPendingSend = false;
+                refusedSendsInARow = 0;
+                return true;
+            }
+
+            refusedSendsInARow++;
+            bool isStillTrying = refusedSendsInARow < MaxRefusedSendsInARow;
+            if (isStillTrying == false)
+            {
+                GiveUpOnPad();
+            }
+
+            return isStillTrying;
+        }
+
         public bool Reset()
         {
             if (boundRumble == null)
@@ -154,6 +230,7 @@ namespace AbstractPixel.Rumble
             lastLow = 0f;
             lastHigh = 0f;
             lastColor = ReadRestColor();
+            lastPlayerLeds = 0;
             lastBrake = TriggerEffect.Off;
             lastThrottle = TriggerEffect.Off;
             hasPendingSend = false;
@@ -164,6 +241,8 @@ namespace AbstractPixel.Rumble
         {
             boundRumble = null;
             boundDualShock = null;
+            rawWriter.Unbind();
+            isRawDualSenseReportUsable = false;
             capabilities = RumbleCapabilities.None;
             displayName = "Unity (none)";
         }
@@ -178,10 +257,17 @@ namespace AbstractPixel.Rumble
         {
             try
             {
-                // Only one output command runs at a time on these pads, so everything goes in one command.
                 if (isRawDualSenseReportUsable)
                 {
                     return SendRawDualSenseReport();
+                }
+
+                // Unity's own PlayStation calls only send the USB report. Over Bluetooth that is garbage to the pad
+                // (Unity measured FPS drops from it), so skip it there: rumble on this pad is lost, but nothing breaks.
+                if (boundDualShock != null && isBoundPadOnBluetooth)
+                {
+                    LogBluetoothSkipOnce();
+                    return true;
                 }
 
                 if (boundDualShock is DualSenseGamepadHID dualSense)
@@ -199,46 +285,70 @@ namespace AbstractPixel.Rumble
             }
             catch (Exception exception)
             {
-                Debug.LogWarning("[Rumble] Unity backend write failed: " + exception.Message);
+                if (hasLoggedWriteException == false)
+                {
+                    hasLoggedWriteException = true;
+                    Debug.LogWarning("[Rumble] Unity backend write threw on " + displayName + ": " + exception);
+                }
+
                 return false;
             }
         }
 
+        private void LogBluetoothSkipOnce()
+        {
+            if (hasLoggedBluetoothSkip)
+            {
+                return;
+            }
+
+            hasLoggedBluetoothSkip = true;
+            Debug.LogWarning("[Rumble] " + displayName + " is on Bluetooth and the game's raw report is not available for it: "
+                + "no rumble or light bar from the Unity backend. Steam Input (Auto mode) or a USB cable fixes it.");
+        }
+
+        /// <summary>One clear line for Player.log, then no more writes to this pad until it is bound again.</summary>
+        private void GiveUpOnPad()
+        {
+            hasGivenUp = true;
+            hasPendingSend = false;
+            string deviceName = "none";
+            InputDevice boundDevice = boundRumble as InputDevice;
+            if (boundDevice != null)
+            {
+                deviceName = boundDevice.layout + " '" + boundDevice.description.product + "'";
+            }
+
+            Debug.LogWarning("[Rumble] Unity backend: " + deviceName + " refused " + MaxRefusedSendsInARow
+                + " sends in a row. Output to this pad stops until it reconnects. Raw DualSense report used: "
+                + isRawDualSenseReportUsable + ". A DualShock 4 over Bluetooth, or a tool like DS4Windows/DSX, causes this.");
+        }
+
         /// <summary>
-        /// Motors, light bar and triggers in one USB report. A refusal is retried next frame (the pad may be busy).
-        /// If the pad keeps rejecting it (e.g. over Bluetooth),
-        /// this pad falls back to Unity's motor + light call and loses the triggers, instead of losing rumble.
+        /// Motors, light bar, player LEDs and triggers in one report, in the pad's USB or Bluetooth format.
+        /// If the pad refuses both formats, this pad falls back to Unity's motor + light call and loses triggers and LEDs.
         /// </summary>
         private bool SendRawDualSenseReport()
         {
-            DualSenseHidOutputCommand command = DualSenseHidOutputCommand.Create();
-            command.SetMotors(lastLow, lastHigh);
-            command.SetLightBar(lastColor);
-            command.SetTriggers(lastBrake, lastThrottle);
+            DualSenseOutputState state = new DualSenseOutputState();
+            state.SetMotors(lastLow, lastHigh);
+            state.SetLightBar(lastColor);
+            state.SetPlayerLeds(lastPlayerLeds);
+            state.SetTriggers(lastBrake, lastThrottle);
 
-            // The pad can be unplugged a moment before the unplug event reaches us: never send to a removed device.
-            InputDevice device = boundDualShock;
-            if (device == null || device.added == false)
+            DualSenseWriteResult result = rawWriter.Write(state);
+            if (result == DualSenseWriteResult.Sent)
             {
                 return true;
             }
 
-            long result = device.ExecuteCommand(ref command);
-            if (result >= 0)
-            {
-                refusedRawReportsInARow = 0;
-                return true;
-            }
-
-            refusedRawReportsInARow++;
-            if (refusedRawReportsInARow < MaxRefusedRawReportsInARow)
+            if (result == DualSenseWriteResult.Busy)
             {
                 return false;
             }
 
-            Debug.LogWarning("[Rumble] DualSense raw report refused (result " + result + "). Triggers off for this pad; rumble and light bar continue.");
             isRawDualSenseReportUsable = false;
-            capabilities &= ~RumbleCapabilities.AdaptiveTriggers;
+            capabilities &= ~(RumbleCapabilities.AdaptiveTriggers | RumbleCapabilities.PlayerLeds);
             return false;
         }
 

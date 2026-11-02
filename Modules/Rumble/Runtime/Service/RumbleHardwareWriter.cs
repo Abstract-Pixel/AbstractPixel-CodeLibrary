@@ -20,6 +20,18 @@ namespace AbstractPixel.Rumble
         private TriggerEffect sentBrake;
         private TriggerEffect sentThrottle;
         private bool hasSentTriggers;
+        private byte sentPlayerLeds;
+        private bool hasSentPlayerLeds;
+
+        // Steam can repaint the light bar itself (config change, overlay, reconnect) without telling us, so the same
+        // colour is re-sent this often on Steam. One tiny call every two seconds.
+        private const float SteamLightBarRefreshInterval = 2f;
+        private float nextLightBarRefreshTime;
+
+        // Breathing / beat effects change the colour every frame; 30 writes a second already looks smooth and keeps
+        // HID and Steam traffic low on high refresh-rate screens. A skipped change is picked up on a later frame.
+        private const float LightBarMinWriteInterval = 1f / 30f;
+        private float lastLightBarWriteTime = float.NegativeInfinity;
 
         public RumbleHardwareWriter(RumbleBackendSelector _selector)
         {
@@ -39,6 +51,9 @@ namespace AbstractPixel.Rumble
             sentHigh = -1f;
             hasSentColor = false;
             hasSentTriggers = false;
+            hasSentPlayerLeds = false;
+            nextLightBarRefreshTime = 0f;
+            lastLightBarWriteTime = float.NegativeInfinity;
             nextMotorWriteTime = 0f;
             nextTriggerWriteTime = 0f;
             steamImpactPunch.Reset();
@@ -149,11 +164,20 @@ namespace AbstractPixel.Rumble
                 && quantisedColor.r == sentColor.r
                 && quantisedColor.g == sentColor.g
                 && quantisedColor.b == sentColor.b;
-            if (isSameColor)
+            bool isRefreshDue = selector.IsSteamActive && Time.unscaledTime >= nextLightBarRefreshTime;
+            if (isSameColor && isRefreshDue == false)
             {
                 return;
             }
 
+            bool isTooSoon = Time.unscaledTime - lastLightBarWriteTime < LightBarMinWriteInterval;
+            if (isTooSoon)
+            {
+                return;
+            }
+
+            lastLightBarWriteTime = Time.unscaledTime;
+            nextLightBarRefreshTime = Time.unscaledTime + SteamLightBarRefreshInterval;
             sentColor = quantisedColor;
             hasSentColor = true;
             WritesThisSession++;
@@ -162,6 +186,32 @@ namespace AbstractPixel.Rumble
             if (isWritten == false)
             {
                 selector.ReportFailure(RumbleCapabilities.LightBar);
+            }
+        }
+
+        /// <summary>DualSense player-indicator dots (bit 0 = leftmost). Change-only, so a blink costs one write per toggle.</summary>
+        public void WritePlayerLeds(byte _litMask)
+        {
+            IRumbleOutput output = selector.ActiveOutput;
+            if (output == null)
+            {
+                return;
+            }
+
+            bool isSame = hasSentPlayerLeds && _litMask == sentPlayerLeds;
+            if (isSame)
+            {
+                return;
+            }
+
+            sentPlayerLeds = _litMask;
+            hasSentPlayerLeds = true;
+            WritesThisSession++;
+
+            bool isWritten = output.SetPlayerLeds(_litMask);
+            if (isWritten == false)
+            {
+                selector.ReportFailure(RumbleCapabilities.PlayerLeds);
             }
         }
 

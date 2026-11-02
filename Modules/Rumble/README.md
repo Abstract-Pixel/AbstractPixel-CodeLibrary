@@ -1,268 +1,288 @@
 # Controller Rumble
 
-Rumble (both motors), the PlayStation light bar and DualSense adaptive triggers, behind one service.
-Game code **asks** for feedback. `RumbleService` decides what the connected pad can show, mixes every request,
-and talks to the hardware through a backend (Steam Input or the Unity Input System).
+Controller feedback in one service: **rumble** (the two motors), the **light bar** (the coloured strip on PlayStation
+pads), the **player LEDs** (the small white line under a DualSense touchpad) and the DualSense **adaptive triggers**
+(L2 / R2 that push back or buzz).
 
-## The whole system in one picture
+Read from the top. Each section goes one level deeper; stop when you know enough.
 
-```
- Gameplay code                              RumbleService  (the public API, one per game)
- ─────────────                              ──────────────────────────────────────────────
- RumblePatternPlayer.PlayOnce(pattern) ──►  Play(pattern) ──► RumblePatternMixer (4 one-shot slots)
- CarRumbleDirector (game, every tick)  ──►  SetContinuous / SetTriggers / SetLightBar
- Pause, finish, game over              ──►  Silence(true / false)
-                                                 │  each frame: mix → gating
-                                                 ▼
-                                            RumbleHardwareWriter  (Steam compensation, player slider,
-                                                 │                 rate limit, send only changes)
-                                                 ▼
-                                            IRumbleOutput   (chosen by RumbleDeviceBinder + RumbleBackendSelector)
-                                             ├─ SteamInputRumbleOutput        (Steam Input API)
-                                             └─ UnityInputSystemRumbleOutput  (Unity Input System, raw DualSense report)
-                                                 │
-                                                 ▼
-                                              controller
-```
+1. [Use it](#1-use-it) – the few calls you need
+2. [What the game does with it](#2-what-the-game-does-with-it) – car, menus, UI
+3. [Change how it feels](#3-change-how-it-feels) – which asset to edit
+4. [How a call reaches the controller](#4-how-a-call-reaches-the-controller) – the pipeline
+5. [Steam or Unity: which one talks to the pad](#5-steam-or-unity-which-one-talks-to-the-pad)
+6. [When it doesn't work](#6-when-it-doesnt-work) – debug panel and known causes
+7. [Deep dive](#7-deep-dive) – raw DualSense reports, Bluetooth, adding a backend
 
-**From a gameplay call to the controller, one frame:**
-1. Game code calls `RumbleService` (or `RumblePatternPlayer.PlayOnce`). A call only stores the request; nothing is sent yet.
-2. In `RumbleService.Update` the playing patterns are sampled. For each motor the **strongest** value wins:
-   `max(continuous × (1 − mute from patterns), strongest pattern)`, times the profile's *Master Intensity*.
-3. Gating: game silence (pause, finish), window focus, feature switches, the motor dead zone and the motor on/off switches.
-4. `RumbleHardwareWriter` applies the backend compensation (Steam only), then the player's *Controller Vibration*
-   slider (last, so 50 % always means half). It sends only real changes, at most *Output Update Rate* times a second.
-5. The active `IRumbleOutput` writes to the pad. If a write fails, that feature is turned off for the session and the
-   rest keeps working.
+**Words used here**
 
-**Which pad and which backend:** `RumbleDeviceBinder` follows the pad the player is using. It ignores a resting second
-pad, and keeps the connected pad when the last input was mouse or keyboard. `RumbleBackendSelector` picks the backend
-for that pad from *Backend Mode*: Auto uses the preferred backend (Steam) if it can serve the pad, otherwise Unity.
-You never handle devices, unplugging, alt-tab or quitting: the service resets the pad itself.
-
-## `RumbleService`: the front door (public API)
-
-`RumbleService` is the **only** script game code talks to. Get it with `ServiceLocator.TryGet(out RumbleService rumble)`.
-Everything else in the module is internal plumbing.
-
-| Call | What it does |
+| Word | Meaning |
 |---|---|
-| `Play(pattern, strength = 1)` | Starts a one-shot pattern (crash, explosion, menu shake). Up to 4 play at once; a 5th replaces the weakest |
-| `StopAllPatterns()` | Stops **every** playing one-shot immediately |
-| `SetContinuous(low, high)` | Ongoing rumble, 0..1 per motor (low = heavy/left, high = light/right). Re-send it every tick |
-| `SetTriggers(brake, throttle)` | DualSense trigger effects: `TriggerEffect.Resistance(start, strength)`, `TriggerEffect.Vibration(start, amplitude, frequency)` or `TriggerEffect.Off` |
-| `SetLightBar(color)` / `ClearLightBar()` | PlayStation light bar colour / back to the rest colour |
-| `Silence(true / false)` | See "Silence and one-shots" below |
-| `SetPreferredBackend(output)` | Hands in the preferred backend (Steam, or your own). See "Adding a backend" |
-| `ActiveCapabilities` | What the current pad can show right now (`Rumble`, `LightBar`, `AdaptiveTriggers`) |
-| `RumbleService.PlayerIntensity` / `RumbleService.AreTriggersEnabled` | Player settings (static), set by `ControllerVibrationSetting` and `AdaptiveTriggersSetting` |
-| `RegisterDebugSource` / `UnregisterDebugSource` | Show a non-pattern feeder (like the car) in the debug overlay |
+| Pattern | An asset describing one short shake (a crash, a click). Plays to its end by itself |
+| Continuous | Rumble the game re-sends every tick, like driving over gravel |
+| Backend | The code that actually talks to the pad: **Steam** (Steam's controller API) or **Unity** (the Unity Input System) |
+| Steam Input | Steam's controller layer. When it is on for a pad type, Steam owns that pad and the game should talk to Steam |
+| Capability | Something the current pad can show: `Rumble`, `LightBar`, `AdaptiveTriggers`, `PlayerLeds` |
 
-The simplest call needs no service lookup: `RumblePatternPlayer.PlayOnce(myPattern)`. You can also add a
-`RumblePatternPlayer` component: tick *Play On Enable*, or call `Play()` from a UnityEvent. Both do nothing,
-safely, when the pattern or the service is missing.
+---
 
-## Silence and one-shots (exact behaviour)
+## 1. Use it
 
-There are two kinds of rumble:
-- **Continuous** (`SetContinuous`, `SetTriggers`): what the game sends every tick, such as driving.
-- **One-shots** (`Play(pattern)`): a pattern with a fixed duration that plays to its end by itself.
+Get the service once: `ServiceLocator.TryGet(out RumbleService rumble)`. It is the only class game code talks to.
 
-`Silence(true)` turns off **the continuous motors and the triggers**. It does **not** touch one-shots: they keep
-playing and are still felt. This is on purpose. Menus run while the game is silenced (pause, win screen), and their
-shakes (engine start, victory guitar, rank stamp) are one-shots that must still play. The light bar keeps working too.
-
-One-shots **can** be stopped, but only all together, with `StopAllPatterns()`. A single one-shot can't be stopped,
-because `Play` returns no handle to it. The car uses this: when it becomes silenced (pause, finish, game over),
-`CarRumbleDirector` calls `StopAllPatterns()` first, so a crash shake doesn't continue into the pause menu. On game
-over it then plays the explosion afterwards.
-
-Separately, when the game window loses focus, **all** motors go to 0 (one-shots included) until it is focused again.
-
-## The car (game code, `Assets/[1]Project/GameplaySystems/ControllerFeedback/`)
-
-The car is a **client** of `RumbleService`, not part of the module. `CarRumbleDirector` runs 30 times a second and:
-- sends the **continuous** driving rumble with `SetContinuous`. `CarContinuousRumble` works it out from road and
-  throttle by speed, the brake and the launch kick;
-- sends the **triggers** with `SetTriggers`. `CarTriggerFeedback` works out the brake shudder, throttle kick and resistance;
-- plays **one-shots** for events with `Play`. `CarRumbleMoments` handles crash, hit, landing, bomb pulse and explosion;
-- drives the light bar (health colour, hit flash) and calls `Silence` for pause, finish and game over.
-
-All its values are on `CarRumbleProfile.asset`. The car's continuous rumble is not a pattern, so it shows in the
-debug overlay through `CarRumbleDebugSource`.
-
-## Debug overlay (find conflicts)
-
-`RumbleDebugOverlay` sits on the `Rumble` object in ManagerBootScene. In the Editor or a development build, press
-**F9** in Play mode. The key and whether it starts visible are fields on the component. It lists, live:
-- **One-shot patterns:** each playing slot with its name, strength, current heavy / light value and time left.
-  Flags: `MUTES-DRIVING` (the driving rumble is pushed down under it), `LIGHT-BAR` and `TRIGGER-BUZZ`.
-- **Continuous sources:** for example *Car (continuous)*, with its road+throttle, brake and launch-kick parts and its
-  trigger effects, or "silenced".
-- **Mix:** the continuous rumble requested, how much the patterns mute it, the mixed value, what was actually sent to
-  the pad (after the backend boost and the player slider), and the requested triggers.
-
-**Reading it:**
-- When several patterns play at once, the **strongest value per motor wins**, so a weak pattern under a strong one
-  isn't felt at all.
-- A `MUTES-DRIVING` pattern pushes the car's rumble down.
-- Tune pattern strengths and flags (or the *Strength By Speed* curves in `CarRumbleProfile`) until each moment reads
-  on its own.
-
-While hidden, the overlay costs one key check per frame. In a release build it switches itself off.
-
-**To show your own system in it:** implement `IRumbleDebugSource` (`DebugName`, `ReadDebugLine()`). Then call
-`RegisterDebugSource`, which is safe to call every frame, and `UnregisterDebugSource` when you're done.
-
-## Adding a backend (`IRumbleOutput`)
-
-A backend is one class that turns the service's final values into hardware writes. The two built-in ones are
-`SteamInputRumbleOutput` and `UnityInputSystemRumbleOutput`. Write a new one for another API, such as a platform SDK
-or a dedicated trigger or haptics library.
-
-**What to implement** (every method returns `false` on failure and must never throw):
-
-| Member | Job |
+| I want to… | Call |
 |---|---|
-| `DisplayName` | Text for logs and the debug overlay |
-| `Capabilities` | What this backend can do for the bound pad: `Rumble`, `LightBar`, `AdaptiveTriggers` |
-| `TryBind(device)` | Can it serve this Input System device? Find the device's handle; return `false` if not |
-| `SetMotors(low, high)` | Both motors, 0..1 |
-| `SetLightBar(color)` | Light bar colour. If unsupported, return `true` and do nothing |
-| `SetTriggers(brake, throttle)` | Trigger effects (`TriggerEffect`: Off, Resistance or Vibration) |
-| `Flush()` | Called at the end of each tick, for backends that batch writes |
-| `Reset()` | Motors to 0, triggers off, light bar restored |
-| `Unbind()` | Forget the pad without writing to it (it was unplugged) |
-| `Release()` | Free native resources on quit |
+| Play a one-off shake | `RumblePatternPlayer.PlayOnce(pattern)` (no lookup needed, safe if anything is missing) |
+| Rumble continuously (send every tick) | `rumble.SetContinuous(heavy, light)`, each 0..1 |
+| Colour the light bar | `rumble.SetLightBar(color)`; `ClearLightBar()` goes back to the default colour |
+| Light the player LEDs | `rumble.SetPlayerLeds(mask)`; 5 bits, bit 0 = leftmost. `ClearPlayerLeds()` turns them off |
+| Make the triggers resist or buzz | `rumble.SetTriggers(brake, throttle)` with `TriggerEffect.Resistance(...)`, `.Vibration(...)` or `.Off` |
+| Mute driving rumble (pause, menus) | `rumble.Silence(true)`; one-off shakes still play |
+| Stop every one-off shake now | `rumble.StopAllPatterns()` |
+| Know what the pad can do | `rumble.ActiveCapabilities` |
 
-**Where to register it:**
-- There is one *preferred* slot (Steam uses it today) plus the built-in Unity fallback.
-- Call `SetPreferredBackend(yourOutput)` once at start-up, from a small installer component next to `RumbleService`,
-  like `SteamRumbleInstaller` in the game.
-- With *Backend Mode* set to Auto, your backend is tried first and Unity is the fallback.
-- *Steam Input Only* means "preferred backend only"; the name is historical.
-- The Steam compensation (see below) applies to whatever sits in the preferred slot.
+You never handle plugging, unplugging, switching pads, alt-tab or quitting. The service does.
 
-**Minimal example:**
+No code at all: add a `RumblePatternPlayer` component next to a sound and tick *Play On Enable*, or call `Play()` from
+a UnityEvent.
 
-```csharp
-public class MyTriggerOutput : IRumbleOutput
-{
-    public string DisplayName => "My Trigger SDK";
-    public RumbleCapabilities Capabilities => RumbleCapabilities.Rumble | RumbleCapabilities.AdaptiveTriggers;
+## 2. What the game does with it
 
-    public bool TryBind(InputDevice _activeDevice) { return MySdk.IsConnected(_activeDevice); }
-    public bool SetMotors(float _low, float _high) { return MySdk.Rumble(_low, _high); }
-    public bool SetLightBar(Color _color) { return true; }   // not supported: nothing to do
-    public bool SetTriggers(TriggerEffect _brake, TriggerEffect _throttle) { return MySdk.Triggers(_brake, _throttle); }
-    public bool Flush() { return true; }
-    public bool Reset() { return MySdk.Rumble(0f, 0f); }
-    public void Unbind() { }
-    public void Release() { }
-}
+Game code lives in `Assets/[1]Project/GameplaySystems/ControllerFeedback/`.
 
-[RequireComponent(typeof(RumbleService))]
-public class MyTriggerInstaller : MonoBehaviour
-{
-    private void Start()
-    {
-        RumbleService rumbleService = GetComponent<RumbleService>();
-        rumbleService.SetPreferredBackend(new MyTriggerOutput());
-    }
-}
-```
+**Light bar, by situation**
 
-(`MySdk` stands for your library.)
-
-## Where to configure things
-
-| I want to change… | Edit this | Location |
+| Situation | Light bar | Who sets it |
 |---|---|---|
-| Backend (Auto / Steam / Unity / Off), master strength, write rates, motor switches, dead zone, features, rest colour, Steam compensation | `RumbleOutputProfile` | `Assets/[1]Project/ProjectServices/Rumble/RumbleOutputProfile.asset` |
-| How driving feels: road, throttle, launch kick, brake, triggers, light bar, and which pattern plays for crash/hit/landing/bomb/explosion | `CarRumbleProfile` | `Assets/[1]Project/GameplaySystems/ControllerFeedback/CarRumbleProfile.asset` |
-| The shape of one moment | a `RumblePattern` | `Assets/[1]Project/GameplaySystems/ControllerFeedback/Patterns/` |
-| Player strength and trigger on/off | *Controller Vibration* and *Adaptive Triggers* (Settings → Controls → Controller Feedback) | `ControllerVibrationSetting`, `AdaptiveTriggersSetting` |
+| Main menu | Purple, slow breath | `MenuLightBarFeedback` (LevelSelectionScene) |
+| Level select | The shown stage's colour (`StageThemePalette.GlowColor`), changes with the page | `MenuLightBarFeedback` |
+| Driving | Health colour (green → red); a white flash on every hit | `CarRumbleDirector` → `CarLightBarFeedback` |
+| Bomb at high priority | Each bomb beat: black, ramp to red, **fast** snap back to the health colour | same |
+| Paused (any menu over gameplay) | Orange, slow breath | same |
+| Game Over | Red, slow breath | same |
+| Win screen | Green, slow breath | same |
 
-Curves read the same everywhere: **X = 0..1** (speed share or time share) and **Y = 0..1** (strength). Every field has
-a tooltip. Edit assets during Play mode: you feel the change at once, and it's kept.
+"Breath" = the colour dims and brightens smoothly (`LightBarBreath`). The DualSense has no built-in pulse
+animation for the light bar, so the game animates the colour itself; only real changes are sent to the pad.
 
-**Pattern fields:**
+**Player LEDs** (Unity backend only, see section 5): a health bar. 5 lit at full health, one fewer per lost fifth, a
+quick flash on every hit, blinking at 25 % health or less, all off at Game Over (`CarPlayerLedFeedback`).
 
-| Field | Meaning |
+**Rumble moments:** road, throttle, brake and launch kick (continuous); crash, hit, landing, bomb beat, explosion
+(patterns); engine start on the main menu, the Play roar, the victory guitar and the rank stamp.
+
+**UI:** every button that announces itself on `UIInteractionEvents` (AbstractPixel.Core) also rumbles: a light
+tick on hover or gamepad select, and a very short heavy knock on click. This is `UIRumbleFeedback`, which lives in
+ManagerBootScene. RallyShift's `UIAudioFeedback` raises those events whenever it plays a UI sound. Buttons that
+already have their own shake carry a `SkipUIClickRumble` component (level select's Play button).
+
+**Reusable pieces in this module** (`Runtime/Feedback/`, not tied to RallyShift):
+
+| Class | What it does |
 |---|---|
-| Heavy Motor Left / Light Motor Right | Strength over the pattern's duration for each motor |
-| Strength | Scales both curves |
-| Mute Driving Rumble | The continuous rumble is pushed down while this plays, so the moment is felt on its own |
-| Flash Light Bar | The light bar shows the flash colour while this plays |
-| Buzz Triggers | L2 and R2 vibrate while this plays (DualSense, both backends) |
-| Use Unscaled Time | Pause and slow motion don't stretch it. Leave it on |
+| `LightBarBreath` | Breathing colour pulse for the light bar |
+| `UIRumbleFeedback` | UI hover and click rumble |
+| `SkipUIClickRumble` | Marker that turns the click rumble off for one button |
 
-**Backend Mode** (the dev toggle) works live in Play mode. In builds, use the launch option
-`-rumble-backend=auto|steam|unity|off`.
-- In the Editor, **Auto means Unity**, because Steam only drives pads for games it launched.
-- Pick *Steam Input Only* to test Steam in the Editor on purpose. Steam must be running, with Steam Input enabled for
-  the game.
-- Every device or backend change logs one `[Rumble] Device: … -> Backend: …` line.
+Any game can use them. It only needs a component that calls `UIInteractionEvents.RaiseHovered` / `RaiseClicked`.
 
-## Designer workflow
+## 3. Change how it feels
 
-1. **Make a moment:** *Create → AbstractPixel → Rumble → Rumble Pattern*.
-2. **Shape it from its sound (recommended):** in the pattern's inspector, open **Bake from sound** and drop in the clip.
-   Copy the start, end trim, delay and fades from how the sound is played (its BroAudio entity), then press **Bake**.
-   - The heavy motor follows the deep part of the sound; the light motor follows the sharp part (clicks, strums).
-   - Quiet moments become gaps.
-   - Re-bake any time the sound changes. You can also draw the two curves by hand.
-3. **Feel it:** enter Play mode, keep the Game view focused, and press **Preview on controller** in the pattern's
-   inspector. Tweak the curves or *Strength* and press it again; Play-mode edits to the asset are kept.
-4. **Hook it up:** add one `RumblePatternPlayer.PlayOnce(pattern)` call next to the sound's `BroAudio.Play(...)`, or add a
-   `RumblePatternPlayer` component. Nothing else needs wiring.
-5. **Check both backends:** switch *Backend Mode* between *Unity Input System Only* and *Steam Input Only* live, and press
-   Preview again.
-6. **Check it in context:** press F9 during the moment and look at the overlay for anything that hides or mutes it.
+All fields have tooltips and can be edited in Play mode (the change is felt at once and kept).
 
-Tips:
-- A pattern louder than the driving rumble is felt on top of it.
-- To make a moment stand on its own, tick *Mute Driving Rumble*.
-- Keep impacts short and strong and continuous effects soft: contrast is what makes a hit feel like a hit.
+| To change… | Edit |
+|---|---|
+| Driving feel, triggers, health colours, hit flash, bomb beat timings, pause / Game Over / win colours and breath, player LEDs | `ControllerFeedback/CarRumbleProfile.asset` |
+| One shake's shape | its pattern in `ControllerFeedback/Patterns/` (UI: `UIHover`, `UIClick`) |
+| UI rumble strength / hover spacing | the `UIRumbleFeedback` component in ManagerBootScene |
+| Main menu colour and breath | `MenuLightBarFeedback` in LevelSelectionScene |
+| Backend, master strength, feature switches, default colour, Steam boost | `ProjectServices/Rumble/RumbleOutputProfile.asset` |
+| Player strength / triggers on-off | Settings → Controls (`ControllerVibrationSetting`, `AdaptiveTriggersSetting`) |
 
-## Steam Input compensation
+**Making a pattern:** *Create → AbstractPixel → Rumble → Rumble Pattern*. In its inspector, **Bake from sound** shapes
+it from an audio clip, and **Preview on controller** (Play mode) lets you feel it. Curves are X = time 0..1,
+Y = strength 0..1. Keep hits short and strong and continuous effects soft.
 
-Steam plays DualSense rumble through its own API, which is weaker than our direct USB write (the Unity backend):
-- Steam's motor **1.0 is softer** than a direct 1.0, and the **heavy (left) motor most of all**.
-- Steam's trigger vibration has only **8 amplitude steps**, so a soft trigger kick (0.3 → step 2) is barely felt.
+## 4. How a call reaches the controller
 
-So the Steam path, and only that path, lifts what it sends. All fields are on `RumbleOutputProfile` and work live:
+```
+ your call ──► RumbleService (stores the request)
+                   │ every frame
+                   ▼
+              mix: for each motor the strongest request wins
+              gate: pause silence, window focus, feature switches
+                   │
+                   ▼
+              RumbleHardwareWriter: player's strength slider, sends only changes, rate-limited
+                   │
+                   ▼
+              backend: Steam  or  Unity  ──► controller
+```
 
-| Field | What it does | Default |
+- A call never talks to the pad directly; it only stores what you want.
+- Up to 4 patterns play at once; per motor the strongest wins, so a weak pattern under a strong one isn't felt.
+- When the window loses focus all motors stop (the light bar stays).
+- While the game is paused (`Time.timeScale` 0), patterns that run on game time stay silent and resume with the game.
+  UI patterns (*Use Unscaled Time*) keep playing.
+- Light bar writes are capped at 30 per second, so a breathing colour never floods the pad.
+- If a feature fails on the pad (e.g. the light bar write is refused), only that feature is turned off, and it is
+  tried again when a different pad is connected. If the pad refuses everything 30 times in a row, output to that pad
+  stops (one warning) until it reconnects.
+
+## 5. Steam or Unity: which one talks to the pad
+
+*Backend Mode* on `RumbleOutputProfile` (in builds also `-rumble-backend=auto|steam|unity|off`):
+
+| Mode | Rule |
+|---|---|
+| **Unity** | Always Unity. Steam is never used |
+| **Steam** | Always Steam. Unity only while Steam can't serve the pad (Steam not running, or the pad not visible to Steam yet); re-checked every second |
+| **Auto** (default) | Steam only if the player has **Steam Input turned on** for that pad type; otherwise Unity. **In the Editor Auto means Unity** |
+
+What each backend can do:
+
+| | Rumble | Light bar | Triggers | Player LEDs |
+|---|---|---|---|---|
+| Unity, DualSense (USB or Bluetooth) | yes | yes | yes | yes |
+| Unity, DualShock 4 on USB | yes | yes | – | – |
+| Unity, DualShock 4 on Bluetooth | – | – | – | – (nothing is sent, see section 6) |
+| Steam, DualSense / DualShock 4 | yes | yes | yes (DualSense) | **no** – Steam has no call for them |
+| Xbox and other pads | rumble only | – | – | – |
+
+Every pad change (plug, unplug, USB ↔ Bluetooth, Xbox ↔ PlayStation) picks the backend again and re-sends
+everything (colour, LEDs, triggers), so the light bar comes back by itself.
+
+## 6. When it doesn't work
+
+**Pass / fail per controller, step by step:** [CONTROLLER_VERIFICATION.md](CONTROLLER_VERIFICATION.md).
+
+**The F9 panel** (`RumbleDebugOverlay`, next to the service) works in the Editor and in **Development Builds only**.
+In a release build it switches itself off.
+- **First F9:** a short check.
+  - Top line: the controller type in its colour, with the model and connection. **PLAYSTATION** is blue, **XBOX**
+    green, **STEAM** greyish blue, and **GENERIC** / **NO CONTROLLER** grey.
+  - Then a verdict: **WORKING**, **WAIT** or **NOT WORKING**, plus what to do. Bluetooth failures appear in orange
+    as **WAIT · BLUETOOTH** or **NOT WORKING · BLUETOOTH**.
+  - Then *THE PAD SHOULD SHOW NOW*: the light bar colour as a swatch with its name, the LED count, rumble on/off and
+    the triggers. If the pad doesn't match, output isn't reaching it.
+- **Second F9:** full details.
+  - A *Controller* section: type, model, connection now and at bind (and how it was read), device / layout /
+    product / interface, Bluetooth drops, seconds since the pad last sent input, and the Bluetooth flag with its reason.
+  - Then the backend and why it was picked, capabilities, every playing pattern and the mix.
+  - On a DualSense on the Unity backend, also USB/Bluetooth, descriptor size, reports sent / refused and the last
+    result.
+- **Third F9:** hides the panel.
+
+**F10** shows the raw bytes, and **F11** runs the Bluetooth self-test (expect `PASS`).
+
+**The log works in every build.** Every pad or backend change writes one line, for example:
+
+```
+[Rumble] Device: DualSense Wireless Controller [layout DualSenseGamepadHID, product 'DualSense Wireless Controller',
+interface HID] -> Backend: Unity (DualSense Bluetooth) -> Caps: Rumble, LightBar, AdaptiveTriggers, PlayerLeds
+(mode Auto, Unity: Auto: Steam Input is off for this pad type) Steam: …
+```
+
+The backend part says the most: `Unity (DualSense Usb)` / `Unity (DualSense Bluetooth)`, `Unity (XInputControllerWindows)`,
+`Unity (DualShock4GamepadHID)`, or `Steam Input (<pad type>)`. An Xbox layout for a PlayStation pad means Steam
+Input or DS4Windows is wrapping it.
+
+Failures write one warning each, never per frame. In the Editor it's the Console. In a build it's:
+
+```
+%USERPROFILE%\AppData\LocalLow\Abstract Pixel Studios\RallyShift\Player.log
+```
+
+(`Player-prev.log` holds the run before.) When someone without the Editor reports a problem, ask for this file first.
+Then ask for an F9 screenshot if they have a development build.
+
+**Warnings you may see and what they mean**
+
+| Log line starts with | Meaning |
+|---|---|
+| `Controller: PlayStation - DualSense (PS5), connection Bluetooth (…)` | Not a warning. One per bind: type, model, connection and how it was read |
+| `Bluetooth: … disconnected (N drop(s) in the last minute)` | The bound Bluetooth pad was removed by Windows. Several in a minute = unstable link |
+| `… is on Bluetooth and the game's raw report is not available for it` | A DualShock 4 (or a DualSense whose raw report failed) on Bluetooth with the Unity backend. Nothing is sent to it, on purpose: Unity's own call is USB-only and sends garbage over Bluetooth |
+| `DualSense refused 78-byte Bluetooth reports …; trying N bytes` | First fallback over Bluetooth: retry at the size the pad's descriptor states |
+| `DualSense refused Usb/Bluetooth reports …; trying … format` | We guessed the connection type wrong; switching once |
+| `DualSense refused raw reports in both … formats` | Raw output is off for this pad. Rumble falls back to Unity's plain call |
+| `DualSense descriptor read late` | Windows had no descriptor yet when the pad appeared; it was re-read and the format corrected |
+| `Unity backend: … refused 30 sends in a row` | Output to this pad stops until it reconnects. Usually a DualShock 4 on Bluetooth, or DS4Windows / DSX |
+| `<Capability> failed on …; turned off until the pad changes` | One feature was refused; the rest still work |
+| `Steam Input backend failed; falling back to the Unity Input System` | Steam mode, but Steam couldn't serve the pad |
+| `The light bar is switched off in RumbleOutputProfile` | A setting, not a bug: turn the LightBar feature back on |
+
+**Known reasons the light bar or LEDs don't change on someone's machine**
+
+| Cause | What happens | Fix for the player |
 |---|---|---|
-| Steam Heavy / Light Motor Gain | Multiplies each motor | 2.2 / 1.6 |
-| Steam Response Curve | Below 1, lifts soft values more than strong ones, so detail is still felt | 0.6 |
-| Steam Trigger Vibration Gain / Floor | Multiplies trigger vibration (throttle kick, brake shudder, bomb buzz) and never lets it drop below the floor (0.5 = step 4 of 8) | 2.5 / 0.5 |
-| Steam Impact Rise Threshold | A heavy-motor jump at least this big in one tick counts as an impact (crash, hit), not driving | 0.4 |
-| Steam Impact Punch Seconds / Light | On an impact, both motors are held at full for this long (heavy at 1, light at least this value) | 0.15 / 0.8 |
+| Steam Input on for the game, but Backend = Unity | Steam hides the real pad behind a virtual Xbox pad: no light bar, LEDs or triggers. The panel says so | Use Auto (default) or turn Steam Input off for the game |
+| DS4Windows, DSX or HidHide running | They take over or hide the pad | Close them |
+| Player LEDs on the Steam backend | Not possible: Steam has no player-LED call | Expected; light bar and rumble still work |
+| DualShock 4 over Bluetooth on the Unity backend | Unity can't write to it, so we send nothing (one log warning) | Use Steam (Auto with Steam Input on) or a USB cable |
+| DualSense just connected over Bluetooth | For the first ~6 s the pad plays its own blue connection light; we hold the light bar back (rumble works) | Expected: our colour appears after ~6 s |
+| Window not focused | Motors stop on purpose | Click the game |
+| Another app wrote to the pad earlier | The pad keeps the old colour until our next change | We re-send everything on every pad change and every 2 s on Steam |
 
-**Trade-off:** Steam can't go above its own 1.0, so strong moments flatten at the top, and the length of time a hit is
-held is the only way left to make it hit harder.
-- **Don't push the gains too high.** If the driving rumble already sits at 1.0, a collision has nothing to rise above
-  and disappears. Driving should sit clearly below 1.0 so impacts stand out.
-- None of these settings change the Unity path.
-- The player's *Controller Vibration* slider is applied **after** the compensation, so 50 % means half on both backends.
+## 7. Deep dive
 
-## What lives where
+### Files
 
 | Class | Job |
 |---|---|
-| `RumbleService` | The public API: stores requests, then mixes and gates them each frame |
-| `RumblePatternMixer` | The 4 one-shot slots: samples them, and the strongest value per motor wins |
-| `RumbleHardwareWriter` | Steam compensation, player slider, rate limit, sends only changes |
-| `SteamOutputBoost` / `SteamImpactPunch` | The Steam compensation (gain, curve, trigger floor, impact punch) |
-| `RumbleDeviceBinder` | Which pad rumbles: follows real pad switches, retries Steam, applies the dev toggle |
-| `RumbleBackendSelector` | Which backend serves that pad; turns off a feature that fails |
-| `RumbleDeviceWatcher` | Listens for pad switches, unplugging, focus and quit |
-| `IRumbleOutput` | The backend contract; `SteamInputRumbleOutput` and `UnityInputSystemRumbleOutput` implement it |
-| `DualSenseHidOutputCommand` / `DualSenseTriggerParamWriter` | The low-level DualSense report (Unity) / the trigger buffer (Steam) |
-| `RumblePattern` / `RumblePatternPlayer` | A one-shot asset / the one-line way to play it |
-| `RumbleDebugOverlay` / `IRumbleDebugSource` | The F9 debug panel / how other systems show up in it |
-| `RumbleAudioEnvelopeBaker`, `RumblePatternEditor` (Editor) | Bakes a pattern from a sound; the pattern inspector's Preview and Bake |
-| `CarRumbleDirector`, `CarContinuousRumble`, `CarTriggerFeedback`, `CarRumbleMoments`, `CarRumbleDebugSource` (game) | The car, as a client of the service |
-| `SteamRumbleInstaller` (game) | Hands the Steam backend to the service |
+| `RumbleService` | Public API; mixes and gates each frame |
+| `RumblePatternMixer` | The 4 pattern slots |
+| `RumbleHardwareWriter` | Player slider, rate limit, change-only sends, Steam light bar refresh |
+| `RumbleDeviceBinder` / `RumbleDeviceWatcher` | Which pad: follows pad switches, unplug, focus, quit |
+| `RumbleBackendSelector` | Which backend (the rules in section 5); switches off a failing feature |
+| `SteamInputRumbleOutput` / `UnityInputSystemRumbleOutput` | The two backends (`IRumbleOutput`) |
+| `DualSenseRawWriter`, `DualSenseOutputState`, `DualSenseHidOutputCommand`, `DualSenseBluetoothOutputCommand`, `DualSenseCrc32` | The raw DualSense report (Unity backend) |
+| `DualSenseTriggerParamWriter` | Trigger data for Steam |
+| `SteamOutputBoost` / `SteamImpactPunch` | Steam strength compensation |
+| `RumbleDebugOverlay`, `IRumbleDebugSource` | F9 panel; how other systems appear in it |
+| `RumblePadCheck`, `RumbleColorName` | The F9 verdict and "the pad should show now" lines |
+| `RumblePadIdentity`, `RumblePadKind`, `RumbleConnection` | What the bound pad is (type, model, USB / Bluetooth). Built once per bind; family from `InputDeviceTracker.GetDeviceFamily` |
+| `RumbleBluetoothHealth`, `RumbleBluetoothCheck`, `RumblePadTypeLine` | Bluetooth drops / silence tracking, the Bluetooth verdict, the coloured controller line |
+
+### Raw DualSense report (Unity backend)
+
+Unity's own DualSense code only covers rumble and the light bar over USB (its source says Bluetooth "is not
+working"). So for a DualSense the Unity backend builds the pad's output message itself: one block of 47 bytes holding
+motors, triggers, light bar and LEDs (`DualSenseOutputState`, same layout as the Linux driver), sent only when it
+changes.
+
+- **USB:** message id 0x02, 48 bytes.
+- **Bluetooth:** message id 0x31, 78 bytes: the same 47 bytes moved by 2, plus a checksum (CRC-32) at the end that
+  the pad uses to reject damaged messages.
+- **Which one:** read from the pad's HID descriptor, its own description of its message size (USB says 48, Bluetooth
+  78+). On Windows the descriptor can still be empty when the pad appears. It is then re-read once a second, up to
+  10 times, and the format is corrected (one log line).
+- **Always 78 bytes over Bluetooth.** Unity's hardware-tested fix (InputSystem PR #2436, not merged in our 1.19)
+  found that Windows rejects the descriptor's 547-byte maximum.
+- **If the pad refuses**, each step logs one warning:
+  1. After 8 refusals over Bluetooth, retry once at the descriptor's size.
+  2. Then try the other format (USB ↔ Bluetooth) once.
+  3. After 15 more refusals, stop raw output for that pad. Rumble falls back to Unity's plain motor call, except over
+     Bluetooth, where that call is skipped because it is USB-only.
+- **Bluetooth connection light:** for the first 6 s after a Bluetooth bind the report leaves out the light bar and
+  LEDs (rumble and triggers still go). Touching them during the pad's connection animation can wedge its firmware
+  (also found by PR #2436). After that the hand-over is sent even if nothing changed.
+- **LED hand-over:** the first writes tell the pad to stop its own start-up light show, otherwise it can ignore our
+  colour.
+- **Proof without a Bluetooth pad:** the self-test (F11, or `AgentScripts/ControllerHaptics/DualSenseBluetoothProbe.cs`)
+  checks the checksum against the standard check value and that the real message bytes match the expected layout.
+
+### Steam strength compensation
+
+Steam's rumble is weaker than a direct write, its heavy motor most of all, and its trigger buzz has only 8 steps.
+The Steam path alone lifts what it sends (gains, a response curve, a trigger floor and a short full-strength "punch"
+on impacts); fields are on `RumbleOutputProfile`. Keep driving rumble clearly below full so impacts still stand out.
+The player's slider is applied after this, so 50 % means half on both backends.
+
+### Adding a backend
+
+Implement `IRumbleOutput` (every method returns `false` on failure and never throws): `DisplayName`,
+`Capabilities`, `TryBind(device)`, `SetMotors`, `SetLightBar`, `SetPlayerLeds`, `SetTriggers`, `Flush`, `Reset`,
+`Unbind`, `Release`. Hand it in once with `rumble.SetPreferredBackend(output)` from a small installer next to the
+service (see `SteamRumbleInstaller`). Optionally implement `IRumbleBackendStatus` so the rules can tell "failed",
+"turned off by the player" and "pad reconnected".

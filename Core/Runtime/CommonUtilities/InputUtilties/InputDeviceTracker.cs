@@ -45,7 +45,7 @@ namespace AbstractPixel.Core
             }
 
             LastUsedDevice = _device;
-            CurrentDeviceFamily = EvaluateDeviceFamily(_device);
+            CurrentDeviceFamily = GetDeviceFamily(_device);
 
             OnCurrentInputDeviceChanged?.Invoke(LastUsedDevice);
             OnDeviceFamilyChanged?.Invoke(CurrentDeviceFamily);
@@ -125,7 +125,8 @@ namespace AbstractPixel.Core
             }
         }
 
-        private static DeviceFamily EvaluateDeviceFamily(InputDevice _device)
+        /// <summary>Which controller family a device belongs to (PlayStation, Xbox, Steam, Nintendo, generic, keyboard/mouse).</summary>
+        public static DeviceFamily GetDeviceFamily(InputDevice _device)
         {
             if (_device == null)
             {

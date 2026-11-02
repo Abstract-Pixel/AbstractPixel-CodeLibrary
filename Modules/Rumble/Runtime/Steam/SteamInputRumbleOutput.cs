@@ -9,8 +9,11 @@ namespace AbstractPixel.Rumble
     /// Main backend through Steamworks ISteamInput. Binds the Steam controller in the player's hands: the only one
     /// connected, or the only one matching the active pad's type. Every native call re-checks Steam readiness,
     /// uses only handles from this session, and never sends to handle 0.
+    /// Also reports its status (IRumbleBackendStatus): whether Steam is up, whether the player has Steam Input on for
+    /// this pad's type, and whether the bound handle is still connected (it changes on reconnect, e.g. USB to Bluetooth).
+    /// Player LEDs: ISteamInput has no call for them (only SetLEDColor for the light bar), so they are not offered here.
     /// </summary>
-    public class SteamInputRumbleOutput : IRumbleOutput
+    public class SteamInputRumbleOutput : IRumbleOutput, IRumbleBackendStatus
     {
         private readonly Func<bool> isSteamReady;
         private readonly InputHandle_t[] connectedHandles = new InputHandle_t[Constants.STEAM_INPUT_MAX_COUNT];
@@ -20,6 +23,7 @@ namespace AbstractPixel.Rumble
         private bool hasLoggedBindFailure;
         private InputHandle_t boundHandle;
         private string displayName = "Steam Input (none)";
+        private string statusLine = "not tried";
         private RumbleCapabilities capabilities = RumbleCapabilities.None;
 
         public SteamInputRumbleOutput(Func<bool> _isSteamReady)
@@ -32,6 +36,88 @@ namespace AbstractPixel.Rumble
 
         private bool IsBound => boundHandle.m_InputHandle != 0;
 
+        // ---------- IRumbleBackendStatus ----------
+
+        public bool IsAvailable
+        {
+            get
+            {
+                try
+                {
+                    return EnsureSteamInput();
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Steam's own answer for this session: which controller families have Steam Input turned on (the player's
+        /// per-game setting overrides the game's default). Steam Deck and Steam Controller always use Steam Input.
+        /// </summary>
+        public bool IsEnabledByPlayerForBoundPad
+        {
+            get
+            {
+                if (CanCall() == false)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    ESteamInputType inputType = SteamInput.GetInputTypeForHandle(boundHandle);
+                    int requiredBit = ReadConfigurationBit(inputType);
+                    if (requiredBit == 0)
+                    {
+                        return true;
+                    }
+
+                    int enabledBits = SteamInput.GetSessionInputConfigurationSettings();
+                    return (enabledBits & requiredBit) != 0;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>False once Steam no longer lists the bound handle (pad unplugged, or reconnected with a new handle).</summary>
+        public bool IsBoundPadStillConnected
+        {
+            get
+            {
+                if (CanCall() == false)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    int controllerCount = SteamInput.GetConnectedControllers(connectedHandles);
+                    int count = Mathf.Min(controllerCount, connectedHandles.Length);
+                    for (int index = 0; index < count; index++)
+                    {
+                        if (connectedHandles[index].m_InputHandle == boundHandle.m_InputHandle)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+        }
+
+        public string StatusLine => statusLine;
+
         public bool TryBind(InputDevice _activeDevice)
         {
             Unbind();
@@ -39,6 +125,7 @@ namespace AbstractPixel.Rumble
             {
                 if (EnsureSteamInput() == false)
                 {
+                    statusLine = "Steam not running or SteamInput.Init failed";
                     return false;
                 }
 
@@ -47,6 +134,7 @@ namespace AbstractPixel.Rumble
                 int handleIndex = FindHandleFor(_activeDevice, controllerCount);
                 if (handleIndex < 0)
                 {
+                    statusLine = "Steam lists " + controllerCount + " pad(s); none matches the active pad";
                     return false;
                 }
 
@@ -54,6 +142,7 @@ namespace AbstractPixel.Rumble
                 RumbleCapabilities typeCapabilities = MapCapabilities(inputType);
                 if (typeCapabilities == RumbleCapabilities.None)
                 {
+                    statusLine = inputType + " is left to Unity";
                     return false;
                 }
 
@@ -65,6 +154,7 @@ namespace AbstractPixel.Rumble
                     triggerWriter.Allocate();
                 }
 
+                statusLine = "bound " + inputType;
                 return true;
             }
             catch (Exception exception)
@@ -120,6 +210,12 @@ namespace AbstractPixel.Rumble
                 Debug.LogWarning("[Rumble] Steam light bar write failed: " + exception.Message);
                 return false;
             }
+        }
+
+        /// <summary>No Steam API for the player-indicator dots (ISteamInput only has SetLEDColor), so never supported.</summary>
+        public bool SetPlayerLeds(byte _litMask)
+        {
+            return false;
         }
 
         public bool SetTriggers(TriggerEffect _brake, TriggerEffect _throttle)
@@ -186,6 +282,7 @@ namespace AbstractPixel.Rumble
         public void Unbind()
         {
             boundHandle = new InputHandle_t(0);
+            statusLine = "not bound";
             capabilities = RumbleCapabilities.None;
             displayName = "Steam Input (none)";
         }
@@ -306,6 +403,30 @@ namespace AbstractPixel.Rumble
             }
 
             return ESteamInputType.k_ESteamInputType_Unknown;
+        }
+
+        /// <summary>The ESteamInputConfigurationEnableType bit that must be on for this pad type. 0 = always Steam (Deck, Steam Controller).</summary>
+        private static int ReadConfigurationBit(ESteamInputType _inputType)
+        {
+            switch (_inputType)
+            {
+                case ESteamInputType.k_ESteamInputType_PS3Controller:
+                case ESteamInputType.k_ESteamInputType_PS4Controller:
+                case ESteamInputType.k_ESteamInputType_PS5Controller:
+                    return (int)ESteamInputConfigurationEnableType.k_ESteamInputConfigurationEnableType_Playstation;
+                case ESteamInputType.k_ESteamInputType_XBox360Controller:
+                case ESteamInputType.k_ESteamInputType_XBoxOneController:
+                    return (int)ESteamInputConfigurationEnableType.k_ESteamInputConfigurationEnableType_Xbox;
+                case ESteamInputType.k_ESteamInputType_SwitchProController:
+                case ESteamInputType.k_ESteamInputType_SwitchJoyConPair:
+                case ESteamInputType.k_ESteamInputType_SwitchJoyConSingle:
+                    return (int)ESteamInputConfigurationEnableType.k_ESteamInputConfigurationEnableType_Switch;
+                case ESteamInputType.k_ESteamInputType_SteamDeckController:
+                case ESteamInputType.k_ESteamInputType_SteamController:
+                    return 0;
+                default:
+                    return (int)ESteamInputConfigurationEnableType.k_ESteamInputConfigurationEnableType_Generic;
+            }
         }
 
         /// <summary>Xbox and unknown types return None so Unity's proven XInput path handles them.</summary>

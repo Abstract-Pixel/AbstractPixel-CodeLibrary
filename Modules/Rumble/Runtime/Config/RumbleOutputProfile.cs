@@ -7,7 +7,7 @@ namespace AbstractPixel.Rumble
     public class RumbleOutputProfile : ScriptableObject
     {
         [Header("Developer")]
-        [Tooltip("The dev toggle. Auto = Steam Input when available, else Unity. Force one backend to compare, or Off. Live in Play mode.")]
+        [Tooltip("Preferred backend. Unity = always Unity, Steam never used. Steam = Steam, Unity only while Steam fails. Auto = Steam only when the player has Steam Input on for the pad, else Unity (in the Editor Auto means Unity). Off = nothing. Live in Play mode.")]
         [SerializeField] private RumbleBackendMode backendMode = RumbleBackendMode.Auto;
 
         [Header("Output")]
@@ -68,6 +68,9 @@ namespace AbstractPixel.Rumble
         [Tooltip("DualSense adaptive trigger resistance and buzz.")]
         [SerializeField] private bool enableAdaptiveTriggers = true;
 
+        [Tooltip("DualSense player-indicator dots (five LEDs under the touchpad). Unity backend only: Steam Input has no API for them.")]
+        [SerializeField] private bool enablePlayerLeds = true;
+
         [Header("Light bar")]
         [Tooltip("Colour the Unity backend restores on reset. Steam restores the player's own colour itself.")]
         [SerializeField] private Color restColor = new Color(0f, 0.25f, 1f, 1f);
@@ -109,6 +112,11 @@ namespace AbstractPixel.Rumble
                 if (enableAdaptiveTriggers)
                 {
                     features |= RumbleCapabilities.AdaptiveTriggers;
+                }
+
+                if (enablePlayerLeds)
+                {
+                    features |= RumbleCapabilities.PlayerLeds;
                 }
 
                 return features;

@@ -54,6 +54,8 @@ namespace AbstractPixel.Rumble
         private float continuousHigh;
         private bool hasLightBarRequest;
         private Color requestedLightBar;
+        private bool hasPlayerLedsRequest;
+        private byte requestedPlayerLeds;
         private TriggerEffect requestedBrake = TriggerEffect.Off;
         private TriggerEffect requestedThrottle = TriggerEffect.Off;
 
@@ -129,6 +131,22 @@ namespace AbstractPixel.Rumble
             hasLightBarRequest = false;
         }
 
+        /// <summary>
+        /// DualSense player-indicator dots, bit 0 = leftmost ... bit 4 = rightmost (e.g. a health bar). Kept until
+        /// cleared, and re-sent after any pad or backend change. Ignored on pads or backends without them (Steam).
+        /// </summary>
+        public void SetPlayerLeds(byte _litMask)
+        {
+            hasPlayerLedsRequest = true;
+            requestedPlayerLeds = _litMask;
+        }
+
+        /// <summary>Stop driving the dots; they go dark.</summary>
+        public void ClearPlayerLeds()
+        {
+            hasPlayerLedsRequest = false;
+        }
+
         public void SetTriggers(TriggerEffect _brake, TriggerEffect _throttle)
         {
             requestedBrake = _brake;
@@ -200,6 +218,49 @@ namespace AbstractPixel.Rumble
         public float PatternDuckAmount => patternMixer.DuckAmount;
         public TriggerEffect RequestedBrake => requestedBrake;
         public TriggerEffect RequestedThrottle => requestedThrottle;
+        public byte RequestedPlayerLeds => requestedPlayerLeds;
+        public bool HasPlayerLedsRequest => hasPlayerLedsRequest;
+        public RumbleCapabilities DebugKilledCapabilities => selector.KilledCapabilities;
+        public RumbleBackendMode DebugAppliedMode => deviceBinder.AppliedMode;
+        public bool DebugIsAutoResolvedForEditor => deviceBinder.IsAutoResolvedForEditor;
+        public string DebugBackendReason => selector.BackendReason;
+        public string DebugPreferredStatus => selector.PreferredStatusLine;
+        public Color DebugLightBar => debugLightBar;
+
+        /// <summary>Raw DualSense report diagnostics while Unity drives a DualSense; null otherwise.</summary>
+        public DualSenseRawWriter DebugDualSenseWriter
+        {
+            get
+            {
+                if (selector.ActiveOutput != selector.UnityOutput)
+                {
+                    return null;
+                }
+
+                return selector.UnityOutput.DualSenseDiagnostics;
+            }
+        }
+
+        /// <summary>What the bound pad is: type, model, connection (debug panel top line).</summary>
+        public RumblePadIdentity DebugPadIdentity => deviceBinder.PadIdentity;
+
+        /// <summary>Bluetooth drops and input silence of the bound pad (debug panel verdict).</summary>
+        public RumbleBluetoothHealth DebugBluetoothHealth => deviceBinder.BluetoothHealth;
+
+        /// <summary>The Unity backend while it drives the pad; null otherwise (debug panel verdict).</summary>
+        public UnityInputSystemRumbleOutput DebugUnityOutput
+        {
+            get
+            {
+                if (selector.ActiveOutput != selector.UnityOutput)
+                {
+                    return null;
+                }
+
+                return selector.UnityOutput;
+            }
+        }
+
         public float SentLow => writer.LastSentLow;
         public float SentHigh => writer.LastSentHigh;
 
@@ -217,6 +278,9 @@ namespace AbstractPixel.Rumble
             deviceBinder.Tick();
             if (selector.ActiveOutput == null)
             {
+                // No pad (keyboard and mouse, or the pad was unplugged): nothing can be shown.
+                ActiveCapabilities = RumbleCapabilities.None;
+                debugCapabilities = RumbleCapabilities.None;
                 return;
             }
 
@@ -226,6 +290,7 @@ namespace AbstractPixel.Rumble
                 patternMixer.Sample();
                 WriteMotors();
                 WriteLightBar();
+                WritePlayerLeds();
                 WriteTriggers();
                 writer.Flush();
                 debugWrites = writer.WritesThisSession;
@@ -332,6 +397,22 @@ namespace AbstractPixel.Rumble
 
             debugLightBar = color;
             writer.WriteLightBar(color);
+        }
+
+        private void WritePlayerLeds()
+        {
+            if (HasCapability(RumbleCapabilities.PlayerLeds) == false)
+            {
+                return;
+            }
+
+            byte litMask = 0;
+            if (hasPlayerLedsRequest)
+            {
+                litMask = requestedPlayerLeds;
+            }
+
+            writer.WritePlayerLeds(litMask);
         }
 
         private void WriteTriggers()

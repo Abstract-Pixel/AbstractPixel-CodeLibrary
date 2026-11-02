@@ -9,6 +9,8 @@ namespace AbstractPixel.Rumble
         None = 0,
         Rumble = 1 << 0,
         LightBar = 1 << 1,
-        AdaptiveTriggers = 1 << 2
+        AdaptiveTriggers = 1 << 2,
+        /// <summary>The DualSense's five player-indicator dots under the touchpad.</summary>
+        PlayerLeds = 1 << 3
     }
 }
