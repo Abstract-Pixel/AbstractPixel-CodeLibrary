@@ -1,6 +1,7 @@
 using AbstractPixel.Core;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace AbstractPixel.Settings
@@ -13,6 +14,9 @@ namespace AbstractPixel.Settings
         [Header("Tab Panel Feedbacks")]
         [SerializeField] private float fadeDuration = 0.25f;
         [SerializeField] private AnimationCurve fadeCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
+        // World-space distance under which two selectables count as one row when picking the first option.
+        private const float RowTolerance = 0.01f;
 
         private Coroutine activeFadeRoutine;
 
@@ -70,13 +74,54 @@ namespace AbstractPixel.Settings
             gameObject.SetActive(!_disableGameObjectAfterFade);
         }
 
+        /// <summary>
+        /// Controller only: selects the panel's first option (the top-most, then left-most usable selectable).
+        /// With the mouse nothing is selected, so no option shows a stale highlight.
+        /// </summary>
         public void SetFirstElementSelected()
         {
-            Selectable firstSelectable = GetComponentInChildren<Selectable>();
-            if (firstSelectable != null)
+            bool isControllerInUse = InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick();
+            if (isControllerInUse == false)
             {
-                firstSelectable.Select();
+                return;
             }
+
+            Selectable firstSelectable = FindFirstUsableSelectable();
+            EventSystem eventSystem = EventSystem.current;
+            if (firstSelectable == null || eventSystem == null)
+            {
+                return;
+            }
+
+            eventSystem.SetSelectedGameObject(firstSelectable.gameObject);
+        }
+
+        /// <summary>The usable selectable nearest the top of the panel (left-most on a tie).</summary>
+        private Selectable FindFirstUsableSelectable()
+        {
+            Selectable firstSelectable = null;
+            Vector3 firstPosition = Vector3.zero;
+            Selectable[] selectables = GetComponentsInChildren<Selectable>(false);
+            foreach (Selectable selectable in selectables)
+            {
+                bool isUsable = selectable.gameObject.activeInHierarchy && selectable.IsInteractable();
+                if (isUsable == false)
+                {
+                    continue;
+                }
+
+                Vector3 position = selectable.transform.position;
+                bool isFirstFound = firstSelectable == null;
+                bool isHigher = position.y > firstPosition.y + RowTolerance;
+                bool isSameRowFurtherLeft = Mathf.Abs(position.y - firstPosition.y) <= RowTolerance && position.x < firstPosition.x;
+                if (isFirstFound || isHigher || isSameRowFurtherLeft)
+                {
+                    firstSelectable = selectable;
+                    firstPosition = position;
+                }
+            }
+
+            return firstSelectable;
         }
     }
 }

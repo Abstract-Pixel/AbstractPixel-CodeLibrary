@@ -919,6 +919,14 @@ namespace AbstractPixel.Core.UI
                     continue;
                 }
 
+                // Left / Right only reach elements really beside the source. One that overlaps it horizontally
+                // sits above or below (a stacked settings row), and moving there on Left/Right would leave the
+                // row the player is changing.
+                if (isHorizontal && OverlapsHorizontally(_source.screenRect, candidate.screenRect))
+                {
+                    continue;
+                }
+
                 Vector2 delta = candidate.center - _source.center;
 
                 float primaryDistance = Vector2.Dot(delta, _direction);
@@ -942,12 +950,107 @@ namespace AbstractPixel.Core.UI
                 }
             }
 
-            if (bestCandidate == null && loopNavigation)
+            // Up / Down move one row at a time: a well-aligned element two rows away must not beat the row in
+            // between just because that row's element sits off to the side (e.g. a settings slider under a
+            // two-column list of rebind buttons).
+            bool isVertical = isHorizontal == false;
+            if (bestCandidate != null && isVertical)
+            {
+                bestCandidate = FindBestInNearestRow(_source, _direction, _candidates);
+            }
+
+            // Left / Right wrap only inside the source's row (handled above); wrapping here would jump to
+            // another row.
+            if (bestCandidate == null && loopNavigation && isVertical)
             {
                 bestCandidate = FindWrapCandidate(_source, _direction, _candidates);
             }
 
             return bestCandidate;
+        }
+
+        private static bool OverlapsHorizontally(Rect _a, Rect _b)
+        {
+            float horizontalOverlap = Mathf.Min(_a.xMax, _b.xMax) - Mathf.Max(_a.xMin, _b.xMin);
+            return horizontalOverlap > ALIGNMENT_EPSILON;
+        }
+
+        /// <summary>
+        /// Vertical step: the nearest row in _direction (by distance along it, inside the cone), then the
+        /// element in that row with the best score (closest, least sideways).
+        /// </summary>
+        private Selectable FindBestInNearestRow(UIElementInfo _source, Vector2 _direction, List<UIElementInfo> _candidates)
+        {
+            bool hasNearest = false;
+            UIElementInfo nearest = default;
+            float nearestDistance = float.MaxValue;
+            for (int index = 0; index < _candidates.Count; ++index)
+            {
+                UIElementInfo candidate = _candidates[index];
+                bool isInCone = IsInDirectionalCone(_source, candidate, _direction);
+                if (isInCone == false)
+                {
+                    continue;
+                }
+
+                float primaryDistance = Vector2.Dot(candidate.center - _source.center, _direction);
+                if (primaryDistance < nearestDistance)
+                {
+                    nearestDistance = primaryDistance;
+                    nearest = candidate;
+                    hasNearest = true;
+                }
+            }
+
+            if (hasNearest == false)
+            {
+                return null;
+            }
+
+            Selectable bestInRow = null;
+            float bestScore = float.MaxValue;
+            for (int index = 0; index < _candidates.Count; ++index)
+            {
+                UIElementInfo candidate = _candidates[index];
+                bool isInNearestRow = IsSameRow(nearest.screenRect, candidate.screenRect);
+                bool isInCone = IsInDirectionalCone(_source, candidate, _direction);
+                if (isInNearestRow == false || isInCone == false)
+                {
+                    continue;
+                }
+
+                Vector2 delta = candidate.center - _source.center;
+                float primaryDistance = Vector2.Dot(delta, _direction);
+                float perpendicularDistance = Mathf.Abs(delta.x * _direction.y - delta.y * _direction.x);
+                float score = primaryDistance + (perpendicularDistance * PERPENDICULAR_WEIGHT);
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    bestInRow = candidate.selectable;
+                }
+            }
+
+            return bestInRow;
+        }
+
+        /// <summary>True when _candidate lies ahead of _source in _direction, within the search cone.</summary>
+        private bool IsInDirectionalCone(UIElementInfo _source, UIElementInfo _candidate, Vector2 _direction)
+        {
+            if (_candidate.selectable == _source.selectable)
+            {
+                return false;
+            }
+
+            Vector2 delta = _candidate.center - _source.center;
+            float primaryDistance = Vector2.Dot(delta, _direction);
+            if (primaryDistance <= ALIGNMENT_EPSILON)
+            {
+                return false;
+            }
+
+            float perpendicularDistance = Mathf.Abs(delta.x * _direction.y - delta.y * _direction.x);
+            float maxConeTangent = Mathf.Tan(directionalConeAngle * Mathf.Deg2Rad);
+            return perpendicularDistance <= primaryDistance * maxConeTangent;
         }
 
         private Selectable FindWrapCandidate(

@@ -1,5 +1,6 @@
 using AbstractPixel.Core;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem; // ADD THIS
@@ -18,6 +19,8 @@ namespace AbstractPixel.Settings
         [SerializeField] private InputActionReference previousTabControllerAction;
         [SerializeField] private InputActionReference nextTabControllerAction;
         bool isInitialized;
+        private TabData pendingTabData;
+        private Coroutine pendingSwitchRoutine;
         private void OnEnable()
         {
             previousTabControllerAction.action.Enable();
@@ -50,11 +53,41 @@ namespace AbstractPixel.Settings
         {
             previousTabControllerAction.action.performed -= HandlePreviousTab;
             nextTabControllerAction.action.performed -= HandleNextTab;
+
+            // A switch still waiting for its frame is dropped with the menu.
+            pendingSwitchRoutine = null;
+            pendingTabData = null;
         }
 
+        /// <summary>
+        /// Switches to the tab one frame later. A tab button presses itself when the D-pad selects it
+        /// (AutoPressOnSelect), so this runs inside Unity's selection callback; showing the panel there
+        /// makes its navigation scripts select from inside that callback, which Unity rejects
+        /// ("Attempting to select ... while already selecting an object").
+        /// </summary>
         public void OnTabSelected(TabData _selectedTabData)
         {
-            if (_selectedTabData == currentTabData) return;
+            if (_selectedTabData == currentTabData && pendingTabData == null) return;
+
+            pendingTabData = _selectedTabData;
+            if (pendingSwitchRoutine == null)
+            {
+                pendingSwitchRoutine = StartCoroutine(SwitchTabNextFrame());
+            }
+        }
+
+        private IEnumerator SwitchTabNextFrame()
+        {
+            yield return null;
+            pendingSwitchRoutine = null;
+            TabData targetTabData = pendingTabData;
+            pendingTabData = null;
+            SwitchTab(targetTabData);
+        }
+
+        private void SwitchTab(TabData _selectedTabData)
+        {
+            if (_selectedTabData == null || _selectedTabData == currentTabData) return;
 
             if (currentTabData != null)
             {
@@ -62,12 +95,10 @@ namespace AbstractPixel.Settings
                 currentTabData.TabButton.SetVisualState(false);
             }
 
+            // ShowPanel also selects the panel's first option for a controller (TabPanel.SetFirstElementSelected).
             currentTabData = _selectedTabData;
             currentTabData.TabPanel.ShowPanel();
             currentTabData.TabButton.SetVisualState(true);
-
-            // Snap the controller focus to the first setting in the new tab!
-            currentTabData.TabPanel.SetFirstElementSelected();
         }
 
         // =========================================================
