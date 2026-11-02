@@ -62,6 +62,11 @@ namespace AbstractPixel.Rumble
                 highToSend = steamImpactPunch.High;
             }
 
+            // The player's slider comes last, so no backend boost can undo it (50 % always means half).
+            float playerIntensity = RumbleService.PlayerIntensity;
+            lowToSend *= playerIntensity;
+            highToSend *= playerIntensity;
+
             float now = Time.unscaledTime;
             if (now < nextMotorWriteTime)
             {
@@ -191,6 +196,11 @@ namespace AbstractPixel.Rumble
                 brake = SteamOutputBoost.BoostTrigger(_brake, _profile);
                 throttle = SteamOutputBoost.BoostTrigger(_throttle, _profile);
             }
+
+            // The player's slider comes last, so the Steam trigger floor can't undo it.
+            float playerIntensity = RumbleService.PlayerIntensity;
+            brake = brake.Scaled(playerIntensity);
+            throttle = throttle.Scaled(playerIntensity);
 
             bool isSame = hasSentTriggers && brake.Equals(sentBrake) && throttle.Equals(sentThrottle);
             if (isSame)

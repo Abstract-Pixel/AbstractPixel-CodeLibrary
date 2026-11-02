@@ -66,7 +66,7 @@ So the Steam path (only) lifts what it sends. All fields are on `RumbleOutputPro
 | Steam Impact Rise Threshold | A heavy-motor jump at least this big in one tick counts as an impact (crash, hit), not driving | 0.4 |
 | Steam Impact Punch Seconds / Light | On an impact, both motors are held at full for this long (heavy 1, light at least this) | 0.15 / 0.8 |
 
-**Trade-off:** Steam can't go above its own 1.0, so strong moments flatten at the top and the time a hit is held is the only way left to make it hit harder. **Don't push the gains too high:** if driving rumble already sits at 1.0, a collision has nothing to rise above and disappears. Driving should sit clearly below 1.0 so impacts stand out. The Unity path is never changed by any of these.
+**Trade-off:** Steam can't go above its own 1.0, so strong moments flatten at the top and the time a hit is held is the only way left to make it hit harder. **Don't push the gains too high:** if driving rumble already sits at 1.0, a collision has nothing to rise above and disappears. Driving should sit clearly below 1.0 so impacts stand out. The Unity path is never changed by any of these. The player's *Controller Vibration* slider is applied **after** the compensation, so 50 % always means half on both backends.
 
 ## Public API
 

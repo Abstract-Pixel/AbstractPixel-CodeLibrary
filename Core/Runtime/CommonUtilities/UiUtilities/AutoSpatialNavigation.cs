@@ -712,9 +712,31 @@ namespace AbstractPixel.Core.UI
                 customNavigation.selectOnLeft = FindBestCandidate(current, Vector2.left, elementInfos, maxConeTangent);
                 customNavigation.selectOnUp = FindBestCandidate(current, Vector2.up, elementInfos, maxConeTangent);
                 customNavigation.selectOnDown = FindBestCandidate(current, Vector2.down, elementInfos, maxConeTangent);
+                KeepSideAxisForSliderValue(current.selectable, ref customNavigation);
 
                 current.selectable.navigation = customNavigation;
             }
+        }
+
+        // A Unity slider only changes its value on Left/Right when it has no neighbour on that side.
+        // A spatial search can find a button diagonally beside it, and then the D-pad moves the focus
+        // instead of the value. So a horizontal slider keeps Left/Right for itself (Up/Down still move on).
+        private static void KeepSideAxisForSliderValue(Selectable _selectable, ref Navigation _navigation)
+        {
+            Slider slider = _selectable as Slider;
+            if (slider == null)
+            {
+                return;
+            }
+
+            bool isHorizontal = slider.direction == Slider.Direction.LeftToRight || slider.direction == Slider.Direction.RightToLeft;
+            if (isHorizontal == false)
+            {
+                return;
+            }
+
+            _navigation.selectOnLeft = null;
+            _navigation.selectOnRight = null;
         }
 
         // Links the buttons as one ordered list on a single axis. Staggered or diagonal layouts still step

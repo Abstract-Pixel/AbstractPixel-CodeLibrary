@@ -235,7 +235,8 @@ namespace AbstractPixel.Rumble
                 float continuousScale = ReadContinuousScale();
                 low = Mathf.Max(continuousLow * continuousScale, patternMixer.Low);
                 high = Mathf.Max(continuousHigh * continuousScale, patternMixer.High);
-                float intensity = profile.MasterIntensity * PlayerIntensity;
+                // The player's slider is applied last, by the writer (after any Steam boost).
+                float intensity = profile.MasterIntensity;
                 low = Mathf.Clamp01(low * intensity);
                 high = Mathf.Clamp01(high * intensity);
             }
@@ -294,7 +295,8 @@ namespace AbstractPixel.Rumble
 
             if (canUseTriggers)
             {
-                float intensity = profile.MasterIntensity * PlayerIntensity;
+                // The player's slider is applied last, by the writer (after any Steam boost).
+                float intensity = profile.MasterIntensity;
                 brake = requestedBrake.Scaled(intensity);
                 throttle = requestedThrottle.Scaled(intensity);
 
