@@ -135,9 +135,36 @@ Y = strength 0..1. Keep hits short and strong and continuous effects soft.
 
 | Mode | Rule |
 |---|---|
-| **Unity** | Always Unity. Steam is never used |
-| **Steam** | Always Steam. Unity only while Steam can't serve the pad (Steam not running, or the pad not visible to Steam yet); re-checked every second |
-| **Auto** (default) | Steam only if the player has **Steam Input turned on** for that pad type; otherwise Unity. **In the Editor Auto means Unity** |
+| **Unity** | Always Unity. Steam is never asked |
+| **Steam** | Steam. If Steam can't serve the pad (not running, lists no pad, can't tell which pad is yours, or a Steam write fails) Unity takes over **at once** (*fallback*); Steam is re-checked every second and takes the pad back when it can |
+| **Auto** (default) | Steam when **Steam Input is on** for the pad, otherwise Unity. **In the Editor Auto means Unity** |
+
+**How "Steam Input is on" is detected:** Steam lists the pad to the game (`GetConnectedControllers`). Steam only hands
+a game the pads it drives with Steam Input, so a listed pad is a Steam Input pad, over USB or Bluetooth alike (Steam
+does the transport). The game's opt-in mask (`GetSessionInputConfigurationSettings`) is **not** used to decide: it
+only holds the game's Steamworks default plus the player's per-game override, not Steam's global per-family settings.
+Deciding with it was the Nov 2026 regression (Auto refused a DualSense Steam was driving, Unity's writes then bounced
+off the pad). The F9 details still show it, as information.
+
+**Fallback** (F9 short check, Player.log) means Unity serves a pad Steam was expected to serve: any Unity binding in
+Steam mode, or in Auto when Steam lists the pad but couldn't serve it. Auto with Steam Input off is the normal Unity
+rule, not a fallback. Features switched off after a failure (e.g. Unity's writes refused while Steam held the pad)
+are allowed again whenever the backend changes.
+
+**Steam Input can hide the pad from Unity completely** (seen on hardware, Nov 2026). With Steam Input on for the
+game, Steam takes the pad as soon as the game registers with Steam (`SteamAPI.Init`, even without `SteamInput.Init`):
+the pad vanishes from the Input System. Started from the Steam library, Steam should give the game a virtual Xbox pad
+instead, through its overlay (expected Steam behaviour, still to be confirmed with this build on hardware). Started any other way (exe double-clicked with `steam_appid.txt`, or the Editor) the
+overlay is missing, so the game gets **no pad at all**: no controller input, and no Unity backend to fall back to.
+The rumble code handles it: a Steam binding stays when Unity loses the device, and in Auto / Steam mode Steam is
+asked even when Unity sees no gamepad (Steam's first pad is used). The F9 device then reads "Steam pad (Unity can't
+see it)" and *Fallback* reads `NOT POSSIBLE` when Steam can't serve it either. **Test Steam Input only from the
+Steam library** (F9 details: *Overlay on*). Release depots must not ship `steam_appid.txt`, so
+`RestartAppIfNecessary` relaunches a double-clicked exe through Steam.
+
+Two pads through Steam (e.g. a DualSense and an Xbox pad): with Steam Input on, Windows shows each one to the game
+as a virtual Xbox pad. Steam says which real pad sits behind each XInput slot (`GetControllerForGamepadIndex`), so
+the pad in the player's hands is matched exactly. A raw PlayStation device is matched by type.
 
 What each backend can do:
 
@@ -147,7 +174,9 @@ What each backend can do:
 | Unity, DualShock 4 on USB | yes | yes | – | – |
 | Unity, DualShock 4 on Bluetooth | – | – | – | – (nothing is sent, see section 6) |
 | Steam, DualSense / DualShock 4 | yes | yes | yes (DualSense) | **no** – Steam has no call for them |
-| Xbox and other pads | rumble only | – | – | – |
+| Steam, Xbox pad / Steam Deck / Steam Controller | rumble only (Xbox gets no Steam strength boost) | – | – | – |
+| Unity, Xbox and other pads | rumble only | – | – | – |
+| Steam, generic / Switch pads | left to Unity | | | |
 
 Every pad change (plug, unplug, USB ↔ Bluetooth, Xbox ↔ PlayStation) picks the backend again and re-sends
 everything (colour, LEDs, triggers), so the light bar comes back by itself.
@@ -160,28 +189,51 @@ everything (colour, LEDs, triggers), so the light bar comes back by itself.
 In a release build it switches itself off.
 - **First F9:** a short check.
   - Top line: the controller type in its colour, with the model and connection. **PLAYSTATION** is blue, **XBOX**
-    green, **STEAM** greyish blue, and **GENERIC** / **NO CONTROLLER** grey.
+    green, **STEAM** (Deck, Steam Controller) greyish blue, and **GENERIC** / **NO CONTROLLER** grey. A pad driven
+    through Steam keeps its family colour and reads e.g. "PS5 pad through Steam Input".
   - Then a verdict: **WORKING**, **WAIT** or **NOT WORKING**, plus what to do. Bluetooth failures appear in orange
     as **WAIT · BLUETOOTH** or **NOT WORKING · BLUETOOTH**.
+  - Then always two lines:
+    - **Steam Input:** `ON` (Steam drives the pad), `OFF for this pad` (Steam runs but lists no pad), `NOT USED`
+      (Unity mode, or Auto in the Editor), `NOT AVAILABLE` (no Steam backend, Steam not running or Init failed),
+      `FAILED` (a Steam write failed), or `ON, but …` (listed but not matched / type left to Unity).
+    - **Fallback:** `ACTIVE - Unity serves the pad because: …` or `none (…)` with the reason.
   - Then *THE PAD SHOULD SHOW NOW*: the light bar colour as a swatch with its name, the LED count, rumble on/off and
     the triggers. If the pad doesn't match, output isn't reaching it.
 - **Second F9:** full details.
   - A *Controller* section: type, model, connection now and at bind (and how it was read), device / layout /
     product / interface, Bluetooth drops, seconds since the pad last sent input, and the Bluetooth flag with its reason.
-  - Then the backend and why it was picked, capabilities, every playing pattern and the mix.
+  - *Backend*: mode, active backend and the rule that picked it.
+  - *Steam Input API*: Steam's last answer; Init state; overlay on/off (off usually means Steam did not launch the
+    process, so it hands it no pads); Steam Deck; every pad Steam lists with its type and XInput slot (bound one
+    marked); the game's opt-in mask (information only). Not asked in Unity mode.
+  - *Pads Unity sees*: every gamepad with type, model, USB / Bluetooth, layout and XInput slot (bound one marked).
+  - Then capabilities, every playing pattern and the mix.
   - On a DualSense on the Unity backend, also USB/Bluetooth, descriptor size, reports sent / refused and the last
     result.
 - **Third F9:** hides the panel.
 
 **F10** shows the raw bytes, and **F11** runs the Bluetooth self-test (expect `PASS`).
 
-**The log works in every build.** Every pad or backend change writes one line, for example:
+**The log works in every build.** Every pad or backend change (including a fallback after a failed Steam write)
+writes a block like this:
 
 ```
 [Rumble] Device: DualSense Wireless Controller [layout DualSenseGamepadHID, product 'DualSense Wireless Controller',
-interface HID] -> Backend: Unity (DualSense Bluetooth) -> Caps: Rumble, LightBar, AdaptiveTriggers, PlayerLeds
-(mode Auto, Unity: Auto: Steam Input is off for this pad type) Steam: …
+interface HID] -> Backend: Steam Input (k_ESteamInputType_PS5Controller) -> Caps: Rumble, LightBar, AdaptiveTriggers
+(mode Auto, Steam (Auto)) Steam: bound PS5Controller
+[Rumble] Steam Input: ON - Steam Input drives this pad | Fallback: none (Steam serves the pad) | mode Auto
+Steam Input API:
+  SteamInput.Init ok.  Overlay on   Steam Deck off
+  Steam lists 1 pad(s) to this game
+    [0] PS5Controller  XInput slot 0  <- BOUND
+  Game opt-in mask 0x… (PlayStation …, Xbox …, …)  info only: the pads Steam lists are what counts
+Pads Unity sees:
+  PlayStation - DualSense (PS5), USB, layout DualSenseGamepadHID  <- BOUND
 ```
+
+In Auto and Steam mode, a change in Steam's answer between binds (e.g. Steam starts or stops listing the pad) writes
+one `[Rumble] Steam Input: … | Fallback: …` line.
 
 The backend part says the most: `Unity (DualSense Usb)` / `Unity (DualSense Bluetooth)`, `Unity (XInputControllerWindows)`,
 `Unity (DualShock4GamepadHID)`, or `Steam Input (<pad type>)`. An Xbox layout for a PlayStation pad means Steam
@@ -209,15 +261,20 @@ Then ask for an F9 screenshot if they have a development build.
 | `DualSense descriptor read late` | Windows had no descriptor yet when the pad appeared; it was re-read and the format corrected |
 | `Unity backend: … refused 30 sends in a row` | Output to this pad stops until it reconnects. Usually a DualShock 4 on Bluetooth, or DS4Windows / DSX |
 | `<Capability> failed on …; turned off until the pad changes` | One feature was refused; the rest still work |
-| `Steam Input backend failed; falling back to the Unity Input System` | Steam mode, but Steam couldn't serve the pad |
+| `Steam Input backend failed; falling back to the Unity Input System` | A Steam write failed; Unity serves the pad until it changes |
+| `Steam Input: OFF for this pad … Fallback: none (Auto rule …)` | Not a warning: Auto with Steam Input off, Unity drives the pad |
+| `Steam Input: … Fallback: ACTIVE …` | Steam was expected but Unity serves the pad; the reason follows |
+| `Steam no longer serves the pad …; rebinding` | Steam stopped listing the bound pad (unplugged, reconnected, Steam Input turned off) |
 | `The light bar is switched off in RumbleOutputProfile` | A setting, not a bug: turn the LightBar feature back on |
 
 **Known reasons the light bar or LEDs don't change on someone's machine**
 
 | Cause | What happens | Fix for the player |
 |---|---|---|
-| Steam Input on for the game, but Backend = Unity | Steam hides the real pad behind a virtual Xbox pad: no light bar, LEDs or triggers. The panel says so | Use Auto (default) or turn Steam Input off for the game |
+| Steam Input on for the game, but Backend = Unity | Steam holds the pad: Unity's writes are refused, or reach only Steam's virtual Xbox pad (no light bar, LEDs or triggers). The verdict says "Steam Input holds it" | Use Auto (default) or Steam mode; check the F9 *Steam Input API* section for why Steam didn't take it |
 | DS4Windows, DSX or HidHide running | They take over or hide the pad | Close them |
+| Steam Input on, game not started from the Steam library (or the Editor) | Steam takes the pad from the game and gives nothing back: no input, *Pads Unity sees: none* | Start from the Steam library, or turn Steam Input off for the game |
+| Steam's per-game rumble setting off | Steam drops every rumble call; the panel can't see it | Steam → game → ⚙ → Controller settings: check rumble is on |
 | Player LEDs on the Steam backend | Not possible: Steam has no player-LED call | Expected; light bar and rumble still work |
 | DualShock 4 over Bluetooth on the Unity backend | Unity can't write to it, so we send nothing (one log warning) | Use Steam (Auto with Steam Input on) or a USB cable |
 | DualSense just connected over Bluetooth | For the first ~6 s the pad plays its own blue connection light; we hold the light bar back (rumble works) | Expected: our colour appears after ~6 s |
@@ -236,6 +293,8 @@ Then ask for an F9 screenshot if they have a development build.
 | `RumbleDeviceBinder` / `RumbleDeviceWatcher` | Which pad: follows pad switches, unplug, focus, quit |
 | `RumbleBackendSelector` | Which backend (the rules in section 5); switches off a failing feature |
 | `SteamInputRumbleOutput` / `UnityInputSystemRumbleOutput` | The two backends (`IRumbleOutput`) |
+| `SteamPadList`, `XInputSlot` | Which Steam pad is the one in the player's hands (one listed, XInput slot, or PlayStation type) |
+| `SteamInputState`, `RumbleSteamReport`, `RumbleSteamLines`, `SteamInputDebugText`, `RumbleConnectedPads` | Steam Input on/off and fallback state; its F9 lines and Player.log block; every pad Unity sees |
 | `DualSenseRawWriter`, `DualSenseOutputState`, `DualSenseHidOutputCommand`, `DualSenseBluetoothOutputCommand`, `DualSenseCrc32` | The raw DualSense report (Unity backend) |
 | `DualSenseTriggerParamWriter` | Trigger data for Steam |
 | `SteamOutputBoost` / `SteamImpactPunch` | Steam strength compensation |
@@ -245,6 +304,10 @@ Then ask for an F9 screenshot if they have a development build.
 | `RumbleBluetoothHealth`, `RumbleBluetoothCheck`, `RumblePadTypeLine` | Bluetooth drops / silence tracking, the Bluetooth verdict, the coloured controller line |
 
 ### Raw DualSense report (Unity backend)
+
+**Hardware-verified (Nov 2026):** this raw-report path gives full rumble and light bar on a DualSense over USB
+and Bluetooth, and on Xbox wired and Bluetooth, with Steam Input off. (The Nov 2026 Steam Input regression is fixed,
+see section 5; the Steam rows still need a hardware re-test.)
 
 Unity's own DualSense code only covers rumble and the light bar over USB (its source says Bluetooth "is not
 working"). So for a DualSense the Unity backend builds the pad's output message itself: one block of 47 bytes holding
@@ -284,5 +347,6 @@ The player's slider is applied after this, so 50 % means half on both backends.
 Implement `IRumbleOutput` (every method returns `false` on failure and never throws): `DisplayName`,
 `Capabilities`, `TryBind(device)`, `SetMotors`, `SetLightBar`, `SetPlayerLeds`, `SetTriggers`, `Flush`, `Reset`,
 `Unbind`, `Release`. Hand it in once with `rumble.SetPreferredBackend(output)` from a small installer next to the
-service (see `SteamRumbleInstaller`). Optionally implement `IRumbleBackendStatus` so the rules can tell "failed",
-"turned off by the player" and "pad reconnected".
+service (see `SteamRumbleInstaller`). Optionally implement `IRumbleBackendStatus` so the rules and the F9 panel can
+tell "not available", why the last bind failed (`SteamInputState`), how many pads the platform lists, "pad
+reconnected", whether the pad gets the strength boost, and the platform's own details for the panel and the log.

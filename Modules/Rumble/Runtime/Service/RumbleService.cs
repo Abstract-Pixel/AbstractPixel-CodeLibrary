@@ -28,6 +28,7 @@ namespace AbstractPixel.Rumble
         [Header("Debug (read only)")]
         [SerializeField, ReadOnly(true)] private string debugDevice = "none";
         [SerializeField, ReadOnly(true)] private string debugBackend = "none";
+        private IRumbleOutput lastSeenOutput;
         [SerializeField, ReadOnly(true)] private RumbleCapabilities debugCapabilities;
         [SerializeField, ReadOnly(true)] private RumbleCapabilities debugKilledCapabilities;
         [SerializeField, ReadOnly(true)] private float debugLow;
@@ -244,6 +245,18 @@ namespace AbstractPixel.Rumble
         /// <summary>What the bound pad is: type, model, connection (debug panel top line).</summary>
         public RumblePadIdentity DebugPadIdentity => deviceBinder.PadIdentity;
 
+        /// <summary>Steam Input on/off and fallback state (debug panel).</summary>
+        public RumbleSteamReport DebugSteamReport => deviceBinder.SteamReport;
+
+        /// <summary>The Steam backend's status for the details view, or null when no Steam backend is installed.</summary>
+        public IRumbleBackendStatus DebugSteamStatus => selector.SteamStatus;
+
+        /// <summary>Every pad Unity sees, rebuilt on each bind (debug panel).</summary>
+        public RumbleConnectedPads DebugConnectedPads => deviceBinder.ConnectedPads;
+
+        /// <summary>The bound Unity device, or null (debug panel).</summary>
+        public UnityEngine.InputSystem.InputDevice DebugBoundDevice => selector.BoundDevice;
+
         /// <summary>Bluetooth drops and input silence of the bound pad (debug panel verdict).</summary>
         public RumbleBluetoothHealth DebugBluetoothHealth => deviceBinder.BluetoothHealth;
 
@@ -276,6 +289,14 @@ namespace AbstractPixel.Rumble
             }
 
             deviceBinder.Tick();
+
+            // A failed Steam write switches to Unity inside the writer, without a rebind: let the binder log it and
+            // rebuild the pad identity (its BindingChanged event refreshes the debug fields and lastSeenOutput).
+            if (selector.ActiveOutput != lastSeenOutput)
+            {
+                deviceBinder.HandleBackendSwitchedAfterFailure();
+            }
+
             if (selector.ActiveOutput == null)
             {
                 // No pad (keyboard and mouse, or the pad was unplugged): nothing can be shown.
@@ -480,11 +501,18 @@ namespace AbstractPixel.Rumble
 
         private void UpdateDeviceDebugFields()
         {
+            lastSeenOutput = selector.ActiveOutput;
             debugBackend = selector.DescribeActiveOutput();
             debugDevice = "none";
-            if (selector.BoundDevice != null)
+            bool hasUnityPad = selector.BoundDevice is UnityEngine.InputSystem.Gamepad;
+            if (hasUnityPad)
             {
                 debugDevice = selector.BoundDevice.displayName;
+            }
+            else if (selector.IsSteamActive)
+            {
+                // Steam Input took the pad away from Unity; Steam still drives it.
+                debugDevice = "Steam pad (Unity can't see it)";
             }
 
             debugCapabilities = ReadBoundCapabilities();

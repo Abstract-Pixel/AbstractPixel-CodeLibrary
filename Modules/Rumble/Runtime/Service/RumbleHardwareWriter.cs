@@ -70,7 +70,7 @@ namespace AbstractPixel.Rumble
             // Steam compensation runs every tick (before the rate limit), so the impact punch sees every rise.
             float lowToSend = _low;
             float highToSend = _high;
-            if (selector.IsSteamActive)
+            if (selector.IsSteamBoosted)
             {
                 ApplySteamCompensation(_low, _high, _profile);
                 lowToSend = steamImpactPunch.Low;
@@ -241,7 +241,7 @@ namespace AbstractPixel.Rumble
 
             TriggerEffect brake = _brake;
             TriggerEffect throttle = _throttle;
-            if (selector.IsSteamActive)
+            if (selector.IsSteamBoosted)
             {
                 brake = SteamOutputBoost.BoostTrigger(_brake, _profile);
                 throttle = SteamOutputBoost.BoostTrigger(_throttle, _profile);

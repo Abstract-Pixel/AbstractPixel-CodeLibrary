@@ -39,6 +39,18 @@ namespace AbstractPixel.Rumble
         public static RumblePadIdentity Read(InputDevice _device, string _backendName)
         {
             RumblePadIdentity identity = new RumblePadIdentity();
+            bool isSteamBackend = _backendName != null && _backendName.StartsWith("Steam");
+            bool hasUnityPad = _device is Gamepad;
+            if (isSteamBackend && hasUnityPad == false)
+            {
+                // Steam drives a pad that Unity can't see (Steam Input took it away from the game).
+                identity.Kind = ReadSteamKind(_backendName);
+                identity.Model = ReadSteamModel(_backendName) + " through Steam Input";
+                identity.ConnectionSource = "Steam owns the pad; Unity can't see it, so the connection is not known";
+                identity.DeviceName = "none in Unity";
+                return identity;
+            }
+
             if (_device == null)
             {
                 return identity;
@@ -56,10 +68,11 @@ namespace AbstractPixel.Rumble
 
         private static RumblePadKind ReadKind(InputDevice _device, string _backendName)
         {
+            // Through Steam the Unity device may be Steam's virtual Xbox pad, so the family comes from Steam's type.
             bool isSteamBackend = _backendName != null && _backendName.StartsWith("Steam");
             if (isSteamBackend)
             {
-                return RumblePadKind.Steam;
+                return ReadSteamKind(_backendName);
             }
 
             DeviceFamily family = InputDeviceTracker.GetDeviceFamily(_device);
@@ -85,7 +98,8 @@ namespace AbstractPixel.Rumble
                 return "keyboard / mouse (no controller in use)";
             }
 
-            if (_kind == RumblePadKind.Steam)
+            bool isSteamBackend = _backendName != null && _backendName.StartsWith("Steam");
+            if (isSteamBackend)
             {
                 return ReadSteamModel(_backendName) + " through Steam Input";
             }
@@ -117,6 +131,25 @@ namespace AbstractPixel.Rumble
             }
 
             return product;
+        }
+
+        /// <summary>PlayStation / Xbox from Steam's pad type in the backend name; Steam for Deck, Steam Controller and the rest.</summary>
+        private static RumblePadKind ReadSteamKind(string _backendName)
+        {
+            bool isPlayStation = _backendName.Contains("PS5Controller") || _backendName.Contains("PS4Controller")
+                || _backendName.Contains("PS3Controller");
+            if (isPlayStation)
+            {
+                return RumblePadKind.PlayStation;
+            }
+
+            bool isXbox = _backendName.Contains("XBox360Controller") || _backendName.Contains("XBoxOneController");
+            if (isXbox)
+            {
+                return RumblePadKind.Xbox;
+            }
+
+            return RumblePadKind.Steam;
         }
 
         /// <summary>Steam's pad type from the backend name, in plain words ("PS5 pad", "Steam Deck").</summary>

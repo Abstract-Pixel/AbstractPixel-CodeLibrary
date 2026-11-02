@@ -7,7 +7,8 @@ namespace AbstractPixel.Rumble
 {
     /// <summary>
     /// In-game rumble debug panel (Editor and development builds only). The toggle key (F9) cycles:
-    /// short check (a WORKING / WAIT / NOT WORKING verdict and what the pad should show) -> full details -> hidden.
+    /// short check (a WORKING / WAIT / NOT WORKING verdict, Steam Input on/off, fallback active/none, and what the pad
+    /// should show) -> full details -> hidden.
     /// The details list everything feeding the controller right now, so conflicts are easy to spot:
     /// - every playing one-shot pattern: name, strength, current heavy/light value, time left, and its flags
     ///   (mutes driving rumble, flashes the light bar, buzzes triggers);
@@ -158,6 +159,7 @@ namespace AbstractPixel.Rumble
             text.Clear();
             RumblePadTypeLine.AppendShort(_rumble, text);
             RumblePadCheck.AppendVerdict(_rumble, text);
+            RumbleSteamLines.AppendShort(_rumble, text);
             RumblePadCheck.AppendExpectedOnPad(_rumble, text);
             if (isShowingDetails == false)
             {
@@ -167,7 +169,7 @@ namespace AbstractPixel.Rumble
 
             text.Append("\n<b>DETAILS</b>  (").Append(toggleKey).Append(" hides)\n");
             RumblePadTypeLine.AppendDetails(_rumble, text);
-            text.Append("Pad: ").Append(_rumble.DebugDevice).Append("  ->  ").Append(_rumble.DebugBackend).Append('\n');
+            RumbleSteamLines.AppendDetails(_rumble, text);
             AppendBackend(_rumble);
             AppendDualSenseReport(_rumble);
             AppendSilence(_rumble);
@@ -187,22 +189,9 @@ namespace AbstractPixel.Rumble
             }
         }
 
-        /// <summary>Which backend rule picked this backend, what the pad can do, and what was switched off.</summary>
+        /// <summary>What the bound pad can do, and what was switched off (the backend rule is in RumbleSteamLines).</summary>
         private void AppendBackend(RumbleService _rumble)
         {
-            text.Append("Mode ").Append(_rumble.DebugAppliedMode);
-            if (_rumble.DebugIsAutoResolvedForEditor)
-            {
-                text.Append(" (profile Auto = Unity in the Editor)");
-            }
-
-            text.Append(": ").Append(_rumble.DebugBackendReason).Append('\n');
-            string steamStatus = _rumble.DebugPreferredStatus;
-            if (string.IsNullOrEmpty(steamStatus) == false)
-            {
-                text.Append("Steam: ").Append(steamStatus).Append('\n');
-            }
-
             text.Append("Caps: ").Append(_rumble.ActiveCapabilities);
             if (_rumble.DebugKilledCapabilities != RumbleCapabilities.None)
             {

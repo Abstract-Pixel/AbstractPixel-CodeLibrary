@@ -18,6 +18,8 @@ Needs the `RumbleDebugOverlay` component next to the `RumbleService`.
    ```
    PLAYSTATION  DualSense (PS5)  ·  USB cable
    WORKING  the DualSense accepts our reports (Usb, 307 sent, 0 refused).
+   Steam Input:  OFF for this pad - Steam runs but lists no pad to the game (…)
+   Fallback:  none (Auto rule: Steam Input is not on for this pad, so Unity drives it)
 
    THE PAD SHOULD SHOW NOW  (if it doesn't match, it's not working)
      Light bar:  ██████ purple  #8925F9
@@ -32,7 +34,8 @@ Needs the `RumbleDebugOverlay` component next to the `RumbleService`.
    |---|---|---|
    | **PLAYSTATION** DualSense (PS5) / DualShock 4 (PS4) · USB cable / Bluetooth (wireless) | blue | The game talks to the PlayStation pad directly; the connection is read from the pad itself |
    | **XBOX** Xbox-style pad (XInput) · connection not reported | green | An Xbox pad, or any pad acting as one. Windows doesn't say whether it's wired or wireless |
-   | **STEAM** PS5 pad / Xbox pad / Steam Deck controls through Steam Input | greyish blue | Steam owns the pad and the game talks to Steam |
+   | **PLAYSTATION** / **XBOX** PS5 pad / PS4 pad / Xbox pad through Steam Input | blue / green | Steam owns the pad and the game talks to Steam. Connection: "not reported" unless Unity also sees the raw PlayStation pad |
+   | **STEAM** Steam Deck controls / Steam Controller through Steam Input | greyish blue | Steam's own hardware |
    | **GENERIC** *product name* | grey | Something else (Switch Pro, cheap HID pad): rumble at most |
    | **NO CONTROLLER** | grey | No pad bound (keyboard / mouse in use, or the pad is gone) |
 
@@ -49,14 +52,29 @@ Needs the `RumbleDebugOverlay` component next to the `RumbleService`.
    | **WAIT · BLUETOOTH** (orange) | The pad is on Bluetooth and its link looks shaky: refusing reports, dropping, or silent | Do what the line says. If it's still there after 10 s, it's a **FAIL** |
    | **NOT WORKING · BLUETOOTH** (orange) | The pad is (or just was) there over Bluetooth, but the link or its reports failed | **FAIL**, unless it's a DualShock 4 without Steam Input (section 3) |
 
-5. **Look at the pad.** Does it match *THE PAD SHOULD SHOW NOW*?
+5. **Read the Steam Input and Fallback lines** (third and fourth lines). They must match the Steam Input setting you
+   are testing (section 2, *Steam Input* and *Fallback* columns):
+
+   | Steam Input line | Means |
+   |---|---|
+   | **ON** (green) | Steam drives the pad |
+   | **OFF for this pad** (yellow) | Steam runs but lists no pad: Steam Input is off for it, or the game wasn't launched from Steam |
+   | **NOT USED** (light blue) | Unity mode, or Auto in the Editor. Steam is not asked |
+   | **NOT AVAILABLE** | No Steam backend, or Steam not running / Init failed |
+   | **FAILED** (red) | A Steam write failed; Unity serves the pad until it changes |
+   | **ON, but …** (yellow) | Steam lists the pad but couldn't serve it (can't tell which of several, or type left to Unity) |
+
+   **Fallback: ACTIVE** (yellow) = Unity serves a pad Steam was expected to serve; the reason follows. **none** = no
+   fallback (Steam serves the pad, or Unity is the rule: Auto with Steam Input off, Unity mode, Editor).
+
+6. **Look at the pad.** Does it match *THE PAD SHOULD SHOW NOW*?
    - Light bar is the same colour → pass. Breathing colours dim and brighten, so the hex number keeps changing:
      match the colour name, not the number.
    - Player LEDs show the same count → pass.
    - Rumble: when it says *on*, you feel it → pass.
    - Triggers: when it says *resistance*, L2/R2 push back → pass.
 
-   **WORKING + the pad matches = PASS.** If it says WORKING but the pad doesn't match, that's a **FAIL**: the game
+   **WORKING + the Steam lines match the setup + the pad matches = PASS.** If it says WORKING but the pad doesn't match, that's a **FAIL**: the game
    thinks it's sending, but the pad isn't showing it. Screenshot it (section 6).
 
 Press **F9** again for the full details (for bug reports), and a third time to hide the panel.
@@ -65,27 +83,41 @@ Press **F9** again for the full details (for bug reports), and a third time to h
 
 **PASS** = the panel shows this verdict and the pad shows these features. Anything else is a **FAIL**.
 
-| Controller | Steam Input for the game | Top line should say | Verdict should say | Light bar | Player LEDs | Triggers | Rumble |
-|---|---|---|---|---|---|---|---|
-| DualSense, USB | off | PLAYSTATION DualSense (PS5) · USB cable | WORKING … (Usb, … 0 refused) | ✅ | ✅ | ✅ | ✅ |
-| DualSense, Bluetooth | off | PLAYSTATION DualSense (PS5) · Bluetooth (wireless) | WAIT ~6 s, then WORKING … (Bluetooth, …) | ✅ after ~6 s | ✅ after ~6 s | ✅ | ✅ |
-| DualSense, USB or Bluetooth | on | STEAM PS5 pad through Steam Input | WORKING Steam owns the pad | ✅ | ❌ expected | ✅ | ✅ |
-| DualShock 4, USB | off | PLAYSTATION DualShock 4 (PS4) · USB cable | WORKING the pad accepts what we send | ✅ | – | – | ✅ |
-| DualShock 4, Bluetooth | off | PLAYSTATION DualShock 4 (PS4) · Bluetooth (wireless) | NOT WORKING · BLUETOOTH … Unity backend can't send to it | ❌ expected | – | – | ❌ expected |
-| DualShock 4, USB or Bluetooth | on | STEAM PS4 pad through Steam Input | WORKING Steam owns the pad | ✅ | – | – | ✅ |
-| Xbox, wired or Bluetooth | off | XBOX Xbox-style pad (XInput) | WORKING rumble only | – | – | – | ✅ |
-| Xbox, wired or Bluetooth | on | STEAM Xbox pad through Steam Input | WORKING Steam owns the pad | – | – | – | ✅ |
-| Generic / lookalike pad | either | XBOX (if it acts as one) or GENERIC | WORKING rumble only, or NOT WORKING no controller found | – | – | – | ✅ if it shows up as an Xbox pad |
-| Steam Deck built-in controls | always on | STEAM Steam Deck controls through Steam Input | WORKING Steam owns the pad | – | – | – | ✅ (Deck haptics) |
+Backend Mode **Auto** (the default), in a Development or release build **launched from the Steam library**:
+
+| Controller | Steam Input for the game | Top line should say | Verdict should say | Steam Input / Fallback | Light bar | Player LEDs | Triggers | Rumble |
+|---|---|---|---|---|---|---|---|---|
+| DualSense, USB | off | PLAYSTATION DualSense (PS5) · USB cable | WORKING … (Usb, … 0 refused) | OFF / none | ✅ | ✅ | ✅ | ✅ |
+| DualSense, Bluetooth | off | PLAYSTATION DualSense (PS5) · Bluetooth (wireless) | WAIT ~6 s, then WORKING … (Bluetooth, …) | OFF / none | ✅ after ~6 s | ✅ after ~6 s | ✅ | ✅ |
+| DualSense, USB or Bluetooth | on | PLAYSTATION PS5 pad through Steam Input | WORKING Steam owns the pad | ON / none | ✅ | ❌ expected | ✅ | ✅ |
+| DualShock 4, USB | off | PLAYSTATION DualShock 4 (PS4) · USB cable | WORKING the pad accepts what we send | OFF / none | ✅ | – | – | ✅ |
+| DualShock 4, Bluetooth | off | PLAYSTATION DualShock 4 (PS4) · Bluetooth (wireless) | NOT WORKING · BLUETOOTH … Unity backend can't send to it | OFF / none | ❌ expected | – | – | ❌ expected |
+| DualShock 4, USB or Bluetooth | on | PLAYSTATION PS4 pad through Steam Input | WORKING Steam owns the pad | ON / none | ✅ | – | – | ✅ |
+| Xbox, wired or Bluetooth | off | XBOX Xbox-style pad (XInput) | WORKING rumble only | OFF / none | – | – | – | ✅ |
+| Xbox, wired or Bluetooth | on | XBOX Xbox pad through Steam Input | WORKING Steam owns the pad | ON / none | – | – | – | ✅ |
+| DualSense + Xbox, both Bluetooth | on | the pad you last pressed, through Steam Input | WORKING Steam owns the pad | ON / none | ✅ (DualSense) | ❌ expected | ✅ (DualSense) | ✅ on the pad in your hands only |
+| Generic / lookalike pad | either | XBOX (if it acts as one) or GENERIC | WORKING rumble only, or NOT WORKING no controller found | OFF, or ON but … / ACTIVE | – | – | – | ✅ if it shows up as an Xbox pad |
+| Steam Deck built-in controls | always on | STEAM Steam Deck controls through Steam Input | WORKING Steam owns the pad | ON / none | – | – | – | ✅ (Deck haptics) |
 
 ✅ must work · ❌ expected = it can't work in this setup, not a bug · – the pad has no such feature
+
+Other modes:
+- **Unity mode** (any pad, any setting): *Steam Input: NOT USED*, *Fallback: none*. With Steam Input **on** for the
+  pad, Steam holds it and the verdict is *NOT WORKING … Steam Input holds it*: expected, use Auto or Steam mode.
+- **Steam mode**, Steam Input on: same as Auto with Steam Input on.
+- **Steam mode**, Steam Input off (or not launched from Steam): Unity drives the pad at once, *Fallback: ACTIVE … Steam
+  lists no pad to this game*. Rumble, light bar, LEDs and triggers as in the "off" rows.
+- **Editor, Auto**: always *Steam Input: NOT USED in the Editor*, Unity drives the pad.
 
 Also a **FAIL** in any row: an error or exception in the Console or Player.log, or the same warning repeated over
 and over.
 
-Tested on hardware so far (Nov 2026): DualSense USB (blue PLAYSTATION line confirmed) and an Xbox-style lookalike
-pad. The XBOX, GENERIC and Bluetooth lines have been rendered with fake devices only. STEAM has only been checked as
-text. All other rows still need real hardware.
+Tested on hardware so far (Nov 2026): DualSense USB and **Bluetooth**, and Xbox wired and **Bluetooth**, all with
+Steam Input off: **verified working**, with full rumble and light bar, through the Unity backend (raw DualSense reports).
+The Steam Input regression (Auto refused pads Steam was driving; see README section 5) is fixed. The "Steam Input on"
+rows and the Steam / Fallback lines are verified in the Editor with a fake Steam backend
+(`AgentScripts/ControllerHaptics/SteamFallbackProbe.cs`) and still need real hardware. The GENERIC line has been
+rendered with fake devices only.
 
 ## 3. Reading NOT WORKING and WAIT
 
@@ -102,6 +134,11 @@ text. All other rows still need real hardware.
 | WAIT · BLUETOOTH … dropped N times in the last minute | **FAIL** (unstable link) | Move closer to the PC / adapter, away from USB 3 ports, or use USB |
 | WAIT · BLUETOOTH … no data from the pad for N s | Press any button | If it clears: fine, the pad was just resting. If it stays while you press: **FAIL** (link stuck) |
 | NOT WORKING the pad refused every send | **FAIL** | Turn the pad off and on; close DS4Windows / DSX; screenshot |
+| NOT WORKING … refused every send because Steam Input holds it | **FAIL** in Auto / Steam mode; expected in Unity mode | Screenshot F9 details: *Steam Input API* says why Steam didn't take the pad |
+| Fallback: ACTIVE … in Steam mode, Steam Input on | **FAIL** | Screenshot F9 details (*Steam Input API*: listed pads, overlay) and send Player.log |
+| Steam Input: OFF for this pad, but Steam Input is on in Steam | **FAIL** (setup) | Launch from the Steam library (overlay must say *on* in F9 details) |
+| NO CONTROLLER, *Pads Unity sees: none*, pad plugged in | **FAIL** (setup) if Steam Input is on and the game wasn't started from Steam | Start from the Steam library. In Auto / Steam mode rumble still goes through Steam (device "Steam pad (Unity can't see it)") but controller input doesn't |
+| Fallback: NOT POSSIBLE | Unity can't see the pad, and Steam couldn't serve it | Screenshot F9 details (*Steam Input API*) |
 | NOT WORKING the DualSense refused our reports in every format | **FAIL** | Screenshot both F9 views and F10 |
 | NOT WORKING LightBar (or other) failed … switched off | **FAIL** | Screenshot; turn the pad off and on to retry |
 | NOT WORKING backend mode is Off | Setting | Backend Mode on the `RumbleOutputProfile`, or remove `-rumble-backend=off` |
@@ -166,8 +203,16 @@ Do section 1 at each step and compare with the game's state table.
   - Then find the `[Rumble] Device: … -> Backend: …` line. The backend must match section 2, for example
   `Unity (DualSense Bluetooth)` or `Steam Input (…PS5…)`. There must be no `Exception` and no `[Rumble]` warning. The
   README (section 6) explains each warning.
-- **Steam Input setting:** Steam → Library → the game → ⚙ → Properties → Controller. Launch from the Steam library
-  when testing the Steam Input rows.
+  - Right after it: `[Rumble] Steam Input: <ON / OFF … / NOT USED …> | Fallback: <ACTIVE … / none …> | mode …`, then
+    *Steam Input API* (listed pads, overlay, opt-in mask) and *Pads Unity sees*. These are the panel's Steam lines and
+    details; check them against section 2 the same way.
+- **Steam Input setting:** Steam → Library → the game → ⚙ → Properties → Controller. **Launch from the Steam
+  library when testing the Steam Input rows** (F9 details must say *Overlay on*). With Steam Input on and the exe
+  started any other way, or in the Editor, Steam takes the pad away from the game and gives nothing back: *Pads
+  Unity sees: none*, no controller input. That is a test-setup **FAIL**, not a game bug. To run a local build
+  through Steam, try Steam → the game → Properties → Launch Options:
+  `"C:\path\to\TestBuild\RallyShift.exe" %command%`, then check that F9 details say *Overlay on* (otherwise upload
+  the build to a Steam beta branch).
 - **Before testing:** close DS4Windows, DSX and HidHide, and keep only one pad on (except for the two-pad check).
 
 **When something fails, send:**

@@ -67,8 +67,18 @@ namespace AbstractPixel.Rumble
         {
             if (_rumble.DebugDevice == "none")
             {
+                // Steam lists a pad that Unity can't see: Steam Input took it away from the game.
+                RumbleSteamReport steamReport = _rumble.DebugSteamReport;
+                if (steamReport.ListedPadCount > 0)
+                {
+                    return "Unity sees no controller because Steam Input holds the pad, and the Steam backend could not "
+                        + "take it (" + _rumble.DebugBackendReason + "). Unity can't be the fallback: it can't see the pad.";
+                }
+
                 return "no controller found. Connect a pad and press a button on it. (Paired over Bluetooth but not "
-                    + "found? Windows hasn't connected it: press the pad's home button to wake it, or re-pair it.)";
+                    + "found? Windows hasn't connected it: press the pad's home button to wake it, or re-pair it. "
+                    + "Steam Input on for the game but started outside the Steam library, or in the Editor? Steam takes "
+                    + "the pad away from the game: start it from Steam, or turn Steam Input off.)";
             }
 
             if (_rumble.DebugAppliedMode == RumbleBackendMode.Off)
@@ -86,6 +96,14 @@ namespace AbstractPixel.Rumble
             UnityInputSystemRumbleOutput unityOutput = _rumble.DebugUnityOutput;
             if (unityOutput != null && unityOutput.HasGivenUp)
             {
+                // Steam listing pads while our direct writes bounce = Steam Input holds this pad (the Nov 2026 case).
+                bool isSteamHoldingPads = _rumble.DebugSteamReport.ListedPadCount > 0;
+                if (isSteamHoldingPads)
+                {
+                    return "the pad refused every send because Steam Input holds it, and the Steam backend could not "
+                        + "take it (" + _rumble.DebugBackendReason + "). Screenshot F9 details.";
+                }
+
                 return "the pad refused every send; output stopped. Turn the pad off and on. If it repeats, close "
                     + "DS4Windows / DSX or use a USB cable.";
             }
@@ -199,7 +217,7 @@ namespace AbstractPixel.Rumble
             _text.Append("  Player LEDs:  ");
             if (hasPlayerLeds == false)
             {
-                _text.Append("not controlled by the game here (Steam has no LED call; the pad keeps its own)\n");
+                _text.Append(DescribeNoPlayerLeds(_rumble)).Append('\n');
                 return;
             }
 
@@ -218,6 +236,24 @@ namespace AbstractPixel.Rumble
             }
 
             _text.Append("<b>").Append(litCount).Append(" of 5 lit</b>\n");
+        }
+
+        /// <summary>Why the game doesn't drive the dots: Steam has no call for them, or they failed on Unity.</summary>
+        private static string DescribeNoPlayerLeds(RumbleService _rumble)
+        {
+            bool isSteam = _rumble.DebugBackend.StartsWith("Steam");
+            if (isSteam)
+            {
+                return "not controlled by the game here (Steam has no LED call; the pad keeps its own)";
+            }
+
+            bool hasFailed = (_rumble.DebugKilledCapabilities & RumbleCapabilities.PlayerLeds) != 0;
+            if (hasFailed)
+            {
+                return "not controlled: they failed on this pad and were switched off";
+            }
+
+            return "not controlled by the game here";
         }
 
         private static void AppendRumble(RumbleService _rumble, StringBuilder _text)

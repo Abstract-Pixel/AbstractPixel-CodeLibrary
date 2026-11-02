@@ -8,14 +8,17 @@ namespace AbstractPixel.Rumble
     /// - Unity (UnityInputSystemOnly): always Unity. The Steam backend is never called, not even to check.
     /// - Steam (SteamInputOnly): Steam. Unity only while Steam fails (not running, Init failed, or it can't see the
     ///   pad yet); the binder keeps checking and moves the pad to Steam as soon as Steam can serve it.
-    /// - Auto: Steam, but only when the player has Steam Input on for this pad's type; otherwise Unity.
+    /// - Auto: Steam whenever Steam lists the pad to this game (Steam only lists the pads it drives with Steam Input,
+    ///   so that is the "Steam Input is on" signal); otherwise Unity. In the Editor the binder turns Auto into Unity.
     /// A capability that fails is turned off until the pad changes; a Steam backend that fails falls back to Unity.
+    /// "Fallback" = Unity serves a pad Steam was expected to serve (see IsFallbackActive); BackendReason says why.
     /// </summary>
     public class RumbleBackendSelector
     {
         private readonly UnityInputSystemRumbleOutput unityOutput;
         private IRumbleOutput steamOutput;
         private bool isSteamBackendBroken;
+        private RumbleBackendMode boundMode = RumbleBackendMode.Auto;
         private RumbleCapabilities killedCapabilities = RumbleCapabilities.None;
 
         public RumbleBackendSelector(UnityInputSystemRumbleOutput _unityOutput)
@@ -32,6 +35,45 @@ namespace AbstractPixel.Rumble
         /// <summary>Why the active backend was chosen, for the debug overlay and the binding log.</summary>
         public string BackendReason { get; private set; } = "not bound";
 
+        /// <summary>What Steam Input is doing for the bound pad (set on bind and on the once-a-second Steam check).</summary>
+        public SteamInputState SteamState { get; private set; } = SteamInputState.NotChecked;
+
+        /// <summary>
+        /// True while Unity serves a pad that Steam was expected to serve:
+        /// - Steam mode: Steam is not serving, for any reason;
+        /// - Auto: Steam Input is on for the pad (Steam lists it) but Steam could not serve it (no match, type left
+        ///   to Unity, or a Steam write failed). Auto with Steam Input off or Steam not running is the normal Unity
+        ///   rule, not a fallback.
+        /// </summary>
+        public bool IsFallbackActive
+        {
+            get
+            {
+                if (ActiveOutput == null || IsSteamActive)
+                {
+                    return false;
+                }
+
+                if (boundMode == RumbleBackendMode.SteamInputOnly)
+                {
+                    return true;
+                }
+
+                if (boundMode != RumbleBackendMode.Auto)
+                {
+                    return false;
+                }
+
+                bool isSteamInputOnButUnserved = SteamState == SteamInputState.PadNotMatched
+                    || SteamState == SteamInputState.PadTypeNotHandled
+                    || SteamState == SteamInputState.FailedForThisPad;
+                return isSteamInputOnButUnserved;
+            }
+        }
+
+        /// <summary>The Steam backend's status, or null when none is installed (debug panel, bind log).</summary>
+        public IRumbleBackendStatus SteamStatus => steamOutput as IRumbleBackendStatus;
+
         /// <summary>The preferred backend's own status line (Steam), or empty.</summary>
         public string PreferredStatusLine
         {
@@ -44,6 +86,29 @@ namespace AbstractPixel.Rumble
                 }
 
                 return status.StatusLine;
+            }
+        }
+
+        /// <summary>
+        /// True while Steam drives a pad that needs the Steam output boost (not Xbox pads). Read per tick: a cached
+        /// interface cast and a bool, no allocation.
+        /// </summary>
+        public bool IsSteamBoosted
+        {
+            get
+            {
+                if (IsSteamActive == false)
+                {
+                    return false;
+                }
+
+                IRumbleBackendStatus status = steamOutput as IRumbleBackendStatus;
+                if (status == null)
+                {
+                    return true;
+                }
+
+                return status.IsBoundPadBoosted;
             }
         }
 
@@ -69,48 +134,69 @@ namespace AbstractPixel.Rumble
         /// <summary>Resets the old pad, then binds the device with the backend the mode allows.</summary>
         public void Bind(InputDevice _device, RumbleBackendMode _mode)
         {
+            IRumbleOutput previousOutput = ActiveOutput;
             ResetActiveOutput();
             UnbindAll();
 
             // A new pad (or the same pad over another connection) starts with every capability allowed again.
-            bool isNewDevice = _device != BoundDevice;
-            if (isNewDevice)
+            // Mouse / keyboard switches don't count: with Steam serving a pad Unity can't see, they would re-arm a
+            // Steam backend that just failed on every mouse move.
+            bool isNewPad = _device != BoundDevice && _device is Gamepad;
+            if (isNewPad)
             {
                 killedCapabilities = RumbleCapabilities.None;
                 isSteamBackendBroken = false;
             }
 
             BoundDevice = _device;
+            boundMode = _mode;
             bool isGamepad = _device is Gamepad;
-            if (isGamepad == false)
+            if (isGamepad)
             {
-                BackendReason = "no gamepad";
-                return;
+                ActiveOutput = ChooseOutput(_device, _mode);
+            }
+            else
+            {
+                ActiveOutput = ChooseOutputWithoutUnityPad(_device, _mode);
             }
 
-            ActiveOutput = ChooseOutput(_device, _mode);
+            bool hasBackendChanged = ActiveOutput != previousOutput;
+            if (hasBackendChanged)
+            {
+                ForgetFailures();
+            }
         }
 
         /// <summary>
         /// Called about once a second in Auto and Steam modes while Unity serves the pad: moves it to Steam as soon as
         /// Steam can serve it (Steam often lists no controller for the first moments after start-up).
         /// </summary>
-        public bool TryUpgradeToSteam(RumbleBackendMode _mode)
+        public bool TryUpgradeToSteam()
         {
             if (IsSteamActive)
             {
                 return false;
             }
 
-            bool isGamepad = BoundDevice is Gamepad;
-            if (isGamepad == false)
-            {
-                return false;
-            }
-
-            IRumbleOutput steamChoice = TryBindSteamFor(BoundDevice, _mode);
+            // Also runs when Unity sees no gamepad at all: Steam Input can hide the pad from Unity entirely.
+            IRumbleOutput steamChoice = TryBindSteamFor(BoundDevice);
             if (steamChoice == null)
             {
+                // Keep saying why Unity serves the pad (or why nothing does), with Steam's latest answer.
+                bool isGamepad = BoundDevice is Gamepad;
+                if (isGamepad == false)
+                {
+                    BackendReason = "no gamepad in Unity, and " + BackendReason;
+                    return false;
+                }
+
+                if (ActiveOutput == null)
+                {
+                    BackendReason = "Unity can't serve this pad (" + BackendReason + ")";
+                    return false;
+                }
+
+                BackendReason = "Unity: " + BackendReason;
                 return false;
             }
 
@@ -118,14 +204,15 @@ namespace AbstractPixel.Rumble
             unityOutput.Reset();
             unityOutput.Unbind();
             ActiveOutput = steamChoice;
+            ForgetFailures();
             return true;
         }
 
         /// <summary>
-        /// While Steam serves the pad: false when it should not any more (its handle is gone after a reconnect, or the
-        /// player turned Steam Input off in Auto mode). The binder then rebinds.
+        /// While Steam serves the pad: false when it should not any more (Steam stopped listing its handle: unplugged,
+        /// reconnected with a new handle, or the player turned Steam Input off). The binder then rebinds.
         /// </summary>
-        public bool IsSteamBindingStillValid(RumbleBackendMode _mode)
+        public bool IsSteamBindingStillValid()
         {
             if (IsSteamActive == false)
             {
@@ -138,16 +225,39 @@ namespace AbstractPixel.Rumble
                 return true;
             }
 
-            if (status.IsBoundPadStillConnected == false)
+            return status.IsBoundPadStillConnected;
+        }
+
+        /// <summary>
+        /// A capability that failed on one backend may work on the other (Unity's writes bounce while Steam holds the
+        /// pad, then Steam takes it), so the kill switches start clean whenever the backend changes.
+        /// </summary>
+        private void ForgetFailures()
+        {
+            killedCapabilities = RumbleCapabilities.None;
+        }
+
+        /// <summary>
+        /// Unity lost the bound device, but Steam may still list the pad: with Steam Input on, Steam can take the
+        /// pad away from Unity (it vanishes from the Input System) while Steam keeps driving it. Then the Steam binding
+        /// stays and only the Unity side is forgotten. False when the pad is really gone; the caller drops it.
+        /// </summary>
+        public bool TryKeepSteamAfterUnityLostDevice()
+        {
+            if (IsSteamActive == false)
             {
                 return false;
             }
 
-            if (_mode == RumbleBackendMode.Auto)
+            IRumbleBackendStatus status = steamOutput as IRumbleBackendStatus;
+            bool isStillListed = status == null || status.IsBoundPadStillConnected;
+            if (isStillListed == false)
             {
-                return status.IsEnabledByPlayerForBoundPad;
+                return false;
             }
 
+            BoundDevice = null;
+            BackendReason = "Steam (" + boundMode + "); Unity no longer sees the pad (Steam Input holds it)";
             return true;
         }
 
@@ -189,9 +299,11 @@ namespace AbstractPixel.Rumble
             {
                 Debug.LogWarning("[Rumble] Steam Input backend failed; falling back to the Unity Input System for this pad.");
                 isSteamBackendBroken = true;
+                SteamState = SteamInputState.FailedForThisPad;
                 InputDevice device = BoundDevice;
                 UnbindAll();
                 ActiveOutput = BindUnity(device, "Steam write failed");
+                ForgetFailures();
                 return;
             }
 
@@ -215,21 +327,48 @@ namespace AbstractPixel.Rumble
             return ActiveOutput.DisplayName;
         }
 
+        /// <summary>
+        /// Unity sees no gamepad (only mouse / keyboard, or nothing). In Auto and Steam mode Steam may still list the
+        /// pad: Steam Input can hide it from Unity completely. Then Steam serves it; otherwise nothing can.
+        /// </summary>
+        private IRumbleOutput ChooseOutputWithoutUnityPad(InputDevice _device, RumbleBackendMode _mode)
+        {
+            bool isSteamAllowed = _mode == RumbleBackendMode.Auto || _mode == RumbleBackendMode.SteamInputOnly;
+            if (isSteamAllowed == false)
+            {
+                BackendReason = "no gamepad";
+                SteamState = SteamInputState.NotChecked;
+                return null;
+            }
+
+            IRumbleOutput steamChoice = TryBindSteamFor(_device);
+            if (steamChoice == null)
+            {
+                BackendReason = "no gamepad in Unity, and " + BackendReason;
+                return null;
+            }
+
+            BackendReason = "Steam (" + _mode + "); Unity sees no gamepad (Steam Input holds the pad)";
+            return steamChoice;
+        }
+
         private IRumbleOutput ChooseOutput(InputDevice _device, RumbleBackendMode _mode)
         {
             if (_mode == RumbleBackendMode.Off)
             {
                 BackendReason = "mode Off";
+                SteamState = SteamInputState.NotChecked;
                 return null;
             }
 
             // Preferred = Unity: Steam is never touched.
             if (_mode == RumbleBackendMode.UnityInputSystemOnly)
             {
+                SteamState = SteamInputState.NotChecked;
                 return BindUnity(_device, "preferred Unity");
             }
 
-            IRumbleOutput steamChoice = TryBindSteamFor(_device, _mode);
+            IRumbleOutput steamChoice = TryBindSteamFor(_device);
             if (steamChoice != null)
             {
                 return steamChoice;
@@ -239,53 +378,49 @@ namespace AbstractPixel.Rumble
             return BindUnity(_device, BackendReason);
         }
 
-        /// <summary>Steam for Auto or Steam mode, if the rules allow it. Sets BackendReason either way.</summary>
-        private IRumbleOutput TryBindSteamFor(InputDevice _device, RumbleBackendMode _mode)
+        /// <summary>Steam for Auto or Steam mode, when Steam lists and matches the pad. Sets BackendReason and SteamState.</summary>
+        private IRumbleOutput TryBindSteamFor(InputDevice _device)
         {
             if (steamOutput == null)
             {
                 BackendReason = "no Steam backend installed";
+                SteamState = SteamInputState.NotInstalled;
                 return null;
             }
 
             if (isSteamBackendBroken)
             {
                 BackendReason = "Steam failed earlier for this pad";
+                SteamState = SteamInputState.FailedForThisPad;
                 return null;
             }
 
             IRumbleBackendStatus status = steamOutput as IRumbleBackendStatus;
-            if (status != null && status.IsAvailable == false)
+            bool isBound = steamOutput.TryBind(_device);
+            if (status != null)
             {
-                BackendReason = "Steam unavailable (not running or Init failed)";
-                return null;
+                SteamState = status.LastBindState;
             }
 
-            bool isBound = steamOutput.TryBind(_device);
             if (isBound == false)
             {
-                BackendReason = "Steam can't serve this pad yet";
+                BackendReason = DescribeSteamRefusal(status);
                 return null;
             }
 
-            // Auto: only when the player has Steam Input on for this pad type.
-            bool needsPlayerOptIn = _mode == RumbleBackendMode.Auto && status != null;
-            if (needsPlayerOptIn && status.IsEnabledByPlayerForBoundPad == false)
-            {
-                steamOutput.Unbind();
-                BackendReason = "Auto: Steam Input is off for this pad type";
-                return null;
-            }
-
-            BackendReason = "Steam (" + _mode + ")";
-            bool isSteamOnlyWithoutOptIn = _mode == RumbleBackendMode.SteamInputOnly && status != null && status.IsEnabledByPlayerForBoundPad == false;
-            if (isSteamOnlyWithoutOptIn)
-            {
-                // The rule says Steam, so Steam it is, but Steam may not forward output for a pad type it does not manage.
-                BackendReason = "Steam (SteamInputOnly) - WARNING: Steam Input is off for this pad type this session; output may not reach the pad";
-            }
-
+            SteamState = SteamInputState.Serving;
+            BackendReason = "Steam (" + boundMode + ")";
             return steamOutput;
+        }
+
+        private static string DescribeSteamRefusal(IRumbleBackendStatus _status)
+        {
+            if (_status == null)
+            {
+                return "Steam can't serve this pad";
+            }
+
+            return _status.StatusLine;
         }
 
         private IRumbleOutput BindUnity(InputDevice _device, string _reason)
