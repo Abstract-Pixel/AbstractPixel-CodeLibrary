@@ -20,5 +20,18 @@ namespace AbstractPixel.Core
             ServiceLocator.Register(trueType, referencedServiceToRegister);
         }
 
+
+        private void OnDestroy()
+        {
+            Type trueType = referencedServiceToRegister.GetType();
+            ServiceLocator.Unregister(trueType);
+        }
+
+        private void OnDisable()
+        {
+            Type trueType = referencedServiceToRegister.GetType();
+            ServiceLocator.Unregister(trueType);
+        }
+
     }
 }
