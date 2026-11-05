@@ -18,6 +18,9 @@ namespace AbstractPixel.Core
         [SerializeField] private PositionConstraints positionConstraints;
         [SerializeField] private RotationConstraints rotationConstraints;
 
+        /// <summary>Raised when the constraints are released, including after a delayed unlock.</summary>
+        public event System.Action OnUnlocked;
+
         private Rigidbody targetRigidbody;
         private RigidbodyConstraints cachedConstraints;
         private bool cachedIsKinematic;
@@ -73,6 +76,7 @@ namespace AbstractPixel.Core
             targetRigidbody.isKinematic = cachedIsKinematic;
             isUsedOnce = true;
             timerCoroutine = null;
+            OnUnlocked?.Invoke();
         }
 
         private RigidbodyConstraints ConvertToRigidbodyConstraints()

@@ -56,6 +56,7 @@ MonoBehaviour:
       - rid: 3582977949081796725
       - rid: 3582977949081796728
       - rid: 3582977949081796729
+      - rid: 1052282225866309743
   - GroupName: Controller
     Category: 5
     Settings:
@@ -94,6 +95,20 @@ MonoBehaviour:
           DisplayName: Adaptive Triggers
           Description: 'PS5 DualSense only: trigger resistance, brake shudder and
             the bomb buzz. Off keeps the triggers loose.'
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        isDefaultValuesPreGenerated: 1
+    - rid: 1052282225866309743
+      type: {class: RunTimerSetting, ns: , asm: Assembly-CSharp}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Show Run Timer
+          Description: Shows your Run Time and best time at the top of the screen,
+            on levels you have already finished.
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
