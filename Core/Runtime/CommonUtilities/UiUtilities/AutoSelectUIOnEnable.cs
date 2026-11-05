@@ -83,6 +83,16 @@ namespace AbstractPixel.Core
                     return;
                 }
                 StopAllCoroutines();
+
+                // A button under the mouse is where the controller takes over. Selecting it now, before the
+                // EventSystem updates, lets the press that switched the device navigate from that button.
+                Selectable hoveredSelectable = MouseHoverSelectableFinder.FindUsableSelectable();
+                if (hoveredSelectable != null)
+                {
+                    EventSystem.current.SetSelectedGameObject(hoveredSelectable.gameObject);
+                    return;
+                }
+
                 StartCoroutine(SelectSelectableAtEndOfFrame());
             }
             else
@@ -90,6 +100,7 @@ namespace AbstractPixel.Core
                 EventSystem.current?.SetSelectedGameObject(null);
             }
         }
+
 
         private IEnumerator SelectSelectableAtEndOfFrame()
         {

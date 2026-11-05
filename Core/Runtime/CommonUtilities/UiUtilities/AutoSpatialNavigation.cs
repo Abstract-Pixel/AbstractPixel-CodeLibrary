@@ -370,6 +370,12 @@ namespace AbstractPixel.Core.UI
 
             if (isInitialSelectionPending)
             {
+                if (TrySelectButtonUnderMouse())
+                {
+                    isInitialSelectionPending = false;
+                    return;
+                }
+
                 // The first button is selected by TryCompleteInitialSelection as soon as it is usable.
                 EndInitialSelectionIfPlayerTookOver();
                 return;
@@ -380,6 +386,26 @@ namespace AbstractPixel.Core.UI
             {
                 SelectClosestButtonToLastPointerPosition();
             }
+        }
+
+        // A button in this menu under the mouse is where the controller takes over, so this press
+        // navigates from it (this runs before the EventSystem) instead of from the first button.
+        private bool TrySelectButtonUnderMouse()
+        {
+            EventSystem currentEventSystem = EventSystem.current;
+            if (currentEventSystem == null || HasUsableSelection(currentEventSystem))
+            {
+                return false;
+            }
+
+            Selectable hoveredSelectable = MouseHoverSelectableFinder.FindUsableSelectable();
+            if (hoveredSelectable == null || !hoveredSelectable.transform.IsChildOf(transform))
+            {
+                return false;
+            }
+
+            SelectNow(hoveredSelectable);
+            return true;
         }
 
         // Checks every connected gamepad, not only Gamepad.current: with two pads connected (or a Steam Deck
