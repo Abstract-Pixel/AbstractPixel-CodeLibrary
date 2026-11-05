@@ -59,6 +59,10 @@ namespace AbstractPixel.Core.UI
         // True from enable until the first button has been selected for a controller.
         private bool isInitialSelectionPending = false;
 
+        // True while the mouse or keyboard is in control. Controller input that does not navigate (shoulders and
+        // triggers switching a leaderboard tab) must then not select a button: only a real navigation press does.
+        private bool isWaitingForControllerNavigation = false;
+
         private static readonly Vector2 NO_POINTER_POSITION = new Vector2(-1f, -1f);
         private Vector2 lastPointerScreenPosition = NO_POINTER_POSITION;
 
@@ -88,6 +92,8 @@ namespace AbstractPixel.Core.UI
             // Whatever is selected now belongs to an earlier screen, or to this menu's last visit (and is hidden).
             // Leaving it would block the first selection and send the first D-pad presses to a hidden button.
             ClearSelection();
+
+            isWaitingForControllerNavigation = !InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick();
 
             isInitialSelectionPending = false;
             if (autoSelectOnEnable)
@@ -180,7 +186,7 @@ namespace AbstractPixel.Core.UI
             }
 
             bool isControllerInUse = InputDeviceTracker.IsLastUsedDeviceGamepadOrJoystick();
-            if (!isControllerInUse)
+            if (!isControllerInUse || isWaitingForControllerNavigation)
             {
                 // Stay pending: if the player picks up the controller during the entrance, the first button is still chosen.
                 return;
@@ -341,6 +347,7 @@ namespace AbstractPixel.Core.UI
             if (mouseDelta.sqrMagnitude > MOUSE_MOVE_THRESHOLD_SQR)
             {
                 lastPointerScreenPosition = currentMouse.position.ReadValue();
+                isWaitingForControllerNavigation = true;
 
                 if (InputDeviceTracker.LastUsedDevice != currentMouse)
                 {
@@ -362,6 +369,8 @@ namespace AbstractPixel.Core.UI
             {
                 return;
             }
+
+            isWaitingForControllerNavigation = false;
 
             if (InputDeviceTracker.LastUsedDevice != navigatingGamepad)
             {
@@ -565,6 +574,12 @@ namespace AbstractPixel.Core.UI
         {
             if (_device is Gamepad || _device is Joystick)
             {
+                if (isWaitingForControllerNavigation)
+                {
+                    // Non-navigation input switched the device. DetectControllerInputAndAdaptSelection handles real navigation.
+                    return;
+                }
+
                 if (isInitialSelectionPending)
                 {
                     // TryCompleteInitialSelection picks the configured first button this frame or once it is usable.
@@ -579,6 +594,8 @@ namespace AbstractPixel.Core.UI
             }
             else if (_device is Mouse)
             {
+                isWaitingForControllerNavigation = true;
+
                 EventSystem currentEventSystem = EventSystem.current;
                 if (currentEventSystem != null && currentEventSystem.currentSelectedGameObject != null)
                 {
