@@ -10,6 +10,8 @@ namespace AbstractPixel.Settings
         bool IsEnabled { get; }
         void Initialize();
         void ApplySettingLogic();
+        void ApplySettingLogicInstantly();
+        void ApplyDefaultWithoutSave();
         bool EvaluateDependencies();
 
         void SaveToDataTransferObject(SettingsDTO _dataTransferObject);

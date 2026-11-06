@@ -9,6 +9,15 @@ namespace AbstractPixel.Settings
     {
         private const string PREFIX_TEXT = "Display ";
 
+        // The default would move the game off the monitor it opened on.
+        public override bool AppliesDefaultWithoutSave
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         protected override void OnInitialize()
         {       
                 GenerateDisplayData();

@@ -6,6 +6,15 @@ namespace AbstractPixel.Settings
     [Serializable]
     public class ScreenModeSetting : BaseOptionsSetting<int, FullScreenMode>
     {
+        // The default would flash a fullscreen mode switch on first launch.
+        public override bool AppliesDefaultWithoutSave
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         protected override void OnInitialize()
         {
             // Runtime safety check

@@ -18,6 +18,9 @@ namespace AbstractPixel.SaveSystem
         private readonly string stringSeparatorIdentifier = "#";
         private bool hasDoneInitialBootLoad = false;
 
+        // A category written before its first load replaces the player's file with whatever is still in memory (defaults).
+        private readonly HashSet<SaveCategory> categoriesLoadedOnce = new HashSet<SaveCategory>();
+
         internal bool isDataLoaded;
         internal bool isDataSaved;
 
@@ -46,9 +49,33 @@ namespace AbstractPixel.SaveSystem
 
         private void Start()
         {
+            LoadCategoriesNeededBeforeFirstFrame();
+
             if (SceneActions.ActiveSceneGroup != null)
             {
                 ExecuteIntialDataLoading(SceneActions.ActiveSceneGroup);
+            }
+        }
+
+        // Runs before every other Start in the boot scene (see the script's execution order) and before the first render,
+        // because the bridges in this scene registered in OnEnable. The normal boot load still reloads these categories,
+        // so anything that subscribes to a load event during Start is still told.
+        private void LoadCategoriesNeededBeforeFirstFrame()
+        {
+            foreach (SaveCatgeoryDefinition definition in saveConfig.GetAllCategoryDefinitions())
+            {
+                if (definition.LoadBeforeFirstFrame == false)
+                {
+                    continue;
+                }
+
+                if (definition.DirectoryScope != SaveScope.Global)
+                {
+                    Debug.LogError($"[SaveManager] {definition.Category} cannot load before the first frame: only Global categories can, no profile is chosen yet.");
+                    continue;
+                }
+
+                LoadDataOf(definition.Category);
             }
         }
 
@@ -142,6 +169,12 @@ namespace AbstractPixel.SaveSystem
 
         internal void SaveDataOf(SaveCategory _category)
         {
+            bool hasBeenLoaded = categoriesLoadedOnce.Contains(_category);
+            if (hasBeenLoaded == false)
+            {
+                return;
+            }
+
             isDataSaved = false;
             if (!savableObjectsRegistry.TryGetValue(_category, out var bridgesDataMap))
             {
@@ -215,6 +248,7 @@ namespace AbstractPixel.SaveSystem
 
         internal void LoadDataOf(SaveCategory _category)
         {
+            categoriesLoadedOnce.Add(_category);
             isDataLoaded = false;
             string profileId = ProfileManager.CurrentProfileID;
             SaveCatgeoryDefinition definition = saveConfig.GetCategoryDefinition(_category);

@@ -67,6 +67,42 @@ namespace AbstractPixel.Settings
 
         protected abstract void OnApplySettingLogic();
 
+        /// <summary>Applies without any transition, for values restored from a save rather than chosen by the player.</summary>
+        public void ApplySettingLogicInstantly()
+        {
+            if (IsEnabled == false || IsActive == false)
+            {
+                return;
+            }
+
+            OnApplySettingLogicInstantly();
+        }
+
+        protected virtual void OnApplySettingLogicInstantly()
+        {
+            OnApplySettingLogic();
+        }
+
+        /// <summary>False when the default is only a label for what the machine already chose, such as the resolution.</summary>
+        public virtual bool AppliesDefaultWithoutSave
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        /// <summary>Applies the current default when there is no save to restore (first launch or a corrupted file).</summary>
+        public void ApplyDefaultWithoutSave()
+        {
+            if (AppliesDefaultWithoutSave == false)
+            {
+                return;
+            }
+
+            ApplySettingLogicInstantly();
+        }
+
         public bool EvaluateDependencies()
         {
             bool previousAvailability = IsActive;

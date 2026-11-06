@@ -7,6 +7,15 @@ namespace AbstractPixel.Settings
     [Serializable]
     public class ResolutionSetting : BaseOptionsSetting<int, Resolution>
     {
+        // The default is 1920x1080, which would downscale a larger monitor on first launch.
+        public override bool AppliesDefaultWithoutSave
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         protected override void OnInitialize()
         {
             // Hardware resolutions must always be generated on boot to query the local monitor!

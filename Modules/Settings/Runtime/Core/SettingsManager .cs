@@ -14,6 +14,7 @@ namespace AbstractPixel.Settings
         [SerializeField] private bool ShowDebugLogs;
 
         private Dictionary<Type, ISettingBackend> settingsDictionary = new Dictionary<Type, ISettingBackend>();
+        private bool hasRestoredFromSave = false;
 
         public new static SettingsManager Instance
         {
@@ -31,6 +32,28 @@ namespace AbstractPixel.Settings
         {
             base.Awake();
             InitializeSettingsDictionary();
+        }
+
+        // SaveManager's Start runs first (execution order -1200) and restores the save if one can be read.
+        private void Start()
+        {
+            if (hasRestoredFromSave == true)
+            {
+                return;
+            }
+
+            ApplyDefaultsBecauseNothingWasRestored();
+        }
+
+        private void ApplyDefaultsBecauseNothingWasRestored()
+        {
+            foreach (KeyValuePair<Type, ISettingBackend> keyValuePair in settingsDictionary)
+            {
+                keyValuePair.Value.ApplyDefaultWithoutSave();
+            }
+
+            ReevaluateAllDependencies();
+            SettingsActions.RaiseSettingsLoaded();
         }
 
         private void InitializeSettingsDictionary()
@@ -116,11 +139,13 @@ namespace AbstractPixel.Settings
                 return;
             }
 
+            hasRestoredFromSave = true;
+
             foreach (KeyValuePair<Type, ISettingBackend> keyValuePair in settingsDictionary)
             {
                 // Inject saved values into the ScriptableObject instances
                 keyValuePair.Value.LoadFromDataTransferObject(_loadedData);
-                keyValuePair.Value.ApplySettingLogic();
+                keyValuePair.Value.ApplySettingLogicInstantly();
             }
             ReevaluateAllDependencies();
             SettingsActions.RaiseSettingsLoaded();
