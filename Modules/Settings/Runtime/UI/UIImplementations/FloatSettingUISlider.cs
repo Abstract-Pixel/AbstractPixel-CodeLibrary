@@ -22,6 +22,11 @@ namespace AbstractPixel.Settings
                 targetSlider.minValue = sliderSetting.MinValue;
                 targetSlider.maxValue = sliderSetting.MaxValue;
 
+                if (targetSlider is AcceleratingSlider acceleratingSlider)
+                {
+                    acceleratingSlider.ConfigureStep(sliderSetting.NavigationStep);
+                }
+
                 targetSlider.SetValueWithoutNotify(liveBindedSetting.CurrentValue);
                 UpdateSliderDisplayValueText(liveBindedSetting.CurrentValue);
                 targetSlider.onValueChanged.AddListener(OnUserChangedSlider);

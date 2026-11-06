@@ -2510,9 +2510,9 @@ MonoBehaviour:
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
         <MinValue>k__BackingField: 0
-        <MaxValue>k__BackingField: 1
+        <MaxValue>k__BackingField: 2
         <DisplayMinValue>k__BackingField: 0
-        <DisplayMaxValue>k__BackingField: 100
+        <DisplayMaxValue>k__BackingField: 200
         targetBroAudioType: 31
         exposedParameterName: Master
         targetMixerGroups:
@@ -2521,6 +2521,10 @@ MonoBehaviour:
         - {fileID: 24300002, guid: cde90455dd5b9d643be946414a928c3e, type: 2}
         - {fileID: 24300002, guid: 9d233b585150a5b4b8c9199aaabcc8ae, type: 2}
         volumeFadeDuration: 1
+        navigationStep:
+          InitialStep: 0.025
+          SecondsUntilIncrease: 1
+          MaxStep: 0.1
     - rid: 8789862167657578633
       type: {class: MusicVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -2535,13 +2539,17 @@ MonoBehaviour:
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
         <MinValue>k__BackingField: 0
-        <MaxValue>k__BackingField: 1
+        <MaxValue>k__BackingField: 2
         <DisplayMinValue>k__BackingField: 0
-        <DisplayMaxValue>k__BackingField: 100
+        <DisplayMaxValue>k__BackingField: 200
         targetBroAudioType: 1
         exposedParameterName: Master
         targetMixerGroups: []
         volumeFadeDuration: 1
+        navigationStep:
+          InitialStep: 0.025
+          SecondsUntilIncrease: 1
+          MaxStep: 0.1
     - rid: 8789862167657578634
       type: {class: SFXVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -2557,14 +2565,18 @@ MonoBehaviour:
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
         <MinValue>k__BackingField: 0
-        <MaxValue>k__BackingField: 1
+        <MaxValue>k__BackingField: 2
         <DisplayMinValue>k__BackingField: 0
-        <DisplayMaxValue>k__BackingField: 100
+        <DisplayMaxValue>k__BackingField: 200
         targetBroAudioType: 8
         exposedParameterName: Master
         targetMixerGroups:
         - {fileID: 24300002, guid: ed7b40a08ecba4843a1c14b789f18c48, type: 2}
         volumeFadeDuration: 1
+        navigationStep:
+          InitialStep: 0.025
+          SecondsUntilIncrease: 1
+          MaxStep: 0.1
     - rid: 8789862167657578635
       type: {class: AmbienceVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -2580,9 +2592,9 @@ MonoBehaviour:
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
         <MinValue>k__BackingField: 0
-        <MaxValue>k__BackingField: 1
+        <MaxValue>k__BackingField: 2
         <DisplayMinValue>k__BackingField: 0
-        <DisplayMaxValue>k__BackingField: 100
+        <DisplayMaxValue>k__BackingField: 200
         targetBroAudioType: 4
         exposedParameterName: Master
         targetMixerGroups:
@@ -2590,6 +2602,10 @@ MonoBehaviour:
         - {fileID: 24300002, guid: cde90455dd5b9d643be946414a928c3e, type: 2}
         - {fileID: 24300002, guid: 9d233b585150a5b4b8c9199aaabcc8ae, type: 2}
         volumeFadeDuration: 1
+        navigationStep:
+          InitialStep: 0.025
+          SecondsUntilIncrease: 1
+          MaxStep: 0.1
     - rid: 8789862167657578636
       type: {class: UIVolumeSetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -2605,13 +2621,17 @@ MonoBehaviour:
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
         <MinValue>k__BackingField: 0
-        <MaxValue>k__BackingField: 1
+        <MaxValue>k__BackingField: 1.5
         <DisplayMinValue>k__BackingField: 0
-        <DisplayMaxValue>k__BackingField: 100
+        <DisplayMaxValue>k__BackingField: 150
         targetBroAudioType: 2
         exposedParameterName: Master
         targetMixerGroups: []
         volumeFadeDuration: 1
+        navigationStep:
+          InitialStep: 0.05
+          SecondsUntilIncrease: 1
+          MaxStep: 0.1
     - rid: 8789862243702931459
       type: {class: DependencyRule_IntComparison, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:

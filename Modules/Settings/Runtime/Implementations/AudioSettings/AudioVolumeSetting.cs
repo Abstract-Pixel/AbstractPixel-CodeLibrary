@@ -23,8 +23,34 @@ namespace AbstractPixel.Settings
         [Tooltip("How long it takes for the volume to fade to the new value in BroAudio.")]
         [SerializeField, HideInInspector] private float volumeFadeDuration = 1f;
 
-        private const float DEFAULT_LINEAR_VOLUME = 1.0f; // 1.0 = Max Volume (0 dB)
-        private const float MINIMUM_DECIBELS = -80.0f;
+        [Tooltip("Gamepad and keyboard stepping, in linear volume (0.05 shows as 5%). Multiples of the initial step land exactly on 100%.")]
+        [SerializeField] private AcceleratingStep navigationStep = new AcceleratingStep(0.05f, 1f, 0.1f);
+
+        public override AcceleratingStep NavigationStep
+        {
+            get
+            {
+                return navigationStep;
+            }
+        }
+
+        /// <summary>The current value limited to this setting's configured range, so a corrupt save cannot play too loud.</summary>
+        public float SafeVolume
+        {
+            get
+            {
+                return AudioVolumeMath.Sanitize(CurrentValue, MaxValue);
+            }
+        }
+
+        private const float DEFAULT_LINEAR_VOLUME = AudioVolumeMath.NormalVolume; // 0 dB. Above this is a boost.
+        private const float NO_FADE_SECONDS = 0.0f;
+
+        // Only a starting point for a brand-new setting. Unity overwrites it with the values saved in the asset.
+        protected AudioVolumeSetting()
+        {
+            DefaultValue = DEFAULT_LINEAR_VOLUME;
+        }
 
         /// <summary>
         /// Raised after this volume is pushed to BroAudio and the mixers, including applies that do not change the value.
@@ -34,22 +60,29 @@ namespace AbstractPixel.Settings
 
         protected override void OnApplySettingLogic()
         {
-            SetVolumeForAllGroups(CurrentValue);
+            ApplyVolume(volumeFadeDuration);
+        }
+
+        // A fade here would play the start of the game at full volume on its way down to the saved value.
+        protected override void OnApplySettingLogicInstantly()
+        {
+            ApplyVolume(NO_FADE_SECONDS);
+        }
+
+        private void ApplyVolume(float _fadeSeconds)
+        {
+            SetVolumeForAllGroups(SafeVolume, _fadeSeconds);
             OnVolumeApplied?.Invoke();
         }
 
-        private void SetVolumeForAllGroups(float linearVolume)
+        private void SetVolumeForAllGroups(float linearVolume, float _fadeSeconds)
         {
-            // 1. Send the raw 0.0 to 1.0 value directly to BroAudio
-            BroAudio.SetVolume(targetBroAudioType, linearVolume, volumeFadeDuration);
+            // 1. Send the linear value directly to BroAudio, which accepts values above 1 as a boost
+            BroAudio.SetVolume(targetBroAudioType, linearVolume, _fadeSeconds);
 
-            // 2. Convert Linear (0 to 1) to Decibels (-80 to 0) for standard Unity Mixers
-            float decibelVolume = MINIMUM_DECIBELS;
+            // 2. Convert to Decibels for standard Unity Mixers, which also accept values above 0 dB
+            float decibelVolume = AudioVolumeMath.ToDecibels(linearVolume);
 
-            if (linearVolume > 0.0001f) // Prevent Log10(0) which causes Infinity errors
-            {
-                decibelVolume = 20f * Mathf.Log10(linearVolume);
-            }
             foreach (AudioMixerGroup mixerGroup in targetMixerGroups)
             {
                 if (mixerGroup != null && mixerGroup.audioMixer != null)
@@ -61,15 +94,14 @@ namespace AbstractPixel.Settings
 
         protected override void OnInitialize()
         {
-            
+
         }
 
 #if UNITY_EDITOR
+        // Nothing to generate. The range and default are configured on the asset, and the debug Reset must not change them.
         protected override void OnValidateInEditor()
         {
-            MinValue = 0.0f;
-            MaxValue = 1.0f;
-            DefaultValue = DEFAULT_LINEAR_VOLUME;
+
         }
 #endif
     }

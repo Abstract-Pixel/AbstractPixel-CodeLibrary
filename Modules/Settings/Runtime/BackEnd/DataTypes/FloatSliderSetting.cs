@@ -18,5 +18,14 @@ namespace AbstractPixel.Settings
 
         [field: SerializeField]
         public float DisplayMaxValue { get; protected set; } = 100.0f;
+
+        /// <summary>How gamepad and keyboard moves step this slider. Null keeps Unity's fixed 10% of the range.</summary>
+        public virtual AcceleratingStep NavigationStep
+        {
+            get
+            {
+                return null;
+            }
+        }
     }
 }
