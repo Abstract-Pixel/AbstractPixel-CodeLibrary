@@ -45,6 +45,7 @@ MonoBehaviour:
       - rid: 8789862167657578635
       - rid: 8789862167657578633
       - rid: 8789862167657578634
+      - rid: 1052282318211252336
       - rid: 8789862167657578636
   - GroupName: All Gameplay Settings
     Category: 4
@@ -112,6 +113,33 @@ MonoBehaviour:
         <DefaultValue>k__BackingField: 1
         dependencyRulesList: []
         isDefaultValuesPreGenerated: 1
+    - rid: 1052282318211252336
+      type: {class: CarVolumeSetting, ns: , asm: Assembly-CSharp}
+      data:
+        <IsEnabled>k__BackingField: 1
+        editorDebugToolbar: 0
+        <CurrentValue>k__BackingField: 1
+        <IsActive>k__BackingField: 1
+        <Metadata>k__BackingField:
+          DisplayName: Car Volume
+          Description: 'Adjusts the loudness of your car: engine, tyres, suspension,
+            brakes and impacts.'
+        <DefaultValue>k__BackingField: 1
+        dependencyRulesList: []
+        isDefaultValuesPreGenerated: 1
+        <MinValue>k__BackingField: 0
+        <MaxValue>k__BackingField: 2
+        <DisplayMinValue>k__BackingField: 0
+        <DisplayMaxValue>k__BackingField: 200
+        targetBroAudioType: 16
+        exposedParameterName: Car
+        targetMixerGroups:
+        - {fileID: 3045882274095012478, guid: 0a625fd119ae7bd4b930dfefa277cde7, type: 2}
+        volumeFadeDuration: 1
+        navigationStep:
+          InitialStep: 0.025
+          SecondsUntilIncrease: 1
+          MaxStep: 0.1
     - rid: 3582977949081796724
       type: {class: MouseXSensitivitySetting, ns: AbstractPixel.Settings, asm: AbstractPixel.Settings}
       data:
@@ -2516,8 +2544,6 @@ MonoBehaviour:
         targetBroAudioType: 31
         exposedParameterName: Master
         targetMixerGroups:
-        - {fileID: 24300002, guid: 4841efd2f0442d945b7e7460f4fdc4cd, type: 2}
-        - {fileID: 24300002, guid: ed7b40a08ecba4843a1c14b789f18c48, type: 2}
         - {fileID: 24300002, guid: cde90455dd5b9d643be946414a928c3e, type: 2}
         - {fileID: 24300002, guid: 9d233b585150a5b4b8c9199aaabcc8ae, type: 2}
         volumeFadeDuration: 1
@@ -2570,8 +2596,7 @@ MonoBehaviour:
         <DisplayMaxValue>k__BackingField: 200
         targetBroAudioType: 8
         exposedParameterName: Master
-        targetMixerGroups:
-        - {fileID: 24300002, guid: ed7b40a08ecba4843a1c14b789f18c48, type: 2}
+        targetMixerGroups: []
         volumeFadeDuration: 1
         navigationStep:
           InitialStep: 0.025
