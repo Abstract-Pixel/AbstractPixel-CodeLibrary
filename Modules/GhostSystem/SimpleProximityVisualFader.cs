@@ -18,6 +18,10 @@ namespace AbstractPixel.GhostSystem
         [Tooltip("All renderers that should fade. They should share the same material logic.")]
         [SerializeField] private Renderer[] targetRenderers;
 
+        [Tooltip("Optional. The material whose colour the fade starts from. Empty = the first renderer's first material. " +
+                 "Set it when the first material is not the main one, e.g. a baked mesh whose window submesh comes first.")]
+        [SerializeField] private Material colorSourceMaterial;
+
         [Header("Distance Settings")]
         [Tooltip("Distance at which the object becomes completely invisible (Alpha = 0).")]
         [SerializeField] private float minFadeDistance = 5f;
@@ -92,7 +96,11 @@ namespace AbstractPixel.GhostSystem
             }
 
             // CRITICAL: Read from sharedMaterial to prevent Unity from silently creating a duplicate material instance.
-            Material baseMat = colorSourceRenderer.sharedMaterial;
+            Material baseMat = colorSourceMaterial;
+            if (baseMat == null)
+            {
+                baseMat = colorSourceRenderer.sharedMaterial;
+            }
             if (baseMat != null && baseMat.HasProperty(colorPropertyID))
             {
                 cachedBaseColor = baseMat.GetColor(colorPropertyID);
