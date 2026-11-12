@@ -1,10 +1,9 @@
 fileFormatVersion: 2
-guid: 30b6d677aa8632048bda945a923bd23e
+guid: 70a2b97e397c42a38e1e2aadaa523f08
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences:
-  - saveManagerUSSStyleSheet: {fileID: 7433441132597879392, guid: cad3a809ba8cacf46a4f3bad72b88f60, type: 3}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

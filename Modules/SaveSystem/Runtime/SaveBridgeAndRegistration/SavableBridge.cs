@@ -3,18 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using UnityEngine;
 
 
 namespace AbstractPixel.SaveSystem
 {
-    /// <summary>Provides a bridge component for managing the saving and restoring of state for associated saveable targets
-    /// within a Unity GameObject. Implements the ISavableBridge interface to support category-based serialization and
-    /// deserialization of component data.</summary>
-    /// <remarks>Attach this component to a GameObject to enable save and restore functionality for all
-    /// components on the GameObject that implement the ISaveable<T> interface and are marked with the
-    /// SaveableAttribute. The SavableBridge automatically discovers eligible components and manages their unique
-    /// identification and registration with the SaveManager.</remarks>
+    /// <summary>
+    /// The Savable Bridge: connects the saved scripts on this GameObject to the save system. A saved script implements
+    /// ISavable&lt;T&gt; and has the [Savable] attribute. The editor finds those scripts and gives each one a save ID.
+    /// </summary>
     public class SavableBridge : MonoBehaviour, ISavableBridge
     {
         [field: SerializeField, ReadOnly(true)] public string UniqueId { get; private set; }
@@ -22,9 +20,6 @@ namespace AbstractPixel.SaveSystem
         [SerializeField, HideInInspector] string lastKnownGameObjectName;
 
         [SerializeField, ReadOnly] private List<SavableTarget> savableTargets = new List<SavableTarget>();
-        private List<SaveCategory> foundSaveCategoriesOnObjectList = new List<SaveCategory>();
-
-        private Dictionary<SaveCategory, List<SavableTarget>> savableTargetsRegistry;
 
         readonly string isavableCaptureMethod = "CaptureData";
         readonly string isavableRestoreMethod = "RestoreData";
@@ -137,117 +132,76 @@ namespace AbstractPixel.SaveSystem
 
 #endif
 
+        // Reflection is looked up once per saved script, here, and kept on this bridge instance.
         private void Awake()
         {
-            savableTargetsRegistry = new Dictionary<SaveCategory, List<SavableTarget>>();
-            foundSaveCategoriesOnObjectList = new List<SaveCategory>();
-
             foreach (SavableTarget target in savableTargets)
             {
                 if (target == null || target.Script == null) continue;
 
-                Type componentType = target.Script.GetType();
-                SavableAttribute attribute = componentType.GetCustomAttribute<SavableAttribute>();
-                if (attribute == null) continue;
-
-                Type interfaceType = componentType.GetInterface(typeof(ISavable<>).Name);
+                Type interfaceType = target.Script.GetType().GetInterface(typeof(ISavable<>).Name);
                 if (interfaceType == null) continue;
 
-                target.CaptureDataMethod = componentType.GetMethod(isavableCaptureMethod);
-                target.RestoreDataMethod = componentType.GetMethod(isavableRestoreMethod);
+                target.CaptureDataMethod = interfaceType.GetMethod(isavableCaptureMethod);
+                target.RestoreDataMethod = interfaceType.GetMethod(isavableRestoreMethod);
                 target.DataToSaveType = interfaceType.GetGenericArguments()[0];
-
-                if (!savableTargetsRegistry.ContainsKey(attribute.Category))
-                {
-                    savableTargetsRegistry.Add(attribute.Category, new List<SavableTarget>());
-                }
-                savableTargetsRegistry[attribute.Category].Add(target);
-
-                if (!foundSaveCategoriesOnObjectList.Contains(attribute.Category))
-                {
-                    foundSaveCategoriesOnObjectList.Add(attribute.Category);
-                }
-            }
-        }
-
-        public object CaptureState(SaveCategory categoryFilter)
-        {
-            Dictionary<string, object> combinedCapturedDataMap = new Dictionary<string, object>();
-
-            if (!savableTargetsRegistry.TryGetValue(categoryFilter, out List<SavableTarget> savableTargetsList))
-            {
-                return null;
-            }
-
-            foreach (SavableTarget target in savableTargetsList)
-            {
-                object capturedData = target.CaptureDataMethod.Invoke(target.Script, null);
-                if (capturedData != null)
-                {
-                    if (target.Identification != null && !string.IsNullOrEmpty(target.Identification.GUID))
-                    {
-                        string compositeKey = $"{target.Identification.ClassName} Component {stringSeparatorIdentifier}{target.Identification.GUID}";
-                        combinedCapturedDataMap.Add(compositeKey, capturedData);
-                    }
-                }
-            }
-
-            return combinedCapturedDataMap;
-        }
-
-        public void RestoreState(object data, SaveCategory categoryFilter)
-        {
-            Dictionary<string, object> combinedCapturedDataMap = SaveDataConverter.Convert<Dictionary<string, object>>(data);
-            if (combinedCapturedDataMap == null) return;
-
-            if (!savableTargetsRegistry.TryGetValue(categoryFilter, out List<SavableTarget> targetsList))
-            {
-                return;
-            }
-
-            Dictionary<string, SavableTarget> guidToTargetMap = new Dictionary<string, SavableTarget>();
-            foreach (SavableTarget target in targetsList)
-            {
-                if (target.Identification != null && !string.IsNullOrEmpty(target.Identification.GUID))
-                {
-                    if (!guidToTargetMap.ContainsKey(target.Identification.GUID))
-                    {
-                        guidToTargetMap.Add(target.Identification.GUID, target);
-                    }
-                }
-            }
-
-            foreach (KeyValuePair<string, object> kvp in combinedCapturedDataMap)
-            {
-                string compositeKey = kvp.Key;
-
-                // Extract GUID from "ClassName#GUID"
-                // We split by the LAST '#' to ensure we get the GUID at the end.
-                int separatorIndex = compositeKey.LastIndexOf(stringSeparatorIdentifier) + 1;
-
-                string extractedGuid = (separatorIndex != -1) ? compositeKey.Substring(separatorIndex) : compositeKey;
-
-                if (guidToTargetMap.TryGetValue(extractedGuid, out SavableTarget target))
-                {
-                    object typedData = SaveDataConverter.Convert(kvp.Value, target.DataToSaveType);
-                    target.RestoreDataMethod.Invoke(target.Script, new object[] { typedData });
-                }
             }
         }
 
         private void OnEnable()
         {
-            if (foundSaveCategoriesOnObjectList.Count > 0)
+            RegisterTargets();
+        }
+
+        // Unregistering captures the scripts' current data first, so nothing is lost when the object goes away.
+        private void OnDisable()
+        {
+            SaveSystem.Unregister(this);
+        }
+
+        private void RegisterTargets()
+        {
+            SaveSession session = SaveSystem.Session;
+            if (session == null) return;
+
+            foreach (SavableTarget target in savableTargets)
             {
-                SaveManager.Instance.RegisterSavableObject(this, foundSaveCategoriesOnObjectList);
+                if (target == null || target.Script == null || target.CaptureDataMethod == null || target.Identification == null) continue;
+
+                // The object's own scene, so with additive scenes a chest saves into its scene's file, not the active scene's.
+                session.RegisterScript(this, target.Script.GetType(), GetSaveId(target), target.DataToSaveType,
+                    () => InvokeScript(target.CaptureDataMethod, target.Script, null),
+                    data => InvokeScript(target.RestoreDataMethod, target.Script, new[] { data }),
+                    gameObject.scene.name, GetEntryName(target));
             }
         }
 
-        private void OnDisable()
+        /// <summary>The save ID of one saved script on this GameObject: "&lt;bridge GUID&gt;/&lt;script GUID&gt;".</summary>
+        private string GetSaveId(SavableTarget target)
         {
-            if (SaveManager.Instance != null && foundSaveCategoriesOnObjectList.Count > 0)
+            int separatorIndex = UniqueId.LastIndexOf(stringSeparatorIdentifier, StringComparison.Ordinal);
+            string bridgeGuid = separatorIndex >= 0 ? UniqueId.Substring(separatorIndex + 1) : UniqueId;
+            return $"{bridgeGuid.Trim('[', ']')}/{target.Identification.GUID}";
+        }
+
+        // A readable name for people reading the save file. Matching uses only the save ID.
+        private string GetEntryName(SavableTarget target)
+        {
+            string scenePath = string.IsNullOrEmpty(gameObject.scene.path) ? gameObject.scene.name : gameObject.scene.path;
+            return $"{scenePath}/{gameObject.name}/{target.Script.GetType().Name}";
+        }
+
+        // Reflection wraps a script's exception; unwrap it so the save system logs the script's own message.
+        private static object InvokeScript(MethodInfo method, object script, object[] arguments)
+        {
+            try
             {
-                SaveManager.Instance.UnregisterSavableObject(this, foundSaveCategoriesOnObjectList);
+                return method.Invoke(script, arguments);
+            }
+            catch (TargetInvocationException exception) when (exception.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                throw;
             }
         }
     }

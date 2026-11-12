@@ -16,6 +16,25 @@ namespace AbstractPixel.SaveSystem.Editor
             return new[] { DiskStorageService.GetRootFolder(false), DiskStorageService.GetRootFolder(true) };
         }
 
+        [MenuItem(MenuRoot + "Save All")]
+        public static void SaveAll()
+        {
+            SaveSystem.SaveAll();
+            Debug.Log("[SaveSystem] Saved every registered object (Save All from the Tools menu).");
+        }
+
+        [MenuItem(MenuRoot + "Load All")]
+        public static void LoadAll()
+        {
+            SaveSystem.Session?.ReloadAll();
+            Debug.Log("[SaveSystem] Re-read every save file and restored every registered object (Load All from the Tools menu).");
+        }
+
+        // Save All and Load All act on the running game, so they're greyed out outside play mode.
+        [MenuItem(MenuRoot + "Save All", true)]
+        [MenuItem(MenuRoot + "Load All", true)]
+        static bool IsPlaying() => EditorApplication.isPlaying;
+
         [MenuItem(MenuRoot + "Open Release Folder")]
         public static void OpenReleaseFolder()
         {

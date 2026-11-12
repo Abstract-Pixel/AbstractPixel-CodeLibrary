@@ -13,6 +13,12 @@ namespace AbstractPixel.SaveSystem
         [field: SerializeField] public FileExtension PrimaryFileExtension { get; private set; } = FileExtension.json;
         public FileExtension BackupFileExtension { get; private set; } = FileExtension.bak;
 
+        [field: SerializeField, Tooltip("Save every save file when the game quits.")]
+        public bool SaveOnQuit { get; private set; } = false;
+
+        [field: SerializeField, Tooltip("Save every save file when the game loses focus, for example when a phone player switches apps.")]
+        public bool SaveOnFocusLoss { get; private set; } = false;
+
         [SerializeField] List<SceneReference> ignoredScenes = new List<SceneReference>();
         [SerializeField] List<SaveCatgeoryDefinition> categoryDefinitionList;
 

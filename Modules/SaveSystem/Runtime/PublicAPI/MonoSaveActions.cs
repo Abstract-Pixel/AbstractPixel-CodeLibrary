@@ -2,13 +2,13 @@ using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
 {
-    [DisallowMultipleComponent] 
+    /// <summary>Lets designers save from UnityEvents, such as a button's On Click, without writing code.</summary>
+    [DisallowMultipleComponent]
     public class MonoSaveActions : MonoBehaviour
     {
-        public void SaveAll() => SaveActions.SaveAll();
-        public void LoadAll() => SaveActions.LoadAll();
-        public void SaveDataOf(SaveCategory _category) => SaveActions.SaveDataOf(_category);
-        public void LoadDataOf(SaveCategory _category) => SaveActions.LoadDataOf(_category);
+        public void SaveAll() => SaveSystem.SaveAll();
 
+        /// <summary>Saves one save file, for example "Settings".</summary>
+        public void Save(string _saveFileName) => SaveSystem.Save(_saveFileName);
     }
 }

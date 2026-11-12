@@ -28,7 +28,7 @@ namespace AbstractPixel.SaveSystem
                 ObjectCreationHandling = ObjectCreationHandling.Replace,
 
                 // TYPE HANDLING (The "Bridge" Strategy)
-                // NONE because SaveDataConverter + SaveableBridge is used
+                // NONE: each saved object restores into its own known type (see ISerializer.FromToken)
                 TypeNameHandling = TypeNameHandling.None
             };
             tokenSerializer = Newtonsoft.Json.JsonSerializer.Create(settings);
