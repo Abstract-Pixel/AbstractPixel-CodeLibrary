@@ -107,27 +107,20 @@ namespace AbstractPixel.SaveSystem
             string directoryPath = null;
 
 
-            if (_definition.DirectoryScope == SaveScope.Global)
+            if (_definition.Location == SaveLocation.Global)
             {
                 directoryPath = _isBackUp ? GetGlobalBackupPath() : GetGlobalPath();
             }
-            else if (_definition.DirectoryScope == SaveScope.GameProfile)
+            else if (_definition.Location == SaveLocation.GameProfile)
             {
-                // Determine Base Profile Path (Normal or Backup)
-                // Result: .../SaveProfiles/GameProfile_GUID/   OR   .../SaveProfiles/GameProfile_GUID/ProfileBackups/
+                directoryPath = _isBackUp ? GetProfileBackupPath(_profileId) : GetProfilePath(_profileId);
+            }
+            else if (_definition.Location == SaveLocation.Scene)
+            {
+                // Scene data sits inside the game profile, in a folder named after the scene.
                 string baseProfilePath = _isBackUp ? GetProfileBackupPath(_profileId) : GetProfilePath(_profileId);
-
-                // Handle Scene Specificity
-                if (_definition.IsSceneSpecific)
-                {
-                    // TO DO: Replace with Scene Integration Abstratcion later
-                    string currentSceneName = SceneActions.ActiveSceneGroup.MainScene.SceneName;
-                    directoryPath = Path.Combine(baseProfilePath, currentSceneName);
-                }
-                else
-                {
-                    directoryPath = baseProfilePath;
-                }
+                string currentSceneName = SceneActions.ActiveSceneGroup.MainScene.SceneName;
+                directoryPath = Path.Combine(baseProfilePath, currentSceneName);
             }
             directoryPath = Path.Combine(directoryPath, fileName);
             return directoryPath;

@@ -83,7 +83,8 @@ namespace AbstractPixel.SaveSystem
                 hasDoneInitialBootLoad = true;
                 yield return null;
             }
-            LoadAllDataByScope(SaveScope.GameProfile);
+            LoadAllDataByScope(SaveLocation.GameProfile);
+            LoadAllDataByScope(SaveLocation.Scene);
         }
 
         void ExecuteProfileStartUpPolicy(SystemMetaData _metaData)
@@ -124,16 +125,16 @@ namespace AbstractPixel.SaveSystem
             SaveEventBus.RaiseOnSaveAllCompleted();
         }
 
-        internal void SaveAllDataByScope(SaveScope _directoryScope)
+        internal void SaveAllDataByScope(SaveLocation _location)
         {
             isDataSaved = false;
             foreach (SaveCatgeoryDefinition definition in saveConfig.GetAllCategoryDefinitions())
             {
-                if (definition.DirectoryScope != _directoryScope) continue;
+                if (definition.Location != _location) continue;
                 SaveDataOf(definition.Category);
             }
             isDataSaved = true;
-            SaveEventBus.RaiseOnSaveScopeCompleted(_directoryScope);
+            SaveEventBus.RaiseOnSaveLocationCompleted(_location);
         }
 
         internal void SaveDataOf(SaveCategory _category)
@@ -153,7 +154,7 @@ namespace AbstractPixel.SaveSystem
             string fullSavePath = SavePathGenerator.GetPath(categoryDefinition, activeProfileId);
 
             SaveFileData categorizedSaveFileData;
-            if (categoryDefinition.DirectoryScope == SaveScope.Global)
+            if (categoryDefinition.Location == SaveLocation.Global)
             {
                 categorizedSaveFileData = new SaveFileData(fileName);
             }
@@ -197,16 +198,16 @@ namespace AbstractPixel.SaveSystem
             SaveEventBus.RaiseOnLoadAllCompleted();
         }
 
-        internal void LoadAllDataByScope(SaveScope _directoryScope)
+        internal void LoadAllDataByScope(SaveLocation _location)
         {
             isDataLoaded = false;
             foreach (SaveCatgeoryDefinition definition in saveConfig.GetAllCategoryDefinitions())
             {
-                if (_directoryScope != definition.DirectoryScope) continue;
+                if (_location != definition.Location) continue;
                 LoadDataOf(definition.Category);
             }
             isDataLoaded = true;
-            SaveEventBus.RaiseOnLoadScopeCompleted(_directoryScope);
+            SaveEventBus.RaiseOnLoadScopeCompleted(_location);
         }
 
         internal void LoadDataOf(SaveCategory _category)

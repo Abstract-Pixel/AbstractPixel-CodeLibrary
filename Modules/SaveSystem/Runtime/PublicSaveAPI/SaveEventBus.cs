@@ -7,17 +7,17 @@ namespace AbstractPixel.SaveSystem
     {
         // STATE TRACKING FOR STICKY EVENTS 
         private static SaveCategory lastLoadedCategory = SaveCategory.None;
-        private static SaveScope lastLoadedScope = SaveScope.None;
+        private static SaveLocation lastLoadedScope = default;
 
         //BACKING DELEGATE FIELDS
         private static Action onLoadAllCompleted = delegate { };
         private static Action<SaveCategory> onLoadCategoryCompleted = delegate { };
-        private static Action<SaveScope> onLoadScopeCompleted= delegate { };
+        private static Action<SaveLocation> onLoadScopeCompleted= delegate { };
 
         // STATELESS SAVE EVENTS 
         public static event Action OnSaveAllCompleted = delegate { };
         public static event Action<SaveCategory> OnSaveCategoryCompleted= delegate { };
-        public static event Action<SaveScope> OnSaveScopeCompleted= delegate { };
+        public static event Action<SaveLocation> OnSaveLocationCompleted= delegate { };
 
         //STATEFUL LOAD EVENTS (Sticky Accessor Pattern)
         public static event Action OnLoadAllCompleted
@@ -46,7 +46,7 @@ namespace AbstractPixel.SaveSystem
             remove => onLoadCategoryCompleted -= value;
         }
 
-        public static event Action<SaveScope> OnLoadScopeCompleted
+        public static event Action<SaveLocation> OnLoadScopeCompleted
         {
             add
             {
@@ -62,7 +62,7 @@ namespace AbstractPixel.SaveSystem
         // EVENT RAISE METHODS (Saves)
         public static void RaiseOnSaveAllCompleted() => OnSaveAllCompleted?.Invoke();
         public static void RaiseOnSaveCategoryCompleted(SaveCategory _category) => OnSaveCategoryCompleted?.Invoke(_category);
-        public static void RaiseOnSaveScopeCompleted(SaveScope _scope) => OnSaveScopeCompleted?.Invoke(_scope);
+        public static void RaiseOnSaveLocationCompleted(SaveLocation _scope) => OnSaveLocationCompleted?.Invoke(_scope);
 
         // EVENT RAISE METHODS (Loads)
         public static void RaiseOnLoadAllCompleted() => onLoadAllCompleted?.Invoke();
@@ -73,7 +73,7 @@ namespace AbstractPixel.SaveSystem
             onLoadCategoryCompleted?.Invoke(_category);
         }
 
-        public static void RaiseOnLoadScopeCompleted(SaveScope _scope)
+        public static void RaiseOnLoadScopeCompleted(SaveLocation _scope)
         {
             lastLoadedScope = _scope;
             onLoadScopeCompleted?.Invoke(_scope);
@@ -85,7 +85,7 @@ namespace AbstractPixel.SaveSystem
             // Reset standard auto-events
             OnSaveAllCompleted = delegate { };
             OnSaveCategoryCompleted = delegate { };
-            OnSaveScopeCompleted = delegate { };
+            OnSaveLocationCompleted = delegate { };
 
             // Reset custom backing delegates
             onLoadAllCompleted = delegate { };
@@ -94,7 +94,7 @@ namespace AbstractPixel.SaveSystem
 
             // Reset state variables
             lastLoadedCategory = SaveCategory.None;
-            lastLoadedScope = SaveScope.None;
+            lastLoadedScope = default;
         }
     }
 }
