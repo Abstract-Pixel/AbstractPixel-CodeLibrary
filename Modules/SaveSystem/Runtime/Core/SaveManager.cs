@@ -104,7 +104,6 @@ namespace AbstractPixel.SaveSystem
                 SaveDataOf(category);
             }
             isDataSaved = true;
-            SaveEventBus.RaiseOnSaveAllCompleted();
         }
 
         internal void SaveAllDataByScope(SaveLocation _location)
@@ -116,7 +115,6 @@ namespace AbstractPixel.SaveSystem
                 SaveDataOf(definition.Category);
             }
             isDataSaved = true;
-            SaveEventBus.RaiseOnSaveLocationCompleted(_location);
         }
 
         internal void SaveDataOf(SaveCategory _category)
@@ -167,7 +165,6 @@ namespace AbstractPixel.SaveSystem
                 saveFileStore.Write(saveKey, categorizedSaveFileData);
             }
             isDataSaved = true;
-            SaveEventBus.RaiseOnSaveCategoryCompleted(_category);
         }
 
         internal void LoadALL()
@@ -178,7 +175,6 @@ namespace AbstractPixel.SaveSystem
                 LoadDataOf(definition.Category);
             }
             isDataLoaded = true;
-            SaveEventBus.RaiseOnLoadAllCompleted();
         }
 
         internal void LoadAllDataByScope(SaveLocation _location)
@@ -190,7 +186,6 @@ namespace AbstractPixel.SaveSystem
                 LoadDataOf(definition.Category);
             }
             isDataLoaded = true;
-            SaveEventBus.RaiseOnLoadScopeCompleted(_location);
         }
 
         internal void LoadDataOf(SaveCategory _category)
@@ -225,7 +220,6 @@ namespace AbstractPixel.SaveSystem
                 }
             }
             isDataLoaded = true;
-            SaveEventBus.RaiseOnLoadCategoryCompleted(_category);
         }
 
         // Until step 2, Scene save files take their scene name from the active scene group, as in v1.
