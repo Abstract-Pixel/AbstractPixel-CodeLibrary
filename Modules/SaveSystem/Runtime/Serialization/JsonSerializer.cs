@@ -58,23 +58,22 @@ namespace AbstractPixel.SaveSystem
             }
 
         }
+        // Returns false without logging: only the caller knows which save key the text came from, so it logs.
         public bool TryDeserialize<T>(string _data, out T _output)
         {
+            _output = default;
             if (string.IsNullOrEmpty(_data))
             {
-                Debug.LogError("JsonSerializer: Cannot deserialize null or empty string.");
-                _output = default;
                 return false;
             }
             try
             {
                 _output = JsonConvert.DeserializeObject<T>(_data, settings);
-                return true;
+                // The text "null" parses without error but holds no data.
+                return _output != null;
             }
-            catch (Exception e)
+            catch (JsonException)
             {
-                Debug.LogError($"JsonSerializer: Deserialization failed with exception: {e.Message} {e.StackTrace}");
-                _output = default;
                 return false;
             }
         }
