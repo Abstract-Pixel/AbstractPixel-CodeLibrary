@@ -11,7 +11,7 @@ namespace AbstractPixel.SaveSystem.Editor
         {
             if (TryInitializeGenerator())
             {
-                OpenDirectory(SavePathGenerator.ShipRootPath);
+                OpenDirectory(DiskStorageService.GetRootFolder(false));
             }
         }
 
@@ -20,7 +20,7 @@ namespace AbstractPixel.SaveSystem.Editor
         {
             if (TryInitializeGenerator())
             {
-                OpenDirectory(SavePathGenerator.DebugRootPath);
+                OpenDirectory(DiskStorageService.GetRootFolder(true));
             }
         }
         [MenuItem("Tools/Save System/Delete All Save Files")]
@@ -36,11 +36,11 @@ namespace AbstractPixel.SaveSystem.Editor
 
             if (confirm)
             {
-                if (Directory.Exists(SavePathGenerator.ShipRootPath))
-                    Directory.Delete(SavePathGenerator.ShipRootPath, true);
+                if (Directory.Exists(DiskStorageService.GetRootFolder(false)))
+                    Directory.Delete(DiskStorageService.GetRootFolder(false), true);
 
-                if (Directory.Exists(SavePathGenerator.DebugRootPath))
-                    Directory.Delete(SavePathGenerator.DebugRootPath, true);
+                if (Directory.Exists(DiskStorageService.GetRootFolder(true)))
+                    Directory.Delete(DiskStorageService.GetRootFolder(true), true);
 
                 Debug.Log("[SaveSystem: FORCED] All files deleted via Tools Menu.");
             }
@@ -61,7 +61,6 @@ namespace AbstractPixel.SaveSystem.Editor
             string path = AssetDatabase.GUIDToAssetPath(guids[0]);
             SaveSystemConfigSO config = AssetDatabase.LoadAssetAtPath<SaveSystemConfigSO>(path);
 
-            SavePathGenerator.Initialize(config);
             return true;
         }
 

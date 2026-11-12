@@ -5,7 +5,9 @@ using UnityEngine.SceneManagement; // Required for Scene specific logic
 
 namespace AbstractPixel.SaveSystem
 {
-    public static class SavePathGenerator
+    // Temporary: the v1 folder-based paths, kept only so the old SaveManager keeps working until T7 removes it.
+    // New code uses SavePathGenerator, which builds storage keys.
+    internal static class LegacyPathGenerator
     {
         // Constant Folder Names
         public static readonly string RootSaveFolder = "SaveFiles";
@@ -32,8 +34,8 @@ namespace AbstractPixel.SaveSystem
         public static void Initialize(SaveSystemConfigSO config)
         {
             SaveConfig = config;
-            DebugRootPath = Path.Combine(Application.dataPath, DebugRootSaveFolder);
-            ShipRootPath = Path.Combine(Application.persistentDataPath, RootSaveFolder);
+            DebugRootPath = DiskStorageService.GetRootFolder(true);
+            ShipRootPath = DiskStorageService.GetRootFolder(false);
 
             CurrentRootPath = SaveConfig.UseDebugPath ? DebugRootPath : ShipRootPath;
             PrimaryFileExtension = $".{SaveConfig.PrimaryFileExtension.ToString().ToLower()}";

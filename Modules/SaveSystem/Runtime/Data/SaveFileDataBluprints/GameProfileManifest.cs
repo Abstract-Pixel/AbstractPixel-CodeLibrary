@@ -19,7 +19,7 @@ namespace AbstractPixel.SaveSystem
         public GameProfileManifest(string _profileId)
         {
             ProfileID = _profileId;
-            ProfileName = SavePathGenerator.GameProfileSavesFolder + _profileId;
+            ProfileName = LegacyPathGenerator.GameProfileSavesFolder + _profileId;
             CreationDateAndTime = DateTime.UtcNow.ToString("o");
             Version = Application.version;
             LastSavedScene = SceneManager.GetActiveScene().name;

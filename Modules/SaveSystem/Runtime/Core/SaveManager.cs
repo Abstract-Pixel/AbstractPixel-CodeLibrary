@@ -25,7 +25,7 @@ namespace AbstractPixel.SaveSystem
         {
             base.Awake();
             saveConfig.Initialize();
-            SavePathGenerator.Initialize(saveConfig);
+            LegacyPathGenerator.Initialize(saveConfig);
 
             fileStorageService = new LegacyFileStorage();
             serializer = new JsonSerializer();
@@ -150,8 +150,8 @@ namespace AbstractPixel.SaveSystem
             string activeProfileId = ProfileManager.CurrentProfileID;
             SaveCatgeoryDefinition categoryDefinition = saveConfig.GetCategoryDefinition(_category);
 
-            string fileName = SavePathGenerator.GetFileNameBasedOnCategoryDefinition(categoryDefinition);
-            string fullSavePath = SavePathGenerator.GetPath(categoryDefinition, activeProfileId);
+            string fileName = LegacyPathGenerator.GetFileNameBasedOnCategoryDefinition(categoryDefinition);
+            string fullSavePath = LegacyPathGenerator.GetPath(categoryDefinition, activeProfileId);
 
             SaveFileData categorizedSaveFileData;
             if (categoryDefinition.Location == SaveLocation.Global)
@@ -216,7 +216,7 @@ namespace AbstractPixel.SaveSystem
             string profileId = ProfileManager.CurrentProfileID;
             SaveCatgeoryDefinition definition = saveConfig.GetCategoryDefinition(_category);
 
-            string loadPath = SavePathGenerator.GetPath(definition, profileId);
+            string loadPath = LegacyPathGenerator.GetPath(definition, profileId);
             if (!fileStorageService.FileExists(loadPath)) return;
 
             string loadedjson = fileStorageService.LoadFile(loadPath);
@@ -306,7 +306,7 @@ namespace AbstractPixel.SaveSystem
 
         private void SaveSystemMetaData()
         {
-            string metaDataFilePath = SavePathGenerator.GetSaveSystemMetaDataPath();
+            string metaDataFilePath = LegacyPathGenerator.GetSaveSystemMetaDataPath();
             SystemMetaData metaData = new SystemMetaData(ProfileManager.CurrentProfileID);
             if (serializer.TrySerialize(metaData, out string json))
             {
@@ -316,7 +316,7 @@ namespace AbstractPixel.SaveSystem
 
         private bool LoadSystemMetaData(out SystemMetaData metaData)
         {
-            string metaDataFilePath = SavePathGenerator.GetSaveSystemMetaDataPath();
+            string metaDataFilePath = LegacyPathGenerator.GetSaveSystemMetaDataPath();
             metaData = null;
             if (!fileStorageService.FileExists(metaDataFilePath)) return false;
             string loadedJson = fileStorageService.LoadFile(metaDataFilePath);

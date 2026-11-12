@@ -121,14 +121,13 @@ namespace AbstractPixel.SaveSystem.Editor
             SaveSystemConfigSO configSO = configProperty.objectReferenceValue as SaveSystemConfigSO;
             if (configSO != null)
             {
-                SavePathGenerator.Initialize(configSO);
             }
         }
 
         private void OpenReleaseDirectory()
         {
             InitializePathsInEditMode();
-            string releasePath = SavePathGenerator.ShipRootPath;
+            string releasePath = DiskStorageService.GetRootFolder(false);
             if (!Directory.Exists(releasePath))
             {
                 Directory.CreateDirectory(releasePath);
@@ -139,7 +138,7 @@ namespace AbstractPixel.SaveSystem.Editor
         private void OpenDebugDirectory()
         {
             InitializePathsInEditMode();
-            string debugPath = SavePathGenerator.DebugRootPath;
+            string debugPath = DiskStorageService.GetRootFolder(true);
             if (!Directory.Exists(debugPath))
             {
                 Directory.CreateDirectory(debugPath);
@@ -151,8 +150,8 @@ namespace AbstractPixel.SaveSystem.Editor
         private void DeleteAllSaves()
         {
             InitializePathsInEditMode();
-            string releasePath = SavePathGenerator.ShipRootPath;
-            string debugPath = SavePathGenerator.DebugRootPath;
+            string releasePath = DiskStorageService.GetRootFolder(false);
+            string debugPath = DiskStorageService.GetRootFolder(true);
             if (Directory.Exists(releasePath))
             {
                 Directory.Delete(releasePath, true);
