@@ -25,6 +25,12 @@ namespace AbstractPixel.SaveSystem
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void StartBeforeTheFirstScene()
         {
+            StartFromResources();
+        }
+
+        /// <summary>Starts the save system with the config in Resources and real save files on disk.</summary>
+        internal static void StartFromResources()
+        {
             SaveSystemConfigSO config = Resources.Load<SaveSystemConfigSO>(ConfigResourceName);
             IDataStorageService storage = config == null ? null : new DiskStorageService(config.UseDebugPath, config.PrimaryFileExtension);
             Start(config, storage, new UnitySceneInfo(), () => Time.realtimeSinceStartupAsDouble);

@@ -13,6 +13,8 @@ namespace AbstractPixel.SaveSystem
     /// The Savable Bridge: connects the saved scripts on this GameObject to the save system. A saved script implements
     /// ISavable&lt;T&gt; and has the [Savable] attribute. The editor finds those scripts and gives each one a save ID.
     /// </summary>
+    // Runs before other scripts, so registering in Start restores data after every Awake and before any other Start.
+    [DefaultExecutionOrder(-10000)]
     public class SavableBridge : MonoBehaviour, ISavableBridge
     {
         [field: SerializeField, ReadOnly(true)] public string UniqueId { get; private set; }
@@ -24,6 +26,8 @@ namespace AbstractPixel.SaveSystem
         readonly string isavableCaptureMethod = "CaptureData";
         readonly string isavableRestoreMethod = "RestoreData";
         readonly string stringSeparatorIdentifier = "#";
+
+        private bool hasStarted;
 
 #if UNITY_EDITOR
         private void OnValidate()
@@ -148,9 +152,20 @@ namespace AbstractPixel.SaveSystem
             }
         }
 
+        // Registering here, not in OnEnable, means every Awake has run, so restored data isn't overwritten by new-game values.
+        private void Start()
+        {
+            hasStarted = true;
+            RegisterTargets();
+        }
+
+        // Covers objects that were disabled and enabled again after their first Start.
         private void OnEnable()
         {
-            RegisterTargets();
+            if (hasStarted)
+            {
+                RegisterTargets();
+            }
         }
 
         // Unregistering captures the scripts' current data first, so nothing is lost when the object goes away.

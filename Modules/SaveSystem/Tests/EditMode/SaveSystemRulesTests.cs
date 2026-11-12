@@ -26,6 +26,31 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
+        public void RuntimeCode_UsesNoCoroutinesFrameWaitsOrSingletons()
+        {
+            // Step 2 replaced the WaitForEndOfFrame load and the SaveManager singleton with the whichever-second rule.
+            Regex forbidden = new Regex(@"WaitForEndOfFrame|StartCoroutine|IEnumerator|PersistentSingleton");
+
+            string[] offenders = Directory.GetFiles(Path.GetFullPath(RuntimeFolder), "*.cs", SearchOption.AllDirectories)
+                .Where(path => forbidden.IsMatch(File.ReadAllText(path)))
+                .Select(Path.GetFileName)
+                .ToArray();
+
+            CollectionAssert.IsEmpty(offenders);
+        }
+
+        [Test]
+        public void RuntimeFiles_StayUnderAbout400Lines()
+        {
+            string[] tooLong = Directory.GetFiles(Path.GetFullPath(RuntimeFolder), "*.cs", SearchOption.AllDirectories)
+                .Where(path => File.ReadAllLines(path).Length > 400)
+                .Select(Path.GetFileName)
+                .ToArray();
+
+            CollectionAssert.IsEmpty(tooLong, "Split files longer than about 400 lines with composition.");
+        }
+
+        [Test]
         public void EditorTools_DeleteTheSameFoldersTheGameSavesTo()
         {
             // Bug 4: "Delete All Save Files" never set up its paths, so it deleted nothing.
