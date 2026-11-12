@@ -78,7 +78,10 @@ namespace AbstractPixel.SaveSystem
                 sceneName = null;
             }
 
-            SavedObjectEntry entry = new SavedObjectEntry(owner, saveId, saveFileName, definition.Location, sceneName, entryName, dataType, capture, restore);
+            SavedObjectEntry entry = new SavedObjectEntry(owner, saveId, saveFileName, definition.Location, sceneName, entryName, dataType, capture, restore)
+            {
+                GameProfileId = GameProfiles.CurrentGameProfileId
+            };
             registry.Add(entry);
             // Whichever comes second: if the data can be loaded now, restore right away.
             TryRestore(entry);
@@ -167,10 +170,20 @@ namespace AbstractPixel.SaveSystem
             loadedGameProfileId = gameProfileId;
             playtimeCountedUntil = unscaledTime();
 
-            // Whichever comes second: every object registered before its data existed restores now.
             foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => entry.Location != SaveLocation.Global).ToList())
             {
-                TryRestore(entry);
+                // Whichever comes second: an object registered before any game profile was open belongs to this one.
+                if (entry.GameProfileId == null)
+                {
+                    entry.GameProfileId = gameProfileId;
+                }
+                // An object from another game profile moves over only if this game profile has data for it.
+                // Otherwise it keeps that game profile's values, and must never capture them into this one.
+                bool restored = TryRestore(entry);
+                if (restored)
+                {
+                    entry.GameProfileId = gameProfileId;
+                }
             }
             SaveEvents.RaiseGameProfileOpened(gameProfileId);
         }
@@ -182,17 +195,15 @@ namespace AbstractPixel.SaveSystem
             SaveEvents.RaiseGameProfileClosed();
         }
 
-        void TryRestore(SavedObjectEntry entry)
+        bool TryRestore(SavedObjectEntry entry)
         {
-            if (TryGetAddress(entry, out SaveFileAddress address))
-            {
-                loadedData.TryRestore(entry, address);
-            }
+            return TryGetAddress(entry, out SaveFileAddress address) && loadedData.TryRestore(entry, address);
         }
 
         void Capture(SavedObjectEntry entry)
         {
-            if (TryGetAddress(entry, out SaveFileAddress address))
+            bool belongsToOpenGameProfile = entry.Location == SaveLocation.Global || entry.GameProfileId == GameProfiles.CurrentGameProfileId;
+            if (belongsToOpenGameProfile && TryGetAddress(entry, out SaveFileAddress address))
             {
                 loadedData.Capture(entry, address);
             }

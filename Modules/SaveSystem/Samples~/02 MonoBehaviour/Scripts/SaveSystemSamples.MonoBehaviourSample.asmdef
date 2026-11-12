@@ -1,0 +1,16 @@
+{
+    "name": "SaveSystemSamples.MonoBehaviourSample",
+    "rootNamespace": "SaveSystemSamples.MonoBehaviourSample",
+    "references": [
+        "AbstractPixel.SaveSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -158,6 +158,8 @@ namespace AbstractPixel.SaveSystem.Tests
             string second = SaveSystem.GameProfiles.CreateNew("Second");
 
             SaveSystem.GameProfiles.Open(second);
+            // The object was registered under the first game profile; registering again makes it part of the second.
+            SaveSystem.Register(health, "player-health");
             health.Current = 77;
             SaveSystem.Unregister(volume);
             SaveSystem.SaveAll();
@@ -165,6 +167,49 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.AreEqual(10, StoredInt(GameKey(first), "player-health"), "The first game profile's file must not change.");
             Assert.AreEqual(77, StoredInt(GameKey(second), "player-health"));
             Assert.AreEqual(3, StoredInt("Global/Settings", "volume"));
+        }
+
+        [Test]
+        public void ObjectFromThePreviousGameProfile_NeverWritesIntoTheNewOne()
+        {
+            // Found by the Save Locations sample: switching game profiles, then reloading the scene, unregisters the old
+            // scene's objects. Their capture must not put the previous game profile's data into the new one.
+            CreateAndOpenGameProfile();
+            PlayerHealth oldSceneHealth = new PlayerHealth { Current = 10 };
+            SaveSystem.Register(oldSceneHealth, "player-health");
+            SaveSystem.SaveAll();
+            string second = SaveSystem.GameProfiles.CreateNew("Second");
+            SaveSystem.GameProfiles.Open(second);
+
+            SaveSystem.Unregister(oldSceneHealth);
+            PlayerHealth newSceneHealth = new PlayerHealth();
+            SaveSystem.Register(newSceneHealth, "player-health");
+            SaveSystem.SaveAll();
+
+            Assert.AreEqual(100, newSceneHealth.Current, "The new game profile has no saved health, so new-game health stays.");
+            Assert.AreEqual(100, StoredInt(GameKey(second), "player-health"));
+        }
+
+        [Test]
+        public void ObjectWithDataInTheNewGameProfile_IsRestoredAndThenBelongsToIt()
+        {
+            string first = CreateAndOpenGameProfile();
+            PlayerHealth health = new PlayerHealth { Current = 30 };
+            SaveSystem.Register(health, "player-health");
+            SaveSystem.SaveAll();
+            string second = SaveSystem.GameProfiles.CreateNew("Second");
+            SaveSystem.GameProfiles.Open(second);
+            health.Current = 60;
+            SaveSystem.Register(health, "player-health");
+            SaveSystem.SaveAll();
+
+            SaveSystem.GameProfiles.Open(first);
+            Assert.AreEqual(30, health.Current, "The first game profile has data, so opening it restores the object.");
+            health.Current = 35;
+            SaveSystem.SaveAll();
+
+            Assert.AreEqual(35, StoredInt(GameKey(first), "player-health"));
+            Assert.AreEqual(60, StoredInt(GameKey(second), "player-health"));
         }
 
         [Test]

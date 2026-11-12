@@ -1,0 +1,16 @@
+{
+    "name": "SaveSystemSamples.GameProfiles",
+    "rootNamespace": "SaveSystemSamples.GameProfiles",
+    "references": [
+        "AbstractPixel.SaveSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

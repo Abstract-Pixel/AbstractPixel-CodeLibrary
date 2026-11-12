@@ -12,6 +12,38 @@
     "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.2",
         "com.unity.addressables": "2.7.6",
-		"com.unity.inputsystem": "1.19.0"
-    }
+        "com.unity.inputsystem": "1.19.0"
+    },
+    "samples": [
+        {
+            "displayName": "Save System 01 Plain CSharp Class",
+            "description": "A plain C# Inventory class that saves with ISavable<T> and one SaveSystem.Register line.",
+            "path": "Modules/SaveSystem/Samples~/01 Plain CSharp Class"
+        },
+        {
+            "displayName": "Save System 02 MonoBehaviour",
+            "description": "A Health script with the Savable Bridge: new-game values in Awake, the saved value is ready in Start.",
+            "path": "Modules/SaveSystem/Samples~/02 MonoBehaviour"
+        },
+        {
+            "displayName": "Save System 03 ScriptableObject",
+            "description": "A GameProgress asset that registers itself with the save system.",
+            "path": "Modules/SaveSystem/Samples~/03 ScriptableObject"
+        },
+        {
+            "displayName": "Save System 04 Save Locations",
+            "description": "Settings in Global, coins in Game Profile and chests in Scene, across two scenes and two game profiles.",
+            "path": "Modules/SaveSystem/Samples~/04 Save Locations"
+        },
+        {
+            "displayName": "Save System 05 Game Profiles",
+            "description": "A simple save slot screen: create, open, list and delete game profiles.",
+            "path": "Modules/SaveSystem/Samples~/05 Game Profiles"
+        },
+        {
+            "displayName": "Save System 06 Plain CSharp And MonoBehaviours Together",
+            "description": "A plain C# quest log and MonoBehaviour pickups saving side by side.",
+            "path": "Modules/SaveSystem/Samples~/06 Plain CSharp And MonoBehaviours Together"
+        }
+    ]
 }

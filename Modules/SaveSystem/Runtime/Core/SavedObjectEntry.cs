@@ -19,6 +19,12 @@ namespace AbstractPixel.SaveSystem
         /// <summary>A readable name written next to the data, such as "Forest/Chest (2)/ChestLid". Matching uses only the save ID.</summary>
         public string EntryName { get; }
 
+        /// <summary>
+        /// The game profile this entry's data belongs to, or null if none was open when it registered.
+        /// An entry only ever writes into its own game profile, so one playthrough can't leak into another.
+        /// </summary>
+        public string GameProfileId { get; set; }
+
         public Type DataType { get; }
         public Func<object> Capture { get; }
         public Action<object> Restore { get; }
