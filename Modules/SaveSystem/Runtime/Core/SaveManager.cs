@@ -39,7 +39,9 @@ namespace AbstractPixel.SaveSystem
             }
             
             
-            ProfileManager = new SaveProfileManager(fileStorageService, saveConfig, serializer);
+            IDataStorageService storage = new DiskStorageService(saveConfig.UseDebugPath, saveConfig.PrimaryFileExtension);
+            SaveFileStore saveFileStore = new SaveFileStore(storage, serializer);
+            ProfileManager = new SaveProfileManager(saveFileStore, storage, new SavePathGenerator(), saveConfig.GameProfileGuidLength);
             SceneEventBus.OnNewSceneGroupTransitionTo += ExecuteIntialDataLoading;
 
         }
@@ -71,15 +73,9 @@ namespace AbstractPixel.SaveSystem
             yield return new WaitForEndOfFrame();
             if (!hasDoneInitialBootLoad)
             {
-                if (LoadSystemMetaData(out SystemMetaData metaData))
-                {
-                    LoadALL();
-                }
-                else
-                {
-                    Debug.Log("No System MetaData found. Assuming this now first launch");
-                }
-                ExecuteProfileStartUpPolicy(metaData);
+                // Choose the game profile first, so GameProfile save files never load with no game profile open.
+                ExecuteProfileStartUpPolicy();
+                LoadALL();
                 hasDoneInitialBootLoad = true;
                 yield return null;
             }
@@ -87,31 +83,18 @@ namespace AbstractPixel.SaveSystem
             LoadAllDataByScope(SaveLocation.Scene);
         }
 
-        void ExecuteProfileStartUpPolicy(SystemMetaData _metaData)
+        void ExecuteProfileStartUpPolicy()
         {
+            // Manual waits for the game to open a game profile itself.
             if (saveConfig.StartupPolicy != SaveStartupPolicy.AutoSetUp) return;
-            // Manual or undefined policy, do nothing. Wait for explicit profile selection from external UI or other system.
 
-            bool isMetaDataNullOrEmptyProfileID = _metaData == null || string.IsNullOrEmpty(_metaData.LastSavedProfileID);
-            bool doesProfileDirectoryExist;
-            if (isMetaDataNullOrEmptyProfileID)
+            if (ProfileManager.TryGetLastOpened(out string lastOpenedId))
             {
-                doesProfileDirectoryExist = false;
+                ProfileManager.Open(lastOpenedId);
+                return;
             }
-            else
-            {
-                doesProfileDirectoryExist = ProfileManager.ProfileDirectoryExists(_metaData.LastSavedProfileID);
-            }
-
-            if (isMetaDataNullOrEmptyProfileID || !doesProfileDirectoryExist)
-            {
-                string newProfilePath = ProfileManager.CreateNewActiveProfileDirectory();
-                SaveSystemMetaData();
-            }
-            else
-            {
-                ProfileManager.SetCurrentActiveProfile(_metaData.LastSavedProfileID);
-            }
+            string displayName = $"Game Profile {ProfileManager.GetAll().Count + 1}";
+            ProfileManager.Open(ProfileManager.CreateNew(displayName));
         }
 
         public void SaveALL()
@@ -147,7 +130,7 @@ namespace AbstractPixel.SaveSystem
             }
             if (bridgesDataMap.Count == 0) return;
 
-            string activeProfileId = ProfileManager.CurrentProfileID;
+            string activeProfileId = ProfileManager.CurrentGameProfileId;
             SaveCatgeoryDefinition categoryDefinition = saveConfig.GetCategoryDefinition(_category);
 
             string fileName = LegacyPathGenerator.GetFileNameBasedOnCategoryDefinition(categoryDefinition);
@@ -213,7 +196,7 @@ namespace AbstractPixel.SaveSystem
         internal void LoadDataOf(SaveCategory _category)
         {
             isDataLoaded = false;
-            string profileId = ProfileManager.CurrentProfileID;
+            string profileId = ProfileManager.CurrentGameProfileId;
             SaveCatgeoryDefinition definition = saveConfig.GetCategoryDefinition(_category);
 
             string loadPath = LegacyPathGenerator.GetPath(definition, profileId);
@@ -302,31 +285,6 @@ namespace AbstractPixel.SaveSystem
                     }
                 }
             }
-        }
-
-        private void SaveSystemMetaData()
-        {
-            string metaDataFilePath = LegacyPathGenerator.GetSaveSystemMetaDataPath();
-            SystemMetaData metaData = new SystemMetaData(ProfileManager.CurrentProfileID);
-            if (serializer.TrySerialize(metaData, out string json))
-            {
-                fileStorageService.SaveFile(json, metaDataFilePath);
-            }
-        }
-
-        private bool LoadSystemMetaData(out SystemMetaData metaData)
-        {
-            string metaDataFilePath = LegacyPathGenerator.GetSaveSystemMetaDataPath();
-            metaData = null;
-            if (!fileStorageService.FileExists(metaDataFilePath)) return false;
-            string loadedJson = fileStorageService.LoadFile(metaDataFilePath);
-            if (string.IsNullOrEmpty(loadedJson)) return false;
-            if (!serializer.TryDeserialize(loadedJson, out metaData))
-            {
-                Debug.LogError($"[SaveManager] Corrupted System MetaData file found at {metaDataFilePath}");
-                return false;
-            }
-            return true;
         }
 
         private bool IsInstanceNull()
