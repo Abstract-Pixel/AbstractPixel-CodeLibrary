@@ -1,75 +1,61 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 namespace AbstractPixel.SaveSystem.Editor
 {
+    /// <summary>Editor menu items for finding and clearing save files.</summary>
     public static class SaveSystemToolsMenu
     {
-        [MenuItem("Tools/Save System/Open Release Folder")]
-        public static void OpenReleaseFolderFromMenu()
+        const string MenuRoot = "Tools/External Project Tools/Save System/";
+
+        /// <summary>The release and debug save folders, the same ones the game writes to.</summary>
+        public static IReadOnlyList<string> GetSaveFolders()
         {
-            if (TryInitializeGenerator())
-            {
-                OpenDirectory(DiskStorageService.GetRootFolder(false));
-            }
+            return new[] { DiskStorageService.GetRootFolder(false), DiskStorageService.GetRootFolder(true) };
         }
 
-        [MenuItem("Tools/Save System/Open Debug Folder")]
-        public static void OpenDebugFolderFromMenu()
+        [MenuItem(MenuRoot + "Open Release Folder")]
+        public static void OpenReleaseFolder()
         {
-            if (TryInitializeGenerator())
-            {
-                OpenDirectory(DiskStorageService.GetRootFolder(true));
-            }
-        }
-        [MenuItem("Tools/Save System/Delete All Save Files")]
-        public static void DeleteAllSavesFromMenu()
-        {
-
-            bool confirm = EditorUtility.DisplayDialog(
-                "Delete All Saves?",
-                "Are you sure you want to delete ALL save files from the Tools menu?",
-                "Yes, Delete",
-                "Cancel"
-            );
-
-            if (confirm)
-            {
-                if (Directory.Exists(DiskStorageService.GetRootFolder(false)))
-                    Directory.Delete(DiskStorageService.GetRootFolder(false), true);
-
-                if (Directory.Exists(DiskStorageService.GetRootFolder(true)))
-                    Directory.Delete(DiskStorageService.GetRootFolder(true), true);
-
-                Debug.Log("[SaveSystem: FORCED] All files deleted via Tools Menu.");
-            }
+            OpenFolder(DiskStorageService.GetRootFolder(false));
         }
 
-        #region Helpers
-
-        private static bool TryInitializeGenerator()
+        [MenuItem(MenuRoot + "Open Debug Folder")]
+        public static void OpenDebugFolder()
         {
-            string[] guids = AssetDatabase.FindAssets("t:SaveSystemConfigSO");
+            OpenFolder(DiskStorageService.GetRootFolder(true));
+        }
 
-            if (guids.Length == 0)
+        [MenuItem(MenuRoot + "Delete All Save Files")]
+        public static void DeleteAllSaveFiles()
+        {
+            bool confirmed = EditorUtility.DisplayDialog(
+                "Delete all save files?",
+                "This deletes every save file in the release and debug save folders, for every game profile. It can't be undone.",
+                "Delete",
+                "Cancel");
+            if (!confirmed)
             {
-                Debug.LogError("[SaveSystem] Could not find a SaveSystemConfigSO in the project! Menu item failed.");
-                return false;
+                return;
             }
 
-            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
-            SaveSystemConfigSO config = AssetDatabase.LoadAssetAtPath<SaveSystemConfigSO>(path);
-
-            return true;
+            foreach (string folder in GetSaveFolders())
+            {
+                if (Directory.Exists(folder))
+                {
+                    Directory.Delete(folder, true);
+                }
+            }
+            Debug.Log($"[SaveSystem] Deleted all save files in: {string.Join(", ", GetSaveFolders())}");
         }
 
-        private static void OpenDirectory(string path)
+        static void OpenFolder(string folder)
         {
-            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-            EditorUtility.RevealInFinder(path);
+            // The folder appears on the first save, so create it to have something to show.
+            Directory.CreateDirectory(folder);
+            EditorUtility.RevealInFinder(folder);
         }
-
-        #endregion
     }
 }

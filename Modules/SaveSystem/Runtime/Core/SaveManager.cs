@@ -11,8 +11,9 @@ namespace AbstractPixel.SaveSystem
     {
         [SerializeField] private SaveSystemConfigSO saveConfig;
         public SaveProfileManager ProfileManager { get; private set; }
-        private LegacyFileStorage fileStorageService;
         private ISerializer serializer;
+        private SaveFileStore saveFileStore;
+        private SavePathGenerator paths;
 
         private Dictionary<SaveCategory, Dictionary<string, ISavableBridge>> savableObjectsRegistry = new();
         private readonly string stringSeparatorIdentifier = "#";
@@ -25,9 +26,6 @@ namespace AbstractPixel.SaveSystem
         {
             base.Awake();
             saveConfig.Initialize();
-            LegacyPathGenerator.Initialize(saveConfig);
-
-            fileStorageService = new LegacyFileStorage();
             serializer = new JsonSerializer();
 
             Dictionary<SaveCategory, Dictionary<string, ISavableBridge>> registeredBridgesBeforeInitialization = null;
@@ -40,8 +38,9 @@ namespace AbstractPixel.SaveSystem
             
             
             IDataStorageService storage = new DiskStorageService(saveConfig.UseDebugPath, saveConfig.PrimaryFileExtension);
-            SaveFileStore saveFileStore = new SaveFileStore(storage, serializer);
-            ProfileManager = new SaveProfileManager(saveFileStore, storage, new SavePathGenerator(), saveConfig.GameProfileGuidLength);
+            saveFileStore = new SaveFileStore(storage, serializer);
+            paths = new SavePathGenerator();
+            ProfileManager = new SaveProfileManager(saveFileStore, storage, paths, saveConfig.GameProfileGuidLength);
             SceneEventBus.OnNewSceneGroupTransitionTo += ExecuteIntialDataLoading;
 
         }
@@ -133,8 +132,12 @@ namespace AbstractPixel.SaveSystem
             string activeProfileId = ProfileManager.CurrentGameProfileId;
             SaveCatgeoryDefinition categoryDefinition = saveConfig.GetCategoryDefinition(_category);
 
-            string fileName = LegacyPathGenerator.GetFileNameBasedOnCategoryDefinition(categoryDefinition);
-            string fullSavePath = LegacyPathGenerator.GetPath(categoryDefinition, activeProfileId);
+            string fileName = categoryDefinition.FileName;
+            if (!TryGetSaveFileKey(categoryDefinition, out string saveKey))
+            {
+                Debug.LogWarning($"[SaveManager] The save file '{fileName}' was not saved: it lives in {categoryDefinition.Location}, and no game profile or scene is open yet. Open a game profile before saving.");
+                return;
+            }
 
             SaveFileData categorizedSaveFileData;
             if (categoryDefinition.Location == SaveLocation.Global)
@@ -161,10 +164,7 @@ namespace AbstractPixel.SaveSystem
 
             if (hasData)
             {
-                if (serializer.TrySerialize(categorizedSaveFileData, out string json))
-                {
-                    fileStorageService.SaveFile(json, fullSavePath);
-                }
+                saveFileStore.Write(saveKey, categorizedSaveFileData);
             }
             isDataSaved = true;
             SaveEventBus.RaiseOnSaveCategoryCompleted(_category);
@@ -196,20 +196,12 @@ namespace AbstractPixel.SaveSystem
         internal void LoadDataOf(SaveCategory _category)
         {
             isDataLoaded = false;
-            string profileId = ProfileManager.CurrentGameProfileId;
             SaveCatgeoryDefinition definition = saveConfig.GetCategoryDefinition(_category);
 
-            string loadPath = LegacyPathGenerator.GetPath(definition, profileId);
-            if (!fileStorageService.FileExists(loadPath)) return;
-
-            string loadedjson = fileStorageService.LoadFile(loadPath);
-            if (string.IsNullOrEmpty(loadedjson)) return;
-
-            if (!serializer.TryDeserialize(loadedjson, out SaveFileData loadedData))
-            {
-                Debug.LogError($"[SaveManager] Corrupted file found at {loadPath}");
-                return;
-            }
+            // Nothing to load until a game profile (and, for Scene save files, a scene) is open.
+            if (!TryGetSaveFileKey(definition, out string saveKey)) return;
+            // SaveFileStore logs a warning or error that names the key when a file can't be read.
+            if (!saveFileStore.TryRead(saveKey, out SaveFileData loadedData)) return;
 
             // Check if we have receivers (Bridges)
             if (!savableObjectsRegistry.TryGetValue(_category, out Dictionary<string, ISavableBridge> bridgesDataMap))
@@ -234,6 +226,24 @@ namespace AbstractPixel.SaveSystem
             }
             isDataLoaded = true;
             SaveEventBus.RaiseOnLoadCategoryCompleted(_category);
+        }
+
+        // Until step 2, Scene save files take their scene name from the active scene group, as in v1.
+        private bool TryGetSaveFileKey(SaveCatgeoryDefinition _definition, out string _saveKey)
+        {
+            _saveKey = null;
+            string gameProfileId = ProfileManager.CurrentGameProfileId;
+            if (_definition.Location != SaveLocation.Global && gameProfileId == null) return false;
+
+            string sceneName = null;
+            if (_definition.Location == SaveLocation.Scene)
+            {
+                if (SceneActions.ActiveSceneGroup == null) return false;
+                sceneName = SceneActions.ActiveSceneGroup.MainScene.SceneName;
+            }
+
+            _saveKey = paths.GetSaveFileKey(_definition.FileName, _definition.Location, gameProfileId, sceneName);
+            return true;
         }
 
         internal void RegisterSavableObject(ISavableBridge bridge, List<SaveCategory> categories)

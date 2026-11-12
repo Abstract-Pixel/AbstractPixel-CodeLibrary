@@ -1,0 +1,47 @@
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using NUnit.Framework;
+using AbstractPixel.SaveSystem.Editor;
+
+namespace AbstractPixel.SaveSystem.Tests
+{
+    // Checks rules from the build plan that span the whole save system.
+    public class SaveSystemRulesTests
+    {
+        const string RuntimeFolder = "Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime";
+
+        [Test]
+        public void RuntimeCode_OnlyDiskStorageServiceTouchesFilesAndFolders()
+        {
+            Regex fileSystemCall = new Regex(@"\b(File|Directory)\.[A-Z]");
+
+            string[] offenders = Directory.GetFiles(Path.GetFullPath(RuntimeFolder), "*.cs", SearchOption.AllDirectories)
+                .Where(path => Path.GetFileName(path) != "DiskStorageService.cs")
+                .Where(path => fileSystemCall.IsMatch(File.ReadAllText(path)))
+                .Select(Path.GetFileName)
+                .ToArray();
+
+            CollectionAssert.IsEmpty(offenders, "Only DiskStorageService may use System.IO.File or Directory.");
+        }
+
+        [Test]
+        public void EditorTools_DeleteTheSameFoldersTheGameSavesTo()
+        {
+            // Bug 4: "Delete All Save Files" never set up its paths, so it deleted nothing.
+            CollectionAssert.AreEqual(
+                new[] { DiskStorageService.GetRootFolder(false), DiskStorageService.GetRootFolder(true) },
+                SaveSystemToolsMenu.GetSaveFolders());
+        }
+
+        [Test]
+        public void CategoryDefinition_FileNameIsTheCustomNameOrTheCategory()
+        {
+            SaveCatgeoryDefinition named = new SaveCatgeoryDefinition { Category = SaveCategory.Game, CustomFileName = "Profile" };
+            SaveCatgeoryDefinition unnamed = new SaveCatgeoryDefinition { Category = SaveCategory.Settings };
+
+            Assert.AreEqual("Profile", named.FileName);
+            Assert.AreEqual("Settings", unnamed.FileName);
+        }
+    }
+}

@@ -1,4 +1,3 @@
-using System.IO;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -115,52 +114,11 @@ namespace AbstractPixel.SaveSystem.Editor
             return root;
         }
 
-        private void InitializePathsInEditMode()
-        {
-            SerializedProperty configProperty = serializedObject.FindProperty("saveConfig");
-            SaveSystemConfigSO configSO = configProperty.objectReferenceValue as SaveSystemConfigSO;
-            if (configSO != null)
-            {
-            }
-        }
+        // The folder logic lives in SaveSystemToolsMenu, so the menu and this inspector always agree.
+        private void OpenReleaseDirectory() => SaveSystemToolsMenu.OpenReleaseFolder();
 
-        private void OpenReleaseDirectory()
-        {
-            InitializePathsInEditMode();
-            string releasePath = DiskStorageService.GetRootFolder(false);
-            if (!Directory.Exists(releasePath))
-            {
-                Directory.CreateDirectory(releasePath);
-            }
-            EditorUtility.RevealInFinder(releasePath);
-        }
+        private void OpenDebugDirectory() => SaveSystemToolsMenu.OpenDebugFolder();
 
-        private void OpenDebugDirectory()
-        {
-            InitializePathsInEditMode();
-            string debugPath = DiskStorageService.GetRootFolder(true);
-            if (!Directory.Exists(debugPath))
-            {
-                Directory.CreateDirectory(debugPath);
-            }
-            EditorUtility.RevealInFinder(debugPath);
-
-        }
-
-        private void DeleteAllSaves()
-        {
-            InitializePathsInEditMode();
-            string releasePath = DiskStorageService.GetRootFolder(false);
-            string debugPath = DiskStorageService.GetRootFolder(true);
-            if (Directory.Exists(releasePath))
-            {
-                Directory.Delete(releasePath, true);
-            }
-            if (Directory.Exists(debugPath))
-            {
-                Directory.Delete(debugPath, true);
-            }
-            Debug.Log("All save files for both debug and release have been deleted.");
-        }
+        private void DeleteAllSaves() => SaveSystemToolsMenu.DeleteAllSaveFiles();
     }
 }

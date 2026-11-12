@@ -16,5 +16,8 @@ namespace AbstractPixel.SaveSystem
 
         public string CustomFileName;
         public bool EncryptFile;
+
+        /// <summary>The save file's name: the custom name if one is set, otherwise the category's name.</summary>
+        public string FileName => string.IsNullOrEmpty(CustomFileName) ? Category.ToString() : CustomFileName;
     }
 }

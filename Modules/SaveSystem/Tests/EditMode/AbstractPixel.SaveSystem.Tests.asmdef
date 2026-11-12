@@ -3,6 +3,7 @@
     "rootNamespace": "AbstractPixel.SaveSystem.Tests",
     "references": [
         "AbstractPixel.SaveSystem",
+        "AbstractPixel.SaveSystem.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
