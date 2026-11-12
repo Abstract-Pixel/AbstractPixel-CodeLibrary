@@ -6,7 +6,7 @@ namespace AbstractPixel.SaveSystem
 {
     public class SaveProfileManager
     {
-        private IDataStorageService storageService;
+        private LegacyFileStorage storageService;
         private ISerializer serializer;
         private SaveSystemConfigSO saveConfig;
         private string profilesRootPath;
@@ -14,7 +14,7 @@ namespace AbstractPixel.SaveSystem
         public string CurrentProfilePath { get; private set; }
         public string CurrentProfileID { get; private set; }
 
-        public SaveProfileManager(IDataStorageService _dataStorageService, SaveSystemConfigSO _saveConfig, ISerializer _serializer)
+        internal SaveProfileManager(LegacyFileStorage _dataStorageService, SaveSystemConfigSO _saveConfig, ISerializer _serializer)
         {
             storageService = _dataStorageService;
             saveConfig = _saveConfig;

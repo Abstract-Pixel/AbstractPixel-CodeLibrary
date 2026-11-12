@@ -11,7 +11,7 @@ namespace AbstractPixel.SaveSystem
     {
         [SerializeField] private SaveSystemConfigSO saveConfig;
         public SaveProfileManager ProfileManager { get; private set; }
-        private IDataStorageService fileStorageService;
+        private LegacyFileStorage fileStorageService;
         private ISerializer serializer;
 
         private Dictionary<SaveCategory, Dictionary<string, ISavableBridge>> savableObjectsRegistry = new();
@@ -27,7 +27,7 @@ namespace AbstractPixel.SaveSystem
             saveConfig.Initialize();
             SavePathGenerator.Initialize(saveConfig);
 
-            fileStorageService = new FileDataStorageService();
+            fileStorageService = new LegacyFileStorage();
             serializer = new JsonSerializer();
 
             Dictionary<SaveCategory, Dictionary<string, ISavableBridge>> registeredBridgesBeforeInitialization = null;

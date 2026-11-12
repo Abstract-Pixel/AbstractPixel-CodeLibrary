@@ -3,20 +3,22 @@ using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
 {
-    public sealed class FileDataStorageService : IDataStorageService
+    // Temporary: the v1 path-based file storage, kept only so the old SaveManager keeps working until T7 removes it.
+    // New code uses IDataStorageService and DiskStorageService.
+    internal sealed class LegacyFileStorage
     {
         static readonly string temporaryFileExtension = $".{FileExtension.tmp.ToString().ToLower()}";
         public bool SaveFile(string _data, string _fullpath)
         {
             if (string.IsNullOrEmpty(_fullpath))
             {
-                Debug.LogError("FileDataStorageService: Save failed. File path is null or empty.");
+                Debug.LogError("LegacyFileStorage: Save failed. File path is null or empty.");
                 return false;
             }
 
             if (string.IsNullOrEmpty(_data))
             {
-                Debug.LogError("FileDataStorageService: Save failed. Serialized Data to save is null or empty.");
+                Debug.LogError("LegacyFileStorage: Save failed. Serialized Data to save is null or empty.");
                 return false;
             }
 
@@ -25,7 +27,7 @@ namespace AbstractPixel.SaveSystem
                 string directoryPath = Path.GetDirectoryName(_fullpath);
                 if (!CreateDirectory(directoryPath))
                 {
-                    Debug.LogWarning($"FileDataStorageService: [Save Warning] Directory does not exist at path: {directoryPath}. Creating directory.");
+                    Debug.LogWarning($"LegacyFileStorage: [Save Warning] Directory does not exist at path: {directoryPath}. Creating directory.");
                     Directory.CreateDirectory(directoryPath);
                 }
                 string tempFilePath = _fullpath + temporaryFileExtension;
@@ -44,12 +46,12 @@ namespace AbstractPixel.SaveSystem
             }
             catch (IOException e)
             {
-                Debug.LogError($"FileDataStorageService:[I/O Exception Error] Save failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[I/O Exception Error] Save failed. Exception: {e}");
                 return false;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"FileDataStorageService:[Unexpected Error] Save failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[Unexpected Error] Save failed. Exception: {e}");
                 return false;
             }
         }
@@ -57,14 +59,14 @@ namespace AbstractPixel.SaveSystem
         {
             if (string.IsNullOrEmpty(_fullpath))
             {
-                Debug.LogError("FileDataStorageService: Load failed. File path is null or empty.");
+                Debug.LogError("LegacyFileStorage: Load failed. File path is null or empty.");
                 return null;
             }
             try
             {
                 if (!File.Exists(_fullpath))
                 {
-                    Debug.LogError($"FileDataStorageService: Load failed. File does not exist at path: {_fullpath}");
+                    Debug.LogError($"LegacyFileStorage: Load failed. File does not exist at path: {_fullpath}");
                     return null;
                 }
                 string data = File.ReadAllText(_fullpath);
@@ -72,12 +74,12 @@ namespace AbstractPixel.SaveSystem
             }
             catch (IOException e)
             {
-                Debug.LogError($"FileDataStorageService:[I/O Exception Error] Load failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[I/O Exception Error] Load failed. Exception: {e}");
                 return null;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"FileDataStorageService:[Unexpected Error] Load failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[Unexpected Error] Load failed. Exception: {e}");
                 return null;
             }
         }
@@ -86,7 +88,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (string.IsNullOrEmpty(_directoryPath))
             {
-                Debug.LogError("FileDataStorageService: CreateDirectory failed. Directory path is null or empty.");
+                Debug.LogError("LegacyFileStorage: CreateDirectory failed. Directory path is null or empty.");
                 return false;
             }
             try
@@ -100,12 +102,12 @@ namespace AbstractPixel.SaveSystem
             }
             catch (IOException e)
             {
-                Debug.LogError($"FileDataStorageService:[I/O Exception Error] CreateDirectory failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[I/O Exception Error] CreateDirectory failed. Exception: {e}");
                 return false;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"FileDataStorageService:[Unexpected Error] CreateDirectory failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[Unexpected Error] CreateDirectory failed. Exception: {e}");
                 return false;
             }
         }
@@ -114,14 +116,14 @@ namespace AbstractPixel.SaveSystem
         {
             if (string.IsNullOrEmpty(_directoryPath))
             {
-                Debug.LogError("FileDataStorageService: GetSubDirectories failed. Directory path is null or empty.");
+                Debug.LogError("LegacyFileStorage: GetSubDirectories failed. Directory path is null or empty.");
                 return null;
             }
             try
             {
                 if (!Directory.Exists(_directoryPath))
                 {
-                    Debug.LogError($"FileDataStorageService: GetSubDirectories failed. Directory does not exist at path: {_directoryPath}");
+                    Debug.LogError($"LegacyFileStorage: GetSubDirectories failed. Directory does not exist at path: {_directoryPath}");
                     return null;
                 }
                 string[] subDirectories = Directory.GetDirectories(_directoryPath);
@@ -129,12 +131,12 @@ namespace AbstractPixel.SaveSystem
             }
             catch (IOException e)
             {
-                Debug.LogError($"FileDataStorageService:[I/O Exception Error] GetSubDirectories failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[I/O Exception Error] GetSubDirectories failed. Exception: {e}");
                 return null;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"FileDataStorageService:[Unexpected Error] GetSubDirectories failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[Unexpected Error] GetSubDirectories failed. Exception: {e}");
                 return null;
             }
         }
@@ -143,7 +145,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (string.IsNullOrEmpty(_directoryPath))
             {
-                Debug.LogError("FileDataStorageService: DeleteDirectory failed. Directory path is null or empty.");
+                Debug.LogError("LegacyFileStorage: DeleteDirectory failed. Directory path is null or empty.");
                 return false;
             }
             try
@@ -157,12 +159,12 @@ namespace AbstractPixel.SaveSystem
             }
             catch (IOException e)
             {
-                Debug.LogError($"FileDataStorageService:[I/O Exception Error] DeleteDirectory failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[I/O Exception Error] DeleteDirectory failed. Exception: {e}");
                 return false;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"FileDataStorageService:[Unexpected Error] DeleteDirectory failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[Unexpected Error] DeleteDirectory failed. Exception: {e}");
                 return false;
             }
 
@@ -172,7 +174,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (string.IsNullOrEmpty(_filePath))
             {
-                Debug.LogError("FileDataStorageService: DeleteFile failed. File path is null or empty.");
+                Debug.LogError("LegacyFileStorage: DeleteFile failed. File path is null or empty.");
                 return false;
             }
             try
@@ -186,12 +188,12 @@ namespace AbstractPixel.SaveSystem
             }
             catch (IOException e)
             {
-                Debug.LogError($"FileDataStorageService:[I/O Exception Error] DeleteFile failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[I/O Exception Error] DeleteFile failed. Exception: {e}");
                 return false;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"FileDataStorageService:[Unexpected Error] DeleteFile failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[Unexpected Error] DeleteFile failed. Exception: {e}");
                 return false;
             }
         }
@@ -200,7 +202,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (string.IsNullOrEmpty(_filePath))
             {
-                Debug.LogError("FileDataStorageService: FileExists check failed. File path is null or empty.");
+                Debug.LogError("LegacyFileStorage: FileExists check failed. File path is null or empty.");
                 return false;
             }
             try
@@ -209,12 +211,12 @@ namespace AbstractPixel.SaveSystem
             }
             catch (IOException e)
             {
-                Debug.LogError($"FileDataStorageService:[I/O Exception Error] FileExists check failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[I/O Exception Error] FileExists check failed. Exception: {e}");
                 return false;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"FileDataStorageService:[Unexpected Error] FileExists check failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[Unexpected Error] FileExists check failed. Exception: {e}");
                 return false;
             }
 
@@ -224,7 +226,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (string.IsNullOrEmpty(_directoryPath))
             {
-                Debug.LogError("FileDataStorageService: DirectoryExists check failed. Directory path is null or empty.");
+                Debug.LogError("LegacyFileStorage: DirectoryExists check failed. Directory path is null or empty.");
                 return false;
             }
             try
@@ -233,12 +235,12 @@ namespace AbstractPixel.SaveSystem
             }
             catch (IOException e)
             {
-                Debug.LogError($"FileDataStorageService:[I/O Exception Error] DirectoryExists check failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[I/O Exception Error] DirectoryExists check failed. Exception: {e}");
                 return false;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"FileDataStorageService:[Unexpected Error] DirectoryExists check failed. Exception: {e}");
+                Debug.LogError($"LegacyFileStorage:[Unexpected Error] DirectoryExists check failed. Exception: {e}");
                 return false;
             }
         }
