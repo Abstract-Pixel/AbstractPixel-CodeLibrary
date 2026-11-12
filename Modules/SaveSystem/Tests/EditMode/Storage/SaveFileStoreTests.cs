@@ -24,13 +24,13 @@ namespace AbstractPixel.SaveSystem.Tests
         static SaveFileData SaveFileWithVolume(int volume)
         {
             SaveFileData saveFile = new SaveFileData("Settings");
-            saveFile.DataMap["volume"] = volume;
+            saveFile.Entries["volume"] = new SaveFileEntry { Name = "volume", Data = volume };
             return saveFile;
         }
 
         static int VolumeOf(SaveFileData saveFile)
         {
-            return System.Convert.ToInt32(saveFile.DataMap["volume"]);
+            return (int)saveFile.Entries["volume"].Data;
         }
 
         [Test]

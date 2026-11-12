@@ -16,8 +16,8 @@ namespace AbstractPixel.SaveSystem
         public string ProfileID;
         public string FileName;
 
-        /// <summary>Saved data keyed by save ID.</summary>
-        public Dictionary<string, object> DataMap = new Dictionary<string, object>();
+        /// <summary>Each saved object's entry, keyed by save ID.</summary>
+        public Dictionary<string, SaveFileEntry> Entries = new Dictionary<string, SaveFileEntry>();
 
         int IVersionedSaveData.FormatVersion => FormatVersion;
 

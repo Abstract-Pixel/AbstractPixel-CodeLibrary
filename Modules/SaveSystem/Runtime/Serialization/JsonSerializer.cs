@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using UnityEngine;
 
@@ -7,6 +8,8 @@ namespace AbstractPixel.SaveSystem
     public class JsonSerializer : ISerializer
     {
         JsonSerializerSettings settings;
+        // The same settings as a Newtonsoft serializer, for converting to and from JToken.
+        Newtonsoft.Json.JsonSerializer tokenSerializer;
 
         public JsonSerializer()
         {
@@ -28,6 +31,7 @@ namespace AbstractPixel.SaveSystem
                 // NONE because SaveDataConverter + SaveableBridge is used
                 TypeNameHandling = TypeNameHandling.None
             };
+            tokenSerializer = Newtonsoft.Json.JsonSerializer.Create(settings);
         }
         public bool TrySerialize<T>(T _data, out string _output)
         {
@@ -58,6 +62,16 @@ namespace AbstractPixel.SaveSystem
             }
 
         }
+        public JToken ToToken(object data)
+        {
+            return JToken.FromObject(data, tokenSerializer);
+        }
+
+        public object FromToken(JToken token, Type type)
+        {
+            return token.ToObject(type, tokenSerializer);
+        }
+
         // Returns false without logging: only the caller knows which save key the text came from, so it logs.
         public bool TryDeserialize<T>(string _data, out T _output)
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
@@ -17,6 +18,10 @@ namespace AbstractPixel.SaveSystem
         const string ReleaseFolderName = "SaveFiles";
         const string DebugFolderName = "DebugSaveFiles";
         const string TemporaryFileSuffix = ".tmp";
+
+        // Windows can lock a file for a moment right after it was read (virus scanners, the search indexer),
+        // so swapping a new file in is retried after these waits before the write gives up.
+        static readonly int[] SwapRetryDelaysInMilliseconds = { 10, 50, 100, 250, 500 };
 
         // UTF-8 without a byte order mark, so other tools read the JSON cleanly.
         static readonly Encoding FileEncoding = new UTF8Encoding(false);
@@ -67,16 +72,7 @@ namespace AbstractPixel.SaveSystem
                 }
 
                 WriteAndFlush(temporaryPath, text);
-
-                // Swap the finished file in. File.Replace keeps the old file intact if the swap fails.
-                if (File.Exists(path))
-                {
-                    File.Replace(temporaryPath, path, null);
-                }
-                else
-                {
-                    File.Move(temporaryPath, path);
-                }
+                SwapIn(temporaryPath, path);
                 return true;
             }
             catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
@@ -174,6 +170,30 @@ namespace AbstractPixel.SaveSystem
             string relativePath = path.Substring(rootFolder.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             string withoutExtension = relativePath.Substring(0, relativePath.Length - fileExtension.Length);
             return withoutExtension.Replace(Path.DirectorySeparatorChar, '/');
+        }
+
+        // Moves the finished temporary file into place. File.Replace keeps the old file intact if the swap fails.
+        static void SwapIn(string temporaryPath, string path)
+        {
+            for (int attempt = 0; ; attempt++)
+            {
+                try
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Replace(temporaryPath, path, null);
+                    }
+                    else
+                    {
+                        File.Move(temporaryPath, path);
+                    }
+                    return;
+                }
+                catch (IOException) when (attempt < SwapRetryDelaysInMilliseconds.Length)
+                {
+                    Thread.Sleep(SwapRetryDelaysInMilliseconds[attempt]);
+                }
+            }
         }
 
         static void WriteAndFlush(string path, string text)

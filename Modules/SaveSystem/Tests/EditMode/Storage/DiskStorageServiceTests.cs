@@ -16,7 +16,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [SetUp]
         public void SetUp()
         {
-            temporaryRootFolder = Path.Combine(Path.GetTempPath(), "SaveSystemTests", Guid.NewGuid().ToString("N"));
+            temporaryRootFolder = TestFolders.CreateTemporaryFolderPath();
             storage = new DiskStorageService(temporaryRootFolder, FileExtension.json);
         }
 
@@ -56,6 +56,18 @@ namespace AbstractPixel.SaveSystem.Tests
 
             Assert.IsFalse(File.Exists(SettingsTempPath));
             Assert.AreEqual("newer", File.ReadAllText(SettingsPath));
+        }
+
+        [Test]
+        public void RepeatedReadsAndWrites_OfTheSameKey_AllSucceed()
+        {
+            // Reading a file right before replacing it can briefly lock it on Windows (for example a virus scan).
+            for (int i = 0; i < 25; i++)
+            {
+                Assert.IsTrue(storage.Write("Global/Settings", "value " + i), $"Write {i} failed.");
+                Assert.IsTrue(storage.TryRead("Global/Settings", out string text));
+                Assert.AreEqual("value " + i, text);
+            }
         }
 
         [Test]

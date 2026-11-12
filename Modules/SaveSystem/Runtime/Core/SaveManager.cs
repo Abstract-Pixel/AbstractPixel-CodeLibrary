@@ -157,7 +157,7 @@ namespace AbstractPixel.SaveSystem
                 object capturedData = bridge.CaptureState(_category);
                 if (capturedData != null)
                 {
-                    categorizedSaveFileData.DataMap.Add(bridge.UniqueId, capturedData);
+                    categorizedSaveFileData.Entries[bridge.UniqueId] = new SaveFileEntry { Name = bridge.UniqueId, Data = serializer.ToToken(capturedData) };
                     hasData = true;
                 }
             }
@@ -211,10 +211,10 @@ namespace AbstractPixel.SaveSystem
                 return;
             }
 
-            foreach (KeyValuePair<string, object> kvp in loadedData.DataMap)
+            foreach (KeyValuePair<string, SaveFileEntry> kvp in loadedData.Entries)
             {
                 string compositeKey = kvp.Key;
-                object objectData = kvp.Value;
+                object objectData = kvp.Value.Data;
 
                 int separatorIndex = compositeKey.LastIndexOf(stringSeparatorIdentifier) + 1;
                 string extractedGUID = compositeKey.Substring(separatorIndex);

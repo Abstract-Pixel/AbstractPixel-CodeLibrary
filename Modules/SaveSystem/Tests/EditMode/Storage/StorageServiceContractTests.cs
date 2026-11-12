@@ -30,7 +30,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [SetUp]
         public void SetUp()
         {
-            temporaryRootFolder = Path.Combine(Path.GetTempPath(), "SaveSystemTests", Guid.NewGuid().ToString("N"));
+            temporaryRootFolder = TestFolders.CreateTemporaryFolderPath();
             storage = kind == "Disk"
                 ? new DiskStorageService(temporaryRootFolder, FileExtension.json)
                 : new MemoryStorageService();
