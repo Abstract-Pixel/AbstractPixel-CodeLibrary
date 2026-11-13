@@ -170,6 +170,19 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
+        public void CustomField_SurvivesARefreshOfTheList()
+        {
+            GameProfile profile = SaveActions.GameProfiles.CreateNew();
+            profile.Custom["Difficulty"] = "Hard";
+
+            SaveActions.GameProfiles.CreateNew();
+            IReadOnlyList<GameProfile> all = SaveActions.GameProfiles.All;
+
+            Assert.AreSame(profile, all[0]);
+            Assert.AreEqual("Hard", all[0].Custom["Difficulty"], "A custom field the game set must stay until it is saved.");
+        }
+
+        [Test]
         public void WithNoConfig_GameProfilesIsAnEmptyList_WhoseMethodsLogOneClearError()
         {
             LogAssert.Expect(LogType.Error, new Regex("SaveSystemConfig"));

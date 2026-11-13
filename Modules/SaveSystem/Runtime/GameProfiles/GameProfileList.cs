@@ -118,15 +118,6 @@ namespace AbstractPixel.SaveSystem
             return handle;
         }
 
-        /// <summary>Puts a newly written manifest into its handle, so the handle shows the latest save.</summary>
-        internal void Refresh(GameProfileManifest manifest)
-        {
-            if (handlesById.TryGetValue(manifest.GameProfileId, out GameProfile handle))
-            {
-                handle.Manifest = manifest;
-            }
-        }
-
         internal bool IsOpen(GameProfile profile)
         {
             return manager != null && manager.CurrentGameProfileId == profile.Id;
@@ -173,7 +164,8 @@ namespace AbstractPixel.SaveSystem
                 GameProfile handle = GetById(manifest.GameProfileId);
                 if (handle != null)
                 {
-                    handle.Manifest = manifest;
+                    // Each game profile has one manifest, the handle's, so custom fields the game set on it survive.
+                    handle.Manifest.TakeSaveSystemFieldsFrom(manifest);
                     sortedHandles.Add(handle);
                 }
             }

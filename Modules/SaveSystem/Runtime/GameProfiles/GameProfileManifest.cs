@@ -37,6 +37,24 @@ namespace AbstractPixel.SaveSystem
 
         int IVersionedSaveData.FormatVersion => FormatVersion;
 
+        /// <summary>
+        /// Copies the fields the save system writes from a manifest read from disk. Custom stays as it is, because
+        /// the game may have changed it since the last save.
+        /// </summary>
+        internal void TakeSaveSystemFieldsFrom(GameProfileManifest stored)
+        {
+            if (ReferenceEquals(stored, this))
+            {
+                return;
+            }
+            SlotNumber = stored.SlotNumber;
+            DisplayName = stored.DisplayName;
+            LastSavedUtc = stored.LastSavedUtc;
+            PlaytimeSeconds = stored.PlaytimeSeconds;
+            LastScene = stored.LastScene;
+            AppVersion = stored.AppVersion;
+        }
+
         // Used by the JSON serializer when it reads a file.
         public GameProfileManifest() { }
 
