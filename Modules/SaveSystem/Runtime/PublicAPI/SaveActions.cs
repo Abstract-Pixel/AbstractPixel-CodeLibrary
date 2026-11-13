@@ -30,8 +30,16 @@ namespace AbstractPixel.SaveSystem
         internal static SaveSession Session => session;
 
         /// <summary>
-        /// Registers a saved object under a save ID. If its data is already loaded, it is restored inside this call,
-        /// so a constructor should call Register last, after setting its new-game values.
+        /// Registers a plain class. Its save ID is its class name; later live instances of the same class get
+        /// "Inventory 2", "Inventory 3" in the order they register. If its data is already loaded, it is restored
+        /// inside this call, so a constructor should call Register last, after setting its new-game values.
+        /// If the order instances register in can change between runs, numbered instances swap data: give them a custom save ID.
+        /// Example: <c>SaveActions.Register(this);</c>
+        /// </summary>
+        public static void Register<T>(ISavable<T> savedObject) => session?.Register(savedObject, null);
+
+        /// <summary>
+        /// Registers a plain class under a custom save ID, which always wins over the automatic one.
         /// Example: <c>SaveActions.Register(this, "player-inventory");</c>
         /// </summary>
         public static void Register<T>(ISavable<T> savedObject, string saveId) => session?.Register(savedObject, saveId);

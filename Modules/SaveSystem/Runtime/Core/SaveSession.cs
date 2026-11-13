@@ -15,6 +15,7 @@ namespace AbstractPixel.SaveSystem
         readonly SaveFileLookup saveFiles;
         readonly SavePathGenerator paths = new SavePathGenerator();
         readonly SaveRegistry registry = new SaveRegistry();
+        readonly AutomaticSaveIds automaticSaveIds = new AutomaticSaveIds();
         readonly LoadedSaveData loadedData;
         readonly ISceneInfo sceneInfo;
         readonly Func<double> unscaledTime;
@@ -61,6 +62,7 @@ namespace AbstractPixel.SaveSystem
             events.RecordLoads(SaveLocation.Global, null);
         }
 
+        /// <summary>Registers a plain class. With no <paramref name="saveId"/> it gets an automatic one: its class name, then numbers.</summary>
         public void Register<T>(ISavable<T> savable, string saveId)
         {
             RegisterScript(savable, savable, savable.GetType(), saveId, typeof(T),
@@ -69,7 +71,8 @@ namespace AbstractPixel.SaveSystem
 
         /// <summary>
         /// The non-generic path the Savable Bridge uses. <paramref name="scriptType"/> says which save file the data goes in;
-        /// <paramref name="sceneName"/> is the object's own scene, or null to use the active scene.
+        /// <paramref name="sceneName"/> is the object's own scene, or null to use the active scene. A null or empty
+        /// <paramref name="saveId"/> asks for an automatic save ID.
         /// </summary>
         public void RegisterScript(object owner, object savedObject, Type scriptType, string saveId, Type dataType,
             Func<object> capture, Action<object> restore, string sceneName, string entryName)
@@ -81,6 +84,12 @@ namespace AbstractPixel.SaveSystem
                 return;
             }
             string saveFileName = definition.FileName;
+
+            bool wantsAutomaticSaveId = string.IsNullOrEmpty(saveId);
+            if (wantsAutomaticSaveId)
+            {
+                saveId = automaticSaveIds.Assign(savedObject, scriptType, saveFileName);
+            }
 
             if (definition.Location == SaveLocation.Scene)
             {
@@ -112,6 +121,7 @@ namespace AbstractPixel.SaveSystem
             foreach (SavedObjectEntry entry in registry.GetEntriesOf(owner))
             {
                 Capture(entry);
+                automaticSaveIds.Release(entry.SavedObject);
             }
             registry.Remove(owner);
         }
@@ -192,6 +202,7 @@ namespace AbstractPixel.SaveSystem
             foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => BelongsTo(entry, savedObject)).ToList())
             {
                 registry.RemoveEntry(entry.SaveFileName, entry.SaveId);
+                automaticSaveIds.Release(entry.SavedObject);
                 if (addresses.TryGetAddress(entry, out SaveFileAddress address))
                 {
                     loadedData.Forget(address, entry.SaveId);
@@ -236,6 +247,7 @@ namespace AbstractPixel.SaveSystem
             IDisposable disposableSceneInfo = sceneInfo as IDisposable;
             disposableSceneInfo?.Dispose();
             registry.Clear();
+            automaticSaveIds.Clear();
             loadedData.Clear();
         }
 
