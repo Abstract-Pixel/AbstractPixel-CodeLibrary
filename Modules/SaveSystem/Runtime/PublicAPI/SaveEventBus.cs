@@ -106,6 +106,12 @@ namespace AbstractPixel.SaveSystem
         /// <summary>SaveAll finished writing every changed save file.</summary>
         public static event Action OnSaveAllCompleted;
 
+        /// <summary>
+        /// A save file could not be written. Gives the save file class and a reason to show the player, such as
+        /// "Saved failed". The previous good save on disk is untouched; check the console for exactly what went wrong.
+        /// </summary>
+        public static event Action<Type, string> OnSaveFailed;
+
         internal static void RaiseLoadCompleted(Type saveFileClass)
         {
             InvokeEach(loadCompleted, saveFileClass, nameof(OnLoadCompleted));
@@ -126,6 +132,18 @@ namespace AbstractPixel.SaveSystem
             InvokeEach(OnSaveCompleted, saveFileClass, nameof(OnSaveCompleted));
         }
 
+        internal static void RaiseSaveFailed(Type saveFileClass, string reason)
+        {
+            if (OnSaveFailed == null)
+            {
+                return;
+            }
+            foreach (Delegate handler in OnSaveFailed.GetInvocationList())
+            {
+                InvokeSafely(handler, nameof(OnSaveFailed), () => ((Action<Type, string>)handler)(saveFileClass, reason));
+            }
+        }
+
         internal static void RaiseSaveAllCompleted()
         {
             InvokeEach(OnSaveAllCompleted, nameof(OnSaveAllCompleted));
@@ -139,6 +157,7 @@ namespace AbstractPixel.SaveSystem
             gameProfileOpened = null;
             OnSaveCompleted = null;
             OnSaveAllCompleted = null;
+            OnSaveFailed = null;
             typedLoadListeners.Clear();
         }
 

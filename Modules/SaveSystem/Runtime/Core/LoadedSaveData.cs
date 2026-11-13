@@ -125,11 +125,12 @@ namespace AbstractPixel.SaveSystem
         /// <summary>
         /// Writes every changed save file, or only those the filter accepts, and adds each written file's name to
         /// <paramref name="writtenFileNames"/> when one is given. A Scene file is written once per scene, so its name
-        /// is only added when every scene's copy was written. Returns false if any write failed.
+        /// is only added when every scene's copy was written. Each failed file's name goes in
+        /// <paramref name="failedFileNames"/> when one is given. Returns false if any write failed.
         /// </summary>
-        public bool WriteChanged(Func<SaveFileData, bool> filter = null, List<string> writtenFileNames = null)
+        public bool WriteChanged(Func<SaveFileData, bool> filter = null, List<string> writtenFileNames = null, List<string> failedFileNames = null)
         {
-            HashSet<string> failedFileNames = new HashSet<string>();
+            HashSet<string> failed = new HashSet<string>();
             foreach (KeyValuePair<string, LoadedFile> loadedFile in filesByKey)
             {
                 LoadedFile file = loadedFile.Value;
@@ -143,7 +144,7 @@ namespace AbstractPixel.SaveSystem
                 file.Data.Timestamp = DateTime.UtcNow.ToString("o");
                 if (!store.Write(loadedFile.Key, file.Data, file.KeepsBackup))
                 {
-                    failedFileNames.Add(file.Data.FileName);
+                    failed.Add(file.Data.FileName);
                     continue;
                 }
                 file.Changed = false;
@@ -153,8 +154,9 @@ namespace AbstractPixel.SaveSystem
                     writtenFileNames.Add(file.Data.FileName);
                 }
             }
-            writtenFileNames?.RemoveAll(failedFileNames.Contains);
-            return failedFileNames.Count == 0;
+            writtenFileNames?.RemoveAll(failed.Contains);
+            failedFileNames?.AddRange(failed);
+            return failed.Count == 0;
         }
 
         /// <summary>Forgets every GameProfile and Scene save file, for example when another game profile opens. Global data stays.</summary>

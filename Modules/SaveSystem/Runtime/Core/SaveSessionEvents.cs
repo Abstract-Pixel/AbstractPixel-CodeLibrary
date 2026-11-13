@@ -51,16 +51,26 @@ namespace AbstractPixel.SaveSystem
 
         public void RaiseSaveCompleted(string fileName)
         {
-            bool isKnownFile = saveFiles.TryGetDefinitionByFileName(fileName, out SaveFileDefinition definition);
-            if (!isKnownFile)
-            {
-                return;
-            }
-            Type saveFileClass = saveFileClasses.Find(definition);
+            Type saveFileClass = SaveFileClassFor(fileName);
             if (saveFileClass != null)
             {
                 SaveEventBus.RaiseSaveCompleted(saveFileClass);
             }
+        }
+
+        public void RaiseSaveFailed(string fileName, string reason)
+        {
+            Type saveFileClass = SaveFileClassFor(fileName);
+            if (saveFileClass != null)
+            {
+                SaveEventBus.RaiseSaveFailed(saveFileClass, reason);
+            }
+        }
+
+        Type SaveFileClassFor(string fileName)
+        {
+            bool isKnownFile = saveFiles.TryGetDefinitionByFileName(fileName, out SaveFileDefinition definition);
+            return isKnownFile ? saveFileClasses.Find(definition) : null;
         }
     }
 }

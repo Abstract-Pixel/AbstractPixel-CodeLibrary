@@ -11,6 +11,7 @@ namespace AbstractPixel.SaveSystem.Tests
         FailingWritesStorage storage;
         FakeSceneInfo scene;
         readonly List<Type> savedFiles = new List<Type>();
+        readonly List<Type> failedFiles = new List<Type>();
         int saveAllCount;
 
         [SetUp]
@@ -18,12 +19,14 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             storage = new FailingWritesStorage();
             savedFiles.Clear();
+            failedFiles.Clear();
             saveAllCount = 0;
             scene = new FakeSceneInfo();
             SaveStartup.Start(CreateConfig(), storage, scene, () => 0d);
             SaveActions.GameProfiles.CreateNew().Open();
             SaveEventBus.OnSaveCompleted += RecordSave;
             SaveEventBus.OnSaveAllCompleted += RecordSaveAll;
+            SaveEventBus.OnSaveFailed += RecordFailure;
         }
 
         [TearDown]
@@ -31,6 +34,7 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             SaveEventBus.OnSaveCompleted -= RecordSave;
             SaveEventBus.OnSaveAllCompleted -= RecordSaveAll;
+            SaveEventBus.OnSaveFailed -= RecordFailure;
             SaveStartup.Stop();
         }
 
@@ -42,6 +46,12 @@ namespace AbstractPixel.SaveSystem.Tests
         void RecordSaveAll()
         {
             saveAllCount++;
+        }
+
+        void RecordFailure(Type saveFileClass, string reason)
+        {
+            Assert.IsNotEmpty(reason, "OnSaveFailed must give a reason the game can show the player.");
+            failedFiles.Add(saveFileClass);
         }
 
         [Test]
@@ -87,6 +97,38 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Save<TestGameFile>();
 
             CollectionAssert.AreEqual(new[] { typeof(TestGameFile) }, savedFiles);
+        }
+
+        // S7: OnSaveFailed, so the game can say "Save failed".
+        [Test]
+        public void SavingOneFile_WhoseWriteFails_RaisesOnSaveFailed()
+        {
+            SaveActions.Register(new PlayerHealth { Current = 40 });
+            storage.FailKeysEndingWith = "/" + GameFile;
+
+            SaveActions.Save<TestGameFile>();
+
+            CollectionAssert.AreEqual(new[] { typeof(TestGameFile) }, failedFiles);
+        }
+
+        [Test]
+        public void SaveAll_WithOneFailedWrite_RaisesOnSaveFailed_OnlyForThatFile()
+        {
+            SaveActions.Register(new PlayerHealth { Current = 40 });
+            SaveActions.Register(new VolumeSetting { Volume = 7 });
+            storage.FailKeysEndingWith = "/" + GameFile;
+
+            SaveActions.SaveAll();
+
+            CollectionAssert.AreEqual(new[] { typeof(TestGameFile) }, failedFiles);
+        }
+
+        [Test]
+        public void SavingOneFile_ThatSucceeds_NeverRaisesOnSaveFailed()
+        {
+            SaveActions.Save<TestGameFile>();
+
+            CollectionAssert.IsEmpty(failedFiles);
         }
 
         // Memory storage that refuses to write chosen keys, like a full disk would.

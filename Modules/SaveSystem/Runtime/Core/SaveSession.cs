@@ -20,6 +20,7 @@ namespace AbstractPixel.SaveSystem
         readonly SaveFileAddresses addresses;
         readonly SaveSessionEvents events;
         readonly SaveFileClassFinder saveFileClasses = new SaveFileClassFinder();
+        readonly bool saveOnSceneUnload;
 
         // The game profile whose data is in loadedData, and the time playtime was last counted up to.
         string loadedGameProfileId;
@@ -55,6 +56,7 @@ namespace AbstractPixel.SaveSystem
             this.serializer = serializer;
             this.sceneInfo = sceneInfo;
             this.unscaledTime = unscaledTime;
+            saveOnSceneUnload = config.SaveOnSceneUnload;
             ProfileManager = new SaveProfileManager(store, storage, config.GameProfileGuidLength, config.DefaultGameProfileName);
             GameProfiles = new GameProfileList(ProfileManager);
             addresses = new SaveFileAddresses(saveFiles, ProfileManager);
@@ -179,11 +181,16 @@ namespace AbstractPixel.SaveSystem
         {
             SavedObjects.CaptureAll();
             List<string> writtenFileNames = new List<string>();
-            loadedData.WriteChanged(null, writtenFileNames);
+            List<string> failedFileNames = new List<string>();
+            loadedData.WriteChanged(null, writtenFileNames, failedFileNames);
             FinishSave();
             foreach (string fileName in writtenFileNames)
             {
                 events.RaiseSaveCompleted(fileName);
+            }
+            foreach (string fileName in failedFileNames)
+            {
+                events.RaiseSaveFailed(fileName, SaveFailedReason);
             }
             SaveEventBus.RaiseSaveAllCompleted();
         }
@@ -210,15 +217,22 @@ namespace AbstractPixel.SaveSystem
         void Save(SaveFileDefinition definition)
         {
             SavedObjects.CaptureAll(entry => entry.SaveFileName == definition.FileName);
+            // A file with nothing to write counts as saved, so a "Saved" message shows. A failed write raises
+            // OnSaveFailed instead of OnSaveCompleted, so the game never tells the player the file is safe.
             bool everyWriteWorked = loadedData.WriteChanged(file => file.FileName == definition.FileName);
             FinishSave();
-            // A file with nothing to write counts as saved, so a "Saved" message shows. A failed write raises nothing:
-            // the store has already logged it, and the game must not tell the player the file is safe.
             if (everyWriteWorked)
             {
                 events.RaiseSaveCompleted(definition.FileName);
             }
+            else
+            {
+                events.RaiseSaveFailed(definition.FileName, SaveFailedReason);
+            }
         }
+
+        // The store has already logged exactly what went wrong; this is what the game shows the player.
+        const string SaveFailedReason = "The save file could not be written. The previous save is kept.";
 
         /// <summary>
         /// Reads one save file from disk again and restores every registered object in it. Changes that weren't saved
@@ -295,6 +309,11 @@ namespace AbstractPixel.SaveSystem
         {
             readySceneNames.Remove(sceneName);
             LoadEvents.ForgetSceneLoads(sceneName);
+            // Every unloading object's own OnDisable has already captured its data by now, so this is safe to write.
+            if (saveOnSceneUnload)
+            {
+                SaveAll();
+            }
         }
 
         /// <summary>
