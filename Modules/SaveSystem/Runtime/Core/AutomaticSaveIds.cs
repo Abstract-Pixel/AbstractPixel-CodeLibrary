@@ -43,7 +43,7 @@ namespace AbstractPixel.SaveSystem
             string name = NameFor(savedObjectClass, saveFileName);
             HashSet<int> numbers = NumbersInUse(saveFileName, name);
             bool canKeepItsNumber = assignedBefore && earlier.SaveFileName == saveFileName && earlier.Name == name && !numbers.Contains(earlier.Number);
-            int number = canKeepItsNumber ? earlier.Number : LowestFreeNumber(numbers);
+            int number = canKeepItsNumber ? earlier.Number : LowestFreeNumber.NotIn(numbers);
             numbers.Add(number);
 
             AssignedSaveId assigned = new AssignedSaveId { SaveFileName = saveFileName, Name = name, Number = number, IsInUse = true };
@@ -105,16 +105,6 @@ namespace AbstractPixel.SaveSystem
                 numbersByName.Add(name, numbers);
             }
             return numbers;
-        }
-
-        static int LowestFreeNumber(HashSet<int> numbers)
-        {
-            int number = 1;
-            while (numbers.Contains(number))
-            {
-                number++;
-            }
-            return number;
         }
 
         // The first instance is just "Inventory"; later ones are "Inventory 2", "Inventory 3".

@@ -7,7 +7,7 @@ namespace AbstractPixel.SaveSystem
     /// Builds every storage key the save system uses. Saving and loading both ask this class,
     /// so they can never disagree about where something lives.
     /// </summary>
-    internal sealed class SavePathGenerator
+    internal static class SavePathGenerator
     {
         const string GlobalFolder = "Global";
         const string GameProfilesFolder = "GameProfiles";
@@ -20,7 +20,7 @@ namespace AbstractPixel.SaveSystem
         /// The key of a save file in its save location. Throws when the save location needs an open game profile
         /// or a scene name and none is given.
         /// </summary>
-        public string GetSaveFileKey(string saveFileName, SaveLocation location, string gameProfileId, string sceneName)
+        public static string GetSaveFileKey(string saveFileName, SaveLocation location, string gameProfileId, string sceneName)
         {
             string fileName = CleanKeyPart(saveFileName);
             switch (location)
@@ -45,12 +45,12 @@ namespace AbstractPixel.SaveSystem
             }
         }
 
-        public string GetGameProfileManifestKey(string gameProfileId)
+        public static string GetGameProfileManifestKey(string gameProfileId)
         {
             return $"{GetGameProfileKeyPrefix(gameProfileId)}{GameProfileManifestName}";
         }
 
-        public string GetSaveSystemMetaDataKey()
+        public static string GetSaveSystemMetaDataKey()
         {
             return $"{GlobalFolder}/{SaveSystemMetaDataName}";
         }
@@ -59,18 +59,18 @@ namespace AbstractPixel.SaveSystem
         /// The key of a file's backup, in the Backups folder that mirrors the main one. Works for key prefixes too,
         /// so <c>GetBackupKey(GetGameProfileKeyPrefix(id))</c> covers every backup of that game profile.
         /// </summary>
-        public string GetBackupKey(string key)
+        public static string GetBackupKey(string key)
         {
             return $"{BackupsFolder}/{key}";
         }
 
         /// <summary>The prefix shared by every key of one game profile, for deleting or listing it.</summary>
-        public string GetGameProfileKeyPrefix(string gameProfileId)
+        public static string GetGameProfileKeyPrefix(string gameProfileId)
         {
             return $"{GameProfilesFolder}/{CleanKeyPart(gameProfileId)}/";
         }
 
-        public string GetAllGameProfilesKeyPrefix()
+        public static string GetAllGameProfilesKeyPrefix()
         {
             return $"{GameProfilesFolder}/";
         }
@@ -81,8 +81,7 @@ namespace AbstractPixel.SaveSystem
             StringBuilder cleaned = new StringBuilder(text.Length);
             foreach (char character in text)
             {
-                bool isAllowed = char.IsLetterOrDigit(character) || character == '-' || character == '_';
-                cleaned.Append(isAllowed ? character : '_');
+                cleaned.Append(StorageKey.IsAllowedKeyCharacter(character) ? character : '_');
             }
             return cleaned.ToString();
         }

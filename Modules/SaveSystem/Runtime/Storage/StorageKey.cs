@@ -18,18 +18,25 @@ namespace AbstractPixel.SaveSystem
             bool leavesSaveFolder = key.Contains("..") || key.StartsWith("/") || key.EndsWith("/");
             if (leavesSaveFolder || HasInvalidCharacter(key))
             {
-                Debug.LogError($"[SaveSystem] The save key '{key}' is not allowed. Use letters, digits, '-', '_' and '/' only, for example 'Global/Settings'.");
+                Debug.LogError($"[SaveSystem] The save key '{key}' is not allowed. Use letters, digits, '-', '_', '.' and '/' only, for example 'Global/Settings'.");
                 return false;
             }
 
             return true;
         }
 
+        /// <summary>The characters one part of a key may hold. '/' only joins parts, so it is never part of one.</summary>
+        public static bool IsAllowedKeyCharacter(char character)
+        {
+            return char.IsLetterOrDigit(character) || character == '-' || character == '_';
+        }
+
         static bool HasInvalidCharacter(string key)
         {
             foreach (char character in key)
             {
-                bool isAllowed = char.IsLetterOrDigit(character) || character == '-' || character == '_' || character == '/' || character == '.';
+                // A whole key may also hold '.', as in an older backup key such as 'GameProfile.backup'.
+                bool isAllowed = character == '/' || character == '.' || IsAllowedKeyCharacter(character);
                 if (!isAllowed)
                 {
                     return true;

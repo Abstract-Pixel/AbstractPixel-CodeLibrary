@@ -15,7 +15,6 @@ namespace AbstractPixel.SaveSystem
 
         readonly SaveFileStore store;
         readonly IDataStorageService storage;
-        readonly SavePathGenerator paths;
         readonly int gameProfileIdLength;
         readonly string defaultGameProfileName;
 
@@ -31,11 +30,10 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Goes up whenever a manifest is written or a game profile is deleted, so lists know to read again.</summary>
         public int ChangeCount { get; private set; }
 
-        public SaveProfileManager(SaveFileStore store, IDataStorageService storage, SavePathGenerator paths, int gameProfileIdLength, string defaultGameProfileName)
+        public SaveProfileManager(SaveFileStore store, IDataStorageService storage, int gameProfileIdLength, string defaultGameProfileName)
         {
             this.store = store;
             this.storage = storage;
-            this.paths = paths;
             // A GUID has 32 hex characters, so the length must fit in that.
             this.gameProfileIdLength = Mathf.Clamp(gameProfileIdLength, 1, 32);
             bool hasDefaultName = !string.IsNullOrEmpty(defaultGameProfileName);
@@ -84,7 +82,7 @@ namespace AbstractPixel.SaveSystem
 
             CurrentGameProfileId = gameProfileId;
             // Written on every open, so the game reopens the right game profile at the next startup.
-            store.Write(paths.GetSaveSystemMetaDataKey(), new SaveSystemMetaData { LastOpenedGameProfileId = gameProfileId });
+            store.Write(SavePathGenerator.GetSaveSystemMetaDataKey(), new SaveSystemMetaData { LastOpenedGameProfileId = gameProfileId });
             Opened?.Invoke(gameProfileId);
             return true;
         }
@@ -101,7 +99,7 @@ namespace AbstractPixel.SaveSystem
 
         public bool Exists(string gameProfileId)
         {
-            return storage.Exists(paths.GetGameProfileManifestKey(gameProfileId));
+            return storage.Exists(SavePathGenerator.GetGameProfileManifestKey(gameProfileId));
         }
 
         /// <summary>
@@ -118,20 +116,20 @@ namespace AbstractPixel.SaveSystem
 
         public bool TryGetManifest(string gameProfileId, out GameProfileManifest manifest)
         {
-            return store.TryRead(paths.GetGameProfileManifestKey(gameProfileId), out manifest);
+            return store.TryRead(SavePathGenerator.GetGameProfileManifestKey(gameProfileId), out manifest);
         }
 
         public bool SaveManifest(GameProfileManifest manifest)
         {
             ChangeCount++;
-            return store.Write(paths.GetGameProfileManifestKey(manifest.GameProfileId), manifest);
+            return store.Write(SavePathGenerator.GetGameProfileManifestKey(manifest.GameProfileId), manifest);
         }
 
         /// <summary>The game profile opened most recently, if it still exists.</summary>
         public bool TryGetLastOpened(out string gameProfileId)
         {
             gameProfileId = null;
-            if (!store.TryRead(paths.GetSaveSystemMetaDataKey(), out SaveSystemMetaData metaData))
+            if (!store.TryRead(SavePathGenerator.GetSaveSystemMetaDataKey(), out SaveSystemMetaData metaData))
             {
                 return false;
             }
@@ -147,9 +145,9 @@ namespace AbstractPixel.SaveSystem
         public bool Delete(string gameProfileId)
         {
             ChangeCount++;
-            string gameProfileKeyPrefix = paths.GetGameProfileKeyPrefix(gameProfileId);
+            string gameProfileKeyPrefix = SavePathGenerator.GetGameProfileKeyPrefix(gameProfileId);
             bool deleted = storage.DeleteAll(gameProfileKeyPrefix);
-            deleted &= storage.DeleteAll(paths.GetBackupKey(gameProfileKeyPrefix));
+            deleted &= storage.DeleteAll(SavePathGenerator.GetBackupKey(gameProfileKeyPrefix));
             if (CurrentGameProfileId == gameProfileId)
             {
                 Close();
@@ -161,9 +159,9 @@ namespace AbstractPixel.SaveSystem
         public bool DeleteAll()
         {
             ChangeCount++;
-            string allGameProfilesKeyPrefix = paths.GetAllGameProfilesKeyPrefix();
+            string allGameProfilesKeyPrefix = SavePathGenerator.GetAllGameProfilesKeyPrefix();
             bool deleted = storage.DeleteAll(allGameProfilesKeyPrefix);
-            deleted &= storage.DeleteAll(paths.GetBackupKey(allGameProfilesKeyPrefix));
+            deleted &= storage.DeleteAll(SavePathGenerator.GetBackupKey(allGameProfilesKeyPrefix));
             Close();
             return deleted;
         }
@@ -171,11 +169,11 @@ namespace AbstractPixel.SaveSystem
         List<GameProfileManifest> ReadAllManifests()
         {
             List<GameProfileManifest> manifests = new List<GameProfileManifest>();
-            foreach (string key in storage.ListKeys(paths.GetAllGameProfilesKeyPrefix()))
+            foreach (string key in storage.ListKeys(SavePathGenerator.GetAllGameProfilesKeyPrefix()))
             {
                 // Keys look like GameProfiles/<id>/GameProfileManifest; skip every other file in the game profile.
                 string[] parts = key.Split('/');
-                bool isManifestKey = parts.Length == 3 && key == paths.GetGameProfileManifestKey(parts[1]);
+                bool isManifestKey = parts.Length == 3 && key == SavePathGenerator.GetGameProfileManifestKey(parts[1]);
                 if (isManifestKey && store.TryRead(key, out GameProfileManifest manifest))
                 {
                     manifests.Add(manifest);
@@ -191,13 +189,7 @@ namespace AbstractPixel.SaveSystem
             {
                 takenSlotNumbers.Add(manifest.SlotNumber);
             }
-
-            int slotNumber = 1;
-            while (takenSlotNumbers.Contains(slotNumber))
-            {
-                slotNumber++;
-            }
-            return slotNumber;
+            return LowestFreeNumber.NotIn(takenSlotNumbers);
         }
 
         void GiveSlotNumbersToOlderManifests(List<GameProfileManifest> manifests)
@@ -218,15 +210,10 @@ namespace AbstractPixel.SaveSystem
                 }
             }
 
-            int nextSlotNumber = 1;
             foreach (GameProfileManifest manifest in withoutSlotNumber)
             {
-                while (takenSlotNumbers.Contains(nextSlotNumber))
-                {
-                    nextSlotNumber++;
-                }
-                manifest.SlotNumber = nextSlotNumber;
-                takenSlotNumbers.Add(nextSlotNumber);
+                manifest.SlotNumber = LowestFreeNumber.NotIn(takenSlotNumbers);
+                takenSlotNumbers.Add(manifest.SlotNumber);
                 SaveManifest(manifest);
             }
         }

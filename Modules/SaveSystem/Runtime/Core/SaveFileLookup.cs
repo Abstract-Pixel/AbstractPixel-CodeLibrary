@@ -57,26 +57,16 @@ namespace AbstractPixel.SaveSystem
 
         public SaveFileDefinition GetBuiltIn(BuiltInSaveFile builtIn)
         {
-            foreach (SaveFileDefinition definition in definitions)
-            {
-                if (definition.IsBuiltIn && definition.BuiltIn == builtIn)
-                {
-                    return definition;
-                }
-            }
-            return null;
+            return definitions.Find(row => row.IsBuiltIn && row.BuiltIn == builtIn);
         }
 
         /// <summary>The row for a save file class. Logs one error naming the class if the config has no row for it.</summary>
         public bool TryGetDefinition(Type saveFileClass, out SaveFileDefinition definition)
         {
-            foreach (SaveFileDefinition candidate in definitions)
+            definition = definitions.Find(row => row.StandsFor(saveFileClass));
+            if (definition != null)
             {
-                if (candidate.StandsFor(saveFileClass))
-                {
-                    definition = candidate;
-                    return true;
-                }
+                return true;
             }
 
             // A library module's class can still save before the editor has added its row, using the module's defaults.
@@ -104,7 +94,7 @@ namespace AbstractPixel.SaveSystem
         /// </summary>
         public bool TryGetDefinitionForSavedObject(Type savedObjectType, out SaveFileDefinition definition)
         {
-            Type saveFileClass = FindSaveFileClass(savedObjectType);
+            Type saveFileClass = SavedScript.SaveFileClassOf(savedObjectType);
             bool namesASaveFile = saveFileClass != null;
             if (namesASaveFile)
             {
@@ -118,16 +108,8 @@ namespace AbstractPixel.SaveSystem
         /// <summary>The row with this storage name. Registered objects keep the storage name of their save file.</summary>
         public bool TryGetDefinitionByFileName(string fileName, out SaveFileDefinition definition)
         {
-            foreach (SaveFileDefinition candidate in definitions)
-            {
-                if (candidate.FileName == fileName)
-                {
-                    definition = candidate;
-                    return true;
-                }
-            }
-            definition = null;
-            return false;
+            definition = definitions.Find(row => row.FileName == fileName);
+            return definition != null;
         }
 
         /// <summary>
@@ -135,32 +117,13 @@ namespace AbstractPixel.SaveSystem
         /// </summary>
         public bool TryGetDefinitionByClassName(string classFullName, out SaveFileDefinition definition)
         {
-            foreach (SaveFileDefinition candidate in definitions)
+            definition = definitions.Find(row => row.ClassFullName == classFullName);
+            if (definition != null)
             {
-                if (candidate.ClassFullName == classFullName)
-                {
-                    definition = candidate;
-                    return true;
-                }
+                return true;
             }
-
-            definition = null;
             Debug.LogError($"[SaveSystem] The save file list has no row for the class '{classFullName}'. Pick the save file again in the inspector, or check the list in the save system config.");
             return false;
-        }
-
-        /// <summary>The TFile of ISavable&lt;TData, TFile&gt; on this type, or null if the type doesn't name a save file.</summary>
-        public static Type FindSaveFileClass(Type savedObjectType)
-        {
-            foreach (Type implemented in savedObjectType.GetInterfaces())
-            {
-                bool isSavableInAFile = implemented.IsGenericType && implemented.GetGenericTypeDefinition() == typeof(ISavable<,>);
-                if (isSavableInAFile)
-                {
-                    return implemented.GetGenericArguments()[1];
-                }
-            }
-            return null;
         }
 
         void AddMissingBuiltIn(BuiltInSaveFile builtIn)

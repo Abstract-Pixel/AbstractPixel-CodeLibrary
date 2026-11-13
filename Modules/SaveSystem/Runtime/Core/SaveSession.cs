@@ -12,7 +12,6 @@ namespace AbstractPixel.SaveSystem
     internal sealed class SaveSession
     {
         readonly SaveFileLookup saveFiles;
-        readonly SavePathGenerator paths = new SavePathGenerator();
         readonly LoadedSaveData loadedData;
         readonly ISceneInfo sceneInfo;
         readonly Func<double> unscaledTime;
@@ -43,9 +42,9 @@ namespace AbstractPixel.SaveSystem
             loadedData = new LoadedSaveData(store, serializer);
             this.sceneInfo = sceneInfo;
             this.unscaledTime = unscaledTime;
-            ProfileManager = new SaveProfileManager(store, storage, paths, config.GameProfileGuidLength, config.DefaultGameProfileName);
+            ProfileManager = new SaveProfileManager(store, storage, config.GameProfileGuidLength, config.DefaultGameProfileName);
             GameProfiles = new GameProfileList(ProfileManager);
-            addresses = new SaveFileAddresses(saveFiles, paths, ProfileManager);
+            addresses = new SaveFileAddresses(saveFiles, ProfileManager);
             FileAccess = new SaveFileAccess(saveFiles, storage, store, GameProfiles);
             events = new SaveSessionEvents(saveFiles, loadedData, addresses, sceneInfo, LoadEvents);
             savedObjects = new SavedObjectTracker(loadedData, addresses, ProfileManager);
@@ -78,7 +77,7 @@ namespace AbstractPixel.SaveSystem
         public void RegisterScript(object owner, object savedObject, Type scriptType, string saveId, Type dataType,
             Func<object> capture, Action<object> restore, string sceneName, string entryName, Action turnOffSceneObject = null)
         {
-            events.Remember(SaveFileLookup.FindSaveFileClass(scriptType));
+            events.Remember(SavedScript.SaveFileClassOf(scriptType));
             bool hasSaveFile = saveFiles.TryGetDefinitionForSavedObject(scriptType, out SaveFileDefinition definition);
             if (!hasSaveFile)
             {

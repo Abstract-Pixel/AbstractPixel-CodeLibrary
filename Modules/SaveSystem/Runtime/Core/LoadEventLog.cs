@@ -57,7 +57,7 @@ namespace AbstractPixel.SaveSystem
         {
             foreach (LoggedLoad logged in loads.ToArray())
             {
-                SaveEventBus.InvokeSafely(handler, logged.SaveFileClass, nameof(SaveEventBus.OnLoadCompleted));
+                SaveEventBus.InvokeSafely(handler, nameof(SaveEventBus.OnLoadCompleted), () => handler(logged.SaveFileClass));
             }
         }
 

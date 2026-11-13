@@ -22,7 +22,6 @@ namespace AbstractPixel.SaveSystem
 
         readonly SaveFileStore store;
         readonly SaveJson serializer;
-        readonly SavePathGenerator paths = new SavePathGenerator();
         readonly Dictionary<string, LoadedFile> filesByKey = new Dictionary<string, LoadedFile>();
 
         public LoadedSaveData(SaveFileStore store, SaveJson serializer)
@@ -48,33 +47,15 @@ namespace AbstractPixel.SaveSystem
             {
                 return false;
             }
-
-            try
-            {
-                entry.Restore(serializer.FromToken(stored.Data, entry.DataType));
-                return true;
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"[SaveSystem] Restoring save ID '{entry.SaveId}' into {entry.Owner.GetType().Name} failed: {exception.Message} The saved data stays in '{address.Key}'; the other saved objects still restore.");
-                return false;
-            }
+            return TryRestoreFrom(stored.Data, entry, "save ID", $"The saved data stays in '{address.Key}'; the other saved objects still restore.");
         }
 
         /// <summary>Keeps a copy of the entry's data as its new-game values. Called once, when it registers, before any restore.</summary>
         public void RememberNewGameValues(SavedObjectEntry entry)
         {
-            try
+            if (TryCaptureToken(entry, "the new-game values of save ID", "A new game profile will keep this object's current values instead. Check its CaptureData.", out JToken captured))
             {
-                object data = entry.Capture();
-                if (data != null)
-                {
-                    entry.NewGameValues = serializer.ToToken(data);
-                }
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"[SaveSystem] Capturing the new-game values of save ID '{entry.SaveId}' from {entry.Owner.GetType().Name} failed: {exception.Message} A new game profile will keep this object's current values instead. Check its CaptureData.");
+                entry.NewGameValues = captured;
             }
         }
 
@@ -85,34 +66,14 @@ namespace AbstractPixel.SaveSystem
             {
                 return false;
             }
-            try
-            {
-                entry.Restore(serializer.FromToken(entry.NewGameValues, entry.DataType));
-                return true;
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"[SaveSystem] Restoring the new-game values of save ID '{entry.SaveId}' into {entry.Owner.GetType().Name} failed: {exception.Message} It keeps its current values. Check its RestoreData.");
-                return false;
-            }
+            return TryRestoreFrom(entry.NewGameValues, entry, "the new-game values of save ID", "It keeps its current values. Check its RestoreData.");
         }
 
         /// <summary>Captures the entry's current data into memory. The key counts as changed only if the data differs.</summary>
         public void Capture(SavedObjectEntry entry, SaveFileAddress address)
         {
-            JToken captured;
-            try
+            if (!TryCaptureToken(entry, "save ID", "Its previous saved data is kept.", out JToken captured))
             {
-                object data = entry.Capture();
-                if (data == null)
-                {
-                    return;
-                }
-                captured = serializer.ToToken(data);
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"[SaveSystem] Capturing save ID '{entry.SaveId}' from {entry.Owner.GetType().Name} failed: {exception.Message} Its previous saved data is kept.");
                 return;
             }
 
@@ -199,28 +160,14 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Forgets every GameProfile and Scene save file, for example when another game profile opens. Global data stays.</summary>
         public void DropGameProfileData()
         {
-            string prefix = paths.GetAllGameProfilesKeyPrefix();
-            foreach (string key in filesByKey.Keys.Where(key => key.StartsWith(prefix, StringComparison.Ordinal)).ToList())
-            {
-                filesByKey.Remove(key);
-            }
+            string prefix = SavePathGenerator.GetAllGameProfilesKeyPrefix();
+            DropWhere(loadedFile => loadedFile.Key.StartsWith(prefix, StringComparison.Ordinal));
         }
 
         /// <summary>Forgets every loaded copy of one save file, so the next use reads it from disk again. Unsaved changes are lost.</summary>
         public void DropFilesNamed(string fileName)
         {
-            List<string> keysToDrop = new List<string>();
-            foreach (KeyValuePair<string, LoadedFile> loadedFile in filesByKey)
-            {
-                if (loadedFile.Value.Data.FileName == fileName)
-                {
-                    keysToDrop.Add(loadedFile.Key);
-                }
-            }
-            foreach (string key in keysToDrop)
-            {
-                filesByKey.Remove(key);
-            }
+            DropWhere(loadedFile => loadedFile.Value.Data.FileName == fileName);
         }
 
         /// <summary>Forgets the loaded copy of one file, so the next use reads it from disk again. Unsaved changes in it are lost.</summary>
@@ -232,6 +179,49 @@ namespace AbstractPixel.SaveSystem
         public void Clear()
         {
             filesByKey.Clear();
+        }
+
+        void DropWhere(Func<KeyValuePair<string, LoadedFile>, bool> match)
+        {
+            foreach (KeyValuePair<string, LoadedFile> loadedFile in filesByKey.Where(match).ToList())
+            {
+                filesByKey.Remove(loadedFile.Key);
+            }
+        }
+
+        // A saved object's own code runs here, so a mistake in it is logged and never stops the other objects.
+        bool TryCaptureToken(SavedObjectEntry entry, string whatIsCaptured, string consequence, out JToken captured)
+        {
+            captured = null;
+            try
+            {
+                object data = entry.Capture();
+                if (data == null)
+                {
+                    return false;
+                }
+                captured = serializer.ToToken(data);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[SaveSystem] Capturing {whatIsCaptured} '{entry.SaveId}' from {entry.Owner.GetType().Name} failed: {exception.Message} {consequence}");
+                return false;
+            }
+        }
+
+        bool TryRestoreFrom(JToken data, SavedObjectEntry entry, string whatIsRestored, string consequence)
+        {
+            try
+            {
+                entry.Restore(serializer.FromToken(data, entry.DataType));
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[SaveSystem] Restoring {whatIsRestored} '{entry.SaveId}' into {entry.Owner.GetType().Name} failed: {exception.Message} {consequence}");
+                return false;
+            }
         }
 
         LoadedFile GetOrRead(SaveFileAddress address)

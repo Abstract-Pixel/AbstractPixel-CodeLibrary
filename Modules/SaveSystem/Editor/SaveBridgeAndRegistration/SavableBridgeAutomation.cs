@@ -52,7 +52,7 @@ namespace AbstractPixel.SaveSystem.Editor
                     {
                         continue;
                     }
-                    bool isSavedScript = script.GetType().GetInterface(typeof(ISavable<>).Name) != null;
+                    bool isSavedScript = SavedScript.IsSaved(script.GetType());
                     if (!isSavedScript)
                     {
                         continue;

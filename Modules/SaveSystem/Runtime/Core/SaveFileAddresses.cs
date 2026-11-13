@@ -7,13 +7,11 @@ namespace AbstractPixel.SaveSystem
     internal sealed class SaveFileAddresses
     {
         readonly SaveFileLookup saveFiles;
-        readonly SavePathGenerator paths;
         readonly SaveProfileManager profileManager;
 
-        public SaveFileAddresses(SaveFileLookup saveFiles, SavePathGenerator paths, SaveProfileManager profileManager)
+        public SaveFileAddresses(SaveFileLookup saveFiles, SaveProfileManager profileManager)
         {
             this.saveFiles = saveFiles;
-            this.paths = paths;
             this.profileManager = profileManager;
         }
 
@@ -40,7 +38,7 @@ namespace AbstractPixel.SaveSystem
         public SaveFileAddress AddressOf(SaveFileDefinition definition, string sceneName)
         {
             string gameProfileId = definition.Location == SaveLocation.Global ? null : profileManager.CurrentGameProfileId;
-            string key = paths.GetSaveFileKey(definition.FileName, definition.Location, gameProfileId, sceneName);
+            string key = SavePathGenerator.GetSaveFileKey(definition.FileName, definition.Location, gameProfileId, sceneName);
             return new SaveFileAddress(key, definition.FileName, gameProfileId, definition.Backup);
         }
     }

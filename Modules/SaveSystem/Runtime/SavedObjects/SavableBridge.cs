@@ -67,8 +67,7 @@ namespace AbstractPixel.SaveSystem
             foreach (MonoBehaviour script in allScripts)
             {
                 if (script == null) continue;
-                Type type = script.GetType();
-                if (type.GetInterface(typeof(ISavable<>).Name) == null) continue;
+                if (!SavedScript.IsSaved(script.GetType())) continue;
                 validScripts.Add(script);
             }
 
@@ -116,7 +115,7 @@ namespace AbstractPixel.SaveSystem
             {
                 if (target == null || target.Script == null) continue;
 
-                Type interfaceType = target.Script.GetType().GetInterface(typeof(ISavable<>).Name);
+                Type interfaceType = SavedScript.FindSavableInterface(target.Script.GetType());
                 if (interfaceType == null) continue;
 
                 target.CaptureDataMethod = interfaceType.GetMethod(isavableCaptureMethod);

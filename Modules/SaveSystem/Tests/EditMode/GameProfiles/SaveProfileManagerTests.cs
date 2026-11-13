@@ -10,21 +10,19 @@ namespace AbstractPixel.SaveSystem.Tests
     public class SaveProfileManagerTests
     {
         MemoryStorageService storage;
-        SavePathGenerator paths;
         SaveProfileManager gameProfiles;
 
         [SetUp]
         public void SetUp()
         {
             storage = new MemoryStorageService();
-            paths = new SavePathGenerator();
             gameProfiles = CreateManager(gameProfileIdLength: 6);
         }
 
         SaveProfileManager CreateManager(int gameProfileIdLength)
         {
             SaveFileStore store = new SaveFileStore(storage, new SaveJson());
-            return new SaveProfileManager(store, storage, paths, gameProfileIdLength, "Game Profile");
+            return new SaveProfileManager(store, storage, gameProfileIdLength, "Game Profile");
         }
 
         [Test]
@@ -33,7 +31,7 @@ namespace AbstractPixel.SaveSystem.Tests
             string gameProfileId = gameProfiles.CreateNew("Game Profile 1");
 
             Assert.AreEqual(6, gameProfileId.Length);
-            Assert.IsTrue(storage.Exists(paths.GetGameProfileManifestKey(gameProfileId)));
+            Assert.IsTrue(storage.Exists(SavePathGenerator.GetGameProfileManifestKey(gameProfileId)));
             Assert.IsNull(gameProfiles.CurrentGameProfileId);
         }
 
@@ -56,14 +54,14 @@ namespace AbstractPixel.SaveSystem.Tests
             // Bug 3: v1 built a relative path for deletion and missed the game profile folder.
             string doomed = gameProfiles.CreateNew("Doomed");
             string kept = gameProfiles.CreateNew("Kept");
-            storage.Write(paths.GetSaveFileKey("GameProfile", SaveLocation.GameProfile, doomed, null), "{}");
-            storage.Write(paths.GetSaveFileKey("Chests", SaveLocation.Scene, doomed, "Forest"), "{}");
-            storage.Write(paths.GetSaveFileKey("GameProfile", SaveLocation.GameProfile, kept, null), "{}");
-            storage.Write(paths.GetSaveFileKey("Settings", SaveLocation.Global, null, null), "{}");
+            storage.Write(SavePathGenerator.GetSaveFileKey("GameProfile", SaveLocation.GameProfile, doomed, null), "{}");
+            storage.Write(SavePathGenerator.GetSaveFileKey("Chests", SaveLocation.Scene, doomed, "Forest"), "{}");
+            storage.Write(SavePathGenerator.GetSaveFileKey("GameProfile", SaveLocation.GameProfile, kept, null), "{}");
+            storage.Write(SavePathGenerator.GetSaveFileKey("Settings", SaveLocation.Global, null, null), "{}");
 
             Assert.IsTrue(gameProfiles.Delete(doomed));
 
-            Assert.IsEmpty(storage.ListKeys(paths.GetGameProfileKeyPrefix(doomed)));
+            Assert.IsEmpty(storage.ListKeys(SavePathGenerator.GetGameProfileKeyPrefix(doomed)));
             CollectionAssert.AreEquivalent(
                 new[] { "GameProfiles/" + kept + "/GameProfile", "GameProfiles/" + kept + "/GameProfileManifest", "Global/Settings" },
                 storage.ListKeys(""));
@@ -74,8 +72,8 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             string doomed = gameProfiles.CreateNew("Doomed");
             string kept = gameProfiles.CreateNew("Kept");
-            string doomedBackupKey = paths.GetBackupKey(paths.GetSaveFileKey("GameProfile", SaveLocation.GameProfile, doomed, null));
-            string keptBackupKey = paths.GetBackupKey(paths.GetSaveFileKey("GameProfile", SaveLocation.GameProfile, kept, null));
+            string doomedBackupKey = SavePathGenerator.GetBackupKey(SavePathGenerator.GetSaveFileKey("GameProfile", SaveLocation.GameProfile, doomed, null));
+            string keptBackupKey = SavePathGenerator.GetBackupKey(SavePathGenerator.GetSaveFileKey("GameProfile", SaveLocation.GameProfile, kept, null));
             storage.Write(doomedBackupKey, "{}");
             storage.Write(keptBackupKey, "{}");
 
@@ -107,7 +105,7 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.IsTrue(gameProfiles.Open(second));
 
             Assert.AreEqual(second, gameProfiles.CurrentGameProfileId);
-            Assert.IsTrue(storage.Exists(paths.GetSaveSystemMetaDataKey()));
+            Assert.IsTrue(storage.Exists(SavePathGenerator.GetSaveSystemMetaDataKey()));
             SaveProfileManager afterRestart = CreateManager(6);
             Assert.IsTrue(afterRestart.TryGetLastOpened(out string lastOpened));
             Assert.AreEqual(second, lastOpened);
@@ -190,7 +188,7 @@ namespace AbstractPixel.SaveSystem.Tests
             gameProfiles.CreateNew("Game Profile 1");
             string second = gameProfiles.CreateNew("Game Profile 2");
             storage.Write("Global/Settings", "{}");
-            storage.Write(paths.GetBackupKey(paths.GetGameProfileManifestKey(second)), "{}");
+            storage.Write(SavePathGenerator.GetBackupKey(SavePathGenerator.GetGameProfileManifestKey(second)), "{}");
 
             Assert.IsTrue(gameProfiles.DeleteAll());
 

@@ -39,7 +39,7 @@ namespace AbstractPixel.SaveSystem
                 bool hasLoadedAll = SaveActions.Session != null && SaveActions.Session.LoadEvents.HasLoadedAll;
                 if (hasLoadedAll)
                 {
-                    InvokeSafely(value, nameof(OnLoadAllCompleted));
+                    InvokeEach(value, nameof(OnLoadAllCompleted));
                 }
             }
             remove => loadAllCompleted -= value;
@@ -54,7 +54,7 @@ namespace AbstractPixel.SaveSystem
                 GameProfile openGameProfile = SaveActions.GameProfiles.Current;
                 if (openGameProfile != null)
                 {
-                    InvokeSafely(value, openGameProfile, nameof(OnGameProfileOpened));
+                    InvokeEach(value, openGameProfile, nameof(OnGameProfileOpened));
                 }
             }
             remove => gameProfileOpened -= value;
@@ -104,45 +104,31 @@ namespace AbstractPixel.SaveSystem
         // Each handler runs on its own, so one that throws can't stop the others or the save system.
         static void InvokeEach<T>(Action<T> handlers, T argument, string eventName)
         {
-            if (handlers == null)
-            {
-                return;
-            }
-            foreach (Delegate handler in handlers.GetInvocationList())
-            {
-                InvokeSafely((Action<T>)handler, argument, eventName);
-            }
+            InvokeEach(handlers, eventName, handler => ((Action<T>)handler)(argument));
         }
 
         static void InvokeEach(Action handlers, string eventName)
         {
+            InvokeEach(handlers, eventName, handler => ((Action)handler)());
+        }
+
+        static void InvokeEach(Delegate handlers, string eventName, Action<Delegate> call)
+        {
             if (handlers == null)
             {
                 return;
             }
             foreach (Delegate handler in handlers.GetInvocationList())
             {
-                InvokeSafely((Action)handler, eventName);
+                InvokeSafely(handler, eventName, () => call(handler));
             }
         }
 
-        internal static void InvokeSafely<T>(Action<T> handler, T argument, string eventName)
+        internal static void InvokeSafely(Delegate handler, string eventName, Action call)
         {
             try
             {
-                handler(argument);
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"[SaveSystem] A handler of SaveEventBus.{eventName} in {DescribeHandler(handler)} threw: {exception.Message} The other handlers still ran. Fix the handler; the save system itself is fine.");
-            }
-        }
-
-        static void InvokeSafely(Action handler, string eventName)
-        {
-            try
-            {
-                handler();
+                call();
             }
             catch (Exception exception)
             {

@@ -60,7 +60,7 @@ namespace AbstractPixel.SaveSystem.Editor
 
         private static void ReportSaveFileWithNoRow(Type savedType, HashSet<string> classesWithARow)
         {
-            Type saveFileClass = SaveFileLookup.FindSaveFileClass(savedType);
+            Type saveFileClass = SavedScript.SaveFileClassOf(savedType);
             bool namesASaveFile = saveFileClass != null && !saveFileClass.IsGenericParameter;
             if (!namesASaveFile)
             {

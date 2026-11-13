@@ -13,8 +13,6 @@ namespace AbstractPixel.SaveSystem
 
         readonly IDataStorageService storage;
         readonly SaveJson serializer;
-        // SavePathGenerator holds no state, so the store keeps its own copy for building backup keys.
-        readonly SavePathGenerator paths = new SavePathGenerator();
 
         public SaveFileStore(IDataStorageService storage, SaveJson serializer)
         {
@@ -53,7 +51,7 @@ namespace AbstractPixel.SaveSystem
         /// </summary>
         public bool Delete(string key)
         {
-            string backupKey = paths.GetBackupKey(key);
+            string backupKey = SavePathGenerator.GetBackupKey(key);
             bool deletedBackup = storage.Exists(backupKey) && storage.Delete(backupKey);
             bool deletedMain = storage.Exists(key) && storage.Delete(key);
             return deletedMain || deletedBackup;
@@ -73,7 +71,7 @@ namespace AbstractPixel.SaveSystem
 
         bool WriteCheckedText<T>(string key, string newText, bool keepBackup) where T : IVersionedSaveData
         {
-            string backupKey = paths.GetBackupKey(key);
+            string backupKey = SavePathGenerator.GetBackupKey(key);
             if (keepBackup)
             {
                 // Back up the current text only if it is valid, so a corrupt file never replaces a good backup.
@@ -107,7 +105,7 @@ namespace AbstractPixel.SaveSystem
                 return Nothing(out text, out content);
             }
 
-            string backupKey = paths.GetBackupKey(key);
+            string backupKey = SavePathGenerator.GetBackupKey(key);
             if (TryReadAndParse(backupKey, out text, out content))
             {
                 string problem = mainExists ? "is corrupt" : "is missing";

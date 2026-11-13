@@ -13,7 +13,6 @@ namespace AbstractPixel.SaveSystem
         readonly SaveFileLookup saveFiles;
         readonly IDataStorageService storage;
         readonly SaveFileStore store;
-        readonly SavePathGenerator paths = new SavePathGenerator();
 
         public GameProfileList GameProfiles { get; }
 
@@ -35,7 +34,7 @@ namespace AbstractPixel.SaveSystem
         public static SaveFileAccess FromConfig(SaveSystemConfigSO config, IDataStorageService storage)
         {
             SaveFileStore store = new SaveFileStore(storage, new SaveJson());
-            SaveProfileManager profileManager = new SaveProfileManager(store, storage, new SavePathGenerator(), config.GameProfileGuidLength, config.DefaultGameProfileName);
+            SaveProfileManager profileManager = new SaveProfileManager(store, storage, config.GameProfileGuidLength, config.DefaultGameProfileName);
             return new SaveFileAccess(new SaveFileLookup(config), storage, store, new GameProfileList(profileManager));
         }
 
@@ -123,7 +122,7 @@ namespace AbstractPixel.SaveSystem
                     Debug.LogError($"[SaveSystem] {call} was given a game profile, but {saveFileClass.Name} lives in Global, where every game profile shares it, so nothing was done. Call it again and leave the game profile out.");
                     return false;
                 }
-                key = paths.GetSaveFileKey(definition.FileName, SaveLocation.Global, null, null);
+                key = SavePathGenerator.GetSaveFileKey(definition.FileName, SaveLocation.Global, null, null);
                 return true;
             }
 
@@ -141,7 +140,7 @@ namespace AbstractPixel.SaveSystem
             }
 
             string sceneName = isSceneFile ? target.Scene.SceneName : null;
-            key = paths.GetSaveFileKey(definition.FileName, definition.Location, gameProfile.Id, sceneName);
+            key = SavePathGenerator.GetSaveFileKey(definition.FileName, definition.Location, gameProfile.Id, sceneName);
             return true;
         }
 
