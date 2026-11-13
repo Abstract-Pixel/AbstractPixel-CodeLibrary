@@ -62,7 +62,7 @@ namespace AbstractPixel.SaveSystem.Editor
         /// The warning for one row: every other row it clashes with, by row number and name, and why. Empty when the
         /// row clashes with nothing.
         /// </summary>
-        public static string DescribeClashes(IReadOnlyList<SaveFileDefinition> rows, int rowIndex)
+        internal static string DescribeClashes(IReadOnlyList<SaveFileDefinition> rows, int rowIndex)
         {
             StringBuilder warning = new StringBuilder();
             foreach (SaveFileClash clash in SaveFileClash.FindAll(rows))

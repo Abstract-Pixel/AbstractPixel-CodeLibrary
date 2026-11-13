@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 namespace AbstractPixel.SaveSystem
 {
     /// <summary>Reads scenes from Unity's SceneManager, and says when each loaded scene is ready.</summary>
-    public sealed class UnitySceneInfo : ISceneInfo, IDisposable
+    internal sealed class UnitySceneInfo : ISceneInfo, IDisposable
     {
         public string ActiveSceneName => SceneManager.GetActiveScene().name;
 

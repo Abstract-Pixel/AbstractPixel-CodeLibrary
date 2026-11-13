@@ -6,7 +6,7 @@ namespace AbstractPixel.SaveSystem
 {
     /// <summary>The summary of one game profile that a save slot screen shows.</summary>
     [Serializable]
-    public sealed class GameProfileManifest : IVersionedSaveData
+    internal sealed class GameProfileManifest : IVersionedSaveData
     {
         public int FormatVersion = SaveFileStore.CurrentFormatVersion;
         public string GameProfileId;

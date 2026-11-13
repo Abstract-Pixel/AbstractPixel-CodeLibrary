@@ -42,7 +42,7 @@ namespace AbstractPixel.SaveSystem
         internal const string DefaultGameSaveFilesScriptPath = "Assets/SaveSystem/GameSaveFiles.cs";
 
         /// <summary>The save file list: one row per save file, with its name, save location and Backup box.</summary>
-        public IReadOnlyList<SaveFileDefinition> SaveFileList => saveFileList;
+        internal IReadOnlyList<SaveFileDefinition> SaveFileList => saveFileList;
 
         /// <summary>Where the editor writes GameSaveFiles.cs.</summary>
         public string GameSaveFilesScriptPath

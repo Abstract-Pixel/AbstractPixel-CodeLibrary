@@ -5,7 +5,7 @@ using UnityEngine;
 namespace AbstractPixel.SaveSystem
 {
     [Serializable]
-    public class SavableTarget
+    internal class SavableTarget
     {
         [HideInInspector][SerializeField] public string InspectorName;
         public MonoBehaviour Script;

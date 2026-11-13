@@ -4,7 +4,7 @@ namespace AbstractPixel.SaveSystem
 {
     /// <summary>The save system's own record in Global, so the game can reopen the most recent game profile at startup.</summary>
     [Serializable]
-    public sealed class SaveSystemMetaData : IVersionedSaveData
+    internal sealed class SaveSystemMetaData : IVersionedSaveData
     {
         public int FormatVersion = SaveFileStore.CurrentFormatVersion;
         public string LastOpenedGameProfileId;

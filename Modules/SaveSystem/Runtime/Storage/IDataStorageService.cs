@@ -7,7 +7,7 @@ namespace AbstractPixel.SaveSystem
     /// forward slashes, letters, digits, <c>-</c> and <c>_</c>, with no file extension.
     /// A backup key starts with <c>Backups/</c>. The storage service decides where the text really goes.
     /// </summary>
-    public interface IDataStorageService
+    internal interface IDataStorageService
     {
         /// <summary>Writes the text. A write either fully succeeds or leaves the previous text untouched.</summary>
         bool Write(string key, string text);

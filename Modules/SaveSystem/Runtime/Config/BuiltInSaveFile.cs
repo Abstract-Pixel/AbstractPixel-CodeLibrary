@@ -4,7 +4,7 @@ namespace AbstractPixel.SaveSystem
     /// The built-in save files every game has. The numbers are stored in configs, so they never change;
     /// new ones go at the end.
     /// </summary>
-    public enum BuiltInSaveFile
+    internal enum BuiltInSaveFile
     {
         None = 0,
 

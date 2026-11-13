@@ -10,7 +10,7 @@ namespace AbstractPixel.SaveSystem
     /// and whether it keeps a backup. The row finds its save file class by the class's full name.
     /// </summary>
     [Serializable]
-    public sealed class SaveFileDefinition
+    internal sealed class SaveFileDefinition
     {
         [Tooltip("The save file's name. For a game save file the editor writes a class with this name into GameSaveFiles.cs.")]
         [FormerlySerializedAs("DisplayName")]

@@ -7,7 +7,7 @@ namespace AbstractPixel.SaveSystem
     /// Tells the save system about scenes: which one is active, which are loaded, and when a newly loaded scene
     /// is ready, so its Scene save files can raise their load events.
     /// </summary>
-    public interface ISceneInfo
+    internal interface ISceneInfo
     {
         string ActiveSceneName { get; }
 

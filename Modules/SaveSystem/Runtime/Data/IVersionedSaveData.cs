@@ -4,7 +4,7 @@ namespace AbstractPixel.SaveSystem
     /// Anything the save system stores. <see cref="FormatVersion"/> records the shape the data was written in,
     /// so a later version of the save system can recognise and upgrade older files.
     /// </summary>
-    public interface IVersionedSaveData
+    internal interface IVersionedSaveData
     {
         int FormatVersion { get; }
     }

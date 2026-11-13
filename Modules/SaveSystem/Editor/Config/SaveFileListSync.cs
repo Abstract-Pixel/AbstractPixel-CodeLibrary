@@ -53,7 +53,7 @@ namespace AbstractPixel.SaveSystem.Editor
         /// rows and a row per module save file class that has none, and puts the built-in rows first in a fixed order.
         /// Rows that exist keep the owner's changes to their location and Backup box. Returns true if anything changed.
         /// </summary>
-        public static bool AddMissingRows(List<SaveFileDefinition> rows, IEnumerable<Type> moduleSaveFileClasses)
+        internal static bool AddMissingRows(List<SaveFileDefinition> rows, IEnumerable<Type> moduleSaveFileClasses)
         {
             bool changed = rows.RemoveAll(row => row == null) > 0;
             changed |= RemoveModuleRowsWhoseClassIsGone(rows);

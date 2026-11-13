@@ -6,7 +6,7 @@ namespace AbstractPixel.SaveSystem
 {
     /// <summary>One saved object's data inside a save file, stored under its save ID.</summary>
     [Serializable]
-    public sealed class SaveFileEntry
+    internal sealed class SaveFileEntry
     {
         /// <summary>A readable name such as "Forest/Chest (2)/ChestLid", for humans reading the file. Matching uses only the save ID.</summary>
         [JsonProperty("name")]

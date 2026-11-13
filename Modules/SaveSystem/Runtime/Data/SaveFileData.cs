@@ -6,7 +6,7 @@ namespace AbstractPixel.SaveSystem
 {
     /// <summary>The contents of one save file: some facts about the file, and the saved data keyed by save ID.</summary>
     [Serializable]
-    public class SaveFileData : IVersionedSaveData
+    internal class SaveFileData : IVersionedSaveData
     {
         public int FormatVersion = SaveFileStore.CurrentFormatVersion;
 

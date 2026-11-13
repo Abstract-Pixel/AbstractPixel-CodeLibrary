@@ -3,7 +3,7 @@ using System;
 namespace AbstractPixel.SaveSystem
 {
     [Serializable]
-    public class SavableIdentification
+    internal class SavableIdentification
     {
         public string ClassName;
         public string GUID;

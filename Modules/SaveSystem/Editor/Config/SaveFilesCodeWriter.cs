@@ -51,7 +51,7 @@ namespace AbstractPixel.SaveSystem.Editor
         }
 
         /// <summary>False, with one error per clash naming both rows, while two rows share a file on disk or a class name.</summary>
-        public static bool CanWrite(IReadOnlyList<SaveFileDefinition> rows)
+        internal static bool CanWrite(IReadOnlyList<SaveFileDefinition> rows)
         {
             List<SaveFileClash> clashes = SaveFileClash.FindAll(rows);
             foreach (SaveFileClash clash in clashes)
@@ -62,7 +62,7 @@ namespace AbstractPixel.SaveSystem.Editor
         }
 
         /// <summary>The text of GameSaveFiles.cs for these rows.</summary>
-        public static string WriteCode(IEnumerable<SaveFileDefinition> rows)
+        internal static string WriteCode(IEnumerable<SaveFileDefinition> rows)
         {
             StringBuilder code = new StringBuilder();
             code.AppendLine(GeneratedHeader);
@@ -86,7 +86,7 @@ namespace AbstractPixel.SaveSystem.Editor
         /// Records each game row's class name, so the game finds the row from the class. The storage name never changes,
         /// so a renamed row still reads the data it saved before.
         /// </summary>
-        public static void PointRowsAtTheirClasses(List<SaveFileDefinition> rows, string assemblyName)
+        internal static void PointRowsAtTheirClasses(List<SaveFileDefinition> rows, string assemblyName)
         {
             foreach (SaveFileDefinition row in rows)
             {
