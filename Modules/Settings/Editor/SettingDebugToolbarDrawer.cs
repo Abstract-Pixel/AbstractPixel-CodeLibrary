@@ -137,36 +137,21 @@ namespace AbstractPixel.Settings.Editor
                 return;
             }
 
-            bool isSaveConfigFound = FindSaveSystemConfigInProject(out SaveSystemConfigSO saveConfig);
-            if (!isSaveConfigFound)
-            {
-                return;
-            }
-
-            SaveFileDefinition settingsDefinition = FindSettingsRow(saveConfig);
-            ReadAndWriteFileWithUpdatedSettings(actionToExecute, setting, settingsDefinition, saveConfig);
+            ReadAndWriteFileWithUpdatedSettings(actionToExecute, setting);
         }
 
-        private static bool ReadAndWriteFileWithUpdatedSettings(Action<ISettingBackend, SettingsDTO> actionToExecute, ISettingBackend setting, SaveFileDefinition settingsDefinition, SaveSystemConfigSO saveConfig)
+        // SaveStorage takes the folder, file type and Backup box from the save system config, so the toolbar reads
+        // and writes the same Settings file the game does.
+        private static bool ReadAndWriteFileWithUpdatedSettings(Action<ISettingBackend, SettingsDTO> actionToExecute, ISettingBackend setting)
         {
-            if (settingsDefinition == null)
+            if (SaveStorage.ReadText<SettingsSaveFile>(out string settingsJson) == false)
             {
-                Debug.LogError("[Settings System] The save system config has no row for SettingsSaveFile yet, so the toolbar can't change saved settings. Select the config once so the editor adds the Settings row.");
+                Debug.LogWarning("[Settings System] The toolbar could not read the saved Settings file. If no error above says why, run the game and save once to create it.");
                 return false;
             }
 
-            // The same storage parts the game uses, so the toolbar reads and writes the file the game reads.
-            DiskStorageService storage = new DiskStorageService(saveConfig.UseDebugPath, saveConfig.PrimaryFileExtension);
             JsonSerializer serializer = new JsonSerializer();
-            SaveFileStore store = new SaveFileStore(storage, serializer);
-            SavePathGenerator paths = new SavePathGenerator();
-            string settingsKey = paths.GetSaveFileKey(settingsDefinition.FileName, settingsDefinition.Location, null, null);
-
-            if (store.TryRead(settingsKey, out SaveFileData settingsFile) == false)
-            {
-                Debug.LogWarning($"[Settings System] There is no saved Settings file at '{settingsKey}' yet. Run the game and save once to create it.");
-                return false;
-            }
+            serializer.TryDeserialize(settingsJson, out SaveFileData settingsFile);
 
             foreach (KeyValuePair<string, SaveFileEntry> savedEntry in settingsFile.Entries)
             {
@@ -178,23 +163,12 @@ namespace AbstractPixel.Settings.Editor
 
                 actionToExecute.Invoke(setting, settingsData);
                 savedEntry.Value.Data = serializer.ToToken(settingsData);
-                return store.Write(settingsKey, settingsFile);
+                serializer.TrySerialize(settingsFile, out string updatedSettingsJson);
+                return SaveStorage.WriteText<SettingsSaveFile>(updatedSettingsJson);
             }
 
-            Debug.LogWarning($"[Settings System] The Settings file at '{settingsKey}' holds no settings data yet. Run the game and save once to create it.");
+            Debug.LogWarning($"[Settings System] The Settings file at '{SaveStorage.GetFilePath<SettingsSaveFile>()}' holds no settings data yet. Run the game and save once to create it.");
             return false;
-        }
-
-        private static SaveFileDefinition FindSettingsRow(SaveSystemConfigSO saveConfig)
-        {
-            foreach (SaveFileDefinition row in saveConfig.SaveFileList)
-            {
-                if (row != null && row.StandsFor(typeof(SettingsSaveFile)))
-                {
-                    return row;
-                }
-            }
-            return null;
         }
 
         // Another saved object could share the Settings file, so an entry that isn't settings data is skipped, not an error.
@@ -217,36 +191,6 @@ namespace AbstractPixel.Settings.Editor
 
             bool hasSettingsDictionaries = settingsData != null && settingsData.FloatSettings != null && settingsData.IntegerSettings != null;
             return hasSettingsDictionaries;
-        }
-
-        private bool FindSaveSystemConfigInProject(out SaveSystemConfigSO saveConfig)
-        {
-            saveConfig = default;
-            // 1. First, try searching by the exact Type name (Make sure it matches your class name exactly)
-            string[] foundGuids = AssetDatabase.FindAssets("t:SaveSystemConfigSO");
-
-            // 2. FALLBACK: If Unity's package boundary blocks the type search, search by the default file name
-            if (foundGuids.Length == 0)
-            {
-                // This searches for any ScriptableObject literally named "SaveSystemConfigSO"
-                foundGuids = AssetDatabase.FindAssets("SaveSystemConfigurationSO t:ScriptableObject");
-            }
-
-            if (foundGuids.Length == 0)
-            {
-                Debug.LogError("[Settings System] Could not find the SaveSystemConfigSO asset in the project! Did you create it via the Create menu?");
-                return false;
-            }
-
-            string configAssetPath = AssetDatabase.GUIDToAssetPath(foundGuids[0]);
-            saveConfig = AssetDatabase.LoadAssetAtPath<SaveSystemConfigSO>(configAssetPath);
-            if (saveConfig == null)
-            {
-                Debug.LogError($"[Settings System] Found an asset at {configAssetPath}, but it couldn't be loaded as SaveSystemConfigSO. Check your Assembly Definitions!");
-                return false;
-            }
-
-            return true;
         }
     }
 }

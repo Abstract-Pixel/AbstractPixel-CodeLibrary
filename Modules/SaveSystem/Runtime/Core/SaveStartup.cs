@@ -31,7 +31,7 @@ namespace AbstractPixel.SaveSystem
         internal static void StartFromResources()
         {
             SaveSystemConfigSO config = Resources.Load<SaveSystemConfigSO>(ConfigResourceName);
-            IDataStorageService storage = config == null ? null : new DiskStorageService(config.UseDebugPath, config.PrimaryFileExtension);
+            IDataStorageService storage = config == null ? null : new DiskStorageService(config);
             Start(config, storage, new UnitySceneInfo(), () => Time.realtimeSinceStartupAsDouble);
         }
 
@@ -41,7 +41,7 @@ namespace AbstractPixel.SaveSystem
             Stop();
             if (config == null)
             {
-                Debug.LogError($"[SaveSystem] No save system config was found, so saving is off. Create one with Assets > Create > Utility > SaveSystemConfigSO, name it '{ConfigResourceName}' and put it in a folder named Resources.");
+                Debug.LogError($"[SaveSystem] No save system config named '{ConfigResourceName}' was found in a Resources folder, so saving is off and every save system call does nothing. Create one with {SaveSystemConfigName.CreateConfigMenuPath}.");
                 return false;
             }
 

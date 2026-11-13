@@ -13,7 +13,7 @@ namespace AbstractPixel.SaveSystem
     /// <c>&lt;root folder&gt;/Global/Settings.json</c>. Writes go to a temporary file first, so a crash
     /// mid-write never destroys the previous save.
     /// </summary>
-    public sealed class DiskStorageService : IDataStorageService
+    internal sealed class DiskStorageService : IDataStorageService
     {
         const string ReleaseFolderName = "SaveFiles";
         const string DebugFolderName = "DebugSaveFiles";
@@ -29,8 +29,9 @@ namespace AbstractPixel.SaveSystem
         readonly string rootFolder;
         readonly string fileExtension;
 
-        public DiskStorageService(bool useDebugFolder, FileExtension extension)
-            : this(GetRootFolder(useDebugFolder), extension)
+        /// <summary>Uses the config's folder and file type, the same ones the game uses.</summary>
+        public DiskStorageService(SaveSystemConfigSO config)
+            : this(GetRootFolder(config.UseDebugPath), config.PrimaryFileExtension)
         {
         }
 
@@ -158,6 +159,12 @@ namespace AbstractPixel.SaveSystem
                 .Where(key => key.StartsWith(keyPrefix ?? string.Empty, StringComparison.Ordinal))
                 .OrderBy(key => key, StringComparer.Ordinal)
                 .ToList();
+        }
+
+        /// <summary>The full path of the file a key is stored in, for "Show in Explorer".</summary>
+        public string GetFilePath(string key)
+        {
+            return ToPath(key);
         }
 
         string ToPath(string key)

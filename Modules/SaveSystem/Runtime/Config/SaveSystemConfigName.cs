@@ -4,5 +4,8 @@ namespace AbstractPixel.SaveSystem
     public static class SaveSystemConfigName
     {
         public const string ResourceName = "SaveSystemConfig";
+
+        /// <summary>The menu item that creates the config, as error messages name it.</summary>
+        public const string CreateConfigMenuPath = "Tools > External Project Tools > Save System > Create Config";
     }
 }

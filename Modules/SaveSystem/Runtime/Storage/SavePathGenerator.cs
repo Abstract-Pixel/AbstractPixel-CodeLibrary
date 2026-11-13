@@ -7,7 +7,7 @@ namespace AbstractPixel.SaveSystem
     /// Builds every storage key the save system uses. Saving and loading both ask this class,
     /// so they can never disagree about where something lives.
     /// </summary>
-    public sealed class SavePathGenerator
+    internal sealed class SavePathGenerator
     {
         const string GlobalFolder = "Global";
         const string GameProfilesFolder = "GameProfiles";

@@ -31,6 +31,9 @@ namespace AbstractPixel.SaveSystem
         /// <summary>The game profiles by folder ID, for the save system's own use.</summary>
         public SaveProfileManager ProfileManager { get; }
 
+        /// <summary>Whole save files as text, for <see cref="SaveStorage"/> while this session runs.</summary>
+        public SaveFileAccess FileAccess { get; }
+
         /// <summary>Which save files have loaded, so late subscribers to load events are told right away.</summary>
         public LoadEventLog LoadEvents { get; } = new LoadEventLog();
 
@@ -44,6 +47,7 @@ namespace AbstractPixel.SaveSystem
             ProfileManager = new SaveProfileManager(store, storage, paths, config.GameProfileGuidLength, config.DefaultGameProfileName);
             GameProfiles = new GameProfileList(ProfileManager);
             addresses = new SaveFileAddresses(saveFiles, paths, ProfileManager);
+            FileAccess = new SaveFileAccess(saveFiles, storage, store, GameProfiles);
             events = new SaveSessionEvents(saveFiles, loadedData, addresses, sceneInfo, LoadEvents);
             ProfileManager.Opened += OnGameProfileOpened;
             ProfileManager.Closed += OnGameProfileClosed;

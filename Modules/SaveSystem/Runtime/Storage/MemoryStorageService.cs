@@ -4,7 +4,7 @@ using System.Linq;
 namespace AbstractPixel.SaveSystem
 {
     /// <summary>Keeps saved text in memory instead of on disk. Tests use it so they never touch real save files.</summary>
-    public sealed class MemoryStorageService : IDataStorageService
+    internal sealed class MemoryStorageService : IDataStorageService
     {
         readonly Dictionary<string, string> textByKey = new Dictionary<string, string>();
 
