@@ -33,6 +33,12 @@ namespace AbstractPixel.SaveSystem
         [field: SerializeField, Tooltip("Save every save file when the game loses focus, for example when a phone player switches apps.")]
         public bool SaveOnFocusLoss { get; private set; } = false;
 
+        [field: SerializeField, Tooltip("Save every save file when a scene unloads, for example right before the next level loads.")]
+        public bool SaveOnSceneUnload { get; private set; } = false;
+
+        [field: SerializeField, Tooltip("Save every save file every this many minutes while the game runs. 0 turns autosave off.")]
+        public float AutosaveIntervalMinutes { get; private set; } = 0f;
+
         [SerializeField, Tooltip("Where the editor writes GameSaveFiles.cs, the class for each game save file in the list below.")]
         string gameSaveFilesScriptPath = DefaultGameSaveFilesScriptPath;
 

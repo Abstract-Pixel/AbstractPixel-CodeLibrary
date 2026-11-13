@@ -138,5 +138,53 @@ namespace AbstractPixel.SaveSystem.Tests
 
             Assert.IsEmpty(SaveActions.GameProfiles.All);
         }
+
+        // S7: "Save when a scene unloads" and "Autosave every N minutes".
+        [Test]
+        public void SaveOnSceneUnload_SavesWhenASceneUnloads()
+        {
+            SaveSystemConfigSO config = ConfigWith(SaveStartupPolicy.AutoSetUp);
+            SetField(config, "<SaveOnSceneUnload>k__BackingField", true);
+            StartWith(config);
+            SaveActions.Register(new VolumeSetting { Volume = 4 }, "volume");
+
+            scene.Unload("Forest");
+
+            Assert.IsTrue(storage.Exists("Global/Settings"));
+        }
+
+        [Test]
+        public void SaveOnSceneUnload_Off_DoesNotSave()
+        {
+            StartWith(ConfigWith(SaveStartupPolicy.AutoSetUp));
+            SaveActions.Register(new VolumeSetting { Volume = 4 }, "volume");
+
+            scene.Unload("Forest");
+
+            Assert.IsFalse(storage.Exists("Global/Settings"));
+        }
+
+        [Test]
+        public void AutosaveIntervalMinutes_CreatesATicker_AndStopRemovesIt()
+        {
+            SaveSystemConfigSO config = ConfigWith(SaveStartupPolicy.AutoSetUp);
+            SetField(config, "<AutosaveIntervalMinutes>k__BackingField", 5f);
+            StartWith(config);
+
+            Assert.IsNotNull(SaveStartup.CurrentAutosaveTicker);
+            Assert.AreEqual(300f, SaveStartup.CurrentAutosaveTicker.IntervalSeconds);
+
+            SaveStartup.Stop();
+
+            Assert.IsNull(SaveStartup.CurrentAutosaveTicker);
+        }
+
+        [Test]
+        public void AutosaveIntervalMinutes_Zero_CreatesNoTicker()
+        {
+            StartWith(ConfigWith(SaveStartupPolicy.AutoSetUp));
+
+            Assert.IsNull(SaveStartup.CurrentAutosaveTicker);
+        }
     }
 }

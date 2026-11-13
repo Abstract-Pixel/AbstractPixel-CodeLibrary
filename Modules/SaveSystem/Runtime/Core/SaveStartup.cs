@@ -14,6 +14,10 @@ namespace AbstractPixel.SaveSystem
 
         static bool saveOnQuit;
         static bool saveOnFocusLoss;
+        static AutosaveTicker autosaveTicker;
+
+        /// <summary>The running autosave ticker, or null when autosave is off. For tests; game code never needs it.</summary>
+        internal static AutosaveTicker CurrentAutosaveTicker => autosaveTicker;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetWhenPlayModeStarts()
@@ -55,6 +59,7 @@ namespace AbstractPixel.SaveSystem
             // Static Unity events, so no MonoBehaviour is needed. Stop removes them again.
             Application.quitting += HandleQuitting;
             Application.focusChanged += HandleFocusChanged;
+            StartAutosaveTickerIfConfigured(config.AutosaveIntervalMinutes);
             return true;
         }
 
@@ -63,7 +68,36 @@ namespace AbstractPixel.SaveSystem
         {
             Application.quitting -= HandleQuitting;
             Application.focusChanged -= HandleFocusChanged;
+            StopAutosaveTicker();
             SaveActions.Stop();
+        }
+
+        static void StartAutosaveTickerIfConfigured(float intervalMinutes)
+        {
+            if (intervalMinutes <= 0f)
+            {
+                return;
+            }
+            GameObject tickerObject = new GameObject("Save System Autosave Ticker") { hideFlags = HideFlags.HideAndDontSave };
+            autosaveTicker = tickerObject.AddComponent<AutosaveTicker>();
+            autosaveTicker.IntervalSeconds = intervalMinutes * 60f;
+        }
+
+        static void StopAutosaveTicker()
+        {
+            if (autosaveTicker != null)
+            {
+                // Tests stop the save system from edit mode, where only DestroyImmediate is allowed.
+                if (Application.isPlaying)
+                {
+                    UnityEngine.Object.Destroy(autosaveTicker.gameObject);
+                }
+                else
+                {
+                    UnityEngine.Object.DestroyImmediate(autosaveTicker.gameObject);
+                }
+            }
+            autosaveTicker = null;
         }
 
         internal static void HandleFocusChanged(bool hasFocus)
