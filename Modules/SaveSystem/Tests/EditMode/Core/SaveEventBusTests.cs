@@ -222,7 +222,7 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.AreEqual(1, loadAllCount);
         }
 
-        // The built-in rows' classes (SaveFiles.Global and friends) may also exist in the project, so tests look only at their own files.
+        // The built-in save files (SaveFiles.Settings and friends) also raise load events, so tests look only at their own files.
         List<Type> FilesFromTheTestKit()
         {
             return loadedFiles.FindAll(loaded => loaded == typeof(TestSettingsFile) || loaded == typeof(TestGameFile) || loaded == typeof(TestChestsFile));

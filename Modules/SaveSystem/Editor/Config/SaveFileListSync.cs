@@ -2,15 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
+using UnityEngine;
 
 namespace AbstractPixel.SaveSystem.Editor
 {
     /// <summary>
-    /// Keeps the save file list complete: the three built-in rows always exist, and every library module's
-    /// save file class (an ISaveFile with [SaveFileDefaults]) gets a row of its own. Runs after every compile.
+    /// Keeps the save file list complete and up to date: the built-in rows always exist and come first, rows saved
+    /// by an older version are upgraded, every library module's save file class (an ISaveFile with
+    /// [SaveFileDefaults]) gets a row of its own, and a module row whose class is gone is removed. Runs after every compile.
     /// </summary>
     public static class SaveFileListSync
     {
+        static readonly BuiltInSaveFile[] BuiltInOrder =
+        {
+            BuiltInSaveFile.GameProfile,
+            BuiltInSaveFile.Scene,
+            BuiltInSaveFile.Settings,
+            BuiltInSaveFile.Input,
+            BuiltInSaveFile.Achievements
+        };
+
         [InitializeOnLoadMethod]
         static void SyncAfterScriptsCompile()
         {
@@ -18,7 +29,10 @@ namespace AbstractPixel.SaveSystem.Editor
             EditorApplication.delayCall += SyncProjectConfig;
         }
 
-        /// <summary>Adds any missing rows to the project's config and saves it. Does nothing when there is no config.</summary>
+        /// <summary>
+        /// Brings the project's config up to date and saves it. When rows changed, or an old SaveFiles.cs is still in
+        /// the project, GameSaveFiles.cs is written again so the classes match the list. Does nothing without a config.
+        /// </summary>
         public static void SyncProjectConfig()
         {
             SaveSystemConfigSO config = SaveSystemConfigFinder.FindInProject();
@@ -28,28 +42,39 @@ namespace AbstractPixel.SaveSystem.Editor
             }
 
             bool changed = AddMissingRows(config.EditableSaveFileList, FindModuleSaveFileClasses());
-            if (changed)
+            if (changed || SaveFilesCodeWriter.OldSaveFilesIsInTheProject())
             {
-                EditorUtility.SetDirty(config);
-                AssetDatabase.SaveAssetIfDirty(config);
+                SaveFilesCodeWriter.WriteFile(config);
             }
         }
 
         /// <summary>
-        /// Adds the built-in rows (first, in a fixed order) and a row per module save file class that has none.
-        /// Rows that exist are left alone, so the owner's changes to a module row's location and Backup box stay.
-        /// Returns true if any row was added.
+        /// Upgrades rows saved by an older version, removes module rows whose class is gone, adds the missing built-in
+        /// rows and a row per module save file class that has none, and puts the built-in rows first in a fixed order.
+        /// Rows that exist keep the owner's changes to their location and Backup box. Returns true if anything changed.
         /// </summary>
         public static bool AddMissingRows(List<SaveFileDefinition> rows, IEnumerable<Type> moduleSaveFileClasses)
         {
-            bool changed = false;
-            changed |= InsertMissingBuiltIn(rows, BuiltInSaveFile.Global, 0);
-            changed |= InsertMissingBuiltIn(rows, BuiltInSaveFile.GameProfile, 1);
-            changed |= InsertMissingBuiltIn(rows, BuiltInSaveFile.Scene, 2);
+            bool changed = rows.RemoveAll(row => row == null) > 0;
+            foreach (SaveFileDefinition row in rows)
+            {
+                changed |= SaveFileDefinition.UpgradeFromOlderVersion(row);
+            }
+            changed |= RemoveModuleRowsWhoseClassIsGone(rows);
+
+            foreach (BuiltInSaveFile builtIn in BuiltInOrder)
+            {
+                bool exists = rows.Exists(row => row.IsBuiltIn && row.BuiltIn == builtIn);
+                if (!exists)
+                {
+                    rows.Add(SaveFileDefinition.CreateBuiltIn(builtIn));
+                    changed = true;
+                }
+            }
 
             foreach (Type moduleSaveFileClass in moduleSaveFileClasses)
             {
-                bool hasRow = rows.Exists(row => row != null && row.StandsFor(moduleSaveFileClass));
+                bool hasRow = rows.Exists(row => row.StandsFor(moduleSaveFileClass));
                 if (hasRow)
                 {
                     continue;
@@ -61,6 +86,8 @@ namespace AbstractPixel.SaveSystem.Editor
                 rows.Add(moduleRow);
                 changed = true;
             }
+
+            changed |= PutBuiltInRowsFirst(rows);
             return changed;
         }
 
@@ -94,17 +121,51 @@ namespace AbstractPixel.SaveSystem.Editor
             return assemblyName;
         }
 
-        static bool InsertMissingBuiltIn(List<SaveFileDefinition> rows, BuiltInSaveFile builtIn, int position)
+        // A module that stopped shipping its class (Settings now uses SaveFiles.Settings) would leave a row that saves nothing.
+        static bool RemoveModuleRowsWhoseClassIsGone(List<SaveFileDefinition> rows)
         {
-            bool exists = rows.Exists(row => row != null && row.BuiltIn == builtIn);
-            if (exists)
+            bool changed = false;
+            for (int index = rows.Count - 1; index >= 0; index--)
             {
-                return false;
-            }
+                SaveFileDefinition row = rows[index];
+                bool classExists = Type.GetType($"{row.ClassFullName}, {row.ClassAssemblyName}", false) != null;
+                if (!row.IsAddedByModule || classExists)
+                {
+                    continue;
+                }
 
-            int insertAt = Math.Min(position, rows.Count);
-            rows.Insert(insertAt, SaveFileDefinition.CreateBuiltIn(builtIn));
-            return true;
+                rows.RemoveAt(index);
+                changed = true;
+                Debug.Log($"[SaveSystem] Removed the save file row '{row.Name}' from the save system config: its class '{row.ClassFullName}' ({row.AddedBy}) no longer exists. Data already saved under the storage name '{row.FileName}' stays on disk.");
+            }
+            return changed;
+        }
+
+        static bool PutBuiltInRowsFirst(List<SaveFileDefinition> rows)
+        {
+            List<SaveFileDefinition> ordered = new List<SaveFileDefinition>();
+            foreach (BuiltInSaveFile builtIn in BuiltInOrder)
+            {
+                ordered.Add(rows.Find(row => row.IsBuiltIn && row.BuiltIn == builtIn));
+            }
+            // Everything else keeps its order, including a second copy of a built-in row, which the config inspector warns about.
+            ordered.AddRange(rows.FindAll(row => !ordered.Contains(row)));
+
+            bool orderChanged = false;
+            for (int index = 0; index < rows.Count; index++)
+            {
+                if (!ReferenceEquals(rows[index], ordered[index]))
+                {
+                    orderChanged = true;
+                    break;
+                }
+            }
+            if (orderChanged)
+            {
+                rows.Clear();
+                rows.AddRange(ordered);
+            }
+            return orderChanged;
         }
     }
 }

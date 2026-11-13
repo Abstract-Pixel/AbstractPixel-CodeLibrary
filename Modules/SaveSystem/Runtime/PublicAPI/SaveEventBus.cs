@@ -7,7 +7,7 @@ namespace AbstractPixel.SaveSystem
     /// Load and save events. Load events and OnGameProfileOpened are sticky: a script that subscribes after the event
     /// already happened is called right away, so it never matters whether it subscribed early or late.
     /// <code>
-    /// SaveEventBus.OnLoadCompleted += file => { if (file == typeof(SaveFiles.Ghosts)) ShowGhosts(); };
+    /// SaveEventBus.OnLoadCompleted += file => { if (file == typeof(GameSaveFiles.Ghosts)) ShowGhosts(); };
     /// </code>
     /// </summary>
     public static class SaveEventBus

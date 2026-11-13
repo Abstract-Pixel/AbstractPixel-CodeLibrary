@@ -6,7 +6,7 @@ namespace AbstractPixel.SaveSystem.Editor
 {
     /// <summary>
     /// The save system config's inspector. When the save file list changes, the built-in and module rows are put
-    /// back if they were removed, and SaveFiles.cs is written again, so the classes always match the list.
+    /// back if they were removed, and GameSaveFiles.cs is written again, so the classes always match the list.
     /// </summary>
     [CustomEditor(typeof(SaveSystemConfigSO))]
     public class SaveSystemConfigEditor : UnityEditor.Editor
@@ -36,7 +36,7 @@ namespace AbstractPixel.SaveSystem.Editor
                 }
             }
 
-            root.Add(new HelpBox("The save file list. Each row is one save file. The editor writes a class per row into SaveFiles.cs, so game code writes SaveActions.Save<SaveFiles.Ghosts>(). Global, GameProfile and Scene are built in, and library modules add their own rows.", HelpBoxMessageType.Info));
+            root.Add(new HelpBox("The save file list. Each row is one save file. GameProfile, Scene, Settings, Input and Achievements are built in: their classes ship with the library, such as SaveFiles.Settings. The editor writes a class for each row you add into GameSaveFiles.cs, so game code writes SaveActions.Save<GameSaveFiles.Ghosts>(). Library modules add their own rows.", HelpBoxMessageType.Info));
 
             SerializedProperty listProperty = serializedObject.FindProperty("saveFileList");
             // The list is what people come here for, so it starts open.
@@ -46,8 +46,8 @@ namespace AbstractPixel.SaveSystem.Editor
             root.Add(listField);
 
             Button writeButton = new Button(WriteNow);
-            writeButton.text = "Write SaveFiles.cs";
-            writeButton.tooltip = "Write SaveFiles.cs from the list now. It is also written whenever the list changes.";
+            writeButton.text = "Write GameSaveFiles.cs";
+            writeButton.tooltip = "Write GameSaveFiles.cs from the list now. It is also written whenever the list changes.";
             writeButton.AddToClassList("save-file-list__actions");
             root.Add(writeButton);
             return root;

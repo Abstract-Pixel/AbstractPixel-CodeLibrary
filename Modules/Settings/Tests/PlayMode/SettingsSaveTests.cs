@@ -52,7 +52,7 @@ namespace AbstractPixel.Settings.PlayModeTests
             Assert.IsFalse(firstToggle.CurrentValue);
 
             firstToggle.SetValue(true);
-            SaveActions.Save<SettingsSaveFile>();
+            SaveActions.Save<SaveFiles.Settings>();
             Object.Destroy(firstManager.gameObject);
             yield return null;
 
@@ -98,13 +98,11 @@ namespace AbstractPixel.Settings.PlayModeTests
             return manager;
         }
 
+        // SaveFiles.Settings is a built-in save file, so a config with an empty save file list still has its row.
         static SaveSystemConfigSO CreateConfig()
         {
             SaveSystemConfigSO newConfig = ScriptableObject.CreateInstance<SaveSystemConfigSO>();
-            newConfig.ReplaceSaveFileList(new List<SaveFileDefinition>
-            {
-                SaveFileDefinition.ForClass(typeof(SettingsSaveFile), "Settings", SaveLocation.Global)
-            });
+            newConfig.ReplaceSaveFileList(new List<SaveFileDefinition>());
             return newConfig;
         }
 

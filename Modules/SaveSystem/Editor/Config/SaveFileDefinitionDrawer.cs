@@ -5,8 +5,8 @@ using UnityEngine.UIElements;
 namespace AbstractPixel.SaveSystem.Editor
 {
     /// <summary>
-    /// Draws one save file list row on a single line: name, save location and Backup box. Built-in rows and
-    /// rows a module added keep their name, and say why under it.
+    /// Draws one save file list row on a single line: name, save location and Backup box. Built-in rows keep their
+    /// name and location, rows a module added keep their name, and both say why under it.
     /// </summary>
     [CustomPropertyDrawer(typeof(SaveFileDefinition))]
     public class SaveFileDefinitionDrawer : PropertyDrawer
@@ -22,18 +22,20 @@ namespace AbstractPixel.SaveSystem.Editor
 
             SerializedProperty builtInProperty = property.FindPropertyRelative(nameof(SaveFileDefinition.BuiltIn));
             SerializedProperty addedByProperty = property.FindPropertyRelative(nameof(SaveFileDefinition.AddedBy));
-            bool isBuiltIn = builtInProperty.enumValueIndex != (int)BuiltInSaveFile.None;
+            // The old built-in Global row (number 1) is an ordinary row now; the editor upgrades it after the next compile.
+            int builtInNumber = builtInProperty.intValue;
+            bool isBuiltIn = builtInNumber != (int)BuiltInSaveFile.None && builtInNumber != 1;
             bool isAddedByModule = !string.IsNullOrEmpty(addedByProperty.stringValue);
 
             PropertyField nameField = new PropertyField(property.FindPropertyRelative(nameof(SaveFileDefinition.Name)), string.Empty);
             nameField.AddToClassList("save-file-row__name");
-            // A built-in row's name is its location's name, and a module's class decides its row's name.
+            // A built-in row's class ships with the library under that name, and a module's class decides its row's name.
             nameField.SetEnabled(!isBuiltIn && !isAddedByModule);
             row.Add(nameField);
 
             PropertyField locationField = new PropertyField(property.FindPropertyRelative(nameof(SaveFileDefinition.Location)), string.Empty);
             locationField.AddToClassList("save-file-row__location");
-            // Each built-in row is its own location's file, so its location can't change.
+            // The library decides where each built-in save file lives, so every game agrees.
             locationField.SetEnabled(!isBuiltIn);
             row.Add(locationField);
 
@@ -57,7 +59,7 @@ namespace AbstractPixel.SaveSystem.Editor
         {
             if (isBuiltIn)
             {
-                return "Built in: every config has this save file.";
+                return "Built in: every game has this save file, and its class ships with the library. Only its Backup box can change.";
             }
             if (!string.IsNullOrEmpty(addedBy))
             {

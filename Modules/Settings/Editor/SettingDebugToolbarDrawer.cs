@@ -144,7 +144,7 @@ namespace AbstractPixel.Settings.Editor
         // and writes the same Settings file the game does.
         private static bool ReadAndWriteFileWithUpdatedSettings(Action<ISettingBackend, SettingsDTO> actionToExecute, ISettingBackend setting)
         {
-            if (SaveStorage.ReadText<SettingsSaveFile>(out string settingsJson) == false)
+            if (SaveStorage.ReadText<SaveFiles.Settings>(out string settingsJson) == false)
             {
                 Debug.LogWarning("[Settings System] The toolbar could not read the saved Settings file. If no error above says why, run the game and save once to create it.");
                 return false;
@@ -164,10 +164,10 @@ namespace AbstractPixel.Settings.Editor
                 actionToExecute.Invoke(setting, settingsData);
                 savedEntry.Value.Data = serializer.ToToken(settingsData);
                 serializer.TrySerialize(settingsFile, out string updatedSettingsJson);
-                return SaveStorage.WriteText<SettingsSaveFile>(updatedSettingsJson);
+                return SaveStorage.WriteText<SaveFiles.Settings>(updatedSettingsJson);
             }
 
-            Debug.LogWarning($"[Settings System] The Settings file at '{SaveStorage.GetFilePath<SettingsSaveFile>()}' holds no settings data yet. Run the game and save once to create it.");
+            Debug.LogWarning($"[Settings System] The Settings file at '{SaveStorage.GetFilePath<SaveFiles.Settings>()}' holds no settings data yet. Run the game and save once to create it.");
             return false;
         }
 

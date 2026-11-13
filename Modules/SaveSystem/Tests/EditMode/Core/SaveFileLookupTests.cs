@@ -53,7 +53,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SaveFileClassWithNoRow_LogsOneErrorNamingTheClassAndHowToAddIt()
         {
             SaveFileLookup lookup = CreateLookup();
-            LogAssert.Expect(LogType.Error, new Regex("SaveFileWithNoRow.*no row in the save system config.*Write SaveFiles.cs"));
+            LogAssert.Expect(LogType.Error, new Regex("SaveFileWithNoRow.*no row in the save system config.*Write GameSaveFiles.cs"));
 
             bool firstTry = lookup.TryGetDefinition(typeof(SaveFileWithNoRow), out SaveFileDefinition _);
             bool secondTry = lookup.TryGetDefinition(typeof(SaveFileWithNoRow), out SaveFileDefinition _);
@@ -64,11 +64,11 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
-        public void EveryLookup_HasTheThreeBuiltInRows_EvenWhenTheConfigLeftThemOut()
+        public void EveryLookup_HasTheBuiltInRows_EvenWhenTheConfigLeftThemOut()
         {
             SaveFileLookup lookup = CreateLookup();
 
-            Assert.AreEqual(SaveLocation.Global, lookup.GetBuiltIn(BuiltInSaveFile.Global).Location);
+            Assert.AreEqual(SaveLocation.Global, lookup.GetBuiltIn(BuiltInSaveFile.Settings).Location);
             Assert.AreEqual(SaveLocation.GameProfile, lookup.GetBuiltIn(BuiltInSaveFile.GameProfile).Location);
             Assert.AreEqual(SaveLocation.Scene, lookup.GetBuiltIn(BuiltInSaveFile.Scene).Location);
             Assert.AreEqual("GameProfile", lookup.GetBuiltIn(BuiltInSaveFile.GameProfile).FileName);
@@ -121,7 +121,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(new GhostTime { BestSeconds = 41 }, "best-ghost");
             SaveActions.SaveAll();
 
-            // The owner renames the row and the editor writes SaveFiles.cs again: the row now stands for a new class.
+            // The owner renames the row and the editor writes GameSaveFiles.cs again: the row now stands for a new class.
             ghostsRow.Name = "Phantoms";
             ghostsRow.ClassFullName = typeof(PhantomsSaveFile).FullName;
             SaveStartup.Start(config, storage, new FakeSceneInfo(), () => 0d);

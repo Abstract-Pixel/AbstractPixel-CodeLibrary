@@ -22,9 +22,11 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveSystemConfigSO config = SaveSystemConfigCreator.CreateOrFind(TestConfigPath);
 
             Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<SaveSystemConfigSO>(TestConfigPath));
-            Assert.AreEqual(BuiltInSaveFile.Global, config.SaveFileList[0].BuiltIn);
-            Assert.AreEqual(BuiltInSaveFile.GameProfile, config.SaveFileList[1].BuiltIn);
-            Assert.AreEqual(BuiltInSaveFile.Scene, config.SaveFileList[2].BuiltIn);
+            Assert.AreEqual(BuiltInSaveFile.GameProfile, config.SaveFileList[0].BuiltIn);
+            Assert.AreEqual(BuiltInSaveFile.Scene, config.SaveFileList[1].BuiltIn);
+            Assert.AreEqual(BuiltInSaveFile.Settings, config.SaveFileList[2].BuiltIn);
+            Assert.AreEqual(BuiltInSaveFile.Input, config.SaveFileList[3].BuiltIn);
+            Assert.AreEqual(BuiltInSaveFile.Achievements, config.SaveFileList[4].BuiltIn);
         }
 
         [Test]

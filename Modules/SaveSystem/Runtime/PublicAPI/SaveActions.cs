@@ -42,7 +42,7 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Captures every registered object, then writes every save file that changed.</summary>
         public static void SaveAll() => session?.SaveAll();
 
-        /// <summary>Like SaveAll, for one save file only. Example: <c>SaveActions.Save&lt;SaveFiles.Ghosts&gt;();</c></summary>
+        /// <summary>Like SaveAll, for one save file only. Example: <c>SaveActions.Save&lt;GameSaveFiles.Ghosts&gt;();</c></summary>
         public static void Save<TFile>() where TFile : ISaveFile => session?.Save(typeof(TFile));
 
         /// <summary>Saves the save file picked in an inspector, through a <see cref="SaveFileReference"/>.</summary>

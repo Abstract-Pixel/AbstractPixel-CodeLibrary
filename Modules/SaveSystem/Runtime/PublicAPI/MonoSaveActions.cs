@@ -22,7 +22,7 @@ namespace AbstractPixel.SaveSystem
             SaveActions.Save(chosenSaveFile);
         }
 
-        /// <summary>Saves one save file. In code, pass <c>SaveFileReference.To&lt;SaveFiles.Ghosts&gt;()</c>.</summary>
+        /// <summary>Saves one save file. In code, pass <c>SaveFileReference.To&lt;GameSaveFiles.Ghosts&gt;()</c>.</summary>
         public void Save(SaveFileReference saveFile) => SaveActions.Save(saveFile);
     }
 }

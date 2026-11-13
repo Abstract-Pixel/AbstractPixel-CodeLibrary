@@ -5,7 +5,7 @@ namespace AbstractPixel.SaveSystem
 {
     /// <summary>
     /// A save file picked in the inspector from a dropdown of the config's save file list. It stores the save file
-    /// class's full name, the same name the list's rows are found by. In code, write <c>SaveFileReference.To&lt;SaveFiles.Ghosts&gt;()</c>.
+    /// class's full name, the same name the list's rows are found by. In code, write <c>SaveFileReference.To&lt;GameSaveFiles.Ghosts&gt;()</c>.
     /// </summary>
     [Serializable]
     public struct SaveFileReference

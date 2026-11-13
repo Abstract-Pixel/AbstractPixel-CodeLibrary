@@ -5,24 +5,82 @@ using NUnit.Framework;
 
 namespace AbstractPixel.SaveSystem.Tests
 {
-    // The editor keeps the save file list complete and writes SaveFiles.cs from it.
+    // The editor keeps the save file list complete and writes GameSaveFiles.cs from it.
     public class SaveFileListEditorTests
     {
-        [SaveFileDefaults("Achievements", SaveLocation.Global)]
-        sealed class AchievementsSaveFile : ISaveFile { }
+        [SaveFileDefaults("Module Stats", SaveLocation.Global)]
+        sealed class ModuleStatsSaveFile : ISaveFile { }
 
         [Test]
-        public void AddMissingRows_AddsTheThreeBuiltInsFirst()
+        public void AddMissingRows_AddsTheFiveBuiltInsFirst()
         {
             List<SaveFileDefinition> rows = new List<SaveFileDefinition>();
 
             bool changed = SaveFileListSync.AddMissingRows(rows, Array.Empty<Type>());
 
             Assert.IsTrue(changed);
-            Assert.AreEqual(3, rows.Count);
-            Assert.AreEqual(BuiltInSaveFile.Global, rows[0].BuiltIn);
-            Assert.AreEqual(BuiltInSaveFile.GameProfile, rows[1].BuiltIn);
-            Assert.AreEqual(BuiltInSaveFile.Scene, rows[2].BuiltIn);
+            Assert.AreEqual(5, rows.Count);
+            Assert.AreEqual(BuiltInSaveFile.GameProfile, rows[0].BuiltIn);
+            Assert.AreEqual(BuiltInSaveFile.Scene, rows[1].BuiltIn);
+            Assert.AreEqual(BuiltInSaveFile.Settings, rows[2].BuiltIn);
+            Assert.AreEqual(BuiltInSaveFile.Input, rows[3].BuiltIn);
+            Assert.AreEqual(BuiltInSaveFile.Achievements, rows[4].BuiltIn);
+            Assert.AreEqual(typeof(SaveFiles.Settings).FullName, rows[2].ClassFullName);
+        }
+
+        [Test]
+        public void AddMissingRows_TurnsTheOldGlobalRowIntoAGameRow_StoredAsGlobal()
+        {
+            SaveFileDefinition oldGlobalRow = SaveFileDefinition.CreateForList("Global", SaveLocation.Global);
+#pragma warning disable CS0618 // The old row is exactly what this test reads.
+            oldGlobalRow.BuiltIn = BuiltInSaveFile.Global;
+#pragma warning restore CS0618
+            oldGlobalRow.ClassFullName = "SaveFiles+Global";
+            List<SaveFileDefinition> rows = new List<SaveFileDefinition> { oldGlobalRow };
+
+            SaveFileListSync.AddMissingRows(rows, Array.Empty<Type>());
+
+            Assert.AreEqual(BuiltInSaveFile.None, oldGlobalRow.BuiltIn);
+            Assert.AreEqual("Global", oldGlobalRow.FileName);
+            Assert.AreEqual(SaveLocation.Global, oldGlobalRow.Location);
+            Assert.AreSame(oldGlobalRow, rows[5], "Built-in rows come first, then the game's own rows.");
+        }
+
+        [Test]
+        public void AddMissingRows_PutsBuiltInRowsBackToTheirFixedNameAndClass_KeepingTheBackupBox()
+        {
+            SaveFileDefinition oldSceneRow = SaveFileDefinition.CreateBuiltIn(BuiltInSaveFile.Scene);
+            oldSceneRow.Name = "Scenes";
+            oldSceneRow.Location = SaveLocation.Global;
+            oldSceneRow.StorageName = "Somewhere";
+            oldSceneRow.ClassFullName = "SaveFiles+Scene";
+            oldSceneRow.ClassAssemblyName = "Assembly-CSharp";
+            oldSceneRow.Backup = false;
+            List<SaveFileDefinition> rows = new List<SaveFileDefinition> { oldSceneRow };
+
+            SaveFileListSync.AddMissingRows(rows, Array.Empty<Type>());
+
+            Assert.AreEqual("Scene", oldSceneRow.Name);
+            Assert.AreEqual(SaveLocation.Scene, oldSceneRow.Location);
+            Assert.AreEqual("Scene", oldSceneRow.FileName);
+            Assert.AreEqual(typeof(SaveFiles.Scene).FullName, oldSceneRow.ClassFullName);
+            Assert.IsFalse(oldSceneRow.Backup);
+        }
+
+        [Test]
+        public void AddMissingRows_DropsAModuleRowWhoseClassIsGone_AndSaysWhichRow()
+        {
+            SaveFileDefinition staleModuleRow = SaveFileDefinition.CreateForList("Settings", SaveLocation.Global);
+            staleModuleRow.ClassFullName = "AbstractPixel.Settings.SettingsSaveFile";
+            staleModuleRow.ClassAssemblyName = "AbstractPixel.Settings";
+            staleModuleRow.AddedBy = "Added by the Settings module";
+            List<SaveFileDefinition> rows = new List<SaveFileDefinition> { staleModuleRow };
+            UnityEngine.TestTools.LogAssert.Expect(UnityEngine.LogType.Log, new System.Text.RegularExpressions.Regex("Removed the save file row 'Settings'.*AbstractPixel.Settings.SettingsSaveFile"));
+
+            SaveFileListSync.AddMissingRows(rows, Array.Empty<Type>());
+
+            Assert.IsFalse(rows.Contains(staleModuleRow));
+            Assert.AreEqual(BuiltInSaveFile.Settings, rows.Find(row => row.FileName == "Settings").BuiltIn);
         }
 
         [Test]
@@ -30,13 +88,13 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             List<SaveFileDefinition> rows = new List<SaveFileDefinition>();
 
-            SaveFileListSync.AddMissingRows(rows, new[] { typeof(AchievementsSaveFile) });
-            bool changedAgain = SaveFileListSync.AddMissingRows(rows, new[] { typeof(AchievementsSaveFile) });
+            SaveFileListSync.AddMissingRows(rows, new[] { typeof(ModuleStatsSaveFile) });
+            bool changedAgain = SaveFileListSync.AddMissingRows(rows, new[] { typeof(ModuleStatsSaveFile) });
 
-            SaveFileDefinition moduleRow = rows.Find(row => row.Name == "Achievements");
+            SaveFileDefinition moduleRow = rows.Find(row => row.Name == "Module Stats");
             Assert.IsNotNull(moduleRow);
             Assert.AreEqual(SaveLocation.Global, moduleRow.Location);
-            Assert.AreEqual(typeof(AchievementsSaveFile).FullName, moduleRow.ClassFullName);
+            Assert.AreEqual(typeof(ModuleStatsSaveFile).FullName, moduleRow.ClassFullName);
             StringAssert.Contains("SaveSystem.Tests", moduleRow.AddedBy);
             Assert.IsTrue(moduleRow.Backup, "New rows start with Backup ticked.");
             Assert.IsFalse(changedAgain, "A second run must not add the row twice.");
@@ -46,33 +104,51 @@ namespace AbstractPixel.SaveSystem.Tests
         public void AddMissingRows_KeepsTheOwnersChangesToAModuleRow()
         {
             List<SaveFileDefinition> rows = new List<SaveFileDefinition>();
-            SaveFileListSync.AddMissingRows(rows, new[] { typeof(AchievementsSaveFile) });
-            SaveFileDefinition moduleRow = rows.Find(row => row.Name == "Achievements");
+            SaveFileListSync.AddMissingRows(rows, new[] { typeof(ModuleStatsSaveFile) });
+            SaveFileDefinition moduleRow = rows.Find(row => row.Name == "Module Stats");
             moduleRow.Location = SaveLocation.GameProfile;
             moduleRow.Backup = false;
 
-            SaveFileListSync.AddMissingRows(rows, new[] { typeof(AchievementsSaveFile) });
+            SaveFileListSync.AddMissingRows(rows, new[] { typeof(ModuleStatsSaveFile) });
 
             Assert.AreEqual(SaveLocation.GameProfile, moduleRow.Location);
             Assert.IsFalse(moduleRow.Backup);
         }
 
         [Test]
-        public void WriteCode_HasOneClassPerRow_AndLeavesOutModuleRows()
+        public void WriteCode_HasOneClassPerGameRow_AndLeavesOutBuiltInAndModuleRows()
         {
             List<SaveFileDefinition> rows = new List<SaveFileDefinition>();
-            SaveFileListSync.AddMissingRows(rows, new[] { typeof(AchievementsSaveFile) });
+            SaveFileListSync.AddMissingRows(rows, new[] { typeof(ModuleStatsSaveFile) });
             rows.Add(SaveFileDefinition.CreateForList("Ghost Runs", SaveLocation.GameProfile));
 
             string code = SaveFilesCodeWriter.WriteCode(rows);
 
-            StringAssert.Contains("// SaveFiles.cs. Written by the editor. Don't edit; change the list in the config.", code);
-            StringAssert.Contains("public static class SaveFiles", code);
-            StringAssert.Contains("public sealed class Global : ISaveFile { }", code);
-            StringAssert.Contains("public sealed class GameProfile : ISaveFile { }", code);
-            StringAssert.Contains("public sealed class Scene : ISaveFile { }", code);
+            StringAssert.Contains("// GameSaveFiles.cs. Written by the editor. Don't edit; change the list in the config.", code);
+            StringAssert.Contains("public static class GameSaveFiles", code);
             StringAssert.Contains("public sealed class GhostRuns : ISaveFile { }", code);
-            StringAssert.DoesNotContain("class Achievements", code);
+            StringAssert.DoesNotContain("class GameProfile", code);
+            StringAssert.DoesNotContain("class Settings", code);
+            StringAssert.DoesNotContain("class ModuleStats", code);
+        }
+
+        [Test]
+        public void OldSaveFilesWrittenByTheEditor_IsRecognisedByItsHeader()
+        {
+            string oldFile = "// SaveFiles.cs. Written by the editor. Don't edit; change the list in the config.\nusing AbstractPixel.SaveSystem;\n";
+            string handWritten = "public static class SaveFiles { }\n";
+
+            Assert.IsTrue(SaveFilesCodeWriter.IsOldSaveFilesWrittenByTheEditor(oldFile));
+            Assert.IsFalse(SaveFilesCodeWriter.IsOldSaveFilesWrittenByTheEditor(handWritten));
+        }
+
+        [Test]
+        public void ConfigThatStillPointsAtSaveFilesCs_WritesGameSaveFilesCsInTheSameFolder()
+        {
+            SaveSystemConfigSO config = UnityEngine.ScriptableObject.CreateInstance<SaveSystemConfigSO>();
+            SaveSystemTestKit.SetField(config, "gameSaveFilesScriptPath", "Assets/Game/SaveFiles.cs");
+
+            Assert.AreEqual("Assets/Game/GameSaveFiles.cs", config.GameSaveFilesScriptPath);
         }
 
         [Test]
@@ -93,7 +169,7 @@ namespace AbstractPixel.SaveSystem.Tests
             row.Name = "Phantoms";
             SaveFilesCodeWriter.PointRowsAtTheirClasses(rows, "Assembly-CSharp");
 
-            Assert.AreEqual("SaveFiles+Phantoms", row.ClassFullName);
+            Assert.AreEqual("GameSaveFiles+Phantoms", row.ClassFullName);
             Assert.AreEqual("Ghosts", row.FileName);
         }
     }

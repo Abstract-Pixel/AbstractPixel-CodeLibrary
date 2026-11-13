@@ -78,7 +78,7 @@ namespace AbstractPixel.SaveSystem.Editor
 
             UnityEngine.Object scriptAsset = GetScriptAssetFromType(savedType);
             string scriptLink = GetHyperlink(scriptAsset, savedType.Name);
-            Debug.LogWarning($"[SaveSystem] {scriptLink} saves into '{saveFileClass.FullName}', but the save system config has no row for that class, so its data isn't saved. Select the config and press Write SaveFiles.cs, or add a row named '{saveFileClass.Name}'.", scriptAsset);
+            Debug.LogWarning($"[SaveSystem] {scriptLink} saves into '{saveFileClass.FullName}', but the save system config has no row for that class, so its data isn't saved. Select the config and press Write GameSaveFiles.cs, or add a row named '{saveFileClass.Name}'.", scriptAsset);
         }
 
         private static string GetHyperlink(UnityEngine.Object asset, string fallbackName)

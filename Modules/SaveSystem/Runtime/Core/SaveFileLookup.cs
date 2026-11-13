@@ -7,10 +7,19 @@ namespace AbstractPixel.SaveSystem
 {
     /// <summary>
     /// Finds the save file list row for a save file class, and the save file a saved object uses.
-    /// The three built-in rows always exist, even when a config leaves them out.
+    /// The built-in rows always exist, even when a config leaves them out.
     /// </summary>
     internal sealed class SaveFileLookup
     {
+        static readonly BuiltInSaveFile[] BuiltInSaveFiles =
+        {
+            BuiltInSaveFile.GameProfile,
+            BuiltInSaveFile.Scene,
+            BuiltInSaveFile.Settings,
+            BuiltInSaveFile.Input,
+            BuiltInSaveFile.Achievements
+        };
+
         readonly List<SaveFileDefinition> definitions = new List<SaveFileDefinition>();
 
         // Each missing class is reported once per session, so a busy scene doesn't fill the console.
@@ -24,13 +33,14 @@ namespace AbstractPixel.SaveSystem
                 {
                     if (row != null)
                     {
-                        definitions.Add(row);
+                        definitions.Add(UpgradedCopyOf(row));
                     }
                 }
             }
-            AddMissingBuiltIn(BuiltInSaveFile.Global);
-            AddMissingBuiltIn(BuiltInSaveFile.GameProfile);
-            AddMissingBuiltIn(BuiltInSaveFile.Scene);
+            foreach (BuiltInSaveFile builtIn in BuiltInSaveFiles)
+            {
+                AddMissingBuiltIn(builtIn);
+            }
         }
 
         public IReadOnlyList<SaveFileDefinition> AllDefinitions => definitions;
@@ -39,7 +49,7 @@ namespace AbstractPixel.SaveSystem
         {
             foreach (SaveFileDefinition definition in definitions)
             {
-                if (definition.BuiltIn == builtIn)
+                if (definition.IsBuiltIn && definition.BuiltIn == builtIn)
                 {
                     return definition;
                 }
@@ -73,7 +83,7 @@ namespace AbstractPixel.SaveSystem
             bool isFirstReport = reportedClasses.Add(saveFileClass.FullName);
             if (isFirstReport)
             {
-                Debug.LogError($"[SaveSystem] The save file class '{saveFileClass.FullName}' has no row in the save system config, so nothing in it is saved. Select the config (Tools > External Project Tools > Save System > Create Config selects it) and press Write SaveFiles.cs, or add a row named '{saveFileClass.Name}' to the save file list.");
+                Debug.LogError($"[SaveSystem] The save file class '{saveFileClass.FullName}' has no row in the save system config, so nothing in it is saved. Select the config (Tools > External Project Tools > Save System > Create Config selects it) and press Write GameSaveFiles.cs, or add a row named '{saveFileClass.Name}' to the save file list.");
             }
             return false;
         }
@@ -110,7 +120,11 @@ namespace AbstractPixel.SaveSystem
             return false;
         }
 
-        /// <summary>The row for the save file class with this full name, as a <see cref="SaveFileReference"/> stores it.</summary>
+        /// <summary>
+        /// The row for the save file class with this full name, as a <see cref="SaveFileReference"/> stores it.
+        /// A reference saved before the built-in save files shipped with the library holds "SaveFiles+Name";
+        /// it still finds the row whose name makes that class name, so scenes and prefabs keep working.
+        /// </summary>
         public bool TryGetDefinitionByClassName(string classFullName, out SaveFileDefinition definition)
         {
             foreach (SaveFileDefinition candidate in definitions)
@@ -121,6 +135,22 @@ namespace AbstractPixel.SaveSystem
                     return true;
                 }
             }
+
+            bool isOldGeneratedClassName = classFullName != null
+                && classFullName.StartsWith(SaveFileDefinition.OldGeneratedClassPrefix, StringComparison.Ordinal);
+            if (isOldGeneratedClassName)
+            {
+                string oldClassName = classFullName.Substring(SaveFileDefinition.OldGeneratedClassPrefix.Length);
+                foreach (SaveFileDefinition candidate in definitions)
+                {
+                    if (SaveFileDefinition.ClassNameFor(candidate.Name) == oldClassName)
+                    {
+                        definition = candidate;
+                        return true;
+                    }
+                }
+            }
+
             definition = null;
             Debug.LogError($"[SaveSystem] The save file list has no row for the class '{classFullName}'. Pick the save file again in the inspector, or check the list in the save system config.");
             return false;
@@ -138,6 +168,14 @@ namespace AbstractPixel.SaveSystem
                 }
             }
             return null;
+        }
+
+        // The running game upgrades a copy, so a config saved by an older version works without touching the asset.
+        static SaveFileDefinition UpgradedCopyOf(SaveFileDefinition row)
+        {
+            SaveFileDefinition copy = row.Copy();
+            SaveFileDefinition.UpgradeFromOlderVersion(copy);
+            return copy;
         }
 
         void AddMissingBuiltIn(BuiltInSaveFile builtIn)

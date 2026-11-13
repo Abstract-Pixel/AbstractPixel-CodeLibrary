@@ -27,6 +27,6 @@ SaveEventBus.OnLoadCompleted += ShowLoadedSaveFile;                             
 profile.Open(); SceneManager.LoadScene(...);                                       // switch game profiles, then reload
 ```
 
-The config decides where each save file lives. A script only names the file's class. In your game you'd use a class from `SaveFiles.cs`, such as `SaveFiles.Settings`. A sample can't see that file, so it brings its own classes.
+The config decides where each save file lives. A script only names the file's class. In your game you'd use a built-in class such as `SaveFiles.Settings`, or one of your own from `GameSaveFiles`. This sample brings its own classes, the way a library module does.
 
 Reload the scene after opening another game profile. Objects from the old profile never write into the new one.

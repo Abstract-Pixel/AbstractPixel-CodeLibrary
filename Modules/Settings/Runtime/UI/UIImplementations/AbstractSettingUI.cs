@@ -128,7 +128,7 @@ namespace AbstractPixel.Settings
         protected virtual void SaveSettingsToFile()
         {
             if(!isInitialized) return;
-            SaveActions.Save<SettingsSaveFile>();
+            SaveActions.Save<SaveFiles.Settings>();
         }
     }
 }
