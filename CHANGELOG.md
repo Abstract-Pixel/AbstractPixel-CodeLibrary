@@ -4,14 +4,18 @@
 **Save System v2.** It can't read v1 save files. Shipped games stay on the `save-system-v1` tag. Guide: `Documentation~/save-system.html`. Changes since v1: `Documentation~/save-system-v2-handoff.html`.
 - **Feature:** No manager in the scene. Make the config with Tools > External Project Tools > Save System > Create Config.
 - **Feature:** Scripts get saved data before `Start`. Plain C# classes and ScriptableObjects can save.
-- **Feature:** Save files are classes in a generated `SaveFiles.cs`. Pick one with `ISavable<TData, TFile>`.
-- **Feature:** `SaveActions.Save<TFile>()`, `Reload<TFile>()` and `Forget(object)`. Three save locations: Global, GameProfile and Scene.
-- **Feature:** `GameProfile` objects with slot numbers, such as `SaveActions.GameProfiles.Get(2).Open()`.
-- **Feature:** Load and save events on `SaveEventBus`. Load events reach late subscribers too.
-- **Feature:** `SaveStorage` reads or writes a whole save file in one line.
+- **Feature:** Save files are classes. Five built-in ones ship with the library (`SaveFiles.GameProfile`, `Scene`, `Settings`, `Input`, `Achievements`), and your own rows are written into `GameSaveFiles.cs`. Pick one with `ISavable<TData, TFile>`.
+- **Feature:** `SaveActions.Register(this)` needs no save ID. Later instances of a class get "Inventory 2", "Inventory 3".
+- **Feature:** `SaveActions.Save<TFile>()`, `Reload<TFile>()` and `Forget(object)`. Forget on a scene object writes a gone marker, so it stays gone. Three save locations: Global, GameProfile and Scene.
+- **Feature:** A new game profile gives objects that stayed alive their new-game values.
+- **Feature:** `GameProfile` objects with slot numbers, such as `SaveActions.GameProfiles.Get(2).Open()`. Custom fields on `profile.Custom` stay until the next save.
+- **Feature:** Load and save events on `SaveEventBus`. Load events reach late subscribers too. `OnSaveCompleted` fires only once a file is on disk.
+- **Feature:** `SaveStorage` reads, writes or deletes a whole save file in one line, for the open game profile by default, with a `SceneField` for Scene files.
+- **Feature:** Save file rows that share a file or a class name warn in the config. Two objects with the same save ID log one error naming both.
 - **Feature:** Safe writes, and an optional backup per save file in a `Backups` folder.
-- **Fix:** Listing and deleting game profiles works. Saving no longer erases data of objects that aren't loaded.
-- **Settings:** Saves into its own `SettingsSaveFile`. The debug toolbar uses `SaveStorage`.
+- **Fix:** Listing and deleting game profiles works. Saving no longer erases data of objects that aren't loaded. A Savable Bridge keeps its save ID when a new scene is first saved.
+- **Cleanup:** Only 22 public types, so autocomplete shows what game code uses. Save data, rows and storage internals are internal now.
+- **Settings:** Saves into the built-in `SaveFiles.Settings`. The debug toolbar uses `SaveStorage`.
 - **Core:** `SearchableDropdown` works on Unity 6 and Unity 7.
 
 ## [1.1.0] - 2026-10-31

@@ -89,6 +89,10 @@ td.now { color: var(--now); }
 
 .note { max-width: 72ch; background: var(--surface); border-left: 3px solid var(--accent); padding: 10px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 0.95rem; }
 .note.warn { border-left-color: var(--v1); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+@media (max-width: 800px) { .two { grid-template-columns: minmax(0, 1fr); } }
+.pane.was .pane-label { background: var(--v2-soft); color: var(--v2); }
+section h3 { font-family: var(--font-display); font-size: 1.1rem; margin: 28px 0 4px; }
 footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
 </style>
 </head>
@@ -97,7 +101,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
   <header>
     <div class="eyebrow">Abstract Pixel Library · Modules/SaveSystem · branch save-system</div>
     <h1>What changed in the save system</h1>
-    <p class="lede">Three versions side by side. v1 is what the shipped game uses. "v2 first" is steps 1 and 2. "v2 now" is after your review. How the system works today is in <code>save-system.html</code>.</p>
+    <p class="lede">Three versions side by side. v1 is what the shipped game uses. "v2 first" is steps 1 and 2. "v2 now" is today, after both of your reviews and the cleanup. The calls that changed since your second review are in <a href="#since-review">their own section</a>, before and after. How the system works today is in <code>save-system.html</code>, and what comes next is in <code>save-system-v2-plan.html</code>.</p>
 
     <div class="stages">
       <div class="stage v1">
@@ -122,12 +126,13 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
       </div>
       <div class="stage now">
         <h2>v2 now</h2>
-        <p class="when">Commits A2 to B9.</p>
+        <p class="when">Commits A2 to K5.</p>
         <ul>
           <li>Old names back: <code>SaveActions</code>, <code>SaveEventBus</code>.</li>
-          <li>Save files are classes, so typos don't compile.</li>
-          <li>Load events back, game profile objects, optional backups.</li>
+          <li>Save files are classes, and five built-in ones ship with the library.</li>
+          <li>Load events back, game profile objects, optional backups, save IDs you never type.</li>
           <li><code>SaveStorage</code> for tools. A Create Config menu item.</li>
+          <li>Only 22 public types, so autocomplete shows what game code uses.</li>
         </ul>
       </div>
     </div>
@@ -146,6 +151,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
         <li><a href="#forget">Forgetting data</a></li>
         <li><a href="#tools">Writing a file from a tool</a></li>
         <li><a href="#disk">Folders and backups</a></li>
+        <li><a href="#since-review">Since your second review</a></li>
         <li><a href="#review">Review tasks and commits</a></li>
         <li><a href="#checked">What I checked</a></li>
         <li><a href="#decisions">Choices I made</a></li>
@@ -186,7 +192,7 @@ public class Health : MonoBehaviour,
     ISavable&lt;bool, SaveFiles.Scene&gt; { … }
 <span class="c">// No attribute, no enum.</span></code></pre></div>
     </div>
-    <p class="why">The config's save file list defines the files. The editor writes <code>SaveFiles.cs</code> from it.</p>
+    <p class="why">The five built-in save files ship with the library in <code>SaveFiles</code>. The editor writes your own rows from the config into <code>GameSaveFiles.cs</code>.</p>
   </section>
 
   <section id="timing">
@@ -293,7 +299,8 @@ SaveEventBus.OnSaveAllCompleted</code></pre></div>
       <div class="pane v2"><div class="pane-label">v2 first</div>
 <pre><code>SaveSystem.Register(this, "player-inventory");</code></pre></div>
       <div class="pane now"><div class="pane-label">v2 now</div>
-<pre><code>SaveActions.Register(this, "player-inventory");</code></pre></div>
+<pre><code>SaveActions.Register(this);
+<span class="c">// Save ID "Inventory", then "Inventory 2".</span></code></pre></div>
     </div>
   </section>
 
@@ -306,7 +313,8 @@ SaveEventBus.OnSaveAllCompleted</code></pre></div>
 <pre><code>SaveSystem.Forget("Game", "quest-dragon");
 <span class="c">// Needed the file name and save ID.</span></code></pre></div>
       <div class="pane now"><div class="pane-label">v2 now</div>
-<pre><code>SaveActions.Forget(coin);</code></pre></div>
+<pre><code>SaveActions.Forget(gameObject);
+<span class="c">// A scene object stays gone after a reload.</span></code></pre></div>
     </div>
   </section>
 
@@ -357,6 +365,130 @@ new FileDataStorageService()
     <p class="why">v2 can't read v1 save files.</p>
   </section>
 
+  <section id="since-review">
+    <h2>Since your second review</h2>
+    <p>Phases R, F and K. "After phase B" is what you reviewed; "Now" is the branch today.</p>
+
+    <h3>Built-in save files ship with the library (R1)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">After phase B</div>
+<pre><code><span class="c">// Assets/SaveSystem/SaveFiles.cs, written by</span>
+<span class="c">// the editor, with a built-in Global row.</span>
+SaveActions.Save&lt;SaveFiles.Global&gt;();
+SaveActions.Save&lt;SaveFiles.Ghosts&gt;();</code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code><span class="c">// In the library: GameProfile, Scene,</span>
+<span class="c">// Settings, Input, Achievements.</span>
+SaveActions.Save&lt;SaveFiles.Settings&gt;();
+<span class="c">// Your rows, in GameSaveFiles.cs:</span>
+SaveActions.Save&lt;GameSaveFiles.Ghosts&gt;();</code></pre></div>
+    </div>
+
+    <h3>Plain classes need no save ID (R2)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">After phase B</div>
+<pre><code>SaveActions.Register(this, "player-inventory");</code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>SaveActions.Register(this);
+<span class="c">// A custom save ID still works.</span></code></pre></div>
+    </div>
+
+    <h3>Forget keeps scene objects gone (R3)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">After phase B</div>
+<pre><code>SaveActions.Forget(coin);
+<span class="c">// Its data went, so the coin came back</span>
+<span class="c">// with its scene.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>SaveActions.Forget(gameObject);
+<span class="c">// Writes a gone marker; the coin turns</span>
+<span class="c">// itself off when its scene loads.</span></code></pre></div>
+    </div>
+
+    <h3>SaveStorage takes a scene and the open game profile (R4)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">After phase B</div>
+<pre><code><span class="c">// No way to name the scene of a Scene file.</span>
+<span class="c">// Delete left the backup behind, and a write</span>
+<span class="c">// in play mode was lost on the next save.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>SaveStorage.ReadText&lt;SaveFiles.Scene&gt;(
+    forestScene, out string json);
+SaveStorage.WriteText&lt;SaveFiles.Settings&gt;(json);
+SaveStorage.Delete&lt;SaveFiles.GameProfile&gt;(slot);</code></pre></div>
+    </div>
+
+    <h3>A new game starts fresh (R5)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">After phase B</div>
+<pre><code>newSlot.Open();
+<span class="c">// A DontDestroyOnLoad manager kept the</span>
+<span class="c">// last game profile's values.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>newSlot.Open();
+<span class="c">// It gets the values it had before anything</span>
+<span class="c">// was restored: its new-game values.</span></code></pre></div>
+    </div>
+
+    <h3>"Saved" only after a real write (F2)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">After phase B</div>
+<pre><code>SaveEventBus.OnSaveCompleted += ShowSaved;
+SaveActions.Save&lt;SaveFiles.Settings&gt;();
+<span class="c">// Raised even when the write failed.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>SaveEventBus.OnSaveCompleted += ShowSaved;
+SaveActions.Save&lt;SaveFiles.Settings&gt;();
+<span class="c">// Raised only when the file is on disk.</span></code></pre></div>
+    </div>
+
+    <h3>Custom slot fields stay put (F3)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">After phase B</div>
+<pre><code>slot.Custom["Difficulty"] = "Hard";
+SaveActions.GameProfiles.CreateNew();
+<span class="c">// The list refreshed; "Difficulty" was gone.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>slot.Custom["Difficulty"] = "Hard";
+SaveActions.GameProfiles.CreateNew();
+<span class="c">// Still "Hard", and written with the next save.</span></code></pre></div>
+    </div>
+
+    <h3>Two objects with one save ID (F4)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">After phase B</div>
+<pre><code>SaveActions.Register(first, "hero");
+SaveActions.Register(second, "hero");
+<span class="c">// The second silently replaced the first.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>SaveActions.Register(first, "hero");
+SaveActions.Register(second, "hero");
+<span class="c">// One error naming both and the fix;</span>
+<span class="c">// only the first is saved.</span></code></pre></div>
+    </div>
+
+    <h3>Editor checks (F1, F5)</h3>
+    <ul>
+      <li>Two save file rows that share a file on disk or a class name get a warning on each row in the config, and <code>GameSaveFiles.cs</code> isn't written until you fix it.</li>
+      <li>A Savable Bridge added to a scene that was never saved keeps its save ID when the scene is first saved. Before, its data was lost at that point. Renaming a GameObject never changed its save ID.</li>
+    </ul>
+
+    <h3>A shorter autocomplete list (K5)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">After phase B</div>
+<pre><code>AbstractPixel.SaveSystem.
+<span class="c">// 44 types, including GameProfileManifest,</span>
+<span class="c">// SaveFileData, SaveFileDefinition,</span>
+<span class="c">// JsonSerializer, ISceneInfo, ...</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>AbstractPixel.SaveSystem.
+<span class="c">// 22 types: SaveActions, SaveEventBus,</span>
+<span class="c">// SaveStorage, SaveFiles, ISavable, ...</span>
+<span class="c">// The config offers json and txt files only.</span></code></pre></div>
+    </div>
+    <p class="why">The cleanup removed 516 lines and changed no behaviour. Both test suites passed after every step.</p>
+  </section>
+
   <section id="review">
     <h2>Review tasks and commits</h2>
     <div class="table-wrap"><table>
@@ -374,6 +506,18 @@ new FileDataStorageService()
         <tr><td>B7</td><td><code>29d97c7</code></td><td><code>SaveStorage</code>.</td></tr>
         <tr><td>B8</td><td><code>6df65b3</code></td><td>Create Config menu item.</td></tr>
         <tr><td>B9</td><td><code>b4bab97</code></td><td>Samples updated and played.</td></tr>
+        <tr><td>R0</td><td><code>2b8f79c</code></td><td>Glossary.</td></tr>
+        <tr><td>R1</td><td><code>2a9e36d</code></td><td>Built-in save files ship with the library.</td></tr>
+        <tr><td>R2</td><td><code>494b927</code></td><td>Save IDs for plain classes, with no string.</td></tr>
+        <tr><td>R3</td><td><code>6b9e366</code></td><td>Forget keeps scene objects gone.</td></tr>
+        <tr><td>R4</td><td><code>c5eb48d</code></td><td><code>SaveStorage</code> with the open game profile and a <code>SceneField</code>.</td></tr>
+        <tr><td>R5</td><td><code>15915d7</code></td><td>New-game values.</td></tr>
+        <tr><td>F1</td><td><code>7bf89c5</code></td><td>Clash warnings in the config.</td></tr>
+        <tr><td>F2</td><td><code>c699e13</code></td><td><code>OnSaveCompleted</code> only for files that were written.</td></tr>
+        <tr><td>F3</td><td><code>b7c58eb</code></td><td>Custom game profile fields survive a refresh.</td></tr>
+        <tr><td>F4</td><td><code>b1c7855</code></td><td>Duplicate save IDs log one error.</td></tr>
+        <tr><td>F5</td><td><code>9832bcf</code></td><td>Bridge IDs stay put when a new scene is first saved.</td></tr>
+        <tr><td>K1 to K5</td><td><code>79b4b75</code> to <code>d0ce7f8</code></td><td>The cleanup.</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -381,9 +525,9 @@ new FileDataStorageService()
   <section id="checked">
     <h2>What I checked</h2>
     <ul>
-      <li>178 EditMode and 13 PlayMode tests pass.</li>
+      <li>223 EditMode and 17 PlayMode tests pass.</li>
       <li>Every library module compiles.</li>
-      <li>I played all six samples and a Settings scene in the Editor. No errors.</li>
+      <li>I played all six samples in the Editor after phase F and again after phase K. No errors. The Settings Lab scene logs a TMP dropdown error from its own setup, not from the save system.</li>
       <li>I checked the Unity calls against the Unity 6 docs. The tests have not run on Unity 6.</li>
     </ul>
   </section>
@@ -393,7 +537,7 @@ new FileDataStorageService()
     <ul>
       <li>A Scene file's load event waits one frame, so every script in the scene has started.</li>
       <li>Unticking Backup deletes the old backup on the next save.</li>
-      <li>Samples bring their own save file classes, because they can't see your <code>SaveFiles.cs</code>.</li>
+      <li>Samples bring their own save file classes, because they can't see your <code>GameSaveFiles.cs</code>.</li>
       <li>I kept the main page and rewrote it as the guide, instead of deleting it.</li>
     </ul>
   </section>
@@ -401,16 +545,14 @@ new FileDataStorageService()
   <section id="open">
     <h2>Still to do</h2>
     <ul>
-      <li>Phase C: <code>[Save]</code> fields, <code>IOnRestored</code>, save IDs for spawned objects.</li>
-      <li>Fix in phase C: a bridge made in an unsaved scene gets a new save ID when you save the scene.</li>
+      <li>Phase S: <code>[Save]</code> fields, checks that block play mode on a wrong setup, renames that keep data, <code>IOnRestored</code>, save IDs for spawned copies, and the small features in the roadmap.</li>
       <li>Close issues #1, #17 to #20 and #23 by hand.</li>
-      <li>Delete <code>save-system-v2-plan.html</code>. It is out of date.</li>
       <li>Run the tests once in a Unity 6.7 project.</li>
     </ul>
     <div class="note warn">The shipped game stays on <code>save-system-v1</code>. Nothing is pushed.</div>
   </section>
 
-  <footer>Branch <code>save-system</code>.</footer>
+  <footer>Branch <code>save-system</code>, last code commit <code>d0ce7f8</code>. Updated 13 Nov 2026.</footer>
 </div>
 </body>
 </html>

@@ -114,7 +114,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
 
   <main>
     <header>
-      <div class="eyebrow">Abstract Pixel Library · Save System v2 · roadmap v6 · 13 Nov 2026</div>
+      <div class="eyebrow">Abstract Pixel Library · Save System v2 · roadmap v7 · 13 Nov 2026</div>
       <h1>Save System roadmap</h1>
       <p class="lede">Where the save system is going, in the order you'd learn it: designers first, then daily code, then the deeper levels. How the system works today is in <code>save-system.html</code>.</p>
       <div class="legend">
@@ -129,11 +129,11 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
       <ol class="timeline">
         <li><span class="when">Steps 0–2</span><div><strong>Safe storage, the core, the timing rule</strong> <span class="pill built">built</span><p>Safe writes, data restored before every <code>Start</code>, no manager in the scene.</p></div></li>
         <li><span class="when">Phases A, B</span><div><strong>Fixes from your first review</strong> <span class="pill built">built</span><p>Save files as classes, game profiles by slot number, sticky load events, optional backups, <code>SaveStorage</code>, Create Config.</p></div></li>
-        <li><span class="when">Phase R</span><div><strong>Fixes from the second review</strong> <span class="pill built">built</span><p>Five built-in save files, save IDs you never type, Forget that keeps scene objects gone, <code>SaveStorage</code> with <code>SceneField</code>, new-game values. 211 EditMode and 17 PlayMode tests.</p></div></li>
-        <li><span class="when">Phase F</span><div><strong>The last bug fixes</strong> <span class="pill next">next run</span><p>Clash warnings in the config, no "Saved" after a failed write, custom slot fields that survive a refresh, an error for duplicate save IDs, bridge IDs that stay put in new scenes. Then every sample is played.</p></div></li>
-        <li><span class="when">Phase K</span><div><strong>The cleanup</strong> <span class="pill next">next run</span><p>About 500 fewer lines with the same features, and only what game code needs left public. <a href="#cleanup">More below.</a></p></div></li>
-        <li><span class="when">Phase H</span><div><strong>Docs and handoff</strong> <span class="pill next">next run</span><p>This page, the guide and the AI handoff, brought up to date.</p></div></li>
-        <li><span class="when">Phase S</span><div><strong><code>[Save]</code> fields and the ladder</strong> <span class="pill plan">planned</span><p>The rest of step 3: <code>[Save]</code>, blocking checks, rename-safe data, small features for developers and designers.</p></div></li>
+        <li><span class="when">Phase R</span><div><strong>Fixes from the second review</strong> <span class="pill built">built</span><p>Five built-in save files, save IDs you never type, Forget that keeps scene objects gone, <code>SaveStorage</code> with <code>SceneField</code>, new-game values.</p></div></li>
+        <li><span class="when">Phase F</span><div><strong>The last bug fixes</strong> <span class="pill built">built</span><p>Clash warnings in the config, no "Saved" after a failed write, custom slot fields that survive a refresh, an error for duplicate save IDs, bridge IDs that stay put in new scenes. Every sample played with no errors.</p></div></li>
+        <li><span class="when">Phase K</span><div><strong>The cleanup</strong> <span class="pill built">built</span><p>516 fewer lines with the same features, and public types down from 44 to 22. <a href="#cleanup">More below.</a></p></div></li>
+        <li><span class="when">Phase H</span><div><strong>Docs and handoff</strong> <span class="pill built">built</span><p>This page, the guide, the before-and-after page and the AI handoff, brought up to date. 223 EditMode and 17 PlayMode tests pass.</p></div></li>
+        <li><span class="when">Phase S</span><div><strong><code>[Save]</code> fields and the ladder</strong> <span class="pill next">next run</span><p>The rest of step 3: <code>[Save]</code>, blocking checks, rename-safe data, small features for developers and designers.</p></div></li>
         <li><span class="when">Steps 4–7</span><div><strong>Designer tools</strong> <span class="pill plan">planned</span><p>Saved ScriptableObjects and saved-variable assets, bridges added while editing, the Save System window, ready-made savers and a save slot screen.</p></div></li>
       </ol>
       <p>ProjectRallyShift stays on save system v1 through GitHub main, so none of this touches it.</p>
@@ -238,7 +238,7 @@ SaveActions.Forget(gameObject);         <span class="c">// a picked-up coin stay
           <tr><td>Save data that isn't plain fields</td><td><code>ISavable&lt;TData&gt;</code> with <code>CaptureData</code> and <code>RestoreData</code></td><td><span class="pill built">built</span></td></tr>
           <tr><td>Read or write a whole file</td><td><code>SaveStorage.ReadText&lt;SaveFiles.Scene&gt;(forestScene, out string json)</code></td><td><span class="pill built">built</span></td></tr>
           <tr><td>Throw away unsaved changes</td><td><code>SaveActions.Reload&lt;SaveFiles.Input&gt;()</code></td><td><span class="pill built">built</span></td></tr>
-          <tr><td>Show difficulty on a slot</td><td><code>profile.Custom["Difficulty"]</code></td><td><span class="pill built">built</span> (refresh fix next run)</td></tr>
+          <tr><td>Show difficulty on a slot</td><td><code>profile.Custom["Difficulty"]</code></td><td><span class="pill built">built</span></td></tr>
           <tr><td>Ship a library module's own file</td><td><code>[SaveFileDefaults("Ghost Runs", SaveLocation.GameProfile)]</code></td><td><span class="pill built">built</span></td></tr>
           <tr><td>Test your own saved scripts</td><td>A public helper that starts the save system on memory storage</td><td><span class="pill plan">later</span></td></tr>
         </tbody>
@@ -260,8 +260,8 @@ start until this is fixed.</span></code></pre></div>
           <tr><td><code>[Save]</code> on a type that can't be written and read back (delegate, interface, <code>object</code>)</td><td>Blocks play mode and builds</td></tr>
           <tr><td>A class with both <code>[Save]</code> fields and <code>ISavable</code></td><td>Blocks play mode and builds</td></tr>
           <tr><td><code>[Save]</code> on a property or method</td><td>Doesn't compile</td></tr>
-          <tr><td>Two save file rows that share a file or a class name</td><td>Warning in the config; <code>GameSaveFiles.cs</code> isn't written <span class="pill next">next run</span></td></tr>
-          <tr><td>Two objects with the same save ID</td><td>One error naming both; the second isn't saved <span class="pill next">next run</span></td></tr>
+          <tr><td>Two save file rows that share a file or a class name</td><td>Warning in the config; <code>GameSaveFiles.cs</code> isn't written <span class="pill built">built</span></td></tr>
+          <tr><td>Two objects with the same save ID</td><td>One error naming both; the second isn't saved <span class="pill built">built</span></td></tr>
           <tr><td>A spawned copy with no <code>SetSaveId</code></td><td>One warning naming the prefab; the copy isn't saved</td></tr>
         </tbody>
       </table></div>
@@ -278,16 +278,16 @@ start until this is fixed.</span></code></pre></div>
     </section>
 
     <section id="cleanup">
-      <h2>The cleanup <span class="pill next">next run</span></h2>
-      <p>The save system is about 5,900 lines in 72 scripts. Most files already do one job. The cleanup deletes code: it doesn't merge files into longer ones, and every feature stays.</p>
+      <h2>The cleanup <span class="pill built">built</span></h2>
+      <p>The cleanup deleted code. It merged no files into longer ones, and every feature stayed: both test suites passed after each step. The runtime and editor code went from 6,036 lines in 73 scripts to 5,668 lines in 70, and the tests from 4,319 lines to 4,171.</p>
       <div class="table-wrap"><table>
-        <thead><tr><th>What goes</th><th>About</th></tr></thead>
+        <thead><tr><th>What went</th><th>Lines removed</th></tr></thead>
         <tbody>
-          <tr><td>Dead code: four unused Vector and Color classes, an interface with one implementation, an unused factory method</td><td>210 lines, 6 files</td></tr>
-          <tr><td>Upgrade code for v2 steps 1 and 2, which only the Lab ever ran</td><td>160 lines</td></tr>
-          <tr><td>The same few lines written two to five times, such as "lowest free number" and "is this a saved script?", each becoming one small helper</td><td>140 lines</td></tr>
-          <tr><td>Methods that only pass a call on</td><td>20 lines</td></tr>
-          <tr><td>Public types game code never needs, made internal: 44 down to about 18</td><td>a much shorter autocomplete list</td></tr>
+          <tr><td>Dead code: four unused Vector and Color classes, the <code>ISerializer</code> and <code>ISavableBridge</code> interfaces, an unused factory method. The JSON class is now the internal <code>SaveJson</code>.</td><td>173, and 6 files</td></tr>
+          <tr><td>Upgrade code for v2 steps 1 and 2, which only the Lab ever ran, and its seven tests</td><td>302</td></tr>
+          <tr><td>The same few lines written two to five times, such as "lowest free number" and "is this a saved script?", each now one small helper</td><td>27 (two helpers added)</td></tr>
+          <tr><td>Methods that only pass a call on</td><td>25</td></tr>
+          <tr><td>Public types game code never needs, made internal: 44 down to 22</td><td>a much shorter autocomplete list</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -297,10 +297,10 @@ start until this is fixed.</span></code></pre></div>
       <div class="table-wrap"><table>
         <thead><tr><th>#</th><th>What</th><th>Helps</th><th>State</th></tr></thead>
         <tbody>
-          <tr><td>F</td><td>The last bug fixes, then play every sample</td><td>Everyone</td><td><span class="pill next">next run</span></td></tr>
-          <tr><td>K</td><td>The cleanup</td><td>Whoever maintains it</td><td><span class="pill next">next run</span></td></tr>
-          <tr><td>H</td><td>Guide, roadmap and AI handoff</td><td>You</td><td><span class="pill next">next run</span></td></tr>
-          <tr><td>S1</td><td><code>[Save]</code> fields, rename safety, blocking checks</td><td>Developers</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>F</td><td>The last bug fixes, then play every sample</td><td>Everyone</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>K</td><td>The cleanup</td><td>Whoever maintains it</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>H</td><td>Guide, roadmap and AI handoff</td><td>You</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>S1</td><td><code>[Save]</code> fields, rename safety, blocking checks</td><td>Developers</td><td><span class="pill next">next run</span></td></tr>
           <tr><td>S2–S4</td><td><code>IOnRestored</code>, <code>SetSaveId</code>, the bridge recognises <code>[Save]</code></td><td>Developers</td><td><span class="pill plan">planned</span></td></tr>
           <tr><td>S5</td><td>Typed load listeners</td><td>Developers</td><td><span class="pill plan">planned</span></td></tr>
           <tr><td>S6</td><td><code>OnSaveFailed</code>, Continue helpers, autosave, UnityEvents, clean JSON for Unity types, Copy save ID button</td><td>Both</td><td><span class="pill plan">planned</span></td></tr>
@@ -345,7 +345,7 @@ start until this is fixed.</span></code></pre></div>
       </table></div>
     </section>
 
-    <footer>Branch <code>save-system</code>, last commit <code>15915d7</code>. Not pushed. Replaces roadmap v5 and the next-steps page.</footer>
+    <footer>Branch <code>save-system</code>, last code commit <code>d0ce7f8</code>. Not pushed. Roadmap v7: phases F, K and H are built. Replaces roadmap v5 and the next-steps page.</footer>
   </main>
 </div>
 </body>
