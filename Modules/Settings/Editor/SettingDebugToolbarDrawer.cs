@@ -143,90 +143,68 @@ namespace AbstractPixel.Settings.Editor
                 return;
             }
 
-            SavePathGenerator.Initialize(saveConfig);
             SaveCatgeoryDefinition settingsDefinition = saveConfig.GetCategoryDefinition(SaveCategory.Settings);
-
-            bool isSettingsSaveDataUpdated = ReadAndWriteFileWithUpdatedSettings(actionToExecute, setting, settingsDefinition);
-            if (!isSettingsSaveDataUpdated)
-            {
-                return;
-            }
+            ReadAndWriteFileWithUpdatedSettings(actionToExecute, setting, settingsDefinition, saveConfig);
         }
 
-        private static bool ReadAndWriteFileWithUpdatedSettings(Action<ISettingBackend, SettingsDTO> actionToExecute, ISettingBackend setting, SaveCatgeoryDefinition settingsDefinition)
+        private static bool ReadAndWriteFileWithUpdatedSettings(Action<ISettingBackend, SettingsDTO> actionToExecute, ISettingBackend setting, SaveCatgeoryDefinition settingsDefinition, SaveSystemConfigSO saveConfig)
         {
             if (settingsDefinition == null)
             {
-                Debug.LogError("Could not find a 'Settings' category definition in SaveSystemConfigSO.");
+                Debug.LogError("[Settings System] The save system config has no 'Settings' save file, so the toolbar can't change saved settings. Add a Settings row to the config's list.");
                 return false;
             }
 
-            // 1. Read the existing save file
-            string fullFilePath = SavePathGenerator.GetPath(settingsDefinition, string.Empty);
+            // The same storage parts the game uses, so the toolbar reads and writes the file the game reads.
+            DiskStorageService storage = new DiskStorageService(saveConfig.UseDebugPath, saveConfig.PrimaryFileExtension);
             JsonSerializer serializer = new JsonSerializer();
-            FileDataStorageService storageService = new FileDataStorageService();
+            SaveFileStore store = new SaveFileStore(storage, serializer);
+            SavePathGenerator paths = new SavePathGenerator();
+            string settingsKey = paths.GetSaveFileKey(settingsDefinition.FileName, settingsDefinition.Location, null, null);
 
-            string existingJson = storageService.LoadFile(fullFilePath);
-
-            if (serializer.TryDeserialize(existingJson, out SaveFileData loadedFileData) == false)
+            if (store.TryRead(settingsKey, out SaveFileData settingsFile) == false)
             {
-                Debug.LogError("Failed to deserialize the existing save file.");
+                Debug.LogWarning($"[Settings System] There is no saved Settings file at '{settingsKey}' yet. Run the game and save once to create it.");
                 return false;
             }
 
-            // 2. Variables to hold BOTH layers of IDs so we don't lose them
-            string targetGameObjectId = null;
-            string targetComponentId = null;
-            SettingsDTO targetDto = null;
-            Dictionary<string, object> targetInnerDictionary = null;
-
-            // 3. Drill down Level 1 (The SavableBridge GameObject ID)
-            foreach (KeyValuePair<string, object> gameObjectKvp in loadedFileData.DataMap)
+            foreach (KeyValuePair<string, SaveFileEntry> savedEntry in settingsFile.Entries)
             {
-                // Convert the raw JSON object into the inner dictionary
-                Dictionary<string, object> innerDictionary = SaveDataConverter.Convert<Dictionary<string, object>>(gameObjectKvp.Value);
-                if (innerDictionary == null) continue;
-
-                // 4. Drill down Level 2 (The Component ID)
-                foreach (KeyValuePair<string, object> componentKvp in innerDictionary)
+                bool isSettingsData = TryReadSettingsData(serializer, savedEntry.Value, out SettingsDTO settingsData);
+                if (isSettingsData == false)
                 {
-                    SettingsDTO dto = SaveDataConverter.Convert<SettingsDTO>(componentKvp.Value);
-
-                    // If it has our dictionaries, we found our target!
-                    if (dto != null && dto.FloatSettings != null && dto.IntegerSettings != null)
-                    {
-                        targetGameObjectId = gameObjectKvp.Key;
-                        targetComponentId = componentKvp.Key;
-                        targetDto = dto;
-                        targetInnerDictionary = innerDictionary;
-                        break;
-                    }
+                    continue;
                 }
 
-                if (targetDto != null) break; // Stop searching if we found it
+                actionToExecute.Invoke(setting, settingsData);
+                savedEntry.Value.Data = serializer.ToToken(settingsData);
+                return store.Write(settingsKey, settingsFile);
             }
 
-            if (string.IsNullOrEmpty(targetGameObjectId) || string.IsNullOrEmpty(targetComponentId) || targetDto == null)
+            Debug.LogWarning($"[Settings System] The Settings file at '{settingsKey}' holds no settings data yet. Run the game and save once to create it.");
+            return false;
+        }
+
+        // Another saved object could share the Settings file, so an entry that isn't settings data is skipped, not an error.
+        private static bool TryReadSettingsData(JsonSerializer serializer, SaveFileEntry savedEntry, out SettingsDTO settingsData)
+        {
+            settingsData = null;
+            if (savedEntry == null || savedEntry.Data == null)
             {
-                Debug.LogWarning("[Settings System] Could not find a valid SettingsDTO in the save file. Run the game and save once to initialize it.");
                 return false;
             }
 
-            // 5. Execute the requested action (Modify the exact setting in the DTO)
-            actionToExecute.Invoke(setting, targetDto);
-
-            // 6. Carefully pack the data back together preserving BOTH IDs
-            targetInnerDictionary[targetComponentId] = targetDto;          // Put DTO back into Component Level
-            loadedFileData.DataMap[targetGameObjectId] = targetInnerDictionary; // Put Component Level back into GameObject Level
-
-            // 7. Re-serialize and save to disk
-            if (serializer.TrySerialize(loadedFileData, out string outputJson) == true)
+            try
             {
-                storageService.SaveFile(outputJson, fullFilePath);
-                AssetDatabase.Refresh();
+                settingsData = serializer.FromToken(savedEntry.Data, typeof(SettingsDTO)) as SettingsDTO;
+            }
+            catch (Exception)
+            {
+                return false;
             }
 
-            return true;
+            bool hasSettingsDictionaries = settingsData != null && settingsData.FloatSettings != null && settingsData.IntegerSettings != null;
+            return hasSettingsDictionaries;
         }
 
         private bool FindSaveSystemConfigInProject(out SaveSystemConfigSO saveConfig)
