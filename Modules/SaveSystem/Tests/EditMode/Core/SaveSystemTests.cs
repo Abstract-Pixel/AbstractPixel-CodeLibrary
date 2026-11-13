@@ -376,8 +376,8 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             string openedId = null;
             int savedCount = 0;
-            SaveEventBus.GameProfileOpened += profile => openedId = profile.Id;
-            SaveEventBus.Saved += () => savedCount++;
+            SaveEventBus.OnGameProfileOpened += profile => openedId = profile.Id;
+            SaveEventBus.OnSaveAllCompleted += () => savedCount++;
 
             string gameProfileId = CreateAndOpenGameProfile();
             SaveActions.SaveAll();
@@ -393,7 +393,7 @@ namespace AbstractPixel.SaveSystem.Tests
             string gameProfileId = CreateAndOpenGameProfile();
             string openedId = null;
 
-            SaveEventBus.GameProfileOpened += profile => openedId = profile.Id;
+            SaveEventBus.OnGameProfileOpened += profile => openedId = profile.Id;
 
             Assert.AreEqual(gameProfileId, openedId);
         }

@@ -102,8 +102,11 @@ namespace AbstractPixel.SaveSystem
             }
         }
 
-        /// <summary>Writes every changed save file, or only those the filter accepts. Returns false if any write failed.</summary>
-        public bool WriteChanged(Func<SaveFileData, bool> filter = null)
+        /// <summary>
+        /// Writes every changed save file, or only those the filter accepts, and adds each written file's name to
+        /// <paramref name="writtenFileNames"/> when one is given. Returns false if any write failed.
+        /// </summary>
+        public bool WriteChanged(Func<SaveFileData, bool> filter = null, List<string> writtenFileNames = null)
         {
             bool allWritten = true;
             foreach (LoadedFile file in filesByKey.Values.Where(file => file.Changed))
@@ -119,6 +122,11 @@ namespace AbstractPixel.SaveSystem
                 if (store.Write(key, file.Data))
                 {
                     file.Changed = false;
+                    bool isFirstWriteOfThisFile = writtenFileNames != null && !writtenFileNames.Contains(file.Data.FileName);
+                    if (isFirstWriteOfThisFile)
+                    {
+                        writtenFileNames.Add(file.Data.FileName);
+                    }
                 }
                 else
                 {

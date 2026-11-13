@@ -93,6 +93,33 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
             Assert.AreEqual(100, nextTime.ValueSeenInStart, "A forgotten object comes back with new-game values.");
         }
 
+        [UnityTest]
+        public IEnumerator SceneReadySignal_WaitsUntilEveryScriptHasStarted_SoTheSceneIsRestored()
+        {
+            yield return StoreSavedHealth(42);
+            HealthForTests health = CreateHealthObject(bridgeFirst: false, activate: false);
+            int healthWhenReady = -1;
+            int healthStartValueWhenReady = 0;
+            GameObject signalObject = new GameObject("Signal");
+            createdObjects.Add(signalObject);
+            signalObject.SetActive(false);
+            SceneReadySignal signal = signalObject.AddComponent<SceneReadySignal>();
+            signal.Ready = sceneName =>
+            {
+                healthWhenReady = health.Current;
+                healthStartValueWhenReady = health.ValueSeenInStart;
+            };
+
+            // The signal is enabled first on purpose: it must still wait for the other object's Start.
+            signalObject.SetActive(true);
+            health.gameObject.SetActive(true);
+            yield return null;
+            yield return null;
+
+            Assert.AreEqual(42, healthWhenReady, "The Savable Bridge restored before the scene said it was ready.");
+            Assert.AreEqual(42, healthStartValueWhenReady, "Every script's Start has run, and saw the restored value.");
+        }
+
         [Test]
         public void SavableBridge_RunsBeforeOtherScripts()
         {

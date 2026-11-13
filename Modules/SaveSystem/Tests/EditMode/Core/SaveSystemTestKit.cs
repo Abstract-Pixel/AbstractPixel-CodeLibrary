@@ -37,7 +37,36 @@ namespace AbstractPixel.SaveSystem.Tests
 
     internal sealed class FakeSceneInfo : ISceneInfo
     {
+        readonly List<string> loadedSceneNames = new List<string> { "Forest" };
+
         public string ActiveSceneName { get; set; } = "Forest";
+
+        public IReadOnlyList<string> LoadedSceneNames => loadedSceneNames;
+
+        public event Action<string> SceneReady;
+        public event Action<string> SceneUnloaded;
+
+        /// <summary>Like loading a scene additively: it joins the loaded scenes, then says it is ready.</summary>
+        public void LoadAdditively(string sceneName)
+        {
+            SignalReady(sceneName);
+        }
+
+        /// <summary>What Unity does one frame after a loaded scene's scripts start, when its Savable Bridges have restored.</summary>
+        public void SignalReady(string sceneName)
+        {
+            if (!loadedSceneNames.Contains(sceneName))
+            {
+                loadedSceneNames.Add(sceneName);
+            }
+            SceneReady?.Invoke(sceneName);
+        }
+
+        public void Unload(string sceneName)
+        {
+            loadedSceneNames.Remove(sceneName);
+            SceneUnloaded?.Invoke(sceneName);
+        }
     }
 
     internal sealed class FakeClock
