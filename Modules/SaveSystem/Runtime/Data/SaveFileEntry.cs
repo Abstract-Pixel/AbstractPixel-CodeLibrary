@@ -15,5 +15,12 @@ namespace AbstractPixel.SaveSystem
         /// <summary>The captured data, kept as JSON until the saved object's type is known.</summary>
         [JsonProperty("data")]
         public JToken Data;
+
+        /// <summary>
+        /// A gone marker: the object placed in a scene was forgotten during play, so it turns itself off the next time
+        /// its scene loads. Left out of the file when false, and a missing field reads as false, so older files read as before.
+        /// </summary>
+        [JsonProperty("gone", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool Gone;
     }
 }

@@ -186,8 +186,22 @@ namespace AbstractPixel.SaveSystem
                 session.RegisterScript(this, target.Script, target.Script.GetType(), GetSaveId(target), target.DataToSaveType,
                     () => InvokeScript(target.CaptureDataMethod, target.Script, null),
                     data => InvokeScript(target.RestoreDataMethod, target.Script, new[] { data }),
-                    gameObject.scene.name, GetEntryName(target));
+                    gameObject.scene.name, GetEntryName(target), TurnOffBecauseForgotten);
+
+                // A gone marker turned this object off; the rest of its scripts stay unregistered.
+                if (!gameObject.activeSelf)
+                {
+                    return;
+                }
             }
+        }
+
+        // Called from Start when a save ID has a gone marker. This bridge runs first, so the other scripts on this
+        // GameObject never reach their Start (their Awake has already run).
+        private void TurnOffBecauseForgotten()
+        {
+            SaveActions.Session?.DropWithoutCapturing(this);
+            gameObject.SetActive(false);
         }
 
         /// <summary>The save ID of one saved script on this GameObject: "&lt;bridge GUID&gt;/&lt;script GUID&gt;".</summary>

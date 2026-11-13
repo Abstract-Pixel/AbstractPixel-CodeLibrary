@@ -29,6 +29,12 @@ namespace AbstractPixel.SaveSystem
                 && entries.TryGetValue(saveId, out entry);
         }
 
+        /// <summary>True while this very entry is registered, not only another entry with its save ID.</summary>
+        public bool Contains(SavedObjectEntry entry)
+        {
+            return TryGetEntry(entry.SaveFileName, entry.SaveId, out SavedObjectEntry registered) && ReferenceEquals(registered, entry);
+        }
+
         public IReadOnlyList<SavedObjectEntry> GetEntriesOf(object owner)
         {
             return AllEntries.Where(entry => ReferenceEquals(entry.Owner, owner)).ToList();

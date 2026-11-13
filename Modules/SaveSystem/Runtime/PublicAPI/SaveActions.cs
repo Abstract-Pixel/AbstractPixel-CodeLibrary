@@ -63,8 +63,10 @@ namespace AbstractPixel.SaveSystem
         public static void Reload<TFile>() where TFile : ISaveFile => session?.Reload(typeof(TFile));
 
         /// <summary>
-        /// Removes one saved object's data on purpose, for example a coin that was picked up, so it doesn't come back.
-        /// Pass the saved object itself: a plain class, a saved script or its GameObject. Example: <c>SaveActions.Forget(coin);</c>
+        /// Makes one saved object's data go away on purpose, for example a coin that was picked up, so it doesn't come back.
+        /// An object placed in a scene gets a gone marker and turns itself off the next time its scene loads; a spawned
+        /// copy or a plain class loses its data. Pass the saved object itself: a plain class, a saved script or its
+        /// GameObject. Call it before Destroy. Example: <c>SaveActions.Forget(gameObject); Destroy(gameObject);</c>
         /// </summary>
         public static void Forget(object savedObject) => session?.Forget(savedObject);
 

@@ -1,26 +1,24 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
 {
     /// <summary>
-    /// One running save system: the registry, the loaded data and the game profiles, wired together.
-    /// It applies the whichever-second rule: an object is restored as soon as both the object and its data exist.
-    /// <see cref="SaveActions"/> hands every call to the current session.
+    /// One running save system: the saved objects, the loaded data and the game profiles, wired together.
+    /// <see cref="SaveActions"/> hands every call to the current session; <see cref="SavedObjectTracker"/> does the
+    /// capturing, restoring and forgetting.
     /// </summary>
     internal sealed class SaveSession
     {
         readonly SaveFileLookup saveFiles;
         readonly SavePathGenerator paths = new SavePathGenerator();
-        readonly SaveRegistry registry = new SaveRegistry();
-        readonly AutomaticSaveIds automaticSaveIds = new AutomaticSaveIds();
         readonly LoadedSaveData loadedData;
         readonly ISceneInfo sceneInfo;
         readonly Func<double> unscaledTime;
         readonly SaveFileAddresses addresses;
         readonly SaveSessionEvents events;
+        readonly SavedObjectTracker savedObjects;
 
         // The game profile whose data is in loadedData, and the time playtime was last counted up to.
         string loadedGameProfileId;
@@ -50,6 +48,7 @@ namespace AbstractPixel.SaveSystem
             addresses = new SaveFileAddresses(saveFiles, paths, ProfileManager);
             FileAccess = new SaveFileAccess(saveFiles, storage, store, GameProfiles);
             events = new SaveSessionEvents(saveFiles, loadedData, addresses, sceneInfo, LoadEvents);
+            savedObjects = new SavedObjectTracker(loadedData, addresses, ProfileManager);
             ProfileManager.Opened += OnGameProfileOpened;
             ProfileManager.Closed += OnGameProfileClosed;
             sceneInfo.SceneReady += OnSceneReady;
@@ -72,10 +71,11 @@ namespace AbstractPixel.SaveSystem
         /// <summary>
         /// The non-generic path the Savable Bridge uses. <paramref name="scriptType"/> says which save file the data goes in;
         /// <paramref name="sceneName"/> is the object's own scene, or null to use the active scene. A null or empty
-        /// <paramref name="saveId"/> asks for an automatic save ID.
+        /// <paramref name="saveId"/> asks for an automatic save ID. <paramref name="turnOffSceneObject"/> is given only
+        /// for an object placed in a scene, so Forget writes a gone marker for it.
         /// </summary>
         public void RegisterScript(object owner, object savedObject, Type scriptType, string saveId, Type dataType,
-            Func<object> capture, Action<object> restore, string sceneName, string entryName)
+            Func<object> capture, Action<object> restore, string sceneName, string entryName, Action turnOffSceneObject = null)
         {
             events.Remember(SaveFileLookup.FindSaveFileClass(scriptType));
             bool hasSaveFile = saveFiles.TryGetDefinitionForSavedObject(scriptType, out SaveFileDefinition definition);
@@ -88,7 +88,7 @@ namespace AbstractPixel.SaveSystem
             bool wantsAutomaticSaveId = string.IsNullOrEmpty(saveId);
             if (wantsAutomaticSaveId)
             {
-                saveId = automaticSaveIds.Assign(savedObject, scriptType, saveFileName);
+                saveId = savedObjects.AssignAutomaticSaveId(savedObject, scriptType, saveFileName);
             }
 
             if (definition.Location == SaveLocation.Scene)
@@ -108,30 +108,37 @@ namespace AbstractPixel.SaveSystem
             SavedObjectEntry entry = new SavedObjectEntry(owner, saveId, saveFileName, definition.Location, sceneName, entryName, dataType, capture, restore)
             {
                 GameProfileId = ProfileManager.CurrentGameProfileId,
-                SavedObject = savedObject
+                SavedObject = savedObject,
+                TurnOffSceneObject = turnOffSceneObject
             };
-            registry.Add(entry);
-            // Whichever comes second: if the data can be loaded now, restore right away.
-            TryRestore(entry);
+            savedObjects.Track(entry);
         }
 
         /// <summary>Captures the object's current data, then forgets the object. Its data stays for the next save.</summary>
         public void Unregister(object owner)
         {
-            foreach (SavedObjectEntry entry in registry.GetEntriesOf(owner))
-            {
-                Capture(entry);
-                automaticSaveIds.Release(entry.SavedObject);
-            }
-            registry.Remove(owner);
+            savedObjects.Untrack(owner);
+        }
+
+        /// <summary>
+        /// Makes a saved object's data go away on purpose, such as a coin that was picked up. An object placed in a
+        /// scene gets a gone marker, so it stays gone after its scene loads again; a plain class or spawned copy loses
+        /// its data. Finds the entry from the object itself: a plain class, a saved script, its Savable Bridge, or its GameObject.
+        /// </summary>
+        public void Forget(object savedObject)
+        {
+            savedObjects.Forget(savedObject);
+        }
+
+        /// <summary>Stops tracking every entry this object owns without capturing it, for an object that turned itself off.</summary>
+        public void DropWithoutCapturing(object owner)
+        {
+            savedObjects.DropWithoutCapturing(owner);
         }
 
         public void SaveAll()
         {
-            foreach (SavedObjectEntry entry in registry.AllEntries.ToList())
-            {
-                Capture(entry);
-            }
+            savedObjects.CaptureAll();
             List<string> writtenFileNames = new List<string>();
             loadedData.WriteChanged(null, writtenFileNames);
             FinishSave();
@@ -163,10 +170,7 @@ namespace AbstractPixel.SaveSystem
 
         void Save(SaveFileDefinition definition)
         {
-            foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => entry.SaveFileName == definition.FileName).ToList())
-            {
-                Capture(entry);
-            }
+            savedObjects.CaptureAll(entry => entry.SaveFileName == definition.FileName);
             loadedData.WriteChanged(file => file.FileName == definition.FileName);
             FinishSave();
             // Saving one file counts as done even when nothing in it changed, so a "Saved" message always shows.
@@ -186,44 +190,7 @@ namespace AbstractPixel.SaveSystem
             }
 
             loadedData.DropFilesNamed(definition.FileName);
-            foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => entry.SaveFileName == definition.FileName).ToList())
-            {
-                TryRestore(entry);
-            }
-        }
-
-        /// <summary>
-        /// Removes a saved object's data on purpose, such as a coin that was picked up, and stops tracking it so it
-        /// can't write itself back. Finds the entry from the object itself: a plain class, a saved script, its
-        /// Savable Bridge, or its GameObject.
-        /// </summary>
-        public void Forget(object savedObject)
-        {
-            foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => BelongsTo(entry, savedObject)).ToList())
-            {
-                registry.RemoveEntry(entry.SaveFileName, entry.SaveId);
-                automaticSaveIds.Release(entry.SavedObject);
-                if (addresses.TryGetAddress(entry, out SaveFileAddress address))
-                {
-                    loadedData.Forget(address, entry.SaveId);
-                }
-            }
-        }
-
-        static bool BelongsTo(SavedObjectEntry entry, object savedObject)
-        {
-            bool isOwner = ReferenceEquals(entry.Owner, savedObject);
-            bool isSavedObject = ReferenceEquals(entry.SavedObject, savedObject);
-            if (isOwner || isSavedObject)
-            {
-                return true;
-            }
-
-            // Forget(gameObject) covers every saved script on it, through its Savable Bridge.
-            GameObject gameObject = savedObject as GameObject;
-            Component ownerComponent = entry.Owner as Component;
-            bool isOnThatGameObject = gameObject != null && ownerComponent != null && ownerComponent.gameObject == gameObject;
-            return isOnThatGameObject;
+            savedObjects.RestoreAll(entry => entry.SaveFileName == definition.FileName);
         }
 
         /// <summary>Re-reads every save file from disk and restores every registered object. Used by the editor's Load All.</summary>
@@ -231,10 +198,7 @@ namespace AbstractPixel.SaveSystem
         {
             loadedData.Clear();
             ReadGlobalSaveFiles();
-            foreach (SavedObjectEntry entry in registry.AllEntries.ToList())
-            {
-                TryRestore(entry);
-            }
+            savedObjects.RestoreAll();
         }
 
         /// <summary>Lets go of every object and event handler, so nothing outlives play mode.</summary>
@@ -246,8 +210,7 @@ namespace AbstractPixel.SaveSystem
             sceneInfo.SceneUnloaded -= OnSceneUnloaded;
             IDisposable disposableSceneInfo = sceneInfo as IDisposable;
             disposableSceneInfo?.Dispose();
-            registry.Clear();
-            automaticSaveIds.Clear();
+            savedObjects.Clear();
             loadedData.Clear();
         }
 
@@ -260,21 +223,7 @@ namespace AbstractPixel.SaveSystem
             loadedGameProfileId = gameProfileId;
             playtimeCountedUntil = unscaledTime();
 
-            foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => entry.Location != SaveLocation.Global).ToList())
-            {
-                // Whichever comes second: an object registered before any game profile was open belongs to this one.
-                if (entry.GameProfileId == null)
-                {
-                    entry.GameProfileId = gameProfileId;
-                }
-                // An object from another game profile moves over only if this game profile has data for it.
-                // Otherwise it keeps that game profile's values, and must never capture them into this one.
-                bool restored = TryRestore(entry);
-                if (restored)
-                {
-                    entry.GameProfileId = gameProfileId;
-                }
-            }
+            savedObjects.RestoreForOpenedGameProfile(gameProfileId);
             SaveEventBus.RaiseGameProfileOpened(GameProfiles.GetById(gameProfileId));
             events.RecordGameProfileLoads();
         }
@@ -299,20 +248,6 @@ namespace AbstractPixel.SaveSystem
             loadedData.DropGameProfileData();
             loadedGameProfileId = null;
             LoadEvents.ForgetGameProfileLoads();
-        }
-
-        bool TryRestore(SavedObjectEntry entry)
-        {
-            return addresses.TryGetAddress(entry, out SaveFileAddress address) && loadedData.TryRestore(entry, address);
-        }
-
-        void Capture(SavedObjectEntry entry)
-        {
-            bool belongsToOpenGameProfile = entry.Location == SaveLocation.Global || entry.GameProfileId == ProfileManager.CurrentGameProfileId;
-            if (belongsToOpenGameProfile && addresses.TryGetAddress(entry, out SaveFileAddress address))
-            {
-                loadedData.Capture(entry, address);
-            }
         }
 
         void FinishSave()

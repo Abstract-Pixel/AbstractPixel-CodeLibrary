@@ -93,6 +93,28 @@ namespace AbstractPixel.SaveSystem
             file.Changed = true;
         }
 
+        /// <summary>
+        /// Replaces one save ID's data with a gone marker, for an object placed in a scene that was forgotten, so it
+        /// turns itself off the next time its scene loads.
+        /// </summary>
+        public void MarkGone(SaveFileAddress address, string saveId, string entryName)
+        {
+            LoadedFile file = GetOrRead(address);
+            bool isAlreadyGone = file.Data.Entries.TryGetValue(saveId, out SaveFileEntry stored) && stored.Gone;
+            if (isAlreadyGone)
+            {
+                return;
+            }
+            file.Data.Entries[saveId] = new SaveFileEntry { Name = entryName, Gone = true };
+            file.Changed = true;
+        }
+
+        /// <summary>True when the save file holds a gone marker for this save ID.</summary>
+        public bool HasGoneMarker(SaveFileAddress address, string saveId)
+        {
+            return GetOrRead(address).Data.Entries.TryGetValue(saveId, out SaveFileEntry stored) && stored.Gone;
+        }
+
         /// <summary>Removes one save ID's data on purpose, for example a coin that was picked up.</summary>
         public void Forget(SaveFileAddress address, string saveId)
         {

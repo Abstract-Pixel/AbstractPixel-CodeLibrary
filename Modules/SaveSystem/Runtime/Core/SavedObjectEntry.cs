@@ -51,6 +51,15 @@ namespace AbstractPixel.SaveSystem
         public Func<object> Capture { get; }
         public Action<object> Restore { get; }
 
+        /// <summary>
+        /// Turns off an object placed in a scene when its save file holds a gone marker. Null for plain classes and
+        /// spawned copies, whose data Forget removes instead.
+        /// </summary>
+        public Action TurnOffSceneObject { get; set; }
+
+        /// <summary>An object placed in a scene: Forget writes a gone marker for it, so it stays gone after a reload.</summary>
+        public bool IsSceneObject => TurnOffSceneObject != null;
+
         public SavedObjectEntry(object owner, string saveId, string saveFileName, SaveLocation location, string sceneName,
             string entryName, Type dataType, Func<object> capture, Action<object> restore)
         {
