@@ -51,6 +51,19 @@ namespace AbstractPixel.SaveSystem.Tests
             return file.Entries[saveId].Data.ToObject<int>();
         }
 
+        // S5: the Savable Bridge asks this to tell a spawned copy from one of the scene's own objects.
+        [Test]
+        public void IsSceneAlreadyReady_TracksSceneReadyAndSceneUnloaded()
+        {
+            Assert.IsFalse(SaveActions.Session.IsSceneAlreadyReady("Forest"));
+
+            scene.SignalReady("Forest");
+            Assert.IsTrue(SaveActions.Session.IsSceneAlreadyReady("Forest"));
+
+            scene.Unload("Forest");
+            Assert.IsFalse(SaveActions.Session.IsSceneAlreadyReady("Forest"));
+        }
+
         [Test]
         public void DataLoadedFirst_RegisterRestoresRightAway()
         {

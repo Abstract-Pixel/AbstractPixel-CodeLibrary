@@ -108,7 +108,7 @@ namespace AbstractPixel.SaveSystem
             string first = SavedObjectEntry.Describe(registered.Owner);
             string second = SavedObjectEntry.Describe(refused.Owner);
             string fix = refused.Owner is Component
-                ? "If both are placed in a scene, remove the Savable Bridge from one of them and add it again, which gives it a new ID. If one was spawned with Instantiate, it shares its prefab's ID, and spawned copies can't be saved on their own yet."
+                ? "If both are placed in a scene, remove the Savable Bridge from one of them and add it again, which gives it a new ID. If one was spawned with Instantiate, it shares its prefab's ID: give it its own with SetSaveId right after Instantiate, before its Start."
                 : "Pass a different save ID to SaveActions.Register for one of them, or leave the save ID out to get an automatic one.";
             return $"[SaveSystem] Two saved objects use the save ID '{refused.SaveId}' in the save file '{refused.SaveFileName}': {first} and {second}. Only the first is saved; {second} was not registered. {fix}";
         }

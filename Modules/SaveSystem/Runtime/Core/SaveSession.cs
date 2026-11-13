@@ -25,6 +25,10 @@ namespace AbstractPixel.SaveSystem
         string loadedGameProfileId;
         double playtimeCountedUntil;
 
+        // Scenes whose SceneReady has already fired. A Savable Bridge Awoken after that is a spawned copy, not
+        // one of the scene's own objects, since every scene object's Awake runs before its scene becomes ready.
+        readonly HashSet<string> readySceneNames = new HashSet<string>();
+
         /// <summary>The game profiles as handles, for game code: <c>SaveActions.GameProfiles</c>.</summary>
         public GameProfileList GameProfiles { get; }
 
@@ -279,6 +283,7 @@ namespace AbstractPixel.SaveSystem
         // A newly loaded scene's Savable Bridges have registered and restored, so its Scene files have loaded.
         void OnSceneReady(string sceneName)
         {
+            readySceneNames.Add(sceneName);
             bool isGameProfileOpen = ProfileManager.CurrentGameProfileId != null;
             if (isGameProfileOpen)
             {
@@ -288,8 +293,15 @@ namespace AbstractPixel.SaveSystem
 
         void OnSceneUnloaded(string sceneName)
         {
+            readySceneNames.Remove(sceneName);
             LoadEvents.ForgetSceneLoads(sceneName);
         }
+
+        /// <summary>
+        /// True once the scene's SceneReady has fired. The Savable Bridge asks this to tell a spawned copy (Awoken
+        /// after its scene was already ready) from one of the scene's own objects (Awoken before that).
+        /// </summary>
+        public bool IsSceneAlreadyReady(string sceneName) => readySceneNames.Contains(sceneName);
 
         void OnGameProfileClosed()
         {

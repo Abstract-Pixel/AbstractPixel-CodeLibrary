@@ -27,6 +27,10 @@ namespace AbstractPixel.SaveSystem
         readonly string stringSeparatorIdentifier = "#";
 
         private bool hasStarted;
+        private bool isRegistered;
+
+        // Set by SetSaveId, for a spawned copy. Null means "use this bridge's own UniqueId", the scene-placed case.
+        private string spawnedCopySaveId;
 
 #if UNITY_EDITOR
         private void OnValidate()
@@ -146,7 +150,7 @@ namespace AbstractPixel.SaveSystem
         private void Start()
         {
             hasStarted = true;
-            RegisterTargets();
+            TryRegisterTargets();
         }
 
         // Covers objects that were disabled and enabled again after their first Start.
@@ -154,7 +158,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (hasStarted)
             {
-                RegisterTargets();
+                TryRegisterTargets();
             }
         }
 
@@ -162,6 +166,43 @@ namespace AbstractPixel.SaveSystem
         private void OnDisable()
         {
             SaveActions.Unregister(this);
+            isRegistered = false;
+        }
+
+        /// <summary>
+        /// Gives a spawned copy its own save ID, so it doesn't share its prefab's. Call it right after Instantiate,
+        /// before the copy's Start; the bridge waits for it instead of registering with the prefab's shared ID.
+        /// </summary>
+        public void SetSaveId(string saveId)
+        {
+            if (string.IsNullOrEmpty(saveId))
+            {
+                Debug.LogError($"[SaveSystem] SetSaveId on '{gameObject.name}' needs a non-empty ID.");
+                return;
+            }
+            spawnedCopySaveId = saveId;
+            TryRegisterTargets();
+        }
+
+        private void TryRegisterTargets()
+        {
+            if (isRegistered) return;
+
+            if (spawnedCopySaveId == null && IsSpawnedCopyWithNoIdYet())
+            {
+                Debug.LogWarning($"[SaveSystem] '{gameObject.name}' was spawned after its scene was already loaded, with no SetSaveId call, so it isn't saved. Call its SetSaveId right after Instantiate, before Start: goblin.SetSaveId(\"a unique id\");");
+                return;
+            }
+
+            RegisterTargets();
+            isRegistered = true;
+        }
+
+        // A Savable Bridge Awoken after its own scene already became ready is a spawned copy, not one of the
+        // scene's own objects: every scene object's Awake runs before its scene's SceneReady fires.
+        private bool IsSpawnedCopyWithNoIdYet()
+        {
+            return SaveActions.Session?.IsSceneAlreadyReady(gameObject.scene.name) ?? false;
         }
 
         private void RegisterTargets()
@@ -169,10 +210,13 @@ namespace AbstractPixel.SaveSystem
             SaveSession session = SaveActions.Session;
             if (session == null) return;
 
+            // A spawned copy's data is forgotten outright; it has no gone marker to turn itself off with.
+            Action turnOffSceneObject = spawnedCopySaveId == null ? TurnOffBecauseForgotten : null;
+
             foreach (SavableTarget target in savableTargets)
             {
                 if (target == null || target.Script == null || target.Identification == null) continue;
-                if (!RegisterOneTarget(session, target)) continue;
+                if (!RegisterOneTarget(session, target, turnOffSceneObject)) continue;
 
                 // A gone marker turned this object off; the rest of its scripts stay unregistered.
                 if (!gameObject.activeSelf)
@@ -184,20 +228,20 @@ namespace AbstractPixel.SaveSystem
 
         // The object's own scene, so with additive scenes a chest saves into its scene's file, not the active scene's.
         // Returns false for a target Awake couldn't reflect, which leaves it unregistered.
-        private bool RegisterOneTarget(SaveSession session, SavableTarget target)
+        private bool RegisterOneTarget(SaveSession session, SavableTarget target, Action turnOffSceneObject)
         {
             if (target.CaptureDataMethod != null)
             {
                 session.RegisterScript(this, target.Script, target.Script.GetType(), GetSaveId(target), target.DataToSaveType,
                     () => InvokeScript(target.CaptureDataMethod, target.Script, null),
                     data => InvokeScript(target.RestoreDataMethod, target.Script, new[] { data }),
-                    gameObject.scene.name, GetEntryName(target), TurnOffBecauseForgotten);
+                    gameObject.scene.name, GetEntryName(target), turnOffSceneObject);
                 return true;
             }
             if (target.Fields != null)
             {
                 session.RegisterSavedFieldScript(this, target.Script, target.Fields, GetSaveId(target),
-                    gameObject.scene.name, GetEntryName(target), TurnOffBecauseForgotten);
+                    gameObject.scene.name, GetEntryName(target), turnOffSceneObject);
                 return true;
             }
             return false;
@@ -211,12 +255,18 @@ namespace AbstractPixel.SaveSystem
             gameObject.SetActive(false);
         }
 
-        /// <summary>The save ID of one saved script on this GameObject: "&lt;bridge GUID&gt;/&lt;script GUID&gt;".</summary>
+        /// <summary>The save ID of one saved script on this GameObject: "&lt;bridge GUID or SetSaveId&gt;/&lt;script GUID&gt;".</summary>
         private string GetSaveId(SavableTarget target)
+        {
+            string bridgeGuid = spawnedCopySaveId ?? DefaultBridgeGuid();
+            return $"{bridgeGuid}/{target.Identification.GUID}";
+        }
+
+        private string DefaultBridgeGuid()
         {
             int separatorIndex = UniqueId.LastIndexOf(stringSeparatorIdentifier, StringComparison.Ordinal);
             string bridgeGuid = separatorIndex >= 0 ? UniqueId.Substring(separatorIndex + 1) : UniqueId;
-            return $"{bridgeGuid.Trim('[', ']')}/{target.Identification.GUID}";
+            return bridgeGuid.Trim('[', ']');
         }
 
         // A readable name for people reading the save file. Matching uses only the save ID.
