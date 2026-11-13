@@ -50,7 +50,10 @@ namespace AbstractPixel.SaveSystem.Editor
             {
                 VisualElement container = new VisualElement();
                 container.Add(dropdown);
-                container.Add(new HelpBox("There is no save system config yet. Use Tools > External Project Tools > Save System > Create Config.", HelpBoxMessageType.Warning));
+                container.Add(new HelpBox("There is no save system config yet, so there are no save files to pick.", HelpBoxMessageType.Warning));
+                Button createConfigButton = new Button(SaveSystemConfigCreator.CreateConfigFromMenu) { text = "Create Config" };
+                createConfigButton.tooltip = "Creates Assets/Resources/SaveSystemConfig.asset and selects it. Select this object again afterwards to see the save files.";
+                container.Add(createConfigButton);
                 return container;
             }
             return dropdown;

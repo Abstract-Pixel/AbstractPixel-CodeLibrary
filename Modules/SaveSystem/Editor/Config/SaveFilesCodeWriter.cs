@@ -133,8 +133,16 @@ namespace AbstractPixel.SaveSystem.Editor
             SaveSystemConfigSO config = SaveSystemConfigFinder.FindInProject();
             if (config == null)
             {
-                Debug.LogError("[SaveSystem] There is no save system config yet, so SaveFiles.cs can't be written. Use Tools > External Project Tools > Save System > Create Config first.");
-                return;
+                bool createConfig = EditorUtility.DisplayDialog(
+                    "No save system config",
+                    "SaveFiles.cs is written from the save system config, and there is none yet. Create one now at Assets/Resources/SaveSystemConfig.asset?",
+                    "Create Config",
+                    "Cancel");
+                if (!createConfig)
+                {
+                    return;
+                }
+                config = SaveSystemConfigCreator.CreateOrFind(SaveSystemConfigFinder.ConfigAssetPath);
             }
             WriteFile(config);
             Debug.Log($"[SaveSystem] Wrote {config.SaveFilesScriptPath} from the save file list.");
