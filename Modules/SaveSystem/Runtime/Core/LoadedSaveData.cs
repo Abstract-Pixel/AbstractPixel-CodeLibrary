@@ -186,6 +186,12 @@ namespace AbstractPixel.SaveSystem
             }
         }
 
+        /// <summary>Forgets the loaded copy of one file, so the next use reads it from disk again. Unsaved changes in it are lost.</summary>
+        public void DropKey(string key)
+        {
+            filesByKey.Remove(key);
+        }
+
         public void Clear()
         {
             filesByKey.Clear();

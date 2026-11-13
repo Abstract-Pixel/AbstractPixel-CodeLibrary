@@ -47,6 +47,18 @@ namespace AbstractPixel.SaveSystem
             return WriteCheckedText<T>(key, text, keepBackup);
         }
 
+        /// <summary>
+        /// Deletes the stored text and its backup, so a later read finds nothing instead of loading the backup as if
+        /// the file were missing. Returns true if anything was deleted.
+        /// </summary>
+        public bool Delete(string key)
+        {
+            string backupKey = paths.GetBackupKey(key);
+            bool deletedBackup = storage.Exists(backupKey) && storage.Delete(backupKey);
+            bool deletedMain = storage.Exists(key) && storage.Delete(key);
+            return deletedMain || deletedBackup;
+        }
+
         /// <summary>Reads the content. With <paramref name="useBackup"/> a missing or corrupt main text falls back to the backup.</summary>
         public bool TryRead<T>(string key, out T content, bool useBackup = true) where T : IVersionedSaveData
         {

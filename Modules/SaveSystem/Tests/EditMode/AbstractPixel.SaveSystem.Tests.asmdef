@@ -2,6 +2,7 @@
     "name": "AbstractPixel.SaveSystem.Tests",
     "rootNamespace": "AbstractPixel.SaveSystem.Tests",
     "references": [
+        "AbstractPixel.Core",
         "AbstractPixel.SaveSystem",
         "AbstractPixel.SaveSystem.Editor",
         "UnityEngine.TestRunner",

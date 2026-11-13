@@ -58,7 +58,8 @@ namespace AbstractPixel.SaveSystem
 
         /// <summary>
         /// Reads one save file from disk again and restores every saved object in it, throwing away changes that
-        /// weren't saved. Use it after another tool wrote the file directly. Example: <c>SaveActions.Reload&lt;SaveFiles.Input&gt;();</c>
+        /// weren't saved. SaveStorage.WriteText already does this for you; use Reload when something outside the save system
+        /// changed the file on disk. Example: <c>SaveActions.Reload&lt;SaveFiles.Input&gt;();</c>
         /// </summary>
         public static void Reload<TFile>() where TFile : ISaveFile => session?.Reload(typeof(TFile));
 

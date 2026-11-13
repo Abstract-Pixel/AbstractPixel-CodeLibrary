@@ -49,6 +49,7 @@ namespace AbstractPixel.SaveSystem
             FileAccess = new SaveFileAccess(saveFiles, storage, store, GameProfiles);
             events = new SaveSessionEvents(saveFiles, loadedData, addresses, sceneInfo, LoadEvents);
             savedObjects = new SavedObjectTracker(loadedData, addresses, ProfileManager);
+            FileAccess.FileChanged += OnFileChangedThroughSaveStorage;
             ProfileManager.Opened += OnGameProfileOpened;
             ProfileManager.Closed += OnGameProfileClosed;
             sceneInfo.SceneReady += OnSceneReady;
@@ -204,6 +205,7 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Lets go of every object and event handler, so nothing outlives play mode.</summary>
         public void Dispose()
         {
+            FileAccess.FileChanged -= OnFileChangedThroughSaveStorage;
             ProfileManager.Opened -= OnGameProfileOpened;
             ProfileManager.Closed -= OnGameProfileClosed;
             sceneInfo.SceneReady -= OnSceneReady;
@@ -226,6 +228,14 @@ namespace AbstractPixel.SaveSystem
             savedObjects.RestoreForOpenedGameProfile(gameProfileId);
             SaveEventBus.RaiseGameProfileOpened(GameProfiles.GetById(gameProfileId));
             events.RecordGameProfileLoads();
+        }
+
+        // SaveStorage wrote or deleted a file: the old copy in memory would overwrite it on the next save, so it is
+        // dropped, and the registered objects in that file take the new text, the same work Reload does.
+        void OnFileChangedThroughSaveStorage(string key)
+        {
+            loadedData.DropKey(key);
+            savedObjects.RestoreAll(entry => addresses.TryGetAddress(entry, out SaveFileAddress address) && address.Key == key);
         }
 
         // A newly loaded scene's Savable Bridges have registered and restored, so its Scene files have loaded.

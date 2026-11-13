@@ -29,7 +29,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void GetFilePath_GlobalSaveFile_IsInTheGlobalFolder()
         {
-            string path = files.GetFilePath(typeof(TestSettingsFile), null, null);
+            string path = files.GetFilePath(typeof(TestSettingsFile), SaveFileTarget.OpenGameProfile, nameof(SaveStorage.GetFilePath));
 
             Assert.AreEqual(Path.Combine(Path.GetFullPath(temporaryRootFolder), "Global", "Settings.json"), path);
         }
