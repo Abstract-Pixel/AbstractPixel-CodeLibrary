@@ -84,6 +84,15 @@ namespace AbstractPixel.SaveSystem
         public void Register(object savedObject, string saveId)
         {
             SavedFieldSet fields = new SavedFieldSet(savedObject.GetType());
+            if (!fields.IsValid)
+            {
+                // The editor already blocked play mode and the build over this; here it is a safety net.
+                foreach (string problem in fields.Problems)
+                {
+                    Debug.LogError($"{problem} {savedObject.GetType().Name} is not registered.");
+                }
+                return;
+            }
             RegisterScript(savedObject, savedObject, savedObject.GetType(), saveId, typeof(JObject),
                 () => fields.Capture(savedObject, serializer),
                 data => fields.Restore(savedObject, (JObject)data, serializer),

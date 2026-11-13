@@ -21,6 +21,12 @@ namespace AbstractPixel.SaveSystem
 
         readonly List<SavedField> fields = new List<SavedField>();
 
+        /// <summary>One error per invalid [Save] field found while building this set, naming the type, the field and the fix.</summary>
+        public List<string> Problems { get; } = new List<string>();
+
+        /// <summary>True when every [Save] field on the class is valid. An invalid field is left out of Capture and Restore.</summary>
+        public bool IsValid => Problems.Count == 0;
+
         public SavedFieldSet(Type savedType)
         {
             const BindingFlags declaredInstanceFields = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
@@ -29,16 +35,21 @@ namespace AbstractPixel.SaveSystem
                 foreach (FieldInfo field in type.GetFields(declaredInstanceFields))
                 {
                     SaveAttribute saved = field.GetCustomAttribute<SaveAttribute>();
-                    if (saved != null)
+                    if (saved == null)
                     {
-                        fields.Add(new SavedField { Field = field, Key = field.Name, FormerlyKey = saved.Formerly });
+                        continue;
                     }
+
+                    string problem = SavedFieldRules.ProblemWith(field);
+                    if (problem != null)
+                    {
+                        Problems.Add(problem);
+                        continue;
+                    }
+                    fields.Add(new SavedField { Field = field, Key = field.Name, FormerlyKey = saved.Formerly });
                 }
             }
         }
-
-        /// <summary>True when the class has at least one [Save] field.</summary>
-        public bool HasAnyField => fields.Count > 0;
 
         /// <summary>Reads every field's current value into a JSON object keyed by field name.</summary>
         public JObject Capture(object instance, SaveJson serializer)
