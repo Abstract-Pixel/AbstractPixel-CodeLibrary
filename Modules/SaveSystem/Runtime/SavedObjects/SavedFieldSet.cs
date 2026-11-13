@@ -27,6 +27,9 @@ namespace AbstractPixel.SaveSystem
         /// <summary>True when every [Save] field on the class is valid. An invalid field is left out of Capture and Restore.</summary>
         public bool IsValid => Problems.Count == 0;
 
+        /// <summary>True when the class has at least one [Save] field, valid or not. SavedScript.IsSaved asks this.</summary>
+        public bool HasAnyField => fields.Count > 0 || Problems.Count > 0;
+
         public SavedFieldSet(Type savedType)
         {
             const BindingFlags declaredInstanceFields = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;

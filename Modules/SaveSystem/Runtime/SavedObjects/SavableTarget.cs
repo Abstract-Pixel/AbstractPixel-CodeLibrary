@@ -16,6 +16,9 @@ namespace AbstractPixel.SaveSystem
         public MethodInfo RestoreDataMethod;
         public Type DataToSaveType;
 
+        // Runtime Only. Set instead of the three fields above when the script has [Save] fields and no ISavable.
+        public SavedFieldSet Fields;
+
         public SavableTarget(MonoBehaviour _script, SavableIdentification _identification)
         {
             Script = _script;

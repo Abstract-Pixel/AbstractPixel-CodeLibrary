@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace AbstractPixel.SaveSystem
 {
     /// <summary>
@@ -25,6 +27,29 @@ namespace AbstractPixel.SaveSystem
                 return false;
             }
             return !IsTheSameObjectInAnyScene(lastKnownGlobalObjectId, currentGlobalObjectId);
+        }
+
+        // B1: a never-saved scene gives every bridge the same empty id, so a copy keeps the original's UniqueId
+        // until the scene is first saved. Once it is, the two bridges' ids finally differ; whichever sibling's id
+        // sorts first keeps the UniqueId, and this one needs a new GUID.
+        public static bool IsDuplicateOfAnotherBridge(string myUniqueId, string myCurrentGlobalObjectId, IEnumerable<(string UniqueId, string GlobalObjectId)> siblingBridges)
+        {
+            if (string.IsNullOrEmpty(myUniqueId) || !IsFromASavedScene(myCurrentGlobalObjectId))
+            {
+                return false;
+            }
+
+            foreach ((string siblingUniqueId, string siblingGlobalObjectId) in siblingBridges)
+            {
+                bool sharesMyUniqueId = siblingUniqueId == myUniqueId;
+                bool isAGenuinelyDifferentObject = siblingGlobalObjectId != myCurrentGlobalObjectId;
+                bool siblingKeepsTheSharedId = string.CompareOrdinal(siblingGlobalObjectId, myCurrentGlobalObjectId) < 0;
+                if (sharesMyUniqueId && isAGenuinelyDifferentObject && siblingKeepsTheSharedId)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>True for an id of an object in a saved scene, the only kind worth remembering.</summary>

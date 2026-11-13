@@ -33,7 +33,9 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Null when the class is fine. Otherwise the error for a class with both [Save] fields and ISavable.</summary>
         public static string ProblemWithClass(Type savedClass)
         {
-            if (SavedScript.IsSaved(savedClass))
+            // Called only for a class TypeCache already found a [Save] field on, so this checks ISavable specifically:
+            // SavedScript.IsSaved would always be true here once it also recognises [Save] fields (S3).
+            if (SavedScript.FindSavableInterface(savedClass) != null)
             {
                 return $"[SaveSystem] {savedClass.Name} has both [Save] fields and ISavable. Pick one: [Save] fields for plain data, or ISavable<TData> for data that needs its own CaptureData and RestoreData.";
             }

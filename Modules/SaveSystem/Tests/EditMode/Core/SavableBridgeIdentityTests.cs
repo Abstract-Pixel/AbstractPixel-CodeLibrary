@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace AbstractPixel.SaveSystem.Tests
@@ -47,6 +48,53 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             Assert.IsFalse(SavableBridgeIdentity.IsFromASavedScene(NeverSavedScene));
             Assert.IsTrue(SavableBridgeIdentity.IsFromASavedScene(Forest));
+        }
+
+        // B1: two bridges copied in a never-saved scene share a UniqueId until the scene is first saved.
+        [Test]
+        public void TwoBridgesSharingAUniqueId_InASavedScene_TheLaterOneNeedsANewGuid()
+        {
+            List<(string UniqueId, string GlobalObjectId)> siblings = new List<(string UniqueId, string GlobalObjectId)>
+            {
+                (UniqueId, Forest)
+            };
+
+            Assert.IsTrue(SavableBridgeIdentity.IsDuplicateOfAnotherBridge(UniqueId, ForestCopyOfTheChest, siblings),
+                "Forest sorts before ForestCopyOfTheChest, so the original keeps the UniqueId and the copy needs a new one.");
+        }
+
+        [Test]
+        public void TwoBridgesSharingAUniqueId_InASavedScene_TheEarlierOneKeepsIt()
+        {
+            List<(string UniqueId, string GlobalObjectId)> siblings = new List<(string UniqueId, string GlobalObjectId)>
+            {
+                (UniqueId, ForestCopyOfTheChest)
+            };
+
+            Assert.IsFalse(SavableBridgeIdentity.IsDuplicateOfAnotherBridge(UniqueId, Forest, siblings));
+        }
+
+        [Test]
+        public void BridgesWithDifferentUniqueIds_NeverClash()
+        {
+            List<(string UniqueId, string GlobalObjectId)> siblings = new List<(string UniqueId, string GlobalObjectId)>
+            {
+                ("Door GameObject #[other]", ForestCopyOfTheChest)
+            };
+
+            Assert.IsFalse(SavableBridgeIdentity.IsDuplicateOfAnotherBridge(UniqueId, Forest, siblings));
+        }
+
+        [Test]
+        public void InANeverSavedScene_NothingClashesYet()
+        {
+            List<(string UniqueId, string GlobalObjectId)> siblings = new List<(string UniqueId, string GlobalObjectId)>
+            {
+                (UniqueId, NeverSavedScene)
+            };
+
+            Assert.IsFalse(SavableBridgeIdentity.IsDuplicateOfAnotherBridge(UniqueId, NeverSavedScene, siblings),
+                "Nothing can tell the copies apart until the scene is saved.");
         }
     }
 }

@@ -84,19 +84,45 @@ namespace AbstractPixel.SaveSystem
         public void Register(object savedObject, string saveId)
         {
             SavedFieldSet fields = new SavedFieldSet(savedObject.GetType());
-            if (!fields.IsValid)
+            if (RefusedBecauseFieldsAreInvalid(fields, savedObject.GetType()))
             {
-                // The editor already blocked play mode and the build over this; here it is a safety net.
-                foreach (string problem in fields.Problems)
-                {
-                    Debug.LogError($"{problem} {savedObject.GetType().Name} is not registered.");
-                }
                 return;
             }
             RegisterScript(savedObject, savedObject, savedObject.GetType(), saveId, typeof(JObject),
                 () => fields.Capture(savedObject, serializer),
                 data => fields.Restore(savedObject, (JObject)data, serializer),
                 null, savedObject.GetType().Name);
+        }
+
+        /// <summary>
+        /// The Savable Bridge's path for a saved script with [Save] fields and no ISavable. Mirrors RegisterScript,
+        /// but captures and restores through <paramref name="fields"/> instead of the script's own methods.
+        /// </summary>
+        public void RegisterSavedFieldScript(object owner, object savedObject, SavedFieldSet fields, string saveId,
+            string sceneName, string entryName, Action turnOffSceneObject)
+        {
+            if (RefusedBecauseFieldsAreInvalid(fields, savedObject.GetType()))
+            {
+                return;
+            }
+            RegisterScript(owner, savedObject, savedObject.GetType(), saveId, typeof(JObject),
+                () => fields.Capture(savedObject, serializer),
+                data => fields.Restore(savedObject, (JObject)data, serializer),
+                sceneName, entryName, turnOffSceneObject);
+        }
+
+        // The editor already blocked play mode and the build over an invalid [Save] field; here it is a safety net.
+        bool RefusedBecauseFieldsAreInvalid(SavedFieldSet fields, Type savedObjectType)
+        {
+            if (fields.IsValid)
+            {
+                return false;
+            }
+            foreach (string problem in fields.Problems)
+            {
+                Debug.LogError($"{problem} {savedObjectType.Name} is not registered.");
+            }
+            return true;
         }
 
         /// <summary>

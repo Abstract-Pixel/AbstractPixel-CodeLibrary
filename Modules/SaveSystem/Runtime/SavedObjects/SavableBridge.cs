@@ -41,7 +41,9 @@ namespace AbstractPixel.SaveSystem
         private void ValidateIdentity()
         {
             string currentGlobalId = UnityEditor.GlobalObjectId.GetGlobalObjectIdSlow(this).ToString();
-            if (SavableBridgeIdentity.NeedsNewGuid(UniqueId, lastKnownGlobalObjectID, currentGlobalId))
+            bool needsNewGuid = SavableBridgeIdentity.NeedsNewGuid(UniqueId, lastKnownGlobalObjectID, currentGlobalId)
+                || SavableBridgeIdentity.IsDuplicateOfAnotherBridge(UniqueId, currentGlobalId, SiblingBridgeIdentities());
+            if (needsNewGuid)
             {
                 string newGuid = Guid.NewGuid().ToString();
                 UniqueId = $"{gameObject.name} GameObject {stringSeparatorIdentifier}[{newGuid}]";
@@ -54,6 +56,17 @@ namespace AbstractPixel.SaveSystem
             {
                 lastKnownGlobalObjectID = currentGlobalId;
                 UnityEditor.EditorUtility.SetDirty(this);
+            }
+        }
+
+        // Other Savable Bridges in this GameObject's scene, so ValidateIdentity can tell a copy from the original
+        // once the scene is first saved and their GlobalObjectIds finally differ (B1).
+        private IEnumerable<(string UniqueId, string GlobalObjectId)> SiblingBridgeIdentities()
+        {
+            foreach (SavableBridge bridge in FindObjectsByType<SavableBridge>(FindObjectsSortMode.None))
+            {
+                if (bridge == this || bridge == null || bridge.gameObject.scene != gameObject.scene) continue;
+                yield return (bridge.UniqueId, UnityEditor.GlobalObjectId.GetGlobalObjectIdSlow(bridge).ToString());
             }
         }
 
@@ -116,11 +129,16 @@ namespace AbstractPixel.SaveSystem
                 if (target == null || target.Script == null) continue;
 
                 Type interfaceType = SavedScript.FindSavableInterface(target.Script.GetType());
-                if (interfaceType == null) continue;
-
-                target.CaptureDataMethod = interfaceType.GetMethod(isavableCaptureMethod);
-                target.RestoreDataMethod = interfaceType.GetMethod(isavableRestoreMethod);
-                target.DataToSaveType = interfaceType.GetGenericArguments()[0];
+                if (interfaceType != null)
+                {
+                    target.CaptureDataMethod = interfaceType.GetMethod(isavableCaptureMethod);
+                    target.RestoreDataMethod = interfaceType.GetMethod(isavableRestoreMethod);
+                    target.DataToSaveType = interfaceType.GetGenericArguments()[0];
+                }
+                else
+                {
+                    target.Fields = new SavedFieldSet(target.Script.GetType());
+                }
             }
         }
 
@@ -153,13 +171,8 @@ namespace AbstractPixel.SaveSystem
 
             foreach (SavableTarget target in savableTargets)
             {
-                if (target == null || target.Script == null || target.CaptureDataMethod == null || target.Identification == null) continue;
-
-                // The object's own scene, so with additive scenes a chest saves into its scene's file, not the active scene's.
-                session.RegisterScript(this, target.Script, target.Script.GetType(), GetSaveId(target), target.DataToSaveType,
-                    () => InvokeScript(target.CaptureDataMethod, target.Script, null),
-                    data => InvokeScript(target.RestoreDataMethod, target.Script, new[] { data }),
-                    gameObject.scene.name, GetEntryName(target), TurnOffBecauseForgotten);
+                if (target == null || target.Script == null || target.Identification == null) continue;
+                if (!RegisterOneTarget(session, target)) continue;
 
                 // A gone marker turned this object off; the rest of its scripts stay unregistered.
                 if (!gameObject.activeSelf)
@@ -167,6 +180,27 @@ namespace AbstractPixel.SaveSystem
                     return;
                 }
             }
+        }
+
+        // The object's own scene, so with additive scenes a chest saves into its scene's file, not the active scene's.
+        // Returns false for a target Awake couldn't reflect, which leaves it unregistered.
+        private bool RegisterOneTarget(SaveSession session, SavableTarget target)
+        {
+            if (target.CaptureDataMethod != null)
+            {
+                session.RegisterScript(this, target.Script, target.Script.GetType(), GetSaveId(target), target.DataToSaveType,
+                    () => InvokeScript(target.CaptureDataMethod, target.Script, null),
+                    data => InvokeScript(target.RestoreDataMethod, target.Script, new[] { data }),
+                    gameObject.scene.name, GetEntryName(target), TurnOffBecauseForgotten);
+                return true;
+            }
+            if (target.Fields != null)
+            {
+                session.RegisterSavedFieldScript(this, target.Script, target.Fields, GetSaveId(target),
+                    gameObject.scene.name, GetEntryName(target), TurnOffBecauseForgotten);
+                return true;
+            }
+            return false;
         }
 
         // Called from Start when a save ID has a gone marker. This bridge runs first, so the other scripts on this

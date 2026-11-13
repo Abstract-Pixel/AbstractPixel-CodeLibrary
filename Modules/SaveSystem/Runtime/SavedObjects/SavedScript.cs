@@ -8,10 +8,10 @@ namespace AbstractPixel.SaveSystem
     /// </summary>
     internal static class SavedScript
     {
-        /// <summary>True when the class implements ISavable&lt;TData&gt;, directly or through ISavable&lt;TData, TFile&gt;.</summary>
+        /// <summary>True when the class implements ISavable&lt;TData&gt; (directly or through ISavable&lt;TData, TFile&gt;), or has at least one [Save] field.</summary>
         public static bool IsSaved(Type scriptClass)
         {
-            return FindSavableInterface(scriptClass) != null;
+            return FindSavableInterface(scriptClass) != null || new SavedFieldSet(scriptClass).HasAnyField;
         }
 
         /// <summary>The ISavable&lt;TData&gt; the class implements, whose CaptureData and RestoreData the bridge calls. Null if none.</summary>
