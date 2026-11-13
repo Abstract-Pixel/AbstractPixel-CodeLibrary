@@ -1,639 +1,352 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Save System v2 Roadmap</title>
-  <!-- Tailwind 3.4.16 classes used on this page, built ahead of time so the page needs no script or internet. -->
-  <style>*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.static{position:static}.fixed{position:fixed}.sticky{position:sticky}.mx-auto{margin-left:auto;margin-right:auto}.mb-2{margin-bottom:.5rem}.ml-auto{margin-left:auto}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.w-16{width:4rem}.w-32{width:8rem}.w-36{width:9rem}.min-w-\[640px\]{min-width:640px}.max-w-3xl{max-width:48rem}.max-w-5xl{max-width:64rem}.flex-1{flex:1 1 0%}.list-disc{list-style-type:disc}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-\[1fr_auto_auto\]{grid-template-columns:1fr auto auto}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.items-baseline{align-items:baseline}.items-stretch{align-items:stretch}.justify-center{justify-content:center}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-x-3{-moz-column-gap:.75rem;column-gap:.75rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-20>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(5rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.space-y-8>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem*var(--tw-space-y-reverse))}.self-center{align-self:center}.overflow-x-auto{overflow-x:auto}.rounded{border-radius:.25rem}.rounded-2xl{border-radius:1rem}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-l-4{border-left-width:4px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-amber-500\/30{border-color:rgba(245,158,11,.3)}.border-amber-500\/40{border-color:rgba(245,158,11,.4)}.border-amber-500\/50{border-color:rgba(245,158,11,.5)}.border-emerald-400{--tw-border-opacity:1;border-color:rgb(52 211 153/var(--tw-border-opacity,1))}.border-emerald-400\/70{border-color:rgba(52,211,153,.7)}.border-emerald-500\/30{border-color:rgba(16,185,129,.3)}.border-emerald-500\/40{border-color:rgba(16,185,129,.4)}.border-emerald-500\/50{border-color:rgba(16,185,129,.5)}.border-emerald-500\/60{border-color:rgba(16,185,129,.6)}.border-emerald-500\/70{border-color:rgba(16,185,129,.7)}.border-indigo-500\/30{border-color:rgba(99,102,241,.3)}.border-indigo-500\/40{border-color:rgba(99,102,241,.4)}.border-indigo-500\/50{border-color:rgba(99,102,241,.5)}.border-pink-400\/60{border-color:rgba(244,114,182,.6)}.border-pink-500\/30{border-color:rgba(236,72,153,.3)}.border-pink-500\/40{border-color:rgba(236,72,153,.4)}.border-red-500\/30{border-color:rgba(239,68,68,.3)}.border-red-500\/40{border-color:rgba(239,68,68,.4)}.border-red-500\/60{border-color:rgba(239,68,68,.6)}.border-sky-400{--tw-border-opacity:1;border-color:rgb(56 189 248/var(--tw-border-opacity,1))}.border-sky-400\/40{border-color:rgba(56,189,248,.4)}.border-slate-500{--tw-border-opacity:1;border-color:rgb(100 116 139/var(--tw-border-opacity,1))}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105/var(--tw-border-opacity,1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85/var(--tw-border-opacity,1))}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59/var(--tw-border-opacity,1))}.border-teal-400{--tw-border-opacity:1;border-color:rgb(45 212 191/var(--tw-border-opacity,1))}.border-teal-400\/50{border-color:rgba(45,212,191,.5)}.bg-amber-500\/10{background-color:rgba(245,158,11,.1)}.bg-amber-500\/15{background-color:rgba(245,158,11,.15)}.bg-amber-500\/5{background-color:rgba(245,158,11,.05)}.bg-black\/30{background-color:rgba(0,0,0,.3)}.bg-black\/40{background-color:rgba(0,0,0,.4)}.bg-emerald-500\/10{background-color:rgba(16,185,129,.1)}.bg-emerald-500\/15{background-color:rgba(16,185,129,.15)}.bg-emerald-500\/20{background-color:rgba(16,185,129,.2)}.bg-emerald-500\/30{background-color:rgba(16,185,129,.3)}.bg-emerald-500\/5{background-color:rgba(16,185,129,.05)}.bg-indigo-500\/10{background-color:rgba(99,102,241,.1)}.bg-indigo-500\/15{background-color:rgba(99,102,241,.15)}.bg-indigo-500\/30{background-color:rgba(99,102,241,.3)}.bg-indigo-500\/5{background-color:rgba(99,102,241,.05)}.bg-pink-500\/10{background-color:rgba(236,72,153,.1)}.bg-pink-500\/20{background-color:rgba(236,72,153,.2)}.bg-pink-500\/5{background-color:rgba(236,72,153,.05)}.bg-red-500\/10{background-color:rgba(239,68,68,.1)}.bg-red-500\/30{background-color:rgba(239,68,68,.3)}.bg-red-500\/5{background-color:rgba(239,68,68,.05)}.bg-sky-500\/20{background-color:rgba(14,165,233,.2)}.bg-sky-500\/5{background-color:rgba(14,165,233,.05)}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85/var(--tw-bg-opacity,1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59/var(--tw-bg-opacity,1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42/var(--tw-bg-opacity,1))}.bg-slate-900\/60{background-color:rgba(15,23,42,.6)}.bg-teal-500\/10{background-color:rgba(20,184,166,.1)}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.pl-12{padding-left:3rem}.pl-4{padding-left:1rem}.pl-5{padding-left:1.25rem}.pl-8{padding-left:2rem}.pt-1{padding-top:.25rem}.pt-2{padding-top:.5rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace}.font-sans{font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji}.font-serif{font-family:ui-serif,Georgia,Cambria,Times New Roman,Times,serif}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.uppercase{text-transform:uppercase}.tracking-wider{letter-spacing:.05em}.tracking-widest{letter-spacing:.1em}.text-amber-100{--tw-text-opacity:1;color:rgb(254 243 199/var(--tw-text-opacity,1))}.text-amber-200{--tw-text-opacity:1;color:rgb(253 230 138/var(--tw-text-opacity,1))}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77/var(--tw-text-opacity,1))}.text-emerald-100{--tw-text-opacity:1;color:rgb(209 250 229/var(--tw-text-opacity,1))}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208/var(--tw-text-opacity,1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183/var(--tw-text-opacity,1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153/var(--tw-text-opacity,1))}.text-indigo-200{--tw-text-opacity:1;color:rgb(199 210 254/var(--tw-text-opacity,1))}.text-indigo-300{--tw-text-opacity:1;color:rgb(165 180 252/var(--tw-text-opacity,1))}.text-pink-200{--tw-text-opacity:1;color:rgb(251 207 232/var(--tw-text-opacity,1))}.text-pink-300{--tw-text-opacity:1;color:rgb(249 168 212/var(--tw-text-opacity,1))}.text-red-100{--tw-text-opacity:1;color:rgb(254 226 226/var(--tw-text-opacity,1))}.text-red-200{--tw-text-opacity:1;color:rgb(254 202 202/var(--tw-text-opacity,1))}.text-red-300{--tw-text-opacity:1;color:rgb(252 165 165/var(--tw-text-opacity,1))}.text-sky-300{--tw-text-opacity:1;color:rgb(125 211 252/var(--tw-text-opacity,1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240/var(--tw-text-opacity,1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225/var(--tw-text-opacity,1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184/var(--tw-text-opacity,1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139/var(--tw-text-opacity,1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105/var(--tw-text-opacity,1))}.text-teal-300{--tw-text-opacity:1;color:rgb(94 234 212/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.line-through{text-decoration-line:line-through}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.opacity-40{opacity:.4}.opacity-60{opacity:.6}.hover\:bg-emerald-500\/25:hover{background-color:rgba(16,185,129,.25)}.hover\:bg-sky-500\/15:hover{background-color:rgba(14,165,233,.15)}.hover\:bg-slate-800\/60:hover{background-color:rgba(30,41,59,.6)}.hover\:bg-teal-500\/20:hover{background-color:rgba(20,184,166,.2)}@media (min-width:640px){.sm\:mx-12{margin-left:3rem;margin-right:3rem}.sm\:mx-4{margin-left:1rem;margin-right:1rem}.sm\:mx-8{margin-left:2rem;margin-right:2rem}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.sm\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.sm\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.sm\:grid-cols-\[220px_1fr\]{grid-template-columns:220px 1fr}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:text-5xl{font-size:3rem;line-height:1}}@media (min-width:768px){.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1024px){.lg\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:grid-cols-7{grid-template-columns:repeat(7,minmax(0,1fr))}}</style>
-  <style>
-    body { background: #070b14; color: #e2e8f0; }
-    pre { font-size: 13px; line-height: 1.6; }
-    .kw { color: #c084fc; } .ty { color: #5eead4; } .st { color: #fcd34d; } .cm { color: #64748b; } .fn { color: #93c5fd; } .at { color: #f9a8d4; }
-    .locker { border: 1px solid #334155; background: #0f172a; border-radius: 6px; padding: 6px 8px; font-family: ui-monospace, monospace; font-size: 11px; }
-    .locker small { display: block; color: #64748b; font-family: ui-sans-serif, sans-serif; font-size: 10px; }
-    .tree { font-family: ui-monospace, monospace; font-size: 12.5px; line-height: 1.9; }
-    .tree .d { color: #e2e8f0; } .tree .f { color: #cbd5e1; }
-    .tree .note { color: #64748b; font-family: ui-sans-serif, sans-serif; font-size: 11.5px; }
-    .b { font-family: ui-sans-serif, sans-serif; font-size: 10px; padding: 1px 6px; border-radius: 999px; margin-left: 6px; vertical-align: 1px; white-space: nowrap; }
-    .b-rev { background: #4a1d34; color: #f9a8d4; }
-    .b-new { background: #064e3b; color: #6ee7b7; }
-    .b-chg { background: #1e3a8a; color: #93c5fd; }
-    .b-int { background: #1e293b; color: #94a3b8; }
-    .b-gone { background: #450a0a; color: #fca5a5; }
-    .b-done { background: #14532d; color: #86efac; }
-    .val { font-family: ui-monospace, monospace; font-size: 13px; }
-    .layer-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
-    .grid > * { min-width: 0; }
-    code { overflow-wrap: anywhere; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Save System Roadmap</title>
+<style>
+/* Everything is inside this file: no fonts, styles or scripts load from the internet. Dark only. */
+:root {
+  --bg: #0d1117; --surface: #161b23; --surface-2: #1c2230; --ink: #e5e9f0; --muted: #9aa4b5; --line: #2a3140;
+  --accent: #8aa6ff; --good: #6fcfa8; --good-soft: #15281f; --next: #f0b45e; --next-soft: #2d2415;
+  --plan: #b9a3ff; --plan-soft: #221d33; --warn: #ef8f7a; --warn-soft: #301c18;
+  --code-bg: #10151d; --code-ink: #dbe1ea; --code-com: #7f8ca0;
+  --font-display: "Segoe UI Semibold", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding: 32px max(16px, env(safe-area-inset-right, 0px)) 64px max(16px, env(safe-area-inset-left, 0px)); }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code { font-family: var(--font-mono); font-size: 0.88em; }
+p code, li code, td code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+
+.page { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px; }
+@media (max-width: 900px) { .page { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
+.rail { position: sticky; top: 24px; align-self: start; }
+@media (max-width: 900px) { .rail { position: static; } }
+.rail h2 { font-family: var(--font-display); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 10px; }
+.rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.rail a { display: block; padding: 6px 10px; border-radius: 6px; text-decoration: none; color: var(--ink); font-size: 0.9rem; }
+.rail a:hover { background: var(--surface); }
+
+main { min-width: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(2rem, 4vw, 2.6rem); line-height: 1.15; margin: 6px 0 12px; }
+.lede { font-size: 1.1rem; color: var(--muted); max-width: 66ch; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 18px 0 0; font-size: 0.85rem; color: var(--muted); }
+
+section { padding-top: 40px; margin-top: 8px; border-top: 1px solid var(--line); }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.45rem; margin: 0 0 6px; }
+h3 { font-family: var(--font-display); font-size: 1.05rem; margin: 26px 0 6px; }
+section > p, section > ul, section > ol { max-width: 68ch; }
+ul, ol { padding-left: 1.2em; }
+li { margin: 4px 0; }
+
+.pill { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; vertical-align: 1px; }
+.pill.built { background: var(--good-soft); color: var(--good); }
+.pill.next { background: var(--next-soft); color: var(--next); }
+.pill.plan { background: var(--plan-soft); color: var(--plan); }
+
+.timeline { list-style: none; padding: 0; margin: 18px 0; display: grid; }
+.timeline li { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--line); margin: 0; }
+.timeline li:last-child { border-bottom: none; }
+.timeline .when { font-family: var(--font-mono); font-size: 0.82rem; color: var(--muted); padding-top: 2px; }
+.timeline strong { font-family: var(--font-display); }
+.timeline p { margin: 2px 0 0; color: var(--muted); font-size: 0.93rem; }
+
+.ladder { display: grid; gap: 10px; margin: 18px 0; }
+.rung { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 14px; }
+.rung .lvl { font-family: var(--font-display); font-size: 1.6rem; color: var(--accent); line-height: 1; padding-top: 2px; }
+.rung h3 { margin: 0 0 2px; }
+.rung .who { font-size: 0.82rem; color: var(--muted); }
+.rung p { margin: 6px 0 0; font-size: 0.95rem; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 18px 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.card h4 { font-family: var(--font-display); font-size: 0.98rem; margin: 0 0 4px; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.card p { margin: 4px 0 0; font-size: 0.9rem; color: var(--muted); }
+
+.code { margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--code-bg); }
+.code-label { font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 7px 14px; background: var(--surface); color: var(--muted); border-bottom: 1px solid var(--line); }
+pre { margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.55; color: var(--code-ink); }
+pre code { font-size: inherit; background: none; padding: 0; }
+.c { color: var(--code-com); font-style: italic; }
+.err { color: var(--warn); }
+
+.table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-display); font-weight: 600; font-size: 0.8rem; color: var(--muted); background: var(--surface-2); }
+tr:last-child td { border-bottom: none; }
+
+.flow { list-style: none; counter-reset: step; padding: 0; margin: 18px 0; display: grid; gap: 10px; }
+.flow li { counter-increment: step; position: relative; padding: 12px 16px 12px 52px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin: 0; }
+.flow li::before { content: counter(step); position: absolute; left: 16px; top: 12px; width: 24px; height: 24px; border-radius: 999px; background: var(--surface-2); color: var(--accent); font-family: var(--font-display); font-size: 0.85rem; display: grid; place-items: center; }
+.flow strong { font-family: var(--font-display); }
+
+footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+</style>
 </head>
-<body class="text-slate-200 font-sans antialiased">
-<main class="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-20">
+<body>
+<div class="page">
+  <nav class="rail" aria-label="Contents">
+    <h2>Roadmap</h2>
+    <ol>
+      <li><a href="#where">Where we are</a></li>
+      <li><a href="#rules">How it should feel</a></li>
+      <li><a href="#designers">For designers</a></li>
+      <li><a href="#daily">Daily code</a></li>
+      <li><a href="#choices">Choices</a></li>
+      <li><a href="#control">Full control</a></li>
+      <li><a href="#wrong">The wrong way is hard</a></li>
+      <li><a href="#cleanup">The cleanup</a></li>
+      <li><a href="#order">Build order</a></li>
+      <li><a href="#decisions">Decisions</a></li>
+      <li><a href="#not">Not doing</a></li>
+    </ol>
+  </nav>
 
-  <!-- HEADER -->
-  <header class="space-y-5">
-    <p class="text-xs uppercase tracking-widest text-slate-500">AbstractPixel-CodeLibrary · Save System · roadmap v5 · after the step 1 and 2 review · 13 Nov 2026</p>
-    <h1 class="font-serif text-4xl sm:text-5xl text-white">Save System v2</h1>
-    <p class="text-lg text-slate-400 max-w-3xl">How saving works after the review. The page starts with what you write in every script and goes deeper as you scroll. Stop reading when you have what you need.</p>
-    <div class="flex flex-wrap gap-3 text-xs text-slate-400">
-      <span><span class="b b-rev">after review</span> changed by your review</span>
-      <span><span class="b b-done">built</span> works today</span>
-      <span><span class="b b-new">planned</span> not built yet</span>
-    </div>
-    <div class="rounded-xl border border-indigo-500/40 bg-indigo-500/10 p-4 text-sm text-slate-300 max-w-3xl">The build plan for AI agents is <code class="text-indigo-200">save-system-v2-build-plan.md</code> in the Lab project's <code class="text-indigo-200">.claude/architecture-reviews</code> folder. It replaces the old steps 1 and 2 plan.</div>
-  </header>
-
-  <!-- STATUS -->
-  <section id="status" class="space-y-5">
-    <h2 class="font-serif text-3xl text-white">Where we are</h2>
-    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-xs">
-      <div class="rounded-lg bg-emerald-500/10 border border-emerald-500/40 p-3"><p class="text-emerald-300 font-mono">Step 0</p><p class="text-slate-300 mt-1">v1 tagged, branches made</p><p class="text-emerald-400 mt-2">done</p></div>
-      <div class="rounded-lg bg-emerald-500/10 border border-emerald-500/40 p-3"><p class="text-emerald-300 font-mono">Step 1</p><p class="text-slate-300 mt-1">Safe storage</p><p class="text-emerald-400 mt-2">done</p></div>
-      <div class="rounded-lg bg-emerald-500/10 border border-emerald-500/40 p-3"><p class="text-emerald-300 font-mono">Step 2</p><p class="text-slate-300 mt-1">The core and the timing rule</p><p class="text-emerald-400 mt-2">done</p></div>
-      <div class="rounded-lg bg-pink-500/10 border-2 border-pink-400/60 p-3"><p class="text-pink-300 font-mono">Phase A</p><p class="text-slate-300 mt-1">Merge main, clean the Lab</p><p class="text-pink-300 mt-2">next</p></div>
-      <div class="rounded-lg bg-pink-500/5 border border-pink-500/30 p-3"><p class="text-pink-300 font-mono">Phase B</p><p class="text-slate-300 mt-1">Fix what the review found</p></div>
-      <div class="rounded-lg bg-indigo-500/5 border border-indigo-500/30 p-3"><p class="text-indigo-300 font-mono">Phase C</p><p class="text-slate-300 mt-1">Step 3: [Save] fields, IDs, spawned copies</p></div>
-      <div class="rounded-lg bg-slate-900 border border-slate-800 p-3"><p class="text-slate-400 font-mono">Later</p><p class="text-slate-400 mt-1">ScriptableObjects, edit-time bridges, window</p></div>
-    </div>
-    <p class="text-sm text-slate-400 max-w-3xl">One phase per session. You review each phase before the next one starts. ProjectRallyShift stays on save system v1 and has its own copy of the library, so none of this touches it.</p>
-  </section>
-
-  <!-- REVIEW SUMMARY -->
-  <section id="review" class="space-y-6">
-    <h2 class="font-serif text-3xl text-white">What your review changed</h2>
-    <p class="text-slate-400 max-w-3xl">Each card is something steps 1 and 2 made harder than v1, and the fix. The rest of steps 1 and 2 stays: safe writes, merging instead of erasing, restore before Start, no SaveManager.</p>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2"><p class="text-white">Names</p><p class="text-red-300 text-xs"><code>SaveSystem.Save(...)</code> didn't compile inside other <code>AbstractPixel.*</code> namespaces.</p><p class="text-emerald-300 text-xs"><code>SaveActions</code> and <code>SaveEventBus</code>, like <code>SceneActions</code> and <code>SceneEventBus</code>.</p></div>
-      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2"><p class="text-white">Save files</p><p class="text-red-300 text-xs">Picked with a string, <code>Save("Settings")</code>, or an enum whose numbers shift.</p><p class="text-emerald-300 text-xs">Classes: <code>Save&lt;SaveFiles.Settings&gt;()</code>. A typo doesn't compile.</p></div>
-      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2"><p class="text-white">Load events</p><p class="text-red-300 text-xs">Removed, which broke code that waits for another system's data.</p><p class="text-emerald-300 text-xs">Back, per file and for all, and sticky: late subscribers still hear them.</p></div>
-      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2"><p class="text-white">Game profiles</p><p class="text-red-300 text-xs">Creating needed a name. Opening needed a string ID.</p><p class="text-emerald-300 text-xs"><code>CreateNew()</code> uses the config's name. Find one by slot number.</p></div>
-      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2"><p class="text-white">Save IDs</p><p class="text-red-300 text-xs">Every plain class needed an ID you had to remember.</p><p class="text-emerald-300 text-xs">One-of-a-kind classes need none. Scene objects get a Copy save ID button.</p></div>
-      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2"><p class="text-white">Writing a file directly</p><p class="text-red-300 text-xs">You had to pass the folder, extension, location and profile again.</p><p class="text-emerald-300 text-xs">One line. The config knows the rest.</p></div>
-      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2"><p class="text-white">Backups</p><p class="text-red-300 text-xs">Always on, written next to each file.</p><p class="text-emerald-300 text-xs">A checkbox per save file, in their own Backups folder.</p></div>
-      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2"><p class="text-white">Config</p><p class="text-red-300 text-xs">You had to know to make one, name it and put it in Resources.</p><p class="text-emerald-300 text-xs">A Create Config menu item does all three.</p></div>
-      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2"><p class="text-white">Built on an old main</p><p class="text-red-300 text-xs">127 commits behind. Settings, converters and the Ghosts file were missing.</p><p class="text-emerald-300 text-xs">Phase A merges main and ports Settings first.</p></div>
-    </div>
-  </section>
-
-  <!-- LAYERS -->
-  <section id="layers" class="space-y-6">
-    <h2 class="font-serif text-3xl text-white">The four layers</h2>
-    <p class="text-slate-400 max-w-3xl">The top layer is what everyone writes. Each layer down is used less often and is closer to the inside of the save system. Most scripts never go past layer 1. Click a layer to jump to it.</p>
-    <div class="space-y-2">
-      <a href="#layer1" class="block rounded-2xl border-2 border-emerald-400/70 bg-emerald-500/15 p-4 hover:bg-emerald-500/25">
-        <div class="flex flex-wrap items-baseline gap-3"><span class="layer-chip text-emerald-300">Layer 1</span><span class="text-white text-lg">Every script</span><span class="text-xs text-slate-400 ml-auto">you, every day</span></div>
-        <p class="text-sm text-slate-300 mt-2">Mark fields with <code class="text-teal-300">[Save]</code> · new-game values in Awake · <code class="text-teal-300">SaveActions.SaveAll()</code></p>
-      </a>
-      <a href="#layer2" class="block rounded-2xl border-2 border-teal-400/50 bg-teal-500/10 p-4 sm:mx-4 hover:bg-teal-500/20">
-        <div class="flex flex-wrap items-baseline gap-3"><span class="layer-chip text-teal-300">Layer 2</span><span class="text-white text-lg">Most games</span><span class="text-xs text-slate-400 ml-auto">once per system</span></div>
-        <p class="text-sm text-slate-300 mt-2">Choose the save file <span class="b b-rev">after review</span> · three save locations · game profiles and slots <span class="b b-rev">after review</span> · load and save events <span class="b b-rev">after review</span> · save IDs <span class="b b-rev">after review</span></p>
-      </a>
-      <a href="#layer3" class="block rounded-2xl border border-sky-400/40 bg-sky-500/5 p-4 sm:mx-8 hover:bg-sky-500/15">
-        <div class="flex flex-wrap items-baseline gap-3"><span class="layer-chip text-sky-300">Layer 3</span><span class="text-white text-lg">Sometimes</span><span class="text-xs text-slate-400 ml-auto">special cases, tools</span></div>
-        <p class="text-sm text-slate-300 mt-2">Full control with ISavable · reading and writing a file directly <span class="b b-rev">after review</span> · reload and forget <span class="b b-rev">after review</span> · backups <span class="b b-rev">after review</span> · creating the config <span class="b b-rev">after review</span></p>
-      </a>
-      <a href="#layer4" class="block rounded-2xl border border-slate-700 bg-slate-900/60 p-4 sm:mx-12 hover:bg-slate-800/60">
-        <div class="flex flex-wrap items-baseline gap-3"><span class="layer-chip text-slate-400">Layer 4</span><span class="text-slate-200 text-lg">Inside</span><span class="text-xs text-slate-500 ml-auto">library work only</span></div>
-        <p class="text-sm text-slate-400 mt-2">Folder map · how one save travels · storage parts, now hidden from game code</p>
-      </a>
-    </div>
-  </section>
-
-  <!-- ================= LAYER 1 ================= -->
-  <section id="layer1" class="space-y-8">
-    <div class="border-l-4 border-emerald-400 pl-4">
-      <p class="layer-chip text-emerald-300">Layer 1 · every script</p>
-      <h2 class="font-serif text-3xl text-white mt-1">Mark it, and it saves</h2>
-    </div>
-
-    <article class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-4">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Mark the fields you want saved</h3><span class="b b-new">planned · phase C</span></div>
-      <pre class="rounded-lg bg-black/40 p-4 overflow-x-auto"><code><span class="kw">public class</span> <span class="ty">Health</span> : <span class="ty">MonoBehaviour</span>
-{
-    <span class="at">[Save]</span> <span class="kw">int</span> current;
-    <span class="at">[Save]</span> <span class="kw">bool</span> isPoisoned;
-
-    <span class="kw">void</span> <span class="fn">Awake</span>() { current = <span class="st">100</span>; }   <span class="cm">// new-game value</span>
-}</code></pre>
-      <p class="text-sm text-slate-300">That's the whole script. The data goes to the GameProfile save file of the open game profile. The editor adds a Savable Bridge to the GameObject for you.</p>
-      <div class="grid sm:grid-cols-2 gap-3 text-xs">
-        <div class="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3 text-emerald-100">Saves numbers, text, true/false, enums, Vector2, Vector3, Quaternion, Color, lists, arrays, dictionaries and your own [Serializable] classes.</div>
-        <div class="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 text-amber-100">Can't save a reference to a GameObject, script or asset. Save its save ID instead. You get a clear error if you try.</div>
+  <main>
+    <header>
+      <div class="eyebrow">Abstract Pixel Library · Save System v2 · roadmap v6 · 13 Nov 2026</div>
+      <h1>Save System roadmap</h1>
+      <p class="lede">Where the save system is going, in the order you'd learn it: designers first, then daily code, then the deeper levels. How the system works today is in <code>save-system.html</code>.</p>
+      <div class="legend">
+        <span><span class="pill built">built</span> works today</span>
+        <span><span class="pill next">next run</span> the next agent run</span>
+        <span><span class="pill plan">planned</span> later in step 3 or after</span>
       </div>
-    </article>
+    </header>
 
-    <article class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-5">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">The one timing rule</h3><span class="b b-done">built</span></div>
-      <p class="text-sm text-slate-300">The save system puts saved values back right after every Awake and before any Start. So Awake sets new-game values, and Start only reads.</p>
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-4 space-y-3">
-          <p class="text-emerald-300 text-sm">Right: new-game value in Awake</p>
-          <pre class="rounded-lg bg-black/40 p-3 text-xs overflow-x-auto"><code><span class="kw">void</span> <span class="fn">Awake</span>() { current = <span class="st">100</span>; }
-<span class="kw">void</span> <span class="fn">Start</span>() { healthBar.<span class="fn">Show</span>(current); }</code></pre>
-          <div class="space-y-2 text-xs">
-            <div class="flex items-center gap-3"><span class="w-16 text-slate-500">Awake</span><span class="val rounded bg-slate-800 px-2 py-1">100</span><span class="text-slate-500">new game</span></div>
-            <div class="flex items-center gap-3"><span class="w-16 text-slate-500">Restore</span><span class="val rounded bg-emerald-500/30 text-emerald-100 px-2 py-1">37</span><span class="text-slate-500">saved value</span></div>
-            <div class="flex items-center gap-3"><span class="w-16 text-slate-500">Start</span><span class="val rounded bg-emerald-500/30 text-emerald-100 px-2 py-1">37</span><span class="text-slate-500">bar shows 37</span></div>
-          </div>
-        </div>
-        <div class="rounded-xl border border-red-500/40 bg-red-500/5 p-4 space-y-3">
-          <p class="text-red-300 text-sm">Wrong: new-game value in Start</p>
-          <pre class="rounded-lg bg-black/40 p-3 text-xs overflow-x-auto"><code><span class="kw">void</span> <span class="fn">Start</span>()
-{
-    current = <span class="st">100</span>;   <span class="cm">// overwrites the save</span>
-    healthBar.<span class="fn">Show</span>(current);
-}</code></pre>
-          <div class="space-y-2 text-xs">
-            <div class="flex items-center gap-3"><span class="w-16 text-slate-500">Awake</span><span class="val rounded bg-slate-800 px-2 py-1 text-slate-500">0</span></div>
-            <div class="flex items-center gap-3"><span class="w-16 text-slate-500">Restore</span><span class="val rounded bg-emerald-500/30 text-emerald-100 px-2 py-1">37</span></div>
-            <div class="flex items-center gap-3"><span class="w-16 text-slate-500">Start</span><span class="val rounded bg-red-500/30 text-red-100 px-2 py-1"><span class="line-through opacity-60">37</span> 100</span><span class="text-red-300">save lost</span></div>
-          </div>
-        </div>
+    <section id="where">
+      <h2>Where we are</h2>
+      <ol class="timeline">
+        <li><span class="when">Steps 0–2</span><div><strong>Safe storage, the core, the timing rule</strong> <span class="pill built">built</span><p>Safe writes, data restored before every <code>Start</code>, no manager in the scene.</p></div></li>
+        <li><span class="when">Phases A, B</span><div><strong>Fixes from your first review</strong> <span class="pill built">built</span><p>Save files as classes, game profiles by slot number, sticky load events, optional backups, <code>SaveStorage</code>, Create Config.</p></div></li>
+        <li><span class="when">Phase R</span><div><strong>Fixes from the second review</strong> <span class="pill built">built</span><p>Five built-in save files, save IDs you never type, Forget that keeps scene objects gone, <code>SaveStorage</code> with <code>SceneField</code>, new-game values. 211 EditMode and 17 PlayMode tests.</p></div></li>
+        <li><span class="when">Phase F</span><div><strong>The last bug fixes</strong> <span class="pill next">next run</span><p>Clash warnings in the config, no "Saved" after a failed write, custom slot fields that survive a refresh, an error for duplicate save IDs, bridge IDs that stay put in new scenes. Then every sample is played.</p></div></li>
+        <li><span class="when">Phase K</span><div><strong>The cleanup</strong> <span class="pill next">next run</span><p>About 500 fewer lines with the same features, and only what game code needs left public. <a href="#cleanup">More below.</a></p></div></li>
+        <li><span class="when">Phase H</span><div><strong>Docs and handoff</strong> <span class="pill next">next run</span><p>This page, the guide and the AI handoff, brought up to date.</p></div></li>
+        <li><span class="when">Phase S</span><div><strong><code>[Save]</code> fields and the ladder</strong> <span class="pill plan">planned</span><p>The rest of step 3: <code>[Save]</code>, blocking checks, rename-safe data, small features for developers and designers.</p></div></li>
+        <li><span class="when">Steps 4–7</span><div><strong>Designer tools</strong> <span class="pill plan">planned</span><p>Saved ScriptableObjects and saved-variable assets, bridges added while editing, the Save System window, ready-made savers and a save slot screen.</p></div></li>
+      </ol>
+      <p>ProjectRallyShift stays on save system v1 through GitHub main, so none of this touches it.</p>
+    </section>
+
+    <section id="rules">
+      <h2>How it should feel</h2>
+      <p>Someone who has never seen the save system should be able to use it alone, without help from an AI. Three rules decide every change:</p>
+      <ul>
+        <li><strong>The daily workflow is tiny and obvious.</strong> About 90% of a game uses two names: <code>[Save]</code> and <code>SaveActions</code>.</li>
+        <li><strong>Advanced features are found from there.</strong> Autocomplete shows only what game code needs. Each call's doc comment names the next step. Each error names the fix.</li>
+        <li><strong>The wrong way is hard.</strong> A setup that works but is secretly wrong shouldn't be possible. If the editor can see the mistake, play mode won't start.</li>
+      </ul>
+      <div class="ladder">
+        <div class="rung"><div class="lvl">0</div><div><h3>No code</h3><div class="who">Designers · level objects, menus</div><p>Add a saver component, tick Autosave, wire buttons and "Saved!" popups through UnityEvents.</p></div></div>
+        <div class="rung"><div class="lvl">1</div><div><h3>Daily code</h3><div class="who">Developers · about 90% of scripts</div><p><code>[Save]</code> on a field. A plain class also calls <code>SaveActions.Register(this)</code>. <code>SaveActions.Forget(gameObject)</code> for picked-up things.</p></div></div>
+        <div class="rung"><div class="lvl">2</div><div><h3>Choices</h3><div class="who">Developers · bigger games</div><p>Pick a save file, refresh after loading, give spawned copies an ID, build save slots, listen for one file loading.</p></div></div>
+        <div class="rung"><div class="lvl">3</div><div><h3>Full control</h3><div class="who">Tools and unusual cases</div><p>Write your own capture and restore, read or write a whole file, add custom slot fields, ship a module's own save file.</p></div></div>
       </div>
-    </article>
+    </section>
 
-    <article class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-4">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Saving</h3><span class="b b-rev">after review</span></div>
-      <pre class="rounded-lg bg-black/40 p-4 overflow-x-auto"><code><span class="ty">SaveActions</span>.<span class="fn">SaveAll</span>();                      <span class="cm">// every save file that changed</span>
-<span class="ty">SaveActions</span>.<span class="fn">Save</span>&lt;<span class="ty">SaveFiles.Ghosts</span>&gt;();        <span class="cm">// one save file</span></code></pre>
-      <p class="text-sm text-slate-300">There is no Load call. An object gets its data as soon as both the object and its data exist. Designers can save from a button with the <code class="text-teal-300">MonoSaveActions</code> component, which shows the save files as a dropdown.</p>
-    </article>
-  </section>
+    <section id="designers">
+      <h2>Level 0: for designers</h2>
+      <p>Today a designer can save from a button with <code>MonoSaveActions</code>, but saving anything in a level needs code. These close that gap, roughly in the order they arrive.</p>
+      <div class="cards">
+        <div class="card"><h4>Save Transform, Save Active State, Save Destroyed <span class="pill plan">step 3</span></h4><p>Drop one on an object to save where it is, whether it's on, or that it was picked up (uses the gone marker). Most level objects need nothing else. Moved earlier than step 7, because <code>[Save]</code> makes each one about 15 lines.</p></div>
+        <div class="card"><h4>Autosave settings <span class="pill plan">step 3</span></h4><p>"Save when a scene unloads" and "Autosave every N minutes", next to Save On Quit in the config.</p></div>
+        <div class="card"><h4>Save events as UnityEvents <span class="pill plan">step 3</span></h4><p>A component with <em>On Loaded</em> (pick a file), <em>On Saved</em> and <em>On Game Profile Opened</em>, plus <em>Reload Chosen File</em>, <em>Open Slot N</em> and <em>New Game</em> on <code>MonoSaveActions</code>. A "Saved!" popup and the main menu buttons with no code.</p></div>
+        <div class="card"><h4>Saved fields in the inspector <span class="pill plan">step 3</span></h4><p>The bridge shows which fields are saved, which file they go to and the save ID, with a Copy save ID button. In play mode it shows live values.</p></div>
+        <div class="card"><h4>Saved-variable assets <span class="pill plan">step 4</span></h4><p><code>SavedBool</code>, <code>SavedInt</code> and <code>SavedString</code> assets such as "Has Red Key" or "Quest Stage", read and set from UnityEvents. The usual way to handle quest flags.</p></div>
+        <div class="card"><h4>"Saved" badge in the Hierarchy <span class="pill plan">step 5</span></h4><p>Bridges are added while editing, never at play time, and every saved object shows a small badge.</p></div>
+        <div class="card"><h4>The Save System window <span class="pill plan">step 6</span></h4><p>Setup, Save Files, Saved Objects, Saved Data and Live. See and reset what's saved without opening JSON files.</p></div>
+        <div class="card"><h4>Save slot screen and thumbnails <span class="pill plan">step 7</span></h4><p>A UI Toolkit prefab with slots, New, Delete with a confirm step, and Rename, plus a small screenshot per slot. The manifest already has room for it.</p></div>
+      </div>
+      <h3>Setting up a game, once these exist</h3>
+      <ol class="flow">
+        <li><strong>Save System window → Set up.</strong> One button makes the config and the folder, then shows a short checklist: autosave, save slot screen, save files.</li>
+        <li><strong>Save Files page.</strong> The five built-in files are already there and locked. Add your own rows, such as Ghosts.</li>
+        <li><strong>On each object, Add Component → a saver</strong>, or a script with <code>[Save]</code> fields. The bridge is added for you and the Hierarchy shows a badge.</li>
+        <li><strong>Main menu.</strong> Drop in the save slot screen, or wire New Game, Continue and Load Slot through UnityEvents.</li>
+        <li><strong>Test.</strong> The Live page shows what was saved, with Open save folder, Clear this game profile and Reset this object.</li>
+      </ol>
+    </section>
 
-  <!-- ================= LAYER 2 ================= -->
-  <section id="layer2" class="space-y-8">
-    <div class="border-l-4 border-teal-400 pl-4">
-      <p class="layer-chip text-teal-300">Layer 2 · most games</p>
-      <h2 class="font-serif text-3xl text-white mt-1">Where data goes, and who it belongs to</h2>
-    </div>
-
-    <!-- save files -->
-    <article id="files" class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-5">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Save files are classes</h3><span class="b b-rev">after review</span><span class="b b-new">planned · phase B</span></div>
-      <p class="text-sm text-slate-300">You add a save file in the config. The editor writes a class with that name. You use the class wherever you mean that file. No strings, no enum numbers.</p>
-      <div class="grid md:grid-cols-3 gap-3 items-stretch">
-        <div class="rounded-xl bg-black/30 p-4 space-y-3">
-          <p class="text-xs uppercase tracking-wider text-slate-500">1 · The list in the config</p>
-          <div class="rounded-lg bg-black/40 p-3 text-xs space-y-2">
-            <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 text-slate-500"><span>Name</span><span>Location</span><span>Backup</span></div>
-            <div class="grid grid-cols-[1fr_auto_auto] gap-x-3"><span class="text-white">Global</span><span class="text-amber-300">Global</span><span>☑</span></div>
-            <div class="grid grid-cols-[1fr_auto_auto] gap-x-3"><span class="text-white">GameProfile</span><span class="text-indigo-300">Game Profile</span><span>☑</span></div>
-            <div class="grid grid-cols-[1fr_auto_auto] gap-x-3"><span class="text-white">Scene</span><span class="text-emerald-300">Scene</span><span>☐</span></div>
-            <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 border-t border-slate-800 pt-2"><span class="text-white">Ghosts</span><span class="text-indigo-300">Game Profile ▾</span><span>☑</span></div>
-            <div class="grid grid-cols-[1fr_auto_auto] gap-x-3"><span class="text-white">Settings <span class="text-slate-500">· Settings module</span></span><span class="text-amber-300">Global ▾</span><span>☐</span></div>
-            <div class="rounded border border-dashed border-slate-600 text-center text-slate-400 py-1">+ add save file</div>
-          </div>
-          <p class="text-xs text-slate-400">The first three are built in. A library module like Settings adds its own row by itself.</p>
-        </div>
-        <div class="rounded-xl bg-black/30 p-4 space-y-3">
-          <p class="text-xs uppercase tracking-wider text-slate-500">2 · The editor writes this</p>
-          <pre class="rounded-lg bg-black/40 p-3 overflow-x-auto text-xs"><code><span class="cm">// SaveFiles.cs. Don't edit.</span>
-<span class="kw">public static class</span> <span class="ty">SaveFiles</span>
+    <section id="daily">
+      <h2>Level 1: daily code</h2>
+      <h3>Mark it, and it saves <span class="pill plan">step 3</span></h3>
+      <div class="code"><div class="code-label">A whole saved script</div>
+<pre><code>public class Health : MonoBehaviour
 {
-  <span class="kw">public sealed class</span> <span class="ty">Global</span>      : <span class="ty">ISaveFile</span> { }
-  <span class="kw">public sealed class</span> <span class="ty">GameProfile</span> : <span class="ty">ISaveFile</span> { }
-  <span class="kw">public sealed class</span> <span class="ty">Scene</span>       : <span class="ty">ISaveFile</span> { }
-  <span class="kw">public sealed class</span> <span class="ty">Ghosts</span>      : <span class="ty">ISaveFile</span> { }
-}</code></pre>
-        </div>
-        <div class="rounded-xl bg-black/30 p-4 space-y-3">
-          <p class="text-xs uppercase tracking-wider text-slate-500">3 · You use it</p>
-          <pre class="rounded-lg bg-black/40 p-3 overflow-x-auto text-xs"><code><span class="kw">public class</span> <span class="ty">Chest</span> : <span class="ty">MonoBehaviour</span>,
-    <span class="ty">ISaveIn</span>&lt;<span class="ty">SaveFiles.Scene</span>&gt;
-{
-    <span class="at">[Save]</span> <span class="kw">bool</span> isOpen;
+    [Save] int current = 100;
+    [Save] bool isPoisoned;
 }
 
-<span class="ty">SaveActions</span>.<span class="fn">Save</span>&lt;<span class="ty">SaveFiles.Ghosts</span>&gt;();</code></pre>
-          <p class="text-xs text-slate-400">Autocomplete lists every save file. The file already knows its location.</p>
-        </div>
-      </div>
-    </article>
-
-    <!-- locations -->
-    <article class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-4">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Three save locations, never more</h3><span class="b b-done">built</span></div>
-      <div class="rounded-xl border-2 border-amber-500/50 bg-amber-500/5 p-4">
-        <div class="flex flex-wrap items-baseline gap-2"><p class="text-amber-200 text-lg">Global</p><p class="text-xs text-slate-400">outside every playthrough · settings, input bindings</p></div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3"><div class="locker">Global<small>built in</small></div><div class="locker">Settings<small>added</small></div></div>
-      </div>
-      <div class="rounded-xl border-2 border-indigo-500/50 bg-indigo-500/5 p-4 space-y-3">
-        <div class="flex flex-wrap items-baseline gap-2"><p class="text-indigo-200 text-lg">Game Profile 1</p><p class="text-xs text-slate-400">one playthrough · the default · every game profile has its own copy</p></div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2"><div class="locker">GameProfile<small>built in</small></div><div class="locker">Ghosts<small>added</small></div><div class="locker">GameProfileManifest<small>for the slot screen</small></div></div>
-        <div class="rounded-xl border-2 border-emerald-500/50 bg-emerald-500/5 p-4">
-          <div class="flex flex-wrap items-baseline gap-2"><p class="text-emerald-200">Scene</p><p class="text-xs text-slate-400">inside the game profile · one folder per scene</p></div>
-          <div class="grid grid-cols-2 gap-3 mt-3">
-            <div class="rounded-lg bg-black/30 p-2"><p class="text-xs text-slate-300 mb-2">Forest</p><div class="locker">Scene<small>built in</small></div></div>
-            <div class="rounded-lg bg-black/30 p-2"><p class="text-xs text-slate-300 mb-2">Castle</p><div class="locker">Scene<small>built in</small></div></div>
-          </div>
-        </div>
-      </div>
-      <p class="text-xs text-slate-400">You can add save files to a location. You can't add a location or choose folders.</p>
-    </article>
-
-    <!-- game profiles -->
-    <article id="profiles" class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-5">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Game profiles and slots</h3><span class="b b-rev">after review</span><span class="b b-new">planned · phase B</span></div>
-      <p class="text-sm text-slate-300">You never type a name or an ID to create or find a game profile. Each one has a slot number that never changes.</p>
-      <div class="grid md:grid-cols-2 gap-4">
-        <pre class="rounded-lg bg-black/40 p-4 overflow-x-auto text-xs"><code><span class="cm">// Create. The name comes from the config.</span>
-<span class="ty">GameProfile</span> profile = <span class="ty">SaveActions</span>.GameProfiles.<span class="fn">CreateNew</span>();
-<span class="cm">// "Game Profile 1"</span>
-
-<span class="cm">// Only if you want your own name:</span>
-<span class="ty">SaveActions</span>.GameProfiles.<span class="fn">CreateNew</span>(<span class="st">"Hard run"</span>);
-
-profile.<span class="fn">Open</span>();
-
-<span class="cm">// Find one</span>
-<span class="ty">GameProfile</span> now   = <span class="ty">SaveActions</span>.GameProfiles.Current;
-<span class="ty">GameProfile</span> slot2 = <span class="ty">SaveActions</span>.GameProfiles.<span class="fn">Get</span>(<span class="st">2</span>);
-
-<span class="kw">foreach</span> (<span class="ty">GameProfile</span> p <span class="kw">in</span> <span class="ty">SaveActions</span>.GameProfiles.All)
-    <span class="fn">ShowSlot</span>(p.SlotNumber, p.DisplayName, p.Playtime);
-
-slot2.<span class="fn">Delete</span>();</code></pre>
-        <div class="space-y-3 text-xs">
-          <p class="text-slate-400">What slot numbers do when you delete one:</p>
-          <div class="rounded-lg bg-black/30 p-3 space-y-2">
-            <p class="text-slate-500">You have three</p>
-            <div class="flex gap-2"><div class="locker flex-1">1<small>Game Profile 1</small></div><div class="locker flex-1">2<small>Game Profile 2</small></div><div class="locker flex-1">3<small>Game Profile 3</small></div></div>
-          </div>
-          <div class="rounded-lg bg-black/30 p-3 space-y-2">
-            <p class="text-slate-500">Delete slot 2. Slot 3 stays slot 3.</p>
-            <div class="flex gap-2"><div class="locker flex-1">1<small>Game Profile 1</small></div><div class="locker flex-1 border-dashed opacity-40">2<small>empty</small></div><div class="locker flex-1">3<small>Game Profile 3</small></div></div>
-          </div>
-          <div class="rounded-lg bg-black/30 p-3 space-y-2">
-            <p class="text-slate-500">CreateNew() fills the lowest empty slot.</p>
-            <div class="flex gap-2"><div class="locker flex-1">1<small>Game Profile 1</small></div><div class="locker flex-1 border-emerald-500/70">2<small>Game Profile 2 · new</small></div><div class="locker flex-1">3<small>Game Profile 3</small></div></div>
-          </div>
-          <p class="text-slate-400">The folder ID on disk still exists. Only the save system sees it.</p>
-        </div>
-      </div>
-    </article>
-
-    <!-- events -->
-    <article id="events" class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-5">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Load and save events</h3><span class="b b-rev">after review</span><span class="b b-new">planned · phase B</span></div>
-      <p class="text-sm text-slate-300">Your own data needs no event: it's there before Start. Events are for when one system waits for <em>another</em> system's data, like achievements waiting for the save to load.</p>
-      <div class="rounded-xl bg-black/30 p-4 overflow-x-auto">
-        <div class="flex items-stretch gap-2 text-xs min-w-[640px]">
-          <div class="rounded-lg bg-slate-800 p-3 w-32"><p class="text-slate-400">Game starts</p><p class="text-slate-300 mt-1">Global files are read</p></div>
-          <div class="text-slate-600 self-center">→</div>
-          <div class="rounded-lg bg-amber-500/15 border border-amber-500/40 p-3 w-36"><p class="text-amber-200 font-mono">OnLoadCompleted</p><p class="text-slate-300 mt-1">(Settings) once its objects are restored</p></div>
-          <div class="text-slate-600 self-center">→</div>
-          <div class="rounded-lg bg-slate-800 p-3 w-32"><p class="text-slate-400">Game profile opens</p><p class="text-slate-300 mt-1">at start, or from a menu</p></div>
-          <div class="text-slate-600 self-center">→</div>
-          <div class="rounded-lg bg-indigo-500/15 border border-indigo-500/40 p-3 w-36"><p class="text-indigo-200 font-mono">OnGameProfileOpened</p><p class="text-slate-300 mt-1">objects restored</p></div>
-          <div class="text-slate-600 self-center">→</div>
-          <div class="rounded-lg bg-emerald-500/15 border border-emerald-500/40 p-3 w-36"><p class="text-emerald-200 font-mono">OnLoadAllCompleted</p><p class="text-slate-300 mt-1">everything is ready</p></div>
-        </div>
-      </div>
-      <div class="grid md:grid-cols-2 gap-4">
-        <pre class="rounded-lg bg-black/40 p-4 overflow-x-auto text-xs"><code><span class="kw">void</span> <span class="fn">OnEnable</span>()
+public class QuestLog
 {
-    <span class="ty">SaveEventBus</span>.OnLoadAllCompleted += <span class="fn">CheckAchievements</span>;
-    <span class="ty">SaveEventBus</span>.OnLoadCompleted += file =&gt;
-    {
-        <span class="kw">if</span> (file == <span class="kw">typeof</span>(<span class="ty">SaveFiles.Ghosts</span>)) <span class="fn">ShowBestGhost</span>();
-    };
-}
-<span class="cm">// Also: OnSaveCompleted(file), OnSaveAllCompleted</span></code></pre>
-        <div class="rounded-xl border border-pink-500/30 bg-pink-500/5 p-4 text-xs space-y-2">
-          <p class="text-pink-200 text-sm">Sticky means you can't be too late</p>
-          <p class="text-slate-300">If your script subscribes after the data already loaded, the handler runs right away. So it doesn't matter whether your script wakes up before or after the save system. No execution order tricks.</p>
-          <div class="flex items-center gap-2 pt-1"><span class="rounded bg-emerald-500/20 px-2 py-1">loaded at 0.01 s</span><span class="text-slate-500">…</span><span class="rounded bg-slate-800 px-2 py-1">you subscribe at 2 s</span><span class="text-slate-500">→</span><span class="rounded bg-pink-500/20 px-2 py-1">called at once</span></div>
-        </div>
-      </div>
-    </article>
+    [Save] List&lt;string&gt; completedQuests = new List&lt;string&gt;();
 
-    <!-- save ids -->
-    <article id="ids" class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-5">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Save IDs you never have to remember</h3><span class="b b-rev">after review</span><span class="b b-new">planned · phase C</span></div>
-      <p class="text-sm text-slate-300">A save ID is the name of one object's data inside a save file. The same object must get the same ID next session, or it won't find its data. Pick the first row that fits:</p>
-      <div class="space-y-2 text-sm">
-        <div class="grid sm:grid-cols-[220px_1fr] gap-2 rounded-xl bg-black/30 p-3"><p class="text-white">Only one of it exists<br/><span class="text-xs text-slate-500">Inventory, Leaderboard, Settings</span></p><div><code class="text-teal-300">SaveActions.Register(this);</code><p class="text-xs text-slate-400 mt-1">No ID. The class name is the ID. A second one without an ID gives a clear error.</p></div></div>
-        <div class="grid sm:grid-cols-[220px_1fr] gap-2 rounded-xl bg-black/30 p-3"><p class="text-white">Placed in a scene<br/><span class="text-xs text-slate-500">a chest, a door, an NPC</span></p><div><p class="text-slate-300 text-xs">Nothing to do. The Savable Bridge has an ID already. Its inspector gets a <span class="rounded bg-slate-700 px-1.5 py-0.5">Copy save ID</span> button for when you need it.</p></div></div>
-        <div class="grid sm:grid-cols-[220px_1fr] gap-2 rounded-xl bg-black/30 p-3"><p class="text-white">Several of one plain class<br/><span class="text-xs text-slate-500">one per level, one per car</span></p><div><code class="text-teal-300">SaveActions.Register(this, level.name);</code><p class="text-xs text-slate-400 mt-1">Use something the object already has that stays the same: a level name, a list index, an asset's name.</p></div></div>
-        <div class="grid sm:grid-cols-[220px_1fr] gap-2 rounded-xl bg-black/30 p-3"><p class="text-white">Spawned from a prefab<br/><span class="text-xs text-slate-500">enemies at spawn points</span></p><div><code class="text-teal-300">goblin.SetSaveId(spawnPoint.name);</code><p class="text-xs text-slate-400 mt-1">See below.</p></div></div>
-        <div class="grid sm:grid-cols-[220px_1fr] gap-2 rounded-xl bg-black/30 p-3"><p class="text-white">Come and go at random<br/><span class="text-xs text-slate-500">dropped loot, bullets</span></p><div><p class="text-slate-300 text-xs">Don't save each one. The spawner saves one list of what exists, and spawns them again next session.</p></div></div>
-      </div>
+    public QuestLog() { SaveActions.Register(this); }   <span class="c">// save ID "QuestLog"</span>
+}</code></pre></div>
+      <ul>
+        <li>Saves numbers, text, bools, enums, Vector2, Vector3, Quaternion, Color, lists, arrays, dictionaries and your own <code>[Serializable]</code> classes.</li>
+        <li>Data is stored by field name. Adding or removing a field never breaks an old save.</li>
+        <li><strong>Renaming a field keeps its data:</strong> <code>[Save(Formerly = "hp")] int health;</code>. Renaming a class keeps it with <code>[SaveId("Inventory")]</code>.</li>
+        <li>New-game values come for free <span class="pill built">built</span>. A new game profile gets the values the object had before anything was restored.</li>
+      </ul>
+      <h3>The one timing rule <span class="pill built">built</span></h3>
+      <p>Saved values come back right after every <code>Awake</code> and before any <code>Start</code>. Set new-game values in <code>Awake</code> or in the field itself; read them in <code>Start</code>.</p>
+      <h3>Saving and forgetting <span class="pill built">built</span></h3>
+      <div class="code"><div class="code-label">SaveActions</div>
+<pre><code>SaveActions.SaveAll();                  <span class="c">// or let autosave do it</span>
+SaveActions.Forget(gameObject);         <span class="c">// a picked-up coin stays gone</span></code></pre></div>
+      <p>There is no Load call. An object gets its data as soon as both exist.</p>
+    </section>
 
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="rounded-xl border border-red-500/30 p-4 space-y-3">
-          <p class="text-red-300 text-sm">Why spawned copies need help</p>
-          <p class="text-xs text-slate-300">Every copy of a prefab is identical, class name and all. Three goblins with one ID overwrite each other's data.</p>
-          <div class="flex gap-3 justify-center">
-            <div class="text-center"><div class="text-3xl">👺</div><div class="locker mt-1 border-red-500/60">Goblin</div></div>
-            <div class="text-center"><div class="text-3xl">👺</div><div class="locker mt-1 border-red-500/60">Goblin</div></div>
-            <div class="text-center"><div class="text-3xl">👺</div><div class="locker mt-1 border-red-500/60">Goblin</div></div>
-          </div>
-        </div>
-        <div class="rounded-xl border border-emerald-500/30 p-4 space-y-3">
-          <p class="text-emerald-300 text-sm">Give each copy what makes it different</p>
-          <pre class="rounded-lg bg-black/40 p-3 overflow-x-auto text-xs"><code><span class="kw">foreach</span> (<span class="ty">Transform</span> point <span class="kw">in</span> spawnPoints)
-{
-    <span class="ty">GameObject</span> goblin = <span class="fn">Instantiate</span>(prefab, point);
-    goblin.<span class="fn">SetSaveId</span>(point.name);
-}</code></pre>
-          <div class="flex gap-3 justify-center">
-            <div class="text-center"><div class="text-3xl">👺</div><div class="locker mt-1 border-emerald-500/60">Bridge</div></div>
-            <div class="text-center"><div class="text-3xl">👺</div><div class="locker mt-1 border-emerald-500/60">Gate</div></div>
-            <div class="text-center"><div class="text-3xl">👺</div><div class="locker mt-1 border-emerald-500/60">Tower</div></div>
-          </div>
-        </div>
-      </div>
-      <p class="text-xs text-slate-400">A copy that never gets an ID isn't saved, and the console names the prefab. Two objects with the same ID in one save file get one error naming both. Removing data on purpose takes the object, not its ID: <code class="text-teal-300">SaveActions.Forget(coin)</code>.</p>
-    </article>
-  </section>
+    <section id="choices">
+      <h2>Level 2: choices</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>You want to…</th><th>Write</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td>Save into another file</td><td><code>class Chest : MonoBehaviour, ISaveIn&lt;SaveFiles.Scene&gt;</code></td><td><span class="pill plan">step 3</span></td></tr>
+          <tr><td>Use a built-in file</td><td><code>SaveFiles.GameProfile</code>, <code>Scene</code>, <code>Settings</code>, <code>Input</code>, <code>Achievements</code></td><td><span class="pill built">built</span></td></tr>
+          <tr><td>Add your own file</td><td>A row in the config becomes <code>GameSaveFiles.Ghosts</code></td><td><span class="pill built">built</span></td></tr>
+          <tr><td>Save one file</td><td><code>SaveActions.Save&lt;GameSaveFiles.Ghosts&gt;()</code></td><td><span class="pill built">built</span></td></tr>
+          <tr><td>Refresh the UI after a load</td><td><code>IOnRestored.OnRestored()</code></td><td><span class="pill plan">step 3</span></td></tr>
+          <tr><td>Save spawned enemies</td><td><code>goblin.SetSaveId(spawnPoint.name)</code></td><td><span class="pill plan">step 3</span></td></tr>
+          <tr><td>Several of one plain class</td><td>Automatic: "Inventory", "Inventory 2", or <code>Register(this, level.name)</code></td><td><span class="pill built">built</span></td></tr>
+          <tr><td>Build save slots</td><td><code>SaveActions.GameProfiles.CreateNew()</code>, <code>Get(2).Open()</code>, <code>All</code></td><td><span class="pill built">built</span></td></tr>
+          <tr><td>A Continue button</td><td><code>SaveActions.GameProfiles.LastOpened</code>, <code>Count</code></td><td><span class="pill plan">step 3</span></td></tr>
+          <tr><td>Wait for one file to load</td><td><code>SaveEventBus.AddLoadListener&lt;GameSaveFiles.Ghosts&gt;(ShowGhosts)</code></td><td><span class="pill plan">step 3</span></td></tr>
+          <tr><td>Tell the player a save failed</td><td><code>SaveEventBus.OnSaveFailed</code></td><td><span class="pill plan">step 3</span></td></tr>
+        </tbody>
+      </table></div>
+      <p>Random things that come and go, like dropped loot, aren't saved one by one. The spawner saves one list and spawns them again.</p>
+    </section>
 
-  <!-- ================= LAYER 3 ================= -->
-  <section id="layer3" class="space-y-8">
-    <div class="border-l-4 border-sky-400 pl-4">
-      <p class="layer-chip text-sky-300">Layer 3 · sometimes</p>
-      <h2 class="font-serif text-3xl text-white mt-1">Special cases and tools</h2>
-    </div>
+    <section id="control">
+      <h2>Level 3: full control</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>You want to…</th><th>Write</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td>Save data that isn't plain fields</td><td><code>ISavable&lt;TData&gt;</code> with <code>CaptureData</code> and <code>RestoreData</code></td><td><span class="pill built">built</span></td></tr>
+          <tr><td>Read or write a whole file</td><td><code>SaveStorage.ReadText&lt;SaveFiles.Scene&gt;(forestScene, out string json)</code></td><td><span class="pill built">built</span></td></tr>
+          <tr><td>Throw away unsaved changes</td><td><code>SaveActions.Reload&lt;SaveFiles.Input&gt;()</code></td><td><span class="pill built">built</span></td></tr>
+          <tr><td>Show difficulty on a slot</td><td><code>profile.Custom["Difficulty"]</code></td><td><span class="pill built">built</span> (refresh fix next run)</td></tr>
+          <tr><td>Ship a library module's own file</td><td><code>[SaveFileDefaults("Ghost Runs", SaveLocation.GameProfile)]</code></td><td><span class="pill built">built</span></td></tr>
+          <tr><td>Test your own saved scripts</td><td>A public helper that starts the save system on memory storage</td><td><span class="pill plan">later</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
 
-    <article class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-4">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Full control: what and where in one line</h3><span class="b b-rev">after review</span><span class="b b-new">planned · phase B</span></div>
-      <pre class="rounded-lg bg-black/40 p-4 overflow-x-auto text-xs"><code><span class="kw">public class</span> <span class="ty">SettingsManager</span> : <span class="ty">MonoBehaviour</span>, <span class="ty">ISavable</span>&lt;<span class="ty">SettingsDTO</span>, <span class="ty">SettingsSaveFile</span>&gt;, <span class="ty">IOnRestored</span>
-{                                                     <span class="cm">//   what          where</span>
-    <span class="kw">public</span> <span class="ty">SettingsDTO</span> <span class="fn">CaptureData</span>() =&gt; ...;
-    <span class="kw">public void</span> <span class="fn">RestoreData</span>(<span class="ty">SettingsDTO</span> data) =&gt; ...;
-    <span class="kw">public void</span> <span class="fn">OnRestored</span>() =&gt; <span class="fn">ApplyAllSettings</span>();   <span class="cm">// optional, runs after restore</span>
-}</code></pre>
-      <div class="grid sm:grid-cols-2 gap-3 text-xs">
-        <div class="rounded-lg bg-red-500/10 border border-red-500/30 p-3"><p class="text-red-300">Before</p><code class="text-slate-300">[Savable(SaveCategory.Settings)]<br/>class SettingsManager : ISavable&lt;SettingsDTO&gt;</code><p class="text-slate-400 mt-1">Two places to keep in sync.</p></div>
-        <div class="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3"><p class="text-emerald-300">After</p><code class="text-slate-300">class SettingsManager : ISavable&lt;SettingsDTO, SettingsSaveFile&gt;</code><p class="text-slate-400 mt-1">One place. Leave out the second part for the GameProfile file.</p></div>
-      </div>
-    </article>
+    <section id="wrong">
+      <h2>The wrong way is hard</h2>
+      <p>After each compile, the editor checks every saved type. A mistake it can see logs one error naming the type, the field and the fix. It also stops play mode from starting and fails the build. <span class="pill plan">step 3, with <code>[Save]</code></span></p>
+      <div class="code"><div class="code-label">What you'd see</div>
+<pre><code><span class="err">[SaveSystem] Health.target is marked [Save] but holds a GameObject, which can't be saved.
+Save something that finds it again instead, such as its name or save ID. Play mode won't
+start until this is fixed.</span></code></pre></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Mistake</th><th>What happens</th></tr></thead>
+        <tbody>
+          <tr><td><code>[Save]</code> on a GameObject, Transform, component or asset field</td><td>Blocks play mode and builds</td></tr>
+          <tr><td><code>[Save]</code> on a <code>static</code>, <code>const</code> or <code>readonly</code> field</td><td>Blocks play mode and builds</td></tr>
+          <tr><td><code>[Save]</code> on a type that can't be written and read back (delegate, interface, <code>object</code>)</td><td>Blocks play mode and builds</td></tr>
+          <tr><td>A class with both <code>[Save]</code> fields and <code>ISavable</code></td><td>Blocks play mode and builds</td></tr>
+          <tr><td><code>[Save]</code> on a property or method</td><td>Doesn't compile</td></tr>
+          <tr><td>Two save file rows that share a file or a class name</td><td>Warning in the config; <code>GameSaveFiles.cs</code> isn't written <span class="pill next">next run</span></td></tr>
+          <tr><td>Two objects with the same save ID</td><td>One error naming both; the second isn't saved <span class="pill next">next run</span></td></tr>
+          <tr><td>A spawned copy with no <code>SetSaveId</code></td><td>One warning naming the prefab; the copy isn't saved</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Renames never lose saved data</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>You rename…</th><th>Data is kept by</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td>A save file row</td><td>Its storage name, set once</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>A GameObject</td><td>Its bridge's ID</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>A <code>[Save]</code> field</td><td><code>[Save(Formerly = "hp")]</code></td><td><span class="pill plan">step 3</span></td></tr>
+          <tr><td>A class registered with <code>Register(this)</code></td><td><code>[SaveId("Inventory")]</code>, or a custom save ID today</td><td><span class="pill plan">step 3</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
 
-    <!-- SaveStorage -->
-    <article id="storage" class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-5">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Reading and writing a file directly</h3><span class="b b-rev">after review</span><span class="b b-new">planned · phase B</span></div>
-      <p class="text-sm text-slate-300">For editor tools and debug buttons that touch a save file itself, like clearing leaderboard runs. The config is the source of truth: folder, debug folder, extension, location and backup all come from it.</p>
-      <div class="grid lg:grid-cols-3 gap-3">
-        <div class="rounded-xl border border-slate-700 p-4 space-y-2">
-          <p class="text-slate-300 text-sm">v1 · 5 lines</p>
-          <pre class="rounded-lg bg-black/40 p-3 overflow-x-auto text-xs"><code><span class="ty">SavePathGenerator</span>.<span class="fn">Initialize</span>(config);
-<span class="kw">var</span> def = config.<span class="fn">GetCategoryDefinition</span>(
-    <span class="ty">SaveCategory</span>.Settings);
-<span class="kw">string</span> path = <span class="ty">SavePathGenerator</span>.<span class="fn">GetPath</span>(def, id);
-<span class="kw">var</span> storage = <span class="kw">new</span> <span class="ty">FileDataStorageService</span>();
-storage.<span class="fn">SaveFile</span>(json, path);</code></pre>
-          <p class="text-xs text-slate-400">Short, but you had to find the config, and it broke if nothing set it up first.</p>
-        </div>
-        <div class="rounded-xl border border-red-500/40 p-4 space-y-2">
-          <p class="text-red-300 text-sm">Steps 1 and 2 · 6 harder lines</p>
-          <pre class="rounded-lg bg-black/40 p-3 overflow-x-auto text-xs"><code><span class="kw">var</span> storage = <span class="kw">new</span> <span class="ty">DiskStorageService</span>(
-    useDebugFolder: <span class="kw">true</span>, <span class="ty">FileExtension</span>.json);
-<span class="kw">var</span> paths = <span class="kw">new</span> <span class="ty">SavePathGenerator</span>();
-<span class="kw">string</span> key = paths.<span class="fn">GetSaveFileKey</span>(<span class="st">"Settings"</span>,
-    <span class="ty">SaveLocation</span>.Global, <span class="kw">null</span>, <span class="kw">null</span>);
-<span class="kw">var</span> store = <span class="kw">new</span> <span class="ty">SaveFileStore</span>(storage, <span class="kw">new</span> <span class="ty">JsonSerializer</span>());
-store.<span class="fn">Write</span>(key, data);</code></pre>
-          <p class="text-xs text-red-200">Repeats what the config already says.</p>
-        </div>
-        <div class="rounded-xl border border-emerald-500/40 p-4 space-y-2">
-          <p class="text-emerald-300 text-sm">After review · 1 line</p>
-          <pre class="rounded-lg bg-black/40 p-3 overflow-x-auto text-xs"><code><span class="ty">SaveStorage</span>.<span class="fn">WriteText</span>&lt;<span class="ty">SaveFiles.Settings</span>&gt;(json);</code></pre>
-          <p class="text-xs text-emerald-200">Works in play mode and in editor tools. Safe write, backup if the file has one.</p>
-        </div>
-      </div>
-      <pre class="rounded-lg bg-black/40 p-4 overflow-x-auto text-xs"><code><span class="ty">SaveStorage</span>.<span class="fn">ReadText</span>&lt;<span class="ty">SaveFiles.Settings</span>&gt;(<span class="kw">out string</span> json);                  <span class="cm">// a Global file</span>
-<span class="ty">SaveStorage</span>.<span class="fn">ReadText</span>&lt;<span class="ty">SaveFiles.GameProfile</span>&gt;(<span class="kw">out string</span> json);               <span class="cm">// the open game profile</span>
-<span class="ty">SaveStorage</span>.<span class="fn">ReadText</span>&lt;<span class="ty">SaveFiles.GameProfile</span>&gt;(profile, <span class="kw">out string</span> json);      <span class="cm">// any game profile</span>
-<span class="ty">SaveStorage</span>.<span class="fn">ReadText</span>&lt;<span class="ty">SaveFiles.Scene</span>&gt;(profile, <span class="st">"Forest"</span>, <span class="kw">out string</span> json);  <span class="cm">// one scene</span>
-<span class="ty">SaveStorage</span>.<span class="fn">Delete</span>&lt;<span class="ty">SaveFiles.Settings</span>&gt;();
-<span class="kw">string</span> path = <span class="ty">SaveStorage</span>.<span class="fn">GetFilePath</span>&lt;<span class="ty">SaveFiles.Settings</span>&gt;();             <span class="cm">// for "Show in Explorer"</span>
-<span class="kw">foreach</span> (<span class="ty">GameProfile</span> profile <span class="kw">in</span> <span class="ty">SaveStorage</span>.GameProfiles) { ... }       <span class="cm">// in edit mode too</span></code></pre>
-    </article>
+    <section id="cleanup">
+      <h2>The cleanup <span class="pill next">next run</span></h2>
+      <p>The save system is about 5,900 lines in 72 scripts. Most files already do one job. The cleanup deletes code: it doesn't merge files into longer ones, and every feature stays.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>What goes</th><th>About</th></tr></thead>
+        <tbody>
+          <tr><td>Dead code: four unused Vector and Color classes, an interface with one implementation, an unused factory method</td><td>210 lines, 6 files</td></tr>
+          <tr><td>Upgrade code for v2 steps 1 and 2, which only the Lab ever ran</td><td>160 lines</td></tr>
+          <tr><td>The same few lines written two to five times, such as "lowest free number" and "is this a saved script?", each becoming one small helper</td><td>140 lines</td></tr>
+          <tr><td>Methods that only pass a call on</td><td>20 lines</td></tr>
+          <tr><td>Public types game code never needs, made internal: 44 down to about 18</td><td>a much shorter autocomplete list</td></tr>
+        </tbody>
+      </table></div>
+    </section>
 
-    <article class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-4">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Reload and forget</h3><span class="b b-rev">after review</span><span class="b b-new">planned · phase B</span></div>
-      <pre class="rounded-lg bg-black/40 p-4 overflow-x-auto text-xs"><code><span class="ty">SaveActions</span>.<span class="fn">Reload</span>&lt;<span class="ty">SaveFiles.Input</span>&gt;();   <span class="cm">// read this file from disk again, restore every object in it</span>
-<span class="ty">SaveActions</span>.<span class="fn">Forget</span>(coin);                  <span class="cm">// drop this object's data on purpose, like a picked-up coin</span></code></pre>
-      <p class="text-sm text-slate-300">Reload is for undoing unsaved changes, like "reset bindings to what was saved". Loading normally stays automatic.</p>
-    </article>
+    <section id="order">
+      <h2>Build order</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>What</th><th>Helps</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td>F</td><td>The last bug fixes, then play every sample</td><td>Everyone</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>K</td><td>The cleanup</td><td>Whoever maintains it</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>H</td><td>Guide, roadmap and AI handoff</td><td>You</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>S1</td><td><code>[Save]</code> fields, rename safety, blocking checks</td><td>Developers</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>S2–S4</td><td><code>IOnRestored</code>, <code>SetSaveId</code>, the bridge recognises <code>[Save]</code></td><td>Developers</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>S5</td><td>Typed load listeners</td><td>Developers</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>S6</td><td><code>OnSaveFailed</code>, Continue helpers, autosave, UnityEvents, clean JSON for Unity types, Copy save ID button</td><td>Both</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>S7</td><td>Samples by the ladder: save a field, buttons with no code, save slots, pick a file, spawned copies, custom data, whole files</td><td>Learning</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>S8</td><td>Save Transform, Save Active State, Save Destroyed</td><td>Designers</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>4</td><td>ScriptableObjects without code, saved-variable assets</td><td>Designers</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>5</td><td>Bridges added while editing, Hierarchy badge</td><td>Both</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>6</td><td>The Save System window</td><td>Both</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>7</td><td>More savers, save slot screen, thumbnails</td><td>Designers</td><td><span class="pill plan">planned</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
 
-    <!-- backups -->
-    <article id="backups" class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-5">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Backups, per save file</h3><span class="b b-rev">after review</span><span class="b b-new">planned · phase B</span></div>
-      <p class="text-sm text-slate-300">You tick Backup on the save files that need one. What's worth it depends on the game: maybe a big GameProfile file, maybe tiny Settings. Each file keeps exactly one backup.</p>
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="rounded-xl bg-black/30 p-4 space-y-3 text-xs">
-          <p class="text-slate-400">Every save of a file with Backup ticked</p>
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="rounded bg-slate-800 px-2 py-1">current good file</span><span class="text-slate-500">copied to</span><span class="rounded bg-sky-500/20 px-2 py-1">Backups/…</span><span class="text-slate-500">replaces the old backup</span>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="rounded bg-emerald-500/20 px-2 py-1">new data</span><span class="text-slate-500">written safely as the file</span>
-          </div>
-          <p class="text-slate-400">If a file is corrupt next launch, its backup loads and the console says so. A file without Backup logs one error instead.</p>
-          <p class="text-slate-400">Game profile manifests are always backed up. They're tiny, and losing one hides a whole slot.</p>
-        </div>
-        <div class="rounded-xl bg-black/30 p-4 tree">
-          <div class="d">SaveFiles/ <span class="note">DebugSaveFiles/ while debugging</span></div>
-          <div class="d pl-4">Global/</div>
-          <div class="f pl-8">Settings.json  SaveSystemMetaData.json</div>
-          <div class="d pl-4">GameProfiles/</div>
-          <div class="d pl-8">a1b2c3/ <span class="note">slot 1</span></div>
-          <div class="f pl-12">GameProfileManifest.json  GameProfile.json</div>
-          <div class="f pl-12">Scenes/Forest/Scene.json</div>
-          <div class="d pl-4 text-sky-300">Backups/ <span class="note">same shape, only ticked files</span></div>
-          <div class="f pl-8">Global/Settings.json</div>
-          <div class="f pl-8">GameProfiles/a1b2c3/GameProfile.json</div>
-          <div class="f pl-8">GameProfiles/a1b2c3/GameProfileManifest.json</div>
-        </div>
-      </div>
-    </article>
+    <section id="decisions">
+      <h2>Decisions</h2>
+      <ol>
+        <li>Five built-in save files ship with the library: GameProfile, Scene, Settings, Input, Achievements. A game's own rows go in <code>GameSaveFiles</code>.</li>
+        <li>Three save locations, never more: Global, Game Profile, Scene.</li>
+        <li><code>Register(this)</code> needs no save ID. A custom one is optional.</li>
+        <li>Forget on a scene object writes a gone marker.</li>
+        <li>A Scene file in <code>SaveStorage</code> always needs a <code>SceneField</code>; the system never guesses the scene.</li>
+        <li>Backups are optional per save file, ticked by default.</li>
+        <li>Clean up by deleting and de-duplicating, never by merging into longer files.</li>
+        <li>Mistakes the editor can see block play mode and builds.</li>
+        <li>Renames of fields, classes, rows and objects never lose saved data.</li>
+        <li>The GitHub project shows features and bug fixes only.</li>
+        <li>ProjectRallyShift stays on v1.</li>
+      </ol>
+    </section>
 
-    <article class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-4">
-      <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl text-white">Creating the config</h3><span class="b b-rev">after review</span><span class="b b-new">planned · phase B</span></div>
-      <div class="grid md:grid-cols-2 gap-4 items-center">
-        <div class="rounded-lg bg-black/40 p-3 text-xs font-mono space-y-1">
-          <p class="text-slate-500">Tools ▸ External Project Tools ▸ Save System ▸</p>
-          <p class="rounded bg-indigo-500/30 text-white px-2 py-1">Create Config</p>
-          <p class="px-2 text-slate-400">Save All · Load All</p>
-          <p class="px-2 text-slate-400">Open Release Folder · Open Debug Folder</p>
-          <p class="px-2 text-slate-400">Delete All Save Files</p>
-        </div>
-        <div class="text-sm text-slate-300 space-y-2">
-          <p>One click makes <code class="text-teal-300">Assets/Resources/SaveSystemConfig.asset</code> and selects it. There's nothing to drag anywhere: the game and the editor tools both find it there.</p>
-          <p class="text-xs text-slate-400">No config at play time? One error that points at this menu item, and saving stays off without crashing.</p>
-        </div>
-      </div>
-    </article>
-  </section>
+    <section id="not">
+      <h2>Not doing</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Idea</th><th>Why not</th></tr></thead>
+        <tbody>
+          <tr><td>XML or other file formats</td><td>Only JSON is written. The config's xml, bak and tmp options get hidden.</td></tr>
+          <tr><td>More save locations</td><td>Three keeps the system easy to learn.</td></tr>
+          <tr><td>Saving on a background thread</td><td>Files are small, and threads plus Unity objects bring hard bugs. Measure first if saving ever stutters.</td></tr>
+          <tr><td>Cloud saves, compression</td><td>Platform-specific. The storage seam is ready when a game needs them.</td></tr>
+          <tr><td>Encryption, for now</td><td>Parked in issue #21 until a game needs it.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
 
-  <!-- ================= LAYER 4 ================= -->
-  <section id="layer4" class="space-y-8">
-    <div class="border-l-4 border-slate-500 pl-4">
-      <p class="layer-chip text-slate-400">Layer 4 · inside</p>
-      <h2 class="font-serif text-3xl text-white mt-1">How it's built</h2>
-    </div>
-
-    <article class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-4">
-      <h3 class="text-xl text-white">Folder map after phase C</h3>
-      <div class="flex flex-wrap gap-3 text-xs">
-        <span><span class="b b-done">built</span> exists today</span>
-        <span><span class="b b-new">planned</span> phase B or C</span>
-        <span><span class="b b-rev">after review</span> changed by the review</span>
-        <span><span class="b b-int">internal</span> game code can't see it</span>
-      </div>
-      <div class="grid lg:grid-cols-2 gap-4">
-        <div class="rounded-xl bg-black/30 p-4 tree">
-          <div class="d">Modules/SaveSystem/Runtime/</div>
-          <div class="d pl-4 mt-2">PublicAPI/ <span class="note">what game code touches</span></div>
-          <div class="f pl-8">SaveActions.cs<span class="b b-rev">after review</span> <span class="note">was SaveSystem</span></div>
-          <div class="f pl-8">SaveEventBus.cs<span class="b b-rev">after review</span> <span class="note">was SaveEvents, sticky events</span></div>
-          <div class="f pl-8">SaveStorage.cs<span class="b b-rev">after review</span> <span class="note">one-line file access</span></div>
-          <div class="f pl-8">ISaveFile.cs<span class="b b-new">planned</span></div>
-          <div class="f pl-8">ISavable.cs<span class="b b-new">planned</span> <span class="note">adds the "where" part</span></div>
-          <div class="f pl-8">ISaveIn.cs · SaveAttribute.cs · IOnRestored.cs<span class="b b-new">planned</span></div>
-          <div class="f pl-8">SaveIdExtensions.cs<span class="b b-new">planned</span> <span class="note">SetSaveId</span></div>
-          <div class="f pl-8">MonoSaveActions.cs<span class="b b-done">built</span></div>
-          <div class="d pl-4 mt-2">GameProfiles/</div>
-          <div class="f pl-8">GameProfile.cs<span class="b b-rev">after review</span> <span class="note">the handle you hold</span></div>
-          <div class="f pl-8">SaveProfileManager.cs<span class="b b-done">built</span> <span class="note">gains slot numbers</span></div>
-          <div class="f pl-8">GameProfileManifest.cs · SaveSystemMetaData.cs<span class="b b-done">built</span></div>
-          <div class="d pl-4 mt-2">SavedObjects/</div>
-          <div class="f pl-8">SavableBridge.cs<span class="b b-done">built</span> <span class="note">slimmed in phase C</span></div>
-          <div class="f pl-8">FieldSaver.cs · InterfaceSaver.cs<span class="b b-new">planned</span></div>
-          <div class="d pl-4 mt-2">Config/</div>
-          <div class="f pl-8">SaveSystemConfigSO.cs<span class="b b-done">built</span> <span class="note">save file list, default profile name</span></div>
-          <div class="f pl-8">SaveFileDefinition.cs<span class="b b-rev">after review</span> <span class="note">was SaveCatgeoryDefinition, adds Backup</span></div>
-          <div class="f pl-8">SaveLocation.cs<span class="b b-done">built</span></div>
-        </div>
-        <div class="rounded-xl bg-black/30 p-4 tree">
-          <div class="d pl-4">Core/ <span class="note">plain C#, no MonoBehaviour</span></div>
-          <div class="f pl-8">SaveSession · SaveRegistry · LoadedSaveData<span class="b b-int">internal</span></div>
-          <div class="f pl-8">SaveStartup · SaveFileLookup<span class="b b-int">internal</span></div>
-          <div class="d pl-4 mt-2">Storage/</div>
-          <div class="f pl-8">SaveFileStore<span class="b b-int">internal</span> <span class="note">safe write, optional backup</span></div>
-          <div class="f pl-8">SavePathGenerator<span class="b b-int">internal</span> <span class="note">builds every key</span></div>
-          <div class="f pl-8">IDataStorageService<span class="b b-done">built</span> <span class="note">public, for console storage later</span></div>
-          <div class="f pl-8">DiskStorageService · MemoryStorageService<span class="b b-int">internal</span></div>
-          <div class="d pl-4 mt-2">Serialization/</div>
-          <div class="f pl-8">ISerializer · JsonSerializer<span class="b b-done">built</span> <span class="note">gains main's Vector3 and Quaternion converters</span></div>
-          <div class="d pl-4 mt-2">Scenes/</div>
-          <div class="f pl-8">ISceneInfo · UnitySceneInfo<span class="b b-done">built</span></div>
-          <div class="d mt-3">Editor/</div>
-          <div class="f pl-4">SaveSystemToolsMenu<span class="b b-rev">after review</span> <span class="note">adds Create Config</span></div>
-          <div class="f pl-4">SaveFilesWriter<span class="b b-new">planned</span> <span class="note">writes SaveFiles.cs</span></div>
-          <div class="f pl-4">SavableBridgeInspector<span class="b b-new">planned</span> <span class="note">Copy save ID</span></div>
-          <div class="mt-3 border-t border-slate-800 pt-2">
-            <p class="note">Removed</p>
-            <div class="f">SaveCategory · SavableAttribute<span class="b b-gone">removed</span> <span class="note">save file classes</span></div>
-            <div class="f">Config Initialize, ignoredScenes, BackupFileExtension<span class="b b-gone">removed</span> <span class="note">unused</span></div>
-          </div>
-          <div class="mt-3 border-t border-slate-800 pt-2">
-            <p class="note">In your game</p>
-            <div class="f">Assets/…/SaveFiles.cs<span class="b b-new">planned</span> <span class="note">written by the editor</span></div>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <article class="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-3 text-sm">
-      <h3 class="text-xl text-white">One save, step by step</h3>
-      <div class="flex flex-wrap items-center gap-2 text-xs">
-        <span class="rounded-lg bg-emerald-500/15 px-3 py-2"><span class="text-slate-500">you</span><br/>SaveActions.SaveAll()</span><span class="text-slate-600">→</span>
-        <span class="rounded-lg bg-black/40 px-3 py-2"><span class="text-slate-500">SaveRegistry</span><br/>lists objects</span><span class="text-slate-600">→</span>
-        <span class="rounded-lg bg-black/40 px-3 py-2"><span class="text-slate-500">FieldSaver</span><br/>captures</span><span class="text-slate-600">→</span>
-        <span class="rounded-lg bg-black/40 px-3 py-2"><span class="text-slate-500">LoadedSaveData</span><br/>merges with what's on disk</span><span class="text-slate-600">→</span>
-        <span class="rounded-lg bg-black/40 px-3 py-2"><span class="text-slate-500">JsonSerializer</span><br/>to text</span><span class="text-slate-600">→</span>
-        <span class="rounded-lg bg-black/40 px-3 py-2"><span class="text-slate-500">SaveFileStore</span><br/>backup if ticked, safe write</span><span class="text-slate-600">→</span>
-        <span class="rounded-lg bg-emerald-500/15 px-3 py-2"><span class="text-slate-500">SaveEventBus</span><br/>OnSaveAllCompleted</span>
-      </div>
-    </article>
-  </section>
-
-  <!-- BUILD ORDER -->
-  <section id="order" class="space-y-6">
-    <h2 class="font-serif text-3xl text-white">Build order</h2>
-    <div class="space-y-3">
-      <div class="rounded-2xl bg-slate-900 border-2 border-pink-400/60 p-5 space-y-2">
-        <div class="flex flex-wrap items-center gap-2"><p class="text-pink-300 font-mono">Phase A</p><p class="text-white">Merge main and clean up the Lab</p><span class="text-xs text-pink-300 ml-auto">next</span></div>
-        <ul class="text-sm text-slate-300 list-disc pl-5 space-y-1">
-          <li>The Lab uses the library through its file link again. The extra library copy and the test mirror folder are deleted.</li>
-          <li>Merge latest main. Keep main's Vector3 and Quaternion converters and the Ghosts file.</li>
-          <li>Port Settings just enough to run, and play it in the Lab Editor.</li>
-        </ul>
-        <p class="text-xs text-amber-200">Before it starts: import BroAudio and Custom Inspector into the Lab. main needs them, and they come from the Asset Store.</p>
-      </div>
-      <div class="rounded-2xl bg-slate-900 border border-pink-500/30 p-5 space-y-2">
-        <div class="flex flex-wrap items-center gap-2"><p class="text-pink-300 font-mono">Phase B</p><p class="text-white">Fix what the review found</p></div>
-        <div class="grid sm:grid-cols-3 gap-2 text-xs">
-          <span class="rounded bg-black/30 px-2 py-1.5">B1 SaveActions, SaveEventBus</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">B2 Save files as classes</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">B3 Save, Reload, Forget by class</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">B4 Sticky load and save events</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">B5 Game profiles and slots</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">B6 Backups per file, own folder</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">B7 SaveStorage one-line access</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">B8 Create Config menu item</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">B9 Port Settings and samples</span>
-        </div>
-      </div>
-      <div class="rounded-2xl bg-slate-900 border border-indigo-500/30 p-5 space-y-2">
-        <div class="flex flex-wrap items-center gap-2"><p class="text-indigo-300 font-mono">Phase C</p><p class="text-white">Step 3: saved objects</p></div>
-        <div class="grid sm:grid-cols-3 gap-2 text-xs">
-          <span class="rounded bg-black/30 px-2 py-1.5">C1 Save IDs without remembering</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">C2 [Save] fields and ISaveIn</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">C3 IOnRestored</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">C4 SetSaveId for spawned copies</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">C5 Slimmer Savable Bridge</span>
-          <span class="rounded bg-black/30 px-2 py-1.5">C6 Samples 07 and 08, docs</span>
-        </div>
-      </div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-        <div class="rounded-xl bg-slate-900 border border-slate-800 p-4"><p class="text-slate-400 font-mono">4</p><p class="text-white mt-1">ScriptableObjects</p><p class="text-xs text-slate-400 mt-1">Registered automatically.</p></div>
-        <div class="rounded-xl bg-slate-900 border border-slate-800 p-4"><p class="text-slate-400 font-mono">5</p><p class="text-white mt-1">Bridges while editing</p><p class="text-xs text-slate-400 mt-1">Never in play mode or at build time.</p></div>
-        <div class="rounded-xl bg-slate-900 border border-slate-800 p-4"><p class="text-slate-400 font-mono">6</p><p class="text-white mt-1">Save System window</p><p class="text-xs text-slate-400 mt-1">Setup, files, objects, data, live.</p></div>
-        <div class="rounded-xl bg-slate-900 border border-slate-800 p-4"><p class="text-slate-400 font-mono">7</p><p class="text-white mt-1">Ready-made savers</p><p class="text-xs text-slate-400 mt-1">For designers.</p></div>
-      </div>
-    </div>
-    <p class="text-sm text-slate-400">Every phase ends with all tests passing and the agent playing the samples in the Lab Editor, so the result is checked in a running game, not only in tests.</p>
-  </section>
-
-  <!-- DECISIONS -->
-  <section id="decisions" class="space-y-6">
-    <h2 class="font-serif text-3xl text-white">Decisions</h2>
-    <div class="grid md:grid-cols-2 gap-4">
-      <div class="rounded-2xl bg-slate-900 border border-emerald-500/30 p-5 space-y-2 text-sm">
-        <p class="text-emerald-300">Decided in the review</p>
-        <ul class="list-disc pl-5 space-y-1 text-slate-300">
-          <li>Merge main first. ProjectRallyShift stays on v1 for good.</li>
-          <li><code>SaveActions</code> and <code>SaveEventBus</code>.</li>
-          <li>Save files are classes, generated from the config list.</li>
-          <li>Sticky load and save events, per file and for all.</li>
-          <li><code>Reload&lt;TFile&gt;()</code> for one file. No public ReloadAll.</li>
-          <li>Game profiles: default name from the config, fixed slot numbers, a handle instead of an ID.</li>
-          <li>Save IDs: class name for one-of-a-kind, bridge ID with a copy button, SetSaveId for spawned copies, Forget takes the object.</li>
-          <li><code>SaveStorage</code>: one line, the config fills in the rest. Storage parts become internal.</li>
-          <li>Config in Resources, made by a Create Config menu item. Closes #18.</li>
-          <li>Backups: a checkbox per save file, in their own folder.</li>
-          <li>One phase per session, checked in the running Editor.</li>
-        </ul>
-      </div>
-      <div class="space-y-4">
-        <div class="rounded-2xl bg-slate-900 border border-pink-500/40 p-5 space-y-3 text-sm">
-          <p class="text-pink-300">Confirmed by you after the review</p>
-          <div><p class="text-white">1 · Library modules bring their own save file</p><p class="text-slate-400">Settings ships a <code>SettingsSaveFile</code> class, and the config list shows it by itself. The library can't see your game's generated <code>SaveFiles.cs</code>, so Settings can't use <code>SaveFiles.Settings</code>.</p></div>
-          <div><p class="text-white">2 · Where the Backups folder sits</p><p class="text-slate-400"><code>SaveFiles/Backups/</code>, mirroring everything, rather than inside <code>GameProfiles/</code>. One place also covers Global files.</p></div>
-          <div><p class="text-white">3 · New save files start with Backup ticked</p><p class="text-slate-400">Safer by default. You untick what doesn't need one.</p></div>
-          <div><p class="text-white">4 · A spawned copy without an ID isn't saved</p><p class="text-slate-400">It warns instead of numbering copies by spawn order, which silently swaps data if the order changes.</p></div>
-        </div>
-        <div class="rounded-2xl bg-slate-900 border border-amber-500/30 p-5 space-y-2 text-sm">
-          <p class="text-amber-300">Still open on GitHub</p>
-          <p class="text-slate-400">#21 encryption · #22 ready-made savers. #19 and #20 close in phase B, #23 in phase C.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-</main>
+    <footer>Branch <code>save-system</code>, last commit <code>15915d7</code>. Not pushed. Replaces roadmap v5 and the next-steps page.</footer>
+  </main>
+</div>
 </body>
 </html>
