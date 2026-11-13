@@ -22,6 +22,9 @@ namespace AbstractPixel.SaveSystem
 
         [SerializeField, ReadOnly] private List<SavableTarget> savableTargets = new List<SavableTarget>();
 
+        /// <summary>This GameObject's saved scripts, for the bridge inspector's read-only list and Copy save ID button.</summary>
+        internal IReadOnlyList<SavableTarget> SavableTargets => savableTargets;
+
         readonly string isavableCaptureMethod = "CaptureData";
         readonly string isavableRestoreMethod = "RestoreData";
         readonly string stringSeparatorIdentifier = "#";
@@ -256,7 +259,7 @@ namespace AbstractPixel.SaveSystem
         }
 
         /// <summary>The save ID of one saved script on this GameObject: "&lt;bridge GUID or SetSaveId&gt;/&lt;script GUID&gt;".</summary>
-        private string GetSaveId(SavableTarget target)
+        internal string GetSaveId(SavableTarget target)
         {
             string bridgeGuid = spawnedCopySaveId ?? DefaultBridgeGuid();
             return $"{bridgeGuid}/{target.Identification.GUID}";

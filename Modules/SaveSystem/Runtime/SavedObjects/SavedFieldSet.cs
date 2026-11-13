@@ -30,6 +30,18 @@ namespace AbstractPixel.SaveSystem
         /// <summary>True when the class has at least one [Save] field, valid or not. SavedScript.IsSaved asks this.</summary>
         public bool HasAnyField => fields.Count > 0 || Problems.Count > 0;
 
+        /// <summary>Every valid field's name, for the bridge inspector's read-only list.</summary>
+        public IEnumerable<string> FieldNames
+        {
+            get
+            {
+                foreach (SavedField field in fields)
+                {
+                    yield return field.Key;
+                }
+            }
+        }
+
         public SavedFieldSet(Type savedType)
         {
             const BindingFlags declaredInstanceFields = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
