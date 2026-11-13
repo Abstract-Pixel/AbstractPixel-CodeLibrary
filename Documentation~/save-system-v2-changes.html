@@ -147,24 +147,24 @@ html { scroll-behavior: smooth; }
       <li class="group">Rarely</li>
       <li><a href="#storage">Storage parts <span class="freq">library work</span></a></li>
       <li><a href="#renames">Name changes <span class="freq">reference</span></a></li>
-      <li><a href="#later">Not built yet <span class="freq">steps 3–8</span></a></li>
+      <li><a href="#later">Not built yet <span class="freq">steps 3 to 8</span></a></li>
     </ol>
   </nav>
 
   <main>
     <header class="intro">
       <div class="eyebrow">Abstract Pixel Library · Modules/SaveSystem · branch save-system</div>
-      <h1>Save System v2: what changed</h1>
+      <h1>What changed in Save System v2</h1>
       <p class="lede">Each part below shows the v1 code next to the v2 code. The parts you will use in almost every project come first. The internals come last.</p>
 
       <div class="status">
         <h2>How much of the plan is built</h2>
         <ul class="steps">
-          <li><span class="pill done">Done</span><span><strong>Step 0.</strong> v1 tagged as <code>save-system-v1</code>, branches made.</span></li>
+          <li><span class="pill done">Done</span><span><strong>Step 0.</strong> The <code>save-system-v1</code> tag marks v1, and both repos have a <code>save-system</code> branch.</span></li>
           <li><span class="pill done">Done</span><span><strong>Step 1, safe storage.</strong> Atomic writes, backups, three save locations, working game profiles, tests.</span></li>
           <li><span class="pill done">Done</span><span><strong>Step 2, the core.</strong> <code>SaveSystem</code>, restore after Awake and before Start, no <code>SaveManager</code>.</span></li>
           <li><span class="pill done">Done</span><span><strong>Samples for steps 1 and 2.</strong> Six importable scenes, each with its own test.</span></li>
-          <li><span class="pill todo">Not started</span><span><strong>Steps 3–8.</strong> <code>[Save]</code> fields, <code>ISaveIn</code>, <code>SaveFiles.cs</code>, ScriptableObject auto-registration, edit-time bridges, the editor window.</span></li>
+          <li><span class="pill todo">Not started</span><span><strong>Steps 3 to 8.</strong> <code>[Save]</code> fields, <code>ISaveIn</code>, <code>SaveFiles.cs</code>, ScriptableObject auto-registration, edit-time bridges, the editor window.</span></li>
         </ul>
         <p>So scripts still pick their save file with <code>[Savable(SaveCategory.X)]</code> and implement <code>ISavable&lt;T&gt;</code>. The level 1 style from the design page (<code>[Save] int current;</code>) comes in step 3. Tests: 103 EditMode and 10 PlayMode, all passing.</p>
       </div>
@@ -214,7 +214,7 @@ void Start()
     shownHealth = health.Current;   // already restored
 }</code></pre></div>
       </div>
-      <div class="note warn"><strong>The one rule to remember:</strong> set new-game values in <code>Awake</code>. A saved field assigned in <code>Start</code> overwrites the value that was just restored.</div>
+      <div class="note warn"><strong>Set new-game values in Awake.</strong> If <code>Start</code> assigns a saved field, it overwrites the value the save system just restored.</div>
       <ul>
         <li>The Savable Bridge is still the component that connects the script. The editor still adds it.</li>
         <li>The bridge now runs first (<code>[DefaultExecutionOrder(-10000)]</code>) and registers in <code>Start</code>. That is what puts restore between <code>Awake</code> and <code>Start</code>.</li>
@@ -249,9 +249,9 @@ SaveSystem.Save("Settings");   // one save file
 // SaveSystem call is a safe no-op.</code></pre></div>
       </div>
       <ul>
-        <li><code>SaveAll</code> writes only the save files that changed. An unchanged file isn't rewritten.</li>
+        <li><code>SaveAll</code> writes only the save files that changed and skips the rest.</li>
         <li>Saving no longer erases objects that aren't loaded right now. v1 rebuilt each file from the registered objects only, so a boss in an unloaded scene lost its data. v2 keeps the data it read and merges new captures into it.</li>
-        <li>When a saved object goes away, its latest values are captured first, so they're written on the next save.</li>
+        <li>When a saved object goes away, the save system captures its latest values first and writes them on the next save.</li>
         <li><code>MonoSaveActions</code> (for UnityEvents) keeps <code>SaveAll()</code> and has <code>Save(string)</code>. Its load methods are gone.</li>
       </ul>
     </section>
@@ -273,16 +273,16 @@ SaveSystem.Save("Settings");   // one save file
 2. Name it SaveSystemConfig.
 3. Put it in a folder named Resources.
 
-That's all. SaveStartup reads it before the first
-scene, opens a game profile if the policy says so,
-and resets itself every time play mode starts.</code></pre></div>
+SaveStartup reads it before the first scene, opens a
+game profile if the policy says so, and resets
+itself every time play mode starts.</code></pre></div>
       </div>
       <p>The config inspector changed in four places:</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Field</th><th>v1</th><th>v2</th></tr></thead>
         <tbody>
-          <tr><td>Each category's place</td><td class="was"><code>DirectoryScope</code>: Global or GameProfile</td><td class="now"><code>Location</code>: Global, GameProfile or Scene (old values carry over)</td></tr>
-          <tr><td>Scene-specific checkbox</td><td class="was"><code>IsSceneSpecific</code></td><td class="now">Removed; pick <code>Scene</code> as the location</td></tr>
+          <tr><td>Each category's place</td><td class="was"><code>DirectoryScope</code>, with Global or GameProfile</td><td class="now"><code>Location</code>, with Global, GameProfile or Scene. Old values carry over.</td></tr>
+          <tr><td>Scene-specific checkbox</td><td class="was"><code>IsSceneSpecific</code></td><td class="now">Removed. Pick <code>Scene</code> as the location.</td></tr>
           <tr><td>Autosave</td><td class="was">None</td><td class="now"><code>SaveOnQuit</code> and <code>SaveOnFocusLoss</code>, both off by default</td></tr>
           <tr><td>Use Debug Path</td><td class="was">Saved into <code>Assets/DebugSaveFiles</code>, which Unity imported as assets</td><td class="now">Saves into <code>&lt;project&gt;/DebugSaveFiles</code>, next to Assets</td></tr>
         </tbody>
@@ -316,7 +316,7 @@ and resets itself every time play mode starts.</code></pre></div>
 
 // The script only names its save file. The config
 // says which location that file lives in:
-[Savable(SaveCategory.Position)]  // Position → Scene
+[Savable(SaveCategory.Position)]  // the config puts Position in Scene
 public class Chest : MonoBehaviour, ISavable&lt;bool&gt; { … }</code></pre></div>
       </div>
       <p>Switching game profiles keeps Global data and swaps everything else. See sample <em>04 Save Locations</em>.</p>
@@ -330,7 +330,7 @@ public class Chest : MonoBehaviour, ISavable&lt;bool&gt; { … }</code></pre></d
 <pre><code class="language-csharp">SaveProfileManager profiles =
     SaveManager.Instance.ProfileManager;
 
-profiles.CreateNewActiveProfileDirectory(); // create + open
+profiles.CreateNewActiveProfileDirectory(); // creates and opens
 profiles.SetCurrentActiveProfile(id);       // "last opened"
                                             // wasn't saved
 string[] ids = profiles.GetAllProfileIds(); // always empty
@@ -396,7 +396,7 @@ void OnDestroy() =&gt; SaveSystem.Unregister(inventory);</code></pre></div>
 
     <section class="topic" id="events">
       <div class="topic-head"><h2>Reacting to save events</h2><span class="freq-tag">sometimes</span></div>
-      <p>v1 had nine events for loads and saves by category and scope. Because restore is automatic, v2 keeps the two that still mean something.</p>
+      <p>v1 had six events for saves and loads, by category and by scope. v2 has two, <code>Saved</code> and <code>GameProfileOpened</code>. The load events are gone because objects restore when they register.</p>
       <div class="compare">
         <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
 <pre><code class="language-csharp">SaveEventBus.OnSaveAllCompleted += OnSaved;
@@ -427,10 +427,10 @@ SaveSystem.GameProfileOpened += id =&gt;
 <pre><code class="language-csharp">SaveSystem.Forget("Game", "quest-dragon");   // save file name, save ID
 SaveSystem.SaveAll();                        // the entry is gone from the file
 
-// If that object is still registered, it is dropped too,
+// Forget also unregisters the object if it is registered,
 // so destroying it afterwards can't write it back.</code></pre></div>
       </div>
-      <div class="note">For objects with a Savable Bridge, the save ID is <code>&lt;bridge GUID&gt;/&lt;script GUID&gt;</code>, and game code can't read it easily yet. Step 3 adds <code>SetSaveId</code> and spawned copies, which make this practical for scene objects.</div>
+      <div class="note">For objects with a Savable Bridge, the save ID is <code>&lt;bridge GUID&gt;/&lt;script GUID&gt;</code>, and game code can't read it easily yet. Step 3 adds <code>SetSaveId</code>, which lets game code give a scene object a save ID it knows.</div>
     </section>
 
     <section class="topic" id="scriptable">
@@ -458,7 +458,7 @@ public class GameProgress : ScriptableObject, ISavable&lt;GameProgressData&gt;
 
     <section class="topic" id="editor">
       <div class="topic-head"><h2>Editor tools</h2><span class="freq-tag">while debugging</span></div>
-      <p>The SaveManager inspector is gone along with SaveManager. Everything now lives in one menu.</p>
+      <p>The SaveManager inspector went away with SaveManager. Every tool is now under Tools &gt; External Project Tools &gt; Save System.</p>
       <div class="compare">
         <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
 <pre><code class="language-text">SaveManager inspector, Debug Controls:
@@ -484,7 +484,7 @@ Tools &gt; External Project Tools &gt; Save System:
 
     <section class="topic" id="disk">
       <div class="topic-head"><h2>What's on disk</h2><span class="freq-tag">while debugging</span></div>
-      <p>Folders are shorter. Every file has a backup. Writes go to a temp file first, so a crash mid-write can't destroy the last good save.</p>
+      <p>Game profile folders sit at <code>GameProfiles/&lt;id&gt;/</code> instead of <code>GameSaves/SaveProfiles/GameProfile&lt;id&gt;/</code>. Every file has a <code>.backup</code> copy of its last good version. Each write goes to a <code>.tmp</code> file first, so a crash during a write leaves the previous save intact.</p>
       <div class="compare">
         <div class="pane before"><div class="pane-label"><span>Before</span><span>v1 folders</span></div>
 <pre><code class="language-text">SaveFiles/
@@ -495,13 +495,13 @@ Tools &gt; External Project Tools &gt; Save System:
     GameProfilea1b2c3/
       GameProfileManifest.json
       Profile.json
-      Forest/            ← scene-specific category
+      Forest/            (a scene-specific category)
         Chests.json</code></pre></div>
         <div class="pane after"><div class="pane-label"><span>After</span><span>v2 folders</span></div>
 <pre><code class="language-text">SaveFiles/                 (DebugSaveFiles/ when debugging)
   Global/
     Settings.json
-    Settings.backup.json   ← last good version
+    Settings.backup.json   (last good version)
     SaveSystemMetaData.json
   GameProfiles/
     a1b2c3/
@@ -539,16 +539,16 @@ Tools &gt; External Project Tools &gt; Save System:
 }</code></pre></div>
       </div>
       <ul>
-        <li>Entries are keyed by save ID only. <code>name</code> is just there to help a human reading the file.</li>
+        <li>The save system matches entries by save ID only. <code>name</code> only helps a person reading the file.</li>
         <li><code>FormatVersion</code> lets a later version spot and upgrade older files. A different version logs a warning.</li>
-        <li>If a file is corrupt, the backup loads with a warning that names the file. If both are unreadable, you get one error that says what to do.</li>
+        <li>If a file is corrupt, the save system loads its backup and logs a warning that names the file. If both are unreadable, it logs one error that says what to do.</li>
         <li>v2 doesn't read v1 save files. The shipped game stays on <code>save-system-v1</code>.</li>
       </ul>
     </section>
 
     <section class="topic" id="storage">
       <div class="topic-head"><h2>Storage parts under the hood</h2><span class="freq-tag">library work and tests</span></div>
-      <p>You only need these to extend the save system or write tests for it. v1 passed full file paths around through static classes. v2 uses small parts, each with one job, that work with keys like <code>GameProfiles/a1b2c3/GameProfile</code>.</p>
+      <p>You only need these to extend the save system or test it. v1 passed full file paths between static classes. v2 splits the work into small classes with one job each, and they pass keys such as <code>GameProfiles/a1b2c3/GameProfile</code>.</p>
       <div class="compare">
         <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
 <pre><code class="language-csharp">SavePathGenerator.Initialize(config);         // static
@@ -577,12 +577,12 @@ store.TryRead(key, out SaveFileData loaded); // falls back to it</code></pre></d
         <thead><tr><th>Part</th><th>Its one job</th></tr></thead>
         <tbody>
           <tr><td><code>IDataStorageService</code></td><td>Write, read, list and delete text by key. A write fully succeeds or leaves the old text untouched.</td></tr>
-          <tr><td><code>DiskStorageService</code></td><td>Keys become files: write <code>.tmp</code>, flush, then <code>File.Replace</code>. It retries if Windows briefly locks the file.</td></tr>
+          <tr><td><code>DiskStorageService</code></td><td>Stores each key as a file. It writes <code>.tmp</code>, flushes it, then calls <code>File.Replace</code>, and retries if Windows locks the file for a moment.</td></tr>
           <tr><td><code>MemoryStorageService</code></td><td>A dictionary, so tests never touch real save files.</td></tr>
           <tr><td><code>SavePathGenerator</code></td><td>Builds every key in one place, so save and load can't disagree.</td></tr>
           <tr><td><code>SaveFileStore</code></td><td>Backups, and reads with a fallback to them.</td></tr>
           <tr><td><code>SaveProfileManager</code></td><td>Game profiles: create, open, list, delete, and remember the last one opened.</td></tr>
-          <tr><td><code>SaveRegistry</code>, <code>LoadedSaveData</code>, <code>SaveSession</code></td><td>Which objects are registered, the data read from disk, and the wiring that applies the whichever-second rule.</td></tr>
+          <tr><td><code>SaveRegistry</code>, <code>LoadedSaveData</code>, <code>SaveSession</code></td><td>The list of registered objects, the data read from disk, and the class that connects them and applies the whichever-second rule.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -593,27 +593,27 @@ store.TryRead(key, out SaveFileData loaded); // falls back to it</code></pre></d
         <thead><tr><th>v1</th><th>v2</th></tr></thead>
         <tbody>
           <tr><td class="was"><code>SaveActions</code></td><td class="now"><code>SaveSystem</code></td></tr>
-          <tr><td class="was"><code>SaveManager</code> in a scene</td><td class="now">Removed; <code>SaveStartup</code> runs by itself</td></tr>
-          <tr><td class="was"><code>SaveManagerEditor</code></td><td class="now">Removed; Tools menu</td></tr>
+          <tr><td class="was"><code>SaveManager</code> in a scene</td><td class="now">Removed. <code>SaveStartup</code> runs by itself.</td></tr>
+          <tr><td class="was"><code>SaveManagerEditor</code></td><td class="now">Removed. Use the Tools menu.</td></tr>
           <tr><td class="was"><code>SaveEventBus</code></td><td class="now"><code>SaveEvents</code>, or the events on <code>SaveSystem</code></td></tr>
           <tr><td class="was"><code>SaveScope</code></td><td class="now"><code>SaveLocation</code> (adds <code>Scene</code>)</td></tr>
           <tr><td class="was"><code>DirectoryScope</code>, <code>IsSceneSpecific</code></td><td class="now"><code>Location</code></td></tr>
           <tr><td class="was"><code>FileDataStorageService</code></td><td class="now"><code>DiskStorageService</code></td></tr>
           <tr><td class="was"><code>SystemMetaData</code></td><td class="now"><code>SaveSystemMetaData</code></td></tr>
           <tr><td class="was"><code>SavePathGenerator</code> (static, paths)</td><td class="now"><code>SavePathGenerator</code> (instance, keys)</td></tr>
-          <tr><td class="was"><code>SaveDataConverter</code></td><td class="now">Removed; <code>ISerializer.FromToken</code></td></tr>
+          <tr><td class="was"><code>SaveDataConverter</code></td><td class="now">Removed. <code>ISerializer.FromToken</code> does its job.</td></tr>
           <tr><td class="was"><code>SaveFileData.DataMap</code></td><td class="now"><code>SaveFileData.Entries</code></td></tr>
           <tr><td class="was">Manifest <code>ProfileID</code>, <code>ProfileName</code>, <code>CreationDateAndTime</code>, <code>LastSavedScene</code></td><td class="now"><code>GameProfileId</code>, <code>DisplayName</code>, <code>CreatedUtc</code>, <code>LastScene</code>, plus <code>LastSavedUtc</code>, <code>PlaytimeSeconds</code>, <code>AppVersion</code>, <code>Custom</code></td></tr>
           <tr><td class="was"><code>MonoSaveActions.SaveDataOf(category)</code></td><td class="now"><code>MonoSaveActions.Save("Settings")</code></td></tr>
           <tr><td class="was">Folder <code>Runtime/Configuration</code>, <code>PublicSaveAPI</code>, <code>SaveBridgeAndRegistration</code></td><td class="now"><code>Runtime/Config</code>, <code>PublicAPI</code>, <code>SavedObjects</code> (GUIDs kept)</td></tr>
         </tbody>
       </table></div>
-      <div class="note warn"><strong>Name clash:</strong> the class <code>SaveSystem</code> sits in the namespace <code>AbstractPixel.SaveSystem</code>. Code inside another <code>AbstractPixel.*</code> namespace finds the namespace first. Write <code>AbstractPixel.SaveSystem.SaveSystem.Register(…)</code> there, or keep game code in its own namespace.</div>
+      <div class="note warn"><strong>Watch the name clash.</strong> The class <code>SaveSystem</code> sits in the namespace <code>AbstractPixel.SaveSystem</code>. Code inside another <code>AbstractPixel.*</code> namespace finds the namespace first. Write <code>AbstractPixel.SaveSystem.SaveSystem.Register(…)</code> there, or keep game code in its own namespace.</div>
     </section>
 
     <section class="topic" id="later">
-      <div class="topic-head"><h2>Not built yet: steps 3 to 8</h2><span class="freq-tag">from the design page</span></div>
-      <p>These parts of the design page are planned but not started. Each needs its own detailed plan, and some wait on open decisions in GitHub issue #17.</p>
+      <div class="topic-head"><h2>Not built yet</h2><span class="freq-tag">from the design page</span></div>
+      <p>The design page plans steps 3 to 8, and none of them has started. Each needs its own detailed plan, and some wait on open decisions in GitHub issue #17.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Step</th><th>What it adds</th><th>What it changes for you</th></tr></thead>
         <tbody>
