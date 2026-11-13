@@ -1,18 +1,18 @@
 # Changelog
 
 ## [Unreleased] - Save System v2 (branch save-system)
-**Save System v2.** Not compatible with v1 save files or code; shipped games stay on the `save-system-v1` tag. Full guide: `Documentation~/save-system.html`. What changed from v1: `Documentation~/save-system-v2-handoff.html`.
-- **Feature:** No SaveManager in the scene. The save system starts before the first scene from `Assets/Resources/SaveSystemConfig.asset`, made by Tools > External Project Tools > Save System > Create Config.
-- **Feature:** Saved data is restored after every `Awake` and before any `Start`, for objects that register at any time. Plain C# classes and ScriptableObjects can save with `SaveActions.Register`.
-- **Feature:** Save files are classes from the config's save file list (`SaveFiles.cs`, written by the editor). `ISavable<TData, TFile>` picks one; library modules ship their own with `[SaveFileDefaults]`.
-- **Feature:** `SaveActions.Save<TFile>()`, `Reload<TFile>()`, `Forget(object)`. Three save locations: Global, GameProfile and Scene.
-- **Feature:** `GameProfile` handles with slot numbers: `SaveActions.GameProfiles.CreateNew()`, `Get(slot)`, `All`, `Current`, `profile.Open()`, `Delete()`, `Rename()`.
-- **Feature:** Sticky load events on `SaveEventBus`: `OnLoadCompleted(Type)`, `OnLoadAllCompleted`, `OnGameProfileOpened`; plus `OnSaveCompleted(Type)` and `OnSaveAllCompleted`.
-- **Feature:** `SaveStorage` reads and writes a whole save file as text in one line, in play mode and edit mode.
-- **Feature:** Atomic writes. Optional backups per save file, in a `Backups` folder that mirrors the main one.
-- **Fix:** Listing and deleting game profiles works; "last opened" is remembered; Delete All Save Files deletes the right folders; saving no longer erases data of objects that aren't loaded.
-- **Settings:** Saves into its own `SettingsSaveFile`; the debug toolbar uses `SaveStorage`.
-- **Core:** `SearchableDropdown` compiles on Unity 6 and Unity 7.
+**Save System v2.** It can't read v1 save files. Shipped games stay on the `save-system-v1` tag. Guide: `Documentation~/save-system.html`. Changes since v1: `Documentation~/save-system-v2-handoff.html`.
+- **Feature:** No manager in the scene. Make the config with Tools > External Project Tools > Save System > Create Config.
+- **Feature:** Scripts get saved data before `Start`. Plain C# classes and ScriptableObjects can save.
+- **Feature:** Save files are classes in a generated `SaveFiles.cs`. Pick one with `ISavable<TData, TFile>`.
+- **Feature:** `SaveActions.Save<TFile>()`, `Reload<TFile>()` and `Forget(object)`. Three save locations: Global, GameProfile and Scene.
+- **Feature:** `GameProfile` objects with slot numbers, such as `SaveActions.GameProfiles.Get(2).Open()`.
+- **Feature:** Load and save events on `SaveEventBus`. Load events reach late subscribers too.
+- **Feature:** `SaveStorage` reads or writes a whole save file in one line.
+- **Feature:** Safe writes, and an optional backup per save file in a `Backups` folder.
+- **Fix:** Listing and deleting game profiles works. Saving no longer erases data of objects that aren't loaded.
+- **Settings:** Saves into its own `SettingsSaveFile`. The debug toolbar uses `SaveStorage`.
+- **Core:** `SearchableDropdown` works on Unity 6 and Unity 7.
 
 ## [1.1.0] - 2026-10-31
 **GameManagment: delayed menus, eased time scale, skip, state fixes.** Every new option defaults to the old behaviour.

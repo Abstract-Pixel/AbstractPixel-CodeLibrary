@@ -4,8 +4,8 @@ A plain C# quest log and MonoBehaviour pickups saving side by side, each with it
 
 ## Before you start
 
-- The project needs a save system config. Make one with **Tools > External Project Tools > Save System > Create Config**.
-- This sample ships one save file class, `SamplePickupsSaveFile` (Scene). After the next compile the editor adds a row for it to the config's save file list. The quest log uses the built-in **GameProfile** save file.
+- Make a save system config with **Tools > External Project Tools > Save System > Create Config**.
+- This sample brings one save file, `SamplePickupsSaveFile` in Scene. The editor adds it to the config after the next compile. The quest log uses the built-in **GameProfile** file.
 - To make the "Reload scene" button work, add the **Plain CSharp And MonoBehaviours Together** scene to File > Build Profiles > Scene List.
 
 ## Try it

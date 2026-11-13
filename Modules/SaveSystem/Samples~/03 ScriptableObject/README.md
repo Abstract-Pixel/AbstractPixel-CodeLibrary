@@ -4,8 +4,8 @@ A `GameProgress` asset that registers itself in `OnEnable`. A later step of the 
 
 ## Before you start
 
-- The project needs a save system config. Make one with **Tools > External Project Tools > Save System > Create Config**.
-- This sample saves into the built-in **GameProfile** save file, so it needs no row of its own in the save file list.
+- Make a save system config with **Tools > External Project Tools > Save System > Create Config**.
+- This sample uses the built-in **GameProfile** save file. You don't need to add anything to the config.
 - To make the "Reload scene" button work, add the **ScriptableObject** scene to File > Build Profiles > Scene List.
 
 ## Try it

@@ -4,8 +4,8 @@ One value in each save location: the volume setting in **Global**, coins in **Ga
 
 ## Before you start
 
-- The project needs a save system config. Make one with **Tools > External Project Tools > Save System > Create Config**.
-- This sample ships two save file classes: `SampleSettingsSaveFile` (Global) and `SampleChestsSaveFile` (Scene). After the next compile the editor adds a row for each to the config's save file list. The coins use the built-in **GameProfile** save file.
+- Make a save system config with **Tools > External Project Tools > Save System > Create Config**.
+- This sample brings two save files, `SampleSettingsSaveFile` in Global and `SampleChestsSaveFile` in Scene. The editor adds them to the config after the next compile. The coins use the built-in **GameProfile** file.
 - To make the "Go to" and "New game profile" buttons work, add the **Save Locations Forest** and **Save Locations Cave** scenes to File > Build Profiles > Scene List.
 
 ## Try it
@@ -15,7 +15,7 @@ One value in each save location: the volume setting in **Global**, coins in **Ga
 3. Press **Go to Save Locations Cave**, then go back. Chest 1 is still open: each scene keeps its own chests.
 4. Press **New game profile**. The volume stays, the coins go back to 0, and the chests are closed.
 5. Press **Next game profile** to go back. The coins and the open chest return.
-6. The **Last save file loaded** line comes from `SaveEventBus.OnLoadCompleted`. The screen subscribes after the save files loaded, and is still told, because load events are sticky. A Scene save file reports once per scene.
+6. The **Last save file loaded** line comes from `SaveEventBus.OnLoadCompleted`. The screen subscribes after the files load and still hears about them, because load events are sticky.
 
 ## The lines that matter
 
@@ -27,6 +27,6 @@ SaveEventBus.OnLoadCompleted += ShowLoadedSaveFile;                             
 profile.Open(); SceneManager.LoadScene(...);                                       // switch game profiles, then reload
 ```
 
-The save file list in the config decides each save file's save location; a script only names its save file class. In your game you'd name a class from `SaveFiles.cs`, such as `SaveFiles.Settings`; a sample lives in its own assembly, so it ships its own classes the way a library module does.
+The config decides where each save file lives. A script only names the file's class. In your game you'd use a class from `SaveFiles.cs`, such as `SaveFiles.Settings`. A sample can't see that file, so it brings its own classes.
 
-After opening a different game profile, reload the scene: objects registered under the previous game profile never write their values into the new one.
+Reload the scene after opening another game profile. Objects from the old profile never write into the new one.

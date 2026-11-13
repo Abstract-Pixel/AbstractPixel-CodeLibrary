@@ -4,8 +4,8 @@ An `Inventory` class with no MonoBehaviour saves with one line: `SaveActions.Reg
 
 ## Before you start
 
-- The project needs a save system config. Make one with **Tools > External Project Tools > Save System > Create Config**.
-- This sample saves into the built-in **GameProfile** save file, so it needs no row of its own in the save file list.
+- Make a save system config with **Tools > External Project Tools > Save System > Create Config**.
+- This sample uses the built-in **GameProfile** save file. You don't need to add anything to the config.
 - To make the "Reload scene" button work, add the **Plain CSharp Class** scene to File > Build Profiles > Scene List.
 
 ## Try it
@@ -24,6 +24,6 @@ SaveActions.Register(this, "player-inventory");       // the last line of the co
 SaveActions.Unregister(Inventory);                    // the owner calls this when the scene ends
 ```
 
-No save file class is named, so the data goes into the built-in GameProfile save file. To pick another save file, name its class: `ISavable<InventoryData, SaveFiles.Bag>`.
+With no save file class named, the data goes into the GameProfile file. To use another file, add its class, such as `ISavable<InventoryData, SaveFiles.Bag>`.
 
-Register last in the constructor: if saved data is already loaded, it's restored inside that call.
+Register on the last line of the constructor. Saved data may arrive inside that call.

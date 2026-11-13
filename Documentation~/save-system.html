@@ -118,25 +118,25 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
     <h2>Most used first</h2>
     <ol>
       <li class="group">Every project</li>
-      <li><a href="#script">Saving a script <span class="freq">every script</span></a></li>
-      <li><a href="#saving">Saving and loading <span class="freq">every game</span></a></li>
-      <li><a href="#setup">Setting it up <span class="freq">once</span></a></li>
-      <li><a href="#files">Save files <span class="freq">once, then rarely</span></a></li>
+      <li><a href="#script">Save a script <span class="freq">every script</span></a></li>
+      <li><a href="#saving">Save and load <span class="freq">every game</span></a></li>
+      <li><a href="#setup">Set it up <span class="freq">once</span></a></li>
+      <li><a href="#files">Save files <span class="freq">once</span></a></li>
       <li class="group">Most games</li>
       <li><a href="#locations">Save locations <span class="freq">often</span></a></li>
       <li><a href="#profiles">Game profiles <span class="freq">often</span></a></li>
       <li><a href="#plain">Plain C# classes <span class="freq">often</span></a></li>
       <li class="group">Some games</li>
-      <li><a href="#events">Load and save events <span class="freq">sometimes</span></a></li>
-      <li><a href="#forget">Forgetting data <span class="freq">sometimes</span></a></li>
+      <li><a href="#events">Events <span class="freq">sometimes</span></a></li>
+      <li><a href="#forget">Forget data <span class="freq">sometimes</span></a></li>
       <li><a href="#scriptable">ScriptableObjects <span class="freq">sometimes</span></a></li>
       <li><a href="#storage">SaveStorage <span class="freq">tools</span></a></li>
       <li class="group">While you work</li>
       <li><a href="#editor">Editor tools <span class="freq">debugging</span></a></li>
-      <li><a href="#disk">What's on disk <span class="freq">debugging</span></a></li>
+      <li><a href="#disk">Files on disk <span class="freq">debugging</span></a></li>
       <li><a href="#samples">Samples <span class="freq">learning</span></a></li>
       <li class="group">Rarely</li>
-      <li><a href="#internals">Under the hood <span class="freq">library work</span></a></li>
+      <li><a href="#internals">Inside the code <span class="freq">library work</span></a></li>
       <li><a href="#unity">Unity versions <span class="freq">new project</span></a></li>
       <li><a href="#later">Not built yet <span class="freq">roadmap</span></a></li>
     </ol>
@@ -146,93 +146,86 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
     <header class="intro">
       <div class="eyebrow">Abstract Pixel Library · Modules/SaveSystem · branch save-system</div>
       <h1>Save System</h1>
-      <p class="lede">How the save system works, from the one line every saved script writes down to the storage underneath. The parts you use in almost every project come first; the internals come last. Words in bold are from the glossary, <code>Modules/SaveSystem/GLOSSARY.md</code>.</p>
+      <p class="lede">How to save data in a game with this library. The parts you use most come first. Words in bold are in the glossary, <code>Modules/SaveSystem/GLOSSARY.md</code>.</p>
 
       <div class="status">
-        <h2>What is built</h2>
+        <h2>What works today</h2>
         <ul class="steps">
-          <li><span class="pill done">Done</span><span><strong>Safe storage.</strong> Atomic writes, optional backups, three save locations, game profiles.</span></li>
-          <li><span class="pill done">Done</span><span><strong>The core.</strong> Restore after Awake and before Start, no manager in the scene, plain C# classes and ScriptableObjects can save.</span></li>
-          <li><span class="pill done">Done</span><span><strong>Review fixes.</strong> Save files as classes, <code>SaveStorage</code>, sticky load events, <code>GameProfile</code> handles, the Create Config menu item.</span></li>
-          <li><span class="pill next">Next</span><span><strong>Saved objects.</strong> <code>[Save]</code> fields, <code>IOnRestored</code>, save IDs you never type, <code>SetSaveId</code> for spawned copies.</span></li>
-          <li><span class="pill todo">Later</span><span>ScriptableObjects registered automatically, bridges added while editing, the Save System window, ready-made savers.</span></li>
+          <li><span class="pill done">Done</span><span>Safe saving to disk, with optional backups.</span></li>
+          <li><span class="pill done">Done</span><span>Scripts get their saved data before <code>Start</code>. No manager in the scene.</span></li>
+          <li><span class="pill done">Done</span><span>Save files as classes, events, game profiles, <code>SaveStorage</code>, a Create Config menu item.</span></li>
+          <li><span class="pill next">Next</span><span><code>[Save]</code> fields, <code>IOnRestored</code>, and save IDs for spawned objects.</span></li>
+          <li><span class="pill todo">Later</span><span>Automatic ScriptableObjects, a Save System window, ready-made savers.</span></li>
         </ul>
-        <p>Tests: 178 EditMode and 13 PlayMode, all passing. Works on Unity 6 and Unity 7.</p>
+        <p>178 EditMode and 13 PlayMode tests pass. Works on Unity 6 and Unity 7.</p>
       </div>
     </header>
 
     <section class="topic" id="script">
-      <div class="topic-head"><h2>Saving a script</h2><span class="freq-tag">every saved script</span></div>
-      <p>A saved script says what to save and how to put it back. The <strong>Savable Bridge</strong> component on the same GameObject connects it to the save system; the editor adds the bridge for you and gives it a <strong>save ID</strong>.</p>
+      <div class="topic-head"><h2>Save a script</h2><span class="freq-tag">every saved script</span></div>
+      <p>A saved script has two methods. <code>CaptureData</code> returns what to save. <code>RestoreData</code> puts it back. The editor adds a <strong>Savable Bridge</strong> to the GameObject, which connects the script to the save system.</p>
       <div class="code"><div class="code-label">A saved MonoBehaviour</div>
 <pre><code>public class Health : MonoBehaviour, ISavable&lt;int&gt;
 {
     public int Current { get; private set; }
 
-    <span class="c">// New-game values go in Awake.</span>
-    void Awake() { Current = 100; }
+    void Awake() { Current = 100; }   <span class="c">// new-game value</span>
 
     public int CaptureData() =&gt; Current;
     public void RestoreData(int loadedData) =&gt; Current = loadedData;
-}
-
-<span class="c">// Any script can read the saved value in Start:</span>
-void Start() { shownHealth = health.Current; }   <span class="c">// already restored</span></code></pre></div>
-      <p>The save system restores right after every <code>Awake</code> and before any <code>Start</code>. It restores an object as soon as both the object and its data exist, whichever comes second, so an object spawned later, or disabled and enabled again, gets its data back the same way.</p>
-      <div class="note warn"><strong>Set new-game values in Awake, never in Start.</strong> If <code>Start</code> assigns a saved value, it overwrites the value the save system just restored.</div>
-      <h3>Picking the save file</h3>
-      <p><code>ISavable&lt;TData&gt;</code> saves into the built-in <strong>GameProfile</strong> save file. To save somewhere else, name the <strong>save file class</strong> as a second type:</p>
+}</code></pre></div>
+      <p>The save system restores data after every <code>Awake</code> and before any <code>Start</code>. So any script can read the saved value in <code>Start</code>. Objects spawned later get their data the same way.</p>
+      <div class="note warn"><strong>Set new-game values in Awake.</strong> A value set in <code>Start</code> overwrites the saved one.</div>
+      <h3>Choose the save file</h3>
+      <p><code>ISavable&lt;TData&gt;</code> saves into the built-in <strong>GameProfile</strong> file. To use another file, add its class as a second type.</p>
       <div class="code"><div class="code-label">Naming a save file</div>
-<pre><code>public class VolumeSetting : MonoBehaviour, ISavable&lt;int, SaveFiles.Settings&gt;  <span class="c">// shared by every game profile</span>
-public class Chest : MonoBehaviour, ISavable&lt;bool, SaveFiles.Scene&gt;            <span class="c">// one file per scene</span></code></pre></div>
-      <p>A typo in a save file class doesn't compile. Where each save file lives is set in the config, not in the script (see <a href="#files">Save files</a>).</p>
+<pre><code>public class VolumeSetting : MonoBehaviour, ISavable&lt;int, SaveFiles.Settings&gt; { … }
+public class Chest : MonoBehaviour, ISavable&lt;bool, SaveFiles.Scene&gt; { … }</code></pre></div>
+      <p>A typo in the class name won't compile.</p>
     </section>
 
     <section class="topic" id="saving">
-      <div class="topic-head"><h2>Saving and loading</h2><span class="freq-tag">every game</span></div>
-      <p><code>SaveActions</code> is the one class game code calls. There is no Load call: objects restore when they register, and opening a game profile restores everything registered before it.</p>
+      <div class="topic-head"><h2>Save and load</h2><span class="freq-tag">every game</span></div>
+      <p>Game code calls <code>SaveActions</code>. There is no Load call. A script gets its data when it registers.</p>
       <div class="code"><div class="code-label">SaveActions</div>
-<pre><code>SaveActions.SaveAll();                       <span class="c">// writes every save file that changed</span>
-SaveActions.Save&lt;SaveFiles.Settings&gt;();      <span class="c">// one save file</span>
-SaveActions.Reload&lt;SaveFiles.Settings&gt;();    <span class="c">// read it from disk again; unsaved changes are lost</span>
-SaveActions.Forget(coin);                    <span class="c">// remove one object's data on purpose</span>
-SaveActions.GameProfiles                     <span class="c">// every game profile, see below</span></code></pre></div>
+<pre><code>SaveActions.SaveAll();                       <span class="c">// write every file that changed</span>
+SaveActions.Save&lt;SaveFiles.Settings&gt;();      <span class="c">// write one file</span>
+SaveActions.Reload&lt;SaveFiles.Settings&gt;();    <span class="c">// read one file from disk again</span>
+SaveActions.Forget(coin);                    <span class="c">// delete one object's data</span></code></pre></div>
       <ul>
-        <li><code>SaveAll</code> writes only the save files that changed.</li>
-        <li>Saving never erases objects that aren't loaded right now: the save system keeps the data it read and merges new captures into it.</li>
-        <li>When a saved object goes away, its latest values are captured first and written on the next save.</li>
-        <li>For UnityEvents and buttons, add <code>MonoSaveActions</code> to a GameObject. It has <code>SaveAll()</code> and <code>SaveChosenFile()</code>, which saves the save file picked from a dropdown in its inspector.</li>
-        <li>The config can save on quit and when the game loses focus (<code>SaveOnQuit</code>, <code>SaveOnFocusLoss</code>, both off by default).</li>
+        <li>Saving keeps the data of objects that aren't loaded, such as a boss in another scene.</li>
+        <li>When an object is destroyed, the save system keeps its last values for the next save.</li>
+        <li>For buttons and UnityEvents, add <code>MonoSaveActions</code>. It has <code>SaveAll()</code> and <code>SaveChosenFile()</code>. You pick the file in its inspector.</li>
+        <li>The config can save when the game quits or loses focus. Both are off by default.</li>
       </ul>
     </section>
 
     <section class="topic" id="setup">
-      <div class="topic-head"><h2>Setting it up in a project</h2><span class="freq-tag">once per project</span></div>
-      <p>Nothing goes in a scene. Use <strong>Tools &gt; External Project Tools &gt; Save System &gt; Create Config</strong>. It creates <code>Assets/Resources/SaveSystemConfig.asset</code> with the built-in save files and every library module's save file, and selects it. If a config already exists it only selects it.</p>
-      <p>The save system reads the config before the first scene loads and resets itself every time play mode starts, so it works with domain reload turned off.</p>
+      <div class="topic-head"><h2>Set it up</h2><span class="freq-tag">once per project</span></div>
+      <p>Click <strong>Tools &gt; External Project Tools &gt; Save System &gt; Create Config</strong>. That's it. Nothing goes in a scene.</p>
+      <p>The menu item creates <code>Assets/Resources/SaveSystemConfig.asset</code>. The save system reads it before the first scene loads.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Config field</th><th>What it does</th></tr></thead>
         <tbody>
-          <tr><td>Use Debug Path</td><td>Saves into <code>DebugSaveFiles/</code> next to <code>Assets/</code>, so you can read the files while you work. Off: the player's save folder.</td></tr>
-          <tr><td>Startup Policy</td><td><code>AutoSetUp</code> reopens the last game profile, or makes one, before the first scene. <code>Manual</code> waits for your save slot screen.</td></tr>
-          <tr><td>Default Game Profile Name</td><td>The name a new game profile gets, followed by its slot number: "Game Profile 2".</td></tr>
-          <tr><td>Game Profile Guid Length</td><td>How many characters a game profile's folder name has.</td></tr>
-          <tr><td>Primary File Extension</td><td>The file type save files are written as.</td></tr>
-          <tr><td>Save On Quit, Save On Focus Loss</td><td>Autosave, both off by default.</td></tr>
+          <tr><td>Use Debug Path</td><td>Saves to <code>DebugSaveFiles/</code> next to <code>Assets/</code>, so you can open the files.</td></tr>
+          <tr><td>Startup Policy</td><td><code>AutoSetUp</code> opens the last game profile at startup. <code>Manual</code> waits for your save slot screen.</td></tr>
+          <tr><td>Default Game Profile Name</td><td>New game profiles get this name plus a number, such as "Game Profile 2".</td></tr>
+          <tr><td>Game Profile Guid Length</td><td>Length of a game profile's folder name.</td></tr>
+          <tr><td>Primary File Extension</td><td>The file type, such as json.</td></tr>
+          <tr><td>Save On Quit, Save On Focus Loss</td><td>Autosave. Off by default.</td></tr>
           <tr><td>Save Files Script Path</td><td>Where the editor writes <code>SaveFiles.cs</code>.</td></tr>
-          <tr><td>Save file list</td><td>One row per save file. See below.</td></tr>
+          <tr><td>Save file list</td><td>One row per save file. See the next part.</td></tr>
         </tbody>
       </table></div>
-      <div class="note">With no config, the save system logs one error that names the asset and the menu item, and every call does nothing. The game keeps running.</div>
+      <div class="note">With no config, you get one error that names the menu item. Save calls then do nothing, and the game keeps running.</div>
     </section>
 
     <section class="topic" id="files">
       <div class="topic-head"><h2>Save files</h2><span class="freq-tag">once, then rarely</span></div>
-      <p>The config's <strong>save file list</strong> has one row per save file: a name, a <strong>save location</strong> and a <strong>Backup</strong> box. Three rows are built in and always exist: <code>Global</code>, <code>GameProfile</code> and <code>Scene</code>. Add a row for each extra file your game wants, such as Settings or Ghosts.</p>
-      <p>When the list changes, the editor writes <code>SaveFiles.cs</code> with one class per row. Scripts name those classes:</p>
-      <div class="code"><div class="code-label">SaveFiles.cs, written by the editor</div>
-<pre><code><span class="c">// SaveFiles.cs. Written by the editor. Don't edit; change the list in the config.</span>
-public static class SaveFiles
+      <p>The config has a <strong>save file list</strong>. Each row is one file, with a name, a <strong>save location</strong> and a <strong>Backup</strong> box. Three rows always exist. They are <code>Global</code>, <code>GameProfile</code> and <code>Scene</code>. Add rows for extra files, such as Settings.</p>
+      <p>The editor turns the list into <code>SaveFiles.cs</code>, with one class per row.</p>
+      <div class="code"><div class="code-label">SaveFiles.cs (written by the editor)</div>
+<pre><code>public static class SaveFiles
 {
     public sealed class Global : ISaveFile { }
     public sealed class GameProfile : ISaveFile { }
@@ -240,58 +233,54 @@ public static class SaveFiles
     public sealed class Settings : ISaveFile { }   <span class="c">// a row you added</span>
 }</code></pre></div>
       <ul>
-        <li>Renaming a row keeps its old data readable: each row keeps the storage name it was first given.</li>
-        <li>The menu item <strong>Write SaveFiles.cs</strong> writes the file by hand, for example after a merge.</li>
-        <li>A library module ships its own save file class, marked with <code>[SaveFileDefaults]</code>. The editor adds its row ("Added by the Settings module") after each compile. You can still change its location and Backup box.</li>
+        <li>Renaming a row keeps its old data. Each row remembers the name it was saved under.</li>
+        <li>A library module brings its own save file class. The editor adds its row for you.</li>
       </ul>
-      <div class="code"><div class="code-label">A module's own save file</div>
+      <div class="code"><div class="code-label">A module's save file</div>
 <pre><code>[SaveFileDefaults("Settings", SaveLocation.Global)]
-public sealed class SettingsSaveFile : ISaveFile { }
-
-public class SettingsManager : MonoBehaviour, ISavable&lt;SettingsDTO, SettingsSaveFile&gt; { … }</code></pre></div>
+public sealed class SettingsSaveFile : ISaveFile { }</code></pre></div>
     </section>
 
     <section class="topic" id="locations">
       <div class="topic-head"><h2>Save locations</h2><span class="freq-tag">most games</span></div>
-      <p>Every save file lives in one of three save locations. A script never picks one; its save file's row does.</p>
+      <p>Each save file lives in one of three places. The row in the config decides which.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Save location</th><th>Holds</th><th>Example</th></tr></thead>
         <tbody>
-          <tr><td><strong>Global</strong></td><td>Data shared by every game profile</td><td>Volume, key bindings</td></tr>
-          <tr><td><strong>GameProfile</strong></td><td>One playthrough</td><td>Coins, inventory, quests</td></tr>
-          <tr><td><strong>Scene</strong></td><td>One scene inside one playthrough</td><td>Which chests are open in the Forest</td></tr>
+          <tr><td><strong>Global</strong></td><td>Data every game profile shares</td><td>Volume</td></tr>
+          <tr><td><strong>GameProfile</strong></td><td>One playthrough</td><td>Coins, inventory</td></tr>
+          <tr><td><strong>Scene</strong></td><td>One scene in one playthrough</td><td>Open chests in the Forest</td></tr>
         </tbody>
       </table></div>
-      <p>Switching game profiles keeps Global data and swaps everything else. An object in an additively loaded scene saves into its own scene's file, not the active scene's.</p>
+      <p>Switching game profiles keeps Global data and swaps the rest. An object in an additive scene saves into its own scene's file.</p>
     </section>
 
     <section class="topic" id="profiles">
-      <div class="topic-head"><h2>Game profiles and save slots</h2><span class="freq-tag">most games</span></div>
-      <p>A <strong>game profile</strong> is one playthrough. You hold a <code>GameProfile</code> and call its methods; you never type its ID. Each one gets a <strong>slot number</strong> that never changes, so slot 2 stays slot 2 after slot 1 is deleted.</p>
+      <div class="topic-head"><h2>Game profiles</h2><span class="freq-tag">most games</span></div>
+      <p>A <strong>game profile</strong> is one playthrough. You hold a <code>GameProfile</code> object and call its methods. Each one has a <strong>slot number</strong> that never changes.</p>
       <div class="code"><div class="code-label">A save slot screen</div>
-<pre><code>GameProfile created = SaveActions.GameProfiles.CreateNew();   <span class="c">// "Game Profile 3"; not opened</span>
+<pre><code>GameProfile created = SaveActions.GameProfiles.CreateNew();   <span class="c">// named "Game Profile 3"</span>
 GameProfile slot = SaveActions.GameProfiles.Get(2);           <span class="c">// by slot number</span>
 slot.Open();
-SceneManager.LoadScene(SceneManager.GetActiveScene().name);   <span class="c">// reload after switching</span>
+SceneManager.LoadScene(SceneManager.GetActiveScene().name);   <span class="c">// reload after opening</span>
 
-foreach (GameProfile profile in SaveActions.GameProfiles.All)  <span class="c">// sorted by slot number</span>
+foreach (GameProfile profile in SaveActions.GameProfiles.All)
 {
-    Debug.Log($"{profile.SlotNumber} {profile.DisplayName} {profile.LastSaved} {profile.Playtime}");
+    Debug.Log($"{profile.SlotNumber} {profile.DisplayName} {profile.LastSaved}");
 }
 
-slot.Rename("Hard mode run");
-slot.Delete();                                <span class="c">// every file and backup of that game profile</span>
-GameProfile open = SaveActions.GameProfiles.Current;   <span class="c">// null when none is open</span></code></pre></div>
+slot.Rename("Hard mode");
+slot.Delete();                                 <span class="c">// deletes its files and backups</span>
+GameProfile open = SaveActions.GameProfiles.Current;   <span class="c">// null if none is open</span></code></pre></div>
       <ul>
-        <li>Every save updates the open game profile's <strong>game profile manifest</strong>: last saved time, last scene and playtime. <code>profile.Custom</code> holds game-specific details such as difficulty.</li>
-        <li>After opening a different game profile, reload your scenes. An object registered under the previous game profile never writes its values into the new one.</li>
-        <li><code>SaveActions.GameProfiles</code> is never null. Without a config it is an empty list whose methods log one clear error.</li>
+        <li>Each save updates the open profile's last saved time, last scene and playtime. Put your own details, such as difficulty, in <code>profile.Custom</code>.</li>
+        <li>Reload your scenes after opening another game profile.</li>
       </ul>
     </section>
 
     <section class="topic" id="plain">
-      <div class="topic-head"><h2>Saving a plain C# class</h2><span class="freq-tag">often</span></div>
-      <p>Any object can save, not only MonoBehaviours. A plain class has no GameObject to carry a save ID, so it passes one when it registers.</p>
+      <div class="topic-head"><h2>Plain C# classes</h2><span class="freq-tag">often</span></div>
+      <p>Any class can save. It passes its own save ID when it registers.</p>
       <div class="code"><div class="code-label">A plain class</div>
 <pre><code>public class Inventory : ISavable&lt;InventoryData&gt;
 {
@@ -300,51 +289,49 @@ GameProfile open = SaveActions.GameProfiles.Current;   <span class="c">// null w
     public Inventory()
     {
         Items = new List&lt;string&gt; { "Wooden Sword" };
-        <span class="c">// Last line: saved items may be restored inside this call.</span>
-        SaveActions.Register(this, "player-inventory");
+        SaveActions.Register(this, "player-inventory");   <span class="c">// last line</span>
     }
 
     public InventoryData CaptureData() =&gt; new InventoryData { Items = new List&lt;string&gt;(Items) };
     public void RestoreData(InventoryData loadedData) =&gt; Items = new List&lt;string&gt;(loadedData.Items);
 }
 
-<span class="c">// Whoever owns it unregisters it when its scene ends; that captures the latest items.</span>
-void OnDestroy() =&gt; SaveActions.Unregister(inventory);</code></pre></div>
-      <p>The save ID must be unique within its save file.</p>
+void OnDestroy() =&gt; SaveActions.Unregister(inventory);   <span class="c">// in the owner</span></code></pre></div>
+      <p>Register on the last line, because saved data may arrive inside that call. Each save ID must be unique in its file.</p>
     </section>
 
     <section class="topic" id="events">
-      <div class="topic-head"><h2>Load and save events</h2><span class="freq-tag">sometimes</span></div>
-      <p><code>SaveEventBus</code> tells scripts when data is ready or written. Load events and <code>OnGameProfileOpened</code> are sticky: a script that subscribes after the event already happened is called right away, so it never matters whether it subscribed early or late.</p>
+      <div class="topic-head"><h2>Events</h2><span class="freq-tag">sometimes</span></div>
+      <p><code>SaveEventBus</code> tells scripts when data has loaded or saved. Load events are sticky. A script that subscribes late still gets called.</p>
       <div class="code"><div class="code-label">SaveEventBus</div>
-<pre><code>SaveEventBus.OnLoadCompleted += file =&gt;          <span class="c">// one save file restored; gives its class</span>
+<pre><code>SaveEventBus.OnLoadCompleted += file =&gt;          <span class="c">// one file loaded</span>
 {
     if (file == typeof(SaveFiles.Ghosts)) { ShowGhosts(); }
 };
-SaveEventBus.OnLoadAllCompleted += Refresh;       <span class="c">// Global data and the open game profile restored</span>
+SaveEventBus.OnLoadAllCompleted += Refresh;       <span class="c">// everything loaded</span>
 SaveEventBus.OnGameProfileOpened += profile =&gt; { };
-SaveEventBus.OnSaveCompleted += file =&gt; { };      <span class="c">// one save file written</span>
+SaveEventBus.OnSaveCompleted += file =&gt; { };      <span class="c">// one file saved</span>
 SaveEventBus.OnSaveAllCompleted += ShowSavedIcon;</code></pre></div>
       <ul>
-        <li><code>OnLoadCompleted</code> comes after the file is read <em>and</em> every registered object in it is restored.</li>
-        <li>A Scene save file raises it once per scene, one frame after that scene's scripts start, so every object in the scene has its data first.</li>
-        <li><code>OnLoadAllCompleted</code> fires each time a game profile opens. Closing the game profile clears the sticky state.</li>
-        <li>Each handler runs on its own. One that throws is logged with its name, and the others still run.</li>
+        <li>A load event comes after every object in that file has its data.</li>
+        <li>A Scene file sends its load event once per scene, one frame after the scene starts.</li>
+        <li><code>OnLoadAllCompleted</code> runs each time a game profile opens.</li>
+        <li>If one handler throws, the others still run.</li>
       </ul>
     </section>
 
     <section class="topic" id="forget">
-      <div class="topic-head"><h2>Forgetting saved data on purpose</h2><span class="freq-tag">sometimes</span></div>
-      <p>For a coin that was picked up and should stay gone. Pass the saved object itself: a plain class, a saved script, or its GameObject.</p>
+      <div class="topic-head"><h2>Forget data</h2><span class="freq-tag">sometimes</span></div>
+      <p>Use it for a coin that was picked up. Pass the object, its script or its GameObject.</p>
       <div class="code"><div class="code-label">SaveActions.Forget</div>
-<pre><code>SaveActions.Forget(coin);      <span class="c">// stops tracking it and removes its data</span>
-Destroy(coin.gameObject);      <span class="c">// destroying it can't write it back now</span>
-SaveActions.SaveAll();         <span class="c">// the entry is gone from the file</span></code></pre></div>
+<pre><code>SaveActions.Forget(coin);
+Destroy(coin.gameObject);
+SaveActions.SaveAll();         <span class="c">// the coin's data is gone</span></code></pre></div>
     </section>
 
     <section class="topic" id="scriptable">
-      <div class="topic-head"><h2>Saving a ScriptableObject</h2><span class="freq-tag">sometimes</span></div>
-      <p>An asset registers itself like a plain class. A later step makes this automatic.</p>
+      <div class="topic-head"><h2>ScriptableObjects</h2><span class="freq-tag">sometimes</span></div>
+      <p>An asset registers itself, like a plain class. This becomes automatic in a later step.</p>
       <div class="code"><div class="code-label">A saved asset</div>
 <pre><code>public class GameProgress : ScriptableObject, ISavable&lt;GameProgressData&gt;
 {
@@ -353,8 +340,7 @@ SaveActions.SaveAll();         <span class="c">// the entry is gone from the fil
     void OnEnable()  =&gt; RegisterWithSaveSystem();
     void OnDisable() =&gt; SaveActions.Unregister(this);
 
-    <span class="c">// In the Editor the asset can load before play mode starts the save system,</span>
-    <span class="c">// so a scene script calls this again in Awake. Registering twice is harmless.</span>
+    <span class="c">// A scene script calls this again in Awake, in case the asset loaded too early.</span>
     public void RegisterWithSaveSystem() =&gt; SaveActions.Register(this, "game-progress");
 
     public GameProgressData CaptureData() =&gt; new GameProgressData { LevelsCompleted = LevelsCompleted };
@@ -363,56 +349,52 @@ SaveActions.SaveAll();         <span class="c">// the entry is gone from the fil
     </section>
 
     <section class="topic" id="storage">
-      <div class="topic-head"><h2>Reading and writing a save file directly</h2><span class="freq-tag">editor tools, debug buttons</span></div>
-      <p><code>SaveStorage</code> reads and writes a whole save file as JSON text in one line. The config says where the file lives and whether it keeps a backup, so nothing else is passed in. It works in play mode and in edit mode.</p>
+      <div class="topic-head"><h2>SaveStorage</h2><span class="freq-tag">editor tools, debug buttons</span></div>
+      <p><code>SaveStorage</code> reads or writes a whole save file as JSON in one line. The config tells it where the file is. It works in play mode and edit mode.</p>
       <div class="code"><div class="code-label">SaveStorage</div>
-<pre><code>SaveStorage.ReadText&lt;SaveFiles.Settings&gt;(out string json);                 <span class="c">// a Global file</span>
-SaveStorage.ReadText&lt;SaveFiles.GameProfile&gt;(out string json);              <span class="c">// the open game profile</span>
+<pre><code>SaveStorage.ReadText&lt;SaveFiles.Settings&gt;(out string json);                 <span class="c">// Global file</span>
+SaveStorage.ReadText&lt;SaveFiles.GameProfile&gt;(out string json);              <span class="c">// open game profile</span>
 SaveStorage.ReadText&lt;SaveFiles.GameProfile&gt;(profile, out string json);     <span class="c">// any game profile</span>
 SaveStorage.ReadText&lt;SaveFiles.Scene&gt;(profile, "Forest", out string json); <span class="c">// one scene</span>
-SaveStorage.WriteText&lt;SaveFiles.Settings&gt;(json);   <span class="c">// atomic; refuses text that isn't a save file</span>
+SaveStorage.WriteText&lt;SaveFiles.Settings&gt;(json);
 SaveStorage.Delete&lt;SaveFiles.Settings&gt;();
-string path = SaveStorage.GetFilePath&lt;SaveFiles.Settings&gt;();   <span class="c">// for "Show in Explorer"</span>
-foreach (GameProfile profile in SaveStorage.GameProfiles) { }   <span class="c">// read from disk in edit mode</span></code></pre></div>
-      <div class="note">In play mode the running save system doesn't see a write. Call <code>SaveActions.Reload&lt;TFile&gt;()</code> after <code>WriteText</code> to restore the saved objects from the new text. The Settings module's debug toolbar is built on <code>SaveStorage</code>.</div>
+string path = SaveStorage.GetFilePath&lt;SaveFiles.Settings&gt;();
+foreach (GameProfile profile in SaveStorage.GameProfiles) { }</code></pre></div>
+      <div class="note">In play mode, call <code>SaveActions.Reload&lt;TFile&gt;()</code> after <code>WriteText</code>. Otherwise objects keep their old values.</div>
     </section>
 
     <section class="topic" id="editor">
       <div class="topic-head"><h2>Editor tools</h2><span class="freq-tag">while debugging</span></div>
-      <p>Every tool is under <strong>Tools &gt; External Project Tools &gt; Save System</strong>.</p>
+      <p>All tools are under <strong>Tools &gt; External Project Tools &gt; Save System</strong>.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Menu item</th><th>What it does</th></tr></thead>
         <tbody>
-          <tr><td>Create Config</td><td>Creates <code>Assets/Resources/SaveSystemConfig.asset</code>, or selects the one that exists.</td></tr>
-          <tr><td>Write SaveFiles.cs</td><td>Writes the save file classes from the save file list. Offers to create the config if there is none.</td></tr>
-          <tr><td>Save All</td><td>Play mode only. Saves every registered object.</td></tr>
-          <tr><td>Load All</td><td>Play mode only. Re-reads every save file and restores every registered object.</td></tr>
-          <tr><td>Open Release Folder, Open Debug Folder</td><td>Shows the folder the game saves to.</td></tr>
-          <tr><td>Delete All Save Files</td><td>Asks first, then deletes both folders, backups included.</td></tr>
+          <tr><td>Create Config</td><td>Creates the config, or selects it if it exists.</td></tr>
+          <tr><td>Write SaveFiles.cs</td><td>Writes the save file classes from the list.</td></tr>
+          <tr><td>Save All</td><td>Saves everything. Play mode only.</td></tr>
+          <tr><td>Load All</td><td>Reads every file again. Play mode only.</td></tr>
+          <tr><td>Open Release Folder, Open Debug Folder</td><td>Opens the save folder.</td></tr>
+          <tr><td>Delete All Save Files</td><td>Asks first, then deletes every save file and backup.</td></tr>
         </tbody>
       </table></div>
-      <p>The config inspector shows the save file list one row per line. Built-in rows and rows added by a module say so, and come back if you remove them. A <code>SaveFileReference</code> field, such as the one on <code>MonoSaveActions</code>, shows a dropdown of the save files in the list.</p>
     </section>
 
     <section class="topic" id="disk">
-      <div class="topic-head"><h2>What's on disk</h2><span class="freq-tag">while debugging</span></div>
-      <p>Each write goes to a temporary file first, is flushed to disk, then swapped in, so a crash during a write leaves the previous save intact. Backups live in their own folder that mirrors the main one, one backup per file.</p>
-      <div class="code"><div class="code-label">The folder map</div>
-<pre><code>SaveFiles/                       <span class="c">(DebugSaveFiles/ next to Assets when Use Debug Path is on)</span>
+      <div class="topic-head"><h2>Files on disk</h2><span class="freq-tag">while debugging</span></div>
+      <p>A save never leaves a half-written file. The save system writes a temporary file first, then swaps it in. Backups sit in their own folder with the same layout.</p>
+      <div class="code"><div class="code-label">Folders</div>
+<pre><code>SaveFiles/
   Global/
     Settings.json
-    SaveSystemMetaData.json      <span class="c">which game profile to reopen at startup</span>
+    SaveSystemMetaData.json      <span class="c">which game profile to open at startup</span>
   GameProfiles/
     a1b2c3/
-      GameProfileManifest.json   <span class="c">what a save slot screen shows</span>
+      GameProfileManifest.json   <span class="c">what the slot screen shows</span>
       GameProfile.json
-      Scenes/
-        Forest/
-          Scene.json
-  Backups/                       <span class="c">the same shape: the last good copy of each file</span>
+      Scenes/Forest/Scene.json
+  Backups/                       <span class="c">same layout, last good copy of each file</span>
     Global/Settings.json
-    GameProfiles/a1b2c3/GameProfile.json
-    GameProfiles/a1b2c3/Scenes/Forest/Scene.json</code></pre></div>
+    GameProfiles/a1b2c3/GameProfile.json</code></pre></div>
       <div class="code"><div class="code-label">One save file</div>
 <pre><code>{
   "FormatVersion": 2,
@@ -428,81 +410,77 @@ foreach (GameProfile profile in SaveStorage.GameProfiles) { }   <span class="c">
   }
 }</code></pre></div>
       <ul>
-        <li>Entries are matched by save ID only. <code>name</code> is there for a person reading the file.</li>
-        <li>A row with Backup ticked keeps the previous good copy. If its file is corrupt, the backup loads and a warning names the file.</li>
-        <li>A row with Backup unticked never falls back. A corrupt file logs one error that names it, and the objects keep their new-game values.</li>
-        <li>The game profile manifest and save system metadata are always backed up: losing a manifest would hide a whole game profile from the slot screen.</li>
-        <li>Deleting a game profile deletes its backups too.</li>
+        <li>The save system matches entries by save ID. The <code>name</code> is only for people.</li>
+        <li>With Backup ticked, a broken file loads its backup, with a warning.</li>
+        <li>With Backup unticked, a broken file logs one error and loads nothing.</li>
+        <li>The game profile manifest and the metadata file always have backups.</li>
       </ul>
     </section>
 
     <section class="topic" id="samples">
       <div class="topic-head"><h2>Samples</h2><span class="freq-tag">learning</span></div>
-      <p>Import them from the Package Manager. Each has a scene, a README and its own test.</p>
+      <p>Import them from the Package Manager. Each has a scene and a README.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Sample</th><th>Shows</th></tr></thead>
         <tbody>
-          <tr><td>01 Plain CSharp Class</td><td>An inventory that saves with <code>SaveActions.Register</code>.</td></tr>
-          <tr><td>02 MonoBehaviour</td><td>Health with a Savable Bridge; a health bar reads the saved value in <code>Start</code>.</td></tr>
-          <tr><td>03 ScriptableObject</td><td>A progress asset that registers itself.</td></tr>
-          <tr><td>04 Save Locations</td><td>Volume in Global, coins in a game profile, chests per scene, and <code>OnLoadCompleted</code> on screen.</td></tr>
-          <tr><td>05 Game Profiles</td><td>A save slot screen: <code>CreateNew()</code>, slots, <code>Get(slot)</code>, open and delete.</td></tr>
-          <tr><td>06 Plain CSharp And MonoBehaviours Together</td><td>A plain quest log and MonoBehaviour pickups saving side by side.</td></tr>
+          <tr><td>01 Plain CSharp Class</td><td>An inventory saved with <code>SaveActions.Register</code>.</td></tr>
+          <tr><td>02 MonoBehaviour</td><td>Health with a Savable Bridge.</td></tr>
+          <tr><td>03 ScriptableObject</td><td>A saved progress asset.</td></tr>
+          <tr><td>04 Save Locations</td><td>Global, game profile and scene data, plus a load event on screen.</td></tr>
+          <tr><td>05 Game Profiles</td><td>A save slot screen.</td></tr>
+          <tr><td>06 Plain CSharp And MonoBehaviours Together</td><td>A quest log and pickups saving side by side.</td></tr>
         </tbody>
       </table></div>
     </section>
 
     <section class="topic" id="internals">
-      <div class="topic-head"><h2>Under the hood</h2><span class="freq-tag">library work and tests</span></div>
-      <p>Game code only touches the public classes above. The rest is internal, with one job per class. Storage passes keys such as <code>GameProfiles/a1b2c3/GameProfile</code>, never full paths.</p>
+      <div class="topic-head"><h2>Inside the code</h2><span class="freq-tag">library work</span></div>
+      <p>Game code only uses the public classes above. These internal classes each do one job.</p>
       <div class="table-wrap"><table>
-        <thead><tr><th>Part</th><th>Its one job</th></tr></thead>
+        <thead><tr><th>Class</th><th>Job</th></tr></thead>
         <tbody>
-          <tr><td><code>SaveStartup</code></td><td>Starts the save system before the first scene and resets it whenever play mode starts or stops.</td></tr>
-          <tr><td><code>SaveSession</code></td><td>One running save system: connects the registry, the loaded data and the game profiles, and applies the whichever-second rule.</td></tr>
-          <tr><td><code>SaveRegistry</code></td><td>Every registered saved object, by save file and save ID.</td></tr>
-          <tr><td><code>LoadedSaveData</code></td><td>The data read from disk, kept in memory and merged with new captures.</td></tr>
-          <tr><td><code>SaveFileAddresses</code></td><td>Where a save file lives right now: its key and whether it keeps a backup.</td></tr>
-          <tr><td><code>SaveSessionEvents</code>, <code>LoadEventLog</code></td><td>Read save files when a session, game profile or scene starts, and remember which have loaded for sticky events.</td></tr>
-          <tr><td><code>SaveFileLookup</code></td><td>Finds a save file's row from its class.</td></tr>
-          <tr><td><code>SaveProfileManager</code>, <code>GameProfileList</code></td><td>Game profiles by folder ID, and the handles game code holds.</td></tr>
-          <tr><td><code>SaveFileStore</code></td><td>Writes with an optional backup, and reads with a fallback to it.</td></tr>
-          <tr><td><code>SaveFileAccess</code></td><td>What <code>SaveStorage</code> uses: the running session's parts, or parts built from the config in edit mode.</td></tr>
-          <tr><td><code>SavePathGenerator</code></td><td>Builds every key in one place, so saving and loading can't disagree.</td></tr>
-          <tr><td><code>DiskStorageService</code>, <code>MemoryStorageService</code></td><td>Store text by key: as files on disk, or in a dictionary so tests never touch real save files.</td></tr>
-          <tr><td><code>UnitySceneInfo</code>, <code>SceneReadySignal</code></td><td>Tell the save system which scenes are loaded, and when a newly loaded scene is ready.</td></tr>
+          <tr><td><code>SaveStartup</code></td><td>Starts the save system before the first scene.</td></tr>
+          <tr><td><code>SaveSession</code></td><td>One running save system. Gives data to objects when both are ready.</td></tr>
+          <tr><td><code>SaveRegistry</code></td><td>The list of registered objects.</td></tr>
+          <tr><td><code>LoadedSaveData</code></td><td>Data read from disk, kept in memory.</td></tr>
+          <tr><td><code>SaveFileAddresses</code></td><td>Where each file is, and whether it has a backup.</td></tr>
+          <tr><td><code>SaveSessionEvents</code>, <code>LoadEventLog</code></td><td>Send load events and remember them for late subscribers.</td></tr>
+          <tr><td><code>SaveFileLookup</code></td><td>Finds a file's row from its class.</td></tr>
+          <tr><td><code>SaveProfileManager</code>, <code>GameProfileList</code></td><td>Game profiles.</td></tr>
+          <tr><td><code>SaveFileStore</code></td><td>Writes and reads files with backups.</td></tr>
+          <tr><td><code>SaveFileAccess</code></td><td>Does the work for <code>SaveStorage</code>.</td></tr>
+          <tr><td><code>SavePathGenerator</code></td><td>Builds every file key.</td></tr>
+          <tr><td><code>DiskStorageService</code>, <code>MemoryStorageService</code></td><td>Store text on disk, or in memory for tests.</td></tr>
+          <tr><td><code>UnitySceneInfo</code>, <code>SceneReadySignal</code></td><td>Track loaded scenes, and say when a new one is ready.</td></tr>
         </tbody>
       </table></div>
     </section>
 
     <section class="topic" id="unity">
-      <div class="topic-head"><h2>Unity versions</h2><span class="freq-tag">starting a project</span></div>
-      <p>The library is built and tested in Unity 7 and also targets Unity 6 (the package's minimum is 6000.0), so a Unity 6.7 LTS project can use it.</p>
+      <div class="topic-head"><h2>Unity versions</h2><span class="freq-tag">new project</span></div>
       <ul>
-        <li>Where Unity 7 renamed an API, the code picks the right name with a version define. For example the searchable dropdown reads <code>childList</code> on Unity 7 and <code>children</code> on Unity 6.</li>
-        <li>The save system keeps no static caches of types or methods, and resets every static when play mode starts, as Unity 7 requires.</li>
-        <li>The tests run in the Unity 7 Lab. Run them once in a Unity 6.7 project before relying on it there.</li>
+        <li>The library works on Unity 6 (6000.0 or newer) and Unity 7. So a Unity 6.7 LTS project can use it.</li>
+        <li>Where Unity 7 renamed something, the code picks the right name for each version.</li>
+        <li>The tests have only run on Unity 7. Run them once in a Unity 6.7 project.</li>
       </ul>
     </section>
 
     <section class="topic" id="later">
       <div class="topic-head"><h2>Not built yet</h2><span class="freq-tag">roadmap</span></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Step</th><th>What it adds</th><th>What it changes for you</th></tr></thead>
+        <thead><tr><th>Step</th><th>Adds</th></tr></thead>
         <tbody>
-          <tr><td>3 Saved objects (next)</td><td><code>[Save]</code> fields, <code>ISaveIn&lt;TFile&gt;</code>, <code>IOnRestored</code>, <code>Register(this)</code> without an ID, a Copy save ID button, <code>SetSaveId</code> for spawned copies</td><td>Most scripts shrink to <code>[Save] int current;</code> with no interface</td></tr>
-          <tr><td>4 ScriptableObjects</td><td>The editor finds saved assets</td><td>No more <code>OnEnable</code> registration</td></tr>
-          <tr><td>5 Bridges while editing</td><td>Bridges added at edit time only</td><td>No bridge added in play mode or at build time</td></tr>
-          <tr><td>6 Save System window</td><td>Setup, Save Files, Saved Objects, Saved Data and Live tabs</td><td>Replaces the Tools menu items</td></tr>
-          <tr><td>7 Ready-made savers</td><td>Components designers add without code</td><td>Common objects save with no script</td></tr>
+          <tr><td>3 (next)</td><td><code>[Save] int current;</code> instead of an interface, <code>IOnRestored</code>, save IDs for spawned objects</td></tr>
+          <tr><td>4</td><td>ScriptableObjects save without code</td></tr>
+          <tr><td>5</td><td>Savable Bridges added only while editing</td></tr>
+          <tr><td>6</td><td>A Save System window</td></tr>
+          <tr><td>7</td><td>Ready-made savers for designers</td></tr>
         </tbody>
       </table></div>
-      <p>What changed from v1 to v2, and during the review, is on the handoff page: <code>save-system-v2-handoff.html</code>.</p>
+      <p>What changed since v1 is in <code>save-system-v2-handoff.html</code>.</p>
     </section>
 
-    <footer>
-      Library branch <code>save-system</code>. Not pushed. Words follow <code>Modules/SaveSystem/GLOSSARY.md</code>.
-    </footer>
+    <footer>Branch <code>save-system</code>. Not pushed.</footer>
   </main>
 </div>
 </body>
