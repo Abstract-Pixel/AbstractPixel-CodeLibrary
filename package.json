@@ -17,7 +17,7 @@
     "samples": [
         {
             "displayName": "Save System 01 Plain CSharp Class",
-            "description": "A plain C# Inventory class that saves with ISavable<T> and one SaveSystem.Register line.",
+            "description": "A plain C# Inventory class that saves with ISavable<T> and one SaveActions.Register line.",
             "path": "Modules/SaveSystem/Samples~/01 Plain CSharp Class"
         },
         {
@@ -37,7 +37,7 @@
         },
         {
             "displayName": "Save System 05 Game Profiles",
-            "description": "A simple save slot screen: create, open, list and delete game profiles.",
+            "description": "A save slot screen: CreateNew(), slot numbers, Get(slot), open and delete game profiles.",
             "path": "Modules/SaveSystem/Samples~/05 Game Profiles"
         },
         {
