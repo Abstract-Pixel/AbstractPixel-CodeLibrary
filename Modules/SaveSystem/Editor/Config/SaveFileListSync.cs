@@ -7,9 +7,9 @@ using UnityEngine;
 namespace AbstractPixel.SaveSystem.Editor
 {
     /// <summary>
-    /// Keeps the save file list complete and up to date: the built-in rows always exist and come first, rows saved
-    /// by an older version are upgraded, every library module's save file class (an ISaveFile with
-    /// [SaveFileDefaults]) gets a row of its own, and a module row whose class is gone is removed. Runs after every compile.
+    /// Keeps the save file list complete: the built-in rows always exist and come first, every library module's save
+    /// file class (an ISaveFile with [SaveFileDefaults]) gets a row of its own, and a module row whose class is gone is
+    /// removed. Runs after every compile.
     /// </summary>
     public static class SaveFileListSync
     {
