@@ -4,8 +4,8 @@ A simple save slot screen: create, open, list and delete game profiles. Each one
 
 ## Before you start
 
-- The project needs a save system config named `SaveSystemConfig` in a `Resources` folder (Assets > Create > Utility > SaveSystemConfigSO). It needs these entries:
-  - `Game` in `GameProfile`
+- The project needs a save system config. Make one with **Tools > External Project Tools > Save System > Create Config**.
+- This sample saves into the built-in **GameProfile** save file, so it needs no row of its own in the save file list.
 - To make the "Open" and "Delete" buttons work, add the **Game Profiles** scene to File > Build Profiles > Scene List.
 
 ## Try it
@@ -19,10 +19,13 @@ A simple save slot screen: create, open, list and delete game profiles. Each one
 ## The lines that matter
 
 ```csharp
-SaveActions.GameProfiles.CreateNew("Game Profile 2");   // returns the new ID; doesn't open it
-SaveActions.GameProfiles.Open(id);                      // then reload the scene
-SaveActions.GameProfiles.GetAll();                      // manifests: DisplayName, LastSavedUtc, PlaytimeSeconds
-SaveActions.GameProfiles.Delete(id);
+GameProfile created = SaveActions.GameProfiles.CreateNew();   // named from the config: "Game Profile 3"; not opened
+GameProfile slot = SaveActions.GameProfiles.Get(slotNumber);  // by the slot number the screen shows
+slot.Open();                                                  // then reload the scene
+foreach (GameProfile profile in SaveActions.GameProfiles.All) // SlotNumber, DisplayName, LastSaved, Playtime
+slot.Delete();
 ```
+
+You never type a game profile's ID: you hold a `GameProfile` and call its methods. Slot numbers never change, so slot 2 stays slot 2 after slot 1 is deleted.
 
 A real save slot screen usually sets the config's Startup Policy to **Manual**, so nothing opens until the player picks a slot. With **AutoSetUp**, the last opened game profile reopens at startup.

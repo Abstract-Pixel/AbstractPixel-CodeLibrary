@@ -4,8 +4,8 @@ A `Health` script on a GameObject with the Savable Bridge. New-game values go in
 
 ## Before you start
 
-- The project needs a save system config named `SaveSystemConfig` in a `Resources` folder (Assets > Create > Utility > SaveSystemConfigSO). It needs these entries:
-  - `Game` in `GameProfile`
+- The project needs a save system config. Make one with **Tools > External Project Tools > Save System > Create Config**.
+- This sample saves into the built-in **GameProfile** save file, so it needs no row of its own in the save file list.
 - To make the "Reload scene" button work, add the **MonoBehaviour** scene to File > Build Profiles > Scene List.
 
 ## Try it
@@ -19,8 +19,7 @@ You should see "Health read in Start" show the saved health, not 100.
 ## The lines that matter
 
 ```csharp
-[Savable(SaveCategory.Game)]
-public class Health : MonoBehaviour, ISavable<int>
+public class Health : MonoBehaviour, ISavable<int>  // no save file class: the built-in GameProfile file
 void Awake() { Current = Max; }                     // Health: the new-game value goes in Awake, never Start
 void Start() { ValueReadInStart = health.Current; } // HealthBar: already sees the saved value
 ```

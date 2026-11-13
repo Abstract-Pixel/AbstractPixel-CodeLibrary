@@ -97,7 +97,7 @@ Removing one saved object's data from its save file on purpose, such as a coin t
 _Avoid_: delete entry, clear data
 
 **Load event**:
-An event the save system raises when saved data is ready: one save file restored, or everything restored. Load events are sticky: a script that subscribes after the event already happened is called right away.
+An event the save system raises when saved data is ready: one save file restored, or everything restored. Load events are sticky: a script that subscribes after the event already happened is called right away. A Scene save file raises its load event once per scene, one frame after that scene's scripts start.
 _Avoid_: callback, data ready signal
 
 ## Code names

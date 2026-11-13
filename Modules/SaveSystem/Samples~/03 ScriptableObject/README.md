@@ -4,8 +4,8 @@ A `GameProgress` asset that registers itself in `OnEnable`. A later step of the 
 
 ## Before you start
 
-- The project needs a save system config named `SaveSystemConfig` in a `Resources` folder (Assets > Create > Utility > SaveSystemConfigSO). It needs these entries:
-  - `Achievements` in `GameProfile`
+- The project needs a save system config. Make one with **Tools > External Project Tools > Save System > Create Config**.
+- This sample saves into the built-in **GameProfile** save file, so it needs no row of its own in the save file list.
 - To make the "Reload scene" button work, add the **ScriptableObject** scene to File > Build Profiles > Scene List.
 
 ## Try it
@@ -19,7 +19,6 @@ You should see the levels and stars come back.
 ## The lines that matter
 
 ```csharp
-[Savable(SaveCategory.Achievements)]
 public class GameProgress : ScriptableObject, ISavable<GameProgressData>
 void OnEnable() => RegisterWithSaveSystem();
 public void RegisterWithSaveSystem() => SaveActions.Register(this, "game-progress");

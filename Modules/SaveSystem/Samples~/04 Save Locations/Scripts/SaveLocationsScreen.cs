@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AbstractPixel.SaveSystem;
 using UnityEngine;
@@ -13,6 +14,26 @@ namespace SaveSystemSamples.SaveLocations
         [SerializeField] PlayerCoins coins;
         [SerializeField] Chest[] chests;
         [SerializeField] string otherSceneName;
+
+        /// <summary>The save file that loaded most recently, as SaveEventBus.OnLoadCompleted reported it.</summary>
+        public string LastLoadedSaveFile { get; private set; } = "nothing yet";
+
+        // OnLoadCompleted is sticky: this screen starts after the save files loaded, and is still told about them.
+        void OnEnable()
+        {
+            SaveEventBus.OnLoadCompleted += ShowLoadedSaveFile;
+        }
+
+        void OnDisable()
+        {
+            SaveEventBus.OnLoadCompleted -= ShowLoadedSaveFile;
+        }
+
+        void ShowLoadedSaveFile(Type saveFileClass)
+        {
+            LastLoadedSaveFile = saveFileClass.Name;
+            Debug.Log($"[Save Locations sample] Loaded the save file {saveFileClass.Name} in scene {SceneManager.GetActiveScene().name}.");
+        }
 
         public void GoToOtherScene()
         {
@@ -38,6 +59,7 @@ namespace SaveSystemSamples.SaveLocations
         {
             GUILayout.BeginArea(new Rect(20, 20, 420, 600));
             GUILayout.Label($"Scene: {SceneManager.GetActiveScene().name}   Game profile: {OpenGameProfileName()}");
+            GUILayout.Label($"Last save file loaded: {LastLoadedSaveFile}");
 
             GUILayout.Label($"Global - volume: {volume.Volume}");
             if (GUILayout.Button("Volume up"))
