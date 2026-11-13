@@ -246,6 +246,20 @@ namespace AbstractPixel.SaveSystem
                 return;
             }
 
+            Reload(definition);
+        }
+
+        /// <summary>Like Reload, for the save file a <see cref="SaveFileReference"/> points at, as picked in the inspector.</summary>
+        public void Reload(SaveFileReference saveFile)
+        {
+            if (saveFiles.TryGetDefinitionByClassName(saveFile.ClassFullName, out SaveFileDefinition definition))
+            {
+                Reload(definition);
+            }
+        }
+
+        void Reload(SaveFileDefinition definition)
+        {
             loadedData.DropFilesNamed(definition.FileName);
             SavedObjects.RestoreAll(entry => entry.SaveFileName == definition.FileName);
         }

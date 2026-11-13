@@ -77,6 +77,9 @@ namespace AbstractPixel.SaveSystem
         /// </summary>
         public static void Reload<TFile>() where TFile : ISaveFile => session?.Reload(typeof(TFile));
 
+        /// <summary>Like Reload, for the save file a <see cref="SaveFileReference"/> points at, as picked in the inspector.</summary>
+        public static void Reload(SaveFileReference saveFile) => session?.Reload(saveFile);
+
         /// <summary>
         /// Makes one saved object's data go away on purpose, for example a coin that was picked up, so it doesn't come back.
         /// An object placed in a scene gets a gone marker and turns itself off the next time its scene loads; a spawned
