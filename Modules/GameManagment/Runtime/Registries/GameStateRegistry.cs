@@ -6,77 +6,136 @@ namespace AbstractPixel.GameManagement
 {
     public static class GameStateRegistry
     {
-        // Replaced Dictionary<GameStateEvent, StateSO> with a highly performant HashSet
         private static HashSet<StateSO> activeStates = new HashSet<StateSO>();
+        private static Stack<StateSO> stateHistory = new Stack<StateSO>();
+        private static HashSet<StateSO> statesWithAppliedConfigurations = new HashSet<StateSO>();
+        private static bool isProcessingStateChange = false;
 
         public static event Action<StateSO> OnStateRegistered = delegate { };
         public static event Action<StateSO> OnStateUnregistered = delegate { };
+        public static event Action<StateSO> OnStateRestored = delegate { };
+        // Raised when a registered state has finished its execution delay and applied its configurations.
+        public static event Action<StateSO> OnStateConfigurationsApplied = delegate { };
+
+        internal static void NotifyConfigurationsApplied(StateSO _stateData)
+        {
+            if (_stateData == null || !activeStates.Contains(_stateData))
+            {
+                return;
+            }
+
+            statesWithAppliedConfigurations.Add(_stateData);
+            OnStateConfigurationsApplied?.Invoke(_stateData);
+        }
 
         /// <summary>
-        /// Attempts to register a state using its data. Automatically evicts lower priority states.
+        /// True once an active state has finished its execution delay and applied its configurations.
         /// </summary>
+        public static bool AreConfigurationsApplied(StateSO _stateData)
+        {
+            if (_stateData == null)
+            {
+                return false;
+            }
+            return statesWithAppliedConfigurations.Contains(_stateData);
+        }
+
         public static bool TryRegisterAsActiveState(StateSO _stateData)
         {
             if (_stateData == null)
             {
-                Debug.LogError("[GameStateRegistry] Attempted to register a null StateSO!");
                 return false;
+            }
+
+            // [MODIFIED]: Guard against recursive event loops during eviction
+            if (isProcessingStateChange)
+            {
+                return false;
+            }
+
+            if (activeStates.Contains(_stateData))
+            {
+                return true;
             }
 
             int incomingPriority = _stateData.Priority;
             int highestActivePriority = GetHighestActivePriority();
 
-            // Deny Entry: A higher priority state is already running.
             if (incomingPriority < highestActivePriority)
             {
                 return false;
             }
 
-            // Prepare Eviction
-            List<StateSO> statesToEvict = new List<StateSO>();
-
-            foreach (StateSO activeState in activeStates)
+            isProcessingStateChange = true;
+            try
             {
-                if (activeState.Priority < incomingPriority)
+                if (_stateData.IsSubState)
                 {
-                    statesToEvict.Add(activeState);
+                    StateSO currentHighest = GetCurrentHighestState();
+                    if (currentHighest != null)
+                    {
+                        stateHistory.Push(currentHighest);
+                    }
+                }
+                else
+                {
+                    stateHistory.Clear();
+                }
+
+                List<StateSO> statesToEvict = new List<StateSO>();
+                foreach (StateSO activeState in activeStates)
+                {
+                    if (activeState.Priority < incomingPriority)
+                    {
+                        statesToEvict.Add(activeState);
+                    }
+                }
+
+                activeStates.Add(_stateData);
+
+                foreach (StateSO evictedState in statesToEvict)
+                {
+                    activeStates.Remove(evictedState);
+                    statesWithAppliedConfigurations.Remove(evictedState);
+                    OnStateUnregistered?.Invoke(evictedState);
                 }
             }
-
-            // Execute Eviction
-            foreach (StateSO evictedState in statesToEvict)
+            finally
             {
-                activeStates.Remove(evictedState);
-                OnStateUnregistered?.Invoke(evictedState);
+                // [MODIFIED]: Release lock BEFORE notifying registered so valid downstream sub-states can enter
+                isProcessingStateChange = false;
             }
 
-            // Register new state
-            bool wasAdded = activeStates.Add(_stateData);
-
-            if (wasAdded)
-            {
-                OnStateRegistered?.Invoke(_stateData);
-            }
-
+            OnStateRegistered?.Invoke(_stateData);
             return true;
         }
 
         public static void UnregisterState(StateSO _stateData)
         {
-            if (_stateData == null) return;
+            if (_stateData == null)
+            {
+                return;
+            }
+
             if (activeStates.Remove(_stateData))
             {
+                statesWithAppliedConfigurations.Remove(_stateData);
                 OnStateUnregistered?.Invoke(_stateData);
+
+                if (_stateData.IsSubState && stateHistory.Count > 0)
+                {
+                    StateSO previousState = stateHistory.Pop();
+                    OnStateRestored?.Invoke(previousState);
+                }
             }
         }
 
-        /// <summary>
-        /// Checks if a specific StateSO asset is currently active in the registry.
-        /// </summary>
         public static bool IsStateActive(StateSO _stateData)
         {
-            if (_stateData == null) return false;
-
+            if (_stateData == null)
+            {
+                return false;
+            }
             return activeStates.Contains(_stateData);
         }
 
@@ -114,8 +173,13 @@ namespace AbstractPixel.GameManagement
         private static void ResetRegistry()
         {
             activeStates = new HashSet<StateSO>();
+            stateHistory = new Stack<StateSO>();
+            statesWithAppliedConfigurations = new HashSet<StateSO>();
+            isProcessingStateChange = false;
             OnStateRegistered = delegate { };
             OnStateUnregistered = delegate { };
+            OnStateRestored = delegate { };
+            OnStateConfigurationsApplied = delegate { };
         }
     }
 }

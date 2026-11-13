@@ -7,7 +7,7 @@ namespace AbstractPixel.SaveSystem
         Settings,
         Position,
         Achievements,
-        Game
-
+        Game,
+        Ghosts
     }
 }

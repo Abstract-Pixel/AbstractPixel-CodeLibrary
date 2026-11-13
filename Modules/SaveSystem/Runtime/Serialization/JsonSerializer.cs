@@ -29,8 +29,16 @@ namespace AbstractPixel.SaveSystem
 
                 // TYPE HANDLING (The "Bridge" Strategy)
                 // NONE: each saved object restores into its own known type (see ISerializer.FromToken)
-                TypeNameHandling = TypeNameHandling.None
+                TypeNameHandling = TypeNameHandling.None,
+
+                // A field renamed or removed between builds is skipped, so older save files still load.
+                MissingMemberHandling = MissingMemberHandling.Ignore
             };
+
+            // Vector3 and Quaternion are written as plain x, y, z (and w) numbers. The converters live in these
+            // settings only, never in JsonConvert.DefaultSettings, so nothing global changes when the save system runs.
+            settings.Converters.Add(new UnityVector3Converter());
+            settings.Converters.Add(new UnityQuaternionConverter());
             tokenSerializer = Newtonsoft.Json.JsonSerializer.Create(settings);
         }
         public bool TrySerialize<T>(T _data, out string _output)

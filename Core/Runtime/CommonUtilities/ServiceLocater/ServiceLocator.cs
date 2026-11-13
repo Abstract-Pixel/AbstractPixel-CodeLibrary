@@ -14,6 +14,8 @@ namespace AbstractPixel.Core
     public static class ServiceLocator
     {
         private static readonly Dictionary<Type, object> services = new();
+        public static Action<Type> OnServiceRegistered;
+        public static Action<Type> OnServiceUnregistered;
 
         /// <summary>
         /// Registers a service instance. 
@@ -31,6 +33,7 @@ namespace AbstractPixel.Core
             else
             {
                 services.Add(type, service);
+                OnServiceRegistered?.Invoke(type);
             }
         }
 
@@ -49,6 +52,7 @@ namespace AbstractPixel.Core
             else
             {
                 services.Add(type, service);
+                OnServiceRegistered?.Invoke(type);
             }
         }
 
@@ -65,6 +69,7 @@ namespace AbstractPixel.Core
                 if (services[type] == (object)service)
                 {
                     services.Remove(type);
+                    OnServiceUnregistered?.Invoke(type);
                 }
             }
         }
@@ -78,6 +83,7 @@ namespace AbstractPixel.Core
             if (services.ContainsKey(type))
             {
                 services.Remove(type);
+                OnServiceUnregistered?.Invoke(type);
                 Debug.Log($"ServiceLocator: Successfully unregistered service of type {type.Name}.");
             }
             else
@@ -130,6 +136,8 @@ namespace AbstractPixel.Core
         private static void ResetStatics()
         {
             services.Clear();
+            OnServiceRegistered = delegate { };
+            OnServiceUnregistered = delegate { };
         }
     }
 }

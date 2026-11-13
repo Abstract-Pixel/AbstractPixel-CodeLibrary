@@ -1,6 +1,5 @@
 using AbstractPixel.SceneManagement;
 using System.Threading.Tasks;
-using AbstractPixel.Core;
 
 namespace AbstractPixel.SceneTransitions
 {
@@ -11,6 +10,7 @@ namespace AbstractPixel.SceneTransitions
 
         public static void Initialize(TransitionProfile _transitionProfile)
         {
+            IsTransitioning = false;
             TransitionManager.Instance?.Initialize(_transitionProfile);
         }
 

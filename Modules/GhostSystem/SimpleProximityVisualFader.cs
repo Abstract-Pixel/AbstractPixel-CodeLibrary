@@ -18,6 +18,10 @@ namespace AbstractPixel.GhostSystem
         [Tooltip("All renderers that should fade. They should share the same material logic.")]
         [SerializeField] private Renderer[] targetRenderers;
 
+        [Tooltip("Optional. The material whose colour the fade starts from. Empty = the first renderer's first material. " +
+                 "Set it when the first material is not the main one, e.g. a baked mesh whose window submesh comes first.")]
+        [SerializeField] private Material colorSourceMaterial;
+
         [Header("Distance Settings")]
         [Tooltip("Distance at which the object becomes completely invisible (Alpha = 0).")]
         [SerializeField] private float minFadeDistance = 5f;
@@ -44,6 +48,28 @@ namespace AbstractPixel.GhostSystem
         }
 
 
+        /// <summary>
+        /// At runtime, fade only the renderers that are actually drawing. Other components (e.g. a mesh merger) may have
+        /// replaced the renderers listed at edit time with merged ones by the time Start runs.
+        /// </summary>
+        private void RefreshRenderersFromVisualRoot()
+        {
+            if (parentTransformVisual == null)
+            {
+                return;
+            }
+
+            var enabledRenderers = new System.Collections.Generic.List<Renderer>();
+            foreach (Renderer candidate in parentTransformVisual.GetComponentsInChildren<Renderer>(true))
+            {
+                if (candidate.enabled)
+                {
+                    enabledRenderers.Add(candidate);
+                }
+            }
+            targetRenderers = enabledRenderers.ToArray();
+        }
+
         private void Awake()
         {
             propertyBlock = new MaterialPropertyBlock();
@@ -52,6 +78,11 @@ namespace AbstractPixel.GhostSystem
 
         private void Start()
         {
+            // The base colour comes from the first renderer listed at edit time, before the list is refreshed,
+            // so it stays the same whichever renderers end up drawing.
+            Renderer colorSourceRenderer = targetRenderers != null && targetRenderers.Length > 0 ? targetRenderers[0] : null;
+            RefreshRenderersFromVisualRoot();
+
             if (targetRenderers == null || targetRenderers.Length == 0)
             {
                 Debug.LogWarning("[SimpleProximityVisualFader] No renderers assigned. Disabling fader.", this);
@@ -59,8 +90,17 @@ namespace AbstractPixel.GhostSystem
                 return;
             }
 
+            if (colorSourceRenderer == null)
+            {
+                colorSourceRenderer = targetRenderers[0];
+            }
+
             // CRITICAL: Read from sharedMaterial to prevent Unity from silently creating a duplicate material instance.
-            Material baseMat = targetRenderers[0].sharedMaterial;
+            Material baseMat = colorSourceMaterial;
+            if (baseMat == null)
+            {
+                baseMat = colorSourceRenderer.sharedMaterial;
+            }
             if (baseMat != null && baseMat.HasProperty(colorPropertyID))
             {
                 cachedBaseColor = baseMat.GetColor(colorPropertyID);
@@ -73,7 +113,9 @@ namespace AbstractPixel.GhostSystem
             }
         }
 
-        private void FixedUpdate()
+        // Per rendered frame, after the ghost and the (interpolated) target have moved, so the fade follows the
+        // distance smoothly instead of stepping on physics ticks.
+        private void LateUpdate()
         {
             if (!isInitialized || targetTransform == null) return;
             float distance = Vector3.Distance(transform.position, targetTransform.position);

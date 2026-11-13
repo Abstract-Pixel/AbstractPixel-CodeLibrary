@@ -1,16 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace AbstractPixel.Tooltip
 {
     public static class TooltipManager
     {
-        // Maps a Config to its SINGLE instantiated UI Shell.
+        // Maps a Config to its SINGLE instantiated UI TooltipView.
         private static Dictionary<TooltipConfig, TooltipView> spawnedTooltipViewsDict = new Dictionary<TooltipConfig, TooltipView>();
 
-        // Optional: A clean parent to keep your hierarchy organized
-        private static Transform uiContainer;
+        private static Transform screenSpaceCanvas;
+        private static Transform worldSpaceCanvas;
         private static TooltipFactory tooltipFactory = new TooltipFactory();
 
         public static void ShowTooltip(TooltipData _tooltipData)
@@ -19,11 +20,13 @@ namespace AbstractPixel.Tooltip
 
             if(spawnedTooltipViewsDict.TryGetValue(config, out TooltipView _tooltipView))
             {
+                _tooltipView.Initialize(_tooltipData);
                 _tooltipView.Show();
             }
             else
             {
-                TooltipView newTooltipView = tooltipFactory.Create(_tooltipData, _parentTransform: uiContainer);
+                Transform parentTransform = config.isWorldSpace ? worldSpaceCanvas : screenSpaceCanvas;
+                TooltipView newTooltipView = tooltipFactory.Create(config.TooltipPrefab, _tooltipData, _parentTransform: parentTransform);
                 newTooltipView.Show();
                 spawnedTooltipViewsDict[_tooltipData.Config] = newTooltipView;
             }
@@ -31,7 +34,6 @@ namespace AbstractPixel.Tooltip
 
         public static void HideTooltip(TooltipConfig _tooltipConfig)
         {
-
             if (spawnedTooltipViewsDict.TryGetValue(_tooltipConfig, out TooltipView viewShell))
             {
                 if (viewShell != null)
@@ -45,16 +47,11 @@ namespace AbstractPixel.Tooltip
         private static void ResetData()
         {
             spawnedTooltipViewsDict.Clear();
-            if (uiContainer == null)
-            {
-                GameObject containerGo = new GameObject("[Tooltip_Container]");
-                Object.DontDestroyOnLoad(containerGo);
-                uiContainer = containerGo.transform;
-            }
+            AutoGenerateCanvasIfNull();
             tooltipFactory = new TooltipFactory();
-
             SceneManager.sceneLoaded -= ResetDataOnSceneLoad;
             SceneManager.sceneLoaded += ResetDataOnSceneLoad;
+
         }
 
         private static void ResetDataOnSceneLoad(Scene _scene, LoadSceneMode _mode)
@@ -72,13 +69,39 @@ namespace AbstractPixel.Tooltip
             spawnedTooltipViewsDict.Clear();
             tooltipFactory = new TooltipFactory();
 
-            if (uiContainer == null)
+            AutoGenerateCanvasIfNull();
+        }
+
+        private static void AutoGenerateCanvasIfNull()
+        {
+            if (screenSpaceCanvas == null)
             {
-                GameObject containerGo = new GameObject("[Tooltip_Container]");
-                Object.DontDestroyOnLoad(containerGo);
-                uiContainer = containerGo.transform;
+                GameObject newCanvas = new GameObject("[Tooltip_Canvas]");
+                Object.DontDestroyOnLoad(newCanvas);
+
+                Canvas canvas = newCanvas.AddComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                canvas.sortingOrder = 30000;
+
+                CanvasScaler scaler = newCanvas.AddComponent<CanvasScaler>();
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920, 1080);
+                scaler.matchWidthOrHeight = 0.5f;
+
+                screenSpaceCanvas = newCanvas.transform;
+            }
+
+            if(worldSpaceCanvas == null)
+            {
+                GameObject newWorldCanvas = new GameObject("[Tooltip_World_Canvas]");
+                Object.DontDestroyOnLoad(newWorldCanvas);
+                Canvas canvas = newWorldCanvas.AddComponent<Canvas>();
+                canvas.renderMode = RenderMode.WorldSpace;
+                canvas.sortingOrder = 30000;
+                CanvasScaler scaler = newWorldCanvas.AddComponent<CanvasScaler>();
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
+                worldSpaceCanvas = newWorldCanvas.transform;
             }
         }
-       
     }
 }

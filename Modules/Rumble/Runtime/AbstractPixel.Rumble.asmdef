@@ -1,0 +1,18 @@
+{
+    "name": "AbstractPixel.Rumble",
+    "rootNamespace": "AbstractPixel.Rumble",
+    "references": [
+        "GUID:0404a8ea4faa386498395a28b0b33112",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:fbb5b4c19b08cc041a75264390b641b6"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

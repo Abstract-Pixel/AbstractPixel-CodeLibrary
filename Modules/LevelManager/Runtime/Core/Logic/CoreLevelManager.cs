@@ -93,13 +93,17 @@ namespace AbstractPixel.LevelFramework
                 return;
             }
 
-            TLevelDefinition nextLevel = GetNextValidLevel();
-            if (nextLevel == null)
+            TLevelDefinition nextLevelDefinition = GetNextValidLevel();
+            if (nextLevelDefinition == null)
             {
                 return;
             }
-
-            UpdateActiveLevelState(nextLevel);
+            if (nextLevelDefinition == activeLevelDefinition)
+            {
+                // We Are already in the next current level
+                return;
+            }
+            UpdateActiveLevelState(nextLevelDefinition);
 
             if (levelTransitioner == null)
             {
@@ -113,9 +117,9 @@ namespace AbstractPixel.LevelFramework
 
         internal virtual void LoadToLevel(TSceneAsset _sceneAsset)
         {
-            if (levelDefinitionsMap.TryGetValue(_sceneAsset, out TLevelDefinition level))
+            if (levelDefinitionsMap.TryGetValue(_sceneAsset, out TLevelDefinition newLevelDefinition))
             {
-                UpdateActiveLevelState(level);
+                UpdateActiveLevelState(newLevelDefinition);
 
                 if (levelTransitioner == null)
                 {
@@ -158,6 +162,13 @@ namespace AbstractPixel.LevelFramework
         #region State & Save Data Management
         internal virtual void MarkCurrentLevelForCompletion(TLevelSaveData _newLevelSaveData)
         {
+            // [MODIFIED]: Null guard prevents ArgumentNullException in Dictionary.TryGetValue
+            if (activeSceneAsset == null)
+            {
+                Debug.LogWarning("[CoreLevelManager] Cannot mark completion: activeSceneAsset is null.");
+                return;
+            }
+
             if (levelSaveDataMap.TryGetValue(activeSceneAsset, out TLevelSaveData saveData))
             {
                 if (_newLevelSaveData != null)
@@ -196,7 +207,12 @@ namespace AbstractPixel.LevelFramework
 
         internal virtual void UnlockLevel(TLevelDefinition _levelDefinition)
         {
+            if (_levelDefinition == null) return;
+
             TSceneAsset sceneAsset = _levelDefinition.SceneAsset;
+            // [MODIFIED]: Guard against null scene asset in placeholder levels
+            if (sceneAsset == null) return;
+
             if (levelSaveDataMap.TryGetValue(sceneAsset, out TLevelSaveData saveData))
             {
                 if (saveData == null)
@@ -337,10 +353,14 @@ namespace AbstractPixel.LevelFramework
         }
         internal TLevelDefinition GetLevelDefinition(TSceneAsset _sceneAsset)
         {
-            if (levelDefinitionsMap.TryGetValue(_sceneAsset, out TLevelDefinition defintion))
+            if (_sceneAsset == null) return null;
+
+            // 1. Fast O(1) Lookup
+            if (levelDefinitionsMap.TryGetValue(_sceneAsset, out TLevelDefinition definition))
             {
-                return defintion;
+                return definition;
             }
+
             return null;
         }
 

@@ -8,8 +8,7 @@ namespace AbstractPixel.Tooltip
     public class TooltipConfig : ScriptableObject
     {
         [SerializeField] internal TooltipView TooltipPrefab;
-        [Tooltip("The maximum number of tooltips that can be spawned at once.Modify Only if necessary.")]
-        [SerializeField,ReadOnly(true)] int maxAllowedSpawnedTooltips = 15;
+        [SerializeField] internal bool isWorldSpace;
 
         [Header("Input Settings")]
         [Tooltip("External Time to wait before showing tooltip.Used if no Input Action is assigned.")]
@@ -20,11 +19,9 @@ namespace AbstractPixel.Tooltip
         [SerializeField] internal bool DeactivateOnInputCancelled = false;
 
         [Header("Positioning Settings")]
-        [Tooltip("The positioning of the tooltip relative to the hovered object.")]
-        [SerializeField] internal TooltipPositioning Positioning = TooltipPositioning.Left;
-        [Tooltip("The behavior of the tooltip's positioning. Fixed means it stays in one place, FollowCursor means it follows the mouse cursor.")]
-        [SerializeField] internal TooltipBehaviour PositioningBehavior = TooltipBehaviour.Fixed;
-        [Tooltip("The additive offset of the tooltip's position relative to the hovered object or cursor.")]
-        [SerializeField] internal Vector2 PositionOffset = Vector2.zero;
+        [Polymorphic, SerializeReference]
+        [Tooltip("The strategy used to position the tooltip relative to its target.")]
+        public TooltipPositioningStrategy PositioningStrategy = new FixedTargetStrategy();
+
     }
 }

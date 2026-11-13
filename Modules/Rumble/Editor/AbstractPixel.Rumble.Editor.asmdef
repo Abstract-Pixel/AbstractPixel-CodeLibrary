@@ -1,0 +1,19 @@
+{
+    "name": "AbstractPixel.Rumble.Editor",
+    "rootNamespace": "AbstractPixel.Rumble.Editor",
+    "references": [
+        "AbstractPixel.Rumble",
+        "AbstractPixel.Core"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

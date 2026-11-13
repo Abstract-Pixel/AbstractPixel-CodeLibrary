@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0] - 2026-10-31
+**GameManagment: delayed menus, eased time scale, skip, state fixes.** Every new option defaults to the old behaviour.
+- **Feature:** `StateSO.OverrideExecutionTimeScale` + `ExecutionTimeScale` (0 freeze, 0.2 slow motion, 1 no freeze), `TimeScaleEaseDuration` and `TimeScaleEaseCurve`. Easing runs on realtime in `GameStateComponent`; defaults (off / 0) keep the instant `IsTimeZeroOnExecution` behaviour.
+- **Feature:** `GameStateRegistry.OnStateConfigurationsApplied` and `AreConfigurationsApplied(state)`: raised once a state has waited its `StateExecutionDelay` and applied its configurations.
+- **Feature:** `GameStateMenu.revealTiming` (`MenuRevealTiming.OnStateRegistered` default, or `OnConfigurationsApplied` to show the menu only after the delay).
+- **Feature:** `GameStateComponent.SkipExecutionDelay()` ends the delay early (applies once). `IsActive` / `StateConfig` getters.
+- **Feature:** `GameStateComponent.reactivateOnActiveSceneChange` (default off): re-activates the state one frame after an active-scene change if it is inactive.
+- **Feature:** `AutoSelectUIOnEnable.waitUntilInteractable` (default off): select only once the selectable is interactable, e.g. after an entrance animation.
+- **Fix:** an evicted state's pending delayed apply / time-scale ease is stopped, so it can no longer apply after it left.
+- **Fix:** `GameStateEventTrigger.OnDisable` now also unsubscribes `OnStateUnregistered` (destroyed triggers stayed subscribed).
+- **Fix (GhostSystem):** `GhostPlayer` plays back in `Update` on game time (like `GhostRecorder`) instead of `FixedUpdate`, and `SimpleProximityVisualFader` fades in `LateUpdate`. Stepping on physics ticks made the ghost judder next to an interpolated player car.
+
 ## [1.0.3] - 2026-04-13
 **Scene Management DataTypes and Tooling**
 - **Feature:** Introduced `SceneField`, a serializable utility to reference Unity scenes safely by name while maintaining a link to the `SceneAsset` in the editor. That can work in runtime foer builds

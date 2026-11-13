@@ -15,7 +15,8 @@ namespace AbstractPixel.Tooltip
     {
         [Header("Configuration & References")]
         [SerializeField] private TooltipConfig tooltipConfig;
-        [SerializeField] private GameObject specificIToolTipProvider;
+        [Tooltip("If set, this will be used instead of the component on this object.")]
+        [SerializeField,ReadOnly(true)] private GameObject specificToolTipProvider;
 
         [Header("Debug Info")]
         [SerializeField, ReadOnly(true)] private bool isCursorHoveringOnObject = false;
@@ -29,9 +30,9 @@ namespace AbstractPixel.Tooltip
         private void Awake()
         {
             // Cache the provider once at startup. Better for performance and safety.
-            if (specificIToolTipProvider != null)
+            if (specificToolTipProvider != null)
             {
-                cachedDataProvider = specificIToolTipProvider.GetComponent<ITooltipDataProvider>();
+                cachedDataProvider = specificToolTipProvider.GetComponent<ITooltipDataProvider>();
             }
             else
             {
@@ -114,6 +115,7 @@ namespace AbstractPixel.Tooltip
             yield return delayBeforeTooltipActivation;
             isActive = true;
             TooltipData tooltipData = cachedDataProvider.GetTooltipData();
+            tooltipData.Config = tooltipConfig; // Set the config in the tooltip data to ensure the manager knows which config to use
             TooltipManager.ShowTooltip(tooltipData);
         }
 

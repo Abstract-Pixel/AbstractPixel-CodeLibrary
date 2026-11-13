@@ -9,6 +9,8 @@ namespace AbstractPixel.SceneManagement
         public static SceneGroup ActiveSceneGroup => SceneCoordinator.Instance?.activeSceneGroup;
         public static SceneGroup PreloadedSceneGroup => SceneCoordinator.Instance?.preloadedSceneGroup;
 
+        public static bool IsLoadingSceneGroup => SceneCoordinator.Instance.IsLoadingSceneGroup;
+
 
         /// <summary>Initializes the start scene data with the specified managerial and contextual scenes, and sets the main
         /// scene.</summary>

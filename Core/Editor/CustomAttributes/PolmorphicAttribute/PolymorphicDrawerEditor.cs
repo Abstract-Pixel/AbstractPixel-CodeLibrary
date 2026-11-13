@@ -1,162 +1,564 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace AbstractPixel.Core.Editor
 {
     [CustomPropertyDrawer(typeof(PolymorphicAttribute), true)]
     public class PolymorphicDrawerEditor : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty _property)
+        private static Dictionary<string, Type> s_resolvedTypesCache = new Dictionary<string, Type>();
+        private static Dictionary<string, List<Type>> s_compatibleTypesCache = new Dictionary<string, List<Type>>();
+        private static Dictionary<string, float> s_heightCache = new Dictionary<string, float>();
+
+        private static GUIStyle s_richTextLabel;
+        private static GUIStyle s_richTextHelpBox;
+        private static GUIStyle s_dotsButtonStyle;
+
+        [Serializable]
+        private class PolymorphicClipboard
         {
-            VisualElement root = new VisualElement();
-
-            Type propertyType = PolymorphicTypeUtility.GetPropertyFromManagedReferenceFullTypeName(_property);
-            List<Type> types = PolymorphicTypeUtility.GetPropertyCompatibleTypes(_property);
-            List<string> typeNames = types.Select(t => t.Name).ToList();
-            List<string> filteredTypeNames = typeNames
-                                            .Select((name, index) => $"{index + 1}. {name}")
-                                            .ToList();
-            bool isNull = propertyType == null;
-
-            int defaultIndex = 0;
-            if (propertyType != null)
-            {
-                if (typeNames.Contains(propertyType.Name))
-                {
-                    defaultIndex = typeNames.IndexOf(propertyType.Name);
-                }
-            }
-
-            DropdownField typesDropDown = new DropdownField("Type", filteredTypeNames, defaultIndex);
-            root.Add(typesDropDown);
-
-            PropertyField body = new PropertyField();
-            body.style.marginTop = 5;
-            body.style.paddingLeft = 13f;
-            body.BindProperty(_property);
-            root.Add(body);
-            if (isNull)
-            {
-                string nullLabel = "<b>UNASSIGNED TYPE<b>";
-                body.label = nullLabel;
-            }
-            string helpBoxMessage = "[Unassigned Polymorphic Type]: Please select a Type from the dropdown Above";
-            HelpBox unassignedErrorBox = new HelpBox(helpBoxMessage, HelpBoxMessageType.Error);
-            unassignedErrorBox.style.display = isNull ? DisplayStyle.Flex : DisplayStyle.None;
-            root.Add(unassignedErrorBox);
-
-            typesDropDown.RegisterValueChangedCallback(evt =>
-            {
-                if (evt.newValue == null) return;
-                string filteresDropDownValue = evt.newValue.Split(". ").Last();
-
-                Type resultType = types.FirstOrDefault(type => type.Name == filteresDropDownValue);
-                if (resultType == null) return;
-                object polymorphicInstance = Activator.CreateInstance(resultType);
-                _property.managedReferenceValue = polymorphicInstance;
-                _property.serializedObject.ApplyModifiedProperties();
-                root.Remove(body);
-                body = new PropertyField(_property);
-                body.BindProperty(_property);
-                root.Add(body);
-            });
-            return root;
+            public string typeName;
+            public string json;
         }
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        static PolymorphicDrawerEditor()
         {
-            EditorGUI.BeginProperty(position, label, property);
-            Type propertyType = PolymorphicTypeUtility.GetPropertyFromManagedReferenceFullTypeName(property);
-            List<Type> types = PolymorphicTypeUtility.GetPropertyCompatibleTypes(property);
-            List<string> typeNames = types.Select(t => t.Name).ToList();
-            string[] filteredTypeNames = typeNames
-                                            .Select((name, index) => $"{index + 1}. {name}")
-                                            .ToArray();
-            bool isNull = propertyType == null;
-            int defaultIndex = 0;
-            if (property.managedReferenceValue == null && types != null && types.Count == 1)
-            {
-                property.managedReferenceValue = Activator.CreateInstance(types[0]);
-                property.serializedObject.ApplyModifiedProperties();
-                propertyType = types[0];
-            }
+            Undo.undoRedoPerformed += () => s_heightCache.Clear();
+        }
 
-            Rect dropdownRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
-            string labelName = property.displayName;
-            if (isNull)
-            {
-                labelName = "UNASSIGNED TYPE";
-            }
+        private string GetCompositeCacheKey(SerializedProperty _property)
+        {
+            return $"{_property.propertyPath}_{_property.managedReferenceFullTypename}_{_property.isExpanded}";
+        }
 
+        public override void OnGUI(Rect _position, SerializedProperty _property, GUIContent _label)
+        {
+            float verticalMargin = 6f;
+            _position.y += verticalMargin;
+            _position.height -= (verticalMargin * 2f);
+
+            int originalIndent = EditorGUI.indentLevel;
+            EditorGUI.BeginProperty(_position, _label, _property);
             EditorGUI.BeginChangeCheck();
 
-            int newIndex = EditorGUI.Popup(dropdownRect, "Type", defaultIndex, filteredTypeNames);
-
-            if (EditorGUI.EndChangeCheck())
+            try
             {
-                if (newIndex >= 0 && newIndex < types.Count)
+                InitializeStyles();
+
+                Type baseType = GetFieldBaseType();
+                string baseTypeName = baseType != null ? baseType.FullName : _property.type;
+
+                Type propertyType = GetAssignedType(_property);
+                List<Type> types = GetCachedCompatibleTypes(_property, baseTypeName);
+
+                if (_property.managedReferenceValue == null && types.Count == 1)
                 {
-                    Type resultType = types[newIndex];
-                    if (resultType == null) return;
-                    object polymorphicInstance = Activator.CreateInstance(resultType);
-                    if (!isNull && newIndex == defaultIndex) return;
-                    property.managedReferenceValue = polymorphicInstance;
-                    property.serializedObject.ApplyModifiedProperties();
+                    _property.managedReferenceValue = Activator.CreateInstance(types[0]);
+                    _property.serializedObject.ApplyModifiedProperties();
+                    propertyType = types[0];
+                }
+
+                bool isNull = propertyType == null;
+                bool hasNoTypes = types.Count == 0;
+
+                // CRITICAL EDGE CASE FIX: Safely detect if we are inside a list.
+                bool isElement = _property.propertyPath.Contains(".Array.data[");
+
+                float borderThickness = 1f;
+                float headerTopPad = 6f;
+                float headerMidPad = 4f;
+                float headerBotPad = 8f;
+                float contentTopSpacing = 8f;
+                float contentBotSpacing = 8f;
+                float singleLine = EditorGUIUtility.singleLineHeight;
+
+                Color borderColor = EditorGUIUtility.isProSkin ? new Color(0.1f, 0.1f, 0.1f, 1f) : new Color(0.6f, 0.6f, 0.6f, 1f);
+                Color headerBgColor = EditorGUIUtility.isProSkin ? new Color(0.35f, 0.35f, 0.35f, 1f) : new Color(0.65f, 0.65f, 0.65f, 1f);
+                Color contentBgColor = EditorGUIUtility.isProSkin ? new Color(0.28f, 0.28f, 0.28f, 1f) : new Color(0.85f, 0.85f, 0.85f, 1f);
+
+                float dropDownOrWarningHeight = hasNoTypes ? (singleLine * 2.5f) : singleLine;
+                float headerInnerHeight = headerTopPad + singleLine + headerMidPad + dropDownOrWarningHeight + headerBotPad;
+                float headerOuterHeight = headerInnerHeight + (borderThickness * 2f);
+
+                // CRITICAL EDGE CASE FIX: 
+                // Unity's ReorderableList ALREADY shifts `_position.x` when `isElement` is true.
+                // Adding originalIndent * 15f causes explosive double-indentation.
+                float indentOffset = isElement ? 0f : (originalIndent * 15f);
+
+                // Reset GUI indent to prevent Unity from artificially squishing our manual Rects
+                EditorGUI.indentLevel = 0;
+
+                Rect headerOuterRect = new Rect(_position.x + indentOffset, _position.y, _position.width - indentOffset, headerOuterHeight);
+                EditorGUI.DrawRect(headerOuterRect, borderColor);
+
+                Rect headerInnerRect = new Rect(headerOuterRect.x + borderThickness, headerOuterRect.y + borderThickness, headerOuterRect.width - (borderThickness * 2f), headerInnerHeight);
+                EditorGUI.DrawRect(headerInnerRect, headerBgColor);
+
+                Rect foldoutRect = new Rect(headerInnerRect.x + 4f, headerInnerRect.y + headerTopPad, 14f, singleLine);
+                if (!hasNoTypes)
+                {
+                    _property.isExpanded = GUI.Toggle(foldoutRect, _property.isExpanded, GUIContent.none, EditorStyles.foldout);
+                }
+
+                float currentX = foldoutRect.xMax;
+
+                // CRITICAL EDGE CASE FIX: 
+                // Unity overrides `_label.text` with the class name when SerializeReference is expanded.
+                // We bypass it completely and parse the immutable property path to retain the Element ID.
+                string displayLabel = _label.text;
+                if (isElement)
+                {
+                    int bracketIdx = _property.propertyPath.LastIndexOf('[');
+                    int closeBracketIdx = _property.propertyPath.LastIndexOf(']');
+                    if (bracketIdx >= 0 && closeBracketIdx > bracketIdx)
+                    {
+                        string indexStr = _property.propertyPath.Substring(bracketIdx + 1, closeBracketIdx - bracketIdx - 1);
+                        displayLabel = $"Element {indexStr}";
+                    }
+                }
+
+                GUIContent prefixContent = new GUIContent($"{displayLabel} ");
+                Vector2 prefixSize = s_richTextLabel.CalcSize(prefixContent);
+                Rect prefixRect = new Rect(currentX, headerInnerRect.y + headerTopPad, prefixSize.x, singleLine);
+                EditorGUI.LabelField(prefixRect, prefixContent, s_richTextLabel);
+                currentX = prefixRect.xMax;
+
+                float removeBtnWidth = 24f;
+                float dotsBtnWidth = 20f;
+                float btnHeight = 18f;
+                float buttonSpacing = 2f;
+                float rightButtonsWidth = isElement ? (removeBtnWidth + dotsBtnWidth + buttonSpacing + 6f) : (dotsBtnWidth + 6f);
+
+                // Protected Bounds Check: Clamp to minimum 10f to prevent catastrophic truncation loop on narrow layouts
+                float rawAvailableWidth = headerInnerRect.width - (currentX - headerInnerRect.x) - rightButtonsWidth - 4f;
+                float maxTypeBoxWidth = Mathf.Max(10f, rawAvailableWidth);
+
+                string typeDisplayName = propertyType != null ? ObjectNames.NicifyVariableName(propertyType.Name) : "Unassigned";
+                float staticPrefixWidth = s_richTextLabel.CalcSize(new GUIContent("TYPE : ")).x;
+                float availableNameWidth = Mathf.Max(5f, maxTypeBoxWidth - staticPrefixWidth - 12f);
+                string truncatedDisplayName = TruncateText(typeDisplayName, EditorStyles.boldLabel, availableNameWidth);
+
+                string richBoxText = $"TYPE : <b>{truncatedDisplayName}</b>";
+                GUIContent richBoxContent = new GUIContent(richBoxText);
+                Vector2 boxContentSize = s_richTextLabel.CalcSize(richBoxContent);
+
+                float actualBoxWidth = Mathf.Max(10f, Mathf.Min(boxContentSize.x + 8f, maxTypeBoxWidth));
+                Rect typeBoxRect = new Rect(currentX, headerInnerRect.y + headerTopPad - 1f, actualBoxWidth, singleLine + 2f);
+                Color typeBoxBorder = EditorGUIUtility.isProSkin ? new Color(0.8f, 0.8f, 0.8f, 0.5f) : new Color(0.3f, 0.3f, 0.3f, 0.5f);
+
+                EditorGUI.DrawRect(new Rect(typeBoxRect.x, typeBoxRect.y, typeBoxRect.width, 1), typeBoxBorder);
+                EditorGUI.DrawRect(new Rect(typeBoxRect.x, typeBoxRect.yMax - 1, typeBoxRect.width, 1), typeBoxBorder);
+                EditorGUI.DrawRect(new Rect(typeBoxRect.x, typeBoxRect.y, 1, typeBoxRect.height), typeBoxBorder);
+                EditorGUI.DrawRect(new Rect(typeBoxRect.xMax - 1, typeBoxRect.y, 1, typeBoxRect.height), typeBoxBorder);
+
+                Rect typeLabelRect = new Rect(typeBoxRect.x + 4f, typeBoxRect.y + 1f, actualBoxWidth - 8f, singleLine);
+                EditorGUI.LabelField(typeLabelRect, richBoxContent, s_richTextLabel);
+
+                Rect removeBtnRect = new Rect(headerInnerRect.xMax - removeBtnWidth - 6f, headerInnerRect.y + headerTopPad, removeBtnWidth, btnHeight);
+                Rect dotsBtnRect = new Rect(removeBtnRect.x - dotsBtnWidth - buttonSpacing, headerInnerRect.y + headerTopPad, dotsBtnWidth, btnHeight);
+
+                if (!isElement)
+                {
+                    dotsBtnRect = new Rect(headerInnerRect.xMax - dotsBtnWidth - 6f, headerInnerRect.y + headerTopPad, dotsBtnWidth, btnHeight);
+                }
+
+                if (GUI.Button(dotsBtnRect, new GUIContent("\u22EE", "Options"), s_dotsButtonStyle))
+                {
+                    ShowContextMenu(dotsBtnRect, _property, baseType);
+                }
+
+                if (isElement)
+                {
+                    Color oldBg = GUI.backgroundColor;
+                    GUI.backgroundColor = new Color(0.85f, 0.4f, 0.4f, 1f);
+                    if (GUI.Button(removeBtnRect, new GUIContent("X", "Remove Element"), EditorStyles.miniButton))
+                    {
+                        GUI.backgroundColor = oldBg;
+                        RemoveElementFromList(_property);
+                        return;
+                    }
+                    GUI.backgroundColor = oldBg;
+                }
+
+                Rect controlRect = new Rect(headerInnerRect.x + 4f, foldoutRect.yMax + headerMidPad, headerInnerRect.width - 10f, dropDownOrWarningHeight);
+                if (hasNoTypes)
+                {
+                    DrawWarningBox(controlRect, baseType);
+                }
+                else
+                {
+                    string buttonText = propertyType != null ? ObjectNames.NicifyVariableName(propertyType.Name) : "Choose a suitable polymorphic type";
+                    string truncatedButtonText = TruncateText(buttonText, EditorStyles.popup, Mathf.Max(10f, controlRect.width - 24f));
+
+                    if (EditorGUI.DropdownButton(controlRect, new GUIContent(truncatedButtonText), FocusType.Keyboard, EditorStyles.popup))
+                    {
+                        ShowSearchableDropdown(controlRect, _property, types, baseType);
+                    }
+                }
+
+                // =========================================================
+                // DRAW CHILDREN (EXPANDED BODY)
+                // =========================================================
+                if (_property.isExpanded && !hasNoTypes)
+                {
+                    float contentInnerHeight = isNull ? (singleLine * 2f) + contentTopSpacing + contentBotSpacing : GetChildrenHeight(_property) + contentTopSpacing + contentBotSpacing;
+
+                    Rect contentOuterRect = new Rect(_position.x + indentOffset, headerOuterRect.yMax - borderThickness, _position.width - indentOffset, contentInnerHeight + (borderThickness * 2f));
+                    EditorGUI.DrawRect(contentOuterRect, borderColor);
+
+                    Rect contentInnerRect = new Rect(contentOuterRect.x + borderThickness, contentOuterRect.y + borderThickness, contentOuterRect.width - (borderThickness * 2f), contentInnerHeight);
+                    EditorGUI.DrawRect(contentInnerRect, contentBgColor);
+
+                    if (isNull)
+                    {
+                        Rect helpBox = new Rect(contentInnerRect.x + 4f, contentInnerRect.y + contentTopSpacing, contentInnerRect.width - 8f, singleLine * 2f);
+                        EditorGUI.HelpBox(helpBox, "[Unassigned]: Please select a Type.", MessageType.Error);
+                    }
+                    else
+                    {
+                        float currentY = contentInnerRect.y + contentTopSpacing;
+
+                        SerializedProperty iterator = _property.Copy();
+                        SerializedProperty endProperty = iterator.GetEndProperty();
+                        bool enterChildren = true;
+
+                        while (iterator.NextVisible(enterChildren))
+                        {
+                            if (SerializedProperty.EqualContents(iterator, endProperty)) break;
+
+                            float propHeight = EditorGUI.GetPropertyHeight(iterator, true);
+
+                            // CRITICAL EDGE CASE FIX: Let Unity natively handle inner property indentation.
+                            // We give it a perfectly bound box, and restore the indentLevel slightly so standard PropertyDrawers behave.
+                            EditorGUI.indentLevel = originalIndent + 1;
+
+                            Rect propRect = new Rect(contentInnerRect.x + 4f, currentY, contentInnerRect.width - 8f, propHeight);
+                            EditorGUI.PropertyField(propRect, iterator, true);
+
+                            currentY += propHeight + EditorGUIUtility.standardVerticalSpacing;
+                            enterChildren = false;
+                        }
+                    }
                 }
             }
-            float bodyY = dropdownRect.yMax + EditorGUIUtility.standardVerticalSpacing;
-            float bodyHeight = isNull ? (EditorGUIUtility.singleLineHeight * 2) : EditorGUI.GetPropertyHeight(property, true);
-
-            Rect bodyRect = new Rect(position.x, bodyY, position.width,bodyHeight);
-            string helpBoxMessage = "[Unassigned Polymorphic Type]: Please select a Type from the dropdown Above";
-            if (isNull)
+            finally
             {
-                EditorGUI.HelpBox(bodyRect, helpBoxMessage, MessageType.Error);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    s_heightCache.Remove(GetCompositeCacheKey(_property));
+                }
+                // Always strictly reset the indentLevel to its starting state to prevent global UI corruption.
+                EditorGUI.indentLevel = originalIndent;
+                EditorGUI.EndProperty();
             }
-            else
-            {
-                labelName = property.displayName;
-                EditorGUI.PropertyField(bodyRect, property, new GUIContent(labelName), true);
-            }
-
-            float separatorY = bodyRect.yMax + EditorGUIUtility.singleLineHeight;
-            Rect separatorRect = new Rect(position.x, separatorY, position.width,1.5f);
-            Color separatorColor = new Color(0.6f, 0.6f, 0.6f, 1f);
-            EditorGUI.DrawRect(separatorRect, separatorColor);
-
-            Rect endSpaceRect = new Rect(position.x, separatorRect.yMax, position.width, 2f);
-            EditorGUI.DrawRect(endSpaceRect, Color.clear);
-            EditorGUI.EndProperty();
-
         }
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        public override float GetPropertyHeight(SerializedProperty _property, GUIContent _label)
         {
-            //1. Dropdown Height
-            float totalHeight = EditorGUIUtility.singleLineHeight;
-            //2. Spacing Between polymorphic Type and dropdown
-            totalHeight += EditorGUIUtility.standardVerticalSpacing;
+            string cacheKey = GetCompositeCacheKey(_property);
 
-            bool isNull = PolymorphicTypeUtility.GetPropertyFromManagedReferenceFullTypeName(property) == null;
-            if (isNull)
+            if (Event.current.type == EventType.Layout || !s_heightCache.ContainsKey(cacheKey))
             {
-                totalHeight += EditorGUIUtility.singleLineHeight * 2 + EditorGUIUtility.standardVerticalSpacing;
+                s_heightCache[cacheKey] = CalculateHeight(_property);
             }
-            else
-            {
-                // Polymorphic PropertyHeight Itself
-                totalHeight += EditorGUI.GetPropertyHeight(property, true);
-            }
-            totalHeight += EditorGUIUtility.singleLineHeight; // Empty space before the line
-            totalHeight += EditorGUIUtility.singleLineHeight; // The line thickness itself
-            totalHeight += EditorGUIUtility.standardVerticalSpacing; // Empty space below the line to space out the next item
-            return totalHeight;
+
+            return s_heightCache[cacheKey];
         }
 
+        private float CalculateHeight(SerializedProperty _property)
+        {
+            Type baseType = GetFieldBaseType();
+            string baseTypeName = baseType != null ? baseType.FullName : _property.type;
+            List<Type> types = GetCachedCompatibleTypes(_property, baseTypeName);
+
+            float borderThickness = 1f;
+            float headerTopPad = 6f;
+            float headerMidPad = 4f;
+            float headerBotPad = 8f;
+            float singleLine = EditorGUIUtility.singleLineHeight;
+            float contentTopSpacing = 8f;
+            float contentBotSpacing = 8f;
+            float verticalMargin = 6f;
+
+            bool hasNoTypes = types.Count == 0;
+            float dropDownOrWarningHeight = hasNoTypes ? (singleLine * 2.5f) : singleLine;
+
+            float headerInnerHeight = headerTopPad + singleLine + headerMidPad + dropDownOrWarningHeight + headerBotPad;
+            float totalHeight = borderThickness + headerInnerHeight + borderThickness;
+
+            if (_property.isExpanded && !hasNoTypes)
+            {
+                float contentInnerHeight = GetAssignedType(_property) == null
+                    ? (singleLine * 2f) + contentTopSpacing + contentBotSpacing
+                    : GetChildrenHeight(_property) + contentTopSpacing + contentBotSpacing;
+
+                totalHeight += contentInnerHeight + borderThickness;
+            }
+
+            return totalHeight + EditorGUIUtility.standardVerticalSpacing + (verticalMargin * 2f);
+        }
+
+        private float GetChildrenHeight(SerializedProperty _property)
+        {
+            float height = 0f;
+            SerializedProperty iterator = _property.Copy();
+            SerializedProperty endProperty = iterator.GetEndProperty();
+            bool enterChildren = true;
+
+            while (iterator.NextVisible(enterChildren))
+            {
+                if (SerializedProperty.EqualContents(iterator, endProperty)) break;
+                height += EditorGUI.GetPropertyHeight(iterator, true) + EditorGUIUtility.standardVerticalSpacing;
+                enterChildren = false;
+            }
+            if (height > 0) height -= EditorGUIUtility.standardVerticalSpacing;
+            return height;
+        }
+
+        private void InitializeStyles()
+        {
+            if (s_richTextLabel == null)
+                s_richTextLabel = new GUIStyle(EditorStyles.label) { richText = true, clipping = TextClipping.Clip, wordWrap = false };
+            if (s_dotsButtonStyle == null)
+                s_dotsButtonStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter, fontSize = 18, fontStyle = FontStyle.Bold };
+            if (s_richTextHelpBox == null)
+                s_richTextHelpBox = new GUIStyle(EditorStyles.helpBox) { richText = true, alignment = TextAnchor.MiddleLeft, padding = new RectOffset(42, 10, 6, 6) };
+        }
+
+        private void ShowSearchableDropdown(Rect _triggerRect, SerializedProperty _property, List<Type> _types, Type _baseType)
+        {
+            List<Type> allTypes = new List<Type> { typeof(void) };
+            allTypes.AddRange(_types);
+            string titleName = _baseType != null ? _baseType.Name : "Item";
+
+            SearchableDropdown<Type> dropdown = new SearchableDropdown<Type>(
+                items: allTypes,
+                nameSelector: t => t == typeof(void) ? "Unassigned" : ObjectNames.NicifyVariableName(t.Name),
+                pathSelector: t => t == typeof(void) ? "" : GetInheritancePath(t, _baseType),
+                onItemSelected: selectedType =>
+                {
+                    Type actualType = selectedType == typeof(void) ? null : selectedType;
+                    ApplyTypeSelection(_property.serializedObject, _property.propertyPath, actualType);
+                    s_heightCache.Remove(GetCompositeCacheKey(_property));
+                },
+                title: $"Select {titleName}"
+            );
+            dropdown.Show(_triggerRect);
+        }
+
+        private void ApplyTypeSelection(SerializedObject _serializedObject, string _propertyPath, Type _selectedType)
+        {
+            _serializedObject.Update();
+            SerializedProperty property = _serializedObject.FindProperty(_propertyPath);
+            if (property != null)
+            {
+                property.managedReferenceValue = _selectedType == null ? null : Activator.CreateInstance(_selectedType);
+                property.isExpanded = true;
+                _serializedObject.ApplyModifiedProperties();
+            }
+        }
+
+        private void ShowContextMenu(Rect _position, SerializedProperty _property, Type _baseType)
+        {
+            GenericMenu menu = new GenericMenu();
+            if (_property.managedReferenceValue != null)
+            {
+                menu.AddItem(new GUIContent("Copy"), false, () =>
+                {
+                    PolymorphicClipboard clipboard = new PolymorphicClipboard
+                    {
+                        typeName = _property.managedReferenceValue.GetType().AssemblyQualifiedName,
+                        json = JsonUtility.ToJson(_property.managedReferenceValue, true)
+                    };
+                    GUIUtility.systemCopyBuffer = JsonUtility.ToJson(clipboard);
+                });
+            }
+            else menu.AddDisabledItem(new GUIContent("Copy"));
+
+            string sysCopy = GUIUtility.systemCopyBuffer;
+            PolymorphicClipboard copiedData = null;
+            try { if (!string.IsNullOrEmpty(sysCopy) && sysCopy.TrimStart().StartsWith("{")) copiedData = JsonUtility.FromJson<PolymorphicClipboard>(sysCopy); } catch { }
+
+            if (copiedData != null && !string.IsNullOrEmpty(copiedData.typeName))
+            {
+                Type copiedType = Type.GetType(copiedData.typeName);
+                string shortName = copiedType != null ? ObjectNames.NicifyVariableName(copiedType.Name) : copiedData.typeName.Split(',')[0].Split('.').LastOrDefault();
+
+                if (copiedType != null && _baseType != null && _baseType.IsAssignableFrom(copiedType))
+                {
+                    menu.AddItem(new GUIContent($"Paste ({shortName})"), false, () =>
+                    {
+                        _property.serializedObject.Update();
+                        object newInstance = Activator.CreateInstance(copiedType);
+                        JsonUtility.FromJsonOverwrite(copiedData.json, newInstance);
+                        _property.managedReferenceValue = newInstance;
+                        _property.isExpanded = true;
+                        _property.serializedObject.ApplyModifiedProperties();
+                        s_heightCache.Remove(GetCompositeCacheKey(_property));
+                    });
+                }
+                else menu.AddDisabledItem(new GUIContent($"Paste (Invalid: {shortName})"));
+            }
+            else menu.AddDisabledItem(new GUIContent("Paste"));
+
+            menu.DropDown(_position);
+        }
+
+        private void RemoveElementFromList(SerializedProperty _property)
+        {
+            string path = _property.propertyPath;
+            int arrayStartIndex = path.LastIndexOf(".Array.data[");
+            if (arrayStartIndex >= 0)
+            {
+                string arrayPath = path.Substring(0, arrayStartIndex);
+                SerializedProperty arrayProp = _property.serializedObject.FindProperty(arrayPath);
+                int bracketIndex = path.IndexOf('[', arrayStartIndex);
+                int closeBracketIndex = path.IndexOf(']', bracketIndex);
+                string indexStr = path.Substring(bracketIndex + 1, closeBracketIndex - bracketIndex - 1);
+
+                if (int.TryParse(indexStr, out int index))
+                {
+                    arrayProp.DeleteArrayElementAtIndex(index);
+                    _property.serializedObject.ApplyModifiedProperties();
+                    s_heightCache.Clear();
+                }
+            }
+        }
+
+        private string GetInheritancePath(Type _type, Type _baseType)
+        {
+            if (_type == null) return "";
+            List<string> pathParts = new List<string>();
+            Type current = _type.BaseType;
+            while (current != null && current != typeof(object) && current != _baseType)
+            {
+                pathParts.Insert(0, current.Name);
+                current = current.BaseType;
+            }
+            return string.Join("/", pathParts);
+        }
+
+        private static string TruncateText(string _text, GUIStyle _style, float _maxWidth)
+        {
+            if (string.IsNullOrEmpty(_text) || _maxWidth <= 0f) return string.Empty;
+            GUIContent content = new GUIContent(_text);
+            if (_style.CalcSize(content).x <= _maxWidth) return _text;
+            string ellipsis = "...";
+            if (_maxWidth <= _style.CalcSize(new GUIContent(ellipsis)).x) return ellipsis;
+
+            int lower = 0, upper = _text.Length;
+            string bestFit = ellipsis;
+            while (lower <= upper)
+            {
+                int mid = lower + (upper - lower) / 2;
+                string attempt = _text.Substring(0, mid) + ellipsis;
+                content.text = attempt;
+                if (_style.CalcSize(content).x <= _maxWidth) { bestFit = attempt; lower = mid + 1; }
+                else { upper = mid - 1; }
+            }
+            return bestFit;
+        }
+
+        private void DrawWarningBox(Rect _helpBoxRect, Type _baseType)
+        {
+            InitializeStyles();
+            string bName = _baseType != null ? _baseType.Name : "Unknown";
+            string firstLine = $"<color=#FFCC00>There are no compatible types for <b><color=#FFFFFF>{bName}</color></b>.</color>";
+            string secondLine = "<color=#D1D1D1>Please create additional classes inheriting this type.</color>";
+            GUI.Label(_helpBoxRect, $"{firstLine}\n{secondLine}", s_richTextHelpBox);
+            GUI.Label(new Rect(_helpBoxRect.x + 10, _helpBoxRect.y + (_helpBoxRect.height - 24f) * 0.5f, 24f, 24f), EditorGUIUtility.IconContent("console.warnicon"));
+        }
+
+        private Type GetAssignedType(SerializedProperty _property)
+        {
+            string typeName = _property.managedReferenceFullTypename;
+            if (string.IsNullOrEmpty(typeName)) return null;
+
+            if (s_resolvedTypesCache.TryGetValue(typeName, out Type cachedType)) return cachedType;
+
+            string[] parts = typeName.Split(' ');
+            if (parts.Length == 2)
+            {
+                Type type = Type.GetType($"{parts[1]}, {parts[0]}");
+                if (type != null)
+                {
+                    s_resolvedTypesCache[typeName] = type;
+                    return type;
+                }
+            }
+
+            Type fallback = PolymorphicTypeUtility.GetPropertyFromManagedReferenceFullTypeName(_property);
+            s_resolvedTypesCache[typeName] = fallback;
+            return fallback;
+        }
+
+        private List<Type> GetCachedCompatibleTypes(SerializedProperty _property, string _baseTypeName)
+        {
+            if (string.IsNullOrEmpty(_baseTypeName)) return new List<Type>();
+
+            if (s_compatibleTypesCache.TryGetValue(_baseTypeName, out List<Type> cachedTypes)) return cachedTypes;
+
+            List<Type> types = PolymorphicTypeUtility.GetPropertyCompatibleTypes(_property);
+
+            if (types == null || types.Count == 0)
+            {
+                types = new List<Type>();
+                Type baseType = GetFieldBaseType();
+                if (baseType != null)
+                {
+                    Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                    foreach (Assembly assembly in assemblies)
+                    {
+                        try
+                        {
+                            foreach (Type type in assembly.GetTypes())
+                            {
+                                if (baseType.IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface && !type.IsGenericType)
+                                {
+                                    types.Add(type);
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            s_compatibleTypesCache[_baseTypeName] = types;
+            return types;
+        }
+
+        private Type GetFieldBaseType()
+        {
+            if (fieldInfo == null) return null;
+            Type type = fieldInfo.FieldType;
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                return type.GetGenericArguments()[0];
+            }
+            if (type.IsArray)
+            {
+                return type.GetElementType();
+            }
+
+            Type currentType = type;
+            while (currentType != null && currentType != typeof(object))
+            {
+                if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == typeof(PolymorphicList<>))
+                {
+                    return currentType.GetGenericArguments()[0];
+                }
+                currentType = currentType.BaseType;
+            }
+
+            // A plain single field: its own declared type is the base type.
+            // (Previously this returned System.Object, so every single-field property shared one type cache entry.)
+            return type;
+        }
     }
 }

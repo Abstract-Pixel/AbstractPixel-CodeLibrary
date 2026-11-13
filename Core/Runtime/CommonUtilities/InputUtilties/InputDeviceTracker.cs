@@ -1,13 +1,20 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem.DualShock;
+using UnityEngine.InputSystem.Switch;
+using UnityEngine.InputSystem.XInput;
 
 namespace AbstractPixel.Core
 {
     public static class InputDeviceTracker
     {
         public static InputDevice LastUsedDevice { get; private set; }
+        public static DeviceFamily CurrentDeviceFamily { get; private set; }
+
         public static event Action<InputDevice> OnCurrentInputDeviceChanged;
+        public static event Action<DeviceFamily> OnDeviceFamilyChanged;
 
         private const float MINIMUM_COMPOSITE_INPUT_REQUIRED = 0.04f;
 
@@ -16,50 +23,176 @@ namespace AbstractPixel.Core
         {
             InputSystem.onActionChange -= ChangeLastUsedDeviceIfChanged;
             InputSystem.onActionChange += ChangeLastUsedDeviceIfChanged;
+
+            if (LastUsedDevice == null)
+            {
+                if (Gamepad.current != null)
+                {
+                    SetActiveDevice(Gamepad.current);
+                }
+                else if (Keyboard.current != null)
+                {
+                    SetActiveDevice(Keyboard.current);
+                }
+            }
+        }
+
+        public static void SetActiveDevice(InputDevice _device)
+        {
+            if (_device == null)
+            {
+                return;
+            }
+
+            LastUsedDevice = _device;
+            CurrentDeviceFamily = GetDeviceFamily(_device);
+
+            OnCurrentInputDeviceChanged?.Invoke(LastUsedDevice);
+            OnDeviceFamilyChanged?.Invoke(CurrentDeviceFamily);
         }
 
         private static void ChangeLastUsedDeviceIfChanged(object _obj, InputActionChange _change)
         {
-            if (_change == InputActionChange.ActionPerformed)
+            if (_change != InputActionChange.ActionPerformed)
             {
-                InputAction action = _obj as InputAction;
-                if (action == null) return;
+                return;
+            }
 
-                if(action.activeValueType == typeof(Vector2))
+            InputAction action = _obj as InputAction;
+            if (action == null)
+            {
+                return;
+            }
+
+            InputControl control = action.activeControl;
+            if (control == null)
+            {
+                return;
+            }
+
+            if (string.Equals(control.name, "position", StringComparison.OrdinalIgnoreCase) ||
+                control.path.IndexOf("/position", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return;
+            }
+
+            if (control.device is Mouse)
+            {
+                if (control is DeltaControl || string.Equals(control.name, "delta", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (control.EvaluateMagnitude() <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
+                    {
+                        return;
+                    }
+                }
+                else if (control is ButtonControl buttonControl)
+                {
+                    if (!buttonControl.isPressed && buttonControl.ReadValue() <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
+                    {
+                        return;
+                    }
+                }
+                else if (control.EvaluateMagnitude() <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                if (action.activeValueType == typeof(Vector2))
                 {
                     Vector2 inputValue = action.ReadValue<Vector2>();
-                    if(inputValue.sqrMagnitude<MINIMUM_COMPOSITE_INPUT_REQUIRED)
+                    if (inputValue.sqrMagnitude < MINIMUM_COMPOSITE_INPUT_REQUIRED)
                     {
                         return;
                     }
                 }
 
-                InputControl control = action.activeControl;
-                if(control == null)
+                // Use the action's magnitude, not activeControl's. Composite parts that share state memory
+                // (stick up/down share the Y axis, a HID hat D-pad shares one field) can report the wrong part
+                // as activeControl, e.g. "leftStick/up" with magnitude 0 on a down push.
+                float actionMagnitude = action.GetControlMagnitude();
+                if (actionMagnitude <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
                 {
                     return;
-                }
-
-                // Double check: Is the specific key/stick actually being pushed by a human right now?
-                // This stops Unity from reporting the arrow keys or DualSense if they are sitting at 0.0 magnitude.
-                if (control.EvaluateMagnitude() <= MINIMUM_COMPOSITE_INPUT_REQUIRED)
-                {
-                    return;
-                }
-
-                    InputDevice device = action.activeControl?.device;
-                if (device != null && device != LastUsedDevice)
-                {
-                    LastUsedDevice = device;
-                    OnCurrentInputDeviceChanged?.Invoke(device);
                 }
             }
+
+            InputDevice device = control.device;
+            if (device != null && device != LastUsedDevice)
+            {
+                SetActiveDevice(device);
+            }
+        }
+
+        /// <summary>Which controller family a device belongs to (PlayStation, Xbox, Steam, Nintendo, generic, keyboard/mouse).</summary>
+        public static DeviceFamily GetDeviceFamily(InputDevice _device)
+        {
+            if (_device == null)
+            {
+                return DeviceFamily.Unknown;
+            }
+
+            if (_device is Keyboard || _device is Mouse)
+            {
+                return DeviceFamily.KeyboardMouse;
+            }
+
+            string productName = _device.description.product?.ToLowerInvariant() ?? string.Empty;
+            string manufacturerName = _device.description.manufacturer?.ToLowerInvariant() ?? string.Empty;
+
+            if (productName.Contains("steam") || productName.Contains("valve") || manufacturerName.Contains("valve"))
+            {
+                return DeviceFamily.SteamDevice;
+            }
+
+            if (_device is DualShockGamepad)
+            {
+                return DeviceFamily.PlayStation;
+            }
+
+            if (_device is XInputController)
+            {
+                return DeviceFamily.Xbox;
+            }
+
+            if (_device is SwitchProControllerHID)
+            {
+                return DeviceFamily.Nintendo;
+            }
+
+            if (productName.Contains("playstation") || productName.Contains("dualshock") || productName.Contains("dualsense") || manufacturerName.Contains("sony"))
+            {
+                return DeviceFamily.PlayStation;
+            }
+
+            if (productName.Contains("xbox") || manufacturerName.Contains("microsoft"))
+            {
+                return DeviceFamily.Xbox;
+            }
+
+            if (productName.Contains("nintendo") || productName.Contains("pro controller") || productName.Contains("joy-con") || manufacturerName.Contains("nintendo"))
+            {
+                return DeviceFamily.Nintendo;
+            }
+
+            if (_device is Gamepad || _device is Joystick)
+            {
+                return DeviceFamily.GenericGamepad;
+            }
+
+            return DeviceFamily.Unknown;
         }
 
         #region Public Device Checking Utility Methods
         public static bool IsLastUsedDeviceGamepadOrJoystick()
         {
-            return LastUsedDevice is Gamepad || LastUsedDevice is Joystick;
+            if (LastUsedDevice is Gamepad || LastUsedDevice is Joystick)
+            {
+                return true;
+            }
+
+            return CurrentDeviceFamily != DeviceFamily.KeyboardMouse && CurrentDeviceFamily != DeviceFamily.Unknown;
         }
 
         public static bool IsLastUsedDeviceOnlyGamepad()
@@ -77,7 +210,7 @@ namespace AbstractPixel.Core
             return LastUsedDevice is Keyboard || LastUsedDevice is Mouse;
         }
 
-        public static bool IsLasTUsedDeviceOnlyKeyboard()
+        public static bool IsLastUsedDeviceOnlyKeyboard()
         {
             return LastUsedDevice is Keyboard;
         }
@@ -86,7 +219,6 @@ namespace AbstractPixel.Core
         {
             return LastUsedDevice is Mouse;
         }
-
         #endregion
     }
 }

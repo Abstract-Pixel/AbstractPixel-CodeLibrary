@@ -35,7 +35,7 @@ namespace AbstractPixel.Core
             {
                 if (instance == null && !isApplicationQuitting)
                 {
-                    instance = FindAnyObjectByType<T>();
+                    instance = FindAnyObjectByType<T>(FindObjectsInactive.Include);
                     if (instance == null)
                     {
                         var go = new GameObject(typeof(T).Name + " Auto-Generated");

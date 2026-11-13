@@ -44,7 +44,7 @@ MonoBehaviour:
   - DisplayName: Settings
     Category: 2
     Location: 1
-    CustomFileName: 
+    CustomFileName: Settings
     EncryptFile: 0
   - DisplayName: Game
     Category: 5
@@ -55,4 +55,9 @@ MonoBehaviour:
     Category: 4
     Location: 2
     CustomFileName: fakedData
+    EncryptFile: 0
+  - DisplayName: Ghosts
+    Category: 6
+    Location: 2
+    CustomFileName: Ghosts
     EncryptFile: 0

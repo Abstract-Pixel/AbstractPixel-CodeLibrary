@@ -1,4 +1,3 @@
-// --- START OF FILE GameStateMenu.cs ---
 using UnityEngine;
 
 namespace AbstractPixel.GameManagement
@@ -16,6 +15,9 @@ namespace AbstractPixel.GameManagement
         [Tooltip("The actual UI GameObject to toggle. Do NOT assign the object this script is attached to, or it will stop listening when disabled!")]
         [SerializeField] private GameObject menuContent;
 
+        [Tooltip("OnStateRegistered shows the menu at once. OnConfigurationsApplied waits for the state's execution delay.")]
+        [SerializeField] private MenuRevealTiming revealTiming = MenuRevealTiming.OnStateRegistered;
+
         private void OnValidate()
         {
             // Designer-Proofing: If the designer forgets to assign the content, 
@@ -28,16 +30,16 @@ namespace AbstractPixel.GameManagement
 
         private void OnEnable()
         {
-            // C# Standard for preventing double-subscription: 
-            // We strictly subscribe in OnEnable and unsubscribe in OnDisable.
             GameStateRegistry.OnStateRegistered += HandleStateRegistered;
             GameStateRegistry.OnStateUnregistered += HandleStateUnregistered;
+            GameStateRegistry.OnStateConfigurationsApplied += HandleStateConfigurationsApplied;
         }
 
         private void OnDisable()
         {
             GameStateRegistry.OnStateRegistered -= HandleStateRegistered;
             GameStateRegistry.OnStateUnregistered -= HandleStateUnregistered;
+            GameStateRegistry.OnStateConfigurationsApplied -= HandleStateConfigurationsApplied;
         }
 
         private void Start()
@@ -45,13 +47,35 @@ namespace AbstractPixel.GameManagement
             // Initialization Sync: Check the registry the moment the scene starts.
             // Because StateComponents register in Awake(), the Registry is already populated.
             bool isTargetStateActive = GameStateRegistry.IsStateActive(targetState);
+            if (revealTiming == MenuRevealTiming.OnConfigurationsApplied)
+            {
+                bool areConfigurationsApplied = GameStateRegistry.AreConfigurationsApplied(targetState);
+                ToggleMenu(isTargetStateActive && areConfigurationsApplied);
+                return;
+            }
             ToggleMenu(isTargetStateActive);
         }
 
         private void HandleStateRegistered(StateSO _registeredState)
         {
             // ShowMenu
+            if (revealTiming != MenuRevealTiming.OnStateRegistered)
+            {
+                return;
+            }
             if (_registeredState == targetState)
+            {
+                ToggleMenu(true);
+            }
+        }
+
+        private void HandleStateConfigurationsApplied(StateSO _appliedState)
+        {
+            if (revealTiming != MenuRevealTiming.OnConfigurationsApplied)
+            {
+                return;
+            }
+            if (_appliedState == targetState)
             {
                 ToggleMenu(true);
             }
