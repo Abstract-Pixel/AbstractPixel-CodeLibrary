@@ -130,23 +130,6 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
-        public void SecondOwner_ReplacesTheFirst_AndTheFirstOwnersUnregisterDoesNotRemoveIt()
-        {
-            // Problem 6: an old scene's object unregistering after the new scene's object registered.
-            string gameProfileId = CreateAndOpenGameProfile();
-            PlayerHealth oldOwner = new PlayerHealth { Current = 1 };
-            PlayerHealth newOwner = new PlayerHealth { Current = 2 };
-            SaveActions.Register(oldOwner, "player-health");
-            SaveActions.Register(newOwner, "player-health");
-
-            SaveActions.Unregister(oldOwner);
-            newOwner.Current = 55;
-            SaveActions.SaveAll();
-
-            Assert.AreEqual(55, StoredInt(GameKey(gameProfileId), "player-health"));
-        }
-
-        [Test]
         public void OpeningAnotherGameProfile_DropsGameProfileAndSceneData_AndKeepsGlobalData()
         {
             string first = CreateAndOpenGameProfile();

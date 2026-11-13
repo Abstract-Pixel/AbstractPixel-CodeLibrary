@@ -39,8 +39,12 @@ namespace AbstractPixel.SaveSystem
         /// </summary>
         public void Track(SavedObjectEntry entry)
         {
+            // A refused duplicate stays out of the save system, so it can't overwrite the first object's data.
+            if (!registry.Add(entry))
+            {
+                return;
+            }
             loadedData.RememberNewGameValues(entry);
-            registry.Add(entry);
             TryRestore(entry);
         }
 
@@ -75,7 +79,7 @@ namespace AbstractPixel.SaveSystem
             bool isGameProfileOpen = profileManager.CurrentGameProfileId != null;
             if (needsGameProfile && !isGameProfileOpen)
             {
-                Debug.LogError($"[SaveSystem] Forget({DescribeForLog(savedObject)}) did nothing: its data lives in a game profile, and no game profile is open, so there is nowhere to forget it from. Open one first, for example SaveActions.GameProfiles.Get(1).Open(), then call Forget.");
+                Debug.LogError($"[SaveSystem] Forget({SavedObjectEntry.Describe(savedObject)}) did nothing: its data lives in a game profile, and no game profile is open, so there is nowhere to forget it from. Open one first, for example SaveActions.GameProfiles.Get(1).Open(), then call Forget.");
                 return;
             }
 
@@ -205,16 +209,6 @@ namespace AbstractPixel.SaveSystem
             Component ownerComponent = entry.Owner as Component;
             bool isOnThatGameObject = gameObject != null && ownerComponent != null && ownerComponent.gameObject == gameObject;
             return isOnThatGameObject;
-        }
-
-        static string DescribeForLog(object savedObject)
-        {
-            UnityEngine.Object unityObject = savedObject as UnityEngine.Object;
-            if (unityObject != null)
-            {
-                return $"'{unityObject.name}' ({savedObject.GetType().Name})";
-            }
-            return savedObject.GetType().Name;
         }
     }
 }

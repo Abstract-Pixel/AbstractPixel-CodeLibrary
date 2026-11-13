@@ -1,4 +1,7 @@
+using System.Text.RegularExpressions;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 using static AbstractPixel.SaveSystem.Tests.SaveSystemTestKit;
 
 namespace AbstractPixel.SaveSystem.Tests
@@ -43,6 +46,18 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             Assert.IsTrue(store.TryRead($"GameProfiles/{gameProfileId}/Game", out SaveFileData file), "The Game save file was never written.");
             return file;
+        }
+
+        [Test]
+        public void TwoObjectsWithTheSameCustomSaveId_OnlyTheFirstIsSaved()
+        {
+            SaveActions.Register(new PlayerHealth { Current = 40 }, "hero");
+            LogAssert.Expect(LogType.Error, new Regex("Two saved objects use the save ID 'hero'"));
+            SaveActions.Register(new PlayerHealth { Current = 70 }, "hero");
+
+            SaveActions.SaveAll();
+
+            Assert.AreEqual(40, StoredGameFile().Entries["hero"].Data.ToObject<int>());
         }
 
         [Test]

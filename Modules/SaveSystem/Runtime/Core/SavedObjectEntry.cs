@@ -81,6 +81,17 @@ namespace AbstractPixel.SaveSystem
             Restore = restore;
         }
 
+        /// <summary>A saved object as an error message names it: "'Chest' (ChestLid)" for a Unity object, else its class name.</summary>
+        public static string Describe(object savedObject)
+        {
+            UnityEngine.Object unityObject = savedObject as UnityEngine.Object;
+            if (unityObject != null)
+            {
+                return $"'{unityObject.name}' ({savedObject.GetType().Name})";
+            }
+            return savedObject.GetType().Name;
+        }
+
         /// <summary>Builds an entry for an <see cref="ISavable{T}"/> without reflection.</summary>
         public static SavedObjectEntry Create<T>(ISavable<T> savable, string saveId, string saveFileName, SaveLocation location,
             string sceneName, string entryName)

@@ -64,8 +64,10 @@ namespace AbstractPixel.SaveSystem.Tests
             StartSaveSystem();
             GameProfile profile = SaveActions.GameProfiles.CreateNew();
             profile.Open();
-            SaveActions.Register(new PlayerHealth { Current = 30 }, "player-health");
+            PlayerHealth healthBeforeTheMenu = new PlayerHealth { Current = 30 };
+            SaveActions.Register(healthBeforeTheMenu, "player-health");
             SaveActions.SaveAll();
+            SaveActions.Unregister(healthBeforeTheMenu);
             SaveActions.GameProfiles.CloseCurrent();
             PlayerHealth health = new PlayerHealth();
             SaveActions.Register(health, "player-health");
