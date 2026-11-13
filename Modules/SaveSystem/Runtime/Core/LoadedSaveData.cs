@@ -61,6 +61,42 @@ namespace AbstractPixel.SaveSystem
             }
         }
 
+        /// <summary>Keeps a copy of the entry's data as its new-game values. Called once, when it registers, before any restore.</summary>
+        public void RememberNewGameValues(SavedObjectEntry entry)
+        {
+            try
+            {
+                object data = entry.Capture();
+                if (data != null)
+                {
+                    entry.NewGameValues = serializer.ToToken(data);
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[SaveSystem] Capturing the new-game values of save ID '{entry.SaveId}' from {entry.Owner.GetType().Name} failed: {exception.Message} A new game profile will keep this object's current values instead. Check its CaptureData.");
+            }
+        }
+
+        /// <summary>Puts the entry's new-game values back, for a game profile that has no data for it. A failing restore is logged, never thrown.</summary>
+        public bool RestoreNewGameValues(SavedObjectEntry entry)
+        {
+            if (entry.NewGameValues == null)
+            {
+                return false;
+            }
+            try
+            {
+                entry.Restore(serializer.FromToken(entry.NewGameValues, entry.DataType));
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[SaveSystem] Restoring the new-game values of save ID '{entry.SaveId}' into {entry.Owner.GetType().Name} failed: {exception.Message} It keeps its current values. Check its RestoreData.");
+                return false;
+            }
+        }
+
         /// <summary>Captures the entry's current data into memory. The key counts as changed only if the data differs.</summary>
         public void Capture(SavedObjectEntry entry, SaveFileAddress address)
         {

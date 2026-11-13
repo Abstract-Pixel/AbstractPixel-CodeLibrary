@@ -33,9 +33,13 @@ namespace AbstractPixel.SaveSystem
             return automaticSaveIds.Assign(savedObject, savedObjectClass, saveFileName);
         }
 
-        /// <summary>Starts tracking the entry and restores it right away if its data can be loaded now.</summary>
+        /// <summary>
+        /// Starts tracking the entry and restores it right away if its data can be loaded now. Its new-game values are
+        /// kept first, before anything is restored.
+        /// </summary>
         public void Track(SavedObjectEntry entry)
         {
+            loadedData.RememberNewGameValues(entry);
             registry.Add(entry);
             TryRestore(entry);
         }
@@ -119,9 +123,9 @@ namespace AbstractPixel.SaveSystem
         }
 
         /// <summary>
-        /// A game profile opened: every GameProfile and Scene object is restored from it. An object registered before
-        /// any game profile was open belongs to this one. An object from another game profile moves over only if this
-        /// game profile has data for it; otherwise it keeps that game profile's values, and must never capture them here.
+        /// A game profile opened: every GameProfile and Scene object is restored from it and belongs to it from now on.
+        /// An object that stayed alive from another game profile, and has no data in this one, gets its new-game values
+        /// back, so a new game starts fresh and is saved into this game profile. Global objects never change here.
         /// </summary>
         public void RestoreForOpenedGameProfile(string gameProfileId)
         {
@@ -132,15 +136,15 @@ namespace AbstractPixel.SaveSystem
                 {
                     continue;
                 }
-                if (entry.GameProfileId == null)
-                {
-                    entry.GameProfileId = gameProfileId;
-                }
+
+                bool cameFromAnotherGameProfile = entry.GameProfileId != null && entry.GameProfileId != gameProfileId;
                 bool restored = TryRestore(entry);
-                if (restored)
+                bool needsNewGameValues = !restored && cameFromAnotherGameProfile && registry.Contains(entry);
+                if (needsNewGameValues)
                 {
-                    entry.GameProfileId = gameProfileId;
+                    loadedData.RestoreNewGameValues(entry);
                 }
+                entry.GameProfileId = gameProfileId;
             }
         }
 

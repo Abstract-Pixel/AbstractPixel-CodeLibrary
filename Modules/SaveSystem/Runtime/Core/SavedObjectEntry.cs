@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json.Linq;
 
 namespace AbstractPixel.SaveSystem
 {
@@ -50,6 +51,12 @@ namespace AbstractPixel.SaveSystem
         public Type DataType { get; }
         public Func<object> Capture { get; }
         public Action<object> Restore { get; }
+
+        /// <summary>
+        /// The object's data when it registered, before anything was restored. A game profile with no data for this
+        /// object restores these, so a new game starts fresh even for an object that stayed alive.
+        /// </summary>
+        public JToken NewGameValues { get; set; }
 
         /// <summary>
         /// Turns off an object placed in a scene when its save file holds a gone marker. Null for plain classes and

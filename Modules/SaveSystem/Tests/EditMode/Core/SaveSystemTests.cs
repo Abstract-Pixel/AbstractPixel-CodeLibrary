@@ -175,8 +175,10 @@ namespace AbstractPixel.SaveSystem.Tests
             // Found by the Save Locations sample: switching game profiles, then reloading the scene, unregisters the old
             // scene's objects. Their capture must not put the previous game profile's data into the new one.
             CreateAndOpenGameProfile();
-            PlayerHealth oldSceneHealth = new PlayerHealth { Current = 10 };
+            PlayerHealth oldSceneHealth = new PlayerHealth();
             SaveActions.Register(oldSceneHealth, "player-health");
+            // Changed after registering, so 10 is the first game profile's value, not a new-game value.
+            oldSceneHealth.Current = 10;
             SaveActions.SaveAll();
             string second = SaveActions.GameProfiles.CreateNew("Second").Id;
             SaveActions.GameProfiles.GetById(second).Open();
