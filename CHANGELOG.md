@@ -17,6 +17,7 @@
 - **Cleanup:** Only 22 public types, so autocomplete shows what game code uses. Save data, rows and storage internals are internal now.
 - **Settings:** Saves into the built-in `SaveFiles.Settings`. The debug toolbar uses `SaveStorage`.
 - **Core:** `SearchableDropdown` works on Unity 6 and Unity 7.
+- **Core:** The library no longer needs the Custom Inspector plugin. `GlyphToggler`'s glyph map is a built-in `Dictionary`, so the package needs Unity 6.6 or later.
 
 ## [1.1.0] - 2026-10-31
 **GameManagment: delayed menus, eased time scale, skip, state fixes.** Every new option defaults to the old behaviour.

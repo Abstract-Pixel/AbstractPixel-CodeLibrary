@@ -52,6 +52,9 @@ li { margin: 4px 0; }
 .pill.built { background: var(--good-soft); color: var(--good); }
 .pill.next { background: var(--next-soft); color: var(--next); }
 .pill.plan { background: var(--plan-soft); color: var(--plan); }
+.pill.high { background: var(--warn-soft); color: var(--warn); }
+.pill.medium { background: var(--next-soft); color: var(--next); }
+.pill.low { background: var(--surface-2); color: var(--muted); }
 
 .timeline { list-style: none; padding: 0; margin: 18px 0; display: grid; }
 .timeline li { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--line); margin: 0; }
@@ -107,6 +110,8 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
       <li><a href="#wrong">The wrong way is hard</a></li>
       <li><a href="#cleanup">The cleanup</a></li>
       <li><a href="#order">Build order</a></li>
+      <li><a href="#phase-s">Phase S plan</a></li>
+      <li><a href="#back-burner">Back burner</a></li>
       <li><a href="#decisions">Decisions</a></li>
       <li><a href="#not">Not doing</a></li>
     </ol>
@@ -114,7 +119,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
 
   <main>
     <header>
-      <div class="eyebrow">Abstract Pixel Library · Save System v2 · roadmap v7 · 13 Nov 2026</div>
+      <div class="eyebrow">Abstract Pixel Library · Save System v2 · roadmap v8 · 13 Nov 2026</div>
       <h1>Save System roadmap</h1>
       <p class="lede">Where the save system is going, in the order you'd learn it: designers first, then daily code, then the deeper levels. How the system works today is in <code>save-system.html</code>.</p>
       <div class="legend">
@@ -133,6 +138,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
         <li><span class="when">Phase F</span><div><strong>The last bug fixes</strong> <span class="pill built">built</span><p>Clash warnings in the config, no "Saved" after a failed write, custom slot fields that survive a refresh, an error for duplicate save IDs, bridge IDs that stay put in new scenes. Every sample played with no errors.</p></div></li>
         <li><span class="when">Phase K</span><div><strong>The cleanup</strong> <span class="pill built">built</span><p>516 fewer lines with the same features, and public types down from 44 to 22. <a href="#cleanup">More below.</a></p></div></li>
         <li><span class="when">Phase H</span><div><strong>Docs and handoff</strong> <span class="pill built">built</span><p>This page, the guide, the before-and-after page and the AI handoff, brought up to date. 223 EditMode and 17 PlayMode tests pass.</p></div></li>
+        <li><span class="when">After H</span><div><strong>Inspector fix and review</strong> <span class="pill built">built</span><p>The library no longer needs the Custom Inspector plugin. Its IMGUI editor for every MonoBehaviour hid the Save Actions save file picker. The package now needs Unity 6.6 or later, for built-in dictionaries. A review of phases F, K and H found no crash or data corruption. The rest is on the <a href="#back-burner">back burner</a>.</p></div></li>
         <li><span class="when">Phase S</span><div><strong><code>[Save]</code> fields and the ladder</strong> <span class="pill next">next run</span><p>The rest of step 3: <code>[Save]</code>, blocking checks, rename-safe data, small features for developers and designers.</p></div></li>
         <li><span class="when">Steps 4–7</span><div><strong>Designer tools</strong> <span class="pill plan">planned</span><p>Saved ScriptableObjects and saved-variable assets, bridges added while editing, the Save System window, ready-made savers and a save slot screen.</p></div></li>
       </ol>
@@ -300,16 +306,56 @@ start until this is fixed.</span></code></pre></div>
           <tr><td>F</td><td>The last bug fixes, then play every sample</td><td>Everyone</td><td><span class="pill built">built</span></td></tr>
           <tr><td>K</td><td>The cleanup</td><td>Whoever maintains it</td><td><span class="pill built">built</span></td></tr>
           <tr><td>H</td><td>Guide, roadmap and AI handoff</td><td>You</td><td><span class="pill built">built</span></td></tr>
-          <tr><td>S1</td><td><code>[Save]</code> fields, rename safety, blocking checks</td><td>Developers</td><td><span class="pill next">next run</span></td></tr>
-          <tr><td>S2–S4</td><td><code>IOnRestored</code>, <code>SetSaveId</code>, the bridge recognises <code>[Save]</code></td><td>Developers</td><td><span class="pill plan">planned</span></td></tr>
-          <tr><td>S5</td><td>Typed load listeners</td><td>Developers</td><td><span class="pill plan">planned</span></td></tr>
-          <tr><td>S6</td><td><code>OnSaveFailed</code>, Continue helpers, autosave, UnityEvents, clean JSON for Unity types, Copy save ID button</td><td>Both</td><td><span class="pill plan">planned</span></td></tr>
-          <tr><td>S7</td><td>Samples by the ladder: save a field, buttons with no code, save slots, pick a file, spawned copies, custom data, whole files</td><td>Learning</td><td><span class="pill plan">planned</span></td></tr>
-          <tr><td>S8</td><td>Save Transform, Save Active State, Save Destroyed</td><td>Designers</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>S1–S3</td><td><code>[Save]</code> fields with rename safety, the blocking checks, MonoBehaviours through the bridge</td><td>Developers</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>S4–S6</td><td><code>IOnRestored</code>, <code>SetSaveId</code> for spawned copies, typed load listeners</td><td>Developers</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>S7</td><td><code>OnSaveFailed</code>, Continue helpers, autosave, UnityEvents, clean JSON for Unity types, Copy save ID button</td><td>Both</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>S8</td><td>Save Transform, Save Active State, Save Destroyed</td><td>Designers</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>S9</td><td>Samples by the ladder, then play every sample</td><td>Learning</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>S10</td><td>Guide, roadmap, before-and-after page and AI handoff</td><td>You</td><td><span class="pill next">next run</span></td></tr>
           <tr><td>4</td><td>ScriptableObjects without code, saved-variable assets</td><td>Designers</td><td><span class="pill plan">planned</span></td></tr>
           <tr><td>5</td><td>Bridges added while editing, Hierarchy badge</td><td>Both</td><td><span class="pill plan">planned</span></td></tr>
           <tr><td>6</td><td>The Save System window</td><td>Both</td><td><span class="pill plan">planned</span></td></tr>
           <tr><td>7</td><td>More savers, save slot screen, thumbnails</td><td>Designers</td><td><span class="pill plan">planned</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="phase-s">
+      <h2>Phase S plan <span class="pill next">next run</span></h2>
+      <p>Phase S finishes step 3. The order changed from the last plan so each task builds on the one before it. <code>[Save]</code> works for plain classes first. Then the checks that block mistakes go in, and then MonoBehaviours get <code>[Save]</code> through the bridge. The samples come last, so they can use the ready-made savers.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Task</th><th>What it adds</th><th>Done when</th></tr></thead>
+        <tbody>
+          <tr><td>S1</td><td><code>[Save]</code> on fields of a plain class registered with <code>Register(this)</code>. Data is stored by field name. <code>[Save(Formerly = "hp")]</code> reads an old name, and <code>[SaveId("Inventory")]</code> keeps a class's automatic save ID after a rename. <code>ISaveIn&lt;TFile&gt;</code> picks the save file, and <code>ISavable&lt;TData, TFile&gt;</code> extends it.</td><td>A plain class with private, public and inherited <code>[Save]</code> fields saves, reloads and keeps its new-game values. A renamed field and a renamed class keep their data.</td></tr>
+          <tr><td>S2</td><td>The blocking checks. After each compile the editor scans every <code>[Save]</code> field and logs one error per mistake. Play mode won't start and builds fail until it's fixed. At runtime the save system refuses the field too.</td><td>Each mistake in <a href="#wrong">the table above</a> has a test that sees its error, the blocked play mode and the failed build.</td></tr>
+          <tr><td>S3</td><td>The Savable Bridge and the auto-adder find scripts with <code>[Save]</code> fields or <code>ISaveIn</code>, through the shared "is this a saved script" helper.</td><td><code>[Save] int current</code> on a MonoBehaviour saves with no other code. A bridge on a prefab asset and in Prefab Mode keeps its ID.</td></tr>
+          <tr><td>S4</td><td><code>IOnRestored.OnRestored()</code>, called after every restore, including new-game values and a game profile opened from a menu.</td><td>A UI script refreshes from <code>OnRestored</code> in all three cases.</td></tr>
+          <tr><td>S5</td><td><code>goblin.SetSaveId(spawnPoint.name)</code> right after <code>Instantiate</code>. A copy without one logs one warning naming the prefab and isn't saved. Forget on a copy removes its data. The duplicate save ID error now points at <code>SetSaveId</code>.</td><td>Two spawned goblins with IDs keep their own data across a reload. A copy without an ID logs one warning.</td></tr>
+          <tr><td>S6</td><td><code>SaveEventBus.AddLoadListener&lt;GameSaveFiles.Ghosts&gt;(ShowGhosts)</code> and <code>RemoveLoadListener</code>. Late listeners still hear about files that already loaded. A Scene file calls the handler once per scene.</td><td>The samples that compare <code>file == typeof(...)</code> use it instead.</td></tr>
+          <tr><td>S7</td><td>Small features: <code>OnSaveFailed(file, reason)</code>, <code>GameProfiles.LastOpened</code> and <code>Count</code>, autosave on scene unload and every N minutes, a UnityEvents component for designers, clean JSON for Vector2, Vector2Int, Vector3Int, Color and Rect, and the Copy save ID button on the bridge.</td><td>Each has its own test. A designer can wire "Saved!" and "Save failed" popups with no code.</td></tr>
+          <tr><td>S8</td><td>Save Transform, Save Active State and Save Destroyed, each a small component built on <code>[Save]</code>.</td><td>Each works on a prefab and a scene object with no code.</td></tr>
+          <tr><td>S9</td><td>Samples by the ladder: save a field, buttons with no code, save slots and Continue, pick a save file, spawned copies, custom data with <code>ISavable</code>, whole files with <code>SaveStorage</code>, and a module shipping its own save file.</td><td>Each sample has a scene, a short README and a PlayMode test, and plays with no console errors.</td></tr>
+          <tr><td>S10</td><td>The guide, this roadmap, the before-and-after page, the changelog and the AI handoff.</td><td>A developer can learn levels 0 to 2 from the guide alone.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Each task a developer or designer would notice gets a GitHub issue. Tests come first, and both suites pass before each commit. A back-burner item gets fixed only when a phase S task already touches its code.</p>
+    </section>
+
+    <section id="back-burner">
+      <h2>Back burner</h2>
+      <p>Found in the review of phases F, K and H on 13 Nov 2026. None of them crashes the game or corrupts saved data, so phase S goes first. A bug that crashes or corrupts data gets fixed straight away and never waits here.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Severity</th><th>Problem</th><th>When to fix</th></tr></thead>
+        <tbody>
+          <tr><td>B1</td><td><span class="pill medium">medium</span></td><td>Two Savable Bridges copied in a scene that was never saved share one ID, and the first save keeps both. Unity gives every object in an unsaved scene the same empty id, so the bridge can't tell the copies apart. The duplicate save ID error reports them in play mode.</td><td>S3, when the bridge changes. Give the later bridge a new ID when the scene is first saved.</td></tr>
+          <tr><td>B2</td><td><span class="pill low">low</span></td><td>The save system's inspector drawers (the save file picker and the save file rows) only draw with UI Toolkit. An inspector plugin that draws everything with IMGUI, such as Odin, makes a game component's save file picker show "No GUI Implemented".</td><td>When a game uses such a plugin. An IMGUI fallback is about 15 lines in the picker's drawer.</td></tr>
+          <tr><td>B3</td><td><span class="pill low">low</span></td><td>The duplicate save ID rule lets a new object take over when the old one's scene is unloaded. No test has reloaded a scene additively while the old copy is still loaded. The library's scene coordinator unloads first, so it doesn't happen today.</td><td>With S5, which touches the same rule.</td></tr>
+          <tr><td>B4</td><td><span class="pill low">low</span></td><td>Nobody has checked a bridge on a prefab asset, or in Prefab Mode, by hand since the ID fix in phase F.</td><td>S3 checks it.</td></tr>
+          <tr><td>B5</td><td><span class="pill low">low</span></td><td><code>SaveFileDefinition.ClassNameFor</code> and <code>SaveFilesCodeWriter.ToClassName</code> are two names for one rule.</td><td>Whichever phase S task next touches either file.</td></tr>
+          <tr><td>B6</td><td><span class="pill low">low</span></td><td>The auto-adder uses <code>IProcessSceneWithReport</code>, which Unity 7 marks obsolete. It still works on Unity 6.7.</td><td>Step 5 replaces the auto-adder.</td></tr>
+          <tr><td>B7</td><td><span class="pill low">low</span></td><td>Every bridge asks Unity for its id each time Unity validates it, and that lookup is slow. Large scenes may feel it.</td><td>Measure in step 5.</td></tr>
+          <tr><td>B8</td><td><span class="pill low">low</span></td><td>Outside the save system. Unity warns that <code>AnimationCommandQueue.commandQueue</code> and <code>ObjectPool.inactivePool</code> look serialized but can't be (UAC1009).</td><td>Any time. Mark them <code>[NonSerialized]</code>.</td></tr>
+          <tr><td>B9</td><td><span class="pill low">low</span></td><td>Lab only. The Settings Lab scene logs one TMP dropdown error and missing-script warnings, because TMP Essentials aren't imported there.</td><td>When the Settings module is next worked on.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -345,7 +391,7 @@ start until this is fixed.</span></code></pre></div>
       </table></div>
     </section>
 
-    <footer>Branch <code>save-system</code>, last code commit <code>d0ce7f8</code>. Not pushed. Roadmap v7: phases F, K and H are built. Replaces roadmap v5 and the next-steps page.</footer>
+    <footer>Branch <code>save-system</code>, last code commit <code>9f2bd07</code>. Not pushed. Roadmap v8: the phase S plan and the back burner. Replaces roadmap v5 and the next-steps page.</footer>
   </main>
 </div>
 </body>
