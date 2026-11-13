@@ -194,5 +194,48 @@ namespace AbstractPixel.SaveSystem.Tests
             LogAssert.Expect(LogType.Error, new Regex("no save system config.*Create Config"));
             Assert.IsNull(SaveActions.GameProfiles.CreateNew());
         }
+
+        // S7: Count and LastOpened, for a save slot screen's Continue button.
+        [Test]
+        public void Count_IsHowManyGameProfilesExist()
+        {
+            Assert.AreEqual(0, SaveActions.GameProfiles.Count);
+
+            SaveActions.GameProfiles.CreateNew();
+            SaveActions.GameProfiles.CreateNew();
+
+            Assert.AreEqual(2, SaveActions.GameProfiles.Count);
+        }
+
+        [Test]
+        public void LastOpened_IsNull_BeforeAnyGameProfileHasEverOpened()
+        {
+            SaveActions.GameProfiles.CreateNew();
+
+            Assert.IsNull(SaveActions.GameProfiles.LastOpened);
+        }
+
+        [Test]
+        public void LastOpened_SurvivesARelaunch()
+        {
+            GameProfile profile = SaveActions.GameProfiles.CreateNew();
+            profile.Open();
+
+            SaveStartup.Start(CreateConfig(), storage, scene, clock.Now);
+
+            Assert.AreEqual(profile.Id, SaveActions.GameProfiles.LastOpened.Id);
+        }
+
+        [Test]
+        public void LastOpened_IsNull_WhenThatGameProfileWasDeleted()
+        {
+            GameProfile profile = SaveActions.GameProfiles.CreateNew();
+            profile.Open();
+            profile.Delete();
+
+            SaveStartup.Start(CreateConfig(), storage, scene, clock.Now);
+
+            Assert.IsNull(SaveActions.GameProfiles.LastOpened);
+        }
     }
 }

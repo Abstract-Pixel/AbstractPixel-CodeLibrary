@@ -50,6 +50,25 @@ namespace AbstractPixel.SaveSystem
             }
         }
 
+        /// <summary>How many game profiles exist. For a save slot screen that only needs the count.</summary>
+        public int Count => All.Count;
+
+        /// <summary>
+        /// The game profile that was open the last time the game quit, or null for a first launch or if it was
+        /// deleted since. For a Continue button; a New Game button uses CreateNew instead.
+        /// </summary>
+        public GameProfile LastOpened
+        {
+            get
+            {
+                if (manager == null || !manager.TryGetLastOpened(out string gameProfileId))
+                {
+                    return null;
+                }
+                return GetById(gameProfileId);
+            }
+        }
+
         /// <summary>Creates a game profile named "&lt;default game profile name&gt; &lt;slot number&gt;" in the lowest free slot. It doesn't open it.</summary>
         public GameProfile CreateNew()
         {
