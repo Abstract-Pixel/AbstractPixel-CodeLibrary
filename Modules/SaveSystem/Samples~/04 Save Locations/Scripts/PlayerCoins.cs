@@ -3,8 +3,7 @@ using UnityEngine;
 
 namespace SaveSystemSamples.SaveLocations
 {
-    // Coins belong to one playthrough, so they're saved in the game profile ("Game").
-    [Savable(SaveCategory.Game)]
+    // Coins belong to one playthrough, so they're saved in the GameProfile save file.
     public class PlayerCoins : MonoBehaviour, ISavable<int>
     {
         public int Coins { get; private set; }

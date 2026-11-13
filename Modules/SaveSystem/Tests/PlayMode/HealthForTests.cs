@@ -3,7 +3,6 @@ using UnityEngine;
 namespace AbstractPixel.SaveSystem.PlayModeTests
 {
     // Follows the documented promise: new-game values in Awake, read the value in Start.
-    [Savable(SaveCategory.Game)]
     public class HealthForTests : MonoBehaviour, ISavable<int>
     {
         public int Current;

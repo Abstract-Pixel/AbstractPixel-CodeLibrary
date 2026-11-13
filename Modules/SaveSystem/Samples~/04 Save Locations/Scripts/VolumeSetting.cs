@@ -3,10 +3,9 @@ using UnityEngine;
 
 namespace SaveSystemSamples.SaveLocations
 {
-    // A setting belongs to the player's machine, not to a playthrough, so it's saved in Global ("Settings").
+    // A setting belongs to the player's machine, not to a playthrough, so it's saved in a Global save file (SampleSettingsSaveFile).
     // Every game profile shares it.
-    [Savable(SaveCategory.Settings)]
-    public class VolumeSetting : MonoBehaviour, ISavable<int>
+    public class VolumeSetting : MonoBehaviour, ISavable<int, SampleSettingsSaveFile>
     {
         public int Volume { get; private set; }
 

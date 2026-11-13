@@ -3,10 +3,9 @@ using UnityEngine;
 
 namespace SaveSystemSamples.SaveLocations
 {
-    // A chest belongs to one scene in one playthrough, so it's saved in the Scene save location ("Position" here).
+    // A chest belongs to one scene in one playthrough, so it's saved in a Scene save file (SampleChestsSaveFile).
     // Each scene gets its own save file, so chests in different scenes never mix.
-    [Savable(SaveCategory.Position)]
-    public class Chest : MonoBehaviour, ISavable<bool>
+    public class Chest : MonoBehaviour, ISavable<bool, SampleChestsSaveFile>
     {
         public bool IsOpen { get; private set; }
 

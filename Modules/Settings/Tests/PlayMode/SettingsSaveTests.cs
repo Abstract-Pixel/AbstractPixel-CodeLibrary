@@ -101,9 +101,9 @@ namespace AbstractPixel.Settings.PlayModeTests
         static SaveSystemConfigSO CreateConfig()
         {
             SaveSystemConfigSO newConfig = ScriptableObject.CreateInstance<SaveSystemConfigSO>();
-            SetField(newConfig, "categoryDefinitionList", new List<SaveCatgeoryDefinition>
+            newConfig.ReplaceSaveFileList(new List<SaveFileDefinition>
             {
-                new SaveCatgeoryDefinition { Category = SaveCategory.Settings, Location = SaveLocation.Global }
+                SaveFileDefinition.ForClass(typeof(SettingsSaveFile), "Settings", SaveLocation.Global)
             });
             return newConfig;
         }

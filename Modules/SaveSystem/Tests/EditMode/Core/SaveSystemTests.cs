@@ -332,17 +332,21 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
-        public void Register_ScriptWithoutSavableAttribute_LogsAnErrorNamingTheType()
+        public void SavableWithNoSaveFileClass_SavesIntoTheGameProfileSaveFile()
         {
-            LogAssert.Expect(LogType.Error, new Regex("UnmarkedSavable"));
+            string gameProfileId = CreateAndOpenGameProfile();
+            SaveActions.Register(new SavedWithNoFileNamed { Value = 12 }, "no-file-named");
 
-            SaveActions.Register(new UnmarkedSavable(), "unmarked");
+            SaveActions.SaveAll();
+
+            Assert.AreEqual(12, StoredInt($"GameProfiles/{gameProfileId}/GameProfile", "no-file-named"));
         }
 
-        class UnmarkedSavable : ISavable<int>
+        class SavedWithNoFileNamed : ISavable<int>
         {
-            public int CaptureData() => 0;
-            public void RestoreData(int _loadedData) { }
+            public int Value;
+            public int CaptureData() => Value;
+            public void RestoreData(int _loadedData) => Value = _loadedData;
         }
     }
 }

@@ -19,9 +19,9 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
-        public void CategoryDefinition_LocationReadsDataSavedAsDirectoryScope()
+        public void SaveFileDefinition_LocationReadsDataSavedAsDirectoryScope()
         {
-            FieldInfo location = typeof(SaveCatgeoryDefinition).GetField(nameof(SaveCatgeoryDefinition.Location));
+            FieldInfo location = typeof(SaveFileDefinition).GetField(nameof(SaveFileDefinition.Location));
             FormerlySerializedAsAttribute formerName = location.GetCustomAttribute<FormerlySerializedAsAttribute>();
 
             Assert.AreEqual(typeof(SaveLocation), location.FieldType);
@@ -30,9 +30,9 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
-        public void CategoryDefinition_HasNoSceneSpecificFlag()
+        public void SaveFileDefinition_HasNoSceneSpecificFlag()
         {
-            Assert.IsNull(typeof(SaveCatgeoryDefinition).GetField("IsSceneSpecific"), "Scene is now a save location, not a flag.");
+            Assert.IsNull(typeof(SaveFileDefinition).GetField("IsSceneSpecific"), "Scene is now a save location, not a flag.");
         }
 
         [Test]

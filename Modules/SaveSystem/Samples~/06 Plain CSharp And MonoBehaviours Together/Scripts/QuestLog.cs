@@ -11,7 +11,6 @@ namespace SaveSystemSamples.Together
     }
 
     // A plain C# quest log, saved in the game profile under its own save ID.
-    [Savable(SaveCategory.Game)]
     public class QuestLog : ISavable<QuestLogData>
     {
         public List<string> CompletedQuests { get; private set; } = new List<string>();

@@ -17,11 +17,13 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             SaveSystemConfigSO config = ScriptableObject.CreateInstance<SaveSystemConfigSO>();
             SetField(config, "<GameProfileGuidLength>k__BackingField", 6);
-            SetField(config, "categoryDefinitionList", new List<SaveCatgeoryDefinition>
+            SaveFileDefinition chestsRow = SaveFileDefinition.ForClass(typeof(TestChestsFile), ChestsFile, SaveLocation.Scene);
+            chestsRow.StorageName = "Chests";
+            config.ReplaceSaveFileList(new List<SaveFileDefinition>
             {
-                new SaveCatgeoryDefinition { Category = SaveCategory.Settings, Location = SaveLocation.Global },
-                new SaveCatgeoryDefinition { Category = SaveCategory.Game, Location = SaveLocation.GameProfile },
-                new SaveCatgeoryDefinition { Category = SaveCategory.Position, Location = SaveLocation.Scene, CustomFileName = "Chests" },
+                SaveFileDefinition.ForClass(typeof(TestSettingsFile), SettingsFile, SaveLocation.Global),
+                SaveFileDefinition.ForClass(typeof(TestGameFile), GameFile, SaveLocation.GameProfile),
+                chestsRow,
             });
             return config;
         }
@@ -44,32 +46,32 @@ namespace AbstractPixel.SaveSystem.Tests
         public double Now() => Seconds;
     }
 
-    [Savable(SaveCategory.Settings)]
-    internal sealed class VolumeSetting : ISavable<int>
+    internal sealed class TestSettingsFile : ISaveFile { }
+    internal sealed class TestGameFile : ISaveFile { }
+    internal sealed class TestChestsFile : ISaveFile { }
+
+    internal sealed class VolumeSetting : ISavable<int, TestSettingsFile>
     {
         public int Volume = 5;
         public int CaptureData() => Volume;
         public void RestoreData(int _loadedData) => Volume = _loadedData;
     }
 
-    [Savable(SaveCategory.Game)]
-    internal sealed class PlayerHealth : ISavable<int>
+    internal sealed class PlayerHealth : ISavable<int, TestGameFile>
     {
         public int Current = 100;
         public int CaptureData() => Current;
         public void RestoreData(int _loadedData) => Current = _loadedData;
     }
 
-    [Savable(SaveCategory.Position)]
-    internal sealed class ChestState : ISavable<bool>
+    internal sealed class ChestState : ISavable<bool, TestChestsFile>
     {
         public bool IsOpen;
         public bool CaptureData() => IsOpen;
         public void RestoreData(bool _loadedData) => IsOpen = _loadedData;
     }
 
-    [Savable(SaveCategory.Game)]
-    internal sealed class ExplodingRestore : ISavable<int>
+    internal sealed class ExplodingRestore : ISavable<int, TestGameFile>
     {
         public int CaptureData() => 1;
         public void RestoreData(int _loadedData) => throw new InvalidOperationException("restore exploded");

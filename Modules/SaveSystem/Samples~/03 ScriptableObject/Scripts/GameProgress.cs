@@ -3,9 +3,8 @@ using UnityEngine;
 
 namespace SaveSystemSamples.ScriptableObjectSample
 {
-    // A saved ScriptableObject asset. "Achievements" lives in the game profile.
+    // A saved ScriptableObject asset. With no save file class, it lives in the GameProfile save file.
     [CreateAssetMenu(fileName = "Game Progress", menuName = "Save System Samples/Game Progress")]
-    [Savable(SaveCategory.Achievements)]
     public class GameProgress : ScriptableObject, ISavable<GameProgressData>
     {
         public int LevelsCompleted;

@@ -11,53 +11,39 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eef6100df71bb3f4fb3f307199f3c8db, type: 3}
   m_Name: SaveSystemConfigSO
-  m_EditorClassIdentifier: AbstractPixel.Utility.Save::AbstractPixel.Utility.Save.SaveSystemConfigSO
+  m_EditorClassIdentifier: 
   <UseDebugPath>k__BackingField: 0
   <GameProfileGuidLength>k__BackingField: 6
   <StartupPolicy>k__BackingField: 1
   <PrimaryFileExtension>k__BackingField: 1
-  ignoredScenes:
-  - <SceneAssetReference>k__BackingField:
-      m_AssetGUID: 
-      m_SubObjectName: 
-      m_SubObjectType: 
-      m_SubObjectGUID: 
-      m_EditorAssetChanged: 0
-    <SceneFieldReference>k__BackingField:
-      sceneName: GameBootScene
-      sceneAsset: {fileID: 102900000, guid: 32483ecc06a6c2546933859930884576, type: 3}
-  - <SceneAssetReference>k__BackingField:
-      m_AssetGUID: 
-      m_SubObjectName: 
-      m_SubObjectType: 
-      m_SubObjectGUID: 
-      m_EditorAssetChanged: 0
-    <SceneFieldReference>k__BackingField:
-      sceneName: ManagerBootScene
-      sceneAsset: {fileID: 102900000, guid: 3a573e85cc3e7e24899412924ffb8fb5, type: 3}
-  categoryDefinitionList:
-  - DisplayName: Input
-    Category: 1
+  <SaveOnQuit>k__BackingField: 0
+  <SaveOnFocusLoss>k__BackingField: 0
+  saveFilesScriptPath: Assets/SaveSystem/SaveFiles.cs
+  saveFileList:
+  - Name: Global
     Location: 1
-    CustomFileName: Input
+    Backup: 1
+    StorageName: Global
+    ClassFullName: SaveFiles+Global
+    ClassAssemblyName: Assembly-CSharp
+    BuiltIn: 1
+    AddedBy: 
     EncryptFile: 0
-  - DisplayName: Settings
-    Category: 2
-    Location: 1
-    CustomFileName: Settings
-    EncryptFile: 0
-  - DisplayName: Game
-    Category: 5
+  - Name: GameProfile
     Location: 2
-    CustomFileName: Profile
+    Backup: 1
+    StorageName: GameProfile
+    ClassFullName: SaveFiles+GameProfile
+    ClassAssemblyName: Assembly-CSharp
+    BuiltIn: 2
+    AddedBy: 
     EncryptFile: 0
-  - DisplayName: Achievements
-    Category: 4
-    Location: 2
-    CustomFileName: fakedData
-    EncryptFile: 0
-  - DisplayName: Ghosts
-    Category: 6
-    Location: 2
-    CustomFileName: Ghosts
+  - Name: Scene
+    Location: 3
+    Backup: 1
+    StorageName: Scene
+    ClassFullName: SaveFiles+Scene
+    ClassAssemblyName: Assembly-CSharp
+    BuiltIn: 3
+    AddedBy: 
     EncryptFile: 0

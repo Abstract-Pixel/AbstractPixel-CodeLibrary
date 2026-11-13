@@ -6,8 +6,7 @@ using AbstractPixel.SaveSystem;
 
 namespace AbstractPixel.Settings
 {
-    [Savable(SaveCategory.Settings)]
-    public class SettingsManager : PersistentSingleton<SettingsManager>, ISavable<SettingsDTO>
+    public class SettingsManager : PersistentSingleton<SettingsManager>, ISavable<SettingsDTO, SettingsSaveFile>
     {
 
         [SerializeField] private SettingsRegistry activeRegistry;

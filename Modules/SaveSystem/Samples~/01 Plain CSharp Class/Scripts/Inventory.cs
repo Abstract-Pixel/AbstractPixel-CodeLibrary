@@ -4,8 +4,7 @@ using AbstractPixel.SaveSystem;
 namespace SaveSystemSamples.PlainCSharpClass
 {
     // A plain C# class: no MonoBehaviour, no GameObject.
-    // [Savable] picks the save file. "Game" lives in the game profile, so each game profile has its own inventory.
-    [Savable(SaveCategory.Game)]
+    // ISavable<InventoryData> with no save file class saves into the GameProfile save file, so each game profile has its own inventory.
     public class Inventory : ISavable<InventoryData>
     {
         public List<string> Items { get; private set; }

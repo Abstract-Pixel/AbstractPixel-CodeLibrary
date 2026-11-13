@@ -122,10 +122,8 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
         {
             SaveSystemConfigSO config = ScriptableObject.CreateInstance<SaveSystemConfigSO>();
             SetField(config, "<StartupPolicy>k__BackingField", SaveStartupPolicy.AutoSetUp);
-            SetField(config, "categoryDefinitionList", new List<SaveCatgeoryDefinition>
-            {
-                new SaveCatgeoryDefinition { Category = SaveCategory.Game, Location = SaveLocation.GameProfile }
-            });
+            // No rows: HealthForTests uses ISavable<int> alone, so it saves into the built-in GameProfile file.
+            config.ReplaceSaveFileList(new List<SaveFileDefinition>());
             return config;
         }
 

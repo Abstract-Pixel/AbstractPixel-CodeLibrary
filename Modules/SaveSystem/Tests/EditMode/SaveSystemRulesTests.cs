@@ -60,13 +60,21 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
-        public void CategoryDefinition_FileNameIsTheCustomNameOrTheCategory()
+        public void SaveFileDefinition_FileNameIsTheStorageNameOrTheName()
         {
-            SaveCatgeoryDefinition named = new SaveCatgeoryDefinition { Category = SaveCategory.Game, CustomFileName = "Profile" };
-            SaveCatgeoryDefinition unnamed = new SaveCatgeoryDefinition { Category = SaveCategory.Settings };
+            SaveFileDefinition renamed = new SaveFileDefinition { Name = "Phantoms", StorageName = "Ghosts" };
+            SaveFileDefinition unnamed = new SaveFileDefinition { Name = "Settings" };
 
-            Assert.AreEqual("Profile", named.FileName);
+            Assert.AreEqual("Ghosts", renamed.FileName);
             Assert.AreEqual("Settings", unnamed.FileName);
+        }
+
+        [Test]
+        public void SaveSystem_HasNoCategoriesLeft()
+        {
+            // Save files are classes now; SaveCategory and [Savable] were removed in B2.
+            Assert.IsNull(typeof(SaveActions).Assembly.GetType("AbstractPixel.SaveSystem.SaveCategory"));
+            Assert.IsNull(typeof(SaveActions).Assembly.GetType("AbstractPixel.SaveSystem.SavableAttribute"));
         }
     }
 }

@@ -52,7 +52,8 @@ namespace AbstractPixel.SaveSystem.Editor
                     {
                         continue;
                     }
-                    if (script.GetType().GetCustomAttribute<SavableAttribute>() == null)
+                    bool isSavedScript = script.GetType().GetInterface(typeof(ISavable<>).Name) != null;
+                    if (!isSavedScript)
                     {
                         continue;
                     }
@@ -70,7 +71,7 @@ namespace AbstractPixel.SaveSystem.Editor
             {
                 Debug.LogError($"Error processing root object for savable automation {_rootObject.name}: {ex.Message} \n" +
                     $"This should not happen, Save system should still function correctly," +
-                    $" as long as savable bridge is added manually and the gameobject implements savable attribute and ISavable interface");
+                    $" as long as a Savable Bridge is added by hand and the script implements ISavable");
             }
         }
     }

@@ -4,7 +4,6 @@ using UnityEngine;
 namespace SaveSystemSamples.MonoBehaviourSample
 {
     // A saved MonoBehaviour. The Savable Bridge on the same GameObject connects it to the save system.
-    [Savable(SaveCategory.Game)]
     public class Health : MonoBehaviour, ISavable<int>
     {
         public const int Max = 100;

@@ -1,18 +1,28 @@
-using AbstractPixel.Core;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace AbstractPixel.SaveSystem
 {
-    [CreateAssetMenu(fileName = "SaveSystemConfigSO", menuName = "Utility/SaveSystemConfigSO")]
+    /// <summary>
+    /// The save system config: the one settings asset for the save system, at Assets/Resources/SaveSystemConfig.asset.
+    /// It is the source of truth for folders, file type, the save file list and game profile names.
+    /// Tools > External Project Tools > Save System > Create Config makes it.
+    /// </summary>
+    [CreateAssetMenu(fileName = "SaveSystemConfig", menuName = "Utility/SaveSystemConfigSO")]
     public class SaveSystemConfigSO : ScriptableObject
     {
-        [field: SerializeField] public bool UseDebugPath { get; private set; } = false;
-        [field: SerializeField] public int GameProfileGuidLength { get; private set; } = 6;
-        [field: SerializeField] public SaveStartupPolicy StartupPolicy { get; private set; } = SaveStartupPolicy.Manual;
-        [field: SerializeField] public FileExtension PrimaryFileExtension { get; private set; } = FileExtension.json;
-        public FileExtension BackupFileExtension { get; private set; } = FileExtension.bak;
+        [field: SerializeField, Tooltip("Save into a folder inside the project instead of the player's save folder, so you can read the files while you work.")]
+        public bool UseDebugPath { get; private set; } = false;
+
+        [field: SerializeField, Tooltip("How many characters a game profile's folder name has.")]
+        public int GameProfileGuidLength { get; private set; } = 6;
+
+        [field: SerializeField, Tooltip("AutoSetUp opens the last game profile, or makes one, before the first scene. Manual waits for your save slot screen.")]
+        public SaveStartupPolicy StartupPolicy { get; private set; } = SaveStartupPolicy.Manual;
+
+        [field: SerializeField, Tooltip("The file type save files are written as.")]
+        public FileExtension PrimaryFileExtension { get; private set; } = FileExtension.json;
 
         [field: SerializeField, Tooltip("Save every save file when the game quits.")]
         public bool SaveOnQuit { get; private set; } = false;
@@ -20,68 +30,63 @@ namespace AbstractPixel.SaveSystem
         [field: SerializeField, Tooltip("Save every save file when the game loses focus, for example when a phone player switches apps.")]
         public bool SaveOnFocusLoss { get; private set; } = false;
 
-        [SerializeField] List<SceneReference> ignoredScenes = new List<SceneReference>();
-        [SerializeField] List<SaveCatgeoryDefinition> categoryDefinitionList;
+        [SerializeField, Tooltip("Where the editor writes SaveFiles.cs, the class for each save file in the list below.")]
+        string saveFilesScriptPath = DefaultSaveFilesScriptPath;
 
-        Dictionary<SaveCategory, SaveCatgeoryDefinition> categoryDefinitionMap = new();
+        [SerializeField, FormerlySerializedAs("categoryDefinitionList")]
+        List<SaveFileDefinition> saveFileList = new List<SaveFileDefinition>();
 
-        private void OnValidate()
+        internal const string DefaultSaveFilesScriptPath = "Assets/SaveSystem/SaveFiles.cs";
+
+        /// <summary>The save file list: one row per save file, with its name, save location and Backup box.</summary>
+        public IReadOnlyList<SaveFileDefinition> SaveFileList => saveFileList;
+
+        /// <summary>Where the editor writes SaveFiles.cs.</summary>
+        public string SaveFilesScriptPath
         {
-            for (int i = 0; i < categoryDefinitionList.Count; i++)
+            get
             {
-                string nameToDisplay = categoryDefinitionList[i].Category.ToString();
-                categoryDefinitionList[i].DisplayName = nameToDisplay;
-            }
-        }
-
-        public void Initialize()
-        {
-            categoryDefinitionMap = new Dictionary<SaveCategory, SaveCatgeoryDefinition>();
-            foreach (SaveCatgeoryDefinition definition in categoryDefinitionList)
-            {
-                if (!categoryDefinitionMap.ContainsKey(definition.Category))
+                bool hasPath = !string.IsNullOrEmpty(saveFilesScriptPath);
+                if (hasPath)
                 {
-                    categoryDefinitionMap.Add(definition.Category, definition);
+                    return saveFilesScriptPath;
                 }
-                else
+                return DefaultSaveFilesScriptPath;
+            }
+        }
+
+        /// <summary>The list itself, for the editor tools that add rows and write SaveFiles.cs.</summary>
+        internal List<SaveFileDefinition> EditableSaveFileList
+        {
+            get
+            {
+                if (saveFileList == null)
                 {
-                    Debug.LogWarning($"[SaveSystemConfigSO] - Duplicate category definition found for category: {definition.Category}");
+                    saveFileList = new List<SaveFileDefinition>();
                 }
+                return saveFileList;
             }
-
         }
 
-        public SaveCatgeoryDefinition GetCategoryDefinition(SaveCategory category)
+        /// <summary>Replaces the whole save file list. Tests use this to build a config in code.</summary>
+        internal void ReplaceSaveFileList(IEnumerable<SaveFileDefinition> rows)
         {
-            
-            if (categoryDefinitionMap.TryGetValue(category, out SaveCatgeoryDefinition definition))
-            {
-                return definition;
-            }
-            // fallback mainly for editor support
-            if (categoryDefinitionMap.Count <= 0 && categoryDefinitionList.Count > 0)
-            {
-                return categoryDefinitionList.Find(item => item.Category == category);
-            }
-            Debug.LogWarning($"[SaveSystemConfigSO] - No definition found for category: {category}");
-            return null;
+            saveFileList = new List<SaveFileDefinition>(rows);
         }
 
-        public IReadOnlyList<SaveCatgeoryDefinition> GetAllCategoryDefinitions()
+#if UNITY_EDITOR
+        void OnValidate()
         {
-            return categoryDefinitionList;
-        }
-
-        public bool IsSceneIgnored(string sceneName)
-        {
-            foreach (SceneReference scene in ignoredScenes)
+            // A new row gets its storage name once, from its name, so renaming it later keeps old data readable.
+            foreach (SaveFileDefinition row in EditableSaveFileList)
             {
-                if (scene.SceneName == sceneName)
+                bool needsStorageName = row != null && string.IsNullOrEmpty(row.StorageName) && !string.IsNullOrEmpty(row.Name);
+                if (needsStorageName)
                 {
-                    return true;
+                    row.StorageName = row.Name;
                 }
             }
-            return false;
         }
+#endif
     }
 }

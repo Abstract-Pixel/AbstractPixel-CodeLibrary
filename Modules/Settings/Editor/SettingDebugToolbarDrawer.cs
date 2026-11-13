@@ -143,15 +143,15 @@ namespace AbstractPixel.Settings.Editor
                 return;
             }
 
-            SaveCatgeoryDefinition settingsDefinition = saveConfig.GetCategoryDefinition(SaveCategory.Settings);
+            SaveFileDefinition settingsDefinition = FindSettingsRow(saveConfig);
             ReadAndWriteFileWithUpdatedSettings(actionToExecute, setting, settingsDefinition, saveConfig);
         }
 
-        private static bool ReadAndWriteFileWithUpdatedSettings(Action<ISettingBackend, SettingsDTO> actionToExecute, ISettingBackend setting, SaveCatgeoryDefinition settingsDefinition, SaveSystemConfigSO saveConfig)
+        private static bool ReadAndWriteFileWithUpdatedSettings(Action<ISettingBackend, SettingsDTO> actionToExecute, ISettingBackend setting, SaveFileDefinition settingsDefinition, SaveSystemConfigSO saveConfig)
         {
             if (settingsDefinition == null)
             {
-                Debug.LogError("[Settings System] The save system config has no 'Settings' save file, so the toolbar can't change saved settings. Add a Settings row to the config's list.");
+                Debug.LogError("[Settings System] The save system config has no row for SettingsSaveFile yet, so the toolbar can't change saved settings. Select the config once so the editor adds the Settings row.");
                 return false;
             }
 
@@ -183,6 +183,18 @@ namespace AbstractPixel.Settings.Editor
 
             Debug.LogWarning($"[Settings System] The Settings file at '{settingsKey}' holds no settings data yet. Run the game and save once to create it.");
             return false;
+        }
+
+        private static SaveFileDefinition FindSettingsRow(SaveSystemConfigSO saveConfig)
+        {
+            foreach (SaveFileDefinition row in saveConfig.SaveFileList)
+            {
+                if (row != null && row.StandsFor(typeof(SettingsSaveFile)))
+                {
+                    return row;
+                }
+            }
+            return null;
         }
 
         // Another saved object could share the Settings file, so an entry that isn't settings data is skipped, not an error.

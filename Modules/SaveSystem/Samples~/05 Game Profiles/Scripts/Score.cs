@@ -4,7 +4,6 @@ using UnityEngine;
 namespace SaveSystemSamples.GameProfiles
 {
     // Some saved data, so each game profile has something of its own to show.
-    [Savable(SaveCategory.Game)]
     public class Score : MonoBehaviour, ISavable<int>
     {
         public int Points { get; private set; }

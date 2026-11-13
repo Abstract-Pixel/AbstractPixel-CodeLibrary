@@ -10,8 +10,7 @@ namespace AbstractPixel.SaveSystem
     /// </summary>
     internal static class SaveStartup
     {
-        // Temporary: the config is found by this name in a Resources folder until the config-location decision is settled.
-        const string ConfigResourceName = "SaveSystemConfig";
+        const string ConfigResourceName = SaveSystemConfigName.ResourceName;
 
         static bool saveOnQuit;
         static bool saveOnFocusLoss;

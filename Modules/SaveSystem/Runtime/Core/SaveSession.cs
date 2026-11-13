@@ -39,7 +39,7 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Reads every Global save file. Runs once at startup.</summary>
         public void ReadGlobalSaveFiles()
         {
-            foreach (SaveCatgeoryDefinition definition in saveFiles.AllDefinitions.Where(definition => definition.Location == SaveLocation.Global))
+            foreach (SaveFileDefinition definition in saveFiles.AllDefinitions.Where(definition => definition.Location == SaveLocation.Global))
             {
                 loadedData.EnsureRead(AddressOf(definition, null));
             }
@@ -52,17 +52,18 @@ namespace AbstractPixel.SaveSystem
         }
 
         /// <summary>
-        /// The non-generic path the Savable Bridge uses. <paramref name="scriptType"/> carries the [Savable] attribute;
+        /// The non-generic path the Savable Bridge uses. <paramref name="scriptType"/> says which save file the data goes in;
         /// <paramref name="sceneName"/> is the object's own scene, or null to use the active scene.
         /// </summary>
         public void RegisterScript(object owner, Type scriptType, string saveId, Type dataType,
             Func<object> capture, Action<object> restore, string sceneName, string entryName)
         {
-            if (!saveFiles.TryGetSaveFileName(scriptType, out string saveFileName)
-                || !saveFiles.TryGetDefinition(saveFileName, out SaveCatgeoryDefinition definition))
+            bool hasSaveFile = saveFiles.TryGetDefinitionForSavedObject(scriptType, out SaveFileDefinition definition);
+            if (!hasSaveFile)
             {
                 return;
             }
+            string saveFileName = definition.FileName;
 
             if (definition.Location == SaveLocation.Scene)
             {
@@ -107,13 +108,13 @@ namespace AbstractPixel.SaveSystem
             FinishSave();
         }
 
-        public void Save(string saveFileName)
+        public void Save(string saveFileRowName)
         {
-            if (!saveFiles.TryGetDefinition(saveFileName, out SaveCatgeoryDefinition definition))
+            if (!saveFiles.TryGetDefinitionByName(saveFileRowName, out SaveFileDefinition definition))
             {
                 return;
             }
-            foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => entry.SaveFileName == saveFileName).ToList())
+            foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => entry.SaveFileName == definition.FileName).ToList())
             {
                 Capture(entry);
             }
@@ -122,12 +123,13 @@ namespace AbstractPixel.SaveSystem
         }
 
         /// <summary>Removes one saved object's data on purpose. A registered owner is forgotten too, so it can't write itself back.</summary>
-        public void Forget(string saveFileName, string saveId)
+        public void Forget(string saveFileRowName, string saveId)
         {
-            if (!saveFiles.TryGetDefinition(saveFileName, out SaveCatgeoryDefinition definition))
+            if (!saveFiles.TryGetDefinitionByName(saveFileRowName, out SaveFileDefinition definition))
             {
                 return;
             }
+            string saveFileName = definition.FileName;
 
             string sceneName = sceneInfo.ActiveSceneName;
             if (registry.TryGetEntry(saveFileName, saveId, out SavedObjectEntry entry))
@@ -235,12 +237,12 @@ namespace AbstractPixel.SaveSystem
         bool TryGetAddress(SavedObjectEntry entry, out SaveFileAddress address)
         {
             address = default;
-            return saveFiles.TryGetDefinition(entry.SaveFileName, out SaveCatgeoryDefinition definition)
+            return saveFiles.TryGetDefinitionByFileName(entry.SaveFileName, out SaveFileDefinition definition)
                 && TryGetAddress(definition, entry.SceneName, out address);
         }
 
         // GameProfile and Scene save files have no address until a game profile is open.
-        bool TryGetAddress(SaveCatgeoryDefinition definition, string sceneName, out SaveFileAddress address)
+        bool TryGetAddress(SaveFileDefinition definition, string sceneName, out SaveFileAddress address)
         {
             address = default;
             string gameProfileId = GameProfiles.CurrentGameProfileId;
@@ -252,7 +254,7 @@ namespace AbstractPixel.SaveSystem
             return true;
         }
 
-        SaveFileAddress AddressOf(SaveCatgeoryDefinition definition, string sceneName)
+        SaveFileAddress AddressOf(SaveFileDefinition definition, string sceneName)
         {
             string gameProfileId = definition.Location == SaveLocation.Global ? null : GameProfiles.CurrentGameProfileId;
             string key = paths.GetSaveFileKey(definition.FileName, definition.Location, gameProfileId, sceneName);

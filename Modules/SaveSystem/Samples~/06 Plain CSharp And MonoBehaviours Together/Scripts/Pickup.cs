@@ -4,9 +4,8 @@ using UnityEngine;
 namespace SaveSystemSamples.Together
 {
     // A pickup in the scene. Each one has its own Savable Bridge, so each has its own save ID.
-    // Pickups belong to their scene, so they're saved in the Scene save location ("Position" here).
-    [Savable(SaveCategory.Position)]
-    public class Pickup : MonoBehaviour, ISavable<bool>
+    // Pickups belong to their scene, so they're saved in a Scene save file (SamplePickupsSaveFile).
+    public class Pickup : MonoBehaviour, ISavable<bool, SamplePickupsSaveFile>
     {
         [SerializeField] string displayName;
 

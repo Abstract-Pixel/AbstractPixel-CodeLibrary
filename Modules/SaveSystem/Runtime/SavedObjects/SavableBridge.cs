@@ -11,7 +11,7 @@ namespace AbstractPixel.SaveSystem
 {
     /// <summary>
     /// The Savable Bridge: connects the saved scripts on this GameObject to the save system. A saved script implements
-    /// ISavable&lt;T&gt; and has the [Savable] attribute. The editor finds those scripts and gives each one a save ID.
+    /// ISavable&lt;TData&gt; or ISavable&lt;TData, TFile&gt;. The editor finds those scripts and gives each one a save ID.
     /// </summary>
     // Runs before other scripts, so registering in Start restores data after every Awake and before any other Start.
     [DefaultExecutionOrder(-10000)]
@@ -95,7 +95,6 @@ namespace AbstractPixel.SaveSystem
                 if (script == null) continue;
                 Type type = script.GetType();
                 if (type.GetInterface(typeof(ISavable<>).Name) == null) continue;
-                if (type.GetCustomAttribute<SavableAttribute>() == null) continue;
                 validScripts.Add(script);
             }
 
