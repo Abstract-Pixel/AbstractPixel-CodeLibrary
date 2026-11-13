@@ -18,7 +18,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SetUp()
         {
             storage = new MemoryStorageService();
-            store = new SaveFileStore(storage, new JsonSerializer());
+            store = new SaveFileStore(storage, new SaveJson());
         }
 
         static SaveFileData SaveFileWithVolume(int volume)

@@ -26,21 +26,22 @@ namespace AbstractPixel.SaveSystem.Tests
 
         MemoryStorageService storage;
         SaveFileStore store;
-        JsonSerializer serializer;
+        SaveJson serializer;
         LoadedSaveData loadedData;
 
         [SetUp]
         public void SetUp()
         {
             storage = new MemoryStorageService();
-            serializer = new JsonSerializer();
+            serializer = new SaveJson();
             store = new SaveFileStore(storage, serializer);
             loadedData = new LoadedSaveData(store, serializer);
         }
 
         static SavedObjectEntry EntryFor(ISavable<int> savable, string saveId, SaveFileAddress address)
         {
-            return SavedObjectEntry.Create(savable, saveId, address.FileName, SaveLocation.GameProfile, null, saveId + "-name");
+            return new SavedObjectEntry(savable, saveId, address.FileName, SaveLocation.GameProfile, null, saveId + "-name", typeof(int),
+                () => savable.CaptureData(), data => savable.RestoreData((int)data));
         }
 
         void StoreFile(SaveFileAddress address, params (string saveId, int value)[] entries)

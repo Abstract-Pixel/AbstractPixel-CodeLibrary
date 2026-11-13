@@ -34,7 +34,7 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Builds every part from the config alone, for use when no save system is running.</summary>
         public static SaveFileAccess FromConfig(SaveSystemConfigSO config, IDataStorageService storage)
         {
-            SaveFileStore store = new SaveFileStore(storage, new JsonSerializer());
+            SaveFileStore store = new SaveFileStore(storage, new SaveJson());
             SaveProfileManager profileManager = new SaveProfileManager(store, storage, new SavePathGenerator(), config.GameProfileGuidLength, config.DefaultGameProfileName);
             return new SaveFileAccess(new SaveFileLookup(config), storage, store, new GameProfileList(profileManager));
         }

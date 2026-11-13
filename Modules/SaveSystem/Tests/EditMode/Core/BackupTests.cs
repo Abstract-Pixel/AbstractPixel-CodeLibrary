@@ -24,7 +24,7 @@ namespace AbstractPixel.SaveSystem.Tests
             storage = new MemoryStorageService();
             scene = new FakeSceneInfo();
             clock = new FakeClock();
-            store = new SaveFileStore(storage, new JsonSerializer());
+            store = new SaveFileStore(storage, new SaveJson());
         }
 
         [TearDown]
@@ -36,7 +36,7 @@ namespace AbstractPixel.SaveSystem.Tests
         void StartSession(SaveSystemConfigSO config)
         {
             SaveActions.Stop();
-            SaveActions.Start(new SaveSession(config, storage, new JsonSerializer(), scene, clock.Now));
+            SaveActions.Start(new SaveSession(config, storage, new SaveJson(), scene, clock.Now));
         }
 
         static SaveSystemConfigSO ConfigWithBackup(string saveFileName, bool backup)

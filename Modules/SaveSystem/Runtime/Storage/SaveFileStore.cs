@@ -12,11 +12,11 @@ namespace AbstractPixel.SaveSystem
         public const int CurrentFormatVersion = 2;
 
         readonly IDataStorageService storage;
-        readonly ISerializer serializer;
+        readonly SaveJson serializer;
         // SavePathGenerator holds no state, so the store keeps its own copy for building backup keys.
         readonly SavePathGenerator paths = new SavePathGenerator();
 
-        public SaveFileStore(IDataStorageService storage, ISerializer serializer)
+        public SaveFileStore(IDataStorageService storage, SaveJson serializer)
         {
             this.storage = storage;
             this.serializer = serializer;

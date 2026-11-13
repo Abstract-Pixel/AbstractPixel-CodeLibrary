@@ -7,7 +7,7 @@ using UnityEngine;
 namespace AbstractPixel.SaveSystem.Tests
 {
     // Checks the serializer settings carried over from main when it was merged into save-system.
-    public class JsonSerializerTests
+    public class SaveJsonTests
     {
         [Serializable]
         class PlayerPosition
@@ -25,7 +25,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void Vector3AndQuaternion_AreWrittenAsPlainNumbers_AndReadBack()
         {
-            JsonSerializer serializer = new JsonSerializer();
+            SaveJson serializer = new SaveJson();
             PlayerPosition saved = new PlayerPosition
             {
                 Position = new Vector3(1f, 2f, 3f),
@@ -45,7 +45,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void AllZeroQuaternion_IsReadAsIdentity()
         {
-            JsonSerializer serializer = new JsonSerializer();
+            SaveJson serializer = new SaveJson();
             JToken token = JToken.Parse("{ \"Position\": { \"x\": 0, \"y\": 0, \"z\": 0 }, \"Rotation\": { \"x\": 0, \"y\": 0, \"z\": 0, \"w\": 0 } }");
 
             PlayerPosition restored = (PlayerPosition)serializer.FromToken(token, typeof(PlayerPosition));
@@ -56,7 +56,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void FieldThatNoLongerExists_IsSkipped_AndTheRestLoads()
         {
-            JsonSerializer serializer = new JsonSerializer();
+            SaveJson serializer = new SaveJson();
             string olderSaveFile = "{ \"Health\": 40, \"RemovedField\": \"old\" }";
 
             bool didRead = serializer.TryDeserialize(olderSaveFile, out OnlyHealth restored);
@@ -70,7 +70,7 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             Func<JsonSerializerSettings> settingsBefore = JsonConvert.DefaultSettings;
 
-            new JsonSerializer();
+            new SaveJson();
 
             // Unity 7 rule: no global lambda that would hold the save system's types past a code reload.
             Assert.AreSame(settingsBefore, JsonConvert.DefaultSettings);

@@ -15,7 +15,7 @@ namespace AbstractPixel.SaveSystem
     /// </summary>
     // Runs before other scripts, so registering in Start restores data after every Awake and before any other Start.
     [DefaultExecutionOrder(-10000)]
-    public class SavableBridge : MonoBehaviour, ISavableBridge
+    public class SavableBridge : MonoBehaviour
     {
         [field: SerializeField, ReadOnly(true)] public string UniqueId { get; private set; }
         [SerializeField, HideInInspector] string lastKnownGlobalObjectID = "";

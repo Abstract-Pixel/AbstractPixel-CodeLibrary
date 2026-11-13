@@ -17,26 +17,13 @@ namespace AbstractPixel.SaveSystem.Tests
 
         static SavedObjectEntry EntryFor(Counter owner, string saveId, string saveFileName = "Game")
         {
-            return SavedObjectEntry.Create(owner, saveId, saveFileName, SaveLocation.GameProfile, null, "Counter");
+            return new SavedObjectEntry(owner, saveId, saveFileName, SaveLocation.GameProfile, null, "Counter", typeof(int),
+                () => owner.CaptureData(), data => owner.RestoreData((int)data));
         }
 
         static SavedObjectEntry EntryOwnedBy(Component owner, string saveId)
         {
             return new SavedObjectEntry(owner, saveId, "Game", SaveLocation.GameProfile, null, owner.name, typeof(int), () => 0, data => { });
-        }
-
-        [Test]
-        public void Create_BuildsCaptureAndRestoreFromTheSavable()
-        {
-            Counter counter = new Counter { Value = 4 };
-            SavedObjectEntry entry = EntryFor(counter, "counter");
-
-            Assert.AreEqual(4, entry.Capture());
-            entry.Restore(9);
-
-            Assert.AreEqual(9, counter.Value);
-            Assert.AreEqual(typeof(int), entry.DataType);
-            Assert.AreSame(counter, entry.Owner);
         }
 
         [Test]

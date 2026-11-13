@@ -45,7 +45,7 @@ namespace AbstractPixel.SaveSystem
                 return false;
             }
 
-            SaveSession session = new SaveSession(config, storage, new JsonSerializer(), sceneInfo, unscaledTime);
+            SaveSession session = new SaveSession(config, storage, new SaveJson(), sceneInfo, unscaledTime);
             SaveActions.Start(session);
             session.ReadGlobalSaveFiles();
             ApplyStartupPolicy(config.StartupPolicy, session.ProfileManager);

@@ -36,7 +36,7 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Which save files have loaded, so late subscribers to load events are told right away.</summary>
         public LoadEventLog LoadEvents { get; } = new LoadEventLog();
 
-        public SaveSession(SaveSystemConfigSO config, IDataStorageService storage, ISerializer serializer, ISceneInfo sceneInfo, Func<double> unscaledTime)
+        public SaveSession(SaveSystemConfigSO config, IDataStorageService storage, SaveJson serializer, ISceneInfo sceneInfo, Func<double> unscaledTime)
         {
             SaveFileStore store = new SaveFileStore(storage, serializer);
             saveFiles = new SaveFileLookup(config);

@@ -17,7 +17,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SetUp()
         {
             storage = new MemoryStorageService();
-            store = new SaveFileStore(storage, new JsonSerializer());
+            store = new SaveFileStore(storage, new SaveJson());
             StartSession();
             GameProfile profile = SaveActions.GameProfiles.CreateNew();
             profile.Open();
@@ -33,7 +33,7 @@ namespace AbstractPixel.SaveSystem.Tests
         void StartSession()
         {
             SaveActions.Stop();
-            SaveActions.Start(new SaveSession(CreateConfig(), storage, new JsonSerializer(), new FakeSceneInfo(), () => 0d));
+            SaveActions.Start(new SaveSession(CreateConfig(), storage, new SaveJson(), new FakeSceneInfo(), () => 0d));
         }
 
         void RelaunchAndOpenTheSameGameProfile()

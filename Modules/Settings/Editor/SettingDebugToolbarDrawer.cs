@@ -150,7 +150,7 @@ namespace AbstractPixel.Settings.Editor
                 return false;
             }
 
-            JsonSerializer serializer = new JsonSerializer();
+            SaveJson serializer = new SaveJson();
             serializer.TryDeserialize(settingsJson, out SaveFileData settingsFile);
 
             foreach (KeyValuePair<string, SaveFileEntry> savedEntry in settingsFile.Entries)
@@ -172,7 +172,7 @@ namespace AbstractPixel.Settings.Editor
         }
 
         // Another saved object could share the Settings file, so an entry that isn't settings data is skipped, not an error.
-        private static bool TryReadSettingsData(JsonSerializer serializer, SaveFileEntry savedEntry, out SettingsDTO settingsData)
+        private static bool TryReadSettingsData(SaveJson serializer, SaveFileEntry savedEntry, out SettingsDTO settingsData)
         {
             settingsData = null;
             if (savedEntry == null || savedEntry.Data == null)

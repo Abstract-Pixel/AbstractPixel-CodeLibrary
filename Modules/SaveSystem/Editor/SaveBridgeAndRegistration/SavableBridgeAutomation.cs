@@ -57,7 +57,7 @@ namespace AbstractPixel.SaveSystem.Editor
                     {
                         continue;
                     }
-                    if (script.TryGetComponent(out ISavableBridge bridge))
+                    if (script.TryGetComponent(out SavableBridge _))
                     {
                         // It already contains a SavableBridge
                         continue;

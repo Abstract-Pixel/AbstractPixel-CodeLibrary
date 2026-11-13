@@ -13,7 +13,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SetUp()
         {
             storage = new MemoryStorageService();
-            SaveActions.Start(new SaveSession(CreateConfig(), storage, new JsonSerializer(), new FakeSceneInfo(), () => 0d));
+            SaveActions.Start(new SaveSession(CreateConfig(), storage, new SaveJson(), new FakeSceneInfo(), () => 0d));
         }
 
         [TearDown]

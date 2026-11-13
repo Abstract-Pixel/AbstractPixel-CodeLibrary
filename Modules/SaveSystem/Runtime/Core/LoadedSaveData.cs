@@ -21,11 +21,11 @@ namespace AbstractPixel.SaveSystem
         }
 
         readonly SaveFileStore store;
-        readonly ISerializer serializer;
+        readonly SaveJson serializer;
         readonly SavePathGenerator paths = new SavePathGenerator();
         readonly Dictionary<string, LoadedFile> filesByKey = new Dictionary<string, LoadedFile>();
 
-        public LoadedSaveData(SaveFileStore store, ISerializer serializer)
+        public LoadedSaveData(SaveFileStore store, SaveJson serializer)
         {
             this.store = store;
             this.serializer = serializer;

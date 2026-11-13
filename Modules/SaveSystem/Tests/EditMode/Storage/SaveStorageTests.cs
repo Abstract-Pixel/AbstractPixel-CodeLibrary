@@ -13,7 +13,7 @@ namespace AbstractPixel.SaveSystem.Tests
     public class SaveStorageTests
     {
         MemoryStorageService storage;
-        JsonSerializer serializer;
+        SaveJson serializer;
         readonly SceneField forest = new SceneField("Forest");
         readonly SceneField lake = new SceneField("Lake");
 
@@ -21,7 +21,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SetUp()
         {
             storage = new MemoryStorageService();
-            serializer = new JsonSerializer();
+            serializer = new SaveJson();
             StartSession(CreateConfig());
         }
 

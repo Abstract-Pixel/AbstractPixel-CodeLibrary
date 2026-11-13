@@ -91,14 +91,5 @@ namespace AbstractPixel.SaveSystem
             }
             return savedObject.GetType().Name;
         }
-
-        /// <summary>Builds an entry for an <see cref="ISavable{T}"/> without reflection.</summary>
-        public static SavedObjectEntry Create<T>(ISavable<T> savable, string saveId, string saveFileName, SaveLocation location,
-            string sceneName, string entryName)
-        {
-            return new SavedObjectEntry(savable, saveId, saveFileName, location, sceneName, entryName, typeof(T),
-                () => savable.CaptureData(),
-                data => savable.RestoreData((T)data));
-        }
     }
 }
