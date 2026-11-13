@@ -7,6 +7,28 @@ namespace AbstractPixel.SaveSystem
     {
         /// <summary>The object that registered. Unregistering with this object removes the entry.</summary>
         public object Owner { get; }
+
+        /// <summary>
+        /// The object whose data this is. For a plain class it is the owner; for a scene object it is the saved script,
+        /// while the owner is its Savable Bridge. Forget looks for either.
+        /// </summary>
+        public object SavedObject
+        {
+            get
+            {
+                if (savedObject != null)
+                {
+                    return savedObject;
+                }
+                return Owner;
+            }
+            set
+            {
+                savedObject = value;
+            }
+        }
+
+        object savedObject;
         public string SaveId { get; }
 
         /// <summary>The save file's name, such as "Game". The config says which save location it lives in.</summary>

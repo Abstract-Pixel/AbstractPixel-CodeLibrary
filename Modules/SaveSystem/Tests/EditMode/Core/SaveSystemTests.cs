@@ -251,10 +251,77 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(new VolumeSetting(), "volume");
             SaveActions.Register(new PlayerHealth(), "player-health");
 
-            SaveActions.Save(SettingsFile);
+            SaveActions.Save<TestSettingsFile>();
 
             Assert.IsTrue(storage.Exists("Global/Settings"));
             Assert.IsFalse(storage.Exists(GameKey(gameProfileId)));
+        }
+
+        [Test]
+        public void Reload_ReadsTheSaveFileAgain_AndThrowsAwayChangesThatWerentSaved()
+        {
+            CreateAndOpenGameProfile();
+            PlayerHealth health = new PlayerHealth { Current = 60 };
+            VolumeSetting volume = new VolumeSetting { Volume = 3 };
+            SaveActions.Register(health, "player-health");
+            SaveActions.Register(volume, "volume");
+            SaveActions.SaveAll();
+            health.Current = 5;
+            volume.Volume = 9;
+
+            SaveActions.Reload<TestGameFile>();
+
+            Assert.AreEqual(60, health.Current, "The GameProfile save file was read again.");
+            Assert.AreEqual(9, volume.Volume, "Other save files are left alone.");
+        }
+
+        [Test]
+        public void Reload_PicksUpAFileThatChangedOnDisk()
+        {
+            CreateAndOpenGameProfile();
+            VolumeSetting volume = new VolumeSetting { Volume = 3 };
+            SaveActions.Register(volume, "volume");
+            SaveActions.SaveAll();
+            // Another tool, such as the input rebinding screen, wrote the file directly.
+            store.TryRead("Global/Settings", out SaveFileData file);
+            file.Entries["volume"].Data = Newtonsoft.Json.Linq.JToken.FromObject(8);
+            store.Write("Global/Settings", file);
+
+            SaveActions.Reload<TestSettingsFile>();
+
+            Assert.AreEqual(8, volume.Volume);
+        }
+
+        [Test]
+        public void Forget_FindsTheObjectsEntryItself_AndStopsCapturingIt()
+        {
+            string gameProfileId = CreateAndOpenGameProfile();
+            PlayerHealth coin = new PlayerHealth();
+            SaveActions.Register(coin, "coin-1");
+            SaveActions.SaveAll();
+
+            SaveActions.Forget(coin);
+            coin.Current = 1;
+            SaveActions.SaveAll();
+
+            Assert.IsTrue(store.TryRead(GameKey(gameProfileId), out SaveFileData file));
+            Assert.IsFalse(file.Entries.ContainsKey("coin-1"));
+        }
+
+        [Test]
+        public void MonoSaveActions_SavesTheSaveFileChosenInTheInspector()
+        {
+            string gameProfileId = CreateAndOpenGameProfile();
+            SaveActions.Register(new VolumeSetting(), "volume");
+            SaveActions.Register(new PlayerHealth(), "player-health");
+            UnityEngine.GameObject buttonObject = new UnityEngine.GameObject("Save Button");
+            MonoSaveActions saveActions = buttonObject.AddComponent<MonoSaveActions>();
+
+            saveActions.Save(SaveFileReference.To<TestSettingsFile>());
+
+            Assert.IsTrue(storage.Exists("Global/Settings"));
+            Assert.IsFalse(storage.Exists(GameKey(gameProfileId)));
+            UnityEngine.Object.DestroyImmediate(buttonObject);
         }
 
         [Test]
@@ -279,7 +346,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(new PlayerHealth(), "coin-2");
             SaveActions.SaveAll();
 
-            SaveActions.Forget(GameFile, "coin-1");
+            SaveActions.Forget(coin);
             // A forgotten object that is destroyed afterwards must not write itself back.
             SaveActions.Unregister(coin);
             SaveActions.SaveAll();

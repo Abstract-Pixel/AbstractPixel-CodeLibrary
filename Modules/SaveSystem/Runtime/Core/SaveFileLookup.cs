@@ -110,19 +110,19 @@ namespace AbstractPixel.SaveSystem
             return false;
         }
 
-        /// <summary>The row with this name, such as "Settings". Logs an error if there is none.</summary>
-        public bool TryGetDefinitionByName(string name, out SaveFileDefinition definition)
+        /// <summary>The row for the save file class with this full name, as a <see cref="SaveFileReference"/> stores it.</summary>
+        public bool TryGetDefinitionByClassName(string classFullName, out SaveFileDefinition definition)
         {
             foreach (SaveFileDefinition candidate in definitions)
             {
-                if (candidate.Name == name)
+                if (candidate.ClassFullName == classFullName)
                 {
                     definition = candidate;
                     return true;
                 }
             }
             definition = null;
-            Debug.LogError($"[SaveSystem] The save file list has no row named '{name}', so it can't be saved. Check the spelling against the list in the save system config.");
+            Debug.LogError($"[SaveSystem] The save file list has no row for the class '{classFullName}'. Pick the save file again in the inspector, or check the list in the save system config.");
             return false;
         }
 

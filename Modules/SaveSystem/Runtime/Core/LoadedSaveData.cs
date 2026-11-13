@@ -138,6 +138,23 @@ namespace AbstractPixel.SaveSystem
             }
         }
 
+        /// <summary>Forgets every loaded copy of one save file, so the next use reads it from disk again. Unsaved changes are lost.</summary>
+        public void DropFilesNamed(string fileName)
+        {
+            List<string> keysToDrop = new List<string>();
+            foreach (KeyValuePair<string, LoadedFile> loadedFile in filesByKey)
+            {
+                if (loadedFile.Value.Data.FileName == fileName)
+                {
+                    keysToDrop.Add(loadedFile.Key);
+                }
+            }
+            foreach (string key in keysToDrop)
+            {
+                filesByKey.Remove(key);
+            }
+        }
+
         public void Clear()
         {
             filesByKey.Clear();

@@ -48,8 +48,9 @@ namespace AbstractPixel.SaveSystem.Tests
                 PlayerHealth health = new PlayerHealth();
                 SaveActions.Register(health, "player-health");
                 SaveActions.SaveAll();
-                SaveActions.Save(GameFile);
-                SaveActions.Forget(GameFile, "player-health");
+                SaveActions.Save<TestGameFile>();
+                SaveActions.Reload<TestGameFile>();
+                SaveActions.Forget(health);
                 SaveActions.Unregister(health);
             });
             Assert.IsFalse(SaveActions.IsGameProfileOpen);

@@ -45,11 +45,23 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Captures every registered object, then writes every save file that changed.</summary>
         public static void SaveAll() => session?.SaveAll();
 
-        /// <summary>Like SaveAll, for one save file only, for example "Settings".</summary>
-        public static void Save(string saveFileName) => session?.Save(saveFileName);
+        /// <summary>Like SaveAll, for one save file only. Example: <c>SaveActions.Save&lt;SaveFiles.Ghosts&gt;();</c></summary>
+        public static void Save<TFile>() where TFile : ISaveFile => session?.Save(typeof(TFile));
 
-        /// <summary>Removes one saved object's data on purpose, for example a coin that was picked up.</summary>
-        public static void Forget(string saveFileName, string saveId) => session?.Forget(saveFileName, saveId);
+        /// <summary>Saves the save file picked in an inspector, through a <see cref="SaveFileReference"/>.</summary>
+        public static void Save(SaveFileReference saveFile) => session?.Save(saveFile);
+
+        /// <summary>
+        /// Reads one save file from disk again and restores every saved object in it, throwing away changes that
+        /// weren't saved. Use it after another tool wrote the file directly. Example: <c>SaveActions.Reload&lt;SaveFiles.Input&gt;();</c>
+        /// </summary>
+        public static void Reload<TFile>() where TFile : ISaveFile => session?.Reload(typeof(TFile));
+
+        /// <summary>
+        /// Removes one saved object's data on purpose, for example a coin that was picked up, so it doesn't come back.
+        /// Pass the saved object itself: a plain class, a saved script or its GameObject. Example: <c>SaveActions.Forget(coin);</c>
+        /// </summary>
+        public static void Forget(object savedObject) => session?.Forget(savedObject);
 
         internal static void Start(SaveSession newSession)
         {

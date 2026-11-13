@@ -47,7 +47,7 @@ namespace AbstractPixel.SaveSystem
 
         public void Register<T>(ISavable<T> savable, string saveId)
         {
-            RegisterScript(savable, savable.GetType(), saveId, typeof(T),
+            RegisterScript(savable, savable, savable.GetType(), saveId, typeof(T),
                 () => savable.CaptureData(), data => savable.RestoreData((T)data), null, savable.GetType().Name);
         }
 
@@ -55,7 +55,7 @@ namespace AbstractPixel.SaveSystem
         /// The non-generic path the Savable Bridge uses. <paramref name="scriptType"/> says which save file the data goes in;
         /// <paramref name="sceneName"/> is the object's own scene, or null to use the active scene.
         /// </summary>
-        public void RegisterScript(object owner, Type scriptType, string saveId, Type dataType,
+        public void RegisterScript(object owner, object savedObject, Type scriptType, string saveId, Type dataType,
             Func<object> capture, Action<object> restore, string sceneName, string entryName)
         {
             bool hasSaveFile = saveFiles.TryGetDefinitionForSavedObject(scriptType, out SaveFileDefinition definition);
@@ -81,7 +81,8 @@ namespace AbstractPixel.SaveSystem
 
             SavedObjectEntry entry = new SavedObjectEntry(owner, saveId, saveFileName, definition.Location, sceneName, entryName, dataType, capture, restore)
             {
-                GameProfileId = GameProfiles.CurrentGameProfileId
+                GameProfileId = GameProfiles.CurrentGameProfileId,
+                SavedObject = savedObject
             };
             registry.Add(entry);
             // Whichever comes second: if the data can be loaded now, restore right away.
@@ -108,12 +109,26 @@ namespace AbstractPixel.SaveSystem
             FinishSave();
         }
 
-        public void Save(string saveFileRowName)
+        /// <summary>Like SaveAll, for one save file only.</summary>
+        public void Save(Type saveFileClass)
         {
-            if (!saveFiles.TryGetDefinitionByName(saveFileRowName, out SaveFileDefinition definition))
+            if (saveFiles.TryGetDefinition(saveFileClass, out SaveFileDefinition definition))
             {
-                return;
+                Save(definition);
             }
+        }
+
+        /// <summary>Saves the save file a <see cref="SaveFileReference"/> points at, as picked in the inspector.</summary>
+        public void Save(SaveFileReference saveFile)
+        {
+            if (saveFiles.TryGetDefinitionByClassName(saveFile.ClassFullName, out SaveFileDefinition definition))
+            {
+                Save(definition);
+            }
+        }
+
+        void Save(SaveFileDefinition definition)
+        {
             foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => entry.SaveFileName == definition.FileName).ToList())
             {
                 Capture(entry);
@@ -122,25 +137,55 @@ namespace AbstractPixel.SaveSystem
             FinishSave();
         }
 
-        /// <summary>Removes one saved object's data on purpose. A registered owner is forgotten too, so it can't write itself back.</summary>
-        public void Forget(string saveFileRowName, string saveId)
+        /// <summary>
+        /// Reads one save file from disk again and restores every registered object in it. Changes that weren't saved
+        /// are thrown away. For a Scene save file this covers every scene whose objects are registered.
+        /// </summary>
+        public void Reload(Type saveFileClass)
         {
-            if (!saveFiles.TryGetDefinitionByName(saveFileRowName, out SaveFileDefinition definition))
+            if (!saveFiles.TryGetDefinition(saveFileClass, out SaveFileDefinition definition))
             {
                 return;
             }
-            string saveFileName = definition.FileName;
 
-            string sceneName = sceneInfo.ActiveSceneName;
-            if (registry.TryGetEntry(saveFileName, saveId, out SavedObjectEntry entry))
+            loadedData.DropFilesNamed(definition.FileName);
+            foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => entry.SaveFileName == definition.FileName).ToList())
             {
-                sceneName = entry.SceneName;
-                registry.RemoveEntry(saveFileName, saveId);
+                TryRestore(entry);
             }
-            if (TryGetAddress(definition, sceneName, out SaveFileAddress address))
+        }
+
+        /// <summary>
+        /// Removes a saved object's data on purpose, such as a coin that was picked up, and stops tracking it so it
+        /// can't write itself back. Finds the entry from the object itself: a plain class, a saved script, its
+        /// Savable Bridge, or its GameObject.
+        /// </summary>
+        public void Forget(object savedObject)
+        {
+            foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => BelongsTo(entry, savedObject)).ToList())
             {
-                loadedData.Forget(address, saveId);
+                registry.RemoveEntry(entry.SaveFileName, entry.SaveId);
+                if (TryGetAddress(entry, out SaveFileAddress address))
+                {
+                    loadedData.Forget(address, entry.SaveId);
+                }
             }
+        }
+
+        static bool BelongsTo(SavedObjectEntry entry, object savedObject)
+        {
+            bool isOwner = ReferenceEquals(entry.Owner, savedObject);
+            bool isSavedObject = ReferenceEquals(entry.SavedObject, savedObject);
+            if (isOwner || isSavedObject)
+            {
+                return true;
+            }
+
+            // Forget(gameObject) covers every saved script on it, through its Savable Bridge.
+            GameObject gameObject = savedObject as GameObject;
+            Component ownerComponent = entry.Owner as Component;
+            bool isOnThatGameObject = gameObject != null && ownerComponent != null && ownerComponent.gameObject == gameObject;
+            return isOnThatGameObject;
         }
 
         /// <summary>Re-reads every save file from disk and restores every registered object. Used by the editor's Load All.</summary>

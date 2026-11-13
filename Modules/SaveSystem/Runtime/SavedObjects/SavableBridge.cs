@@ -183,7 +183,7 @@ namespace AbstractPixel.SaveSystem
                 if (target == null || target.Script == null || target.CaptureDataMethod == null || target.Identification == null) continue;
 
                 // The object's own scene, so with additive scenes a chest saves into its scene's file, not the active scene's.
-                session.RegisterScript(this, target.Script.GetType(), GetSaveId(target), target.DataToSaveType,
+                session.RegisterScript(this, target.Script, target.Script.GetType(), GetSaveId(target), target.DataToSaveType,
                     () => InvokeScript(target.CaptureDataMethod, target.Script, null),
                     data => InvokeScript(target.RestoreDataMethod, target.Script, new[] { data }),
                     gameObject.scene.name, GetEntryName(target));

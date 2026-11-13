@@ -74,6 +74,25 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
             Assert.AreEqual(7, health.Current, "Re-enabling must restore the value captured on disable, not the older saved one.");
         }
 
+        [UnityTest]
+        public IEnumerator ForgettingASavedScript_RemovesItsData_SoItStartsFreshNextTime()
+        {
+            yield return StoreSavedHealth(42);
+            HealthForTests health = CreateHealthObject(bridgeFirst: false);
+            yield return null;
+            Assert.AreEqual(42, health.Current);
+
+            // A coin picked up: forget it first, then destroy it, so it can't write itself back on disable.
+            SaveActions.Forget(health);
+            Object.Destroy(health.gameObject);
+            yield return null;
+            SaveActions.SaveAll();
+            HealthForTests nextTime = CreateHealthObject(bridgeFirst: false);
+            yield return null;
+
+            Assert.AreEqual(100, nextTime.ValueSeenInStart, "A forgotten object comes back with new-game values.");
+        }
+
         [Test]
         public void SavableBridge_RunsBeforeOtherScripts()
         {

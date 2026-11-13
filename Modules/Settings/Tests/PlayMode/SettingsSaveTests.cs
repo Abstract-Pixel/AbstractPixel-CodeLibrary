@@ -52,7 +52,7 @@ namespace AbstractPixel.Settings.PlayModeTests
             Assert.IsFalse(firstToggle.CurrentValue);
 
             firstToggle.SetValue(true);
-            SaveActions.Save("Settings");
+            SaveActions.Save<SettingsSaveFile>();
             Object.Destroy(firstManager.gameObject);
             yield return null;
 
