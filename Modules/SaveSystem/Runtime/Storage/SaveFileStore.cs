@@ -3,8 +3,8 @@ using UnityEngine;
 namespace AbstractPixel.SaveSystem
 {
     /// <summary>
-    /// Reads and writes stored data safely. Every write keeps the previous good version as a backup,
-    /// and every read falls back to that backup when the main text is missing or corrupt.
+    /// Reads and writes stored data safely. When a save file keeps a backup, every write first copies the previous
+    /// good version into the Backups folder, and every read falls back to it when the main text is missing or corrupt.
     /// </summary>
     public sealed class SaveFileStore
     {
@@ -22,12 +22,24 @@ namespace AbstractPixel.SaveSystem
             this.serializer = serializer;
         }
 
-        public bool Write<T>(string key, T content) where T : IVersionedSaveData
+        /// <summary>
+        /// Writes the content. With <paramref name="keepBackup"/> the previous good text is kept as the backup first;
+        /// without it any old backup is removed, so it can't be loaded by surprise later.
+        /// </summary>
+        public bool Write<T>(string key, T content, bool keepBackup = true) where T : IVersionedSaveData
         {
-            // Back up the current text only if it is valid, so a corrupt file never replaces a good backup.
-            if (storage.TryRead(key, out string currentText) && serializer.TryDeserialize(currentText, out T _))
+            string backupKey = paths.GetBackupKey(key);
+            if (keepBackup)
             {
-                storage.Write(paths.GetBackupKey(key), currentText);
+                // Back up the current text only if it is valid, so a corrupt file never replaces a good backup.
+                if (storage.TryRead(key, out string currentText) && serializer.TryDeserialize(currentText, out T _))
+                {
+                    storage.Write(backupKey, currentText);
+                }
+            }
+            else if (storage.Exists(backupKey))
+            {
+                storage.Delete(backupKey);
             }
 
             if (!serializer.TrySerialize(content, out string newText))
@@ -38,10 +50,9 @@ namespace AbstractPixel.SaveSystem
             return storage.Write(key, newText);
         }
 
-        public bool TryRead<T>(string key, out T content) where T : IVersionedSaveData
+        /// <summary>Reads the content. With <paramref name="useBackup"/> a missing or corrupt main text falls back to the backup.</summary>
+        public bool TryRead<T>(string key, out T content, bool useBackup = true) where T : IVersionedSaveData
         {
-            string backupKey = paths.GetBackupKey(key);
-
             if (TryReadAndParse(key, out content))
             {
                 CheckFormatVersion(key, content);
@@ -49,6 +60,17 @@ namespace AbstractPixel.SaveSystem
             }
 
             bool mainExists = storage.Exists(key);
+            if (!useBackup)
+            {
+                if (mainExists)
+                {
+                    Debug.LogError($"[SaveSystem] The save file '{key}' is corrupt, so its saved data was not loaded. Its save file row has Backup unticked, so there is no backup to fall back to. Delete the file to start fresh, or fix the JSON by hand.");
+                }
+                content = default;
+                return false;
+            }
+
+            string backupKey = paths.GetBackupKey(key);
             if (TryReadAndParse(backupKey, out content))
             {
                 string problem = mainExists ? "is corrupt" : "is missing";

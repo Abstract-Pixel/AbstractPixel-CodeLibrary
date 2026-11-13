@@ -70,6 +70,22 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
+        public void Delete_AlsoRemovesThatGameProfilesBackups()
+        {
+            string doomed = gameProfiles.CreateNew("Doomed");
+            string kept = gameProfiles.CreateNew("Kept");
+            string doomedBackupKey = paths.GetBackupKey(paths.GetSaveFileKey("GameProfile", SaveLocation.GameProfile, doomed, null));
+            string keptBackupKey = paths.GetBackupKey(paths.GetSaveFileKey("GameProfile", SaveLocation.GameProfile, kept, null));
+            storage.Write(doomedBackupKey, "{}");
+            storage.Write(keptBackupKey, "{}");
+
+            gameProfiles.Delete(doomed);
+
+            Assert.IsFalse(storage.Exists(doomedBackupKey));
+            Assert.IsTrue(storage.Exists(keptBackupKey));
+        }
+
+        [Test]
         public void Delete_ClosesTheGameProfileIfItWasOpen()
         {
             string gameProfileId = gameProfiles.CreateNew("Game Profile 1");
@@ -172,8 +188,9 @@ namespace AbstractPixel.SaveSystem.Tests
         public void DeleteAll_RemovesEveryGameProfileButKeepsGlobalData()
         {
             gameProfiles.CreateNew("Game Profile 1");
-            gameProfiles.CreateNew("Game Profile 2");
+            string second = gameProfiles.CreateNew("Game Profile 2");
             storage.Write("Global/Settings", "{}");
+            storage.Write(paths.GetBackupKey(paths.GetGameProfileManifestKey(second)), "{}");
 
             Assert.IsTrue(gameProfiles.DeleteAll());
 

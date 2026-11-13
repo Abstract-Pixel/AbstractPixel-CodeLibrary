@@ -96,7 +96,7 @@ namespace AbstractPixel.SaveSystem.Tests
             StartWith(ConfigWith(SaveStartupPolicy.Manual));
             SaveActions.Register(new VolumeSetting { Volume = 9 }, "volume");
             SaveActions.SaveAll();
-            storage.Write("Global/Settings.backup", "{}");
+            storage.Write("Backups/Global/Settings", "{}");
 
             StartWith(ConfigWith(SaveStartupPolicy.Manual));
             // Deleting the file now proves the data was already read into memory at startup.

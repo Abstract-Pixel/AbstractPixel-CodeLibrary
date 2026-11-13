@@ -143,11 +143,13 @@ namespace AbstractPixel.SaveSystem
             return true;
         }
 
-        /// <summary>Deletes every save file of the game profile, and closes it if it was open.</summary>
+        /// <summary>Deletes every save file and backup of the game profile, and closes it if it was open.</summary>
         public bool Delete(string gameProfileId)
         {
             ChangeCount++;
-            bool deleted = storage.DeleteAll(paths.GetGameProfileKeyPrefix(gameProfileId));
+            string gameProfileKeyPrefix = paths.GetGameProfileKeyPrefix(gameProfileId);
+            bool deleted = storage.DeleteAll(gameProfileKeyPrefix);
+            deleted &= storage.DeleteAll(paths.GetBackupKey(gameProfileKeyPrefix));
             if (CurrentGameProfileId == gameProfileId)
             {
                 Close();
@@ -155,11 +157,13 @@ namespace AbstractPixel.SaveSystem
             return deleted;
         }
 
-        /// <summary>Deletes every game profile. Global save files stay.</summary>
+        /// <summary>Deletes every game profile and their backups. Global save files stay.</summary>
         public bool DeleteAll()
         {
             ChangeCount++;
-            bool deleted = storage.DeleteAll(paths.GetAllGameProfilesKeyPrefix());
+            string allGameProfilesKeyPrefix = paths.GetAllGameProfilesKeyPrefix();
+            bool deleted = storage.DeleteAll(allGameProfilesKeyPrefix);
+            deleted &= storage.DeleteAll(paths.GetBackupKey(allGameProfilesKeyPrefix));
             Close();
             return deleted;
         }

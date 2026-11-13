@@ -14,7 +14,7 @@ namespace AbstractPixel.SaveSystem
         const string ScenesFolder = "Scenes";
         const string GameProfileManifestName = "GameProfileManifest";
         const string SaveSystemMetaDataName = "SaveSystemMetaData";
-        const string BackupSuffix = ".backup";
+        const string BackupsFolder = "Backups";
 
         /// <summary>
         /// The key of a save file in its save location. Throws when the save location needs an open game profile
@@ -55,9 +55,13 @@ namespace AbstractPixel.SaveSystem
             return $"{GlobalFolder}/{SaveSystemMetaDataName}";
         }
 
+        /// <summary>
+        /// The key of a file's backup, in the Backups folder that mirrors the main one. Works for key prefixes too,
+        /// so <c>GetBackupKey(GetGameProfileKeyPrefix(id))</c> covers every backup of that game profile.
+        /// </summary>
         public string GetBackupKey(string key)
         {
-            return key + BackupSuffix;
+            return $"{BackupsFolder}/{key}";
         }
 
         /// <summary>The prefix shared by every key of one game profile, for deleting or listing it.</summary>

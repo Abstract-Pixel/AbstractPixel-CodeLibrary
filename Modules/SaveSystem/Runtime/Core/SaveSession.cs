@@ -18,7 +18,8 @@ namespace AbstractPixel.SaveSystem
         readonly LoadedSaveData loadedData;
         readonly ISceneInfo sceneInfo;
         readonly Func<double> unscaledTime;
-        readonly SaveFileClassFinder saveFileClasses = new SaveFileClassFinder();
+        readonly SaveFileAddresses addresses;
+        readonly SaveSessionEvents events;
 
         // The game profile whose data is in loadedData, and the time playtime was last counted up to.
         string loadedGameProfileId;
@@ -42,6 +43,8 @@ namespace AbstractPixel.SaveSystem
             this.unscaledTime = unscaledTime;
             ProfileManager = new SaveProfileManager(store, storage, paths, config.GameProfileGuidLength, config.DefaultGameProfileName);
             GameProfiles = new GameProfileList(ProfileManager);
+            addresses = new SaveFileAddresses(saveFiles, paths, ProfileManager);
+            events = new SaveSessionEvents(saveFiles, loadedData, addresses, sceneInfo, LoadEvents);
             ProfileManager.Opened += OnGameProfileOpened;
             ProfileManager.Closed += OnGameProfileClosed;
             sceneInfo.SceneReady += OnSceneReady;
@@ -51,11 +54,7 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Reads every Global save file and raises its load event. Runs once at startup.</summary>
         public void ReadGlobalSaveFiles()
         {
-            foreach (SaveFileDefinition definition in saveFiles.AllDefinitions.Where(definition => definition.Location == SaveLocation.Global))
-            {
-                loadedData.EnsureRead(AddressOf(definition, null));
-                LoadEvents.RecordLoad(saveFileClasses.Find(definition), SaveLocation.Global, null);
-            }
+            events.RecordLoads(SaveLocation.Global, null);
         }
 
         public void Register<T>(ISavable<T> savable, string saveId)
@@ -71,7 +70,7 @@ namespace AbstractPixel.SaveSystem
         public void RegisterScript(object owner, object savedObject, Type scriptType, string saveId, Type dataType,
             Func<object> capture, Action<object> restore, string sceneName, string entryName)
         {
-            saveFileClasses.Remember(SaveFileLookup.FindSaveFileClass(scriptType));
+            events.Remember(SaveFileLookup.FindSaveFileClass(scriptType));
             bool hasSaveFile = saveFiles.TryGetDefinitionForSavedObject(scriptType, out SaveFileDefinition definition);
             if (!hasSaveFile)
             {
@@ -124,7 +123,7 @@ namespace AbstractPixel.SaveSystem
             FinishSave();
             foreach (string fileName in writtenFileNames)
             {
-                RaiseSaveCompleted(fileName);
+                events.RaiseSaveCompleted(fileName);
             }
             SaveEventBus.RaiseSaveAllCompleted();
         }
@@ -132,7 +131,7 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Like SaveAll, for one save file only.</summary>
         public void Save(Type saveFileClass)
         {
-            saveFileClasses.Remember(saveFileClass);
+            events.Remember(saveFileClass);
             if (saveFiles.TryGetDefinition(saveFileClass, out SaveFileDefinition definition))
             {
                 Save(definition);
@@ -157,21 +156,7 @@ namespace AbstractPixel.SaveSystem
             loadedData.WriteChanged(file => file.FileName == definition.FileName);
             FinishSave();
             // Saving one file counts as done even when nothing in it changed, so a "Saved" message always shows.
-            RaiseSaveCompleted(definition.FileName);
-        }
-
-        void RaiseSaveCompleted(string fileName)
-        {
-            bool isKnownFile = saveFiles.TryGetDefinitionByFileName(fileName, out SaveFileDefinition definition);
-            if (!isKnownFile)
-            {
-                return;
-            }
-            Type saveFileClass = saveFileClasses.Find(definition);
-            if (saveFileClass != null)
-            {
-                SaveEventBus.RaiseSaveCompleted(saveFileClass);
-            }
+            events.RaiseSaveCompleted(definition.FileName);
         }
 
         /// <summary>
@@ -180,7 +165,7 @@ namespace AbstractPixel.SaveSystem
         /// </summary>
         public void Reload(Type saveFileClass)
         {
-            saveFileClasses.Remember(saveFileClass);
+            events.Remember(saveFileClass);
             if (!saveFiles.TryGetDefinition(saveFileClass, out SaveFileDefinition definition))
             {
                 return;
@@ -203,7 +188,7 @@ namespace AbstractPixel.SaveSystem
             foreach (SavedObjectEntry entry in registry.AllEntries.Where(entry => BelongsTo(entry, savedObject)).ToList())
             {
                 registry.RemoveEntry(entry.SaveFileName, entry.SaveId);
-                if (TryGetAddress(entry, out SaveFileAddress address))
+                if (addresses.TryGetAddress(entry, out SaveFileAddress address))
                 {
                     loadedData.Forget(address, entry.SaveId);
                 }
@@ -275,33 +260,7 @@ namespace AbstractPixel.SaveSystem
                 }
             }
             SaveEventBus.RaiseGameProfileOpened(GameProfiles.GetById(gameProfileId));
-            RaiseGameProfileLoadEvents();
-        }
-
-        // Every registered object is restored by now, so each GameProfile file, and each loaded scene's Scene files,
-        // can say it has loaded. Then everything has.
-        void RaiseGameProfileLoadEvents()
-        {
-            LoadEvents.ForgetGameProfileLoads();
-            foreach (SaveFileDefinition definition in saveFiles.AllDefinitions.Where(definition => definition.Location == SaveLocation.GameProfile))
-            {
-                loadedData.EnsureRead(AddressOf(definition, null));
-                LoadEvents.RecordLoad(saveFileClasses.Find(definition), SaveLocation.GameProfile, null);
-            }
-            foreach (string sceneName in sceneInfo.LoadedSceneNames)
-            {
-                RaiseSceneLoadEvents(sceneName);
-            }
-            LoadEvents.RecordLoadAll();
-        }
-
-        void RaiseSceneLoadEvents(string sceneName)
-        {
-            foreach (SaveFileDefinition definition in saveFiles.AllDefinitions.Where(definition => definition.Location == SaveLocation.Scene))
-            {
-                loadedData.EnsureRead(AddressOf(definition, sceneName));
-                LoadEvents.RecordLoad(saveFileClasses.Find(definition), SaveLocation.Scene, sceneName);
-            }
+            events.RecordGameProfileLoads();
         }
 
         // A newly loaded scene's Savable Bridges have registered and restored, so its Scene files have loaded.
@@ -310,7 +269,7 @@ namespace AbstractPixel.SaveSystem
             bool isGameProfileOpen = ProfileManager.CurrentGameProfileId != null;
             if (isGameProfileOpen)
             {
-                RaiseSceneLoadEvents(sceneName);
+                events.RecordLoads(SaveLocation.Scene, sceneName);
             }
         }
 
@@ -328,13 +287,13 @@ namespace AbstractPixel.SaveSystem
 
         bool TryRestore(SavedObjectEntry entry)
         {
-            return TryGetAddress(entry, out SaveFileAddress address) && loadedData.TryRestore(entry, address);
+            return addresses.TryGetAddress(entry, out SaveFileAddress address) && loadedData.TryRestore(entry, address);
         }
 
         void Capture(SavedObjectEntry entry)
         {
             bool belongsToOpenGameProfile = entry.Location == SaveLocation.Global || entry.GameProfileId == ProfileManager.CurrentGameProfileId;
-            if (belongsToOpenGameProfile && TryGetAddress(entry, out SaveFileAddress address))
+            if (belongsToOpenGameProfile && addresses.TryGetAddress(entry, out SaveFileAddress address))
             {
                 loadedData.Capture(entry, address);
             }
@@ -362,33 +321,6 @@ namespace AbstractPixel.SaveSystem
             manifest.LastScene = sceneInfo.ActiveSceneName;
             manifest.AppVersion = Application.version;
             ProfileManager.SaveManifest(manifest);
-        }
-
-        bool TryGetAddress(SavedObjectEntry entry, out SaveFileAddress address)
-        {
-            address = default;
-            return saveFiles.TryGetDefinitionByFileName(entry.SaveFileName, out SaveFileDefinition definition)
-                && TryGetAddress(definition, entry.SceneName, out address);
-        }
-
-        // GameProfile and Scene save files have no address until a game profile is open.
-        bool TryGetAddress(SaveFileDefinition definition, string sceneName, out SaveFileAddress address)
-        {
-            address = default;
-            string gameProfileId = ProfileManager.CurrentGameProfileId;
-            if (definition.Location != SaveLocation.Global && gameProfileId == null)
-            {
-                return false;
-            }
-            address = AddressOf(definition, definition.Location == SaveLocation.Scene ? sceneName : null);
-            return true;
-        }
-
-        SaveFileAddress AddressOf(SaveFileDefinition definition, string sceneName)
-        {
-            string gameProfileId = definition.Location == SaveLocation.Global ? null : ProfileManager.CurrentGameProfileId;
-            string key = paths.GetSaveFileKey(definition.FileName, definition.Location, gameProfileId, sceneName);
-            return new SaveFileAddress(key, definition.FileName, gameProfileId);
         }
     }
 }

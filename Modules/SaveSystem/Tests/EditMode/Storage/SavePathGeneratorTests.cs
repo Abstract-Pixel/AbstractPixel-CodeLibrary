@@ -15,7 +15,7 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.AreEqual("GameProfiles/a1b2c3/Scenes/Forest/Chests", paths.GetSaveFileKey("Chests", SaveLocation.Scene, "a1b2c3", "Forest"));
             Assert.AreEqual("GameProfiles/a1b2c3/GameProfileManifest", paths.GetGameProfileManifestKey("a1b2c3"));
             Assert.AreEqual("Global/SaveSystemMetaData", paths.GetSaveSystemMetaDataKey());
-            Assert.AreEqual("Global/Settings.backup", paths.GetBackupKey("Global/Settings"));
+            Assert.AreEqual("Backups/Global/Settings", paths.GetBackupKey("Global/Settings"));
         }
 
         [Test]

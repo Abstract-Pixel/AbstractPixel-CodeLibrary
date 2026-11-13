@@ -17,6 +17,7 @@ namespace AbstractPixel.SaveSystem
         {
             public SaveFileData Data;
             public bool Changed;
+            public bool KeepsBackup;
         }
 
         readonly SaveFileStore store;
@@ -119,7 +120,7 @@ namespace AbstractPixel.SaveSystem
                 string key = filesByKey.First(pair => pair.Value == file).Key;
                 file.Data.Version = Application.version;
                 file.Data.Timestamp = DateTime.UtcNow.ToString("o");
-                if (store.Write(key, file.Data))
+                if (store.Write(key, file.Data, file.KeepsBackup))
                 {
                     file.Changed = false;
                     bool isFirstWriteOfThisFile = writtenFileNames != null && !writtenFileNames.Contains(file.Data.FileName);
@@ -176,11 +177,11 @@ namespace AbstractPixel.SaveSystem
             }
 
             // A file that doesn't exist yet starts empty and is created on the first save.
-            if (!store.TryRead(address.Key, out SaveFileData data))
+            if (!store.TryRead(address.Key, out SaveFileData data, address.KeepsBackup))
             {
                 data = new SaveFileData(address.FileName, address.GameProfileId);
             }
-            file = new LoadedFile { Data = data };
+            file = new LoadedFile { Data = data, KeepsBackup = address.KeepsBackup };
             filesByKey.Add(address.Key, file);
             return file;
         }
