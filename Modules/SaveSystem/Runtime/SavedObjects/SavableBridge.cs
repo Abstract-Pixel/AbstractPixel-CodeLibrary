@@ -19,7 +19,6 @@ namespace AbstractPixel.SaveSystem
     {
         [field: SerializeField, ReadOnly(true)] public string UniqueId { get; private set; }
         [SerializeField, HideInInspector] string lastKnownGlobalObjectID = "";
-        [SerializeField, HideInInspector] string lastKnownGameObjectName;
 
         [SerializeField, ReadOnly] private List<SavableTarget> savableTargets = new List<SavableTarget>();
 
@@ -34,52 +33,27 @@ namespace AbstractPixel.SaveSystem
         {
             if (Application.isPlaying) return;
 
-            UnityEditor.EditorApplication.hierarchyChanged -= OnHierarchyChanged;
-            UnityEditor.EditorApplication.hierarchyChanged += OnHierarchyChanged;
-
             ValidateIdentity();
             SyncSavableTargets();
         }
 
+        // The save ID uses only the GUID, so renaming the GameObject never changes it and needs no handling here.
         private void ValidateIdentity()
         {
             string currentGlobalId = UnityEditor.GlobalObjectId.GetGlobalObjectIdSlow(this).ToString();
-            bool isNewOrDuplicated = lastKnownGlobalObjectID != currentGlobalId || string.IsNullOrEmpty(UniqueId);
-            bool isRenamed = lastKnownGameObjectName != gameObject.name;
-
-            if (isNewOrDuplicated)
+            if (SavableBridgeIdentity.NeedsNewGuid(UniqueId, lastKnownGlobalObjectID, currentGlobalId))
             {
                 string newGuid = Guid.NewGuid().ToString();
                 UniqueId = $"{gameObject.name} GameObject {stringSeparatorIdentifier}[{newGuid}]";
-
-                lastKnownGlobalObjectID = currentGlobalId;
-                lastKnownGameObjectName = gameObject.name;
                 UnityEditor.EditorUtility.SetDirty(this);
             }
-            else if (isRenamed)
+
+            // A scene that was never saved gives every object the same id, so it is only remembered once the scene has a path.
+            bool isWorthRemembering = SavableBridgeIdentity.IsFromASavedScene(currentGlobalId) && lastKnownGlobalObjectID != currentGlobalId;
+            if (isWorthRemembering)
             {
-                int separatorIndex = UniqueId.IndexOf(stringSeparatorIdentifier);
-                if (separatorIndex >= 0)
-                {
-                    // Extract everything from the '#' to the end
-                    string pureGuidPart = UniqueId.Substring(separatorIndex);
-
-                    // Stitch the new name with the old GUID
-                    UniqueId = $"{gameObject.name} GameObject {pureGuidPart}";
-                    lastKnownGameObjectName = gameObject.name;
-
-                    UnityEditor.EditorUtility.SetDirty(this);
-                }
-            }
-        }
-        private void OnHierarchyChanged()
-        {
-            if (Application.isPlaying || this == null) return;
-
-            // Performance check: Only run the heavy logic if OUR name actually changed
-            if (lastKnownGameObjectName != gameObject.name)
-            {
-                ValidateIdentity();
+                lastKnownGlobalObjectID = currentGlobalId;
+                UnityEditor.EditorUtility.SetDirty(this);
             }
         }
 
