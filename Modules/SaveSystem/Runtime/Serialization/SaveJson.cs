@@ -36,10 +36,17 @@ namespace AbstractPixel.SaveSystem
                 MissingMemberHandling = MissingMemberHandling.Ignore
             };
 
-            // Vector3 and Quaternion are written as plain x, y, z (and w) numbers. The converters live in these
-            // settings only, never in JsonConvert.DefaultSettings, so nothing global changes when the save system runs.
+            // Each Unity value type is written as its plain numbers, not Unity's extra computed properties
+            // (normalized, magnitude, and the like, which can also loop forever without ReferenceLoopHandling).
+            // The converters live in these settings only, never in JsonConvert.DefaultSettings, so nothing global
+            // changes when the save system runs.
+            settings.Converters.Add(new UnityVector2Converter());
+            settings.Converters.Add(new UnityVector2IntConverter());
             settings.Converters.Add(new UnityVector3Converter());
+            settings.Converters.Add(new UnityVector3IntConverter());
             settings.Converters.Add(new UnityQuaternionConverter());
+            settings.Converters.Add(new UnityColorConverter());
+            settings.Converters.Add(new UnityRectConverter());
             tokenSerializer = JsonSerializer.Create(settings);
         }
         public bool TrySerialize<T>(T _data, out string _output)
