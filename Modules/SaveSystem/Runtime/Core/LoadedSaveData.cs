@@ -215,12 +215,34 @@ namespace AbstractPixel.SaveSystem
             try
             {
                 entry.Restore(serializer.FromToken(data, entry.DataType));
-                return true;
             }
             catch (Exception exception)
             {
                 Debug.LogError($"[SaveSystem] Restoring {whatIsRestored} '{entry.SaveId}' into {entry.Owner.GetType().Name} failed: {exception.Message} {consequence}");
                 return false;
+            }
+
+            // Every restore path funnels through here, so this is the one place IOnRestored needs to fire from.
+            NotifyRestored(entry);
+            return true;
+        }
+
+        // The object's own code runs here too, so a mistake in OnRestored is logged and never stops the restore
+        // that already succeeded, or the other saved objects still to come.
+        static void NotifyRestored(SavedObjectEntry entry)
+        {
+            IOnRestored listener = entry.SavedObject as IOnRestored;
+            if (listener == null)
+            {
+                return;
+            }
+            try
+            {
+                listener.OnRestored();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[SaveSystem] OnRestored on {entry.Owner.GetType().Name} (save ID '{entry.SaveId}') failed: {exception.Message} The restored data is kept.");
             }
         }
 
