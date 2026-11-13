@@ -139,6 +139,60 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.AreEqual(0, loadAllCount);
         }
 
+        // S6: AddLoadListener<TFile> wraps OnLoadCompleted, filtered to one save file class.
+        [Test]
+        public void AddLoadListener_OnlyHearsAboutItsOwnFile()
+        {
+            StartSaveSystem();
+            int gameFileHeard = 0;
+            SaveEventBus.AddLoadListener<TestGameFile>(() => gameFileHeard++);
+
+            SaveActions.GameProfiles.CreateNew().Open();
+
+            Assert.AreEqual(1, gameFileHeard, "The game profile opening loads TestGameFile and TestChestsFile; only TestGameFile should be heard.");
+        }
+
+        [Test]
+        public void AddLoadListener_IsSticky()
+        {
+            StartSaveSystem();
+            SaveActions.GameProfiles.CreateNew().Open();
+            int gameFileHeard = 0;
+
+            SaveEventBus.AddLoadListener<TestGameFile>(() => gameFileHeard++);
+
+            Assert.AreEqual(1, gameFileHeard, "The game profile was already open, so the listener hears about it right away.");
+        }
+
+        [Test]
+        public void RemoveLoadListener_StopsFutureCalls()
+        {
+            StartSaveSystem();
+            int gameFileHeard = 0;
+            void Listener() => gameFileHeard++;
+            SaveEventBus.AddLoadListener<TestGameFile>(Listener);
+
+            SaveEventBus.RemoveLoadListener<TestGameFile>(Listener);
+            SaveActions.GameProfiles.CreateNew().Open();
+
+            Assert.AreEqual(0, gameFileHeard);
+        }
+
+        [Test]
+        public void AddLoadListener_ForASceneFile_FiresOncePerScene()
+        {
+            StartSaveSystem();
+            SaveActions.GameProfiles.CreateNew().Open();
+            int chestsFileHeard = 0;
+            SaveEventBus.AddLoadListener<TestChestsFile>(() => chestsFileHeard++);
+            chestsFileHeard = 0;
+
+            scene.LoadAdditively("Cave");
+            scene.LoadAdditively("Lake");
+
+            Assert.AreEqual(2, chestsFileHeard);
+        }
+
         [Test]
         public void AdditiveScene_FiresTheSceneSaveFileOncePerScene()
         {

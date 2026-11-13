@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
@@ -15,6 +16,11 @@ namespace AbstractPixel.SaveSystem
         static Action<Type> loadCompleted;
         static Action loadAllCompleted;
         static Action<GameProfile> gameProfileOpened;
+
+        // The Action<Type> each AddLoadListener<TFile> call actually subscribed with, so RemoveLoadListener<TFile>
+        // can unsubscribe that exact one. Keyed by both the handler and TFile, so the same handler can listen to
+        // more than one save file.
+        static readonly Dictionary<(Delegate Handler, Type FileType), Action<Type>> typedLoadListeners = new Dictionary<(Delegate, Type), Action<Type>>();
 
         /// <summary>
         /// One save file was read and every registered object in it restored. Gives the save file class.
@@ -60,6 +66,40 @@ namespace AbstractPixel.SaveSystem
             remove => gameProfileOpened -= value;
         }
 
+        /// <summary>
+        /// Calls handler every time this save file's load event fires: once per scene for a Scene file, otherwise
+        /// once. Sticky: subscribing after it already loaded calls handler right away.
+        /// Example: <c>SaveEventBus.AddLoadListener&lt;GameSaveFiles.Ghosts&gt;(ShowGhosts);</c>
+        /// </summary>
+        public static void AddLoadListener<TFile>(Action handler) where TFile : ISaveFile
+        {
+            (Delegate, Type) key = (handler, typeof(TFile));
+            if (typedLoadListeners.ContainsKey(key))
+            {
+                return;
+            }
+            Action<Type> listener = loadedFile =>
+            {
+                if (loadedFile == typeof(TFile))
+                {
+                    handler();
+                }
+            };
+            typedLoadListeners[key] = listener;
+            OnLoadCompleted += listener;
+        }
+
+        /// <summary>Stops handler from hearing about this save file's load event.</summary>
+        public static void RemoveLoadListener<TFile>(Action handler) where TFile : ISaveFile
+        {
+            (Delegate, Type) key = (handler, typeof(TFile));
+            if (typedLoadListeners.TryGetValue(key, out Action<Type> listener))
+            {
+                OnLoadCompleted -= listener;
+                typedLoadListeners.Remove(key);
+            }
+        }
+
         /// <summary>One save file was written. Save&lt;TFile&gt;() raises it for that file; SaveAll raises it for each file it wrote.</summary>
         public static event Action<Type> OnSaveCompleted;
 
@@ -99,6 +139,7 @@ namespace AbstractPixel.SaveSystem
             gameProfileOpened = null;
             OnSaveCompleted = null;
             OnSaveAllCompleted = null;
+            typedLoadListeners.Clear();
         }
 
         // Each handler runs on its own, so one that throws can't stop the others or the save system.
