@@ -172,10 +172,14 @@ namespace AbstractPixel.SaveSystem
         void Save(SaveFileDefinition definition)
         {
             savedObjects.CaptureAll(entry => entry.SaveFileName == definition.FileName);
-            loadedData.WriteChanged(file => file.FileName == definition.FileName);
+            bool everyWriteWorked = loadedData.WriteChanged(file => file.FileName == definition.FileName);
             FinishSave();
-            // Saving one file counts as done even when nothing in it changed, so a "Saved" message always shows.
-            events.RaiseSaveCompleted(definition.FileName);
+            // A file with nothing to write counts as saved, so a "Saved" message shows. A failed write raises nothing:
+            // the store has already logged it, and the game must not tell the player the file is safe.
+            if (everyWriteWorked)
+            {
+                events.RaiseSaveCompleted(definition.FileName);
+            }
         }
 
         /// <summary>

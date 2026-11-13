@@ -163,36 +163,37 @@ namespace AbstractPixel.SaveSystem
 
         /// <summary>
         /// Writes every changed save file, or only those the filter accepts, and adds each written file's name to
-        /// <paramref name="writtenFileNames"/> when one is given. Returns false if any write failed.
+        /// <paramref name="writtenFileNames"/> when one is given. A Scene file is written once per scene, so its name
+        /// is only added when every scene's copy was written. Returns false if any write failed.
         /// </summary>
         public bool WriteChanged(Func<SaveFileData, bool> filter = null, List<string> writtenFileNames = null)
         {
-            bool allWritten = true;
-            foreach (LoadedFile file in filesByKey.Values.Where(file => file.Changed))
+            HashSet<string> failedFileNames = new HashSet<string>();
+            foreach (KeyValuePair<string, LoadedFile> loadedFile in filesByKey)
             {
-                if (filter != null && !filter(file.Data))
+                LoadedFile file = loadedFile.Value;
+                bool isWanted = file.Changed && (filter == null || filter(file.Data));
+                if (!isWanted)
                 {
                     continue;
                 }
 
-                string key = filesByKey.First(pair => pair.Value == file).Key;
                 file.Data.Version = Application.version;
                 file.Data.Timestamp = DateTime.UtcNow.ToString("o");
-                if (store.Write(key, file.Data, file.KeepsBackup))
+                if (!store.Write(loadedFile.Key, file.Data, file.KeepsBackup))
                 {
-                    file.Changed = false;
-                    bool isFirstWriteOfThisFile = writtenFileNames != null && !writtenFileNames.Contains(file.Data.FileName);
-                    if (isFirstWriteOfThisFile)
-                    {
-                        writtenFileNames.Add(file.Data.FileName);
-                    }
+                    failedFileNames.Add(file.Data.FileName);
+                    continue;
                 }
-                else
+                file.Changed = false;
+                bool isFirstWriteOfThisFile = writtenFileNames != null && !writtenFileNames.Contains(file.Data.FileName);
+                if (isFirstWriteOfThisFile)
                 {
-                    allWritten = false;
+                    writtenFileNames.Add(file.Data.FileName);
                 }
             }
-            return allWritten;
+            writtenFileNames?.RemoveAll(failedFileNames.Contains);
+            return failedFileNames.Count == 0;
         }
 
         /// <summary>Forgets every GameProfile and Scene save file, for example when another game profile opens. Global data stays.</summary>
