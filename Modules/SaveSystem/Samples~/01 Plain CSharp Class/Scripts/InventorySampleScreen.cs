@@ -20,7 +20,7 @@ namespace SaveSystemSamples.PlainCSharpClass
         // Unregistering captures the latest items, so they're written on the next save.
         void OnDestroy()
         {
-            SaveSystem.Unregister(Inventory);
+            SaveActions.Unregister(Inventory);
         }
 
         void OnGUI()
@@ -42,7 +42,7 @@ namespace SaveSystemSamples.PlainCSharpClass
             }
             if (GUILayout.Button("Save"))
             {
-                SaveSystem.SaveAll();
+                SaveActions.SaveAll();
             }
             if (GUILayout.Button("Reload scene"))
             {

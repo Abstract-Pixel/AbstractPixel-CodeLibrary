@@ -7,7 +7,7 @@ namespace AbstractPixel.SaveSystem
     /// <summary>
     /// One running save system: the registry, the loaded data and the game profiles, wired together.
     /// It applies the whichever-second rule: an object is restored as soon as both the object and its data exist.
-    /// <see cref="SaveSystem"/> hands every call to the current session.
+    /// <see cref="SaveActions"/> hands every call to the current session.
     /// </summary>
     internal sealed class SaveSession
     {
@@ -185,14 +185,14 @@ namespace AbstractPixel.SaveSystem
                     entry.GameProfileId = gameProfileId;
                 }
             }
-            SaveEvents.RaiseGameProfileOpened(gameProfileId);
+            SaveEventBus.RaiseGameProfileOpened(gameProfileId);
         }
 
         void OnGameProfileClosed()
         {
             loadedData.DropGameProfileData();
             loadedGameProfileId = null;
-            SaveEvents.RaiseGameProfileClosed();
+            SaveEventBus.RaiseGameProfileClosed();
         }
 
         bool TryRestore(SavedObjectEntry entry)
@@ -212,7 +212,7 @@ namespace AbstractPixel.SaveSystem
         void FinishSave()
         {
             UpdateOpenGameProfileManifest();
-            SaveEvents.RaiseSaved();
+            SaveEventBus.RaiseSaved();
         }
 
         void UpdateOpenGameProfileManifest()

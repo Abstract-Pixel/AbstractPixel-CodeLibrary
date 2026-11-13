@@ -20,14 +20,14 @@ namespace SaveSystemSamples.ScriptableObjectSample
         // Unregistering captures the latest values, so they're written on the next save.
         void OnDisable()
         {
-            SaveSystem.Unregister(this);
+            SaveActions.Unregister(this);
         }
 
         // In the Editor, Unity can load the asset before play mode starts the save system, so OnEnable's call does
         // nothing then. Calling this again from a scene script covers that. Registering twice is harmless.
         public void RegisterWithSaveSystem()
         {
-            SaveSystem.Register(this, "game-progress");
+            SaveActions.Register(this, "game-progress");
         }
 
         public void ResetToNewGame()

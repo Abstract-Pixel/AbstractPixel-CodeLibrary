@@ -20,7 +20,7 @@ namespace SaveSystemSamples.Together
         // The quest log is plain C#, so its owner unregisters it when the scene ends. That captures its latest data.
         void OnDestroy()
         {
-            SaveSystem.Unregister(QuestLog);
+            SaveActions.Unregister(QuestLog);
         }
 
         public void ResetSample()
@@ -56,7 +56,7 @@ namespace SaveSystemSamples.Together
 
             if (GUILayout.Button("Save"))
             {
-                SaveSystem.SaveAll();
+                SaveActions.SaveAll();
             }
             if (GUILayout.Button("Reload scene"))
             {

@@ -128,8 +128,7 @@ namespace AbstractPixel.Settings
         protected virtual void SaveSettingsToFile()
         {
             if(!isInitialized) return;
-            // The full name is needed because this file sits inside another AbstractPixel namespace.
-            AbstractPixel.SaveSystem.SaveSystem.Save(nameof(SaveCategory.Settings));
+            SaveActions.Save(nameof(SaveCategory.Settings));
         }
     }
 }

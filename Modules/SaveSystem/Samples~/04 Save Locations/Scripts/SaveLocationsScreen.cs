@@ -45,11 +45,11 @@ namespace SaveSystemSamples.SaveLocations
             }
             if (GUILayout.Button("Save"))
             {
-                SaveSystem.SaveAll();
+                SaveActions.SaveAll();
             }
             if (GUILayout.Button("New game profile"))
             {
-                OpenAndReload(SaveSystem.GameProfiles.CreateNew($"Game Profile {SaveSystem.GameProfiles.GetAll().Count + 1}"));
+                OpenAndReload(SaveActions.GameProfiles.CreateNew($"Game Profile {SaveActions.GameProfiles.GetAll().Count + 1}"));
             }
             if (GUILayout.Button("Next game profile"))
             {
@@ -61,16 +61,16 @@ namespace SaveSystemSamples.SaveLocations
         // Reloading the scene resets every object to its new-game values, then restores the opened game profile's data.
         static void OpenAndReload(string gameProfileId)
         {
-            SaveSystem.GameProfiles.Open(gameProfileId);
+            SaveActions.GameProfiles.Open(gameProfileId);
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         static string NextGameProfileId()
         {
-            IReadOnlyList<GameProfileManifest> all = SaveSystem.GameProfiles.GetAll();
+            IReadOnlyList<GameProfileManifest> all = SaveActions.GameProfiles.GetAll();
             for (int i = 0; i < all.Count; i++)
             {
-                if (all[i].GameProfileId == SaveSystem.GameProfiles.CurrentGameProfileId)
+                if (all[i].GameProfileId == SaveActions.GameProfiles.CurrentGameProfileId)
                 {
                     return all[(i + 1) % all.Count].GameProfileId;
                 }
@@ -80,8 +80,8 @@ namespace SaveSystemSamples.SaveLocations
 
         static string OpenGameProfileName()
         {
-            string openId = SaveSystem.GameProfiles?.CurrentGameProfileId;
-            if (openId != null && SaveSystem.GameProfiles.TryGetManifest(openId, out GameProfileManifest manifest))
+            string openId = SaveActions.GameProfiles?.CurrentGameProfileId;
+            if (openId != null && SaveActions.GameProfiles.TryGetManifest(openId, out GameProfileManifest manifest))
             {
                 return manifest.DisplayName;
             }

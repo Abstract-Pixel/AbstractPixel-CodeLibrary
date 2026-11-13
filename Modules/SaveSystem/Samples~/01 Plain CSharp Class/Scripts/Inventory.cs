@@ -15,7 +15,7 @@ namespace SaveSystemSamples.PlainCSharpClass
             // New-game values first...
             Items = new List<string> { "Wooden Sword" };
             // ...then register last, because the save system may restore the saved items inside this call.
-            SaveSystem.Register(this, "player-inventory");
+            SaveActions.Register(this, "player-inventory");
         }
 
         public void Add(string item)

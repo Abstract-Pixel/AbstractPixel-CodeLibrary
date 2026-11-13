@@ -22,7 +22,7 @@ You should see the levels and stars come back.
 [Savable(SaveCategory.Achievements)]
 public class GameProgress : ScriptableObject, ISavable<GameProgressData>
 void OnEnable() => RegisterWithSaveSystem();
-public void RegisterWithSaveSystem() => SaveSystem.Register(this, "game-progress");
+public void RegisterWithSaveSystem() => SaveActions.Register(this, "game-progress");
 ```
 
 In the Editor, Unity can load the asset before play mode starts the save system, so `OnEnable` runs too early. `GameProgressScreen.Awake` registers the asset again to cover that; registering twice is harmless. Values you change on an asset in play mode stay in the Editor's memory after you stop, until the save system restores the saved ones on the next Play.

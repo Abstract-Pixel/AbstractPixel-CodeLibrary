@@ -46,14 +46,14 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.DoesNotThrow(() =>
             {
                 PlayerHealth health = new PlayerHealth();
-                SaveSystem.Register(health, "player-health");
-                SaveSystem.SaveAll();
-                SaveSystem.Save(GameFile);
-                SaveSystem.Forget(GameFile, "player-health");
-                SaveSystem.Unregister(health);
+                SaveActions.Register(health, "player-health");
+                SaveActions.SaveAll();
+                SaveActions.Save(GameFile);
+                SaveActions.Forget(GameFile, "player-health");
+                SaveActions.Unregister(health);
             });
-            Assert.IsFalse(SaveSystem.IsGameProfileOpen);
-            Assert.IsNull(SaveSystem.GameProfiles);
+            Assert.IsFalse(SaveActions.IsGameProfileOpen);
+            Assert.IsNull(SaveActions.GameProfiles);
             LogAssert.NoUnexpectedReceived();
         }
 
@@ -62,22 +62,22 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             Assert.IsTrue(StartWith(ConfigWith(SaveStartupPolicy.AutoSetUp)));
 
-            Assert.IsTrue(SaveSystem.IsGameProfileOpen);
-            Assert.AreEqual(1, SaveSystem.GameProfiles.GetAll().Count);
-            Assert.AreEqual("Game Profile 1", SaveSystem.GameProfiles.GetAll()[0].DisplayName);
+            Assert.IsTrue(SaveActions.IsGameProfileOpen);
+            Assert.AreEqual(1, SaveActions.GameProfiles.GetAll().Count);
+            Assert.AreEqual("Game Profile 1", SaveActions.GameProfiles.GetAll()[0].DisplayName);
         }
 
         [Test]
         public void AutoSetUp_LaterLaunch_ReopensTheLastOpenedGameProfile()
         {
             StartWith(ConfigWith(SaveStartupPolicy.AutoSetUp));
-            string second = SaveSystem.GameProfiles.CreateNew("Game Profile 2");
-            SaveSystem.GameProfiles.Open(second);
+            string second = SaveActions.GameProfiles.CreateNew("Game Profile 2");
+            SaveActions.GameProfiles.Open(second);
 
             StartWith(ConfigWith(SaveStartupPolicy.AutoSetUp));
 
-            Assert.AreEqual(second, SaveSystem.GameProfiles.CurrentGameProfileId);
-            Assert.AreEqual(2, SaveSystem.GameProfiles.GetAll().Count);
+            Assert.AreEqual(second, SaveActions.GameProfiles.CurrentGameProfileId);
+            Assert.AreEqual(2, SaveActions.GameProfiles.GetAll().Count);
         }
 
         [Test]
@@ -85,23 +85,23 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             StartWith(ConfigWith(SaveStartupPolicy.Manual));
 
-            Assert.IsFalse(SaveSystem.IsGameProfileOpen);
-            Assert.IsEmpty(SaveSystem.GameProfiles.GetAll());
+            Assert.IsFalse(SaveActions.IsGameProfileOpen);
+            Assert.IsEmpty(SaveActions.GameProfiles.GetAll());
         }
 
         [Test]
         public void GlobalSaveFiles_AreReadAtStartup()
         {
             StartWith(ConfigWith(SaveStartupPolicy.Manual));
-            SaveSystem.Register(new VolumeSetting { Volume = 9 }, "volume");
-            SaveSystem.SaveAll();
+            SaveActions.Register(new VolumeSetting { Volume = 9 }, "volume");
+            SaveActions.SaveAll();
             storage.Write("Global/Settings.backup", "{}");
 
             StartWith(ConfigWith(SaveStartupPolicy.Manual));
             // Deleting the file now proves the data was already read into memory at startup.
             storage.Delete("Global/Settings");
             VolumeSetting volume = new VolumeSetting();
-            SaveSystem.Register(volume, "volume");
+            SaveActions.Register(volume, "volume");
 
             Assert.AreEqual(9, volume.Volume);
         }
@@ -110,7 +110,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SaveOnFocusLoss_SavesWhenTheGameLosesFocus()
         {
             StartWith(ConfigWith(SaveStartupPolicy.AutoSetUp, saveOnFocusLoss: true));
-            SaveSystem.Register(new VolumeSetting { Volume = 4 }, "volume");
+            SaveActions.Register(new VolumeSetting { Volume = 4 }, "volume");
 
             SaveStartup.HandleFocusChanged(false);
 
@@ -121,7 +121,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SaveOnFocusLoss_Off_DoesNotSave()
         {
             StartWith(ConfigWith(SaveStartupPolicy.AutoSetUp));
-            SaveSystem.Register(new VolumeSetting { Volume = 4 }, "volume");
+            SaveActions.Register(new VolumeSetting { Volume = 4 }, "volume");
 
             SaveStartup.HandleFocusChanged(false);
 
@@ -135,7 +135,7 @@ namespace AbstractPixel.SaveSystem.Tests
 
             SaveStartup.Stop();
 
-            Assert.IsNull(SaveSystem.GameProfiles);
+            Assert.IsNull(SaveActions.GameProfiles);
         }
     }
 }

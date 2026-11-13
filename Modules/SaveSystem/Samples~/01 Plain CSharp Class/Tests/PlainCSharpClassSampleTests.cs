@@ -17,7 +17,7 @@ namespace SaveSystemSamples.PlainCSharpClass.Tests
             yield return SampleScene.Load(SceneName);
             string item = "Test Gem " + Guid.NewGuid().ToString("N").Substring(0, 6);
             Object.FindAnyObjectByType<InventorySampleScreen>().Inventory.Add(item);
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             yield return SampleScene.Load(SceneName);
 
@@ -26,7 +26,7 @@ namespace SaveSystemSamples.PlainCSharpClass.Tests
 
             // Leave the sample's save data as it was.
             inventory.Remove(item);
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
         }
     }
 }

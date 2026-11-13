@@ -19,7 +19,7 @@ namespace SaveSystemSamples.Together
         public QuestLog()
         {
             // Register last: the saved quests may be restored inside this call.
-            SaveSystem.Register(this, "quest-log");
+            SaveActions.Register(this, "quest-log");
         }
 
         public void Complete(string quest)

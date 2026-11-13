@@ -1,6 +1,6 @@
 # 01 Plain CSharp Class
 
-An `Inventory` class with no MonoBehaviour saves with one line: `SaveSystem.Register`.
+An `Inventory` class with no MonoBehaviour saves with one line: `SaveActions.Register`.
 
 ## Before you start
 
@@ -21,8 +21,8 @@ You should see the same items come back.
 ```csharp
 [Savable(SaveCategory.Game)]                         // which save file: Game lives in the game profile
 public class Inventory : ISavable<InventoryData>     // CaptureData and RestoreData move the data
-SaveSystem.Register(this, "player-inventory");       // the last line of the constructor
-SaveSystem.Unregister(Inventory);                    // the owner calls this when the scene ends
+SaveActions.Register(this, "player-inventory");       // the last line of the constructor
+SaveActions.Unregister(Inventory);                    // the owner calls this when the scene ends
 ```
 
 Register last in the constructor: if saved data is already loaded, it's restored inside that call.

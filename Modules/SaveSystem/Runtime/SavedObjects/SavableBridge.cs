@@ -171,12 +171,12 @@ namespace AbstractPixel.SaveSystem
         // Unregistering captures the scripts' current data first, so nothing is lost when the object goes away.
         private void OnDisable()
         {
-            SaveSystem.Unregister(this);
+            SaveActions.Unregister(this);
         }
 
         private void RegisterTargets()
         {
-            SaveSession session = SaveSystem.Session;
+            SaveSession session = SaveActions.Session;
             if (session == null) return;
 
             foreach (SavableTarget target in savableTargets)

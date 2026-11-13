@@ -6,9 +6,9 @@ namespace AbstractPixel.SaveSystem
     [DisallowMultipleComponent]
     public class MonoSaveActions : MonoBehaviour
     {
-        public void SaveAll() => SaveSystem.SaveAll();
+        public void SaveAll() => SaveActions.SaveAll();
 
         /// <summary>Saves one save file, for example "Settings".</summary>
-        public void Save(string _saveFileName) => SaveSystem.Save(_saveFileName);
+        public void Save(string _saveFileName) => SaveActions.Save(_saveFileName);
     }
 }

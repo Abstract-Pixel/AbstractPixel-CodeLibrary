@@ -22,7 +22,7 @@ namespace SaveSystemSamples.MonoBehaviourSample.Tests
                 health.TakeDamage(10);
             }
             int expected = Health.Max - hits * 10;
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             yield return SampleScene.Load(SceneName);
 

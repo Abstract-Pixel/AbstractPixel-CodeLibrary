@@ -2,8 +2,8 @@ using System;
 
 namespace AbstractPixel.SaveSystem
 {
-    /// <summary>Events the save system raises. <see cref="SaveSystem"/> exposes the same events.</summary>
-    public static class SaveEvents
+    /// <summary>Events the save system raises. <see cref="SaveActions"/> exposes the same events.</summary>
+    public static class SaveEventBus
     {
         static Action<string> gameProfileOpened;
         static string openGameProfileId;

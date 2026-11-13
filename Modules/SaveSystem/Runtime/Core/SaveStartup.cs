@@ -47,7 +47,7 @@ namespace AbstractPixel.SaveSystem
             }
 
             SaveSession session = new SaveSession(config, storage, new JsonSerializer(), sceneInfo, unscaledTime);
-            SaveSystem.Start(session);
+            SaveActions.Start(session);
             session.ReadGlobalSaveFiles();
             ApplyStartupPolicy(config.StartupPolicy, session.GameProfiles);
 
@@ -64,14 +64,14 @@ namespace AbstractPixel.SaveSystem
         {
             Application.quitting -= HandleQuitting;
             Application.focusChanged -= HandleFocusChanged;
-            SaveSystem.Stop();
+            SaveActions.Stop();
         }
 
         internal static void HandleFocusChanged(bool hasFocus)
         {
             if (!hasFocus && saveOnFocusLoss)
             {
-                SaveSystem.SaveAll();
+                SaveActions.SaveAll();
             }
         }
 
@@ -80,14 +80,14 @@ namespace AbstractPixel.SaveSystem
         {
             if (saveOnQuit)
             {
-                SaveSystem.SaveAll();
+                SaveActions.SaveAll();
             }
             Stop();
         }
 
         static void ApplyStartupPolicy(SaveStartupPolicy policy, SaveProfileManager gameProfiles)
         {
-            // Manual waits for the game to call SaveSystem.GameProfiles.Open, for example from a save slot screen.
+            // Manual waits for the game to call SaveActions.GameProfiles.Open, for example from a save slot screen.
             if (policy != SaveStartupPolicy.AutoSetUp)
             {
                 return;

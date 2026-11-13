@@ -19,10 +19,10 @@ A simple save slot screen: create, open, list and delete game profiles. Each one
 ## The lines that matter
 
 ```csharp
-SaveSystem.GameProfiles.CreateNew("Game Profile 2");   // returns the new ID; doesn't open it
-SaveSystem.GameProfiles.Open(id);                      // then reload the scene
-SaveSystem.GameProfiles.GetAll();                      // manifests: DisplayName, LastSavedUtc, PlaytimeSeconds
-SaveSystem.GameProfiles.Delete(id);
+SaveActions.GameProfiles.CreateNew("Game Profile 2");   // returns the new ID; doesn't open it
+SaveActions.GameProfiles.Open(id);                      // then reload the scene
+SaveActions.GameProfiles.GetAll();                      // manifests: DisplayName, LastSavedUtc, PlaytimeSeconds
+SaveActions.GameProfiles.Delete(id);
 ```
 
 A real save slot screen usually sets the config's Startup Policy to **Manual**, so nothing opens until the player picks a slot. With **AutoSetUp**, the last opened game profile reopens at startup.

@@ -18,7 +18,7 @@ namespace SaveSystemSamples.ScriptableObjectSample.Tests
             int levels = Random.Range(1, 1000);
             progress.LevelsCompleted = levels;
             progress.Stars = 3;
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             // Like a fresh launch: the asset starts at its new-game values until the save system restores it.
             progress.ResetToNewGame();

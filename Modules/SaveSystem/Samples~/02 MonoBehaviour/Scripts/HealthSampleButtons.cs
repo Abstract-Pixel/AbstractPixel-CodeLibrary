@@ -22,7 +22,7 @@ namespace SaveSystemSamples.MonoBehaviourSample
             }
             if (GUILayout.Button("Save"))
             {
-                SaveSystem.SaveAll();
+                SaveActions.SaveAll();
             }
             if (GUILayout.Button("Reload scene"))
             {

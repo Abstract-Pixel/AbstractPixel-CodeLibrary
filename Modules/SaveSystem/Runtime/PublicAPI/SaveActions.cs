@@ -7,7 +7,7 @@ namespace AbstractPixel.SaveSystem
     /// as soon as both the object and its data exist, whichever comes second.
     /// Until the save system has started (it needs a save system config), every call is a safe no-op.
     /// </summary>
-    public static class SaveSystem
+    public static class SaveActions
     {
         static SaveSession session;
 
@@ -19,15 +19,15 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Raised when a game profile opens. Subscribing while one is open calls the handler right away.</summary>
         public static event Action<string> GameProfileOpened
         {
-            add => SaveEvents.GameProfileOpened += value;
-            remove => SaveEvents.GameProfileOpened -= value;
+            add => SaveEventBus.GameProfileOpened += value;
+            remove => SaveEventBus.GameProfileOpened -= value;
         }
 
         /// <summary>Raised after SaveAll or Save finishes writing.</summary>
         public static event Action Saved
         {
-            add => SaveEvents.Saved += value;
-            remove => SaveEvents.Saved -= value;
+            add => SaveEventBus.Saved += value;
+            remove => SaveEventBus.Saved -= value;
         }
 
         internal static SaveSession Session => session;
@@ -35,7 +35,7 @@ namespace AbstractPixel.SaveSystem
         /// <summary>
         /// Registers a saved object under a save ID. If its data is already loaded, it is restored inside this call,
         /// so a constructor should call Register last, after setting its new-game values.
-        /// Example: <c>SaveSystem.Register(this, "player-inventory");</c>
+        /// Example: <c>SaveActions.Register(this, "player-inventory");</c>
         /// </summary>
         public static void Register<T>(ISavable<T> savedObject, string saveId) => session?.Register(savedObject, saveId);
 
@@ -62,7 +62,7 @@ namespace AbstractPixel.SaveSystem
         {
             session?.Dispose();
             session = null;
-            SaveEvents.Clear();
+            SaveEventBus.Clear();
         }
     }
 }

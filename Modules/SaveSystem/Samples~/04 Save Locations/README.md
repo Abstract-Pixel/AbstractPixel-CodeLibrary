@@ -24,7 +24,7 @@ One value in each save location: the volume setting in **Global**, coins in **Ga
 [Savable(SaveCategory.Settings)]  public class VolumeSetting   // Global: shared by every game profile
 [Savable(SaveCategory.Game)]      public class PlayerCoins     // Game Profile: one per playthrough
 [Savable(SaveCategory.Position)]  public class Chest           // Scene: one file per scene, per game profile
-SaveSystem.GameProfiles.Open(id); SceneManager.LoadScene(...);  // switch game profiles, then reload
+SaveActions.GameProfiles.Open(id); SceneManager.LoadScene(...);  // switch game profiles, then reload
 ```
 
 The config decides each save file's save location; the scripts only name the save file. After opening a different game profile, reload the scene: objects registered under the previous game profile never write their values into the new one.

@@ -18,7 +18,7 @@ namespace SaveSystemSamples.Together.Tests
             screen.ResetSample();
             Pickup chosen = screen.Pickups[1];
             chosen.Collect(screen.QuestLog);
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             yield return SampleScene.Load(SceneName);
 

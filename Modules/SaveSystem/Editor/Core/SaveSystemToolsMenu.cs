@@ -19,14 +19,14 @@ namespace AbstractPixel.SaveSystem.Editor
         [MenuItem(MenuRoot + "Save All")]
         public static void SaveAll()
         {
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
             Debug.Log("[SaveSystem] Saved every registered object (Save All from the Tools menu).");
         }
 
         [MenuItem(MenuRoot + "Load All")]
         public static void LoadAll()
         {
-            SaveSystem.Session?.ReloadAll();
+            SaveActions.Session?.ReloadAll();
             Debug.Log("[SaveSystem] Re-read every save file and restored every registered object (Load All from the Tools menu).");
         }
 

@@ -89,7 +89,7 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
             HealthForTests earlier = CreateHealthObject(bridgeFirst: false);
             yield return null;
             earlier.Current = value;
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
             Object.Destroy(earlier.gameObject);
             yield return null;
         }

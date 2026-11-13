@@ -13,7 +13,7 @@ namespace SaveSystemSamples.GameProfiles
 
         void OnGUI()
         {
-            SaveProfileManager gameProfiles = SaveSystem.GameProfiles;
+            SaveProfileManager gameProfiles = SaveActions.GameProfiles;
             if (gameProfiles == null)
             {
                 GUILayout.Label("The save system isn't running. Check that a SaveSystemConfig exists in a Resources folder.");
@@ -28,7 +28,7 @@ namespace SaveSystemSamples.GameProfiles
             }
             if (GUILayout.Button("Save"))
             {
-                SaveSystem.SaveAll();
+                SaveActions.SaveAll();
             }
 
             GUILayout.Space(10);

@@ -20,10 +20,10 @@ You should see the same pickups collected and the same quests in the log. **Rese
 ## The lines that matter
 
 ```csharp
-SaveSystem.Register(this, "quest-log");               // QuestLog: plain C#, saved in the game profile
+SaveActions.Register(this, "quest-log");               // QuestLog: plain C#, saved in the game profile
 [Savable(SaveCategory.Position)] public class Pickup  // each pickup has its own Savable Bridge and save ID
 questLog.Complete($"Found the {displayName}");       // a MonoBehaviour updating the plain C# object
-SaveSystem.Unregister(QuestLog);                      // the owner unregisters the plain C# object
+SaveActions.Unregister(QuestLog);                      // the owner unregisters the plain C# object
 ```
 
 The two kinds don't need to know about each other's saving. Each has its own save ID, and one Save writes both.

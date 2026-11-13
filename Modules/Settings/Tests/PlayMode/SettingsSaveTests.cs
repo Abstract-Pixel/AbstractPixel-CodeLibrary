@@ -5,7 +5,6 @@ using AbstractPixel.SaveSystem;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using SaveSystemApi = AbstractPixel.SaveSystem.SaveSystem;
 
 namespace AbstractPixel.Settings.PlayModeTests
 {
@@ -53,7 +52,7 @@ namespace AbstractPixel.Settings.PlayModeTests
             Assert.IsFalse(firstToggle.CurrentValue);
 
             firstToggle.SetValue(true);
-            SaveSystemApi.Save("Settings");
+            SaveActions.Save("Settings");
             Object.Destroy(firstManager.gameObject);
             yield return null;
 

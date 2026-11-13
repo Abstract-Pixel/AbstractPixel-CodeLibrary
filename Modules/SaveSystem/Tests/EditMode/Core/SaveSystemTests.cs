@@ -26,20 +26,20 @@ namespace AbstractPixel.SaveSystem.Tests
         [TearDown]
         public void TearDown()
         {
-            SaveSystem.Stop();
+            SaveActions.Stop();
         }
 
         // Starting a new session over the same storage is like quitting and relaunching the game.
         void StartSession()
         {
-            SaveSystem.Stop();
-            SaveSystem.Start(new SaveSession(CreateConfig(), storage, new JsonSerializer(), scene, clock.Now));
+            SaveActions.Stop();
+            SaveActions.Start(new SaveSession(CreateConfig(), storage, new JsonSerializer(), scene, clock.Now));
         }
 
         string CreateAndOpenGameProfile()
         {
-            string gameProfileId = SaveSystem.GameProfiles.CreateNew("Game Profile");
-            SaveSystem.GameProfiles.Open(gameProfileId);
+            string gameProfileId = SaveActions.GameProfiles.CreateNew("Game Profile");
+            SaveActions.GameProfiles.Open(gameProfileId);
             return gameProfileId;
         }
 
@@ -56,13 +56,13 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             string gameProfileId = CreateAndOpenGameProfile();
             PlayerHealth before = new PlayerHealth { Current = 40 };
-            SaveSystem.Register(before, "player-health");
-            SaveSystem.SaveAll();
+            SaveActions.Register(before, "player-health");
+            SaveActions.SaveAll();
             StartSession();
-            SaveSystem.GameProfiles.Open(gameProfileId);
+            SaveActions.GameProfiles.Open(gameProfileId);
             PlayerHealth after = new PlayerHealth();
 
-            SaveSystem.Register(after, "player-health");
+            SaveActions.Register(after, "player-health");
 
             Assert.AreEqual(40, after.Current);
         }
@@ -71,14 +71,14 @@ namespace AbstractPixel.SaveSystem.Tests
         public void ObjectRegisteredFirst_OpeningTheGameProfileRestoresIt()
         {
             string gameProfileId = CreateAndOpenGameProfile();
-            SaveSystem.Register(new PlayerHealth { Current = 40 }, "player-health");
-            SaveSystem.SaveAll();
+            SaveActions.Register(new PlayerHealth { Current = 40 }, "player-health");
+            SaveActions.SaveAll();
             StartSession();
             PlayerHealth health = new PlayerHealth();
-            SaveSystem.Register(health, "player-health");
+            SaveActions.Register(health, "player-health");
             Assert.AreEqual(100, health.Current, "No game profile is open yet, so nothing restores.");
 
-            SaveSystem.GameProfiles.Open(gameProfileId);
+            SaveActions.GameProfiles.Open(gameProfileId);
 
             Assert.AreEqual(40, health.Current);
         }
@@ -86,15 +86,15 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void GlobalData_RestoresWithNoGameProfileOpen()
         {
-            SaveSystem.Register(new VolumeSetting { Volume = 2 }, "volume");
-            SaveSystem.SaveAll();
+            SaveActions.Register(new VolumeSetting { Volume = 2 }, "volume");
+            SaveActions.SaveAll();
             StartSession();
             VolumeSetting volume = new VolumeSetting();
 
-            SaveSystem.Register(volume, "volume");
+            SaveActions.Register(volume, "volume");
 
             Assert.AreEqual(2, volume.Volume);
-            Assert.IsFalse(SaveSystem.IsGameProfileOpen);
+            Assert.IsFalse(SaveActions.IsGameProfileOpen);
         }
 
         [Test]
@@ -102,12 +102,12 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             string gameProfileId = CreateAndOpenGameProfile();
             PlayerHealth health = new PlayerHealth();
-            SaveSystem.Register(health, "player-health");
+            SaveActions.Register(health, "player-health");
             health.Current = 7;
 
-            SaveSystem.Unregister(health);
+            SaveActions.Unregister(health);
             health.Current = 99;
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             Assert.AreEqual(7, StoredInt(GameKey(gameProfileId), "player-health"));
         }
@@ -117,13 +117,13 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             // Problem 3: v1 wrote only the objects registered right now.
             string gameProfileId = CreateAndOpenGameProfile();
-            SaveSystem.Register(new PlayerHealth { Current = 30 }, "boss-health");
-            SaveSystem.SaveAll();
+            SaveActions.Register(new PlayerHealth { Current = 30 }, "boss-health");
+            SaveActions.SaveAll();
             StartSession();
-            SaveSystem.GameProfiles.Open(gameProfileId);
-            SaveSystem.Register(new PlayerHealth { Current = 80 }, "player-health");
+            SaveActions.GameProfiles.Open(gameProfileId);
+            SaveActions.Register(new PlayerHealth { Current = 80 }, "player-health");
 
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             Assert.AreEqual(30, StoredInt(GameKey(gameProfileId), "boss-health"));
             Assert.AreEqual(80, StoredInt(GameKey(gameProfileId), "player-health"));
@@ -136,12 +136,12 @@ namespace AbstractPixel.SaveSystem.Tests
             string gameProfileId = CreateAndOpenGameProfile();
             PlayerHealth oldOwner = new PlayerHealth { Current = 1 };
             PlayerHealth newOwner = new PlayerHealth { Current = 2 };
-            SaveSystem.Register(oldOwner, "player-health");
-            SaveSystem.Register(newOwner, "player-health");
+            SaveActions.Register(oldOwner, "player-health");
+            SaveActions.Register(newOwner, "player-health");
 
-            SaveSystem.Unregister(oldOwner);
+            SaveActions.Unregister(oldOwner);
             newOwner.Current = 55;
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             Assert.AreEqual(55, StoredInt(GameKey(gameProfileId), "player-health"));
         }
@@ -152,17 +152,17 @@ namespace AbstractPixel.SaveSystem.Tests
             string first = CreateAndOpenGameProfile();
             PlayerHealth health = new PlayerHealth { Current = 10 };
             VolumeSetting volume = new VolumeSetting { Volume = 3 };
-            SaveSystem.Register(health, "player-health");
-            SaveSystem.Register(volume, "volume");
-            SaveSystem.SaveAll();
-            string second = SaveSystem.GameProfiles.CreateNew("Second");
+            SaveActions.Register(health, "player-health");
+            SaveActions.Register(volume, "volume");
+            SaveActions.SaveAll();
+            string second = SaveActions.GameProfiles.CreateNew("Second");
 
-            SaveSystem.GameProfiles.Open(second);
+            SaveActions.GameProfiles.Open(second);
             // The object was registered under the first game profile; registering again makes it part of the second.
-            SaveSystem.Register(health, "player-health");
+            SaveActions.Register(health, "player-health");
             health.Current = 77;
-            SaveSystem.Unregister(volume);
-            SaveSystem.SaveAll();
+            SaveActions.Unregister(volume);
+            SaveActions.SaveAll();
 
             Assert.AreEqual(10, StoredInt(GameKey(first), "player-health"), "The first game profile's file must not change.");
             Assert.AreEqual(77, StoredInt(GameKey(second), "player-health"));
@@ -176,15 +176,15 @@ namespace AbstractPixel.SaveSystem.Tests
             // scene's objects. Their capture must not put the previous game profile's data into the new one.
             CreateAndOpenGameProfile();
             PlayerHealth oldSceneHealth = new PlayerHealth { Current = 10 };
-            SaveSystem.Register(oldSceneHealth, "player-health");
-            SaveSystem.SaveAll();
-            string second = SaveSystem.GameProfiles.CreateNew("Second");
-            SaveSystem.GameProfiles.Open(second);
+            SaveActions.Register(oldSceneHealth, "player-health");
+            SaveActions.SaveAll();
+            string second = SaveActions.GameProfiles.CreateNew("Second");
+            SaveActions.GameProfiles.Open(second);
 
-            SaveSystem.Unregister(oldSceneHealth);
+            SaveActions.Unregister(oldSceneHealth);
             PlayerHealth newSceneHealth = new PlayerHealth();
-            SaveSystem.Register(newSceneHealth, "player-health");
-            SaveSystem.SaveAll();
+            SaveActions.Register(newSceneHealth, "player-health");
+            SaveActions.SaveAll();
 
             Assert.AreEqual(100, newSceneHealth.Current, "The new game profile has no saved health, so new-game health stays.");
             Assert.AreEqual(100, StoredInt(GameKey(second), "player-health"));
@@ -195,18 +195,18 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             string first = CreateAndOpenGameProfile();
             PlayerHealth health = new PlayerHealth { Current = 30 };
-            SaveSystem.Register(health, "player-health");
-            SaveSystem.SaveAll();
-            string second = SaveSystem.GameProfiles.CreateNew("Second");
-            SaveSystem.GameProfiles.Open(second);
+            SaveActions.Register(health, "player-health");
+            SaveActions.SaveAll();
+            string second = SaveActions.GameProfiles.CreateNew("Second");
+            SaveActions.GameProfiles.Open(second);
             health.Current = 60;
-            SaveSystem.Register(health, "player-health");
-            SaveSystem.SaveAll();
+            SaveActions.Register(health, "player-health");
+            SaveActions.SaveAll();
 
-            SaveSystem.GameProfiles.Open(first);
+            SaveActions.GameProfiles.Open(first);
             Assert.AreEqual(30, health.Current, "The first game profile has data, so opening it restores the object.");
             health.Current = 35;
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             Assert.AreEqual(35, StoredInt(GameKey(first), "player-health"));
             Assert.AreEqual(60, StoredInt(GameKey(second), "player-health"));
@@ -217,10 +217,10 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             string gameProfileId = CreateAndOpenGameProfile();
             ChestState chest = new ChestState { IsOpen = true };
-            SaveSystem.Register(chest, "chest-1");
+            SaveActions.Register(chest, "chest-1");
             scene.ActiveSceneName = "Town";
 
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             Assert.IsTrue(storage.Exists($"GameProfiles/{gameProfileId}/Scenes/Forest/Chests"));
             Assert.IsFalse(storage.Exists($"GameProfiles/{gameProfileId}/Scenes/Town/Chests"));
@@ -230,16 +230,16 @@ namespace AbstractPixel.SaveSystem.Tests
         public void ExceptionInOneRestore_IsLogged_AndTheOthersStillRestore()
         {
             string gameProfileId = CreateAndOpenGameProfile();
-            SaveSystem.Register(new ExplodingRestore(), "exploding");
-            SaveSystem.Register(new PlayerHealth { Current = 12 }, "player-health");
-            SaveSystem.SaveAll();
+            SaveActions.Register(new ExplodingRestore(), "exploding");
+            SaveActions.Register(new PlayerHealth { Current = 12 }, "player-health");
+            SaveActions.SaveAll();
             StartSession();
-            SaveSystem.Register(new ExplodingRestore(), "exploding");
+            SaveActions.Register(new ExplodingRestore(), "exploding");
             PlayerHealth health = new PlayerHealth();
-            SaveSystem.Register(health, "player-health");
+            SaveActions.Register(health, "player-health");
             LogAssert.Expect(LogType.Error, new Regex("exploding.*ExplodingRestore.*restore exploded"));
 
-            SaveSystem.GameProfiles.Open(gameProfileId);
+            SaveActions.GameProfiles.Open(gameProfileId);
 
             Assert.AreEqual(12, health.Current);
         }
@@ -248,10 +248,10 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SaveOneFile_WritesOnlyThatSaveFilesKeys()
         {
             string gameProfileId = CreateAndOpenGameProfile();
-            SaveSystem.Register(new VolumeSetting(), "volume");
-            SaveSystem.Register(new PlayerHealth(), "player-health");
+            SaveActions.Register(new VolumeSetting(), "volume");
+            SaveActions.Register(new PlayerHealth(), "player-health");
 
-            SaveSystem.Save(SettingsFile);
+            SaveActions.Save(SettingsFile);
 
             Assert.IsTrue(storage.Exists("Global/Settings"));
             Assert.IsFalse(storage.Exists(GameKey(gameProfileId)));
@@ -261,11 +261,11 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SaveAll_SkipsKeysThatDidNotChange()
         {
             string gameProfileId = CreateAndOpenGameProfile();
-            SaveSystem.Register(new PlayerHealth(), "player-health");
-            SaveSystem.SaveAll();
+            SaveActions.Register(new PlayerHealth(), "player-health");
+            SaveActions.SaveAll();
             storage.Delete(GameKey(gameProfileId));
 
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             Assert.IsFalse(storage.Exists(GameKey(gameProfileId)), "Nothing changed, so the key must not be written again.");
         }
@@ -275,14 +275,14 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             string gameProfileId = CreateAndOpenGameProfile();
             PlayerHealth coin = new PlayerHealth();
-            SaveSystem.Register(coin, "coin-1");
-            SaveSystem.Register(new PlayerHealth(), "coin-2");
-            SaveSystem.SaveAll();
+            SaveActions.Register(coin, "coin-1");
+            SaveActions.Register(new PlayerHealth(), "coin-2");
+            SaveActions.SaveAll();
 
-            SaveSystem.Forget(GameFile, "coin-1");
+            SaveActions.Forget(GameFile, "coin-1");
             // A forgotten object that is destroyed afterwards must not write itself back.
-            SaveSystem.Unregister(coin);
-            SaveSystem.SaveAll();
+            SaveActions.Unregister(coin);
+            SaveActions.SaveAll();
 
             Assert.IsTrue(store.TryRead(GameKey(gameProfileId), out SaveFileData file));
             CollectionAssert.AreEquivalent(new[] { "coin-2" }, file.Entries.Keys);
@@ -296,9 +296,9 @@ namespace AbstractPixel.SaveSystem.Tests
             clock.Seconds = 25;
             scene.ActiveSceneName = "Castle";
 
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
-            Assert.IsTrue(SaveSystem.GameProfiles.TryGetManifest(gameProfileId, out GameProfileManifest manifest));
+            Assert.IsTrue(SaveActions.GameProfiles.TryGetManifest(gameProfileId, out GameProfileManifest manifest));
             Assert.AreEqual(15, manifest.PlaytimeSeconds);
             Assert.AreEqual("Castle", manifest.LastScene);
             Assert.IsFalse(string.IsNullOrEmpty(manifest.LastSavedUtc));
@@ -309,11 +309,11 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             string openedId = null;
             int savedCount = 0;
-            SaveSystem.GameProfileOpened += id => openedId = id;
-            SaveSystem.Saved += () => savedCount++;
+            SaveActions.GameProfileOpened += id => openedId = id;
+            SaveActions.Saved += () => savedCount++;
 
             string gameProfileId = CreateAndOpenGameProfile();
-            SaveSystem.SaveAll();
+            SaveActions.SaveAll();
 
             Assert.AreEqual(gameProfileId, openedId);
             Assert.AreEqual(1, savedCount);
@@ -326,7 +326,7 @@ namespace AbstractPixel.SaveSystem.Tests
             string gameProfileId = CreateAndOpenGameProfile();
             string openedId = null;
 
-            SaveSystem.GameProfileOpened += id => openedId = id;
+            SaveActions.GameProfileOpened += id => openedId = id;
 
             Assert.AreEqual(gameProfileId, openedId);
         }
@@ -336,7 +336,7 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             LogAssert.Expect(LogType.Error, new Regex("UnmarkedSavable"));
 
-            SaveSystem.Register(new UnmarkedSavable(), "unmarked");
+            SaveActions.Register(new UnmarkedSavable(), "unmarked");
         }
 
         class UnmarkedSavable : ISavable<int>
