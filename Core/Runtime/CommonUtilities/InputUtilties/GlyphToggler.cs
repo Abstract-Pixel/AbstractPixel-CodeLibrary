@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using CustomInspector;
 
 namespace AbstractPixel.Core
 {
@@ -8,7 +8,9 @@ namespace AbstractPixel.Core
     public sealed class GlyphToggler : MonoBehaviour
     {
         [SerializeField] private Image targetImage;
-        [SerializeField] private ReorderableDictionary<DeviceFamily, Sprite> glyphMap;
+        // Unity 6.6 and later serialize a Dictionary field marked [SerializeField] and draw it as a key and value list.
+        [SerializeField, DictionaryDisplay(keyLabel = "Device", valueLabel = "Glyph")]
+        private Dictionary<DeviceFamily, Sprite> glyphMap = new Dictionary<DeviceFamily, Sprite>();
 
         private bool cachedRaycastTarget;
 
