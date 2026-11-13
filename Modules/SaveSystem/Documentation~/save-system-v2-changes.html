@@ -1,0 +1,643 @@
+<title>Save System v2 Changes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: a sticky contents rail ordered by how often you'll use each part, and a reading column of before/after pairs. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --ink: #1b2230;
+  --muted: #5a6475;
+  --line: #dde1e8;
+  --accent: #2d55c8;
+  --before: #a24a2a;
+  --before-soft: #f6ebe6;
+  --after: #1c7558;
+  --after-soft: #e5f2ec;
+  --code-bg: #f1f3f7;
+  --code-ink: #222a38;
+  --code-key: #6a3fb5;
+  --code-type: #1d6f8f;
+  --code-str: #8a5a12;
+  --code-com: #7a8494;
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d; --surface: #1a1f28; --ink: #e5e9f0; --muted: #9aa4b5; --line: #2c3340;
+    --accent: #8aa6ff; --before: #e39572; --before-soft: #2e211c; --after: #6fcfa8; --after-soft: #18291f;
+    --code-bg: #161b23; --code-ink: #dbe1ea; --code-key: #c3a2ff; --code-type: #7cc7e3; --code-str: #e7b765; --code-com: #7f8a9c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161d; --surface: #1a1f28; --ink: #e5e9f0; --muted: #9aa4b5; --line: #2c3340;
+  --accent: #8aa6ff; --before: #e39572; --before-soft: #2e211c; --after: #6fcfa8; --after-soft: #18291f;
+  --code-bg: #161b23; --code-ink: #dbe1ea; --code-key: #c3a2ff; --code-type: #7cc7e3; --code-str: #e7b765; --code-com: #7f8a9c;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code { font-family: var(--font-mono); font-size: 0.88em; }
+p code, li code, td code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+
+.page { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 48px; }
+@media (max-width: 900px) { .page { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
+
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; }
+@media (max-width: 900px) { .rail { position: static; } }
+.rail h2 { font-family: var(--font-display); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 12px; }
+.rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.rail a { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: baseline; padding: 6px 10px; border-radius: 6px; text-decoration: none; color: var(--ink); font-size: 0.9rem; }
+.rail a:hover { background: var(--surface); }
+.rail .freq { font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
+.rail .group { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 14px 10px 4px; }
+
+main { min-width: 0; }
+header.intro { margin-bottom: 40px; }
+header.intro .eyebrow { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(2rem, 4vw, 2.6rem); line-height: 1.15; margin: 6px 0 12px; text-wrap: balance; }
+.lede { font-size: 1.1rem; color: var(--muted); max-width: 65ch; margin: 0; }
+
+.status { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; margin: 28px 0 0; }
+.status h2 { font-family: var(--font-display); font-size: 1.05rem; margin: 0 0 12px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.steps li { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: baseline; font-size: 0.95rem; }
+.pill { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em; padding: 2px 8px; border-radius: 999px; text-align: center; }
+.pill.done { background: var(--after-soft); color: var(--after); }
+.pill.todo { background: var(--code-bg); color: var(--muted); }
+.status p { margin: 14px 0 0; color: var(--muted); font-size: 0.92rem; max-width: 70ch; }
+
+section.topic { padding-top: 40px; margin-top: 8px; border-top: 1px solid var(--line); }
+.topic-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 14px; }
+.topic h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.45rem; margin: 0; text-wrap: balance; }
+.freq-tag { font-size: 0.75rem; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; }
+.topic > p, .topic > ul { max-width: 68ch; }
+.topic ul { padding-left: 1.2em; }
+.topic li { margin: 4px 0; }
+
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 18px 0; }
+@media (max-width: 760px) { .compare { grid-template-columns: minmax(0, 1fr); } }
+.compare.single { grid-template-columns: minmax(0, 1fr); }
+.pane { min-width: 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--code-bg); display: flex; flex-direction: column; }
+.pane-label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 7px 14px; }
+.pane.before .pane-label { background: var(--before-soft); color: var(--before); }
+.pane.after .pane-label { background: var(--after-soft); color: var(--after); }
+.pane.neutral .pane-label { background: var(--surface); color: var(--muted); }
+.pane-label span:last-child { font-weight: 500; text-transform: none; letter-spacing: 0; }
+pre { margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.55; color: var(--code-ink); flex: 1; }
+pre code { font-size: inherit; background: none; padding: 0; }
+.hljs-keyword, .hljs-built_in, .hljs-literal { color: var(--code-key); }
+.hljs-title, .hljs-type, .hljs-title.class_, .hljs-meta { color: var(--code-type); }
+.hljs-string, .hljs-number { color: var(--code-str); }
+.hljs-comment { color: var(--code-com); font-style: italic; }
+.hljs-attr { color: var(--code-type); }
+
+.note { max-width: 68ch; background: var(--surface); border-left: 3px solid var(--accent); padding: 10px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 0.95rem; }
+.note.warn { border-left-color: var(--before); }
+
+.table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-display); font-weight: 600; font-size: 0.82rem; color: var(--muted); background: var(--bg); }
+tr:last-child td { border-bottom: none; }
+td.was { color: var(--before); }
+td.now { color: var(--after); }
+
+footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="page">
+  <nav class="rail" aria-label="Contents">
+    <h2>Most used first</h2>
+    <ol>
+      <li class="group">Every project</li>
+      <li><a href="#monobehaviour">Saving a script <span class="freq">every script</span></a></li>
+      <li><a href="#saving">Saving and loading <span class="freq">every game</span></a></li>
+      <li><a href="#setup">Setting it up <span class="freq">once</span></a></li>
+      <li class="group">Most games</li>
+      <li><a href="#locations">Save locations <span class="freq">often</span></a></li>
+      <li><a href="#profiles">Game profiles <span class="freq">often</span></a></li>
+      <li><a href="#plain">Plain C# classes <span class="freq">often</span></a></li>
+      <li class="group">Some games</li>
+      <li><a href="#events">Events <span class="freq">sometimes</span></a></li>
+      <li><a href="#forget">Forgetting data <span class="freq">sometimes</span></a></li>
+      <li><a href="#scriptable">ScriptableObjects <span class="freq">sometimes</span></a></li>
+      <li class="group">While you work</li>
+      <li><a href="#editor">Editor tools <span class="freq">debugging</span></a></li>
+      <li><a href="#disk">What's on disk <span class="freq">debugging</span></a></li>
+      <li class="group">Rarely</li>
+      <li><a href="#storage">Storage parts <span class="freq">library work</span></a></li>
+      <li><a href="#renames">Name changes <span class="freq">reference</span></a></li>
+      <li><a href="#later">Not built yet <span class="freq">steps 3–8</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="intro">
+      <div class="eyebrow">Abstract Pixel Library · Modules/SaveSystem · branch save-system</div>
+      <h1>Save System v2: what changed</h1>
+      <p class="lede">Each part below shows the v1 code next to the v2 code. The parts you will use in almost every project come first. The internals come last.</p>
+
+      <div class="status">
+        <h2>How much of the plan is built</h2>
+        <ul class="steps">
+          <li><span class="pill done">Done</span><span><strong>Step 0.</strong> v1 tagged as <code>save-system-v1</code>, branches made.</span></li>
+          <li><span class="pill done">Done</span><span><strong>Step 1, safe storage.</strong> Atomic writes, backups, three save locations, working game profiles, tests.</span></li>
+          <li><span class="pill done">Done</span><span><strong>Step 2, the core.</strong> <code>SaveSystem</code>, restore after Awake and before Start, no <code>SaveManager</code>.</span></li>
+          <li><span class="pill done">Done</span><span><strong>Samples for steps 1 and 2.</strong> Six importable scenes, each with its own test.</span></li>
+          <li><span class="pill todo">Not started</span><span><strong>Steps 3–8.</strong> <code>[Save]</code> fields, <code>ISaveIn</code>, <code>SaveFiles.cs</code>, ScriptableObject auto-registration, edit-time bridges, the editor window.</span></li>
+        </ul>
+        <p>So scripts still pick their save file with <code>[Savable(SaveCategory.X)]</code> and implement <code>ISavable&lt;T&gt;</code>. The level 1 style from the design page (<code>[Save] int current;</code>) comes in step 3. Tests: 103 EditMode and 10 PlayMode, all passing.</p>
+      </div>
+    </header>
+
+    <section class="topic" id="monobehaviour">
+      <div class="topic-head"><h2>Saving a MonoBehaviour</h2><span class="freq-tag">every saved script</span></div>
+      <p>The script itself looks the same. What changed is <em>when</em> the saved value arrives. v1 restored data at the end of the frame after a scene group finished loading, so <code>Start</code> still saw new-game values and the UI had to wait for a load event. v2 restores right after every <code>Awake</code> and before any <code>Start</code>.</p>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
+<pre><code class="language-csharp">[Savable(SaveCategory.Game)]
+public class Health : MonoBehaviour, ISavable&lt;int&gt;
+{
+    public int Current;
+
+    void Start()
+    {
+        Current = 100;
+        // Saved data hasn't arrived yet here.
+        // It comes at the end of the frame after the
+        // scene group transition, from SaveManager.
+    }
+
+    public int CaptureData() =&gt; Current;
+    public void RestoreData(int data) =&gt; Current = data;
+}
+
+// A health bar had to wait for the load event:
+void OnEnable() =&gt;
+    SaveEventBus.OnLoadCategoryCompleted += c =&gt; Refresh();</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2</span></div>
+<pre><code class="language-csharp">[Savable(SaveCategory.Game)]
+public class Health : MonoBehaviour, ISavable&lt;int&gt;
+{
+    public int Current { get; private set; }
+
+    // New-game values go in Awake.
+    void Awake() { Current = 100; }
+
+    public int CaptureData() =&gt; Current;
+    public void RestoreData(int data) =&gt; Current = data;
+}
+
+// A health bar can read the saved value in Start:
+void Start()
+{
+    shownHealth = health.Current;   // already restored
+}</code></pre></div>
+      </div>
+      <div class="note warn"><strong>The one rule to remember:</strong> set new-game values in <code>Awake</code>. A saved field assigned in <code>Start</code> overwrites the value that was just restored.</div>
+      <ul>
+        <li>The Savable Bridge is still the component that connects the script. The editor still adds it.</li>
+        <li>The bridge now runs first (<code>[DefaultExecutionOrder(-10000)]</code>) and registers in <code>Start</code>. That is what puts restore between <code>Awake</code> and <code>Start</code>.</li>
+        <li>An object spawned later, or one disabled and enabled again, gets its data back the same way. In v1 anything that appeared after the single load never got data.</li>
+        <li>A chest in an additive scene saves into its own scene's file, not the active scene's.</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="saving">
+      <div class="topic-head"><h2>Saving, and why there is no Load</h2><span class="freq-tag">every game</span></div>
+      <p><code>SaveActions</code> is now <code>SaveSystem</code>. Loading is no longer a call you make. An object gets its data as soon as both the object and its data exist, whichever comes second.</p>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
+<pre><code class="language-csharp">SaveActions.SaveAll();
+SaveActions.SaveDataOf(SaveCategory.Settings);
+SaveActions.SaveDataOfScope(SaveScope.Global);
+
+SaveActions.LoadAll();
+SaveActions.LoadDataOf(SaveCategory.Settings);
+
+// No SaveManager in the scene? SaveActions created
+// one with no config, and it threw in Awake.</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2</span></div>
+<pre><code class="language-csharp">SaveSystem.SaveAll();
+SaveSystem.Save("Settings");   // one save file
+
+// No load calls. Registering restores when the data
+// is ready; opening a game profile restores everything
+// registered before it.
+
+// No config? One clear error at startup, and every
+// SaveSystem call is a safe no-op.</code></pre></div>
+      </div>
+      <ul>
+        <li><code>SaveAll</code> writes only the save files that changed. An unchanged file isn't rewritten.</li>
+        <li>Saving no longer erases objects that aren't loaded right now. v1 rebuilt each file from the registered objects only, so a boss in an unloaded scene lost its data. v2 keeps the data it read and merges new captures into it.</li>
+        <li>When a saved object goes away, its latest values are captured first, so they're written on the next save.</li>
+        <li><code>MonoSaveActions</code> (for UnityEvents) keeps <code>SaveAll()</code> and has <code>Save(string)</code>. Its load methods are gone.</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="setup">
+      <div class="topic-head"><h2>Setting it up in a project</h2><span class="freq-tag">once per project</span></div>
+      <p>Nothing goes in a scene any more. The save system starts by itself before the first scene loads.</p>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
+<pre><code class="language-text">1. Put a SaveManager in the boot scene.
+2. Drag a SaveSystemConfigSO onto it.
+3. Set up SceneCoordinator scene groups, because
+   loading waited for a scene group transition.
+4. Tune script execution order so the SaveManager
+   ran before other scripts.</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2</span></div>
+<pre><code class="language-text">1. Create a SaveSystemConfigSO
+   (Assets &gt; Create &gt; Utility &gt; SaveSystemConfigSO).
+2. Name it SaveSystemConfig.
+3. Put it in a folder named Resources.
+
+That's all. SaveStartup reads it before the first
+scene, opens a game profile if the policy says so,
+and resets itself every time play mode starts.</code></pre></div>
+      </div>
+      <p>The config inspector changed in four places:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Field</th><th>v1</th><th>v2</th></tr></thead>
+        <tbody>
+          <tr><td>Each category's place</td><td class="was"><code>DirectoryScope</code>: Global or GameProfile</td><td class="now"><code>Location</code>: Global, GameProfile or Scene (old values carry over)</td></tr>
+          <tr><td>Scene-specific checkbox</td><td class="was"><code>IsSceneSpecific</code></td><td class="now">Removed; pick <code>Scene</code> as the location</td></tr>
+          <tr><td>Autosave</td><td class="was">None</td><td class="now"><code>SaveOnQuit</code> and <code>SaveOnFocusLoss</code>, both off by default</td></tr>
+          <tr><td>Use Debug Path</td><td class="was">Saved into <code>Assets/DebugSaveFiles</code>, which Unity imported as assets</td><td class="now">Saves into <code>&lt;project&gt;/DebugSaveFiles</code>, next to Assets</td></tr>
+        </tbody>
+      </table></div>
+      <p><code>StartupPolicy</code> works as before: <code>AutoSetUp</code> reopens the last game profile or creates "Game Profile 1"; <code>Manual</code> waits for your save slot screen.</p>
+      <div class="note">The Resources location is temporary until the config-location decision (GitHub #18) is settled.</div>
+    </section>
+
+    <section class="topic" id="locations">
+      <div class="topic-head"><h2>Choosing where data lives</h2><span class="freq-tag">most games</span></div>
+      <p>There are exactly three save locations. Scene used to be a checkbox on a GameProfile category. Now it is a location of its own, and it always sits inside a game profile.</p>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
+<pre><code class="language-csharp">public enum SaveScope
+{
+    None = 0,
+    Global = 1,
+    GameProfile = 2
+}
+
+// Scene data: a GameProfile category with
+// IsSceneSpecific ticked. Its folder name came from
+// SceneActions.ActiveSceneGroup.MainScene.</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2</span></div>
+<pre><code class="language-csharp">public enum SaveLocation
+{
+    Global = 1,       // settings, shared by every game profile
+    GameProfile = 2,  // one playthrough
+    Scene = 3         // one scene in one playthrough
+}
+
+// The script only names its save file. The config
+// says which location that file lives in:
+[Savable(SaveCategory.Position)]  // Position → Scene
+public class Chest : MonoBehaviour, ISavable&lt;bool&gt; { … }</code></pre></div>
+      </div>
+      <p>Switching game profiles keeps Global data and swaps everything else. See sample <em>04 Save Locations</em>.</p>
+    </section>
+
+    <section class="topic" id="profiles">
+      <div class="topic-head"><h2>Game profiles and save slots</h2><span class="freq-tag">most games</span></div>
+      <p>You reach game profiles through <code>SaveSystem.GameProfiles</code>. The v1 methods mixed creating and opening, and two of them didn't work.</p>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
+<pre><code class="language-csharp">SaveProfileManager profiles =
+    SaveManager.Instance.ProfileManager;
+
+profiles.CreateNewActiveProfileDirectory(); // create + open
+profiles.SetCurrentActiveProfile(id);       // "last opened"
+                                            // wasn't saved
+string[] ids = profiles.GetAllProfileIds(); // always empty
+profiles.DeleteProfileDirectory(id);        // missed the
+                                            // folder
+GameProfileManifest m = profiles.LoadProfileManifestByID(id);
+// m.ProfileName, m.CreationDateAndTime, m.LastSavedScene</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2</span></div>
+<pre><code class="language-csharp">SaveProfileManager profiles = SaveSystem.GameProfiles;
+
+string id = profiles.CreateNew("Game Profile 2"); // create only
+profiles.Open(id);       // remembered for the next launch
+SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+foreach (GameProfileManifest slot in profiles.GetAll())
+{
+    Debug.Log($"{slot.DisplayName}  {slot.LastSavedUtc}  " +
+              $"{slot.PlaytimeSeconds}s  {slot.LastScene}");
+}
+
+profiles.Delete(id);     // every file of that game profile
+bool isOpen = SaveSystem.IsGameProfileOpen;</code></pre></div>
+      </div>
+      <ul>
+        <li><code>SaveAll</code> keeps the open game profile's manifest current: last saved time, last scene and playtime.</li>
+        <li>The manifest has a <code>Custom</code> dictionary for game-specific slot details, such as difficulty or chapter.</li>
+        <li>After opening a different game profile, reload your scenes. An object registered under the previous game profile never writes its values into the new one. It only moves over if the new game profile has data for it.</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="plain">
+      <div class="topic-head"><h2>Saving a plain C# class</h2><span class="freq-tag">often</span></div>
+      <p>This is new. In v1 only MonoBehaviours with a Savable Bridge could save. In v2 any object can register itself with one line.</p>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
+<pre><code class="language-csharp">// Not possible. Every saved script had to sit on a
+// GameObject with a Savable Bridge, so data classes
+// were wrapped in a MonoBehaviour just to be saved.</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2</span></div>
+<pre><code class="language-csharp">[Savable(SaveCategory.Game)]
+public class Inventory : ISavable&lt;InventoryData&gt;
+{
+    public List&lt;string&gt; Items { get; private set; }
+
+    public Inventory()
+    {
+        Items = new List&lt;string&gt; { "Wooden Sword" };
+        // Last line: saved items may be restored here.
+        SaveSystem.Register(this, "player-inventory");
+    }
+
+    public InventoryData CaptureData() =&gt;
+        new InventoryData { Items = new List&lt;string&gt;(Items) };
+    public void RestoreData(InventoryData data) =&gt;
+        Items = new List&lt;string&gt;(data.Items);
+}
+
+// Whoever owns it unregisters it when its scene ends:
+void OnDestroy() =&gt; SaveSystem.Unregister(inventory);</code></pre></div>
+      </div>
+      <p>A plain class has no GameObject to carry a save ID, so you pick the ID yourself. It must be unique within its save file.</p>
+    </section>
+
+    <section class="topic" id="events">
+      <div class="topic-head"><h2>Reacting to save events</h2><span class="freq-tag">sometimes</span></div>
+      <p>v1 had nine events for loads and saves by category and scope. Because restore is automatic, v2 keeps the two that still mean something.</p>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
+<pre><code class="language-csharp">SaveEventBus.OnSaveAllCompleted += OnSaved;
+SaveEventBus.OnSaveCategoryCompleted += c =&gt; { };
+SaveEventBus.OnSaveScopeCompleted += s =&gt; { };
+SaveEventBus.OnLoadAllCompleted += OnLoaded;
+SaveEventBus.OnLoadCategoryCompleted += c =&gt; { };
+SaveEventBus.OnLoadScopeCompleted += s =&gt; { };</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2</span></div>
+<pre><code class="language-csharp">SaveSystem.Saved += OnSaved;   // after SaveAll or Save
+
+SaveSystem.GameProfileOpened += id =&gt;
+{
+    // Subscribing while a game profile is already open
+    // calls this right away. AutoSetUp opens one before
+    // any Awake runs, so late subscribers still hear it.
+};
+
+// The same events also live on SaveEvents.</code></pre></div>
+      </div>
+    </section>
+
+    <section class="topic" id="forget">
+      <div class="topic-head"><h2>Forgetting saved data on purpose</h2><span class="freq-tag">sometimes</span></div>
+      <p>This is new. It removes one saved object's data from its save file, for something like a coin that was picked up and should stay gone.</p>
+      <div class="compare single">
+        <div class="pane after"><div class="pane-label"><span>New in v2</span><span>SaveSystem.Forget</span></div>
+<pre><code class="language-csharp">SaveSystem.Forget("Game", "quest-dragon");   // save file name, save ID
+SaveSystem.SaveAll();                        // the entry is gone from the file
+
+// If that object is still registered, it is dropped too,
+// so destroying it afterwards can't write it back.</code></pre></div>
+      </div>
+      <div class="note">For objects with a Savable Bridge, the save ID is <code>&lt;bridge GUID&gt;/&lt;script GUID&gt;</code>, and game code can't read it easily yet. Step 3 adds <code>SetSaveId</code> and spawned copies, which make this practical for scene objects.</div>
+    </section>
+
+    <section class="topic" id="scriptable">
+      <div class="topic-head"><h2>Saving a ScriptableObject</h2><span class="freq-tag">sometimes</span></div>
+      <p>This is new, done by hand for now. An asset registers itself the same way a plain class does. Step 5 makes it automatic.</p>
+      <div class="compare single">
+        <div class="pane after"><div class="pane-label"><span>New in v2</span><span>until step 5</span></div>
+<pre><code class="language-csharp">[Savable(SaveCategory.Achievements)]
+public class GameProgress : ScriptableObject, ISavable&lt;GameProgressData&gt;
+{
+    public int LevelsCompleted;
+
+    void OnEnable()  =&gt; RegisterWithSaveSystem();
+    void OnDisable() =&gt; SaveSystem.Unregister(this);
+
+    // In the Editor the asset can load before play mode starts the save system,
+    // so a scene script calls this again in Awake. Registering twice is harmless.
+    public void RegisterWithSaveSystem() =&gt; SaveSystem.Register(this, "game-progress");
+
+    public GameProgressData CaptureData() =&gt; new GameProgressData { LevelsCompleted = LevelsCompleted };
+    public void RestoreData(GameProgressData data) =&gt; LevelsCompleted = data.LevelsCompleted;
+}</code></pre></div>
+      </div>
+    </section>
+
+    <section class="topic" id="editor">
+      <div class="topic-head"><h2>Editor tools</h2><span class="freq-tag">while debugging</span></div>
+      <p>The SaveManager inspector is gone along with SaveManager. Everything now lives in one menu.</p>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
+<pre><code class="language-text">SaveManager inspector, Debug Controls:
+  Delete All Saves          (no confirmation)
+  Open Release / Debug Save Directory
+  SAVE ALL DATA ! / LOAD ALL DATA !
+
+Tools &gt; External Project Tools &gt; Save System:
+  Open Release Folder, Open Debug Folder
+  Delete All Save Files     (deleted nothing:
+                             its paths were never set)</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2</span></div>
+<pre><code class="language-text">Tools &gt; External Project Tools &gt; Save System:
+  Save All                  (play mode only)
+  Load All                  (play mode only: re-reads every
+                             file, restores every object)
+  Open Release Folder
+  Open Debug Folder
+  Delete All Save Files     (asks first, uses the same
+                             folders the game writes to)</code></pre></div>
+      </div>
+    </section>
+
+    <section class="topic" id="disk">
+      <div class="topic-head"><h2>What's on disk</h2><span class="freq-tag">while debugging</span></div>
+      <p>Folders are shorter. Every file has a backup. Writes go to a temp file first, so a crash mid-write can't destroy the last good save.</p>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1 folders</span></div>
+<pre><code class="language-text">SaveFiles/
+  Global/
+    Settings.json
+    SystemMetaData.json
+  GameSaves/SaveProfiles/
+    GameProfilea1b2c3/
+      GameProfileManifest.json
+      Profile.json
+      Forest/            ← scene-specific category
+        Chests.json</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2 folders</span></div>
+<pre><code class="language-text">SaveFiles/                 (DebugSaveFiles/ when debugging)
+  Global/
+    Settings.json
+    Settings.backup.json   ← last good version
+    SaveSystemMetaData.json
+  GameProfiles/
+    a1b2c3/
+      GameProfileManifest.json
+      GameProfile.json
+      Scenes/
+        Forest/
+          Scene.json</code></pre></div>
+      </div>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1 file</span></div>
+<pre><code class="language-json">{
+  "Version": "1.0",
+  "Timestamp": "2026-07-05T17:09:54.0000000Z",
+  "ProfileID": "a1b2c3",
+  "DataMap": {
+    "Player GameObject #[5eecb91f-…]": {
+      "Health Component #27062df3-…": 40
+    }
+  }
+}</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2 file</span></div>
+<pre><code class="language-json">{
+  "FormatVersion": 2,
+  "Version": "1.0",
+  "Timestamp": "2026-11-13T04:12:08.0000000Z",
+  "ProfileID": "a1b2c3",
+  "FileName": "GameProfile",
+  "Entries": {
+    "5eecb91f-…/27062df3-…": {
+      "name": "Assets/Scenes/Level.unity/Player/Health",
+      "data": 40
+    }
+  }
+}</code></pre></div>
+      </div>
+      <ul>
+        <li>Entries are keyed by save ID only. <code>name</code> is just there to help a human reading the file.</li>
+        <li><code>FormatVersion</code> lets a later version spot and upgrade older files. A different version logs a warning.</li>
+        <li>If a file is corrupt, the backup loads with a warning that names the file. If both are unreadable, you get one error that says what to do.</li>
+        <li>v2 doesn't read v1 save files. The shipped game stays on <code>save-system-v1</code>.</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="storage">
+      <div class="topic-head"><h2>Storage parts under the hood</h2><span class="freq-tag">library work and tests</span></div>
+      <p>You only need these to extend the save system or write tests for it. v1 passed full file paths around through static classes. v2 uses small parts, each with one job, that work with keys like <code>GameProfiles/a1b2c3/GameProfile</code>.</p>
+      <div class="compare">
+        <div class="pane before"><div class="pane-label"><span>Before</span><span>v1</span></div>
+<pre><code class="language-csharp">SavePathGenerator.Initialize(config);         // static
+string path = SavePathGenerator.GetPath(definition, profileId);
+
+var storage = new FileDataStorageService();
+storage.SaveFile(json, path);
+// Deleted the old file, then moved the new one in.
+// A crash in between left no save at all.
+
+string text = storage.LoadFile(path);</code></pre></div>
+        <div class="pane after"><div class="pane-label"><span>After</span><span>v2</span></div>
+<pre><code class="language-csharp">IDataStorageService storage =
+    new DiskStorageService(useDebugFolder: true, FileExtension.json);
+// Tests use: new MemoryStorageService()
+
+var paths = new SavePathGenerator();          // builds every key
+string key = paths.GetSaveFileKey(
+    "GameProfile", SaveLocation.GameProfile, gameProfileId, null);
+
+var store = new SaveFileStore(storage, new JsonSerializer());
+store.Write(key, saveFile);    // keeps the last good one as .backup
+store.TryRead(key, out SaveFileData loaded); // falls back to it</code></pre></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Part</th><th>Its one job</th></tr></thead>
+        <tbody>
+          <tr><td><code>IDataStorageService</code></td><td>Write, read, list and delete text by key. A write fully succeeds or leaves the old text untouched.</td></tr>
+          <tr><td><code>DiskStorageService</code></td><td>Keys become files: write <code>.tmp</code>, flush, then <code>File.Replace</code>. It retries if Windows briefly locks the file.</td></tr>
+          <tr><td><code>MemoryStorageService</code></td><td>A dictionary, so tests never touch real save files.</td></tr>
+          <tr><td><code>SavePathGenerator</code></td><td>Builds every key in one place, so save and load can't disagree.</td></tr>
+          <tr><td><code>SaveFileStore</code></td><td>Backups, and reads with a fallback to them.</td></tr>
+          <tr><td><code>SaveProfileManager</code></td><td>Game profiles: create, open, list, delete, and remember the last one opened.</td></tr>
+          <tr><td><code>SaveRegistry</code>, <code>LoadedSaveData</code>, <code>SaveSession</code></td><td>Which objects are registered, the data read from disk, and the wiring that applies the whichever-second rule.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="topic" id="renames">
+      <div class="topic-head"><h2>Name changes at a glance</h2><span class="freq-tag">reference</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>v1</th><th>v2</th></tr></thead>
+        <tbody>
+          <tr><td class="was"><code>SaveActions</code></td><td class="now"><code>SaveSystem</code></td></tr>
+          <tr><td class="was"><code>SaveManager</code> in a scene</td><td class="now">Removed; <code>SaveStartup</code> runs by itself</td></tr>
+          <tr><td class="was"><code>SaveManagerEditor</code></td><td class="now">Removed; Tools menu</td></tr>
+          <tr><td class="was"><code>SaveEventBus</code></td><td class="now"><code>SaveEvents</code>, or the events on <code>SaveSystem</code></td></tr>
+          <tr><td class="was"><code>SaveScope</code></td><td class="now"><code>SaveLocation</code> (adds <code>Scene</code>)</td></tr>
+          <tr><td class="was"><code>DirectoryScope</code>, <code>IsSceneSpecific</code></td><td class="now"><code>Location</code></td></tr>
+          <tr><td class="was"><code>FileDataStorageService</code></td><td class="now"><code>DiskStorageService</code></td></tr>
+          <tr><td class="was"><code>SystemMetaData</code></td><td class="now"><code>SaveSystemMetaData</code></td></tr>
+          <tr><td class="was"><code>SavePathGenerator</code> (static, paths)</td><td class="now"><code>SavePathGenerator</code> (instance, keys)</td></tr>
+          <tr><td class="was"><code>SaveDataConverter</code></td><td class="now">Removed; <code>ISerializer.FromToken</code></td></tr>
+          <tr><td class="was"><code>SaveFileData.DataMap</code></td><td class="now"><code>SaveFileData.Entries</code></td></tr>
+          <tr><td class="was">Manifest <code>ProfileID</code>, <code>ProfileName</code>, <code>CreationDateAndTime</code>, <code>LastSavedScene</code></td><td class="now"><code>GameProfileId</code>, <code>DisplayName</code>, <code>CreatedUtc</code>, <code>LastScene</code>, plus <code>LastSavedUtc</code>, <code>PlaytimeSeconds</code>, <code>AppVersion</code>, <code>Custom</code></td></tr>
+          <tr><td class="was"><code>MonoSaveActions.SaveDataOf(category)</code></td><td class="now"><code>MonoSaveActions.Save("Settings")</code></td></tr>
+          <tr><td class="was">Folder <code>Runtime/Configuration</code>, <code>PublicSaveAPI</code>, <code>SaveBridgeAndRegistration</code></td><td class="now"><code>Runtime/Config</code>, <code>PublicAPI</code>, <code>SavedObjects</code> (GUIDs kept)</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note warn"><strong>Name clash:</strong> the class <code>SaveSystem</code> sits in the namespace <code>AbstractPixel.SaveSystem</code>. Code inside another <code>AbstractPixel.*</code> namespace finds the namespace first. Write <code>AbstractPixel.SaveSystem.SaveSystem.Register(…)</code> there, or keep game code in its own namespace.</div>
+    </section>
+
+    <section class="topic" id="later">
+      <div class="topic-head"><h2>Not built yet: steps 3 to 8</h2><span class="freq-tag">from the design page</span></div>
+      <p>These parts of the design page are planned but not started. Each needs its own detailed plan, and some wait on open decisions in GitHub issue #17.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Step</th><th>What it adds</th><th>What it changes for you</th></tr></thead>
+        <tbody>
+          <tr><td>3 Saved objects</td><td><code>[Save]</code> fields, <code>ISaveIn&lt;TFile&gt;</code>, <code>ISavable&lt;TData, TFile&gt;</code>, <code>IOnRestored</code>, <code>SetSaveId</code></td><td>Most scripts shrink to <code>[Save] int current;</code> with no interface or attribute</td></tr>
+          <tr><td>4 Save files</td><td>A save file list in the config and a generated <code>SaveFiles.cs</code></td><td><code>SaveCategory</code> and <code>[Savable]</code> go away</td></tr>
+          <tr><td>5 ScriptableObjects</td><td>The editor finds saved assets</td><td>No more <code>OnEnable</code> registration</td></tr>
+          <tr><td>6 Bridges while editing</td><td>Bridges added at edit time only</td><td>No bridge added in play mode or at build time</td></tr>
+          <tr><td>7 Editor window</td><td>Five tabs and a bridge inspector</td><td>Replaces the Tools menu items</td></tr>
+          <tr><td>8 Samples</td><td>One scene per learning level</td><td>The six current samples move to the new style</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <footer>
+      Library branch <code>save-system</code> at <code>8cb0fd9</code>, built on <code>21c295b</code>. Not pushed. Full detail in <code>save-system-v2-progress.md</code>.
+    </footer>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  if (window.hljs) {
+    document.querySelectorAll('pre code.language-csharp, pre code.language-json').forEach(function (block) {
+      window.hljs.highlightElement(block);
+    });
+  }
+</script>
