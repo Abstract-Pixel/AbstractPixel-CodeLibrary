@@ -1,5 +1,3 @@
-using System;
-
 namespace AbstractPixel.SaveSystem
 {
     /// <summary>
@@ -10,11 +8,7 @@ namespace AbstractPixel.SaveSystem
     {
         None = 0,
 
-        // Configs made before the built-in save files shipped with the library had a built-in Global row.
-        // It is kept so those configs still read; the editor turns that row into an ordinary row stored as "Global".
-        [Obsolete("Global is a save location, not a built-in save file. Use SaveFiles.Settings, SaveFiles.Input or SaveFiles.Achievements, or add a game save file.")]
-        Global = 1,
-
+        // 1 was the built-in Global row of v2's first steps. It stays unused so stored numbers keep their meaning.
         GameProfile = 2,
         Scene = 3,
         Settings = 4,

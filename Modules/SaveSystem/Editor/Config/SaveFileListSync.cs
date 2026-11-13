@@ -30,8 +30,8 @@ namespace AbstractPixel.SaveSystem.Editor
         }
 
         /// <summary>
-        /// Brings the project's config up to date and saves it. When rows changed, or an old SaveFiles.cs is still in
-        /// the project, GameSaveFiles.cs is written again so the classes match the list. Does nothing without a config.
+        /// Brings the project's config up to date and saves it. When rows changed, GameSaveFiles.cs is written again
+        /// so the classes match the list. Does nothing without a config.
         /// </summary>
         public static void SyncProjectConfig()
         {
@@ -42,24 +42,20 @@ namespace AbstractPixel.SaveSystem.Editor
             }
 
             bool changed = AddMissingRows(config.EditableSaveFileList, FindModuleSaveFileClasses());
-            if (changed || SaveFilesCodeWriter.OldSaveFilesIsInTheProject())
+            if (changed)
             {
                 SaveFilesCodeWriter.WriteFile(config);
             }
         }
 
         /// <summary>
-        /// Upgrades rows saved by an older version, removes module rows whose class is gone, adds the missing built-in
+        /// Removes module rows whose class is gone, adds the missing built-in
         /// rows and a row per module save file class that has none, and puts the built-in rows first in a fixed order.
         /// Rows that exist keep the owner's changes to their location and Backup box. Returns true if anything changed.
         /// </summary>
         public static bool AddMissingRows(List<SaveFileDefinition> rows, IEnumerable<Type> moduleSaveFileClasses)
         {
             bool changed = rows.RemoveAll(row => row == null) > 0;
-            foreach (SaveFileDefinition row in rows)
-            {
-                changed |= SaveFileDefinition.UpgradeFromOlderVersion(row);
-            }
             changed |= RemoveModuleRowsWhoseClassIsGone(rows);
 
             foreach (BuiltInSaveFile builtIn in BuiltInOrder)

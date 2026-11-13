@@ -18,17 +18,12 @@ namespace AbstractPixel.SaveSystem.Editor
     {
         const string GeneratedHeader = "// GameSaveFiles.cs. Written by the editor. Don't edit; change the list in the config.";
 
-        // The first line of the SaveFiles.cs the editor wrote before the built-in save files shipped with the library.
-        const string OldGeneratedHeader = "// SaveFiles.cs. Written by the editor. Don't edit; change the list in the config.";
-        const string OldGeneratedFileName = "SaveFiles.cs";
-
         /// <summary>
-        /// Writes GameSaveFiles.cs if its text changed, deletes an old SaveFiles.cs the editor wrote, and points every
-        /// game row at its class. Returns true if the file changed.
+        /// Writes GameSaveFiles.cs if its text changed, and points every game row at its class. Returns true if the
+        /// file changed.
         /// </summary>
         public static bool WriteFile(SaveSystemConfigSO config)
         {
-            config.UpgradeOldGameSaveFilesScriptPath();
             string scriptPath = config.GameSaveFilesScriptPath;
             List<SaveFileDefinition> rows = config.EditableSaveFileList;
             SaveFileListSync.AddMissingRows(rows, SaveFileListSync.FindModuleSaveFileClasses());
@@ -38,9 +33,6 @@ namespace AbstractPixel.SaveSystem.Editor
             {
                 return false;
             }
-
-            // Two SaveFiles classes would make every "SaveFiles.Settings" in game code ambiguous, so the old one goes first.
-            DeleteOldSaveFiles();
 
             string code = WriteCode(rows);
             string fullPath = Path.GetFullPath(scriptPath);
@@ -116,43 +108,6 @@ namespace AbstractPixel.SaveSystem.Editor
         public static string ToClassName(string rowName)
         {
             return SaveFileDefinition.ClassNameFor(rowName);
-        }
-
-        /// <summary>True when the text is a SaveFiles.cs the editor wrote before GameSaveFiles.cs replaced it.</summary>
-        public static bool IsOldSaveFilesWrittenByTheEditor(string fileText)
-        {
-            return fileText != null && fileText.StartsWith(OldGeneratedHeader, StringComparison.Ordinal);
-        }
-
-        /// <summary>True while the project still has a SaveFiles.cs the editor wrote.</summary>
-        public static bool OldSaveFilesIsInTheProject()
-        {
-            return FindOldSaveFiles().Count > 0;
-        }
-
-        static void DeleteOldSaveFiles()
-        {
-            foreach (string assetPath in FindOldSaveFiles())
-            {
-                AssetDatabase.DeleteAsset(assetPath);
-                Debug.Log($"[SaveSystem] Deleted '{assetPath}', the SaveFiles.cs the editor wrote before. The built-in save files are now SaveFiles.GameProfile, SaveFiles.Scene, SaveFiles.Settings, SaveFiles.Input and SaveFiles.Achievements in the library, and your own save files are in GameSaveFiles. Replace SaveFiles.Global with a game save file of your own.");
-            }
-        }
-
-        // Only a file whose first line is the old header is touched, so a hand-written SaveFiles.cs is safe.
-        static List<string> FindOldSaveFiles()
-        {
-            List<string> oldFiles = new List<string>();
-            foreach (string guid in AssetDatabase.FindAssets("SaveFiles t:MonoScript", new[] { "Assets" }))
-            {
-                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-                bool hasTheOldName = Path.GetFileName(assetPath) == OldGeneratedFileName;
-                if (hasTheOldName && IsOldSaveFilesWrittenByTheEditor(File.ReadAllText(assetPath)))
-                {
-                    oldFiles.Add(assetPath);
-                }
-            }
-            return oldFiles;
         }
 
         // GameSaveFiles.cs compiles into whichever assembly owns its folder: Assembly-CSharp, or an assembly definition's.

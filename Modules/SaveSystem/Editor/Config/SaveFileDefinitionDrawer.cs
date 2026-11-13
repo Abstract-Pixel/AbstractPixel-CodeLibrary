@@ -25,9 +25,7 @@ namespace AbstractPixel.SaveSystem.Editor
 
             SerializedProperty builtInProperty = property.FindPropertyRelative(nameof(SaveFileDefinition.BuiltIn));
             SerializedProperty addedByProperty = property.FindPropertyRelative(nameof(SaveFileDefinition.AddedBy));
-            // The old built-in Global row (number 1) is an ordinary row now; the editor upgrades it after the next compile.
-            int builtInNumber = builtInProperty.intValue;
-            bool isBuiltIn = builtInNumber != (int)BuiltInSaveFile.None && builtInNumber != 1;
+            bool isBuiltIn = builtInProperty.intValue != (int)BuiltInSaveFile.None;
             bool isAddedByModule = !string.IsNullOrEmpty(addedByProperty.stringValue);
 
             PropertyField nameField = new PropertyField(property.FindPropertyRelative(nameof(SaveFileDefinition.Name)), string.Empty);

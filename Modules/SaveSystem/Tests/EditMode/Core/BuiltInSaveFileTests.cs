@@ -33,68 +33,6 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
-        public void ConfigWithTheOldGlobalBuiltInRow_KeepsItAsAnOrdinaryRowStoredAsGlobal()
-        {
-            SaveFileDefinition oldGlobalRow = new SaveFileDefinition
-            {
-                Name = "Global",
-                Location = SaveLocation.Global,
-                StorageName = "Global",
-                ClassFullName = "SaveFiles+Global",
-                ClassAssemblyName = "Assembly-CSharp",
-#pragma warning disable CS0618 // The old row is exactly what this test reads.
-                BuiltIn = BuiltInSaveFile.Global
-#pragma warning restore CS0618
-            };
-
-            SaveFileLookup lookup = CreateLookup(oldGlobalRow);
-            bool found = lookup.TryGetDefinitionByFileName("Global", out SaveFileDefinition definition);
-
-            Assert.IsTrue(found, "Data saved in the old Global file must stay readable.");
-            Assert.IsFalse(definition.IsBuiltIn);
-            Assert.AreEqual(SaveLocation.Global, definition.Location);
-            Assert.AreEqual("GameSaveFiles+Global", definition.ClassFullName);
-        }
-
-        [Test]
-        public void ConfigWithAnOldBuiltInClassName_StillFindsTheRow_AndKeepsItsBackupBox()
-        {
-            SaveFileDefinition oldGameProfileRow = new SaveFileDefinition
-            {
-                Name = "GameProfile",
-                Location = SaveLocation.GameProfile,
-                StorageName = "GameProfile",
-                ClassFullName = "SaveFiles+GameProfile",
-                ClassAssemblyName = "Assembly-CSharp",
-                BuiltIn = BuiltInSaveFile.GameProfile,
-                Backup = false
-            };
-
-            SaveFileLookup lookup = CreateLookup(oldGameProfileRow);
-            bool found = lookup.TryGetDefinition(typeof(SaveFiles.GameProfile), out SaveFileDefinition definition);
-
-            Assert.IsTrue(found);
-            Assert.IsFalse(definition.Backup);
-            Assert.AreEqual(1, CountRowsStoredAs(lookup, "GameProfile"), "The old row and the built-in row are one row.");
-        }
-
-        [Test]
-        public void ReferenceWithAnOldSaveFilesClassName_FindsItsRowByName()
-        {
-            SaveFileDefinition ghostRunsRow = SaveFileDefinition.CreateForList("Ghost Runs", SaveLocation.GameProfile);
-            ghostRunsRow.ClassFullName = "GameSaveFiles+GhostRuns";
-            SaveFileLookup lookup = CreateLookup(ghostRunsRow);
-
-            bool foundGameRow = lookup.TryGetDefinitionByClassName("SaveFiles+GhostRuns", out SaveFileDefinition gameRow);
-            bool foundBuiltInRow = lookup.TryGetDefinitionByClassName("SaveFiles+Scene", out SaveFileDefinition builtInRow);
-
-            Assert.IsTrue(foundGameRow, "A scene or prefab saved before R1 holds SaveFiles+GhostRuns.");
-            Assert.AreEqual("Ghost Runs", gameRow.Name);
-            Assert.IsTrue(foundBuiltInRow);
-            Assert.AreEqual(BuiltInSaveFile.Scene, builtInRow.BuiltIn);
-        }
-
-        [Test]
         public void SaveFileReferenceToABuiltInClass_SavesThatFile()
         {
             MemoryStorageService storage = new MemoryStorageService();
@@ -112,19 +50,6 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveSystemConfigSO config = ScriptableObject.CreateInstance<SaveSystemConfigSO>();
             config.ReplaceSaveFileList(new List<SaveFileDefinition>());
             return config;
-        }
-
-        static int CountRowsStoredAs(SaveFileLookup lookup, string fileName)
-        {
-            int count = 0;
-            foreach (SaveFileDefinition definition in lookup.AllDefinitions)
-            {
-                if (definition.FileName == fileName)
-                {
-                    count++;
-                }
-            }
-            return count;
         }
 
         sealed class GraphicsQuality : ISavable<int, SaveFiles.Settings>

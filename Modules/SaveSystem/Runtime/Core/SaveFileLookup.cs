@@ -33,7 +33,7 @@ namespace AbstractPixel.SaveSystem
                 {
                     if (row != null)
                     {
-                        definitions.Add(UpgradedCopyOf(row));
+                        definitions.Add(row);
                     }
                 }
             }
@@ -132,8 +132,6 @@ namespace AbstractPixel.SaveSystem
 
         /// <summary>
         /// The row for the save file class with this full name, as a <see cref="SaveFileReference"/> stores it.
-        /// A reference saved before the built-in save files shipped with the library holds "SaveFiles+Name";
-        /// it still finds the row whose name makes that class name, so scenes and prefabs keep working.
         /// </summary>
         public bool TryGetDefinitionByClassName(string classFullName, out SaveFileDefinition definition)
         {
@@ -143,21 +141,6 @@ namespace AbstractPixel.SaveSystem
                 {
                     definition = candidate;
                     return true;
-                }
-            }
-
-            bool isOldGeneratedClassName = classFullName != null
-                && classFullName.StartsWith(SaveFileDefinition.OldGeneratedClassPrefix, StringComparison.Ordinal);
-            if (isOldGeneratedClassName)
-            {
-                string oldClassName = classFullName.Substring(SaveFileDefinition.OldGeneratedClassPrefix.Length);
-                foreach (SaveFileDefinition candidate in definitions)
-                {
-                    if (SaveFileDefinition.ClassNameFor(candidate.Name) == oldClassName)
-                    {
-                        definition = candidate;
-                        return true;
-                    }
                 }
             }
 
@@ -178,14 +161,6 @@ namespace AbstractPixel.SaveSystem
                 }
             }
             return null;
-        }
-
-        // The running game upgrades a copy, so a config saved by an older version works without touching the asset.
-        static SaveFileDefinition UpgradedCopyOf(SaveFileDefinition row)
-        {
-            SaveFileDefinition copy = row.Copy();
-            SaveFileDefinition.UpgradeFromOlderVersion(copy);
-            return copy;
         }
 
         void AddMissingBuiltIn(BuiltInSaveFile builtIn)

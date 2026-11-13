@@ -33,7 +33,7 @@ namespace AbstractPixel.SaveSystem
         [field: SerializeField, Tooltip("Save every save file when the game loses focus, for example when a phone player switches apps.")]
         public bool SaveOnFocusLoss { get; private set; } = false;
 
-        [SerializeField, FormerlySerializedAs("saveFilesScriptPath"), Tooltip("Where the editor writes GameSaveFiles.cs, the class for each game save file in the list below.")]
+        [SerializeField, Tooltip("Where the editor writes GameSaveFiles.cs, the class for each game save file in the list below.")]
         string gameSaveFilesScriptPath = DefaultGameSaveFilesScriptPath;
 
         [SerializeField, FormerlySerializedAs("categoryDefinitionList")]
@@ -41,14 +41,10 @@ namespace AbstractPixel.SaveSystem
 
         internal const string DefaultGameSaveFilesScriptPath = "Assets/SaveSystem/GameSaveFiles.cs";
 
-        // Configs made before the built-in save files shipped with the library point at the old file name.
-        const string OldGeneratedFileName = "SaveFiles.cs";
-        const string GeneratedFileName = "GameSaveFiles.cs";
-
         /// <summary>The save file list: one row per save file, with its name, save location and Backup box.</summary>
         public IReadOnlyList<SaveFileDefinition> SaveFileList => saveFileList;
 
-        /// <summary>Where the editor writes GameSaveFiles.cs. An old path ending in SaveFiles.cs gives GameSaveFiles.cs in the same folder.</summary>
+        /// <summary>Where the editor writes GameSaveFiles.cs.</summary>
         public string GameSaveFilesScriptPath
         {
             get
@@ -58,28 +54,8 @@ namespace AbstractPixel.SaveSystem
                 {
                     return DefaultGameSaveFilesScriptPath;
                 }
-
-                bool isOldFileName = gameSaveFilesScriptPath == OldGeneratedFileName
-                    || gameSaveFilesScriptPath.EndsWith("/" + OldGeneratedFileName, System.StringComparison.Ordinal);
-                if (isOldFileName)
-                {
-                    string folder = gameSaveFilesScriptPath.Substring(0, gameSaveFilesScriptPath.Length - OldGeneratedFileName.Length);
-                    return folder + GeneratedFileName;
-                }
                 return gameSaveFilesScriptPath;
             }
-        }
-
-        /// <summary>Stores the GameSaveFiles.cs path in place of an old SaveFiles.cs path, so the inspector shows it. Returns true if it changed.</summary>
-        internal bool UpgradeOldGameSaveFilesScriptPath()
-        {
-            string upToDatePath = GameSaveFilesScriptPath;
-            if (gameSaveFilesScriptPath == upToDatePath)
-            {
-                return false;
-            }
-            gameSaveFilesScriptPath = upToDatePath;
-            return true;
         }
 
         /// <summary>The list itself, for the editor tools that add rows and write GameSaveFiles.cs.</summary>
