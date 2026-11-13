@@ -13,7 +13,6 @@ namespace AbstractPixel.SaveSystem
     internal sealed class SavedObjectTracker
     {
         readonly SaveRegistry registry = new SaveRegistry();
-        readonly AutomaticSaveIds automaticSaveIds = new AutomaticSaveIds();
         readonly LoadedSaveData loadedData;
         readonly SaveFileAddresses addresses;
         readonly SaveProfileManager profileManager;
@@ -27,11 +26,8 @@ namespace AbstractPixel.SaveSystem
 
         public IEnumerable<SavedObjectEntry> AllEntries => registry.AllEntries;
 
-        /// <summary>A plain class's automatic save ID in this save file: its class name, then "Inventory 2" and so on.</summary>
-        public string AssignAutomaticSaveId(object savedObject, Type savedObjectClass, string saveFileName)
-        {
-            return automaticSaveIds.Assign(savedObject, savedObjectClass, saveFileName);
-        }
+        /// <summary>A plain class's automatic save ID in its save file: its class name, then "Inventory 2" and so on.</summary>
+        public AutomaticSaveIds AutomaticSaveIds { get; } = new AutomaticSaveIds();
 
         /// <summary>
         /// Starts tracking the entry and restores it right away if its data can be loaded now. Its new-game values are
@@ -155,7 +151,7 @@ namespace AbstractPixel.SaveSystem
         public void Clear()
         {
             registry.Clear();
-            automaticSaveIds.Clear();
+            AutomaticSaveIds.Clear();
         }
 
         bool TryRestore(SavedObjectEntry entry)
@@ -192,7 +188,7 @@ namespace AbstractPixel.SaveSystem
             {
                 registry.RemoveEntry(entry.SaveFileName, entry.SaveId);
             }
-            automaticSaveIds.Release(entry.SavedObject);
+            AutomaticSaveIds.Release(entry.SavedObject);
         }
 
         static bool BelongsTo(SavedObjectEntry entry, object savedObject)

@@ -17,7 +17,7 @@ namespace AbstractPixel.SaveSystem
         readonly Func<double> unscaledTime;
         readonly SaveFileAddresses addresses;
         readonly SaveSessionEvents events;
-        readonly SavedObjectTracker savedObjects;
+        readonly SaveFileClassFinder saveFileClasses = new SaveFileClassFinder();
 
         // The game profile whose data is in loadedData, and the time playtime was last counted up to.
         string loadedGameProfileId;
@@ -31,6 +31,12 @@ namespace AbstractPixel.SaveSystem
 
         /// <summary>Whole save files as text, for <see cref="SaveStorage"/> while this session runs.</summary>
         public SaveFileAccess FileAccess { get; }
+
+        /// <summary>
+        /// The registered saved objects: unregister, forget and drop them here. It does the capturing, restoring and
+        /// forgetting for this session.
+        /// </summary>
+        public SavedObjectTracker SavedObjects { get; }
 
         /// <summary>Which save files have loaded, so late subscribers to load events are told right away.</summary>
         public LoadEventLog LoadEvents { get; } = new LoadEventLog();
@@ -46,8 +52,8 @@ namespace AbstractPixel.SaveSystem
             GameProfiles = new GameProfileList(ProfileManager);
             addresses = new SaveFileAddresses(saveFiles, ProfileManager);
             FileAccess = new SaveFileAccess(saveFiles, storage, store, GameProfiles);
-            events = new SaveSessionEvents(saveFiles, loadedData, addresses, sceneInfo, LoadEvents);
-            savedObjects = new SavedObjectTracker(loadedData, addresses, ProfileManager);
+            events = new SaveSessionEvents(saveFiles, loadedData, addresses, sceneInfo, LoadEvents, saveFileClasses);
+            SavedObjects = new SavedObjectTracker(loadedData, addresses, ProfileManager);
             FileAccess.FileChanged += OnFileChangedThroughSaveStorage;
             ProfileManager.Opened += OnGameProfileOpened;
             ProfileManager.Closed += OnGameProfileClosed;
@@ -77,7 +83,7 @@ namespace AbstractPixel.SaveSystem
         public void RegisterScript(object owner, object savedObject, Type scriptType, string saveId, Type dataType,
             Func<object> capture, Action<object> restore, string sceneName, string entryName, Action turnOffSceneObject = null)
         {
-            events.Remember(SavedScript.SaveFileClassOf(scriptType));
+            saveFileClasses.Remember(SavedScript.SaveFileClassOf(scriptType));
             bool hasSaveFile = saveFiles.TryGetDefinitionForSavedObject(scriptType, out SaveFileDefinition definition);
             if (!hasSaveFile)
             {
@@ -88,7 +94,7 @@ namespace AbstractPixel.SaveSystem
             bool wantsAutomaticSaveId = string.IsNullOrEmpty(saveId);
             if (wantsAutomaticSaveId)
             {
-                saveId = savedObjects.AssignAutomaticSaveId(savedObject, scriptType, saveFileName);
+                saveId = SavedObjects.AutomaticSaveIds.Assign(savedObject, scriptType, saveFileName);
             }
 
             if (definition.Location == SaveLocation.Scene)
@@ -111,34 +117,12 @@ namespace AbstractPixel.SaveSystem
                 SavedObject = savedObject,
                 TurnOffSceneObject = turnOffSceneObject
             };
-            savedObjects.Track(entry);
-        }
-
-        /// <summary>Captures the object's current data, then forgets the object. Its data stays for the next save.</summary>
-        public void Unregister(object owner)
-        {
-            savedObjects.Untrack(owner);
-        }
-
-        /// <summary>
-        /// Makes a saved object's data go away on purpose, such as a coin that was picked up. An object placed in a
-        /// scene gets a gone marker, so it stays gone after its scene loads again; a plain class or spawned copy loses
-        /// its data. Finds the entry from the object itself: a plain class, a saved script, its Savable Bridge, or its GameObject.
-        /// </summary>
-        public void Forget(object savedObject)
-        {
-            savedObjects.Forget(savedObject);
-        }
-
-        /// <summary>Stops tracking every entry this object owns without capturing it, for an object that turned itself off.</summary>
-        public void DropWithoutCapturing(object owner)
-        {
-            savedObjects.DropWithoutCapturing(owner);
+            SavedObjects.Track(entry);
         }
 
         public void SaveAll()
         {
-            savedObjects.CaptureAll();
+            SavedObjects.CaptureAll();
             List<string> writtenFileNames = new List<string>();
             loadedData.WriteChanged(null, writtenFileNames);
             FinishSave();
@@ -152,7 +136,7 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Like SaveAll, for one save file only.</summary>
         public void Save(Type saveFileClass)
         {
-            events.Remember(saveFileClass);
+            saveFileClasses.Remember(saveFileClass);
             if (saveFiles.TryGetDefinition(saveFileClass, out SaveFileDefinition definition))
             {
                 Save(definition);
@@ -170,7 +154,7 @@ namespace AbstractPixel.SaveSystem
 
         void Save(SaveFileDefinition definition)
         {
-            savedObjects.CaptureAll(entry => entry.SaveFileName == definition.FileName);
+            SavedObjects.CaptureAll(entry => entry.SaveFileName == definition.FileName);
             bool everyWriteWorked = loadedData.WriteChanged(file => file.FileName == definition.FileName);
             FinishSave();
             // A file with nothing to write counts as saved, so a "Saved" message shows. A failed write raises nothing:
@@ -187,14 +171,14 @@ namespace AbstractPixel.SaveSystem
         /// </summary>
         public void Reload(Type saveFileClass)
         {
-            events.Remember(saveFileClass);
+            saveFileClasses.Remember(saveFileClass);
             if (!saveFiles.TryGetDefinition(saveFileClass, out SaveFileDefinition definition))
             {
                 return;
             }
 
             loadedData.DropFilesNamed(definition.FileName);
-            savedObjects.RestoreAll(entry => entry.SaveFileName == definition.FileName);
+            SavedObjects.RestoreAll(entry => entry.SaveFileName == definition.FileName);
         }
 
         /// <summary>Re-reads every save file from disk and restores every registered object. Used by the editor's Load All.</summary>
@@ -202,7 +186,7 @@ namespace AbstractPixel.SaveSystem
         {
             loadedData.Clear();
             ReadGlobalSaveFiles();
-            savedObjects.RestoreAll();
+            SavedObjects.RestoreAll();
         }
 
         /// <summary>Lets go of every object and event handler, so nothing outlives play mode.</summary>
@@ -215,7 +199,7 @@ namespace AbstractPixel.SaveSystem
             sceneInfo.SceneUnloaded -= OnSceneUnloaded;
             IDisposable disposableSceneInfo = sceneInfo as IDisposable;
             disposableSceneInfo?.Dispose();
-            savedObjects.Clear();
+            SavedObjects.Clear();
             loadedData.Clear();
         }
 
@@ -228,7 +212,7 @@ namespace AbstractPixel.SaveSystem
             loadedGameProfileId = gameProfileId;
             playtimeCountedUntil = unscaledTime();
 
-            savedObjects.RestoreForOpenedGameProfile(gameProfileId);
+            SavedObjects.RestoreForOpenedGameProfile(gameProfileId);
             SaveEventBus.RaiseGameProfileOpened(GameProfiles.GetById(gameProfileId));
             events.RecordGameProfileLoads();
         }
@@ -238,7 +222,7 @@ namespace AbstractPixel.SaveSystem
         void OnFileChangedThroughSaveStorage(string key)
         {
             loadedData.DropKey(key);
-            savedObjects.RestoreAll(entry => addresses.TryGetAddress(entry, out SaveFileAddress address) && address.Key == key);
+            SavedObjects.RestoreAll(entry => addresses.TryGetAddress(entry, out SaveFileAddress address) && address.Key == key);
         }
 
         // A newly loaded scene's Savable Bridges have registered and restored, so its Scene files have loaded.

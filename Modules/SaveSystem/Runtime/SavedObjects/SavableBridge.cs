@@ -173,7 +173,7 @@ namespace AbstractPixel.SaveSystem
         // GameObject never reach their Start (their Awake has already run).
         private void TurnOffBecauseForgotten()
         {
-            SaveActions.Session?.DropWithoutCapturing(this);
+            SaveActions.Session?.SavedObjects.DropWithoutCapturing(this);
             gameObject.SetActive(false);
         }
 

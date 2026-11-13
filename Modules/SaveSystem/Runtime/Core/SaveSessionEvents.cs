@@ -14,21 +14,16 @@ namespace AbstractPixel.SaveSystem
         readonly SaveFileAddresses addresses;
         readonly ISceneInfo sceneInfo;
         readonly LoadEventLog loadEvents;
-        readonly SaveFileClassFinder saveFileClasses = new SaveFileClassFinder();
+        readonly SaveFileClassFinder saveFileClasses;
 
-        public SaveSessionEvents(SaveFileLookup saveFiles, LoadedSaveData loadedData, SaveFileAddresses addresses, ISceneInfo sceneInfo, LoadEventLog loadEvents)
+        public SaveSessionEvents(SaveFileLookup saveFiles, LoadedSaveData loadedData, SaveFileAddresses addresses, ISceneInfo sceneInfo, LoadEventLog loadEvents, SaveFileClassFinder saveFileClasses)
         {
             this.saveFiles = saveFiles;
             this.loadedData = loadedData;
             this.addresses = addresses;
             this.sceneInfo = sceneInfo;
             this.loadEvents = loadEvents;
-        }
-
-        /// <summary>Notes a save file class seen in use, so its events can name it.</summary>
-        public void Remember(Type saveFileClass)
-        {
-            saveFileClasses.Remember(saveFileClass);
+            this.saveFileClasses = saveFileClasses;
         }
 
         /// <summary>Reads every save file in one save location and records that each has loaded.</summary>

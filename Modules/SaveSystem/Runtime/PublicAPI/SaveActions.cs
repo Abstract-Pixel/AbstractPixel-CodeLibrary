@@ -45,7 +45,7 @@ namespace AbstractPixel.SaveSystem
         public static void Register<T>(ISavable<T> savedObject, string saveId) => session?.Register(savedObject, saveId);
 
         /// <summary>Captures the object's current data, then stops tracking it. Its data is written on the next save.</summary>
-        public static void Unregister(object savedObject) => session?.Unregister(savedObject);
+        public static void Unregister(object savedObject) => session?.SavedObjects.Untrack(savedObject);
 
         /// <summary>Captures every registered object, then writes every save file that changed.</summary>
         public static void SaveAll() => session?.SaveAll();
@@ -69,7 +69,7 @@ namespace AbstractPixel.SaveSystem
         /// copy or a plain class loses its data. Pass the saved object itself: a plain class, a saved script or its
         /// GameObject. Call it before Destroy. Example: <c>SaveActions.Forget(gameObject); Destroy(gameObject);</c>
         /// </summary>
-        public static void Forget(object savedObject) => session?.Forget(savedObject);
+        public static void Forget(object savedObject) => session?.SavedObjects.Forget(savedObject);
 
         internal static void Start(SaveSession newSession)
         {
