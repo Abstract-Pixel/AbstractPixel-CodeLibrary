@@ -22,7 +22,11 @@ namespace AbstractPixel.SaveSystem
         string loadedGameProfileId;
         double playtimeCountedUntil;
 
-        public SaveProfileManager GameProfiles { get; }
+        /// <summary>The game profiles as handles, for game code: <c>SaveActions.GameProfiles</c>.</summary>
+        public GameProfileList GameProfiles { get; }
+
+        /// <summary>The game profiles by folder ID, for the save system's own use.</summary>
+        public SaveProfileManager ProfileManager { get; }
 
         public SaveSession(SaveSystemConfigSO config, IDataStorageService storage, ISerializer serializer, ISceneInfo sceneInfo, Func<double> unscaledTime)
         {
@@ -31,9 +35,10 @@ namespace AbstractPixel.SaveSystem
             loadedData = new LoadedSaveData(store, serializer);
             this.sceneInfo = sceneInfo;
             this.unscaledTime = unscaledTime;
-            GameProfiles = new SaveProfileManager(store, storage, paths, config.GameProfileGuidLength);
-            GameProfiles.Opened += OnGameProfileOpened;
-            GameProfiles.Closed += OnGameProfileClosed;
+            ProfileManager = new SaveProfileManager(store, storage, paths, config.GameProfileGuidLength, config.DefaultGameProfileName);
+            GameProfiles = new GameProfileList(ProfileManager);
+            ProfileManager.Opened += OnGameProfileOpened;
+            ProfileManager.Closed += OnGameProfileClosed;
         }
 
         /// <summary>Reads every Global save file. Runs once at startup.</summary>
@@ -81,7 +86,7 @@ namespace AbstractPixel.SaveSystem
 
             SavedObjectEntry entry = new SavedObjectEntry(owner, saveId, saveFileName, definition.Location, sceneName, entryName, dataType, capture, restore)
             {
-                GameProfileId = GameProfiles.CurrentGameProfileId,
+                GameProfileId = ProfileManager.CurrentGameProfileId,
                 SavedObject = savedObject
             };
             registry.Add(entry);
@@ -202,8 +207,8 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Lets go of every object and event handler, so nothing outlives play mode.</summary>
         public void Dispose()
         {
-            GameProfiles.Opened -= OnGameProfileOpened;
-            GameProfiles.Closed -= OnGameProfileClosed;
+            ProfileManager.Opened -= OnGameProfileOpened;
+            ProfileManager.Closed -= OnGameProfileClosed;
             registry.Clear();
             loadedData.Clear();
         }
@@ -232,7 +237,7 @@ namespace AbstractPixel.SaveSystem
                     entry.GameProfileId = gameProfileId;
                 }
             }
-            SaveEventBus.RaiseGameProfileOpened(gameProfileId);
+            SaveEventBus.RaiseGameProfileOpened(GameProfiles.GetById(gameProfileId));
         }
 
         void OnGameProfileClosed()
@@ -249,7 +254,7 @@ namespace AbstractPixel.SaveSystem
 
         void Capture(SavedObjectEntry entry)
         {
-            bool belongsToOpenGameProfile = entry.Location == SaveLocation.Global || entry.GameProfileId == GameProfiles.CurrentGameProfileId;
+            bool belongsToOpenGameProfile = entry.Location == SaveLocation.Global || entry.GameProfileId == ProfileManager.CurrentGameProfileId;
             if (belongsToOpenGameProfile && TryGetAddress(entry, out SaveFileAddress address))
             {
                 loadedData.Capture(entry, address);
@@ -264,19 +269,21 @@ namespace AbstractPixel.SaveSystem
 
         void UpdateOpenGameProfileManifest()
         {
-            string gameProfileId = GameProfiles.CurrentGameProfileId;
-            if (gameProfileId == null || !GameProfiles.TryGetManifest(gameProfileId, out GameProfileManifest manifest))
+            // The handle's own manifest is updated, so custom fields the game set on it are written too.
+            GameProfile openGameProfile = GameProfiles.Current;
+            if (openGameProfile == null)
             {
                 return;
             }
 
+            GameProfileManifest manifest = openGameProfile.Manifest;
             double now = unscaledTime();
             manifest.PlaytimeSeconds += now - playtimeCountedUntil;
             playtimeCountedUntil = now;
             manifest.LastSavedUtc = DateTime.UtcNow.ToString("o");
             manifest.LastScene = sceneInfo.ActiveSceneName;
             manifest.AppVersion = Application.version;
-            GameProfiles.SaveManifest(manifest);
+            ProfileManager.SaveManifest(manifest);
         }
 
         bool TryGetAddress(SavedObjectEntry entry, out SaveFileAddress address)
@@ -290,7 +297,7 @@ namespace AbstractPixel.SaveSystem
         bool TryGetAddress(SaveFileDefinition definition, string sceneName, out SaveFileAddress address)
         {
             address = default;
-            string gameProfileId = GameProfiles.CurrentGameProfileId;
+            string gameProfileId = ProfileManager.CurrentGameProfileId;
             if (definition.Location != SaveLocation.Global && gameProfileId == null)
             {
                 return false;
@@ -301,7 +308,7 @@ namespace AbstractPixel.SaveSystem
 
         SaveFileAddress AddressOf(SaveFileDefinition definition, string sceneName)
         {
-            string gameProfileId = definition.Location == SaveLocation.Global ? null : GameProfiles.CurrentGameProfileId;
+            string gameProfileId = definition.Location == SaveLocation.Global ? null : ProfileManager.CurrentGameProfileId;
             string key = paths.GetSaveFileKey(definition.FileName, definition.Location, gameProfileId, sceneName);
             return new SaveFileAddress(key, definition.FileName, gameProfileId);
         }

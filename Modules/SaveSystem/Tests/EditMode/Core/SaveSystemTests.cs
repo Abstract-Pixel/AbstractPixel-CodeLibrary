@@ -38,9 +38,9 @@ namespace AbstractPixel.SaveSystem.Tests
 
         string CreateAndOpenGameProfile()
         {
-            string gameProfileId = SaveActions.GameProfiles.CreateNew("Game Profile");
-            SaveActions.GameProfiles.Open(gameProfileId);
-            return gameProfileId;
+            GameProfile profile = SaveActions.GameProfiles.CreateNew();
+            profile.Open();
+            return profile.Id;
         }
 
         string GameKey(string gameProfileId) => $"GameProfiles/{gameProfileId}/Game";
@@ -59,7 +59,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(before, "player-health");
             SaveActions.SaveAll();
             StartSession();
-            SaveActions.GameProfiles.Open(gameProfileId);
+            SaveActions.GameProfiles.GetById(gameProfileId).Open();
             PlayerHealth after = new PlayerHealth();
 
             SaveActions.Register(after, "player-health");
@@ -78,7 +78,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(health, "player-health");
             Assert.AreEqual(100, health.Current, "No game profile is open yet, so nothing restores.");
 
-            SaveActions.GameProfiles.Open(gameProfileId);
+            SaveActions.GameProfiles.GetById(gameProfileId).Open();
 
             Assert.AreEqual(40, health.Current);
         }
@@ -94,7 +94,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(volume, "volume");
 
             Assert.AreEqual(2, volume.Volume);
-            Assert.IsFalse(SaveActions.IsGameProfileOpen);
+            Assert.IsNull(SaveActions.GameProfiles.Current);
         }
 
         [Test]
@@ -120,7 +120,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(new PlayerHealth { Current = 30 }, "boss-health");
             SaveActions.SaveAll();
             StartSession();
-            SaveActions.GameProfiles.Open(gameProfileId);
+            SaveActions.GameProfiles.GetById(gameProfileId).Open();
             SaveActions.Register(new PlayerHealth { Current = 80 }, "player-health");
 
             SaveActions.SaveAll();
@@ -155,9 +155,9 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(health, "player-health");
             SaveActions.Register(volume, "volume");
             SaveActions.SaveAll();
-            string second = SaveActions.GameProfiles.CreateNew("Second");
+            string second = SaveActions.GameProfiles.CreateNew("Second").Id;
 
-            SaveActions.GameProfiles.Open(second);
+            SaveActions.GameProfiles.GetById(second).Open();
             // The object was registered under the first game profile; registering again makes it part of the second.
             SaveActions.Register(health, "player-health");
             health.Current = 77;
@@ -178,8 +178,8 @@ namespace AbstractPixel.SaveSystem.Tests
             PlayerHealth oldSceneHealth = new PlayerHealth { Current = 10 };
             SaveActions.Register(oldSceneHealth, "player-health");
             SaveActions.SaveAll();
-            string second = SaveActions.GameProfiles.CreateNew("Second");
-            SaveActions.GameProfiles.Open(second);
+            string second = SaveActions.GameProfiles.CreateNew("Second").Id;
+            SaveActions.GameProfiles.GetById(second).Open();
 
             SaveActions.Unregister(oldSceneHealth);
             PlayerHealth newSceneHealth = new PlayerHealth();
@@ -197,13 +197,13 @@ namespace AbstractPixel.SaveSystem.Tests
             PlayerHealth health = new PlayerHealth { Current = 30 };
             SaveActions.Register(health, "player-health");
             SaveActions.SaveAll();
-            string second = SaveActions.GameProfiles.CreateNew("Second");
-            SaveActions.GameProfiles.Open(second);
+            string second = SaveActions.GameProfiles.CreateNew("Second").Id;
+            SaveActions.GameProfiles.GetById(second).Open();
             health.Current = 60;
             SaveActions.Register(health, "player-health");
             SaveActions.SaveAll();
 
-            SaveActions.GameProfiles.Open(first);
+            SaveActions.GameProfiles.GetById(first).Open();
             Assert.AreEqual(30, health.Current, "The first game profile has data, so opening it restores the object.");
             health.Current = 35;
             SaveActions.SaveAll();
@@ -239,7 +239,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(health, "player-health");
             LogAssert.Expect(LogType.Error, new Regex("exploding.*ExplodingRestore.*restore exploded"));
 
-            SaveActions.GameProfiles.Open(gameProfileId);
+            SaveActions.GameProfiles.GetById(gameProfileId).Open();
 
             Assert.AreEqual(12, health.Current);
         }
@@ -365,7 +365,7 @@ namespace AbstractPixel.SaveSystem.Tests
 
             SaveActions.SaveAll();
 
-            Assert.IsTrue(SaveActions.GameProfiles.TryGetManifest(gameProfileId, out GameProfileManifest manifest));
+            Assert.IsTrue(SaveActions.Session.ProfileManager.TryGetManifest(gameProfileId, out GameProfileManifest manifest));
             Assert.AreEqual(15, manifest.PlaytimeSeconds);
             Assert.AreEqual("Castle", manifest.LastScene);
             Assert.IsFalse(string.IsNullOrEmpty(manifest.LastSavedUtc));
@@ -376,8 +376,8 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             string openedId = null;
             int savedCount = 0;
-            SaveActions.GameProfileOpened += id => openedId = id;
-            SaveActions.Saved += () => savedCount++;
+            SaveEventBus.GameProfileOpened += profile => openedId = profile.Id;
+            SaveEventBus.Saved += () => savedCount++;
 
             string gameProfileId = CreateAndOpenGameProfile();
             SaveActions.SaveAll();
@@ -393,7 +393,7 @@ namespace AbstractPixel.SaveSystem.Tests
             string gameProfileId = CreateAndOpenGameProfile();
             string openedId = null;
 
-            SaveActions.GameProfileOpened += id => openedId = id;
+            SaveEventBus.GameProfileOpened += profile => openedId = profile.Id;
 
             Assert.AreEqual(gameProfileId, openedId);
         }

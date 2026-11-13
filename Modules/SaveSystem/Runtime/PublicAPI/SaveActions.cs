@@ -11,23 +11,20 @@ namespace AbstractPixel.SaveSystem
     {
         static SaveSession session;
 
-        /// <summary>Creates, opens, lists and deletes game profiles. Null until the save system has started.</summary>
-        public static SaveProfileManager GameProfiles => session?.GameProfiles;
-
-        public static bool IsGameProfileOpen => session?.GameProfiles.CurrentGameProfileId != null;
-
-        /// <summary>Raised when a game profile opens. Subscribing while one is open calls the handler right away.</summary>
-        public static event Action<string> GameProfileOpened
+        /// <summary>
+        /// Every game profile, plus CreateNew, Current and Get(slot). Never null: without a save system config it is
+        /// an empty list whose methods log one clear error.
+        /// </summary>
+        public static GameProfileList GameProfiles
         {
-            add => SaveEventBus.GameProfileOpened += value;
-            remove => SaveEventBus.GameProfileOpened -= value;
-        }
-
-        /// <summary>Raised after SaveAll or Save finishes writing.</summary>
-        public static event Action Saved
-        {
-            add => SaveEventBus.Saved += value;
-            remove => SaveEventBus.Saved -= value;
+            get
+            {
+                if (session == null)
+                {
+                    return GameProfileList.Empty;
+                }
+                return session.GameProfiles;
+            }
         }
 
         internal static SaveSession Session => session;

@@ -11,6 +11,9 @@ namespace AbstractPixel.SaveSystem
         public int FormatVersion = SaveFileStore.CurrentFormatVersion;
         public string GameProfileId;
 
+        /// <summary>The number the save slot screen shows: 1, 2, 3. It never changes, even when other game profiles are deleted.</summary>
+        public int SlotNumber;
+
         /// <summary>The name players see, for example "Game Profile 1".</summary>
         public string DisplayName;
 

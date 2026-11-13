@@ -5,21 +5,21 @@ namespace AbstractPixel.SaveSystem
     /// <summary>Events the save system raises. <see cref="SaveActions"/> exposes the same events.</summary>
     public static class SaveEventBus
     {
-        static Action<string> gameProfileOpened;
-        static string openGameProfileId;
+        static Action<GameProfile> gameProfileOpened;
+        static GameProfile openGameProfile;
 
         /// <summary>
-        /// Raised with the game profile's ID when it opens. Subscribing while a game profile is already open calls
+        /// Raised with the game profile when it opens. Subscribing while a game profile is already open calls
         /// the handler right away, because the save system may open one before the first scene's Awake runs.
         /// </summary>
-        public static event Action<string> GameProfileOpened
+        public static event Action<GameProfile> GameProfileOpened
         {
             add
             {
                 gameProfileOpened += value;
-                if (openGameProfileId != null)
+                if (openGameProfile != null)
                 {
-                    value(openGameProfileId);
+                    value(openGameProfile);
                 }
             }
             remove => gameProfileOpened -= value;
@@ -28,15 +28,15 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Raised after SaveAll or Save finishes writing.</summary>
         public static event Action Saved;
 
-        internal static void RaiseGameProfileOpened(string gameProfileId)
+        internal static void RaiseGameProfileOpened(GameProfile profile)
         {
-            openGameProfileId = gameProfileId;
-            gameProfileOpened?.Invoke(gameProfileId);
+            openGameProfile = profile;
+            gameProfileOpened?.Invoke(profile);
         }
 
         internal static void RaiseGameProfileClosed()
         {
-            openGameProfileId = null;
+            openGameProfile = null;
         }
 
         internal static void RaiseSaved()
@@ -48,7 +48,7 @@ namespace AbstractPixel.SaveSystem
         internal static void Clear()
         {
             gameProfileOpened = null;
-            openGameProfileId = null;
+            openGameProfile = null;
             Saved = null;
         }
     }

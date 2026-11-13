@@ -48,7 +48,7 @@ namespace AbstractPixel.SaveSystem
             SaveSession session = new SaveSession(config, storage, new JsonSerializer(), sceneInfo, unscaledTime);
             SaveActions.Start(session);
             session.ReadGlobalSaveFiles();
-            ApplyStartupPolicy(config.StartupPolicy, session.GameProfiles);
+            ApplyStartupPolicy(config.StartupPolicy, session.ProfileManager);
 
             saveOnQuit = config.SaveOnQuit;
             saveOnFocusLoss = config.SaveOnFocusLoss;
@@ -86,7 +86,7 @@ namespace AbstractPixel.SaveSystem
 
         static void ApplyStartupPolicy(SaveStartupPolicy policy, SaveProfileManager gameProfiles)
         {
-            // Manual waits for the game to call SaveActions.GameProfiles.Open, for example from a save slot screen.
+            // Manual waits for the game to open a game profile, for example from a save slot screen.
             if (policy != SaveStartupPolicy.AutoSetUp)
             {
                 return;
@@ -97,8 +97,7 @@ namespace AbstractPixel.SaveSystem
                 gameProfiles.Open(lastOpenedId);
                 return;
             }
-            string displayName = $"Game Profile {gameProfiles.GetAll().Count + 1}";
-            gameProfiles.Open(gameProfiles.CreateNew(displayName));
+            gameProfiles.Open(gameProfiles.CreateNew());
         }
     }
 }

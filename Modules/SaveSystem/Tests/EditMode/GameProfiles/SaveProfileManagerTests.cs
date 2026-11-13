@@ -24,7 +24,7 @@ namespace AbstractPixel.SaveSystem.Tests
         SaveProfileManager CreateManager(int gameProfileIdLength)
         {
             SaveFileStore store = new SaveFileStore(storage, new JsonSerializer());
-            return new SaveProfileManager(store, storage, paths, gameProfileIdLength);
+            return new SaveProfileManager(store, storage, paths, gameProfileIdLength, "Game Profile");
         }
 
         [Test]

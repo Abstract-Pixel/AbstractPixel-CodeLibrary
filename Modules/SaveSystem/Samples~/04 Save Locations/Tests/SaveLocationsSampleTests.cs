@@ -27,7 +27,7 @@ namespace SaveSystemSamples.SaveLocations.Tests
         public IEnumerator SwitchingGameProfiles_KeepsGlobalData_AndChangesTheRest()
         {
             yield return SampleScene.Load(Forest);
-            string firstGameProfile = SaveActions.GameProfiles.CurrentGameProfileId;
+            GameProfile firstGameProfile = SaveActions.GameProfiles.Current;
             Object.FindAnyObjectByType<VolumeSetting>().VolumeDown();
             int volume = Object.FindAnyObjectByType<VolumeSetting>().Volume;
             Object.FindAnyObjectByType<PlayerCoins>().Add(5);
@@ -40,21 +40,21 @@ namespace SaveSystemSamples.SaveLocations.Tests
             Assert.IsTrue(FirstChest().IsOpen, "The chest should still be open after visiting the cave.");
             SaveActions.SaveAll();
 
-            string secondGameProfile = SaveActions.GameProfiles.CreateNew("Save Locations Test");
-            SaveActions.GameProfiles.Open(secondGameProfile);
+            GameProfile secondGameProfile = SaveActions.GameProfiles.CreateNew("Save Locations Test");
+            secondGameProfile.Open();
             yield return SampleScene.Load(Forest);
 
             Assert.AreEqual(volume, Object.FindAnyObjectByType<VolumeSetting>().Volume, "Global data is shared by every game profile.");
             Assert.AreEqual(0, Object.FindAnyObjectByType<PlayerCoins>().Coins, "A new game profile starts with new-game coins.");
             Assert.IsFalse(FirstChest().IsOpen, "A new game profile starts with closed chests.");
 
-            SaveActions.GameProfiles.Open(firstGameProfile);
+            firstGameProfile.Open();
             yield return SampleScene.Load(Forest);
 
             Assert.AreEqual(coins, Object.FindAnyObjectByType<PlayerCoins>().Coins);
             Assert.IsTrue(FirstChest().IsOpen);
 
-            SaveActions.GameProfiles.Delete(secondGameProfile);
+            secondGameProfile.Delete();
         }
     }
 }

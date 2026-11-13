@@ -53,8 +53,8 @@ namespace AbstractPixel.SaveSystem.Tests
                 SaveActions.Forget(health);
                 SaveActions.Unregister(health);
             });
-            Assert.IsFalse(SaveActions.IsGameProfileOpen);
-            Assert.IsNull(SaveActions.GameProfiles);
+            Assert.IsNull(SaveActions.GameProfiles.Current);
+            Assert.IsEmpty(SaveActions.GameProfiles.All);
             LogAssert.NoUnexpectedReceived();
         }
 
@@ -63,22 +63,22 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             Assert.IsTrue(StartWith(ConfigWith(SaveStartupPolicy.AutoSetUp)));
 
-            Assert.IsTrue(SaveActions.IsGameProfileOpen);
-            Assert.AreEqual(1, SaveActions.GameProfiles.GetAll().Count);
-            Assert.AreEqual("Game Profile 1", SaveActions.GameProfiles.GetAll()[0].DisplayName);
+            Assert.IsNotNull(SaveActions.GameProfiles.Current);
+            Assert.AreEqual(1, SaveActions.GameProfiles.All.Count);
+            Assert.AreEqual("Game Profile 1", SaveActions.GameProfiles.All[0].DisplayName);
         }
 
         [Test]
         public void AutoSetUp_LaterLaunch_ReopensTheLastOpenedGameProfile()
         {
             StartWith(ConfigWith(SaveStartupPolicy.AutoSetUp));
-            string second = SaveActions.GameProfiles.CreateNew("Game Profile 2");
-            SaveActions.GameProfiles.Open(second);
+            string second = SaveActions.GameProfiles.CreateNew("Game Profile 2").Id;
+            SaveActions.GameProfiles.GetById(second).Open();
 
             StartWith(ConfigWith(SaveStartupPolicy.AutoSetUp));
 
-            Assert.AreEqual(second, SaveActions.GameProfiles.CurrentGameProfileId);
-            Assert.AreEqual(2, SaveActions.GameProfiles.GetAll().Count);
+            Assert.AreEqual(second, SaveActions.GameProfiles.Current.Id);
+            Assert.AreEqual(2, SaveActions.GameProfiles.All.Count);
         }
 
         [Test]
@@ -86,8 +86,8 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             StartWith(ConfigWith(SaveStartupPolicy.Manual));
 
-            Assert.IsFalse(SaveActions.IsGameProfileOpen);
-            Assert.IsEmpty(SaveActions.GameProfiles.GetAll());
+            Assert.IsNull(SaveActions.GameProfiles.Current);
+            Assert.IsEmpty(SaveActions.GameProfiles.All);
         }
 
         [Test]
@@ -136,7 +136,7 @@ namespace AbstractPixel.SaveSystem.Tests
 
             SaveStartup.Stop();
 
-            Assert.IsNull(SaveActions.GameProfiles);
+            Assert.IsEmpty(SaveActions.GameProfiles.All);
         }
     }
 }

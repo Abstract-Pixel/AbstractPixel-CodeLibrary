@@ -6,12 +6,33 @@ using UnityEngine.SceneManagement;
 namespace SaveSystemSamples.SaveLocations
 {
     // Shows one value from each save location, and buttons to change scenes and game profiles.
+    // Each button calls a public method, so tests and tools can press it from code too.
     public class SaveLocationsScreen : MonoBehaviour
     {
         [SerializeField] VolumeSetting volume;
         [SerializeField] PlayerCoins coins;
         [SerializeField] Chest[] chests;
         [SerializeField] string otherSceneName;
+
+        public void GoToOtherScene()
+        {
+            SceneManager.LoadScene(otherSceneName);
+        }
+
+        public void Save()
+        {
+            SaveActions.SaveAll();
+        }
+
+        public void NewGameProfile()
+        {
+            OpenAndReload(SaveActions.GameProfiles.CreateNew());
+        }
+
+        public void NextGameProfile()
+        {
+            OpenAndReload(FindNextGameProfile());
+        }
 
         void OnGUI()
         {
@@ -41,51 +62,60 @@ namespace SaveSystemSamples.SaveLocations
 
             if (GUILayout.Button($"Go to {otherSceneName}"))
             {
-                SceneManager.LoadScene(otherSceneName);
+                GoToOtherScene();
             }
             if (GUILayout.Button("Save"))
             {
-                SaveActions.SaveAll();
+                Save();
             }
             if (GUILayout.Button("New game profile"))
             {
-                OpenAndReload(SaveActions.GameProfiles.CreateNew($"Game Profile {SaveActions.GameProfiles.GetAll().Count + 1}"));
+                NewGameProfile();
             }
             if (GUILayout.Button("Next game profile"))
             {
-                OpenAndReload(NextGameProfileId());
+                NextGameProfile();
             }
             GUILayout.EndArea();
         }
 
         // Reloading the scene resets every object to its new-game values, then restores the opened game profile's data.
-        static void OpenAndReload(string gameProfileId)
+        static void OpenAndReload(GameProfile profile)
         {
-            SaveActions.GameProfiles.Open(gameProfileId);
+            if (profile == null)
+            {
+                return;
+            }
+            profile.Open();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
-        static string NextGameProfileId()
+        // The game profile after the open one, by slot number, going back to the first after the last.
+        static GameProfile FindNextGameProfile()
         {
-            IReadOnlyList<GameProfileManifest> all = SaveActions.GameProfiles.GetAll();
+            IReadOnlyList<GameProfile> all = SaveActions.GameProfiles.All;
             for (int i = 0; i < all.Count; i++)
             {
-                if (all[i].GameProfileId == SaveActions.GameProfiles.CurrentGameProfileId)
+                if (all[i].IsOpen)
                 {
-                    return all[(i + 1) % all.Count].GameProfileId;
+                    return all[(i + 1) % all.Count];
                 }
             }
-            return all.Count > 0 ? all[0].GameProfileId : null;
+            if (all.Count > 0)
+            {
+                return all[0];
+            }
+            return null;
         }
 
         static string OpenGameProfileName()
         {
-            string openId = SaveActions.GameProfiles?.CurrentGameProfileId;
-            if (openId != null && SaveActions.GameProfiles.TryGetManifest(openId, out GameProfileManifest manifest))
+            GameProfile current = SaveActions.GameProfiles.Current;
+            if (current == null)
             {
-                return manifest.DisplayName;
+                return "none";
             }
-            return "none";
+            return current.DisplayName;
         }
     }
 }

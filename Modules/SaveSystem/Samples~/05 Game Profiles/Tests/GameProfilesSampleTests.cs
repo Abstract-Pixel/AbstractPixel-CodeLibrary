@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Linq;
 using AbstractPixel.SaveSystem;
 using NUnit.Framework;
 using UnityEngine.TestTools;
@@ -13,30 +11,35 @@ namespace SaveSystemSamples.GameProfiles.Tests
         const string SceneName = "Game Profiles";
 
         [UnityTest]
-        public IEnumerator CreateOpenSaveAndDelete_AGameProfile()
+        public IEnumerator CreateOpenSaveAndDelete_AGameProfile_BySlotNumber()
         {
             yield return SampleScene.Load(SceneName);
-            string previousGameProfile = SaveActions.GameProfiles.CurrentGameProfileId;
-            string displayName = "Test Slot " + Guid.NewGuid().ToString("N").Substring(0, 6);
+            GameProfile previousGameProfile = SaveActions.GameProfiles.Current;
+            SaveSlotScreen screen = Object.FindAnyObjectByType<SaveSlotScreen>();
 
-            string gameProfileId = SaveActions.GameProfiles.CreateNew(displayName);
-            Assert.IsTrue(SaveActions.GameProfiles.GetAll().Any(manifest => manifest.DisplayName == displayName));
+            GameProfile created = screen.CreateGameProfile();
+            int slotNumber = created.SlotNumber;
+            Assert.AreSame(created, SaveActions.GameProfiles.Get(slotNumber));
+            StringAssert.EndsWith(" " + slotNumber, created.DisplayName, "A new game profile is named from the config and its slot number.");
 
-            SaveActions.GameProfiles.Open(gameProfileId);
+            created.Open();
             yield return SampleScene.Load(SceneName);
+            screen = Object.FindAnyObjectByType<SaveSlotScreen>();
             Assert.AreEqual(0, Object.FindAnyObjectByType<Score>().Points, "A new game profile starts with new-game values.");
-            Object.FindAnyObjectByType<Score>().Add(100);
-            SaveActions.SaveAll();
+            screen.AddPoints();
+            screen.Save();
 
             yield return SampleScene.Load(SceneName);
             Assert.AreEqual(100, Object.FindAnyObjectByType<Score>().Points);
-            Assert.IsTrue(SaveActions.GameProfiles.TryGetManifest(gameProfileId, out GameProfileManifest manifest));
-            Assert.IsFalse(string.IsNullOrEmpty(manifest.LastSavedUtc), "Saving updates the manifest's last saved time.");
+            Assert.IsNotNull(created.LastSaved, "Saving updates the game profile's last saved time.");
 
-            SaveActions.GameProfiles.Delete(gameProfileId);
-            Assert.IsFalse(SaveActions.GameProfiles.GetAll().Any(slot => slot.GameProfileId == gameProfileId));
+            created.Delete();
+            Assert.IsNull(SaveActions.GameProfiles.Get(slotNumber));
 
-            SaveActions.GameProfiles.Open(previousGameProfile);
+            if (previousGameProfile != null)
+            {
+                previousGameProfile.Open();
+            }
         }
     }
 }

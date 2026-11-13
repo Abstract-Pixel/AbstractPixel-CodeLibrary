@@ -18,6 +18,9 @@ namespace AbstractPixel.SaveSystem
         [field: SerializeField, Tooltip("How many characters a game profile's folder name has.")]
         public int GameProfileGuidLength { get; private set; } = 6;
 
+        [field: SerializeField, Tooltip("The name every new game profile gets, followed by its slot number, such as \"Game Profile 2\".")]
+        public string DefaultGameProfileName { get; private set; } = "Game Profile";
+
         [field: SerializeField, Tooltip("AutoSetUp opens the last game profile, or makes one, before the first scene. Manual waits for your save slot screen.")]
         public SaveStartupPolicy StartupPolicy { get; private set; } = SaveStartupPolicy.Manual;
 
