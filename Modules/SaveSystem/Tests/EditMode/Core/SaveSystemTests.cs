@@ -253,7 +253,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(new VolumeSetting(), "volume");
             SaveActions.Register(new PlayerHealth(), "player-health");
 
-            SaveActions.Save<TestSettingsFile>();
+            SaveActions.Save<SaveFiles.Settings>();
 
             Assert.IsTrue(storage.Exists("Global/Settings"));
             Assert.IsFalse(storage.Exists(GameKey(gameProfileId)));
@@ -289,7 +289,7 @@ namespace AbstractPixel.SaveSystem.Tests
             file.Entries["volume"].Data = Newtonsoft.Json.Linq.JToken.FromObject(8);
             store.Write("Global/Settings", file);
 
-            SaveActions.Reload<TestSettingsFile>();
+            SaveActions.Reload<SaveFiles.Settings>();
 
             Assert.AreEqual(8, volume.Volume);
         }
@@ -319,7 +319,7 @@ namespace AbstractPixel.SaveSystem.Tests
             UnityEngine.GameObject buttonObject = new UnityEngine.GameObject("Save Button");
             MonoSaveActions saveActions = buttonObject.AddComponent<MonoSaveActions>();
 
-            saveActions.Save(SaveFileReference.To<TestSettingsFile>());
+            saveActions.Save(SaveFileReference.To<SaveFiles.Settings>());
 
             Assert.IsTrue(storage.Exists("Global/Settings"));
             Assert.IsFalse(storage.Exists(GameKey(gameProfileId)));

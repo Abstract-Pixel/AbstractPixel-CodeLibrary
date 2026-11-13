@@ -54,9 +54,9 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void WriteText_ThenReadText_GlobalSaveFile_GivesTheSameData()
         {
-            Assert.IsTrue(SaveStorage.WriteText<TestSettingsFile>(SaveFileText(SettingsFile, 7)));
+            Assert.IsTrue(SaveStorage.WriteText<SaveFiles.Settings>(SaveFileText(SettingsFile, 7)));
 
-            Assert.IsTrue(SaveStorage.ReadText<TestSettingsFile>(out string json));
+            Assert.IsTrue(SaveStorage.ReadText<SaveFiles.Settings>(out string json));
 
             Assert.AreEqual(7, VolumeIn(json));
             Assert.IsTrue(storage.Exists("Global/Settings"));
@@ -65,7 +65,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void ReadText_NothingSavedYet_ReturnsFalseWithoutLogging()
         {
-            Assert.IsFalse(SaveStorage.ReadText<TestSettingsFile>(out string json));
+            Assert.IsFalse(SaveStorage.ReadText<SaveFiles.Settings>(out string json));
 
             Assert.IsNull(json);
             LogAssert.NoUnexpectedReceived();
@@ -76,7 +76,7 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             LogAssert.Expect(LogType.Error, new Regex("Global/Settings.*not a valid save file"));
 
-            Assert.IsFalse(SaveStorage.WriteText<TestSettingsFile>("{ this is not json"));
+            Assert.IsFalse(SaveStorage.WriteText<SaveFiles.Settings>("{ this is not json"));
 
             Assert.IsFalse(storage.Exists("Global/Settings"));
         }
@@ -84,8 +84,8 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void WriteText_KeepsABackupWhenTheRowSaysSo()
         {
-            SaveStorage.WriteText<TestSettingsFile>(SaveFileText(SettingsFile, 1));
-            SaveStorage.WriteText<TestSettingsFile>(SaveFileText(SettingsFile, 2));
+            SaveStorage.WriteText<SaveFiles.Settings>(SaveFileText(SettingsFile, 1));
+            SaveStorage.WriteText<SaveFiles.Settings>(SaveFileText(SettingsFile, 2));
 
             Assert.IsTrue(storage.Exists("Backups/Global/Settings"));
         }
@@ -154,9 +154,9 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void SceneForAFileThatIsNotASceneFile_LogsOneError_AndDoesNothing()
         {
-            LogAssert.Expect(LogType.Error, new Regex("SaveStorage.WriteText.*TestSettingsFile.*not a Scene save file.*leave the scene out"));
+            LogAssert.Expect(LogType.Error, new Regex("SaveStorage.WriteText<Settings>.*not a Scene save file.*leave the scene out"));
 
-            Assert.IsFalse(SaveStorage.WriteText<TestSettingsFile>(forest, SaveFileText(SettingsFile, 1)));
+            Assert.IsFalse(SaveStorage.WriteText<SaveFiles.Settings>(forest, SaveFileText(SettingsFile, 1)));
 
             Assert.IsFalse(storage.Exists("Global/Settings"));
         }
@@ -165,9 +165,9 @@ namespace AbstractPixel.SaveSystem.Tests
         public void GameProfileForAGlobalFile_LogsOneError_AndDoesNothing()
         {
             GameProfile profile = SaveActions.GameProfiles.CreateNew();
-            LogAssert.Expect(LogType.Error, new Regex("SaveStorage.WriteText.*TestSettingsFile.*Global.*every game profile shares it.*leave the game profile out"));
+            LogAssert.Expect(LogType.Error, new Regex("SaveStorage.WriteText<Settings>.*Global.*every game profile shares it.*leave the game profile out"));
 
-            Assert.IsFalse(SaveStorage.WriteText<TestSettingsFile>(profile, SaveFileText(SettingsFile, 1)));
+            Assert.IsFalse(SaveStorage.WriteText<SaveFiles.Settings>(profile, SaveFileText(SettingsFile, 1)));
 
             Assert.IsFalse(storage.Exists("Global/Settings"));
         }
@@ -205,15 +205,15 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void Delete_RemovesTheSaveFile_AndItsBackup()
         {
-            SaveStorage.WriteText<TestSettingsFile>(SaveFileText(SettingsFile, 1));
-            SaveStorage.WriteText<TestSettingsFile>(SaveFileText(SettingsFile, 2));
+            SaveStorage.WriteText<SaveFiles.Settings>(SaveFileText(SettingsFile, 1));
+            SaveStorage.WriteText<SaveFiles.Settings>(SaveFileText(SettingsFile, 2));
             Assert.IsTrue(storage.Exists("Backups/Global/Settings"));
 
-            Assert.IsTrue(SaveStorage.Delete<TestSettingsFile>());
+            Assert.IsTrue(SaveStorage.Delete<SaveFiles.Settings>());
 
             Assert.IsFalse(storage.Exists("Global/Settings"));
             Assert.IsFalse(storage.Exists("Backups/Global/Settings"), "A backup left behind loads on the next read, as if the file were missing.");
-            Assert.IsFalse(SaveStorage.ReadText<TestSettingsFile>(out string _));
+            Assert.IsFalse(SaveStorage.ReadText<SaveFiles.Settings>(out string _));
         }
 
         [Test]
@@ -223,25 +223,25 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(volume, "volume");
             SaveActions.SaveAll();
 
-            SaveStorage.WriteText<TestSettingsFile>(SaveFileText(SettingsFile, 9));
+            SaveStorage.WriteText<SaveFiles.Settings>(SaveFileText(SettingsFile, 9));
             SaveActions.SaveAll();
 
             Assert.AreEqual(9, volume.Volume, "The registered object takes the new text, like Reload does.");
-            Assert.IsTrue(SaveStorage.ReadText<TestSettingsFile>(out string json));
+            Assert.IsTrue(SaveStorage.ReadText<SaveFiles.Settings>(out string json));
             Assert.AreEqual(9, VolumeIn(json), "The running session's old copy must not overwrite the new text.");
         }
 
         [Test]
         public void Delete_InPlayMode_TheNextSaveDoesNotWriteTheOldCopyBack()
         {
-            SaveStorage.WriteText<TestSettingsFile>(SaveFileText(SettingsFile, 30, "boss-volume"));
+            SaveStorage.WriteText<SaveFiles.Settings>(SaveFileText(SettingsFile, 30, "boss-volume"));
             SaveActions.Register(new VolumeSetting { Volume = 3 }, "volume");
             SaveActions.SaveAll();
 
-            SaveStorage.Delete<TestSettingsFile>();
+            SaveStorage.Delete<SaveFiles.Settings>();
             SaveActions.SaveAll();
 
-            Assert.IsTrue(SaveStorage.ReadText<TestSettingsFile>(out string json));
+            Assert.IsTrue(SaveStorage.ReadText<SaveFiles.Settings>(out string json));
             Assert.IsTrue(serializer.TryDeserialize(json, out SaveFileData saveFile));
             Assert.IsFalse(saveFile.Entries.ContainsKey("boss-volume"), "Deleted data came back from the running session's copy.");
             Assert.IsTrue(saveFile.Entries.ContainsKey("volume"));
@@ -262,7 +262,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void GetFilePath_WithMemoryStorage_IsNull()
         {
             // Memory storage has no files. The disk path is checked in SaveFileAccessTests.
-            Assert.IsNull(SaveStorage.GetFilePath<TestSettingsFile>());
+            Assert.IsNull(SaveStorage.GetFilePath<SaveFiles.Settings>());
             Assert.IsNull(SaveStorage.GetFilePath<TestChestsFile>(forest, SaveActions.GameProfiles.CreateNew()));
         }
     }

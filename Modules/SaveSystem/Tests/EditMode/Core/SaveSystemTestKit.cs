@@ -8,11 +8,11 @@ namespace AbstractPixel.SaveSystem.Tests
     /// <summary>Shared pieces for tests that run the whole save system on memory storage.</summary>
     internal static class SaveSystemTestKit
     {
-        public const string SettingsFile = "Settings";   // Global
+        public const string SettingsFile = "Settings";   // Global, the built-in SaveFiles.Settings row
         public const string GameFile = "Game";           // GameProfile
         public const string ChestsFile = "Position";     // Scene, stored as "Chests"
 
-        /// <summary>A config with one save file in each save location.</summary>
+        /// <summary>A config with one save file in each save location. Global uses the built-in Settings row.</summary>
         public static SaveSystemConfigSO CreateConfig()
         {
             SaveSystemConfigSO config = ScriptableObject.CreateInstance<SaveSystemConfigSO>();
@@ -21,7 +21,7 @@ namespace AbstractPixel.SaveSystem.Tests
             chestsRow.StorageName = "Chests";
             config.ReplaceSaveFileList(new List<SaveFileDefinition>
             {
-                SaveFileDefinition.ForClass(typeof(TestSettingsFile), SettingsFile, SaveLocation.Global),
+                SaveFileDefinition.CreateBuiltIn(BuiltInSaveFile.Settings),
                 SaveFileDefinition.ForClass(typeof(TestGameFile), GameFile, SaveLocation.GameProfile),
                 chestsRow,
             });
@@ -75,11 +75,10 @@ namespace AbstractPixel.SaveSystem.Tests
         public double Now() => Seconds;
     }
 
-    internal sealed class TestSettingsFile : ISaveFile { }
     internal sealed class TestGameFile : ISaveFile { }
     internal sealed class TestChestsFile : ISaveFile { }
 
-    internal sealed class VolumeSetting : ISavable<int, TestSettingsFile>
+    internal sealed class VolumeSetting : ISavable<int, SaveFiles.Settings>
     {
         public int Volume = 5;
         public int CaptureData() => Volume;

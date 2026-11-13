@@ -41,6 +41,16 @@ namespace AbstractPixel.SaveSystem
             {
                 AddMissingBuiltIn(builtIn);
             }
+            ReportClashes();
+        }
+
+        // Every lookup by storage name or class finds the first matching row, so the first row is the one that is used.
+        void ReportClashes()
+        {
+            foreach (SaveFileClash clash in SaveFileClash.FindAll(definitions))
+            {
+                Debug.LogError($"[SaveSystem] {clash.Describe()} The first row is used. Rename one of them in the save system config.");
+            }
         }
 
         public IReadOnlyList<SaveFileDefinition> AllDefinitions => definitions;

@@ -92,7 +92,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveEventBus.OnLoadCompleted += RecordLoad;
             SaveEventBus.OnLoadAllCompleted += RecordLoadAll;
 
-            CollectionAssert.Contains(loadedFiles, typeof(TestSettingsFile), "Global save files load at startup.");
+            CollectionAssert.Contains(loadedFiles, typeof(SaveFiles.Settings), "Global save files load at startup.");
             CollectionAssert.Contains(loadedFiles, typeof(TestGameFile));
             Assert.AreEqual(1, loadAllCount);
         }
@@ -105,7 +105,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveEventBus.OnLoadCompleted += RecordLoad;
             SaveEventBus.OnLoadAllCompleted += RecordLoadAll;
 
-            CollectionAssert.AreEquivalent(new[] { typeof(TestSettingsFile) }, FilesFromTheTestKit());
+            CollectionAssert.AreEquivalent(new[] { typeof(SaveFiles.Settings) }, FilesFromTheTestKit());
             Assert.AreEqual(0, loadAllCount, "Load all completed means a game profile is restored too.");
         }
 
@@ -133,7 +133,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveEventBus.OnLoadCompleted += RecordLoad;
             SaveEventBus.OnLoadAllCompleted += RecordLoadAll;
 
-            CollectionAssert.AreEquivalent(new[] { typeof(TestSettingsFile) }, FilesFromTheTestKit());
+            CollectionAssert.AreEquivalent(new[] { typeof(SaveFiles.Settings) }, FilesFromTheTestKit());
             Assert.AreEqual(0, loadAllCount);
         }
 
@@ -192,7 +192,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.SaveAll();
             SaveActions.Save<TestGameFile>();
 
-            CollectionAssert.AreEqual(new[] { typeof(TestSettingsFile), typeof(TestGameFile) }, savedFiles);
+            CollectionAssert.AreEqual(new[] { typeof(SaveFiles.Settings), typeof(TestGameFile) }, savedFiles);
             Assert.AreEqual(1, saveAllCount, "Saving one file doesn't count as Save All.");
         }
 
@@ -225,7 +225,7 @@ namespace AbstractPixel.SaveSystem.Tests
         // The built-in save files (SaveFiles.Settings and friends) also raise load events, so tests look only at their own files.
         List<Type> FilesFromTheTestKit()
         {
-            return loadedFiles.FindAll(loaded => loaded == typeof(TestSettingsFile) || loaded == typeof(TestGameFile) || loaded == typeof(TestChestsFile));
+            return loadedFiles.FindAll(loaded => loaded == typeof(SaveFiles.Settings) || loaded == typeof(TestGameFile) || loaded == typeof(TestChestsFile));
         }
     }
 }

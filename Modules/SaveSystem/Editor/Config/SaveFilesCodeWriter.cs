@@ -33,6 +33,12 @@ namespace AbstractPixel.SaveSystem.Editor
             List<SaveFileDefinition> rows = config.EditableSaveFileList;
             SaveFileListSync.AddMissingRows(rows, SaveFileListSync.FindModuleSaveFileClasses());
 
+            // A clash would write a file that doesn't compile, or two save files into one file on disk.
+            if (!CanWrite(rows))
+            {
+                return false;
+            }
+
             // Two SaveFiles classes would make every "SaveFiles.Settings" in game code ambiguous, so the old one goes first.
             DeleteOldSaveFiles();
 
@@ -50,6 +56,17 @@ namespace AbstractPixel.SaveSystem.Editor
             EditorUtility.SetDirty(config);
             AssetDatabase.SaveAssetIfDirty(config);
             return !isUnchanged;
+        }
+
+        /// <summary>False, with one error per clash naming both rows, while two rows share a file on disk or a class name.</summary>
+        public static bool CanWrite(IReadOnlyList<SaveFileDefinition> rows)
+        {
+            List<SaveFileClash> clashes = SaveFileClash.FindAll(rows);
+            foreach (SaveFileClash clash in clashes)
+            {
+                Debug.LogError($"[SaveSystem] GameSaveFiles.cs was not written: {clash.Describe()} Rename one of the rows in the save system config; it is written again as soon as the clash is gone.");
+            }
+            return clashes.Count == 0;
         }
 
         /// <summary>The text of GameSaveFiles.cs for these rows.</summary>

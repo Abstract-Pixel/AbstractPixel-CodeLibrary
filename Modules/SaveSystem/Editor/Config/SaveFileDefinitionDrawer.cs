@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
@@ -52,7 +55,81 @@ namespace AbstractPixel.SaveSystem.Editor
                 noteLabel.AddToClassList("save-file-row__note");
                 container.Add(noteLabel);
             }
+
+            AddClashWarning(container, property);
             return container;
+        }
+
+        /// <summary>
+        /// The warning for one row: every other row it clashes with, by row number and name, and why. Empty when the
+        /// row clashes with nothing.
+        /// </summary>
+        public static string DescribeClashes(IReadOnlyList<SaveFileDefinition> rows, int rowIndex)
+        {
+            StringBuilder warning = new StringBuilder();
+            foreach (SaveFileClash clash in SaveFileClash.FindAll(rows))
+            {
+                bool isFirst = ReferenceEquals(clash.First, rows[rowIndex]);
+                bool isSecond = ReferenceEquals(clash.Second, rows[rowIndex]);
+                if (!isFirst && !isSecond)
+                {
+                    continue;
+                }
+                SaveFileDefinition otherRow = isFirst ? clash.Second : clash.First;
+                int otherRowNumber = IndexOf(rows, otherRow) + 1;
+                string reason = clash.SharesAFile ? $"both are stored as '{otherRow.FileName}' in {otherRow.Location}" : "both make the same class in GameSaveFiles.cs";
+                warning.AppendLine($"Clashes with row {otherRowNumber} ('{otherRow.Name}'): {reason}. Rename one. GameSaveFiles.cs isn't written until the clash is gone.");
+            }
+            return warning.ToString().TrimEnd();
+        }
+
+        // The warning follows the list as it changes, so it appears and clears while the owner types a name.
+        static void AddClashWarning(VisualElement container, SerializedProperty property)
+        {
+            SaveSystemConfigSO config = property.serializedObject.targetObject as SaveSystemConfigSO;
+            int rowIndex = RowIndexOf(property.propertyPath);
+            if (config == null || rowIndex < 0)
+            {
+                return;
+            }
+
+            HelpBox clashWarning = new HelpBox(string.Empty, HelpBoxMessageType.Warning);
+            clashWarning.AddToClassList("save-file-row__clash");
+            container.Add(clashWarning);
+
+            void Refresh()
+            {
+                bool rowStillExists = rowIndex < config.SaveFileList.Count;
+                string warning = rowStillExists ? DescribeClashes(config.SaveFileList, rowIndex) : string.Empty;
+                clashWarning.text = warning;
+                clashWarning.EnableInClassList("save-file-row__clash--hidden", string.IsNullOrEmpty(warning));
+            }
+
+            Refresh();
+            container.TrackSerializedObjectValue(property.serializedObject, changed => Refresh());
+        }
+
+        // A list element's path ends in "Array.data[3]".
+        static int RowIndexOf(string propertyPath)
+        {
+            Match match = Regex.Match(propertyPath, @"\.Array\.data\[(\d+)\]$");
+            if (!match.Success)
+            {
+                return -1;
+            }
+            return int.Parse(match.Groups[1].Value);
+        }
+
+        static int IndexOf(IReadOnlyList<SaveFileDefinition> rows, SaveFileDefinition row)
+        {
+            for (int index = 0; index < rows.Count; index++)
+            {
+                if (ReferenceEquals(rows[index], row))
+                {
+                    return index;
+                }
+            }
+            return -1;
         }
 
         static string DescribeRow(bool isBuiltIn, string addedBy, string storageName)

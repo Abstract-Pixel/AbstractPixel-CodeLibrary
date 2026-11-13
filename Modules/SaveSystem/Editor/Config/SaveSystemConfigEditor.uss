@@ -27,3 +27,11 @@
     margin-top: 6px;
     margin-bottom: 6px;
 }
+
+.save-file-row__clash {
+    margin-top: 2px;
+}
+
+.save-file-row__clash--hidden {
+    display: none;
+}
