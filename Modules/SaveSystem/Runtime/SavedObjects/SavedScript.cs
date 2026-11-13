@@ -20,11 +20,11 @@ namespace AbstractPixel.SaveSystem
             return FindInterface(scriptClass, typeof(ISavable<>));
         }
 
-        /// <summary>The TFile of ISavable&lt;TData, TFile&gt;, or null when the class leaves the save file to the default.</summary>
+        /// <summary>The TFile of ISaveIn&lt;TFile&gt; (which ISavable&lt;TData, TFile&gt; extends), or null for the default save file.</summary>
         public static Type SaveFileClassOf(Type scriptClass)
         {
-            Type savableInAFile = FindInterface(scriptClass, typeof(ISavable<,>));
-            return savableInAFile?.GetGenericArguments()[1];
+            Type saveFileChoice = FindInterface(scriptClass, typeof(ISaveIn<>));
+            return saveFileChoice?.GetGenericArguments()[0];
         }
 
         static Type FindInterface(Type scriptClass, Type genericInterface)

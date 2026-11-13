@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace AbstractPixel.SaveSystem
@@ -70,9 +71,16 @@ namespace AbstractPixel.SaveSystem
             classOwningEachName.Clear();
         }
 
-        // The class name, unless another class with the same name already uses it in this save file.
+        // [SaveId("Inventory")] on the class, so the name survives a rename; otherwise the class name, unless
+        // another class with the same name already uses it in this save file.
         string NameFor(Type savedObjectClass, string saveFileName)
         {
+            SaveIdAttribute savedId = savedObjectClass.GetCustomAttribute<SaveIdAttribute>();
+            if (savedId != null)
+            {
+                return savedId.Id;
+            }
+
             if (!classOwningEachName.TryGetValue(saveFileName, out Dictionary<string, string> owners))
             {
                 owners = new Dictionary<string, string>();

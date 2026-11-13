@@ -14,7 +14,7 @@ namespace AbstractPixel.SaveSystem
     /// What and where in one line: a saved object whose data is <typeparamref name="TData"/>, kept in the save file
     /// <typeparamref name="TFile"/>. Example: <c>public class SettingsManager : MonoBehaviour, ISavable&lt;SettingsDTO, SaveFiles.Settings&gt;</c>
     /// </summary>
-    public interface ISavable<TData, TFile> : ISavable<TData> where TFile : ISaveFile
+    public interface ISavable<TData, TFile> : ISavable<TData>, ISaveIn<TFile> where TFile : ISaveFile
     {
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
@@ -13,6 +14,7 @@ namespace AbstractPixel.SaveSystem
     {
         readonly SaveFileLookup saveFiles;
         readonly LoadedSaveData loadedData;
+        readonly SaveJson serializer;
         readonly ISceneInfo sceneInfo;
         readonly Func<double> unscaledTime;
         readonly SaveFileAddresses addresses;
@@ -46,6 +48,7 @@ namespace AbstractPixel.SaveSystem
             SaveFileStore store = new SaveFileStore(storage, serializer);
             saveFiles = new SaveFileLookup(config);
             loadedData = new LoadedSaveData(store, serializer);
+            this.serializer = serializer;
             this.sceneInfo = sceneInfo;
             this.unscaledTime = unscaledTime;
             ProfileManager = new SaveProfileManager(store, storage, config.GameProfileGuidLength, config.DefaultGameProfileName);
@@ -72,6 +75,19 @@ namespace AbstractPixel.SaveSystem
         {
             RegisterScript(savable, savable, savable.GetType(), saveId, typeof(T),
                 () => savable.CaptureData(), data => savable.RestoreData((T)data), null, savable.GetType().Name);
+        }
+
+        /// <summary>
+        /// Registers a plain class whose data is its [Save] fields, with no ISavable. With no <paramref name="saveId"/>
+        /// it gets an automatic one: its class name, then numbers, unless [SaveId] names one.
+        /// </summary>
+        public void Register(object savedObject, string saveId)
+        {
+            SavedFieldSet fields = new SavedFieldSet(savedObject.GetType());
+            RegisterScript(savedObject, savedObject, savedObject.GetType(), saveId, typeof(JObject),
+                () => fields.Capture(savedObject, serializer),
+                data => fields.Restore(savedObject, (JObject)data, serializer),
+                null, savedObject.GetType().Name);
         }
 
         /// <summary>

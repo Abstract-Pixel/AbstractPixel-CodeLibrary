@@ -44,6 +44,20 @@ namespace AbstractPixel.SaveSystem
         /// </summary>
         public static void Register<T>(ISavable<T> savedObject, string saveId) => session?.Register(savedObject, saveId);
 
+        /// <summary>
+        /// Registers a plain class whose data is its <see cref="SaveAttribute"/> fields. Its save ID is its class
+        /// name, unless <see cref="SaveIdAttribute"/> names one; later live instances of the same class get
+        /// "Inventory 2", "Inventory 3" in the order they register. Data isn't plain fields? Use ISavable&lt;TData&gt;.
+        /// Example: <c>SaveActions.Register(this);</c>
+        /// </summary>
+        public static void Register(object savedObject) => session?.Register(savedObject, null);
+
+        /// <summary>
+        /// Registers a plain class under a custom save ID, which always wins over the automatic one.
+        /// Example: <c>SaveActions.Register(this, "player-inventory");</c>
+        /// </summary>
+        public static void Register(object savedObject, string saveId) => session?.Register(savedObject, saveId);
+
         /// <summary>Captures the object's current data, then stops tracking it. Its data is written on the next save.</summary>
         public static void Unregister(object savedObject) => session?.SavedObjects.Untrack(savedObject);
 
