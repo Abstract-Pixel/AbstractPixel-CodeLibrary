@@ -60,7 +60,8 @@ namespace AbstractPixel.Core.Editor
                     string[] folders = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (var folder in folders)
                     {
-                        var found = parent.children.FirstOrDefault(c => c.name == folder);
+                        // Unity 7 removed AdvancedDropdownItem.children; childList is the same list.
+                        AdvancedDropdownItem found = parent.childList.FirstOrDefault(c => c.name == folder);
                         if (found == null)
                         {
                             found = new AdvancedDropdownItem(folder)
