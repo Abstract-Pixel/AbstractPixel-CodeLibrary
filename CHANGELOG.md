@@ -13,8 +13,14 @@
 - **Feature:** `SaveStorage` reads, writes or deletes a whole save file in one line, for the open game profile by default, with a `SceneField` for Scene files.
 - **Feature:** Save file rows that share a file or a class name warn in the config. Two objects with the same save ID log one error naming both.
 - **Feature:** Safe writes, and an optional backup per save file in a `Backups` folder.
-- **Fix:** Listing and deleting game profiles works. Saving no longer erases data of objects that aren't loaded. A Savable Bridge keeps its save ID when a new scene is first saved.
-- **Cleanup:** Only 22 public types, so autocomplete shows what game code uses. Save data, rows and storage internals are internal now.
+- **Feature:** `[Save]` on a field saves it with no other code, on a MonoBehaviour, a plain class (plus `SaveActions.Register(this)`) or a ScriptableObject. `[Save(Formerly = "hp")]` and `[SaveId("Inventory")]` keep data through renames. `ISaveIn<TFile>` picks the save file. A class switched from `ISavable<int>` to one `[Save]` field keeps its saved value.
+- **Feature:** Mistakes the editor can see, such as `[Save]` on a GameObject field, log one error naming the fix, block play mode and fail the build.
+- **Feature:** `IOnRestored`, `SetSaveId` for spawned copies, typed load listeners (`SaveEventBus.AddLoadListener<TFile>`), `SaveEventBus.OnSaveFailed`, and `SaveActions.GameProfiles.LastOpened` and `Count` for a Continue button.
+- **Feature:** For designers: Save Transform, Save Active State and Save Destroyed components; autosave on scene unload or every N minutes; UnityEvents and Open Slot, New Game and Reload Chosen File on Mono Save Actions; the bridge inspector lists saved fields and has a Copy save ID button.
+- **Feature:** Clean JSON for Vector2, Vector2Int, Vector3Int, Color and Rect.
+- **Samples:** Eight samples in ladder order: Save A Field, Buttons With No Code, Save Slots And Continue, Pick A Save File, Spawned Copies, Custom Data With ISavable, Whole Files With SaveStorage, ScriptableObject.
+- **Fix:** Listing and deleting game profiles works. Saving no longer erases data of objects that aren't loaded. A Savable Bridge keeps its save ID when a new scene is first saved. A saved scene object switched off and on keeps saving.
+- **Cleanup:** Only the public types game code uses show in autocomplete. Save data, rows and storage internals are internal.
 - **Settings:** Saves into the built-in `SaveFiles.Settings`. The debug toolbar uses `SaveStorage`.
 - **Core:** `SearchableDropdown` works on Unity 6 and Unity 7.
 - **Core:** The library no longer needs the Custom Inspector plugin. `GlyphToggler`'s glyph map is a built-in `Dictionary`, so the package needs Unity 6.6 or later.

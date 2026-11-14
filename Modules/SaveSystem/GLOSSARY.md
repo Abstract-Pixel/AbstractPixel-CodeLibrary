@@ -74,6 +74,22 @@ _Avoid_: savable, participant, save target
 A field marked `[Save]`. The save system captures and restores it with no other code.
 _Avoid_: persistent field, serialized field
 
+**Former field name**:
+The name a saved field had before it was renamed, written as `[Save(Formerly = "hp")]`. Saved data under the former name still loads, so a rename never loses it.
+_Avoid_: alias, old key
+
+**Save file choice**:
+The save file a saved object's data goes in, picked with `ISaveIn<TFile>`. With no choice the data goes in the GameProfile save file.
+_Avoid_: target file, file binding
+
+**Blocking mistake**:
+A mistake in saved code the editor can see, such as `[Save]` on a GameObject field or on a class that also implements ISavable. It logs one error naming the fix, stops play mode from starting and fails the build.
+_Avoid_: validation warning, lint
+
+**Ready-made saver**:
+A component that saves one common thing about a GameObject with no code: Save Transform, Save Active State or Save Destroyed.
+_Avoid_: save component, preset
+
 **Save ID**:
 The name that identifies one saved object's data inside a save file. No two saved objects in the same save file share one. A plain class uses its class name, and later live instances of the same class get "Inventory 2", "Inventory 3" in the order they register, unless it picks a custom save ID. A scene object uses its Savable Bridge's ID; a spawned copy gets one from `SetSaveId`.
 _Avoid_: unique ID, GUID, composite key
@@ -116,6 +132,22 @@ _Avoid_: tombstone, deleted flag
 An event the save system raises when saved data is ready: one save file restored, or everything restored. Load events are sticky: a script that subscribes after the event already happened is called right away. A Scene save file raises its load event once per scene, one frame after that scene's scripts start.
 _Avoid_: callback, data ready signal
 
+**Typed load listener**:
+A load event handler for one save file class, added with `SaveEventBus.AddLoadListener<TFile>`. It is sticky like every load event.
+_Avoid_: file filter, typeof check
+
+**Restored notice**:
+The call a saved object gets through `IOnRestored.OnRestored()` after each restore, including a restore of new-game values.
+_Avoid_: after-load hook, post-deserialize
+
+**Save failed**:
+A save file that could not be written, reported with the reason through `SaveEventBus.OnSaveFailed`. The previous good file stays on disk.
+_Avoid_: write error
+
+**Autosave**:
+Saving every save file without the game asking: on quit, on focus loss, when a scene unloads, or every few minutes, as the config's checkboxes choose.
+_Avoid_: auto-persist, background save
+
 ## Code names
 
 | Word | Class |
@@ -128,3 +160,10 @@ _Avoid_: callback, data ready signal
 | Built-in save file | `SaveFiles.GameProfile`, `SaveFiles.Scene`, `SaveFiles.Settings`, `SaveFiles.Input`, `SaveFiles.Achievements` |
 | Game save file | `GameSaveFiles.<Name>`, written by the editor into `GameSaveFiles.cs` |
 | Save system config | `SaveSystemConfigSO` |
+| Saved field, former field name | `[Save]`, `[Save(Formerly = "...")]` |
+| Custom save ID that survives a class rename | `[SaveId("...")]` |
+| Save file choice | `ISaveIn<TFile>` |
+| Restored notice | `IOnRestored` |
+| Spawned copy's save ID | `SetSaveId` |
+| Ready-made saver | `SaveTransform`, `SaveActiveState`, `SaveDestroyed` |
+| Buttons and events with no code | `MonoSaveActions` |

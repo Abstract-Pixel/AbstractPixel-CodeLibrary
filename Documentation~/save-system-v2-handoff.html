@@ -101,7 +101,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
   <header>
     <div class="eyebrow">Abstract Pixel Library · Modules/SaveSystem · branch save-system</div>
     <h1>What changed in the save system</h1>
-    <p class="lede">Three versions side by side. v1 is what the shipped game uses. "v2 first" is steps 1 and 2. "v2 now" is today, after both of your reviews and the cleanup. The calls that changed since your second review are in <a href="#since-review">their own section</a>, before and after. How the system works today is in <code>save-system.html</code>, and what comes next is in <code>save-system-v2-plan.html</code>.</p>
+    <p class="lede">Three versions side by side. v1 is what the shipped game uses. "v2 first" is steps 1 and 2. "v2 now" is today, after both of your reviews, the cleanup and phase S. The calls that changed since your second review are in <a href="#since-review">their own section</a>, and phase S has <a href="#phase-s">its own</a>, before and after. How the system works today is in <code>save-system.html</code>, and what comes next is in <code>save-system-v2-plan.html</code>.</p>
 
     <div class="stages">
       <div class="stage v1">
@@ -126,13 +126,14 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
       </div>
       <div class="stage now">
         <h2>v2 now</h2>
-        <p class="when">Commits A2 to K5.</p>
+        <p class="when">Commits A2 to S9.</p>
         <ul>
           <li>Old names back: <code>SaveActions</code>, <code>SaveEventBus</code>.</li>
           <li>Save files are classes, and five built-in ones ship with the library.</li>
           <li>Load events back, game profile objects, optional backups, save IDs you never type.</li>
           <li><code>SaveStorage</code> for tools. A Create Config menu item.</li>
-          <li>Only 22 public types, so autocomplete shows what game code uses.</li>
+          <li>Autocomplete shows only what game code uses.</li>
+          <li><code>[Save]</code> on a field, and mistakes that block play mode. Ready-made savers and UnityEvents for designers.</li>
         </ul>
       </div>
     </div>
@@ -152,6 +153,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
         <li><a href="#tools">Writing a file from a tool</a></li>
         <li><a href="#disk">Folders and backups</a></li>
         <li><a href="#since-review">Since your second review</a></li>
+        <li><a href="#phase-s">Phase S: saved fields and the ladder</a></li>
         <li><a href="#review">Review tasks and commits</a></li>
         <li><a href="#checked">What I checked</a></li>
         <li><a href="#decisions">Choices I made</a></li>
@@ -189,8 +191,11 @@ public class Health : MonoBehaviour,
 <span class="c">// Same as v1.</span></code></pre></div>
       <div class="pane now"><div class="pane-label">v2 now</div>
 <pre><code>public class Chest : MonoBehaviour,
-    ISavable&lt;bool, SaveFiles.Scene&gt; { … }
-<span class="c">// No attribute, no enum.</span></code></pre></div>
+    ISaveIn&lt;SaveFiles.Scene&gt;
+{
+    [Save] bool isOpen;
+}
+<span class="c">// No attribute, no enum, no methods.</span></code></pre></div>
     </div>
     <p class="why">The five built-in save files ship with the library in <code>SaveFiles</code>. The editor writes your own rows from the config into <code>GameSaveFiles.cs</code>.</p>
   </section>
@@ -489,6 +494,94 @@ SaveActions.Register(second, "hero");
     <p class="why">The cleanup removed 516 lines and changed no behaviour. Both test suites passed after every step.</p>
   </section>
 
+  <section id="phase-s">
+    <h2>Phase S: saved fields and the ladder</h2>
+    <p>S1 to S10, 13 and 14 Nov 2026. "Before" is the branch after phase K.</p>
+
+    <h3>A saved field is one word (S1, S3)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">Before</div>
+<pre><code>public class Health : MonoBehaviour, ISavable&lt;int&gt;
+{
+    public int Current { get; private set; }
+    void Awake() { Current = 100; }
+    public int CaptureData() =&gt; Current;
+    public void RestoreData(int data) =&gt; Current = data;
+}</code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>public class Health : MonoBehaviour
+{
+    [Save] int current = 100;
+}
+<span class="c">// A plain class adds SaveActions.Register(this).</span></code></pre></div>
+    </div>
+    <p class="why">Data is stored by field name. <code>[Save(Formerly = "hp")]</code> and <code>[SaveId("Inventory")]</code> keep data through renames. A script moved from <code>ISavable&lt;int&gt;</code> to one <code>[Save]</code> field keeps its saved value.</p>
+
+    <h3>The wrong way is blocked (S2)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">Before</div>
+<pre><code>[Save] GameObject target;
+<span class="c">// Nothing existed to stop it.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>[Save] GameObject target;
+<span class="c">// One error naming Health.target and the fix.</span>
+<span class="c">// Play mode won't start; the build fails.</span></code></pre></div>
+    </div>
+
+    <h3>Spawned copies (S5)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">Before</div>
+<pre><code>Instantiate(goblinPrefab);
+<span class="c">// Every copy shared one save ID.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>Goblin goblin = Instantiate(goblinPrefab);
+goblin.SetSaveId($"goblin-{spawnPoint.name}");</code></pre></div>
+    </div>
+
+    <h3>Listening for one file (S6) and a failed save (S7)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">Before</div>
+<pre><code>SaveEventBus.OnLoadCompleted += file =&gt;
+{
+    if (file == typeof(GameSaveFiles.Ghosts)) ShowGhosts();
+};
+<span class="c">// A failed save raised nothing.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>SaveEventBus.AddLoadListener&lt;GameSaveFiles.Ghosts&gt;(ShowGhosts);
+SaveEventBus.OnSaveFailed += (file, reason) =&gt; ShowError(reason);</code></pre></div>
+    </div>
+
+    <h3>For designers (S7, S8)</h3>
+    <ul>
+      <li>Save Transform, Save Active State and Save Destroyed components save position, on or off, and "picked up" with no code.</li>
+      <li><code>MonoSaveActions</code> has On Loaded, On Saved, On Save Failed and On Game Profile Opened events, plus Reload Chosen File, Open Slot and New Game.</li>
+      <li>The config saves on scene unload and every N minutes if asked.</li>
+      <li>The Savable Bridge inspector lists each saved script's save file and fields, with a Copy save ID button.</li>
+      <li>A Continue button needs <code>SaveActions.GameProfiles.LastOpened</code> and <code>Count</code>.</li>
+    </ul>
+
+    <h3>Samples follow the ladder (S9)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">Before</div>
+<pre><code>01 Plain CSharp Class
+02 MonoBehaviour
+03 ScriptableObject
+04 Save Locations
+05 Game Profiles
+06 Plain CSharp And MonoBehaviours Together</code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code>01 Save A Field
+02 Buttons With No Code
+03 Save Slots And Continue
+04 Pick A Save File
+05 Spawned Copies
+06 Custom Data With ISavable
+07 Whole Files With SaveStorage
+08 ScriptableObject</code></pre></div>
+    </div>
+    <p class="why">Each has a scene, a README and a PlayMode test. Playing them found four bugs, all fixed: Save Destroyed alone did nothing, Save Active State couldn't be turned back on, a scene object switched off and on stopped saving, and the <code>ISavable&lt;int&gt;</code> to <code>[Save]</code> switch lost data.</p>
+  </section>
+
   <section id="review">
     <h2>Review tasks and commits</h2>
     <div class="table-wrap"><table>
@@ -518,6 +611,15 @@ SaveActions.Register(second, "hero");
         <tr><td>F4</td><td><code>b1c7855</code></td><td>Duplicate save IDs log one error.</td></tr>
         <tr><td>F5</td><td><code>9832bcf</code></td><td>Bridge IDs stay put when a new scene is first saved.</td></tr>
         <tr><td>K1 to K5</td><td><code>79b4b75</code> to <code>d0ce7f8</code></td><td>The cleanup.</td></tr>
+        <tr><td>S1</td><td><code>ba78bfd</code>, <code>9dc9f7b</code></td><td><code>[Save]</code> fields, <code>ISaveIn</code>, renames; the <code>ISavable&lt;int&gt;</code> switch keeps data.</td></tr>
+        <tr><td>S2</td><td><code>c989ec3</code></td><td>Blocking checks.</td></tr>
+        <tr><td>S3</td><td><code>d6e7c27</code></td><td>The bridge finds <code>[Save]</code> fields. Copied bridges get their own ID.</td></tr>
+        <tr><td>S4</td><td><code>502703c</code></td><td><code>IOnRestored</code>.</td></tr>
+        <tr><td>S5</td><td><code>3a1e84e</code>, <code>a034425</code></td><td><code>SetSaveId</code>; a scene object switched off and on keeps saving.</td></tr>
+        <tr><td>S6</td><td><code>facef6c</code></td><td>Typed load listeners.</td></tr>
+        <tr><td>S7</td><td><code>a890e9c</code> to <code>1b0667b</code></td><td><code>OnSaveFailed</code>, Continue helpers, autosave, UnityEvents, JSON converters, Copy save ID.</td></tr>
+        <tr><td>S8</td><td><code>a7c039b</code>, <code>835f651</code></td><td>Three ready-made savers, and two fixes found in the samples.</td></tr>
+        <tr><td>S9</td><td><code>0b6ec62</code></td><td>Samples by the ladder.</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -525,9 +627,9 @@ SaveActions.Register(second, "hero");
   <section id="checked">
     <h2>What I checked</h2>
     <ul>
-      <li>223 EditMode and 17 PlayMode tests pass.</li>
+      <li>284 EditMode and 44 PlayMode tests pass, the samples' 12 included.</li>
       <li>Every library module compiles.</li>
-      <li>I played all six samples in the Editor after phase F and again after phase K. No errors. The Settings Lab scene logs a TMP dropdown error from its own setup, not from the save system.</li>
+      <li>I played all eight samples in the Editor after phase S, with odd uses on top: buttons pressed twice, an object switched off and on in one frame, a save with no game profile open, a copy spawned with no ID, a deleted file saved again, rubbish pasted into a file. Only the expected warning and error appeared. The Settings Lab scene logs TMP warnings from its own setup, not from the save system.</li>
       <li>I checked the Unity calls against the Unity 6 docs. The tests have not run on Unity 6.</li>
     </ul>
   </section>
@@ -537,7 +639,8 @@ SaveActions.Register(second, "hero");
     <ul>
       <li>A Scene file's load event waits one frame, so every script in the scene has started.</li>
       <li>Unticking Backup deletes the old backup on the next save.</li>
-      <li>Samples bring their own save file classes, because they can't see your <code>GameSaveFiles.cs</code>.</li>
+      <li>Samples use the built-in save files. Sample 04 also ships one class of its own, the way a library module does, because samples can't see your <code>GameSaveFiles.cs</code>.</li>
+      <li>The ScriptableObject sample stays, as 08, until step 4 makes assets register on their own.</li>
       <li>I kept the main page and rewrote it as the guide, instead of deleting it.</li>
     </ul>
   </section>
@@ -545,14 +648,15 @@ SaveActions.Register(second, "hero");
   <section id="open">
     <h2>Still to do</h2>
     <ul>
-      <li>Phase S: <code>[Save]</code> fields, checks that block play mode on a wrong setup, renames that keep data, <code>IOnRestored</code>, save IDs for spawned copies, and the small features in the roadmap.</li>
+      <li>Phase D: a whole-library check and the handoff for step 4.</li>
+      <li>GitHub: an issue for S8, then close it and #43 (samples) with their commits.</li>
       <li>Close issues #1, #17 to #20 and #23 by hand.</li>
       <li>Run the tests once in a Unity 6.7 project.</li>
     </ul>
     <div class="note warn">The shipped game stays on <code>save-system-v1</code>. Nothing is pushed.</div>
   </section>
 
-  <footer>Branch <code>save-system</code>, last code commit <code>d0ce7f8</code>. Updated 13 Nov 2026.</footer>
+  <footer>Branch <code>save-system</code>, last code commit <code>0b6ec62</code>. Updated 14 Nov 2026.</footer>
 </div>
 </body>
 </html>
