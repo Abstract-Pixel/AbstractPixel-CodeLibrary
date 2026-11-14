@@ -77,7 +77,8 @@ namespace AbstractPixel.SaveSystem
         // once the scene is first saved and their GlobalObjectIds finally differ (B1).
         private IEnumerable<(string UniqueId, string GlobalObjectId)> SiblingBridgeIdentities()
         {
-            foreach (SavableBridge bridge in FindObjectsByType<SavableBridge>(FindObjectsSortMode.None))
+            // B12: the overload without a sort mode exists on 6.6+, so no UNITY_7000_0_OR_NEWER guard is needed.
+            foreach (SavableBridge bridge in FindObjectsByType<SavableBridge>())
             {
                 if (bridge == this || bridge == null || bridge.gameObject.scene != gameObject.scene) continue;
                 yield return (bridge.UniqueId, UnityEditor.GlobalObjectId.GetGlobalObjectIdSlow(bridge).ToString());
