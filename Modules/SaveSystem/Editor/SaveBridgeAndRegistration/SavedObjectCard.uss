@@ -11,6 +11,9 @@
 
 .saved-object-card__body {
     margin-left: 8px;
+    padding-left: 6px;
+    border-left-width: 1px;
+    border-left-color: rgba(128, 128, 128, 0.35);
     overflow: hidden;
 }
 
@@ -25,6 +28,27 @@
 .saved-object-card__field-formerly {
     color: rgb(150, 150, 150);
     margin-left: 6px;
+}
+
+.saved-object-card__field-badge {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(128, 128, 128, 0.12);
+    border-width: 1px;
+    border-color: rgba(128, 128, 128, 0.3);
+    border-radius: 9px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.saved-object-card__field-type-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    margin-right: 5px;
+    flex-shrink: 0;
 }
 
 .saved-object-card__field-value {
@@ -69,8 +93,7 @@
 .saved-object-card__save-id-row {
     flex-direction: row;
     align-items: center;
-    margin-top: 2px;
-    margin-left: 8px;
+    margin-top: 4px;
     max-width: 100%;
 }
 

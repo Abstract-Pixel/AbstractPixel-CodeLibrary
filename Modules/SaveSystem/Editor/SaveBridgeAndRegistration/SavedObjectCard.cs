@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace AbstractPixel.SaveSystem.Editor
@@ -36,6 +37,7 @@ namespace AbstractPixel.SaveSystem.Editor
         Label saveIdLabel;
         Label headerNote;
         SavedObjectDescription description;
+        bool saveIdRevealed;
 
         public SavedObjectCard()
         {
@@ -47,7 +49,13 @@ namespace AbstractPixel.SaveSystem.Editor
             }
 
             foldout = new Foldout();
-            foldout.RegisterValueChangedCallback(_ => RefreshLiveValues());
+            foldout.RegisterValueChangedCallback(_ =>
+            {
+                // The ID row lives inside the fold content, so it hides with the rest when collapsed;
+                // this just keeps the button's own label (on the always-visible header) in sync.
+                ApplySaveIdVisibility();
+                RefreshLiveValues();
+            });
             Add(foldout);
 
             // The foldout's own toggle is the header row; the save ID button lives there too, so it's reachable
@@ -77,18 +85,17 @@ namespace AbstractPixel.SaveSystem.Editor
         {
             description = newDescription;
             fieldValueLabels.Clear();
+            saveIdRevealed = false;
             body.Clear();
+            // body.Clear() above already dropped the previous bind's row (it lives inside body).
+            revealedSaveIdRow = null;
+            saveIdLabel = null;
 
             // Remove everything the header or a previous Bind added after the foldout's own label and toggle.
             if (showSaveIdButton != null)
             {
                 headerToggle.Remove(showSaveIdButton);
                 showSaveIdButton = null;
-            }
-            if (revealedSaveIdRow != null)
-            {
-                Remove(revealedSaveIdRow);
-                revealedSaveIdRow = null;
             }
             if (headerNote != null)
             {
@@ -137,9 +144,18 @@ namespace AbstractPixel.SaveSystem.Editor
             VisualElement container = new VisualElement();
             container.AddToClassList("saved-object-card__field-row");
 
+            VisualElement badge = new VisualElement();
+            badge.AddToClassList("saved-object-card__field-badge");
+            container.Add(badge);
+
+            VisualElement dot = new VisualElement();
+            dot.AddToClassList("saved-object-card__field-type-dot");
+            dot.style.backgroundColor = new StyleColor(ColorForFieldType(row.Field.FieldType));
+            badge.Add(dot);
+
             Label nameAndType = new Label($"{row.Name} ({row.ShortTypeName})");
             nameAndType.AddToClassList("saved-object-card__field-name");
-            container.Add(nameAndType);
+            badge.Add(nameAndType);
 
             if (row.FormerlyName != null)
             {
@@ -157,8 +173,21 @@ namespace AbstractPixel.SaveSystem.Editor
             return container;
         }
 
-        // Lives on the header row (inside the foldout's own toggle) and the card's own body, not inside the
-        // fold content, so the save ID is reachable without expanding the card.
+        // A simple, Unity-muted category color for the field's type, the same idea as a Shader Graph port dot.
+        static Color ColorForFieldType(Type type)
+        {
+            if (type == typeof(bool)) return new Color(0.82f, 0.45f, 0.45f);
+            if (type == typeof(string)) return new Color(0.86f, 0.70f, 0.35f);
+            if (type == typeof(int) || type == typeof(long) || type == typeof(float) || type == typeof(double)) return new Color(0.40f, 0.62f, 0.86f);
+            if (type.IsEnum) return new Color(0.45f, 0.75f, 0.62f);
+            if (type == typeof(Vector2) || type == typeof(Vector3) || type == typeof(Vector4) || type == typeof(Quaternion)) return new Color(0.64f, 0.52f, 0.82f);
+            if (type == typeof(Color) || type == typeof(Color32)) return new Color(0.84f, 0.55f, 0.72f);
+            return new Color(0.59f, 0.59f, 0.59f);
+        }
+
+        // The button lives on the header row (inside the foldout's own toggle), always reachable. The revealed
+        // row lives in the fold content, right after the field rows, so it hides with the card and lines up
+        // under the header label the same way they do.
         void BuildSaveIdArea()
         {
             if (description.ShowsSpawnedCopyNote)
@@ -184,15 +213,29 @@ namespace AbstractPixel.SaveSystem.Editor
             revealedSaveIdRow.Add(saveIdLabel);
 
             revealedSaveIdRow.Add(new Button(() => EditorGUIUtility.systemCopyBuffer = saveIdLabel.text) { text = "Copy save ID" });
-            Insert(IndexOf(foldout) + 1, revealedSaveIdRow);
+            body.Add(revealedSaveIdRow);
         }
 
         void ToggleSaveIdReveal()
         {
-            bool willReveal = revealedSaveIdRow.style.display == DisplayStyle.None;
-            revealedSaveIdRow.style.display = willReveal ? DisplayStyle.Flex : DisplayStyle.None;
-            showSaveIdButton.text = willReveal ? "Hide save ID" : "Show save ID";
-            UpdateRevealedSaveId();
+            saveIdRevealed = !saveIdRevealed;
+            ApplySaveIdVisibility();
+        }
+
+        // Hidden whenever the card is collapsed, even if it was revealed before, since it lives in the fold content.
+        void ApplySaveIdVisibility()
+        {
+            if (revealedSaveIdRow == null)
+            {
+                return;
+            }
+            bool visible = saveIdRevealed && foldout.value;
+            revealedSaveIdRow.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            showSaveIdButton.text = saveIdRevealed ? "Hide save ID" : "Show save ID";
+            if (visible)
+            {
+                UpdateRevealedSaveId();
+            }
         }
 
         void UpdateRevealedSaveId()

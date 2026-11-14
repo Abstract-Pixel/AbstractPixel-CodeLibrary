@@ -16,7 +16,6 @@
 .save-file-row__line2 {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
     margin-top: 2px;
 }
 
@@ -29,7 +28,8 @@
     -unity-font-style: italic;
     color: rgb(150, 150, 150);
     flex-shrink: 1;
-    -unity-text-align: middle-right;
+    margin-left: 14px;
+    -unity-text-align: middle-left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
