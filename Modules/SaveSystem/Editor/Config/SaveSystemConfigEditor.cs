@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
@@ -43,6 +44,7 @@ namespace AbstractPixel.SaveSystem.Editor
             listProperty.isExpanded = true;
             PropertyField listField = new PropertyField(listProperty, "Save File List");
             root.Add(listField);
+            HookNewRowReset(listField);
 
             VisualElement updateArea = BuildUpdateArea(config);
             root.Add(updateArea);
@@ -52,6 +54,48 @@ namespace AbstractPixel.SaveSystem.Editor
             root.schedule.Execute(() => RefreshUpdateArea(config, updateArea)).Every(200);
 
             return root;
+        }
+
+        // The list's array insert (the same one its own "+" button uses) duplicates the previous element's
+        // values, including BuiltIn/ClassFullName/StorageName - so a new row silently clashes with, and is
+        // mistaken for, whatever row it was inserted after, and never counts as a game save file needing a
+        // class. ListView's own ListView isn't ready the instant this method runs, so this polls briefly for it.
+        void HookNewRowReset(VisualElement listField)
+        {
+            IVisualElementScheduledItem findListView = null;
+            findListView = listField.schedule.Execute(() =>
+            {
+                ListView listView = listField.Q<ListView>();
+                if (listView == null)
+                {
+                    return;
+                }
+                listView.itemsAdded += ResetNewRows;
+                findListView.Pause();
+            }).Every(50);
+        }
+
+        void ResetNewRows(IEnumerable<int> indices)
+        {
+            SerializedProperty list = serializedObject.FindProperty("saveFileList");
+            foreach (int index in indices)
+            {
+                if (index < 0 || index >= list.arraySize)
+                {
+                    continue;
+                }
+                SerializedProperty row = list.GetArrayElementAtIndex(index);
+                row.FindPropertyRelative(nameof(SaveFileDefinition.Name)).stringValue = string.Empty;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.Location)).intValue = (int)SaveLocation.GameProfile;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.Backup)).boolValue = true;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.StorageName)).stringValue = string.Empty;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.ClassFullName)).stringValue = string.Empty;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.ClassAssemblyName)).stringValue = string.Empty;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.BuiltIn)).intValue = (int)BuiltInSaveFile.None;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.AddedBy)).stringValue = string.Empty;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.EncryptFile)).boolValue = false;
+            }
+            serializedObject.ApplyModifiedProperties();
         }
 
         VisualElement BuildUpdateArea(SaveSystemConfigSO config)
