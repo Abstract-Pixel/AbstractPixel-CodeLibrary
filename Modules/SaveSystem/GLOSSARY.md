@@ -70,6 +70,10 @@ _Avoid_: save settings, save manager config
 Anything whose data the save system captures and restores: a MonoBehaviour, a plain C# class or a ScriptableObject.
 _Avoid_: savable, participant, save target
 
+**Saved script**:
+A MonoBehaviour with saved fields or ISavable. Each saved script on a GameObject is its own saved object with its own save ID, and the GameObject's Savable Bridge connects them all. A GameObject can hold any number of saved scripts, including two of the same script.
+_Avoid_: savable component, save target
+
 **Saved field**:
 A field marked `[Save]`. The save system captures and restores it with no other code.
 _Avoid_: persistent field, serialized field

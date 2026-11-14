@@ -111,6 +111,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
       <li><a href="#cleanup">The cleanup</a></li>
       <li><a href="#order">Build order</a></li>
       <li><a href="#phase-s">Phase S</a></li>
+      <li><a href="#phase-t">Phase T</a></li>
       <li><a href="#back-burner">Back burner</a></li>
       <li><a href="#decisions">Decisions</a></li>
       <li><a href="#not">Not doing</a></li>
@@ -119,7 +120,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
 
   <main>
     <header>
-      <div class="eyebrow">Abstract Pixel Library · Save System v2 · roadmap v9 · 14 Nov 2026</div>
+      <div class="eyebrow">Abstract Pixel Library · Save System v2 · roadmap v10 · 14 Nov 2026</div>
       <h1>Save System roadmap</h1>
       <p class="lede">Where the save system is going, in the order you'd learn it: designers first, then daily code, then the deeper levels. How the system works today is in <code>save-system.html</code>.</p>
       <div class="legend">
@@ -140,8 +141,9 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
         <li><span class="when">Phase H</span><div><strong>Docs and handoff</strong> <span class="pill built">built</span><p>This page, the guide, the before-and-after page and the AI handoff, brought up to date. 223 EditMode and 17 PlayMode tests pass.</p></div></li>
         <li><span class="when">After H</span><div><strong>Inspector fix and review</strong> <span class="pill built">built</span><p>The library no longer needs the Custom Inspector plugin. Its IMGUI editor for every MonoBehaviour hid the Save Actions save file picker. The package now needs Unity 6.6 or later, for built-in dictionaries. A review of phases F, K and H found no crash or data corruption. The rest is on the <a href="#back-burner">back burner</a>.</p></div></li>
         <li><span class="when">Phase S</span><div><strong><code>[Save]</code> fields and the ladder</strong> <span class="pill built">built</span><p><code>[Save]</code> fields, blocking checks, rename-safe data, <code>ISaveIn</code>, <code>IOnRestored</code>, spawned copies, typed load listeners, small features for developers and designers, three ready-made savers, and eight samples in ladder order. Four bugs found while playing the samples are fixed. 284 EditMode and 44 PlayMode tests pass.</p></div></li>
-        <li><span class="when">Phase D</span><div><strong>Final check and the step 4 handoff</strong> <span class="pill next">next run</span><p>Both suites, every module compiling, every sample played, a first run on Unity 6.7, and the handoff for step 4.</p></div></li>
-        <li><span class="when">Steps 4–7</span><div><strong>Designer tools</strong> <span class="pill plan">planned</span><p>Saved ScriptableObjects and saved-variable assets, bridges added while editing, the Save System window, ready-made savers and a save slot screen.</p></div></li>
+        <li><span class="when">Phase T</span><div><strong>Inspector tooling</strong> <span class="pill next">next run</span><p>The bridge inspector shows every saved script on the object, with live values in play mode. Mistakes show on the object, bridges appear while editing, the Hierarchy shows a badge, and the Saved Objects window lists everything that registered. Moved ahead of the send-off because it polishes what exists and adds no new system. <a href="#phase-t">More below.</a></p></div></li>
+        <li><span class="when">Phase D</span><div><strong>Final check and the send-off</strong> <span class="pill plan">after T</span><p>Both suites, every module compiling, every sample played, a first run on Unity 6.7, and the send-off handoff.</p></div></li>
+        <li><span class="when">Step 7</span><div><strong>More ready-made savers</strong> <span class="pill plan">planned</span><p>The rest of issue #22. Steps 5 and 6 moved into phase T. Step 4 and the save slot screen are cut; see <a href="#not">Not doing</a>.</p></div></li>
       </ol>
       <p>ProjectRallyShift stays on save system v1 through GitHub main, so none of this touches it.</p>
     </section>
@@ -169,19 +171,18 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
         <div class="card"><h4>Save Transform, Save Active State, Save Destroyed <span class="pill built">built</span></h4><p>Drop one on an object to save where it is, whether it's on, or that it was picked up (uses the gone marker). Most level objects need nothing else. Moved earlier than step 7, because <code>[Save]</code> makes each one about 15 lines.</p></div>
         <div class="card"><h4>Autosave settings <span class="pill built">built</span></h4><p>"Save when a scene unloads" and "Autosave every N minutes", next to Save On Quit in the config.</p></div>
         <div class="card"><h4>Save events as UnityEvents <span class="pill built">built</span></h4><p>A component with <em>On Loaded</em> (pick a file), <em>On Saved</em> and <em>On Game Profile Opened</em>, plus <em>Reload Chosen File</em>, <em>Open Slot N</em> and <em>New Game</em> on <code>MonoSaveActions</code>. A "Saved!" popup and the main menu buttons with no code.</p></div>
-        <div class="card"><h4>Saved fields in the inspector <span class="pill built">built</span></h4><p>The bridge shows which fields are saved, which file they go to and the save ID, with a Copy save ID button. Live values in play mode come with the Save System window in step 6.</p></div>
-        <div class="card"><h4>Saved-variable assets <span class="pill plan">step 4</span></h4><p><code>SavedBool</code>, <code>SavedInt</code> and <code>SavedString</code> assets such as "Has Red Key" or "Quest Stage", read and set from UnityEvents. The usual way to handle quest flags.</p></div>
-        <div class="card"><h4>"Saved" badge in the Hierarchy <span class="pill plan">step 5</span></h4><p>Bridges are added while editing, never at play time, and every saved object shows a small badge.</p></div>
-        <div class="card"><h4>The Save System window <span class="pill plan">step 6</span></h4><p>Setup, Save Files, Saved Objects, Saved Data and Live. See and reset what's saved without opening JSON files.</p></div>
-        <div class="card"><h4>Save slot screen and thumbnails <span class="pill plan">step 7</span></h4><p>A UI Toolkit prefab with slots, New, Delete with a confirm step, and Rename, plus a small screenshot per slot. The manifest already has room for it.</p></div>
+        <div class="card"><h4>Saved fields in the inspector <span class="pill built">built</span></h4><p>The bridge shows which fields are saved, which file they go to and the save ID, with a Copy save ID button.</p></div>
+        <div class="card"><h4>Every saved script on one card each <span class="pill next">phase T</span></h4><p>One card per saved script on the object, even two of the same script. Field names and types, "was: hp" for a renamed field, live values in play mode, and the save ID behind a Show save ID button. Mistakes show on the card, not only in the Console.</p></div>
+        <div class="card"><h4>"Saved" badge in the Hierarchy <span class="pill next">phase T</span></h4><p>Bridges are added while editing, never at play time, and every saved object shows a small badge. Red when it has a mistake. A parent whose children save shows a grey dot.</p></div>
+        <div class="card"><h4>The Saved Objects window <span class="pill next">phase T</span></h4><p>In play mode, every saved object that registered, plain classes and ScriptableObjects included, grouped by save file, with live values and a Ping button. Read only. The planned Setup, Save Files and Saved Data pages are cut: the config inspector and the JSON files already cover them.</p></div>
+        <div class="card"><h4>A clearer save file list <span class="pill next">phase T</span></h4><p>Each row in the config takes two lines: name and location, then Backup and the class the row makes. An <em>Update save file classes</em> button replaces "Write GameSaveFiles.cs" and only shows when the list has changes the file doesn't have yet. The menu item is greyed out otherwise. An out-of-date list blocks play mode.</p></div>
       </div>
       <h3>Setting up a game, once these exist</h3>
       <ol class="flow">
-        <li><strong>Save System window → Set up.</strong> One button makes the config and the folder, then shows a short checklist: autosave, save slot screen, save files.</li>
-        <li><strong>Save Files page.</strong> The five built-in files are already there and locked. Add your own rows, such as Ghosts.</li>
-        <li><strong>On each object, Add Component → a saver</strong>, or a script with <code>[Save]</code> fields. The bridge is added for you and the Hierarchy shows a badge.</li>
-        <li><strong>Main menu.</strong> Drop in the save slot screen, or wire New Game, Continue and Load Slot through UnityEvents.</li>
-        <li><strong>Test.</strong> The Live page shows what was saved, with Open save folder, Clear this game profile and Reset this object.</li>
+        <li><strong>Tools → Save System → Create Config.</strong> The five built-in files are already in its save file list and locked. Add your own rows, such as Ghosts, then press Update save file classes.</li>
+        <li><strong>On each object, Add Component → a saver</strong>, or a script with <code>[Save]</code> fields. The bridge is added for you, its card shows what saves, and the Hierarchy shows a badge.</li>
+        <li><strong>Main menu.</strong> Wire New Game, Continue and Load Slot through UnityEvents, or build a slot screen from <code>SaveActions.GameProfiles</code> (sample 03).</li>
+        <li><strong>Test.</strong> Press Play. The bridge cards and the Saved Objects window show the live values.</li>
       </ol>
     </section>
 
@@ -313,11 +314,12 @@ start until this is fixed.</span></code></pre></div>
           <tr><td>S8</td><td>Save Transform, Save Active State, Save Destroyed</td><td>Designers</td><td><span class="pill built">built</span></td></tr>
           <tr><td>S9</td><td>Samples by the ladder, then play every sample</td><td>Learning</td><td><span class="pill built">built</span></td></tr>
           <tr><td>S10</td><td>Guide, roadmap, before-and-after page and AI handoff</td><td>You</td><td><span class="pill built">built</span></td></tr>
-          <tr><td>D</td><td>Whole-library check, Unity 6.7 run, step 4 handoff</td><td>Whoever maintains it</td><td><span class="pill next">next run</span></td></tr>
-          <tr><td>4</td><td>ScriptableObjects without code, saved-variable assets</td><td>Designers</td><td><span class="pill plan">planned</span></td></tr>
-          <tr><td>5</td><td>Bridges added while editing, Hierarchy badge</td><td>Both</td><td><span class="pill plan">planned</span></td></tr>
-          <tr><td>6</td><td>The Save System window</td><td>Both</td><td><span class="pill plan">planned</span></td></tr>
-          <tr><td>7</td><td>More savers, save slot screen, thumbnails</td><td>Designers</td><td><span class="pill plan">planned</span></td></tr>
+          <tr><td>T1–T2</td><td>One card per saved script on the bridge, live values, save ID behind a button, mistakes on the card</td><td>Both</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>T3–T4</td><td>Bridges added while editing, Hierarchy badge</td><td>Both</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>T5–T6</td><td>The Saved Objects window, a clearer save file list with Update save file classes</td><td>Both</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>T7</td><td>Guide, roadmap and AI handoff</td><td>You</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>D</td><td>Whole-library check, Unity 6.7 run, send-off handoff</td><td>Whoever maintains it</td><td><span class="pill plan">after T</span></td></tr>
+          <tr><td>7</td><td>More ready-made savers</td><td>Designers</td><td><span class="pill plan">planned</span></td></tr>
         </tbody>
       </table></div>
     </section>
@@ -343,6 +345,24 @@ start until this is fixed.</span></code></pre></div>
       <p>Playing the samples found four bugs, all fixed with a test first: Save Destroyed did nothing on an object with nothing else saved; Save Active State could never be turned back on; a saved scene object switched off and on after its scene loaded stopped saving; and switching a script from <code>ISavable&lt;int&gt;</code> to one <code>[Save]</code> field lost the saved value on the next save. Sample 04 keeps one save file class shipped the way a library module does, and a ScriptableObject sample is kept as 08.</p>
     </section>
 
+    <section id="phase-t">
+      <h2>Phase T <span class="pill next">next run</span></h2>
+      <p>Planned with you on 14 Nov 2026. The goal: a designer sees, on the object, everything that object saves, and hears about a mistake where they're looking. The runtime already saves every saved script on a GameObject, each with its own save ID. The inspector only made it look like one. Phase T adds no runtime feature and no inspector button beyond Copy save ID.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Task</th><th>What it adds</th><th>Done when</th></tr></thead>
+        <tbody>
+          <tr><td>T1</td><td>The bridge inspector draws one card per saved script: script name, save file and field count in the header, then each field's name and type, "was: hp" for a renamed field, or the data type for <code>ISavable</code>. Play mode adds live values. The save ID sits behind a Show save ID button. On a prefab it says spawned copies get their ID from <code>SetSaveId</code>, and a copy still waiting for one shows a warning. The raw Unique Id field is hidden, and the cards update the moment a saved script is added.</td><td>Three saved scripts show three cards, the same script twice shows "Chest (1)" and "Chest (2)", and a live value appears in play mode.</td></tr>
+          <tr><td>T2</td><td>Blocking mistakes and "this save file has no row in the config" show on the card with the fix, not only in the Console. Fixes B14.</td><td>Each kind of mistake shows on its card.</td></tr>
+          <tr><td>T3</td><td>Bridges are added the moment a saved script is added, in scenes and in prefab assets, with Undo. Nothing is added at play time or build time. A scene that still lacks a bridge fails the build, and logs an error in play mode, saying "open the scene once". Fixes B6 and B13, measures B7.</td><td>Add Component adds the bridge, one Undo removes both, and every sample still plays.</td></tr>
+          <tr><td>T4</td><td>A "Saved" badge on Hierarchy rows, red when the object has a mistake, and a grey dot on a parent whose children save.</td><td>The badge rules have tests. You check the look by hand.</td></tr>
+          <tr><td>T5</td><td>The Saved Objects window: in play mode, every registered saved object grouped by save file, on the same cards, with live values and a Ping button. Plain classes and ScriptableObjects show up too.</td><td>A plain class and a bridge script both appear in play mode.</td></tr>
+          <tr><td>T6</td><td>The save file list: two lines per row, with the Backup box and the row's class on the second. GameSaveFiles.cs is written when you press <em>Update save file classes</em>, not on every keystroke. The button, and the menu item of the same name, only work when the list has changes the file doesn't have yet. An out-of-date list blocks play mode and builds. Fixes B5.</td><td>The button hides once the file matches, the menu item greys out, and play mode refuses to start with an out-of-date list.</td></tr>
+          <tr><td>T7</td><td>Samples updated for the new tools (one object with several saved scripts, README lines for 01, 05 and 08), the guide, this roadmap, the changelog and the AI handoff for phase D.</td><td>The guide has a short "See what's saved" section, and every changed sample's test passes.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Built most important first: T1, T6, T3, T2, T5, T4, then T7. If a run ends early, the finished tasks are committed and T7 still happens.</p>
+    </section>
+
     <section id="back-burner">
       <h2>Back burner</h2>
       <p>B1 to B10 come from the review of phases F, K and H on 13 Nov 2026; B11 to B13 from phase S. None of them crashes the game or corrupts saved data. A bug that crashes or corrupts data gets fixed straight away and never waits here.</p>
@@ -353,14 +373,15 @@ start until this is fixed.</span></code></pre></div>
           <tr><td>B2</td><td><span class="pill low">low</span></td><td>The save system's inspector drawers (the save file picker and the save file rows) only draw with UI Toolkit. An inspector plugin that draws everything with IMGUI, such as Odin, makes a game component's save file picker show "No GUI Implemented".</td><td>When a game uses such a plugin. An IMGUI fallback is about 15 lines in the picker's drawer.</td></tr>
           <tr><td>B3</td><td><span class="pill low">low</span></td><td>The duplicate save ID rule lets a new object take over when the old one's scene is unloaded. No test has reloaded a scene additively while the old copy is still loaded. The library's scene coordinator unloads first, so it doesn't happen today.</td><td><span class="pill built">fixed</span> in S5 (<code>3a1e84e</code>). A PlayMode test confirms the duplicate is refused.</td></tr>
           <tr><td>B4</td><td><span class="pill low">low</span></td><td>Nobody has checked a bridge on a prefab asset, or in Prefab Mode, by hand since the ID fix in phase F.</td><td><span class="pill built">checked</span> in S3 by reasoning, and in S9 by sample 05's Goblin prefab, whose bridge kept its ID through saving the prefab and playing.</td></tr>
-          <tr><td>B5</td><td><span class="pill low">low</span></td><td><code>SaveFileDefinition.ClassNameFor</code> and <code>SaveFilesCodeWriter.ToClassName</code> are two names for one rule.</td><td>Whichever phase S task next touches either file.</td></tr>
-          <tr><td>B6</td><td><span class="pill low">low</span></td><td>The auto-adder uses <code>IProcessSceneWithReport</code>, which Unity 7 marks obsolete. It still works on Unity 6.7.</td><td>Step 5 replaces the auto-adder.</td></tr>
-          <tr><td>B7</td><td><span class="pill low">low</span></td><td>Every bridge asks Unity for its id each time Unity validates it, and that lookup is slow. Large scenes may feel it.</td><td>Measure in step 5.</td></tr>
+          <tr><td>B5</td><td><span class="pill low">low</span></td><td><code>SaveFileDefinition.ClassNameFor</code> and <code>SaveFilesCodeWriter.ToClassName</code> are two names for one rule.</td><td>T6.</td></tr>
+          <tr><td>B6</td><td><span class="pill low">low</span></td><td>The auto-adder uses <code>IProcessSceneWithReport</code>, which Unity 7 marks obsolete. It still works on Unity 6.7.</td><td>T3 replaces the auto-adder.</td></tr>
+          <tr><td>B7</td><td><span class="pill low">low</span></td><td>Every bridge asks Unity for its id each time Unity validates it, and that lookup is slow. Large scenes may feel it.</td><td>Measure in T3.</td></tr>
           <tr><td>B8</td><td><span class="pill low">low</span></td><td>Outside the save system. Unity warns that <code>AnimationCommandQueue.commandQueue</code> and <code>ObjectPool.inactivePool</code> look serialized but can't be (UAC1009).</td><td>Any time. Mark them <code>[NonSerialized]</code>.</td></tr>
           <tr><td>B10</td><td><span class="pill low">low</span></td><td>Outside the save system. Unity warns (UAC1015) about the four dictionaries in the Settings module's <code>SettingsDTO</code>. Newtonsoft writes them to JSON, so they work. Don't mark them <code>[NonSerialized]</code>, because Newtonsoft skips those fields too and settings would stop saving.</td><td>When the Settings module is next worked on. Suppress the warning, or mark them <code>[SerializeField]</code> if Unity should also keep them.</td></tr>
           <tr><td>B11</td><td><span class="pill low">low</span></td><td>A spawned copy created by a scene's own startup code, before that scene is ready, counts as a scene object, so a missing <code>SetSaveId</code> isn't reported.</td><td>When someone hits it. Nobody spawns saved enemies in the same frame a scene loads today.</td></tr>
-          <tr><td>B12</td><td><span class="pill low">low</span></td><td>The bridge's duplicate check calls <code>FindObjectsByType</code> with a sort mode, which Unity 7 marks obsolete. It works on Unity 6.7.</td><td>Step 5, or when Unity 6.7 has the overload without a sort mode.</td></tr>
-          <tr><td>B13</td><td><span class="pill low">low</span></td><td>The ready-made saver and bridge PlayMode tests build bridges by hand and skip the "is this a saved script" rule. That hid the Save Destroyed bug until the sample was played.</td><td>Phase D or step 5: a test helper that builds bridges the way the editor does.</td></tr>
+          <tr><td>B12</td><td><span class="pill low">low</span></td><td>The bridge's duplicate check calls <code>FindObjectsByType</code> with a sort mode, which Unity 7 marks obsolete. It works on Unity 6.7.</td><td>T3, if Unity 6.7 has the overload without a sort mode.</td></tr>
+          <tr><td>B13</td><td><span class="pill low">low</span></td><td>The ready-made saver and bridge PlayMode tests build bridges by hand and skip the "is this a saved script" rule. That hid the Save Destroyed bug until the sample was played.</td><td>T3: its tests build bridges the way the editor does.</td></tr>
+          <tr><td>B14</td><td><span class="pill low">low</span></td><td>Found while planning phase T. The "save file has no row in the config" warning only checks <code>ISavable</code> scripts. A script with <code>[Save]</code> fields and <code>ISaveIn</code> whose file has no row saves nothing, with no warning.</td><td>T2.</td></tr>
           <tr><td>B9</td><td><span class="pill low">low</span></td><td>Lab only. The Settings Lab scene logs one TMP dropdown error and missing-script warnings, because TMP Essentials aren't imported there. In phase S's play check only the warnings appeared.</td><td>When the Settings module is next worked on.</td></tr>
         </tbody>
       </table></div>
@@ -380,6 +401,9 @@ start until this is fixed.</span></code></pre></div>
         <li>Renames of fields, classes, rows and objects never lose saved data.</li>
         <li>The GitHub project shows features and bug fixes only.</li>
         <li>ProjectRallyShift stays on v1.</li>
+        <li>Editor tooling that polishes existing features comes before the send-off (phase T). New systems come after it.</li>
+        <li>The bridge inspector shows saved scripts, not raw IDs. The save ID sits behind a button.</li>
+        <li>GameSaveFiles.cs is written when you press Update save file classes, not on every change.</li>
       </ol>
     </section>
 
@@ -393,11 +417,13 @@ start until this is fixed.</span></code></pre></div>
           <tr><td>Saving on a background thread</td><td>Files are small, and threads plus Unity objects bring hard bugs. Measure first if saving ever stutters.</td></tr>
           <tr><td>Cloud saves, compression</td><td>Platform-specific. The storage seam is ready when a game needs them.</td></tr>
           <tr><td>Encryption, for now</td><td>Parked in issue #21 until a game needs it.</td></tr>
+          <tr><td>ScriptableObjects registered automatically, saved-variable assets (<code>SavedBool</code>, <code>SavedInt</code>)</td><td>A ScriptableObject already saves like a plain class: <code>[Save]</code> fields and <code>Register(this)</code> (sample 08). Most saved data lives in MonoBehaviours and plain classes. Cut on 14 Nov 2026.</td></tr>
+          <tr><td>A save slot screen prefab, save slot thumbnails</td><td>Every game's menu looks different. <code>SaveActions.GameProfiles</code> and the UnityEvents are enough to build one (sample 03). Cut on 14 Nov 2026.</td></tr>
         </tbody>
       </table></div>
     </section>
 
-    <footer>Branch <code>save-system</code>, last code commit <code>0b6ec62</code>. Not pushed. Roadmap v9: phase S built, phase D next, back burner up to date.</footer>
+    <footer>Branch <code>save-system</code>, last code commit <code>0b6ec62</code>. Not pushed. Roadmap v10: phase S built, phase T next, then phase D.</footer>
   </main>
 </div>
 </body>
