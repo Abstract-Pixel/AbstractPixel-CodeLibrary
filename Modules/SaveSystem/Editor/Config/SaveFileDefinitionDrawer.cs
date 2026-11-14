@@ -19,32 +19,41 @@ namespace AbstractPixel.SaveSystem.Editor
             VisualElement container = new VisualElement();
             container.styleSheets.Add(SaveSystemConfigEditor.LoadStyleSheet());
 
-            VisualElement row = new VisualElement();
-            row.AddToClassList("save-file-row");
-            container.Add(row);
+            VisualElement line1 = new VisualElement();
+            line1.AddToClassList("save-file-row");
+            container.Add(line1);
 
             SerializedProperty builtInProperty = property.FindPropertyRelative(nameof(SaveFileDefinition.BuiltIn));
             SerializedProperty addedByProperty = property.FindPropertyRelative(nameof(SaveFileDefinition.AddedBy));
+            SerializedProperty nameProperty = property.FindPropertyRelative(nameof(SaveFileDefinition.Name));
             bool isBuiltIn = builtInProperty.intValue != (int)BuiltInSaveFile.None;
             bool isAddedByModule = !string.IsNullOrEmpty(addedByProperty.stringValue);
 
-            PropertyField nameField = new PropertyField(property.FindPropertyRelative(nameof(SaveFileDefinition.Name)), string.Empty);
+            PropertyField nameField = new PropertyField(nameProperty, string.Empty);
             nameField.AddToClassList("save-file-row__name");
             // A built-in row's class ships with the library under that name, and a module's class decides its row's name.
             nameField.SetEnabled(!isBuiltIn && !isAddedByModule);
-            row.Add(nameField);
+            line1.Add(nameField);
 
             PropertyField locationField = new PropertyField(property.FindPropertyRelative(nameof(SaveFileDefinition.Location)), string.Empty);
             locationField.AddToClassList("save-file-row__location");
             // The library decides where each built-in save file lives, so every game agrees.
             locationField.SetEnabled(!isBuiltIn);
-            row.Add(locationField);
+            line1.Add(locationField);
+
+            VisualElement line2 = new VisualElement();
+            line2.AddToClassList("save-file-row__line2");
+            container.Add(line2);
 
             Toggle backupToggle = new Toggle("Backup");
             backupToggle.BindProperty(property.FindPropertyRelative(nameof(SaveFileDefinition.Backup)));
             backupToggle.tooltip = "Keep the previous good copy of this save file in the Backups folder, and load it if the save file is corrupt.";
             backupToggle.AddToClassList("save-file-row__backup");
-            row.Add(backupToggle);
+            line2.Add(backupToggle);
+
+            Label classLabel = new Label(DescribeClass(isBuiltIn, isAddedByModule, nameProperty.stringValue, property.FindPropertyRelative(nameof(SaveFileDefinition.ClassFullName)).stringValue));
+            classLabel.AddToClassList("save-file-row__class");
+            line2.Add(classLabel);
 
             string note = DescribeRow(isBuiltIn, addedByProperty.stringValue, property.FindPropertyRelative(nameof(SaveFileDefinition.StorageName)).stringValue);
             if (!string.IsNullOrEmpty(note))
@@ -128,6 +137,21 @@ namespace AbstractPixel.SaveSystem.Editor
                 }
             }
             return -1;
+        }
+
+        /// <summary>The class this row makes, in grey under it: "GameSaveFiles.Ghosts", "SaveFiles.Settings", or a module's own class.</summary>
+        static string DescribeClass(bool isBuiltIn, bool isAddedByModule, string name, string classFullName)
+        {
+            if (isBuiltIn)
+            {
+                return $"SaveFiles.{name}";
+            }
+            if (isAddedByModule)
+            {
+                int lastDot = classFullName.LastIndexOf('.');
+                return lastDot >= 0 ? classFullName.Substring(lastDot + 1) : classFullName;
+            }
+            return $"GameSaveFiles.{SaveFileDefinition.ClassNameFor(name)}";
         }
 
         static string DescribeRow(bool isBuiltIn, string addedBy, string storageName)

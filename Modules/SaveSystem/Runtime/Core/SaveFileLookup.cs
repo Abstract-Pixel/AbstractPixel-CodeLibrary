@@ -83,7 +83,7 @@ namespace AbstractPixel.SaveSystem
             bool isFirstReport = reportedClasses.Add(saveFileClass.FullName);
             if (isFirstReport)
             {
-                Debug.LogError($"[SaveSystem] The save file class '{saveFileClass.FullName}' has no row in the save system config, so nothing in it is saved. Select the config (Tools > External Project Tools > Save System > Create Config selects it) and press Write GameSaveFiles.cs, or add a row named '{saveFileClass.Name}' to the save file list.");
+                Debug.LogError($"[SaveSystem] The save file class '{saveFileClass.FullName}' has no row in the save system config, so nothing in it is saved. Select the config (Tools > External Project Tools > Save System > Create Config selects it) and press Update save file classes, or add a row named '{saveFileClass.Name}' to the save file list.");
             }
             return false;
         }

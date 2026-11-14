@@ -6,14 +6,12 @@ namespace AbstractPixel.SaveSystem.Editor
 {
     /// <summary>
     /// The save system config's inspector. When the save file list changes, the built-in and module rows are put
-    /// back if they were removed, and GameSaveFiles.cs is written again, so the classes always match the list.
+    /// back if they were removed. GameSaveFiles.cs is written only when Update save file classes is pressed.
     /// </summary>
     [CustomEditor(typeof(SaveSystemConfigSO))]
     public class SaveSystemConfigEditor : UnityEditor.Editor
     {
         const string StyleSheetPath = "Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveSystemConfigEditor.uss";
-
-        bool isWriteScheduled;
 
         public static StyleSheet LoadStyleSheet()
         {
@@ -22,6 +20,8 @@ namespace AbstractPixel.SaveSystem.Editor
 
         public override VisualElement CreateInspectorGUI()
         {
+            SaveSystemConfigSO config = (SaveSystemConfigSO)target;
+
             VisualElement root = new VisualElement();
             root.styleSheets.Add(LoadStyleSheet());
 
@@ -36,46 +36,52 @@ namespace AbstractPixel.SaveSystem.Editor
                 }
             }
 
-            root.Add(new HelpBox("The save file list. Each row is one save file. GameProfile, Scene, Settings, Input and Achievements are built in: their classes ship with the library, such as SaveFiles.Settings. The editor writes a class for each row you add into GameSaveFiles.cs, so game code writes SaveActions.Save<GameSaveFiles.Ghosts>(). Library modules add their own rows.", HelpBoxMessageType.Info));
+            root.Add(new HelpBox("The save file list. Each row is one save file. GameProfile, Scene, Settings, Input and Achievements are built in: their classes ship with the library, such as SaveFiles.Settings. Press Update save file classes to write a class for each row you add into GameSaveFiles.cs, so game code writes SaveActions.Save<GameSaveFiles.Ghosts>(). Library modules add their own rows.", HelpBoxMessageType.Info));
 
             SerializedProperty listProperty = serializedObject.FindProperty("saveFileList");
             // The list is what people come here for, so it starts open.
             listProperty.isExpanded = true;
             PropertyField listField = new PropertyField(listProperty, "Save File List");
-            listField.TrackPropertyValue(listProperty, changed => ScheduleWrite());
             root.Add(listField);
 
-            Button writeButton = new Button(WriteNow);
-            writeButton.text = "Write GameSaveFiles.cs";
-            writeButton.tooltip = "Write GameSaveFiles.cs from the list now. It is also written whenever the list changes.";
-            writeButton.AddToClassList("save-file-list__actions");
-            root.Add(writeButton);
+            VisualElement updateArea = BuildUpdateArea(config);
+            root.Add(updateArea);
+            listField.TrackPropertyValue(listProperty, _ => RefreshUpdateArea(config, updateArea));
+
             return root;
         }
 
-        // Typing a name changes the list on every key, so the file is written once the editor is idle again.
-        void ScheduleWrite()
+        VisualElement BuildUpdateArea(SaveSystemConfigSO config)
         {
-            if (isWriteScheduled)
-            {
-                return;
-            }
-            isWriteScheduled = true;
-            EditorApplication.delayCall += WriteNow;
+            VisualElement area = new VisualElement();
+
+            Label waitingLabel = new Label("The save file list has changes that GameSaveFiles.cs doesn't have yet.");
+            waitingLabel.AddToClassList("save-file-list__waiting");
+            area.Add(waitingLabel);
+
+            Button updateButton = new Button(() => WriteNow(config, area)) { text = "Update save file classes" };
+            updateButton.AddToClassList("save-file-list__actions");
+            area.Add(updateButton);
+
+            RefreshUpdateArea(config, area);
+            return area;
         }
 
-        void WriteNow()
+        // The button and its line disappear together once GameSaveFiles.cs matches the list.
+        static void RefreshUpdateArea(SaveSystemConfigSO config, VisualElement area)
         {
-            isWriteScheduled = false;
-            SaveSystemConfigSO config = target as SaveSystemConfigSO;
-            if (config == null)
-            {
-                return;
-            }
+            bool isOutOfDate = SaveFileListStatus.IsOutOfDate(config.SaveFileList, config.GameSaveFilesScriptPath);
+            area.style.display = isOutOfDate ? DisplayStyle.Flex : DisplayStyle.None;
+            // Disabled, not hidden, while a clash blocks the write: the row above already says why.
+            area.Q<Button>().SetEnabled(SaveFileClash.FindAll(config.SaveFileList).Count == 0);
+        }
 
+        void WriteNow(SaveSystemConfigSO config, VisualElement area)
+        {
             serializedObject.ApplyModifiedProperties();
             SaveFilesCodeWriter.WriteFile(config);
             serializedObject.Update();
+            RefreshUpdateArea(config, area);
         }
     }
 }

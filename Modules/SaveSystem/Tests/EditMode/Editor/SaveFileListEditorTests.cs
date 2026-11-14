@@ -94,11 +94,11 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
-        public void ToClassName_TurnsARowNameIntoAValidClassName()
+        public void ClassNameFor_TurnsARowNameIntoAValidClassName()
         {
-            Assert.AreEqual("GhostRuns", SaveFilesCodeWriter.ToClassName("Ghost Runs"));
-            Assert.AreEqual("Level2Data", SaveFilesCodeWriter.ToClassName("level-2 data"));
-            Assert.AreEqual("_3DModels", SaveFilesCodeWriter.ToClassName("3D models"));
+            Assert.AreEqual("GhostRuns", SaveFileDefinition.ClassNameFor("Ghost Runs"));
+            Assert.AreEqual("Level2Data", SaveFileDefinition.ClassNameFor("level-2 data"));
+            Assert.AreEqual("_3DModels", SaveFileDefinition.ClassNameFor("3D models"));
         }
 
         [Test]

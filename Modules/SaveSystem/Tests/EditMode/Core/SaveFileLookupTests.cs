@@ -53,7 +53,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SaveFileClassWithNoRow_LogsOneErrorNamingTheClassAndHowToAddIt()
         {
             SaveFileLookup lookup = CreateLookup();
-            LogAssert.Expect(LogType.Error, new Regex("SaveFileWithNoRow.*no row in the save system config.*Write GameSaveFiles.cs"));
+            LogAssert.Expect(LogType.Error, new Regex("SaveFileWithNoRow.*no row in the save system config.*Update save file classes"));
 
             bool firstTry = lookup.TryGetDefinition(typeof(SaveFileWithNoRow), out SaveFileDefinition _);
             bool secondTry = lookup.TryGetDefinition(typeof(SaveFileWithNoRow), out SaveFileDefinition _);

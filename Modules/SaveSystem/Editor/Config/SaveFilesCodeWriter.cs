@@ -56,7 +56,7 @@ namespace AbstractPixel.SaveSystem.Editor
             List<SaveFileClash> clashes = SaveFileClash.FindAll(rows);
             foreach (SaveFileClash clash in clashes)
             {
-                Debug.LogError($"[SaveSystem] GameSaveFiles.cs was not written: {clash.Describe()} Rename one of the rows in the save system config; it is written again as soon as the clash is gone.");
+                Debug.LogError($"[SaveSystem] GameSaveFiles.cs was not written: {clash.Describe()} Rename one of the rows in the save system config, then press Update save file classes.");
             }
             return clashes.Count == 0;
         }
@@ -75,7 +75,7 @@ namespace AbstractPixel.SaveSystem.Editor
             {
                 if (row != null && row.IsGameSaveFile)
                 {
-                    code.AppendLine($"    public sealed class {ToClassName(row.Name)} : ISaveFile {{ }}");
+                    code.AppendLine($"    public sealed class {SaveFileDefinition.ClassNameFor(row.Name)} : ISaveFile {{ }}");
                 }
             }
             code.AppendLine("}");
@@ -99,15 +99,9 @@ namespace AbstractPixel.SaveSystem.Editor
                 {
                     row.StorageName = row.Name;
                 }
-                row.ClassFullName = SaveFileDefinition.GeneratedClassPrefix + ToClassName(row.Name);
+                row.ClassFullName = SaveFileDefinition.GeneratedClassPrefix + SaveFileDefinition.ClassNameFor(row.Name);
                 row.ClassAssemblyName = assemblyName;
             }
-        }
-
-        /// <summary>A row name as a C# class name: "Ghost Runs" becomes "GhostRuns", "3D models" becomes "_3DModels".</summary>
-        public static string ToClassName(string rowName)
-        {
-            return SaveFileDefinition.ClassNameFor(rowName);
         }
 
         // GameSaveFiles.cs compiles into whichever assembly owns its folder: Assembly-CSharp, or an assembly definition's.
@@ -121,25 +115,24 @@ namespace AbstractPixel.SaveSystem.Editor
             return Path.GetFileNameWithoutExtension(assemblyFileName);
         }
 
-        [MenuItem("Tools/External Project Tools/Save System/Write GameSaveFiles.cs")]
+        [MenuItem("Tools/External Project Tools/Save System/Update Save File Classes")]
         static void WriteFromMenu()
         {
             SaveSystemConfigSO config = SaveSystemConfigFinder.FindInProject();
             if (config == null)
             {
-                bool createConfig = EditorUtility.DisplayDialog(
-                    "No save system config",
-                    "GameSaveFiles.cs is written from the save system config, and there is none yet. Create one now at Assets/Resources/SaveSystemConfig.asset?",
-                    "Create Config",
-                    "Cancel");
-                if (!createConfig)
-                {
-                    return;
-                }
-                config = SaveSystemConfigCreator.CreateOrFind(SaveSystemConfigFinder.ConfigAssetPath);
+                return;
             }
             WriteFile(config);
             Debug.Log($"[SaveSystem] Wrote {config.GameSaveFilesScriptPath} from the save file list.");
+        }
+
+        // Greyed out once the list matches GameSaveFiles.cs, or while there is no config to read it from.
+        [MenuItem("Tools/External Project Tools/Save System/Update Save File Classes", true)]
+        static bool CanWriteFromMenu()
+        {
+            SaveSystemConfigSO config = SaveSystemConfigFinder.FindInProject();
+            return config != null && SaveFileListStatus.IsOutOfDate(config.SaveFileList, config.GameSaveFilesScriptPath);
         }
     }
 }
