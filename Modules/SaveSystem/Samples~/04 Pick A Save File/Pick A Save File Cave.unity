@@ -521,7 +521,7 @@ MonoBehaviour:
   chests: 
   - {fileID: 461750161}
   - {fileID: 1975904425}
-  otherSceneName: Save Locations Forest
+  otherSceneName: Pick A Save File Forest
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

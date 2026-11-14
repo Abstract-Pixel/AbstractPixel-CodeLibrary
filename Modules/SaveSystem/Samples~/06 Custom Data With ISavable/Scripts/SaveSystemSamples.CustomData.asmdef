@@ -1,6 +1,6 @@
 {
-    "name": "SaveSystemSamples.PlainCSharpClass",
-    "rootNamespace": "SaveSystemSamples.PlainCSharpClass",
+    "name": "SaveSystemSamples.CustomData",
+    "rootNamespace": "SaveSystemSamples.CustomData",
     "references": [
         "AbstractPixel.SaveSystem"
     ],

@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using AbstractPixel.SaveSystem;
 
-namespace SaveSystemSamples.PlainCSharpClass
+namespace SaveSystemSamples.CustomData
 {
-    // A plain C# class: no MonoBehaviour, no GameObject.
-    // ISavable<InventoryData> with no save file class saves into the GameProfile save file, so each game profile has its own inventory.
+    // ISavable<TData> is for when [Save] fields aren't enough: the saved shape differs from the live fields, the data
+    // needs a copy or a conversion on the way in and out, or the fields hold things JSON can't store.
+    // Here CaptureData hands over a copy, so later changes to Items never sneak into data already captured.
+    // With no save file class it saves into the GameProfile file. To pick another: ISavable<InventoryData, SaveFiles.Scene>.
     public class Inventory : ISavable<InventoryData>
     {
         public List<string> Items { get; private set; }

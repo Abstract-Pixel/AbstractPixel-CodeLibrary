@@ -1,34 +1,27 @@
 using AbstractPixel.SaveSystem;
 using UnityEngine;
 
-namespace SaveSystemSamples.MonoBehaviourSample
+namespace SaveSystemSamples.SaveAField
 {
-    // A saved MonoBehaviour. The Savable Bridge on the same GameObject connects it to the save system.
-    public class Health : MonoBehaviour, ISavable<int>
+    // A saved MonoBehaviour: [Save] on a field is all it takes. The Savable Bridge on the same GameObject connects it.
+    public class Health : MonoBehaviour
     {
         public const int Max = 100;
 
-        public int Current { get; private set; }
+        // The value written here is the new-game value. The save system restores the saved value after every Awake
+        // and before any Start, so never reset a [Save] field in Start: that would overwrite what was just loaded.
+        [Save] int current = Max;
 
-        // New-game value goes in Awake. The save system restores saved health after every Awake and before any Start.
-        // Setting Current in Start instead would overwrite the restored value.
-        void Awake()
-        {
-            Current = Max;
-        }
+        public int Current => current;
 
         public void TakeDamage(int amount)
         {
-            Current = Mathf.Max(0, Current - amount);
+            current = Mathf.Max(0, current - amount);
         }
 
         public void Heal(int amount)
         {
-            Current = Mathf.Min(Max, Current + amount);
+            current = Mathf.Min(Max, current + amount);
         }
-
-        public int CaptureData() => Current;
-
-        public void RestoreData(int _loadedData) => Current = _loadedData;
     }
 }

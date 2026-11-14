@@ -1,38 +1,36 @@
-using System;
 using System.Collections.Generic;
 using AbstractPixel.SaveSystem;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace SaveSystemSamples.SaveLocations
+namespace SaveSystemSamples.PickASaveFile
 {
-    // Shows one value from each save location, and buttons to change scenes and game profiles.
+    // Shows one value from each save file, and buttons to save one file, change scenes and change game profiles.
     // Each button calls a public method, so tests and tools can press it from code too.
-    public class SaveLocationsScreen : MonoBehaviour
+    public class PickASaveFileScreen : MonoBehaviour
     {
         [SerializeField] VolumeSetting volume;
         [SerializeField] PlayerCoins coins;
         [SerializeField] Chest[] chests;
         [SerializeField] string otherSceneName;
 
-        /// <summary>The save file that loaded most recently, as SaveEventBus.OnLoadCompleted reported it.</summary>
-        public string LastLoadedSaveFile { get; private set; } = "nothing yet";
+        /// <summary>How many times this scene's Scene save file loaded, as the typed load listener heard it.</summary>
+        public int SceneFileLoadCount { get; private set; }
 
-        // OnLoadCompleted is sticky: this screen starts after the save files loaded, and is still told about them.
+        // A typed load listener is sticky: this screen starts after the Scene file loaded, and still hears about it.
         void OnEnable()
         {
-            SaveEventBus.OnLoadCompleted += ShowLoadedSaveFile;
+            SaveEventBus.AddLoadListener<SaveFiles.Scene>(CountSceneFileLoad);
         }
 
         void OnDisable()
         {
-            SaveEventBus.OnLoadCompleted -= ShowLoadedSaveFile;
+            SaveEventBus.RemoveLoadListener<SaveFiles.Scene>(CountSceneFileLoad);
         }
 
-        void ShowLoadedSaveFile(Type saveFileClass)
+        void CountSceneFileLoad()
         {
-            LastLoadedSaveFile = saveFileClass.Name;
-            Debug.Log($"[Save Locations sample] Loaded the save file {saveFileClass.Name} in scene {SceneManager.GetActiveScene().name}.");
+            SceneFileLoadCount++;
         }
 
         public void GoToOtherScene()
@@ -40,9 +38,21 @@ namespace SaveSystemSamples.SaveLocations
             SceneManager.LoadScene(otherSceneName);
         }
 
-        public void Save()
+        public void SaveEverything()
         {
             SaveActions.SaveAll();
+        }
+
+        // Writes only the settings file; unsaved coins and chests stay unsaved.
+        public void SaveOnlyTheSettings()
+        {
+            SaveActions.Save<SampleSettingsSaveFile>();
+        }
+
+        // Throws away unsaved changes to the coins by reading the GameProfile file back from disk.
+        public void UndoUnsavedCoins()
+        {
+            SaveActions.Reload<SaveFiles.GameProfile>();
         }
 
         public void NewGameProfile()
@@ -57,17 +67,17 @@ namespace SaveSystemSamples.SaveLocations
 
         void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(20, 20, 420, 600));
+            GUILayout.BeginArea(new Rect(20, 20, 460, 640));
             GUILayout.Label($"Scene: {SceneManager.GetActiveScene().name}   Game profile: {OpenGameProfileName()}");
-            GUILayout.Label($"Last save file loaded: {LastLoadedSaveFile}");
+            GUILayout.Label($"This scene's Scene file loaded {SceneFileLoadCount} time(s)");
 
-            GUILayout.Label($"Global - volume: {volume.Volume}");
+            GUILayout.Label($"Sample Settings (Global) - volume: {volume.Volume}");
             if (GUILayout.Button("Volume up"))
             {
                 volume.VolumeUp();
             }
 
-            GUILayout.Label($"Game profile - coins: {coins.Coins}");
+            GUILayout.Label($"GameProfile - coins: {coins.Coins}");
             if (GUILayout.Button("Add 5 coins"))
             {
                 coins.Add(5);
@@ -82,13 +92,22 @@ namespace SaveSystemSamples.SaveLocations
                 }
             }
 
+            GUILayout.Space(10);
+            if (GUILayout.Button("Save everything"))
+            {
+                SaveEverything();
+            }
+            if (GUILayout.Button("Save only the settings"))
+            {
+                SaveOnlyTheSettings();
+            }
+            if (GUILayout.Button("Undo unsaved coins"))
+            {
+                UndoUnsavedCoins();
+            }
             if (GUILayout.Button($"Go to {otherSceneName}"))
             {
                 GoToOtherScene();
-            }
-            if (GUILayout.Button("Save"))
-            {
-                Save();
             }
             if (GUILayout.Button("New game profile"))
             {

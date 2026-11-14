@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SaveSystemSamples.PlainCSharpClass
+namespace SaveSystemSamples.CustomData
 {
     // The data that goes into the save file. Plain public fields, so JSON can store them.
     [Serializable]

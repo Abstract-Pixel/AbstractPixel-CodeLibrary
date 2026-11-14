@@ -1,31 +1,24 @@
 using AbstractPixel.SaveSystem;
 using UnityEngine;
 
-namespace SaveSystemSamples.SaveLocations
+namespace SaveSystemSamples.PickASaveFile
 {
-    // A setting belongs to the player's machine, not to a playthrough, so it's saved in a Global save file (SampleSettingsSaveFile).
-    // Every game profile shares it.
-    public class VolumeSetting : MonoBehaviour, ISavable<int, SampleSettingsSaveFile>
+    // A setting belongs to the player's machine, not to a playthrough, so it goes in a Global save file that every
+    // game profile shares. In your game that's usually the built-in SaveFiles.Settings; this sample ships its own.
+    public class VolumeSetting : MonoBehaviour, ISaveIn<SampleSettingsSaveFile>
     {
-        public int Volume { get; private set; }
+        [Save] int volume = 5;
 
-        void Awake()
-        {
-            Volume = 5;
-        }
+        public int Volume => volume;
 
         public void VolumeUp()
         {
-            Volume = Mathf.Min(10, Volume + 1);
+            volume = Mathf.Min(10, volume + 1);
         }
 
         public void VolumeDown()
         {
-            Volume = Mathf.Max(0, Volume - 1);
+            volume = Mathf.Max(0, volume - 1);
         }
-
-        public int CaptureData() => Volume;
-
-        public void RestoreData(int _loadedData) => Volume = _loadedData;
     }
 }

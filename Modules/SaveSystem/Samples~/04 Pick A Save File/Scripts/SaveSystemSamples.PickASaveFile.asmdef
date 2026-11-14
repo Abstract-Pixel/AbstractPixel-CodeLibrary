@@ -1,6 +1,6 @@
 {
-    "name": "SaveSystemSamples.SaveLocations",
-    "rootNamespace": "SaveSystemSamples.SaveLocations",
+    "name": "SaveSystemSamples.PickASaveFile",
+    "rootNamespace": "SaveSystemSamples.PickASaveFile",
     "references": [
         "AbstractPixel.SaveSystem"
     ],

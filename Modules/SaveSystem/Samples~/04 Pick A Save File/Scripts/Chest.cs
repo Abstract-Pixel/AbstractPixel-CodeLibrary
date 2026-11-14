@@ -1,26 +1,19 @@
 using AbstractPixel.SaveSystem;
 using UnityEngine;
 
-namespace SaveSystemSamples.SaveLocations
+namespace SaveSystemSamples.PickASaveFile
 {
-    // A chest belongs to one scene in one playthrough, so it's saved in a Scene save file (SampleChestsSaveFile).
-    // Each scene gets its own save file, so chests in different scenes never mix.
-    public class Chest : MonoBehaviour, ISavable<bool, SampleChestsSaveFile>
+    // A chest belongs to one scene in one playthrough, so ISaveIn picks the built-in Scene save file.
+    // Each scene gets its own file, so chests in different scenes never mix.
+    public class Chest : MonoBehaviour, ISaveIn<SaveFiles.Scene>
     {
-        public bool IsOpen { get; private set; }
+        [Save] bool isOpen;
 
-        void Awake()
-        {
-            IsOpen = false;
-        }
+        public bool IsOpen => isOpen;
 
         public void Open()
         {
-            IsOpen = true;
+            isOpen = true;
         }
-
-        public bool CaptureData() => IsOpen;
-
-        public void RestoreData(bool _loadedData) => IsOpen = _loadedData;
     }
 }

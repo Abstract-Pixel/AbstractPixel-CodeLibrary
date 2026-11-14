@@ -2,7 +2,7 @@ using AbstractPixel.SaveSystem;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace SaveSystemSamples.PlainCSharpClass
+namespace SaveSystemSamples.CustomData
 {
     // Draws the sample's buttons and owns the Inventory. The Inventory itself is plain C#.
     public class InventorySampleScreen : MonoBehaviour

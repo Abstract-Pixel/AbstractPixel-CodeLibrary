@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace SaveSystemSamples.GameProfiles.Tests
+namespace SaveSystemSamples.SaveSlots.Tests
 {
     // Loads a sample scene by name, wherever the sample was imported, without needing it in the build's scene list.
     internal static class SampleScene

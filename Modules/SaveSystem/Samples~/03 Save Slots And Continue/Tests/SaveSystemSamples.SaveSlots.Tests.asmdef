@@ -1,9 +1,9 @@
 {
-    "name": "SaveSystemSamples.GameProfiles.Tests",
-    "rootNamespace": "SaveSystemSamples.GameProfiles.Tests",
+    "name": "SaveSystemSamples.SaveSlots.Tests",
+    "rootNamespace": "SaveSystemSamples.SaveSlots.Tests",
     "references": [
         "AbstractPixel.SaveSystem",
-        "SaveSystemSamples.GameProfiles",
+        "SaveSystemSamples.SaveSlots",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

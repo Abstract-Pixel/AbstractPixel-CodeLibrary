@@ -1,9 +1,9 @@
 {
-    "name": "SaveSystemSamples.MonoBehaviourSample.Tests",
-    "rootNamespace": "SaveSystemSamples.MonoBehaviourSample.Tests",
+    "name": "SaveSystemSamples.SaveAField.Tests",
+    "rootNamespace": "SaveSystemSamples.SaveAField.Tests",
     "references": [
         "AbstractPixel.SaveSystem",
-        "SaveSystemSamples.MonoBehaviourSample",
+        "SaveSystemSamples.SaveAField",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

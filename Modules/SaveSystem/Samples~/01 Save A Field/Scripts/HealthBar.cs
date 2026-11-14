@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SaveSystemSamples.MonoBehaviourSample
+namespace SaveSystemSamples.SaveAField
 {
     // Shows the player's health. It reads the value once in Start, like a real UI often does.
     public class HealthBar : MonoBehaviour

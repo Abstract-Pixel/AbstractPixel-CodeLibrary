@@ -1,25 +1,18 @@
 using AbstractPixel.SaveSystem;
 using UnityEngine;
 
-namespace SaveSystemSamples.GameProfiles
+namespace SaveSystemSamples.SaveSlots
 {
-    // Some saved data, so each game profile has something of its own to show.
-    public class Score : MonoBehaviour, ISavable<int>
+    // Some saved data, so each game profile has something of its own to show. It lives in the GameProfile save file.
+    public class Score : MonoBehaviour
     {
-        public int Points { get; private set; }
+        [Save] int points;
 
-        void Awake()
-        {
-            Points = 0;
-        }
+        public int Points => points;
 
         public void Add(int amount)
         {
-            Points += amount;
+            points += amount;
         }
-
-        public int CaptureData() => Points;
-
-        public void RestoreData(int _loadedData) => Points = _loadedData;
     }
 }

@@ -1,6 +1,6 @@
 {
-    "name": "SaveSystemSamples.MonoBehaviourSample",
-    "rootNamespace": "SaveSystemSamples.MonoBehaviourSample",
+    "name": "SaveSystemSamples.SaveAField",
+    "rootNamespace": "SaveSystemSamples.SaveAField",
     "references": [
         "AbstractPixel.SaveSystem"
     ],

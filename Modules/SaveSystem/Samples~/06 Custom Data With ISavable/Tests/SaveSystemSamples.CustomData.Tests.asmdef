@@ -1,9 +1,9 @@
 {
-    "name": "SaveSystemSamples.PlainCSharpClass.Tests",
-    "rootNamespace": "SaveSystemSamples.PlainCSharpClass.Tests",
+    "name": "SaveSystemSamples.CustomData.Tests",
+    "rootNamespace": "SaveSystemSamples.CustomData.Tests",
     "references": [
         "AbstractPixel.SaveSystem",
-        "SaveSystemSamples.PlainCSharpClass",
+        "SaveSystemSamples.CustomData",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

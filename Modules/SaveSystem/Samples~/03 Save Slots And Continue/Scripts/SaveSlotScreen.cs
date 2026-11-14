@@ -3,7 +3,7 @@ using AbstractPixel.SaveSystem;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace SaveSystemSamples.GameProfiles
+namespace SaveSystemSamples.SaveSlots
 {
     // A simple save slot screen: create, open, list and delete game profiles by slot number.
     // Each button calls a public method, so tests and tools can press it from code too.
@@ -39,6 +39,26 @@ namespace SaveSystemSamples.GameProfiles
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
+        // A main menu's Continue button: open the game profile the player had open last time.
+        // LastOpened is null on a first launch, so the button is greyed out then (see OnGUI).
+        public void Continue()
+        {
+            GameProfile lastOpened = SaveActions.GameProfiles.LastOpened;
+            if (lastOpened == null)
+            {
+                return;
+            }
+            lastOpened.Open();
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
+        // Back to the main menu: nothing is open, so Continue has something to do.
+        public void BackToMainMenu()
+        {
+            SaveActions.SaveAll();
+            SaveActions.GameProfiles.CloseCurrent();
+        }
+
         public void DeleteSlot(int slotNumber)
         {
             GameProfile profile = SaveActions.GameProfiles.Get(slotNumber);
@@ -57,18 +77,30 @@ namespace SaveSystemSamples.GameProfiles
         void OnGUI()
         {
             GUILayout.BeginArea(new Rect(20, 20, 640, 700));
-            GUILayout.Label($"Points in the open game profile: {score.Points}");
-            if (GUILayout.Button("Add 100 points"))
+            bool isAnyGameProfileOpen = SaveActions.GameProfiles.Current != null;
+            if (isAnyGameProfileOpen)
             {
-                AddPoints();
+                GUILayout.Label($"Points in the open game profile: {score.Points}");
+                if (GUILayout.Button("Add 100 points"))
+                {
+                    AddPoints();
+                }
+                if (GUILayout.Button("Save"))
+                {
+                    Save();
+                }
+                if (GUILayout.Button("Back to the main menu (save and close)"))
+                {
+                    BackToMainMenu();
+                }
             }
-            if (GUILayout.Button("Save"))
+            else
             {
-                Save();
+                DrawMainMenu();
             }
 
             GUILayout.Space(10);
-            GUILayout.Label("Game profiles, by slot number");
+            GUILayout.Label($"Game profiles, by slot number ({SaveActions.GameProfiles.Count} in total)");
             foreach (GameProfile profile in SaveActions.GameProfiles.All)
             {
                 DrawSlot(profile);
@@ -78,6 +110,19 @@ namespace SaveSystemSamples.GameProfiles
                 CreateGameProfile();
             }
             GUILayout.EndArea();
+        }
+
+        void DrawMainMenu()
+        {
+            GUILayout.Label("Main menu: no game profile is open.");
+            GameProfile lastOpened = SaveActions.GameProfiles.LastOpened;
+            GUI.enabled = lastOpened != null;
+            string continueLabel = lastOpened == null ? "Continue (no saves yet)" : $"Continue {lastOpened.DisplayName}";
+            if (GUILayout.Button(continueLabel))
+            {
+                Continue();
+            }
+            GUI.enabled = true;
         }
 
         void DrawSlot(GameProfile profile)

@@ -521,7 +521,7 @@ MonoBehaviour:
   chests: 
   - {fileID: 687964955}
   - {fileID: 446621106}
-  otherSceneName: Save Locations Cave
+  otherSceneName: Pick A Save File Cave
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

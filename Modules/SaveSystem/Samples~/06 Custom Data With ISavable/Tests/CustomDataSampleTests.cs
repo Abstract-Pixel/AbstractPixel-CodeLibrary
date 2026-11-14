@@ -5,11 +5,11 @@ using NUnit.Framework;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
-namespace SaveSystemSamples.PlainCSharpClass.Tests
+namespace SaveSystemSamples.CustomData.Tests
 {
-    public class PlainCSharpClassSampleTests
+    public class CustomDataSampleTests
     {
-        const string SceneName = "Plain CSharp Class";
+        const string SceneName = "Custom Data With ISavable";
 
         [UnityTest]
         public IEnumerator FoundItem_IsStillThereAfterSavingAndReloading()

@@ -1,6 +1,6 @@
 {
-    "name": "SaveSystemSamples.GameProfiles",
-    "rootNamespace": "SaveSystemSamples.GameProfiles",
+    "name": "SaveSystemSamples.SaveSlots",
+    "rootNamespace": "SaveSystemSamples.SaveSlots",
     "references": [
         "AbstractPixel.SaveSystem"
     ],

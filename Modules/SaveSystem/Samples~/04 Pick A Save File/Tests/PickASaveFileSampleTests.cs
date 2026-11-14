@@ -4,12 +4,12 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace SaveSystemSamples.SaveLocations.Tests
+namespace SaveSystemSamples.PickASaveFile.Tests
 {
-    public class SaveLocationsSampleTests
+    public class PickASaveFileSampleTests
     {
-        const string Forest = "Save Locations Forest";
-        const string Cave = "Save Locations Cave";
+        const string Forest = "Pick A Save File Forest";
+        const string Cave = "Pick A Save File Cave";
 
         static Chest FirstChest()
         {
@@ -38,9 +38,10 @@ namespace SaveSystemSamples.SaveLocations.Tests
             yield return SampleScene.Load(Cave);
             yield return SampleScene.Load(Forest);
             Assert.IsTrue(FirstChest().IsOpen, "The chest should still be open after visiting the cave.");
+            Assert.AreEqual(1, Object.FindAnyObjectByType<PickASaveFileScreen>().SceneFileLoadCount, "The typed load listener hears this scene's Scene file once.");
             SaveActions.SaveAll();
 
-            GameProfile secondGameProfile = SaveActions.GameProfiles.CreateNew("Save Locations Test");
+            GameProfile secondGameProfile = SaveActions.GameProfiles.CreateNew("Pick A Save File Test");
             secondGameProfile.Open();
             yield return SampleScene.Load(Forest);
 
@@ -55,6 +56,27 @@ namespace SaveSystemSamples.SaveLocations.Tests
             Assert.IsTrue(FirstChest().IsOpen);
 
             secondGameProfile.Delete();
+        }
+
+        [UnityTest]
+        public IEnumerator SaveOnlyTheSettings_WritesTheVolume_AndLeavesTheCoinsUnsaved()
+        {
+            yield return SampleScene.Load(Forest);
+            PickASaveFileScreen screen = Object.FindAnyObjectByType<PickASaveFileScreen>();
+            VolumeSetting volume = Object.FindAnyObjectByType<VolumeSetting>();
+            PlayerCoins coins = Object.FindAnyObjectByType<PlayerCoins>();
+            screen.SaveEverything();
+            int savedCoins = coins.Coins;
+
+            volume.VolumeDown();
+            int changedVolume = volume.Volume;
+            coins.Add(5);
+            screen.SaveOnlyTheSettings();
+            screen.UndoUnsavedCoins();
+
+            Assert.AreEqual(savedCoins, coins.Coins, "The coins were never saved, so reloading the GameProfile file puts them back.");
+            SaveActions.Reload<SampleSettingsSaveFile>();
+            Assert.AreEqual(changedVolume, volume.Volume, "The settings file was saved on its own, so reloading it keeps the new volume.");
         }
     }
 }

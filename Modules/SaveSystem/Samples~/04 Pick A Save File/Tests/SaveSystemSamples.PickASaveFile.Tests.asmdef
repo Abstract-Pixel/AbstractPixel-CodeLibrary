@@ -1,9 +1,9 @@
 {
-    "name": "SaveSystemSamples.SaveLocations.Tests",
-    "rootNamespace": "SaveSystemSamples.SaveLocations.Tests",
+    "name": "SaveSystemSamples.PickASaveFile.Tests",
+    "rootNamespace": "SaveSystemSamples.PickASaveFile.Tests",
     "references": [
         "AbstractPixel.SaveSystem",
-        "SaveSystemSamples.SaveLocations",
+        "SaveSystemSamples.PickASaveFile",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

@@ -1,25 +1,18 @@
 using AbstractPixel.SaveSystem;
 using UnityEngine;
 
-namespace SaveSystemSamples.SaveLocations
+namespace SaveSystemSamples.PickASaveFile
 {
-    // Coins belong to one playthrough, so they're saved in the GameProfile save file.
-    public class PlayerCoins : MonoBehaviour, ISavable<int>
+    // Coins belong to one playthrough. With no ISaveIn, they go in the built-in GameProfile save file.
+    public class PlayerCoins : MonoBehaviour
     {
-        public int Coins { get; private set; }
+        [Save] int coins;
 
-        void Awake()
-        {
-            Coins = 0;
-        }
+        public int Coins => coins;
 
         public void Add(int amount)
         {
-            Coins += amount;
+            coins += amount;
         }
-
-        public int CaptureData() => Coins;
-
-        public void RestoreData(int _loadedData) => Coins = _loadedData;
     }
 }
