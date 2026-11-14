@@ -82,17 +82,39 @@ namespace AbstractPixel.SaveSystem
         /// Writes every field this data has a value for. A field missing from the data (new, or stored under its
         /// Formerly name) keeps its current value, so a new field never breaks an old save.
         /// </summary>
-        public void Restore(object instance, JObject data, SaveJson serializer)
+        public void Restore(object instance, JToken data, SaveJson serializer)
         {
+            JObject valuesByFieldName = data as JObject;
+            if (valuesByFieldName == null)
+            {
+                RestoreSingleValue(instance, data, serializer);
+                return;
+            }
             foreach (SavedField field in fields)
             {
-                if (!TryFindToken(data, field, out JToken token))
+                if (!TryFindToken(valuesByFieldName, field, out JToken token))
                 {
                     continue;
                 }
-                object value = token.Type == JTokenType.Null ? null : serializer.FromToken(token, field.Field.FieldType);
-                field.Field.SetValue(instance, value);
+                SetFromToken(instance, field, token, serializer);
             }
+        }
+
+        // An ISavable<int> (or any single-value ISavable) saved a bare value under this save ID. A class switched to
+        // [Save] fields can read it only when exactly one field could have meant it; anything else would be a guess.
+        void RestoreSingleValue(object instance, JToken data, SaveJson serializer)
+        {
+            if (fields.Count != 1)
+            {
+                throw new InvalidOperationException($"The saved data is a single value, the way an ISavable<T> saves it, but {instance.GetType().Name} has {fields.Count} [Save] fields, so there is no telling which one it belongs to. To keep players' saved data, give {instance.GetType().Name} exactly one [Save] field until their saves have been written again, or go back to ISavable<T>.");
+            }
+            SetFromToken(instance, fields[0], data, serializer);
+        }
+
+        static void SetFromToken(object instance, SavedField field, JToken token, SaveJson serializer)
+        {
+            object value = token.Type == JTokenType.Null ? null : serializer.FromToken(token, field.Field.FieldType);
+            field.Field.SetValue(instance, value);
         }
 
         static bool TryFindToken(JObject data, SavedField field, out JToken token)

@@ -94,9 +94,9 @@ namespace AbstractPixel.SaveSystem
             {
                 return;
             }
-            RegisterScript(savedObject, savedObject, savedObject.GetType(), saveId, typeof(JObject),
+            RegisterScript(savedObject, savedObject, savedObject.GetType(), saveId, typeof(JToken),
                 () => fields.Capture(savedObject, serializer),
-                data => fields.Restore(savedObject, (JObject)data, serializer),
+                data => fields.Restore(savedObject, (JToken)data, serializer),
                 null, savedObject.GetType().Name);
         }
 
@@ -111,9 +111,9 @@ namespace AbstractPixel.SaveSystem
             {
                 return;
             }
-            RegisterScript(owner, savedObject, savedObject.GetType(), saveId, typeof(JObject),
+            RegisterScript(owner, savedObject, savedObject.GetType(), saveId, typeof(JToken),
                 () => fields.Capture(savedObject, serializer),
-                data => fields.Restore(savedObject, (JObject)data, serializer),
+                data => fields.Restore(savedObject, (JToken)data, serializer),
                 sceneName, entryName, turnOffSceneObject);
         }
 
