@@ -46,7 +46,9 @@ namespace AbstractPixel.SaveSystem.Editor
 
             VisualElement updateArea = BuildUpdateArea(config);
             root.Add(updateArea);
-            listField.TrackPropertyValue(listProperty, _ => RefreshUpdateArea(config, updateArea));
+            // The list's own add/remove buttons change the array outside any single property's value, so
+            // TrackSerializedObjectValue (the whole object) is what actually notices a row being added or removed.
+            root.TrackSerializedObjectValue(serializedObject, _ => RefreshUpdateArea(config, updateArea));
 
             return root;
         }
@@ -68,8 +70,11 @@ namespace AbstractPixel.SaveSystem.Editor
         }
 
         // The button and its line disappear together once GameSaveFiles.cs matches the list.
-        static void RefreshUpdateArea(SaveSystemConfigSO config, VisualElement area)
+        void RefreshUpdateArea(SaveSystemConfigSO config, VisualElement area)
         {
+            // A row just added or removed through the list's own buttons is still only on the SerializedObject
+            // side until this runs, so config.SaveFileList (the actual object) would otherwise read stale data.
+            serializedObject.ApplyModifiedProperties();
             bool isOutOfDate = SaveFileListStatus.IsOutOfDate(config.SaveFileList, config.GameSaveFilesScriptPath);
             area.style.display = isOutOfDate ? DisplayStyle.Flex : DisplayStyle.None;
             // Disabled, not hidden, while a clash blocks the write: the row above already says why.
@@ -78,7 +83,6 @@ namespace AbstractPixel.SaveSystem.Editor
 
         void WriteNow(SaveSystemConfigSO config, VisualElement area)
         {
-            serializedObject.ApplyModifiedProperties();
             SaveFilesCodeWriter.WriteFile(config);
             serializedObject.Update();
             RefreshUpdateArea(config, area);

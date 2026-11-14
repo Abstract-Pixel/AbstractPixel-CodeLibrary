@@ -62,6 +62,11 @@ namespace AbstractPixel.SaveSystem
 
         public bool IsBuiltIn => BuiltIn != BuiltInSaveFile.None;
 
+        /// <summary>True only for GameProfile: every game needs it, so its name and save location can't change.
+        /// The library's other built-in rows (Scene, Settings, Input, Achievements) keep their class binding by
+        /// BuiltIn, not by Name, so they can be renamed, relocated and backed up like any row.</summary>
+        public bool IsLocked => BuiltIn == BuiltInSaveFile.GameProfile;
+
         public bool IsAddedByModule => !string.IsNullOrEmpty(AddedBy);
 
         /// <summary>A game save file: a row the developer added, whose class the editor writes into GameSaveFiles.cs.</summary>

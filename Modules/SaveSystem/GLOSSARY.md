@@ -33,7 +33,7 @@ A named file of saved data that lives in exactly one save location. Every game h
 _Avoid_: category, save category
 
 **Built-in save file**:
-One of the five save files every game has: GameProfile and Scene, which live in their own save locations, and Settings, Input and Achievements, which live in Global. They can't be removed or renamed; only their Backup box can change.
+One of the five save files every game has: GameProfile and Scene, which live in their own save locations, and Settings, Input and Achievements, which live in Global. Each row keeps its class by BuiltIn, not by name, so it can be renamed, moved and backed up like any row. Only GameProfile's name and save location are locked, since every game needs it there.
 _Avoid_: default file, system file
 
 **Game save file**:

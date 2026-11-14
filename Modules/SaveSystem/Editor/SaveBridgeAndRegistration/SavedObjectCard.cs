@@ -23,6 +23,8 @@ namespace AbstractPixel.SaveSystem.Editor
         static bool IsPlaying => IsPlayingOverrideForTests ?? EditorApplication.isPlaying;
 
         readonly Foldout foldout;
+        readonly Toggle headerToggle;
+        readonly Label headerLabel;
         readonly VisualElement body;
         readonly Label errorLabel;
         readonly HelpBox waitingHelpBox;
@@ -32,6 +34,7 @@ namespace AbstractPixel.SaveSystem.Editor
         Button showSaveIdButton;
         VisualElement revealedSaveIdRow;
         Label saveIdLabel;
+        Label headerNote;
         SavedObjectDescription description;
 
         public SavedObjectCard()
@@ -46,6 +49,12 @@ namespace AbstractPixel.SaveSystem.Editor
             foldout = new Foldout();
             foldout.RegisterValueChangedCallback(_ => RefreshLiveValues());
             Add(foldout);
+
+            // The foldout's own toggle is the header row; the save ID button lives there too, so it's reachable
+            // without expanding the card. headerLabel is the foldout's own text, shrunk so the button never overflows.
+            headerToggle = foldout.Q<Toggle>();
+            headerLabel = headerToggle.Q<Label>();
+            headerLabel?.AddToClassList("saved-object-card__header-label");
 
             body = new VisualElement();
             body.AddToClassList("saved-object-card__body");
@@ -70,6 +79,23 @@ namespace AbstractPixel.SaveSystem.Editor
             fieldValueLabels.Clear();
             body.Clear();
 
+            // Remove everything the header or a previous Bind added after the foldout's own label and toggle.
+            if (showSaveIdButton != null)
+            {
+                headerToggle.Remove(showSaveIdButton);
+                showSaveIdButton = null;
+            }
+            if (revealedSaveIdRow != null)
+            {
+                Remove(revealedSaveIdRow);
+                revealedSaveIdRow = null;
+            }
+            if (headerNote != null)
+            {
+                Remove(headerNote);
+                headerNote = null;
+            }
+
             foldout.text = description.HeaderText;
             foldout.viewDataKey = $"AbstractPixel.SaveSystem.SavedObjectCard.{description.ViewDataKey}";
             foldout.value = initiallyOpen;
@@ -88,6 +114,15 @@ namespace AbstractPixel.SaveSystem.Editor
                 customDataValueLabel.AddToClassList("saved-object-card__custom-data-value");
                 customDataValueLabel.style.display = DisplayStyle.None;
                 body.Add(customDataValueLabel);
+            }
+
+            foreach (string mistake in description.BlockingMistakes)
+            {
+                body.Add(new HelpBox(mistake, HelpBoxMessageType.Error));
+            }
+            if (description.MissingConfigRowWarning != null)
+            {
+                body.Add(new HelpBox(description.MissingConfigRowWarning, HelpBoxMessageType.Warning));
             }
 
             body.Add(errorLabel);
@@ -122,18 +157,23 @@ namespace AbstractPixel.SaveSystem.Editor
             return container;
         }
 
+        // Lives on the header row (inside the foldout's own toggle) and the card's own body, not inside the
+        // fold content, so the save ID is reachable without expanding the card.
         void BuildSaveIdArea()
         {
             if (description.ShowsSpawnedCopyNote)
             {
-                Label note = new Label("Spawned copies get their save ID from SetSaveId");
-                note.AddToClassList("saved-object-card__note");
-                body.Add(note);
+                headerNote = new Label("Spawned copies get their save ID from SetSaveId");
+                headerNote.AddToClassList("saved-object-card__note");
+                Add(headerNote);
                 return;
             }
 
             showSaveIdButton = new Button(ToggleSaveIdReveal) { text = "Show save ID" };
-            body.Add(showSaveIdButton);
+            showSaveIdButton.AddToClassList("saved-object-card__header-save-id-button");
+            // The header row toggles the foldout on any click; stop it here so the button acts on its own.
+            showSaveIdButton.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+            headerToggle.Add(showSaveIdButton);
 
             revealedSaveIdRow = new VisualElement();
             revealedSaveIdRow.AddToClassList("saved-object-card__save-id-row");
@@ -144,7 +184,7 @@ namespace AbstractPixel.SaveSystem.Editor
             revealedSaveIdRow.Add(saveIdLabel);
 
             revealedSaveIdRow.Add(new Button(() => EditorGUIUtility.systemCopyBuffer = saveIdLabel.text) { text = "Copy save ID" });
-            body.Add(revealedSaveIdRow);
+            Insert(IndexOf(foldout) + 1, revealedSaveIdRow);
         }
 
         void ToggleSaveIdReveal()

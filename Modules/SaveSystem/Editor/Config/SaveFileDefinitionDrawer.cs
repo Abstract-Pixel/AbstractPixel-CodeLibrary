@@ -8,8 +8,8 @@ using UnityEngine.UIElements;
 namespace AbstractPixel.SaveSystem.Editor
 {
     /// <summary>
-    /// Draws one save file list row on a single line: name, save location and Backup box. Built-in rows keep their
-    /// name and location, rows a module added keep their name, and both say why under it.
+    /// Draws one save file list row on a single line: name, save location and Backup box. Only GameProfile's name
+    /// and location are locked; a module's own row keeps its name too. Both say why under it.
     /// </summary>
     [CustomPropertyDrawer(typeof(SaveFileDefinition))]
     public class SaveFileDefinitionDrawer : PropertyDrawer
@@ -27,18 +27,20 @@ namespace AbstractPixel.SaveSystem.Editor
             SerializedProperty addedByProperty = property.FindPropertyRelative(nameof(SaveFileDefinition.AddedBy));
             SerializedProperty nameProperty = property.FindPropertyRelative(nameof(SaveFileDefinition.Name));
             bool isBuiltIn = builtInProperty.intValue != (int)BuiltInSaveFile.None;
+            bool isLocked = builtInProperty.intValue == (int)BuiltInSaveFile.GameProfile;
             bool isAddedByModule = !string.IsNullOrEmpty(addedByProperty.stringValue);
 
             PropertyField nameField = new PropertyField(nameProperty, string.Empty);
             nameField.AddToClassList("save-file-row__name");
-            // A built-in row's class ships with the library under that name, and a module's class decides its row's name.
-            nameField.SetEnabled(!isBuiltIn && !isAddedByModule);
+            // Only GameProfile is locked. The library's other built-in rows keep their class binding by BuiltIn,
+            // not by Name, so renaming them is safe; a module's own class still decides its row's name.
+            nameField.SetEnabled(!isLocked && !isAddedByModule);
             line1.Add(nameField);
 
             PropertyField locationField = new PropertyField(property.FindPropertyRelative(nameof(SaveFileDefinition.Location)), string.Empty);
             locationField.AddToClassList("save-file-row__location");
-            // The library decides where each built-in save file lives, so every game agrees.
-            locationField.SetEnabled(!isBuiltIn);
+            // Every game needs GameProfile at the GameProfile location; the rest can move.
+            locationField.SetEnabled(!isLocked);
             line1.Add(locationField);
 
             VisualElement line2 = new VisualElement();
@@ -51,11 +53,12 @@ namespace AbstractPixel.SaveSystem.Editor
             backupToggle.AddToClassList("save-file-row__backup");
             line2.Add(backupToggle);
 
-            Label classLabel = new Label(DescribeClass(isBuiltIn, isAddedByModule, nameProperty.stringValue, property.FindPropertyRelative(nameof(SaveFileDefinition.ClassFullName)).stringValue));
+            string classDescription = DescribeClass(isBuiltIn, isAddedByModule, nameProperty.stringValue, property.FindPropertyRelative(nameof(SaveFileDefinition.ClassFullName)).stringValue);
+            Label classLabel = new Label(classDescription);
             classLabel.AddToClassList("save-file-row__class");
             line2.Add(classLabel);
 
-            string note = DescribeRow(isBuiltIn, addedByProperty.stringValue, property.FindPropertyRelative(nameof(SaveFileDefinition.StorageName)).stringValue);
+            string note = DescribeRow(isLocked, isBuiltIn, addedByProperty.stringValue, property.FindPropertyRelative(nameof(SaveFileDefinition.StorageName)).stringValue);
             if (!string.IsNullOrEmpty(note))
             {
                 Label noteLabel = new Label(note);
@@ -139,26 +142,37 @@ namespace AbstractPixel.SaveSystem.Editor
             return -1;
         }
 
-        /// <summary>The class this row makes, in grey under it: "GameSaveFiles.Ghosts", "SaveFiles.Settings", or a module's own class.</summary>
+        /// <summary>The class this row makes, in grey under it: "GameSaveFiles.Ghosts", "SaveFiles.Settings", or a module's own class.
+        /// Read from ClassFullName, not the row's Name, since a renamed built-in row still binds to its original class.</summary>
         static string DescribeClass(bool isBuiltIn, bool isAddedByModule, string name, string classFullName)
         {
             if (isBuiltIn)
             {
-                return $"SaveFiles.{name}";
+                return $"SaveFiles.{LastSegmentOf(classFullName)}";
             }
             if (isAddedByModule)
             {
-                int lastDot = classFullName.LastIndexOf('.');
-                return lastDot >= 0 ? classFullName.Substring(lastDot + 1) : classFullName;
+                return LastSegmentOf(classFullName);
             }
             return $"GameSaveFiles.{SaveFileDefinition.ClassNameFor(name)}";
         }
 
-        static string DescribeRow(bool isBuiltIn, string addedBy, string storageName)
+        // A nested class's full name uses '+' ("...SaveFiles+Scene"); a top-level one uses '.'.
+        static string LastSegmentOf(string classFullName)
         {
+            int lastSeparator = classFullName.LastIndexOfAny(new[] { '.', '+' });
+            return lastSeparator >= 0 ? classFullName.Substring(lastSeparator + 1) : classFullName;
+        }
+
+        static string DescribeRow(bool isLocked, bool isBuiltIn, string addedBy, string storageName)
+        {
+            if (isLocked)
+            {
+                return "Built in: the default save location for everything in the game. Can't be changed.";
+            }
             if (isBuiltIn)
             {
-                return "Built in: every game has this save file, and its class ships with the library. Only its Backup box can change.";
+                return string.Empty;
             }
             if (!string.IsNullOrEmpty(addedBy))
             {

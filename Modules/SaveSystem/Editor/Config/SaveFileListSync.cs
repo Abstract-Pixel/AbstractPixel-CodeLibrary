@@ -57,6 +57,7 @@ namespace AbstractPixel.SaveSystem.Editor
         {
             bool changed = rows.RemoveAll(row => row == null) > 0;
             changed |= RemoveModuleRowsWhoseClassIsGone(rows);
+            changed |= RemoveStaleBuiltInRows(rows);
 
             foreach (BuiltInSaveFile builtIn in BuiltInOrder)
             {
@@ -133,6 +134,27 @@ namespace AbstractPixel.SaveSystem.Editor
                 rows.RemoveAt(index);
                 changed = true;
                 Debug.Log($"[SaveSystem] Removed the save file row '{row.Name}' from the save system config: its class '{row.ClassFullName}' ({row.AddedBy}) no longer exists. Data already saved under the storage name '{row.FileName}' stays on disk.");
+            }
+            return changed;
+        }
+
+        // A built-in slot the library dropped (the unused Global slot from v2's first steps) would otherwise
+        // linger forever in any config it was already saved into.
+        static bool RemoveStaleBuiltInRows(List<SaveFileDefinition> rows)
+        {
+            bool changed = false;
+            for (int index = rows.Count - 1; index >= 0; index--)
+            {
+                SaveFileDefinition row = rows[index];
+                bool isStale = row.IsBuiltIn && Array.IndexOf(BuiltInOrder, row.BuiltIn) < 0;
+                if (!isStale)
+                {
+                    continue;
+                }
+
+                rows.RemoveAt(index);
+                changed = true;
+                Debug.Log($"[SaveSystem] Removed the save file row '{row.Name}': the library no longer ships a built-in save file for it. Data already saved under the storage name '{row.FileName}' stays on disk.");
             }
             return changed;
         }

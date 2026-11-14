@@ -49,6 +49,12 @@ namespace AbstractPixel.SaveSystem.Editor
         public bool IsWaitingForSetSaveId;
         public bool ShowsSpawnedCopyNote;
 
+        /// <summary>Every blocking mistake on this saved script, with the same text the Console gets.</summary>
+        public IReadOnlyList<string> BlockingMistakes;
+
+        /// <summary>Null when the save file has a row. Otherwise the warning naming the fix.</summary>
+        public string MissingConfigRowWarning;
+
         /// <summary>Builds the description for one saved script on a Savable Bridge's GameObject.</summary>
         public static SavedObjectDescription ForBridgeTarget(SavableBridge bridge, SavableTarget target, string numberSuffix, SaveJson serializer)
         {
@@ -56,13 +62,16 @@ namespace AbstractPixel.SaveSystem.Editor
             Type saveFileClass = SavedScript.SaveFileClassOf(scriptType);
             string saveFileName = saveFileClass != null ? saveFileClass.Name : "GameProfile";
             string scriptName = target.Identification.ClassName + numberSuffix;
+            SavedFieldSet fields = new SavedFieldSet(scriptType);
 
             SavedObjectDescription description = new SavedObjectDescription
             {
                 ViewDataKey = target.Identification.GUID,
                 GetSaveId = () => bridge.GetSaveId(target),
                 IsWaitingForSetSaveId = bridge.IsWaitingForSetSaveId,
-                ShowsSpawnedCopyNote = IsPrefabAssetOrPrefabMode(bridge.gameObject)
+                ShowsSpawnedCopyNote = IsPrefabAssetOrPrefabMode(bridge.gameObject),
+                BlockingMistakes = SavedScriptMistakes.BlockingMistakesOf(scriptType, fields),
+                MissingConfigRowWarning = SaveFileRowCheck.ProblemWith(scriptType, SaveSystemConfigFinder.FindInProject())
             };
 
             Type savableInterface = SavedScript.FindSavableInterface(scriptType);
@@ -75,7 +84,6 @@ namespace AbstractPixel.SaveSystem.Editor
             }
             else
             {
-                SavedFieldSet fields = new SavedFieldSet(scriptType);
                 description.FieldRows = fields.Fields.Select(ToFieldRow).ToList();
                 description.HeaderText = $"{scriptName} · {saveFileName} · {DescribeFieldCount(fields)}";
                 description.CaptureLiveValues = () => fields.Capture(target.Script, serializer);

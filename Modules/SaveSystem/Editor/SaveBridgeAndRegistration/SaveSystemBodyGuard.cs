@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
@@ -43,42 +42,30 @@ namespace AbstractPixel.SaveSystem.Editor
                 return;
             }
 
-            HashSet<string> classesWithARow = new HashSet<string>();
-            foreach (SaveFileDefinition row in config.SaveFileList)
+            foreach (Type savedType in TypeCache.GetTypesDerivedFrom<MonoBehaviour>())
             {
-                if (row != null && !string.IsNullOrEmpty(row.ClassFullName))
-                {
-                    classesWithARow.Add(row.ClassFullName);
-                }
-            }
-
-            foreach (Type savedType in TypeCache.GetTypesDerivedFrom(typeof(ISavable<>)))
-            {
-                ReportSaveFileWithNoRow(savedType, classesWithARow);
+                ReportSaveFileWithNoRow(savedType, config);
             }
         }
 
-        private static void ReportSaveFileWithNoRow(Type savedType, HashSet<string> classesWithARow)
+        private static void ReportSaveFileWithNoRow(Type savedType, SaveSystemConfigSO config)
         {
-            Type saveFileClass = SavedScript.SaveFileClassOf(savedType);
-            bool namesASaveFile = saveFileClass != null && !saveFileClass.IsGenericParameter;
-            if (!namesASaveFile)
+            // A test fixture's made-up save file class never belongs in the project's config.
+            bool isTestClass = savedType.Assembly.GetName().Name.EndsWith("Tests", StringComparison.Ordinal);
+            if (isTestClass || !SavedScript.IsSaved(savedType))
             {
                 return;
             }
 
-            // A module's own class gets its row added by SaveFileListSync, so only report classes that can't be added.
-            bool hasRow = classesWithARow.Contains(saveFileClass.FullName);
-            bool rowWillBeAdded = Attribute.IsDefined(saveFileClass, typeof(SaveFileDefaultsAttribute));
-            bool isTestClass = savedType.Assembly.GetName().Name.EndsWith("Tests", StringComparison.Ordinal);
-            if (hasRow || rowWillBeAdded || isTestClass)
+            string problem = SaveFileRowCheck.ProblemWith(savedType, config);
+            if (problem == null)
             {
                 return;
             }
 
             UnityEngine.Object scriptAsset = GetScriptAssetFromType(savedType);
             string scriptLink = GetHyperlink(scriptAsset, savedType.Name);
-            Debug.LogWarning($"[SaveSystem] {scriptLink} saves into '{saveFileClass.FullName}', but the save system config has no row for that class, so its data isn't saved. Select the config and press Update save file classes, or add a row named '{saveFileClass.Name}'.", scriptAsset);
+            Debug.LogWarning($"[SaveSystem] {scriptLink} {problem}", scriptAsset);
         }
 
         private static string GetHyperlink(UnityEngine.Object asset, string fallbackName)
