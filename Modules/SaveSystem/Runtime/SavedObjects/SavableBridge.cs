@@ -25,6 +25,9 @@ namespace AbstractPixel.SaveSystem
         /// <summary>This GameObject's saved scripts, for the bridge inspector's read-only list and Copy save ID button.</summary>
         internal IReadOnlyList<SavableTarget> SavableTargets => savableTargets;
 
+        /// <summary>True when this bridge is a spawned copy with no SetSaveId call yet, so it isn't registered. For the bridge inspector's warning.</summary>
+        internal bool IsWaitingForSetSaveId => isSpawnedCopy && spawnedCopySaveId == null && !isRegistered;
+
         readonly string isavableCaptureMethod = "CaptureData";
         readonly string isavableRestoreMethod = "RestoreData";
         readonly string stringSeparatorIdentifier = "#";

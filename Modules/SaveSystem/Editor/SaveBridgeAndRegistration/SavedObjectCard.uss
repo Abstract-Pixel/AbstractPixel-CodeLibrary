@@ -1,0 +1,53 @@
+.saved-object-card {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.saved-object-card__body {
+    margin-left: 14px;
+}
+
+.saved-object-card__field-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.saved-object-card__field-formerly {
+    color: rgb(150, 150, 150);
+    margin-left: 6px;
+}
+
+.saved-object-card__field-value {
+    color: rgb(150, 150, 150);
+    margin-left: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.saved-object-card__custom-data-value {
+    white-space: pre;
+    color: rgb(150, 150, 150);
+    margin-top: 2px;
+}
+
+.saved-object-card__error {
+    color: rgb(220, 120, 120);
+    margin-top: 4px;
+}
+
+.saved-object-card__note {
+    color: rgb(150, 150, 150);
+    margin-top: 4px;
+}
+
+.saved-object-card__save-id-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.saved-object-card__save-id-label {
+    flex-grow: 1;
+    color: rgb(150, 150, 150);
+}

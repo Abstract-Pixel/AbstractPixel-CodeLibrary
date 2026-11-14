@@ -12,11 +12,19 @@ namespace AbstractPixel.SaveSystem
     /// </summary>
     internal sealed class SavedFieldSet
     {
-        sealed class SavedField
+        /// <summary>One reflected [Save] field: the field itself, the key its data is stored under, and its former key.</summary>
+        internal readonly struct SavedField
         {
-            public FieldInfo Field;
-            public string Key;
-            public string FormerlyKey;
+            public readonly FieldInfo Field;
+            public readonly string Key;
+            public readonly string FormerlyKey;
+
+            public SavedField(FieldInfo field, string key, string formerlyKey)
+            {
+                Field = field;
+                Key = key;
+                FormerlyKey = formerlyKey;
+            }
         }
 
         readonly List<SavedField> fields = new List<SavedField>();
@@ -30,17 +38,8 @@ namespace AbstractPixel.SaveSystem
         /// <summary>True when the class has at least one [Save] field, valid or not. SavedScript.IsSaved asks this.</summary>
         public bool HasAnyField => fields.Count > 0 || Problems.Count > 0;
 
-        /// <summary>Every valid field's name, for the bridge inspector's read-only list.</summary>
-        public IEnumerable<string> FieldNames
-        {
-            get
-            {
-                foreach (SavedField field in fields)
-                {
-                    yield return field.Key;
-                }
-            }
-        }
+        /// <summary>Every valid field, for the bridge inspector's card. Built once in the constructor; never reflected twice.</summary>
+        public IReadOnlyList<SavedField> Fields => fields;
 
         public SavedFieldSet(Type savedType)
         {
@@ -61,7 +60,7 @@ namespace AbstractPixel.SaveSystem
                         Problems.Add(problem);
                         continue;
                     }
-                    fields.Add(new SavedField { Field = field, Key = field.Name, FormerlyKey = saved.Formerly });
+                    fields.Add(new SavedField(field, field.Name, saved.Formerly));
                 }
             }
         }
