@@ -35,6 +35,10 @@ namespace AbstractPixel.SaveSystem
         // Set by SetSaveId, for a spawned copy. Null means "use this bridge's own UniqueId", the scene-placed case.
         private string spawnedCopySaveId;
 
+        // Decided once in Awake. Asking again at each registration would mistake a scene object that is switched
+        // off and on after its scene loaded for a spawned copy, and stop saving it.
+        private bool isSpawnedCopy;
+
 #if UNITY_EDITOR
         private void OnValidate()
         {
@@ -131,6 +135,7 @@ namespace AbstractPixel.SaveSystem
         // Reflection is looked up once per saved script, here, and kept on this bridge instance.
         private void Awake()
         {
+            isSpawnedCopy = WasAwokenAfterItsSceneWasReady();
             foreach (SavableTarget target in savableTargets)
             {
                 if (target == null || target.Script == null) continue;
@@ -191,7 +196,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (isRegistered) return;
 
-            if (spawnedCopySaveId == null && IsSpawnedCopyWithNoIdYet())
+            if (spawnedCopySaveId == null && isSpawnedCopy)
             {
                 Debug.LogWarning($"[SaveSystem] '{gameObject.name}' was spawned after its scene was already loaded, with no SetSaveId call, so it isn't saved. Call its SetSaveId right after Instantiate, before Start: goblin.SetSaveId(\"a unique id\");");
                 return;
@@ -203,7 +208,7 @@ namespace AbstractPixel.SaveSystem
 
         // A Savable Bridge Awoken after its own scene already became ready is a spawned copy, not one of the
         // scene's own objects: every scene object's Awake runs before its scene's SceneReady fires.
-        private bool IsSpawnedCopyWithNoIdYet()
+        private bool WasAwokenAfterItsSceneWasReady()
         {
             return SaveActions.Session?.IsSceneAlreadyReady(gameObject.scene.name) ?? false;
         }

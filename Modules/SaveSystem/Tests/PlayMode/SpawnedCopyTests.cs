@@ -135,6 +135,25 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
             Assert.AreEqual(7, original.gold, "The refused duplicate was never tracked, so its change was never captured.");
         }
 
+        // A scene object switched off and on again after its scene is ready is still a scene object, not a copy.
+        [UnityTest]
+        public IEnumerator SceneObjectTurnedOffAndOnAfterItsSceneIsReady_IsStillSaved()
+        {
+            InventoryForTests chest = CreateSceneObject("Chest GameObject #[chest-guid]");
+            yield return null;
+            sceneInfo.SignalReady(SceneName);
+
+            chest.gameObject.SetActive(false);
+            chest.gameObject.SetActive(true);
+            chest.gold = 77;
+            SaveActions.SaveAll();
+            chest.gold = 0;
+            SaveActions.Reload<SaveFiles.GameProfile>();
+
+            LogAssert.NoUnexpectedReceived();
+            Assert.AreEqual(77, chest.gold, "Re-enabling a scene object registers it again, so its change is still saved.");
+        }
+
         // Mirrors Instantiate: by the time this returns, Awake has already run (so the bridge's reflection setup
         // is ready for SetSaveId to use), but Start is still a frame away, same as the real Instantiate timing.
         InventoryForTests CreateSpawnedCopy()
