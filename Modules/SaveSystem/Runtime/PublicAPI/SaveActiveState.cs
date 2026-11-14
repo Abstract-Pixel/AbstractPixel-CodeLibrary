@@ -10,9 +10,20 @@ namespace AbstractPixel.SaveSystem
     {
         [Save] bool isActive = true;
 
+        bool hasStarted;
+        bool isBeingTurnedBackOn;
+
         void OnEnable()
         {
             isActive = gameObject.activeSelf;
+            // The bridge's OnEnable runs next and registers again, which restores the "off" captured when this was
+            // turned off. OnRestored must ignore that one restore, or the object could never be turned back on.
+            isBeingTurnedBackOn = hasStarted;
+        }
+
+        void Start()
+        {
+            hasStarted = true;
         }
 
         void OnDisable()
@@ -20,8 +31,21 @@ namespace AbstractPixel.SaveSystem
             isActive = gameObject.activeSelf;
         }
 
+        // The bridge registers after every OnEnable, so clear the flag here as well as in OnRestored: a re-register
+        // with no saved data never calls OnRestored.
+        void Update()
+        {
+            isBeingTurnedBackOn = false;
+        }
+
         public void OnRestored()
         {
+            if (isBeingTurnedBackOn)
+            {
+                isBeingTurnedBackOn = false;
+                isActive = true;
+                return;
+            }
             gameObject.SetActive(isActive);
         }
     }

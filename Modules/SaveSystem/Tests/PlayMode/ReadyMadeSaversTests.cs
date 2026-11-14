@@ -76,6 +76,25 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
         }
 
         [UnityTest]
+        public IEnumerator SaveActiveState_CanBeTurnedBackOn_AndRemembersBeingOn()
+        {
+            SaveActiveState lamp = CreateSceneObject<SaveActiveState>();
+            yield return null;
+            lamp.gameObject.SetActive(false);
+            yield return null;
+
+            lamp.gameObject.SetActive(true);
+            yield return null;
+            Assert.IsTrue(lamp.gameObject.activeSelf, "Turning it back on must not be undone by the value saved when it was turned off.");
+            SaveActions.SaveAll();
+
+            Relaunch();
+            SaveActiveState lampNextTime = CreateSceneObject<SaveActiveState>();
+            yield return null;
+            Assert.IsTrue(lampNextTime.gameObject.activeSelf);
+        }
+
+        [UnityTest]
         public IEnumerator SaveActiveState_StaysOn_WhenItWasNeverTurnedOff()
         {
             SaveActiveState crate = CreateSceneObject<SaveActiveState>();
@@ -109,6 +128,25 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
             yield return null;
 
             Assert.IsFalse(crateNextTime.activeSelf, "DestroyAndForget forgot the crate, so it stays gone like any other forgotten scene object.");
+        }
+
+        [UnityTest]
+        public IEnumerator SaveDestroyed_StaysGone_OnAnObjectWithNothingElseSaved()
+        {
+            // This test builds the bridge by hand, so check the rule the real bridge and the auto-adder use to pick scripts.
+            Assert.IsTrue(SavedScript.IsSaved(typeof(SaveDestroyed)), "Save Destroyed must count as a saved script, or a coin with nothing else saved never gets a Savable Bridge.");
+            SaveDestroyed coin = CreateSceneObject<SaveDestroyed>();
+            yield return null;
+
+            coin.DestroyAndForget();
+            SaveActions.SaveAll();
+            yield return null;
+
+            Relaunch();
+            SaveDestroyed coinNextTime = CreateSceneObject<SaveDestroyed>();
+            yield return null;
+
+            Assert.IsFalse(coinNextTime.gameObject.activeSelf, "A coin with only Save Destroyed on it is the usual designer case, so it must stay gone too.");
         }
 
         T CreateSceneObject<T>() where T : MonoBehaviour
