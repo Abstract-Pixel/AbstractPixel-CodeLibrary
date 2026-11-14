@@ -46,9 +46,10 @@ namespace AbstractPixel.SaveSystem.Editor
 
             VisualElement updateArea = BuildUpdateArea(config);
             root.Add(updateArea);
-            // The list's own add/remove buttons change the array outside any single property's value, so
-            // TrackSerializedObjectValue (the whole object) is what actually notices a row being added or removed.
-            root.TrackSerializedObjectValue(serializedObject, _ => RefreshUpdateArea(config, updateArea));
+            // TrackSerializedObjectValue works for most changes, but a plain interval is unconditionally
+            // correct regardless of what any future list control change does internally, matching the same
+            // defensive polling SavedObjectCard already uses for its own similarly externally-driven refresh.
+            root.schedule.Execute(() => RefreshUpdateArea(config, updateArea)).Every(200);
 
             return root;
         }

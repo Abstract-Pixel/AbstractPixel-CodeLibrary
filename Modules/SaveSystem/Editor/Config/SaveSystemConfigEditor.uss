@@ -16,6 +16,7 @@
 .save-file-row__line2 {
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
     margin-top: 2px;
 }
 
@@ -24,12 +25,20 @@
     flex-grow: 0;
 }
 
+/* Unity's default field label reserves a wide min-width so labels line up across a column of
+   fields. This Toggle's "Backup" label isn't lining up with anything else, so that reserved
+   width just reads as a large, unexplained gap before its own checkbox. */
+.save-file-row__backup .unity-base-field__label {
+    min-width: 0;
+    width: auto;
+    margin-right: 3px;
+}
+
 .save-file-row__class {
     -unity-font-style: italic;
     color: rgb(150, 150, 150);
     flex-shrink: 1;
-    margin-left: 14px;
-    -unity-text-align: middle-left;
+    -unity-text-align: middle-right;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
