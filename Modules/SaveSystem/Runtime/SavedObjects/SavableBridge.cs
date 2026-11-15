@@ -35,6 +35,10 @@ namespace AbstractPixel.SaveSystem
         private bool hasStarted;
         private bool isRegistered;
 
+        // Awake looks up each saved script's reflection. A pool can call SetSaveId on a copy that is still switched
+        // off, before its Awake; registering then would find nothing to register and never try again.
+        private bool hasAwoken;
+
         // Set by SetSaveId, for a spawned copy. Null means "use this bridge's own UniqueId", the scene-placed case.
         private string spawnedCopySaveId;
 
@@ -156,6 +160,7 @@ namespace AbstractPixel.SaveSystem
                     target.Fields = new SavedFieldSet(target.Script.GetType());
                 }
             }
+            hasAwoken = true;
         }
 
         // Registering here, not in OnEnable, means every Awake has run, so restored data isn't overwritten by new-game values.
@@ -198,7 +203,8 @@ namespace AbstractPixel.SaveSystem
 
         private void TryRegisterTargets()
         {
-            if (isRegistered) return;
+            // Start registers once Awake has run, using the save ID SetSaveId kept.
+            if (isRegistered || !hasAwoken) return;
 
             if (spawnedCopySaveId == null && isSpawnedCopy)
             {
@@ -206,8 +212,7 @@ namespace AbstractPixel.SaveSystem
                 return;
             }
 
-            RegisterTargets();
-            isRegistered = true;
+            isRegistered = RegisterTargets();
         }
 
         // A Savable Bridge Awoken after its own scene already became ready is a spawned copy, not one of the
@@ -217,10 +222,11 @@ namespace AbstractPixel.SaveSystem
             return SaveActions.Session?.IsSceneAlreadyReady(gameObject.scene.name) ?? false;
         }
 
-        private void RegisterTargets()
+        // False when no save system is running, so a later OnEnable or SetSaveId tries again.
+        private bool RegisterTargets()
         {
             SaveSession session = SaveActions.Session;
-            if (session == null) return;
+            if (session == null) return false;
 
             // A spawned copy's data is forgotten outright; it has no gone marker to turn itself off with.
             Action turnOffSceneObject = spawnedCopySaveId == null ? TurnOffBecauseForgotten : null;
@@ -233,9 +239,10 @@ namespace AbstractPixel.SaveSystem
                 // A gone marker turned this object off; the rest of its scripts stay unregistered.
                 if (!gameObject.activeSelf)
                 {
-                    return;
+                    return true;
                 }
             }
+            return true;
         }
 
         // The object's own scene, so with additive scenes a chest saves into its scene's file, not the active scene's.

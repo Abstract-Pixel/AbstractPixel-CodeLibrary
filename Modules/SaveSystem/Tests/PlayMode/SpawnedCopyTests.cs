@@ -154,9 +154,37 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
             Assert.AreEqual(77, chest.gold, "Re-enabling a scene object registers it again, so its change is still saved.");
         }
 
+        // A pool instantiates copies switched off and hands out IDs before switching them on, so SetSaveId runs
+        // before the bridge's Awake.
+        [UnityTest]
+        public IEnumerator CopyGivenASaveIdWhileStillSwitchedOff_IsSavedOnceSwitchedOn()
+        {
+            sceneInfo.SignalReady(SceneName);
+
+            InventoryForTests pooled = CreateSwitchedOffCopy();
+            pooled.GetComponent<SavableBridge>().SetSaveId("pooled-goblin-1");
+            pooled.gameObject.SetActive(true);
+            yield return null;
+
+            pooled.gold = 33;
+            SaveActions.SaveAll();
+            pooled.gold = 0;
+            SaveActions.Reload<SaveFiles.GameProfile>();
+
+            Assert.AreEqual(33, pooled.gold);
+        }
+
         // Mirrors Instantiate: by the time this returns, Awake has already run (so the bridge's reflection setup
         // is ready for SetSaveId to use), but Start is still a frame away, same as the real Instantiate timing.
         InventoryForTests CreateSpawnedCopy()
+        {
+            InventoryForTests inventory = CreateSwitchedOffCopy();
+            inventory.gameObject.SetActive(true);
+            return inventory;
+        }
+
+        // Like Instantiate on a switched-off prefab: no Awake has run yet.
+        InventoryForTests CreateSwitchedOffCopy()
         {
             GameObject copyObject = new GameObject("Inventory(Clone)");
             createdObjects.Add(copyObject);
@@ -169,8 +197,6 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
             {
                 new SavableTarget(inventory, new SavableIdentification(nameof(InventoryForTests), "script-guid"))
             });
-
-            copyObject.SetActive(true);
             return inventory;
         }
 
