@@ -585,7 +585,7 @@ SaveEventBus.OnSaveFailed += (file, reason) =&gt; ShowError(reason);</code></pre
 
   <section id="phase-t">
     <h2>Phase T so far: inspector fixes</h2>
-    <p>15 Nov 2026. T1 (the bridge inspector cards) and T6 (the config inspector) had already landed; this was a run of fixes against your feedback on both, not a new phase T task. T2, T4 and T5 haven't started.</p>
+    <p>15 Nov 2026. T1 (the bridge inspector cards) and T6 (the config inspector) had already landed; this was a run of fixes against your feedback on both, not a new phase T task. A later run on the same day finished T2, T5 and most of T4; see "T2, T4 and T5" at the end of this section.</p>
 
     <h3>Each saved field's type, at a glance (T1)</h3>
     <div class="two">
@@ -615,6 +615,23 @@ isPoisoned (bool)</code></pre></div>
 
     <h3>Still broken: removing a row</h3>
     <p>After the fix above, adding a row and renaming it correctly shows the Update save file classes button. Removing a row does not bring the button back, and I haven't reproduced this myself. <code>capture editor_window</code> crashed the Lab Editor three times trying to film the whole add-update-remove-update walkthrough you asked for, and I stopped using it rather than risk a fourth crash. The progress report has what's ruled out so far and a hypothesis to check first. <code>SaveSystemConfigEditorTests</code> only checks the button at the moment the inspector opens, never after a row is added or removed through the live list, so there's no test guarding this in either direction.</p>
+
+    <h3>T2, T4 and T5 (later the same day)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">Before</div>
+<pre><code><span class="c">// A script saves into a file that has no row:</span>
+<span class="c">// one Console warning, only for ISavable scripts.</span>
+<span class="c">// A plain [Save] class: nothing at all.</span>
+<span class="c">// Plain classes and ScriptableObjects: nowhere to look.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code><span class="c">// The mistake shows on the script's card, for</span>
+<span class="c">// ISavable and ISaveIn classes alike.</span>
+<span class="c">// Tools &gt; ... &gt; Save System &gt; Saved Objects lists</span>
+<span class="c">// every registered object in play mode.</span>
+<span class="c">// Hierarchy rows get a Saved badge (see below).</span></code></pre></div>
+    </div>
+    <p class="why">T2's code was already in the repository, inside the T6 fix commit <code>ba976a1</code>, with no tests. That run wrote 14 tests for it. T5 adds the Saved Objects window: save-file groups with counts, Scene files split by scene, the same cards as the bridge inspector, a Ping button for anything that is a Unity object, and one line in edit mode. T4's badge rules (Saved, red, grey dot) are built and tested without drawing.</p>
+    <div class="note warn">T4 isn't visible in the Lab. Unity 7000.0.0a16's new Hierarchy window never called <code>EditorApplication.hierarchyWindowItemByEntityIdOnGUI</code> in my check, even with 27 scene objects and the window focused. The Unity 6.7 hook (<code>hierarchyWindowItemOnGUI</code>) is written but has never run. Nobody has seen the badge on screen. T5's window has tests for its grouping and content; nobody has opened it in play mode by hand either.</div>
   </section>
 
   <section id="review">
@@ -670,7 +687,7 @@ isPoisoned (bool)</code></pre></div>
       <li>Every library module compiles.</li>
       <li>I played all eight samples in the Editor after phase S, with odd uses on top: buttons pressed twice, an object switched off and on in one frame, a save with no game profile open, a copy spawned with no ID, a deleted file saved again, rubbish pasted into a file. Only the expected warning and error appeared. The Settings Lab scene logs TMP warnings from its own setup, not from the save system.</li>
       <li>I checked the Unity calls against the Unity 6 docs. The tests have not run on Unity 6.</li>
-      <li>307 EditMode tests pass after the 15 Nov inspector fixes. PlayMode wasn't re-run before the Lab Editor crashed, so run both suites before trusting this state.</li>
+      <li>351 EditMode and 44 PlayMode tests pass at <code>90973fb</code>. That count includes seven tests from another agent's uncommitted work on the save config.</li>
     </ul>
   </section>
 
@@ -694,12 +711,14 @@ isPoisoned (bool)</code></pre></div>
       <li>Run the tests once in a Unity 6.7 project.</li>
       <li>The removing-a-row bug in the config inspector (see <a href="#phase-t">Phase T so far</a>). Not fixed.</li>
       <li>The screenshot-by-screenshot add/update/remove/update walkthrough you asked for. Not done. <code>capture editor_window</code> crashed the Lab Editor three times.</li>
-      <li>T2, T4 and T5 haven't started. T7 (the guide, roadmap, changelog and this page's phase T section) comes once T2 to T5 are done.</li>
+      <li>T4: make the badge show. Find out whether Unity 7's new Hierarchy window has another way to draw on rows (<code>HierarchyViewCellDescriptor</code> looks like it), and check the Unity 6.7 hook.</li>
+      <li>T7's sample changes: one object with several saved scripts, README lines for samples 01, 05 and 08.</li>
+      <li>Look at the Saved Objects window and the cards in play mode by hand. Only their logic is tested.</li>
     </ul>
     <div class="note warn">The shipped game stays on <code>save-system-v1</code>. Nothing is pushed.</div>
   </section>
 
-  <footer>Branch <code>save-system</code>, last code commit <code>da12d72</code>. Updated 15 Nov 2026.</footer>
+  <footer>Branch <code>save-system</code>, last code commit <code>90973fb</code>. Updated 15 Nov 2026.</footer>
 </div>
 </body>
 </html>

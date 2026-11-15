@@ -314,10 +314,12 @@ start until this is fixed.</span></code></pre></div>
           <tr><td>S8</td><td>Save Transform, Save Active State, Save Destroyed</td><td>Designers</td><td><span class="pill built">built</span></td></tr>
           <tr><td>S9</td><td>Samples by the ladder, then play every sample</td><td>Learning</td><td><span class="pill built">built</span></td></tr>
           <tr><td>S10</td><td>Guide, roadmap, before-and-after page and AI handoff</td><td>You</td><td><span class="pill built">built</span></td></tr>
-          <tr><td>T1–T2</td><td>One card per saved script on the bridge, live values, save ID behind a button, mistakes on the card</td><td>Both</td><td><span class="pill next">next run</span></td></tr>
-          <tr><td>T3–T4</td><td>Bridges added while editing, Hierarchy badge</td><td>Both</td><td><span class="pill next">next run</span></td></tr>
-          <tr><td>T5–T6</td><td>The Saved Objects window, a clearer save file list with Update save file classes</td><td>Both</td><td><span class="pill next">next run</span></td></tr>
-          <tr><td>T7</td><td>Guide, roadmap and AI handoff</td><td>You</td><td><span class="pill next">next run</span></td></tr>
+          <tr><td>T1–T2</td><td>One card per saved script on the bridge, live values, save ID behind a button, mistakes on the card</td><td>Both</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>T3</td><td>Bridges added while editing</td><td>Both</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>T4</td><td>Hierarchy badge</td><td>Both</td><td><span class="pill next">partly built</span></td></tr>
+          <tr><td>T5</td><td>The Saved Objects window</td><td>Both</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>T6</td><td>A clearer save file list with Update save file classes</td><td>Both</td><td><span class="pill next">built, B15 open</span></td></tr>
+          <tr><td>T7</td><td>Guide, roadmap, changelog and AI handoff. The sample changes are not done.</td><td>You</td><td><span class="pill next">partly built</span></td></tr>
           <tr><td>D</td><td>Whole-library check, Unity 6.7 run, send-off handoff</td><td>Whoever maintains it</td><td><span class="pill plan">after T</span></td></tr>
           <tr><td>7</td><td>More ready-made savers</td><td>Designers</td><td><span class="pill plan">planned</span></td></tr>
         </tbody>
@@ -346,7 +348,7 @@ start until this is fixed.</span></code></pre></div>
     </section>
 
     <section id="phase-t">
-      <h2>Phase T <span class="pill next">next run</span></h2>
+      <h2>Phase T <span class="pill next">in progress</span></h2>
       <p>Planned with you on 14 Nov 2026. The goal: a designer sees, on the object, everything that object saves, and hears about a mistake where they're looking. The runtime already saves every saved script on a GameObject, each with its own save ID. The inspector only made it look like one. Phase T adds no runtime feature and no inspector button beyond Copy save ID.</p>
       <p>15 Nov 2026: a run went into your feedback on T1 and T6 instead of a new task, fixed three bugs and found one still open (B15, below). Before and after in <code>save-system-v2-handoff.html</code>'s "Phase T so far" section.</p>
       <div class="table-wrap"><table>
@@ -361,6 +363,7 @@ start until this is fixed.</span></code></pre></div>
           <tr><td>T7</td><td>Samples updated for the new tools (one object with several saved scripts, README lines for 01, 05 and 08), the guide, this roadmap, the changelog and the AI handoff for phase D.</td><td>The guide has a short "See what's saved" section, and every changed sample's test passes.</td></tr>
         </tbody>
       </table></div>
+      <p>15 Nov 2026, later run: T2's code was already in the repository (it arrived inside a T6 fix commit) with no tests, so that run wrote them. T5 is built. T4's rules and cache are built and tested, but the Hierarchy window in Unity 7000.0.0a16 never called the row hook, so the badge has not been seen on screen. The sample changes in T7 are not done. B15 was left to another agent.</p>
       <p>Built most important first: T1, T6, T3, T2, T5, T4, then T7. If a run ends early, the finished tasks are committed and T7 still happens.</p>
     </section>
 
@@ -382,9 +385,9 @@ start until this is fixed.</span></code></pre></div>
           <tr><td>B11</td><td><span class="pill low">low</span></td><td>A spawned copy created by a scene's own startup code, before that scene is ready, counts as a scene object, so a missing <code>SetSaveId</code> isn't reported.</td><td>When someone hits it. Nobody spawns saved enemies in the same frame a scene loads today.</td></tr>
           <tr><td>B12</td><td><span class="pill low">low</span></td><td>The bridge's duplicate check calls <code>FindObjectsByType</code> with a sort mode, which Unity 7 marks obsolete. It works on Unity 6.7.</td><td>T3, if Unity 6.7 has the overload without a sort mode.</td></tr>
           <tr><td>B13</td><td><span class="pill low">low</span></td><td>The ready-made saver and bridge PlayMode tests build bridges by hand and skip the "is this a saved script" rule. That hid the Save Destroyed bug until the sample was played.</td><td>T3: its tests build bridges the way the editor does.</td></tr>
-          <tr><td>B14</td><td><span class="pill low">low</span></td><td>Found while planning phase T. The "save file has no row in the config" warning only checks <code>ISavable</code> scripts. A script with <code>[Save]</code> fields and <code>ISaveIn</code> whose file has no row saves nothing, with no warning.</td><td>T2.</td></tr>
+          <tr><td>B14</td><td><span class="pill built">fixed</span></td><td>Fixed in T2. The "save file has no row in the config" warning now covers every class with <code>ISaveIn</code>, not only <code>ISavable</code> ones, and has tests.</td><td>Done.</td></tr>
           <tr><td>B9</td><td><span class="pill low">low</span></td><td>Lab only. The Settings Lab scene logs one TMP dropdown error and missing-script warnings, because TMP Essentials aren't imported there. In phase S's play check only the warnings appeared.</td><td>When the Settings module is next worked on.</td></tr>
-          <tr><td>B15</td><td><span class="pill high">high</span></td><td>Found 15 Nov 2026, fixing your T6 feedback. Removing a row from the config's save file list doesn't bring back the <em>Update save file classes</em> button, so <code>GameSaveFiles.cs</code> can go stale with no warning. Not reproduced outside your Editor yet; a hypothesis is in <code>save-system-v2-progress.md</code>'s top section.</td><td>Next run, before any other T6 work.</td></tr>
+          <tr><td>B15</td><td><span class="pill high">high</span></td><td>Found 15 Nov 2026, fixing your T6 feedback. Removing a row from the config's save file list doesn't bring back the <em>Update save file classes</em> button, so <code>GameSaveFiles.cs</code> can go stale with no warning. Not reproduced outside your Editor yet; a hypothesis is in <code>save-system-v2-progress.md</code>'s top section.</td><td>Another agent was working on it on 15 Nov 2026. Check with them before starting.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -425,7 +428,7 @@ start until this is fixed.</span></code></pre></div>
       </table></div>
     </section>
 
-    <footer>Branch <code>save-system</code>, last code commit <code>da12d72</code>. Not pushed. Roadmap v11: phase S built, phase T in progress (T1 and T6 fixed against feedback, B15 open), then phase D.</footer>
+    <footer>Branch <code>save-system</code>, last code commit <code>90973fb</code>. Not pushed. Roadmap v12: phase S built, phase T in progress (T1, T2, T3, T5 built; T4 and T7 partly; B15 open), then phase D.</footer>
   </main>
 </div>
 </body>

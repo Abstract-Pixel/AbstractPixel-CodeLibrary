@@ -19,6 +19,9 @@
 - **Feature:** For designers: Save Transform, Save Active State and Save Destroyed components; autosave on scene unload or every N minutes; UnityEvents and Open Slot, New Game and Reload Chosen File on Mono Save Actions; the bridge inspector lists saved fields and has a Copy save ID button.
 - **Feature:** Clean JSON for Vector2, Vector2Int, Vector3Int, Color and Rect.
 - **Feature:** The bridge inspector's saved field list shows each field's type as a small colour dot. The save ID row hides when its card collapses.
+- **Feature:** Mistakes on a saved script, such as a save file with no row in the config, show on its card in the bridge inspector as well as in the Console. The row check now covers every class with `ISaveIn`, not only `ISavable` ones.
+- **Feature:** Tools > External Project Tools > Save System > Saved Objects lists every registered saved object in play mode, grouped by save file, on the same cards as the bridge inspector, with a Ping button. Plain classes and ScriptableObjects show up there.
+- **Feature:** A "Saved" badge on Hierarchy rows with saved scripts, red on a mistake, and a grey dot on a parent whose children save. It has not been seen on screen: Unity 7000.0.0a16's new Hierarchy window never called the row hook.
 - **Fix:** A save file row added through the config's list no longer copies the row before it. It used to keep that row's class and storage name, which blocked `GameSaveFiles.cs` from ever picking it up.
 - **Samples:** Eight samples in ladder order: Save A Field, Buttons With No Code, Save Slots And Continue, Pick A Save File, Spawned Copies, Custom Data With ISavable, Whole Files With SaveStorage, ScriptableObject.
 - **Fix:** Listing and deleting game profiles works. Saving no longer erases data of objects that aren't loaded. A Savable Bridge keeps its save ID when a new scene is first saved. A saved scene object switched off and on keeps saving.

@@ -134,6 +134,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
       <li><a href="#scriptable">ScriptableObjects <span class="freq">sometimes</span></a></li>
       <li><a href="#storage">SaveStorage <span class="freq">tools</span></a></li>
       <li class="group">While you work</li>
+      <li><a href="#see">See what's saved <span class="freq">debugging</span></a></li>
       <li><a href="#editor">Editor tools <span class="freq">debugging</span></a></li>
       <li><a href="#disk">Files on disk <span class="freq">debugging</span></a></li>
       <li><a href="#samples">Samples <span class="freq">learning</span></a></li>
@@ -420,6 +421,21 @@ foreach (GameProfile profile in SaveStorage.GameProfiles) { }</code></pre></div>
       </ul>
     </section>
 
+    <section class="topic" id="see">
+      <div class="topic-head"><h2>See what's saved</h2><span class="freq-tag">while debugging</span></div>
+      <p>Four places show what the save system holds. None of them has a button that changes data.</p>
+      <h3>On the object</h3>
+      <p>Select a GameObject with a Savable Bridge. The inspector draws one card per saved script, in component order. Each header reads like "Chest · Scene · 3 fields". A script that appears twice reads "Chest (1)" and "Chest (2)". Open a card to see each saved field with its type, and "was: hp" under a field you renamed with <code>[Save(Formerly = "hp")]</code>. An <code>ISavable</code> script shows its data type.</p>
+      <p>In play mode an open card also shows each field's current value, refreshed twice a second. The <em>Show save ID</em> button reveals the ID the object registered under, with a <em>Copy save ID</em> button. On a prefab the card says spawned copies get their ID from <code>SetSaveId</code>.</p>
+      <h3>Mistakes</h3>
+      <p>The same text the Console gets appears on the card. A <code>[Save]</code> field the save system can't store shows as a red box. A script whose save file has no row in the config shows a yellow box that names the fix. This covers both <code>ISavable&lt;TData, TFile&gt;</code> and a plain <code>[Save]</code> class that picks its file with <code>ISaveIn&lt;TFile&gt;</code>.</p>
+      <h3>In play mode, everything at once</h3>
+      <p>Open <strong>Tools &gt; External Project Tools &gt; Save System &gt; Saved Objects</strong>. In edit mode it only says to enter play mode. In play mode it lists every registered saved object, grouped by save file, with Scene files split by scene. Each group header shows its count. Each object is the same card as above, named "Chest on Chest 2" for a script on a GameObject or by class name for a plain class. Objects that are Unity objects have a <em>Ping</em> button. Plain classes and ScriptableObjects show up here and nowhere else. The window is read only.</p>
+      <h3>In the Hierarchy</h3>
+      <p>A GameObject with at least one saved script gets a small <em>Saved</em> badge at the right of its row. The tooltip lists what it saves, for example "Saves: Chest, Save Transform (Scene)". The badge is red when a saved script on it has a mistake. A parent that saves nothing itself but has saving children gets a grey dot, and its tooltip names the children.</p>
+      <div class="note warn">The Hierarchy badge doesn't show in the Lab's Unity 7000.0.0a16. Its new Hierarchy window never called the row hook the badge draws through. The badge's rules have tests, and it hasn't been seen on screen on any Unity version.</div>
+    </section>
+
     <section class="topic" id="editor">
       <div class="topic-head"><h2>Editor tools</h2><span class="freq-tag">while debugging</span></div>
       <p>All tools are under <strong>Tools &gt; External Project Tools &gt; Save System</strong>.</p>
@@ -427,7 +443,8 @@ foreach (GameProfile profile in SaveStorage.GameProfiles) { }</code></pre></div>
         <thead><tr><th>Menu item</th><th>What it does</th></tr></thead>
         <tbody>
           <tr><td>Create Config</td><td>Creates the config, or selects it if it exists.</td></tr>
-          <tr><td>Write GameSaveFiles.cs</td><td>Writes the classes for your own save files from the list. It also runs whenever the list changes.</td></tr>
+          <tr><td>Update Save File Classes</td><td>Writes the classes for your own save files from the list into GameSaveFiles.cs. Greyed out while the file already matches.</td></tr>
+          <tr><td>Saved Objects</td><td>Opens the window that lists every registered saved object in play mode. See "See what's saved".</td></tr>
           <tr><td>Save All</td><td>Saves everything. Play mode only.</td></tr>
           <tr><td>Load All</td><td>Reads every file again. Play mode only.</td></tr>
           <tr><td>Open Release Folder, Open Debug Folder</td><td>Opens the save folder.</td></tr>
