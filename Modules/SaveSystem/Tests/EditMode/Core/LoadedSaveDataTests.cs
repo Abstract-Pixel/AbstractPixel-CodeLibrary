@@ -174,6 +174,56 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.IsFalse(loadedData.TryRestore(EntryFor(new Broken(), "broken", GameFile), GameFile));
         }
 
+        // Throws on the first restore only, like old data that fails until the game's code is fixed and reloaded.
+        class FailsOnce : ISavable<int>
+        {
+            public int Value;
+            int restoreCount;
+
+            public int CaptureData() => Value;
+
+            public void RestoreData(int _loadedData)
+            {
+                restoreCount++;
+                if (restoreCount == 1)
+                {
+                    throw new InvalidOperationException("restore exploded");
+                }
+                Value = _loadedData;
+            }
+        }
+
+        [Test]
+        public void Capture_AfterAFailedRestore_KeepsTheSavedData()
+        {
+            StoreFile(GameFile, ("player", 7));
+            SavedObjectEntry entry = EntryFor(new FailsOnce(), "player", GameFile);
+            LogAssert.Expect(LogType.Error, new Regex("player.*restore exploded"));
+            loadedData.TryRestore(entry, GameFile);
+
+            loadedData.Capture(entry, GameFile);
+            loadedData.WriteChanged();
+
+            Assert.AreEqual(7, StoredValue(GameFile, "player"), "The object never got its saved data, so saving its new-game value would erase the player's progress.");
+        }
+
+        [Test]
+        public void Capture_AfterALaterRestoreSucceeds_SavesAgain()
+        {
+            StoreFile(GameFile, ("player", 7));
+            FailsOnce savable = new FailsOnce();
+            SavedObjectEntry entry = EntryFor(savable, "player", GameFile);
+            LogAssert.Expect(LogType.Error, new Regex("player.*restore exploded"));
+            loadedData.TryRestore(entry, GameFile);
+            loadedData.TryRestore(entry, GameFile);
+
+            savable.Value = 9;
+            loadedData.Capture(entry, GameFile);
+            loadedData.WriteChanged();
+
+            Assert.AreEqual(9, StoredValue(GameFile, "player"));
+        }
+
         [Test]
         public void WrittenFile_UsesTheNameAndDataEntryShape()
         {

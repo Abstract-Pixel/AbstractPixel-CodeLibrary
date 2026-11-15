@@ -18,6 +18,10 @@ namespace AbstractPixel.SaveSystem
             public SaveFileData Data;
             public bool Changed;
             public bool KeepsBackup;
+
+            // Save IDs whose stored data failed to restore. Their object never got that data, so capturing it would
+            // write new-game values over the player's progress. Dropping the file (a reload) clears this.
+            public readonly HashSet<string> SaveIdsThatFailedToRestore = new HashSet<string>();
         }
 
         readonly SaveFileStore store;
@@ -43,11 +47,23 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Restores the entry if its save file holds data for its save ID. A failing restore is logged, never thrown.</summary>
         public bool TryRestore(SavedObjectEntry entry, SaveFileAddress address)
         {
-            if (!GetOrRead(address).Data.Entries.TryGetValue(entry.SaveId, out SaveFileEntry stored) || stored.Data == null)
+            LoadedFile file = GetOrRead(address);
+            if (!file.Data.Entries.TryGetValue(entry.SaveId, out SaveFileEntry stored) || stored.Data == null)
             {
                 return false;
             }
-            return TryRestoreFrom(stored.Data, entry, "save ID", $"The saved data stays in '{address.Key}'; the other saved objects still restore.");
+
+            string consequence = $"The saved data stays in '{address.Key}', and this object isn't saved over it until it restores. Fix RestoreData or the saved data, then reload. The other saved objects still restore.";
+            bool restored = TryRestoreFrom(stored.Data, entry, "save ID", consequence);
+            if (restored)
+            {
+                file.SaveIdsThatFailedToRestore.Remove(entry.SaveId);
+            }
+            else
+            {
+                file.SaveIdsThatFailedToRestore.Add(entry.SaveId);
+            }
+            return restored;
         }
 
         /// <summary>Keeps a copy of the entry's data as its new-game values. Called once, when it registers, before any restore.</summary>
@@ -72,12 +88,16 @@ namespace AbstractPixel.SaveSystem
         /// <summary>Captures the entry's current data into memory. The key counts as changed only if the data differs.</summary>
         public void Capture(SavedObjectEntry entry, SaveFileAddress address)
         {
+            LoadedFile file = GetOrRead(address);
+            if (file.SaveIdsThatFailedToRestore.Contains(entry.SaveId))
+            {
+                return;
+            }
             if (!TryCaptureToken(entry, "save ID", "Its previous saved data is kept.", out JToken captured))
             {
                 return;
             }
 
-            LoadedFile file = GetOrRead(address);
             bool isUnchanged = file.Data.Entries.TryGetValue(entry.SaveId, out SaveFileEntry stored)
                 && stored.Name == entry.EntryName
                 && JToken.DeepEquals(stored.Data, captured);
@@ -97,6 +117,7 @@ namespace AbstractPixel.SaveSystem
         public void MarkGone(SaveFileAddress address, string saveId, string entryName)
         {
             LoadedFile file = GetOrRead(address);
+            file.SaveIdsThatFailedToRestore.Remove(saveId);
             bool isAlreadyGone = file.Data.Entries.TryGetValue(saveId, out SaveFileEntry stored) && stored.Gone;
             if (isAlreadyGone)
             {
@@ -116,6 +137,7 @@ namespace AbstractPixel.SaveSystem
         public void Forget(SaveFileAddress address, string saveId)
         {
             LoadedFile file = GetOrRead(address);
+            file.SaveIdsThatFailedToRestore.Remove(saveId);
             if (file.Data.Entries.Remove(saveId))
             {
                 file.Changed = true;
