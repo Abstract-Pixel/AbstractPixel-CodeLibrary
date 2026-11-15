@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
@@ -16,6 +17,11 @@ namespace AbstractPixel.SaveSystem
         readonly LoadedSaveData loadedData;
         readonly SaveFileAddresses addresses;
         readonly SaveProfileManager profileManager;
+
+        // Each save ID's values from its first registration this session, by save file and save ID. An object that
+        // registers again mid-game (switched off and on, or Register called twice) would otherwise take its current,
+        // played values as its new-game values, and carry one playthrough into a new game profile.
+        readonly Dictionary<string, JToken> firstNewGameValues = new Dictionary<string, JToken>();
 
         public SavedObjectTracker(LoadedSaveData loadedData, SaveFileAddresses addresses, SaveProfileManager profileManager)
         {
@@ -40,8 +46,23 @@ namespace AbstractPixel.SaveSystem
             {
                 return;
             }
-            loadedData.RememberNewGameValues(entry);
+            RememberNewGameValuesOnce(entry);
             TryRestore(entry);
+        }
+
+        void RememberNewGameValuesOnce(SavedObjectEntry entry)
+        {
+            string key = $"{entry.SaveFileName}/{entry.SaveId}";
+            if (firstNewGameValues.TryGetValue(key, out JToken firstValues))
+            {
+                entry.NewGameValues = firstValues;
+                return;
+            }
+            loadedData.RememberNewGameValues(entry);
+            if (entry.NewGameValues != null)
+            {
+                firstNewGameValues[key] = entry.NewGameValues;
+            }
         }
 
         /// <summary>Captures the object's current data, then stops tracking it. Its data stays for the next save.</summary>
@@ -152,6 +173,7 @@ namespace AbstractPixel.SaveSystem
         {
             registry.Clear();
             AutomaticSaveIds.Clear();
+            firstNewGameValues.Clear();
         }
 
         bool TryRestore(SavedObjectEntry entry)

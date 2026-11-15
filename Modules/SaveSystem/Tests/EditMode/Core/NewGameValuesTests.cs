@@ -44,6 +44,23 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.AreEqual(70, health.Current, "Slot 2's values were saved into slot 2.");
         }
 
+        // A scene object switched off and on, or a plain class registered again, registers a second time mid-game.
+        // Its new-game values are still the ones it had the first time, so slot 1's progress can't leak into slot 2.
+        [Test]
+        public void ObjectRegisteredAgainMidGame_StillStartsANewGameWithItsFirstValues()
+        {
+            PlayerHealth health = new PlayerHealth();
+            SaveActions.Register(health);
+            SaveActions.GameProfiles.CreateNew().Open();
+            health.Current = 40;
+
+            SaveActions.Unregister(health);
+            SaveActions.Register(health);
+            SaveActions.GameProfiles.CreateNew().Open();
+
+            Assert.AreEqual(100, health.Current);
+        }
+
         [Test]
         public void GlobalObject_KeepsItsValues_WhenTheGameProfileChanges()
         {
