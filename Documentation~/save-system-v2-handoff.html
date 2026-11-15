@@ -101,7 +101,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
   <header>
     <div class="eyebrow">Abstract Pixel Library · Modules/SaveSystem · branch save-system</div>
     <h1>What changed in the save system</h1>
-    <p class="lede">Three versions side by side. v1 is what the shipped game uses. "v2 first" is steps 1 and 2. "v2 now" is today, after both of your reviews, the cleanup and phase S. The calls that changed since your second review are in <a href="#since-review">their own section</a>, and phase S has <a href="#phase-s">its own</a>, before and after. How the system works today is in <code>save-system.html</code>, and what comes next is in <code>save-system-v2-plan.html</code>.</p>
+    <p class="lede">Three versions side by side. v1 is what the shipped game uses. "v2 first" is steps 1 and 2. "v2 now" is today, after both of your reviews, the cleanup and phase S. The calls that changed since your second review are in <a href="#since-review">their own section</a>, phase S has <a href="#phase-s">its own</a>, before and after, and the inspector fixes from your phase T feedback have <a href="#phase-t">theirs</a>. How the system works today is in <code>save-system.html</code>, and what comes next is in <code>save-system-v2-plan.html</code>.</p>
 
     <div class="stages">
       <div class="stage v1">
@@ -154,6 +154,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
         <li><a href="#disk">Folders and backups</a></li>
         <li><a href="#since-review">Since your second review</a></li>
         <li><a href="#phase-s">Phase S: saved fields and the ladder</a></li>
+        <li><a href="#phase-t">Phase T so far: inspector fixes</a></li>
         <li><a href="#review">Review tasks and commits</a></li>
         <li><a href="#checked">What I checked</a></li>
         <li><a href="#decisions">Choices I made</a></li>
@@ -582,6 +583,40 @@ SaveEventBus.OnSaveFailed += (file, reason) =&gt; ShowError(reason);</code></pre
     <p class="why">Each has a scene, a README and a PlayMode test. Playing them found four bugs, all fixed: Save Destroyed alone did nothing, Save Active State couldn't be turned back on, a scene object switched off and on stopped saving, and the <code>ISavable&lt;int&gt;</code> to <code>[Save]</code> switch lost data.</p>
   </section>
 
+  <section id="phase-t">
+    <h2>Phase T so far: inspector fixes</h2>
+    <p>15 Nov 2026. T1 (the bridge inspector cards) and T6 (the config inspector) had already landed; this was a run of fixes against your feedback on both, not a new phase T task. T2, T4 and T5 haven't started.</p>
+
+    <h3>Each saved field's type, at a glance (T1)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">Before</div>
+<pre><code>current (int)
+isPoisoned (bool)</code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code><span class="c">// Each name sits in a small badge with a colour dot for its type:</span>
+<span class="c">// blue for numbers, red for bool, amber for string, teal for enum...</span>
+current (int)
+isPoisoned (bool)</code></pre></div>
+    </div>
+    <p class="why">The colours match Unity's own muted palette, not a bright accent colour, so the card still looks native. The save ID row now sits inside the card's own fold, so it hides when you collapse the card instead of staying on screen.</p>
+
+    <h3>A new save file row stopped clashing with the one before it (T6)</h3>
+    <div class="two">
+      <div class="pane was"><div class="pane-label">Before</div>
+<pre><code><span class="c">// Press "+" after the "Input" row, then rename it "Ghosts".</span>
+<span class="c">// The new row kept Input's class and storage name.</span>
+<span class="c">// It clashed with Input, and Update save file classes never appeared.</span></code></pre></div>
+      <div class="pane now"><div class="pane-label">Now</div>
+<pre><code><span class="c">// Press "+". The new row's class, storage name and built-in flag</span>
+<span class="c">// are blanked the instant it's added, before you type a name.</span>
+<span class="c">// Rename it "Ghosts": no clash, and the button appears.</span></code></pre></div>
+    </div>
+    <p class="why">Unity's own array insert duplicates the row before it, including fields the row's own inspector doesn't show. A new row looked identical to its neighbour until you renamed it, and renaming never changed its hidden class and storage identity. The list now resets those fields when a row is added, the same way a brand new row is built in code.</p>
+
+    <h3>Still broken: removing a row</h3>
+    <p>After the fix above, adding a row and renaming it correctly shows the Update save file classes button. Removing a row does not bring the button back, and I haven't reproduced this myself. <code>capture editor_window</code> crashed the Lab Editor three times trying to film the whole add-update-remove-update walkthrough you asked for, and I stopped using it rather than risk a fourth crash. The progress report has what's ruled out so far and a hypothesis to check first. <code>SaveSystemConfigEditorTests</code> only checks the button at the moment the inspector opens, never after a row is added or removed through the live list, so there's no test guarding this in either direction.</p>
+  </section>
+
   <section id="review">
     <h2>Review tasks and commits</h2>
     <div class="table-wrap"><table>
@@ -620,6 +655,10 @@ SaveEventBus.OnSaveFailed += (file, reason) =&gt; ShowError(reason);</code></pre
         <tr><td>S7</td><td><code>a890e9c</code> to <code>1b0667b</code></td><td><code>OnSaveFailed</code>, Continue helpers, autosave, UnityEvents, JSON converters, Copy save ID.</td></tr>
         <tr><td>S8</td><td><code>a7c039b</code>, <code>835f651</code></td><td>Three ready-made savers, and two fixes found in the samples.</td></tr>
         <tr><td>S9</td><td><code>0b6ec62</code></td><td>Samples by the ladder.</td></tr>
+        <tr><td>T1/T6 fix</td><td><code>ba976a1</code></td><td>Save file list editing, Savable Bridge card styling restored.</td></tr>
+        <tr><td>T1 fix</td><td><code>6169c3f</code></td><td>Type-dot badges, save ID row fold and alignment, row spacing.</td></tr>
+        <tr><td>T6 fix</td><td><code>1e464e0</code></td><td>Update-classes button refresh, Backup checkbox spacing.</td></tr>
+        <tr><td>T6 fix</td><td><code>da12d72</code></td><td>A new row no longer inherits the row before it.</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -631,6 +670,7 @@ SaveEventBus.OnSaveFailed += (file, reason) =&gt; ShowError(reason);</code></pre
       <li>Every library module compiles.</li>
       <li>I played all eight samples in the Editor after phase S, with odd uses on top: buttons pressed twice, an object switched off and on in one frame, a save with no game profile open, a copy spawned with no ID, a deleted file saved again, rubbish pasted into a file. Only the expected warning and error appeared. The Settings Lab scene logs TMP warnings from its own setup, not from the save system.</li>
       <li>I checked the Unity calls against the Unity 6 docs. The tests have not run on Unity 6.</li>
+      <li>307 EditMode tests pass after the 15 Nov inspector fixes. PlayMode wasn't re-run before the Lab Editor crashed, so run both suites before trusting this state.</li>
     </ul>
   </section>
 
@@ -652,11 +692,14 @@ SaveEventBus.OnSaveFailed += (file, reason) =&gt; ShowError(reason);</code></pre
       <li>GitHub: an issue for S8, then close it and #43 (samples) with their commits.</li>
       <li>Close issues #1, #17 to #20 and #23 by hand.</li>
       <li>Run the tests once in a Unity 6.7 project.</li>
+      <li>The removing-a-row bug in the config inspector (see <a href="#phase-t">Phase T so far</a>). Not fixed.</li>
+      <li>The screenshot-by-screenshot add/update/remove/update walkthrough you asked for. Not done. <code>capture editor_window</code> crashed the Lab Editor three times.</li>
+      <li>T2, T4 and T5 haven't started. T7 (the guide, roadmap, changelog and this page's phase T section) comes once T2 to T5 are done.</li>
     </ul>
     <div class="note warn">The shipped game stays on <code>save-system-v1</code>. Nothing is pushed.</div>
   </section>
 
-  <footer>Branch <code>save-system</code>, last code commit <code>0b6ec62</code>. Updated 14 Nov 2026.</footer>
+  <footer>Branch <code>save-system</code>, last code commit <code>da12d72</code>. Updated 15 Nov 2026.</footer>
 </div>
 </body>
 </html>

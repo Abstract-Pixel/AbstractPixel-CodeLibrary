@@ -120,7 +120,7 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
 
   <main>
     <header>
-      <div class="eyebrow">Abstract Pixel Library · Save System v2 · roadmap v10 · 14 Nov 2026</div>
+      <div class="eyebrow">Abstract Pixel Library · Save System v2 · roadmap v11 · 15 Nov 2026</div>
       <h1>Save System roadmap</h1>
       <p class="lede">Where the save system is going, in the order you'd learn it: designers first, then daily code, then the deeper levels. How the system works today is in <code>save-system.html</code>.</p>
       <div class="legend">
@@ -348,6 +348,7 @@ start until this is fixed.</span></code></pre></div>
     <section id="phase-t">
       <h2>Phase T <span class="pill next">next run</span></h2>
       <p>Planned with you on 14 Nov 2026. The goal: a designer sees, on the object, everything that object saves, and hears about a mistake where they're looking. The runtime already saves every saved script on a GameObject, each with its own save ID. The inspector only made it look like one. Phase T adds no runtime feature and no inspector button beyond Copy save ID.</p>
+      <p>15 Nov 2026: a run went into your feedback on T1 and T6 instead of a new task, fixed three bugs and found one still open (B15, below). Before and after in <code>save-system-v2-handoff.html</code>'s "Phase T so far" section.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Task</th><th>What it adds</th><th>Done when</th></tr></thead>
         <tbody>
@@ -383,6 +384,7 @@ start until this is fixed.</span></code></pre></div>
           <tr><td>B13</td><td><span class="pill low">low</span></td><td>The ready-made saver and bridge PlayMode tests build bridges by hand and skip the "is this a saved script" rule. That hid the Save Destroyed bug until the sample was played.</td><td>T3: its tests build bridges the way the editor does.</td></tr>
           <tr><td>B14</td><td><span class="pill low">low</span></td><td>Found while planning phase T. The "save file has no row in the config" warning only checks <code>ISavable</code> scripts. A script with <code>[Save]</code> fields and <code>ISaveIn</code> whose file has no row saves nothing, with no warning.</td><td>T2.</td></tr>
           <tr><td>B9</td><td><span class="pill low">low</span></td><td>Lab only. The Settings Lab scene logs one TMP dropdown error and missing-script warnings, because TMP Essentials aren't imported there. In phase S's play check only the warnings appeared.</td><td>When the Settings module is next worked on.</td></tr>
+          <tr><td>B15</td><td><span class="pill high">high</span></td><td>Found 15 Nov 2026, fixing your T6 feedback. Removing a row from the config's save file list doesn't bring back the <em>Update save file classes</em> button, so <code>GameSaveFiles.cs</code> can go stale with no warning. Not reproduced outside your Editor yet; a hypothesis is in <code>save-system-v2-progress.md</code>'s top section.</td><td>Next run, before any other T6 work.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -423,7 +425,7 @@ start until this is fixed.</span></code></pre></div>
       </table></div>
     </section>
 
-    <footer>Branch <code>save-system</code>, last code commit <code>0b6ec62</code>. Not pushed. Roadmap v10: phase S built, phase T next, then phase D.</footer>
+    <footer>Branch <code>save-system</code>, last code commit <code>da12d72</code>. Not pushed. Roadmap v11: phase S built, phase T in progress (T1 and T6 fixed against feedback, B15 open), then phase D.</footer>
   </main>
 </div>
 </body>
