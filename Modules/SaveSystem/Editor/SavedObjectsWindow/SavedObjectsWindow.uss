@@ -1,0 +1,9 @@
+.saved-objects-window__message {
+    margin: 8px;
+    color: rgb(150, 150, 150);
+    white-space: normal;
+}
+
+.saved-objects-window__group {
+    margin-top: 4px;
+}

@@ -33,6 +33,7 @@ namespace AbstractPixel.SaveSystem.Editor
 
         Label customDataValueLabel;
         Button showSaveIdButton;
+        Button pingButton;
         VisualElement revealedSaveIdRow;
         Label saveIdLabel;
         Label headerNote;
@@ -135,8 +136,29 @@ namespace AbstractPixel.SaveSystem.Editor
             body.Add(errorLabel);
             body.Add(waitingHelpBox);
             BuildSaveIdArea();
+            BuildPingButton();
 
             RefreshLiveValues();
+        }
+
+        // Only the Saved Objects window gives a description something to ping.
+        void BuildPingButton()
+        {
+            if (pingButton != null)
+            {
+                headerToggle.Remove(pingButton);
+                pingButton = null;
+            }
+            if (description.PingTarget == null)
+            {
+                return;
+            }
+
+            UnityEngine.Object target = description.PingTarget;
+            pingButton = new Button(() => EditorGUIUtility.PingObject(target)) { text = "Ping" };
+            pingButton.AddToClassList("saved-object-card__header-save-id-button");
+            pingButton.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+            headerToggle.Add(pingButton);
         }
 
         VisualElement BuildFieldRow(SavedObjectDescription.FieldRow row)

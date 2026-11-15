@@ -49,6 +49,9 @@ namespace AbstractPixel.SaveSystem.Editor
         public bool IsWaitingForSetSaveId;
         public bool ShowsSpawnedCopyNote;
 
+        /// <summary>What the card's Ping button selects in the Editor. Null for a plain class, which has nothing to ping.</summary>
+        public UnityEngine.Object PingTarget;
+
         /// <summary>Every blocking mistake on this saved script, with the same text the Console gets.</summary>
         public IReadOnlyList<string> BlockingMistakes;
 
@@ -90,6 +93,66 @@ namespace AbstractPixel.SaveSystem.Editor
             }
 
             return description;
+        }
+
+        /// <summary>Builds the description for one registered saved object, for the Saved Objects window (T5).</summary>
+        public static SavedObjectDescription ForEntry(SavedObjectEntry entry, SaveJson serializer)
+        {
+            object savedObject = entry.SavedObject;
+            Type savedType = savedObject.GetType();
+            SavedFieldSet fields = new SavedFieldSet(savedType);
+            string name = NameOf(savedObject);
+
+            SavedObjectDescription description = new SavedObjectDescription
+            {
+                ViewDataKey = $"{entry.SaveFileName}/{entry.SaveId}",
+                GetSaveId = () => entry.SaveId,
+                BlockingMistakes = new List<string>(),
+                PingTarget = PingTargetOf(savedObject),
+                CaptureLiveValues = () => ToToken(entry.Capture(), serializer)
+            };
+
+            Type savableInterface = SavedScript.FindSavableInterface(savedType);
+            if (savableInterface != null)
+            {
+                description.CustomDataTypeName = savableInterface.GetGenericArguments()[0].Name;
+                description.HeaderText = $"{name} · {entry.SaveFileName} · custom data";
+            }
+            else
+            {
+                description.FieldRows = fields.Fields.Select(ToFieldRow).ToList();
+                description.HeaderText = $"{name} · {entry.SaveFileName} · {DescribeFieldCount(fields)}";
+            }
+            return description;
+        }
+
+        // A [Save]-field object already captures a JToken; an ISavable captures its own data class.
+        static JToken ToToken(object captured, SaveJson serializer)
+        {
+            return captured as JToken ?? serializer.ToToken(captured);
+        }
+
+        // "Chest on Chest 2" for a script on a GameObject, "Inventory (My Asset)" for an asset, else the class name.
+        static string NameOf(object savedObject)
+        {
+            string className = savedObject.GetType().Name;
+            Component component = savedObject as Component;
+            if (component != null)
+            {
+                return $"{className} on {component.gameObject.name}";
+            }
+            UnityEngine.Object unityObject = savedObject as UnityEngine.Object;
+            return unityObject != null ? $"{className} ({unityObject.name})" : className;
+        }
+
+        static UnityEngine.Object PingTargetOf(object savedObject)
+        {
+            Component component = savedObject as Component;
+            if (component != null)
+            {
+                return component.gameObject;
+            }
+            return savedObject as UnityEngine.Object;
         }
 
         static FieldRow ToFieldRow(SavedFieldSet.SavedField field)
