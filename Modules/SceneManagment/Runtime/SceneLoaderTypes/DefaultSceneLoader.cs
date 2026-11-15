@@ -76,7 +76,10 @@ namespace AbstractPixel.SceneManagement
                 sceneLoadHandles.Remove(sceneReference.SceneName);
             }
             await sceneUnLoadHandle.AsTask();
-            GC.Collect();
+        }
+
+        public async Task ReleaseUnusedMemory()
+        {
             await Resources.UnloadUnusedAssets().AsTask();
         }
     }

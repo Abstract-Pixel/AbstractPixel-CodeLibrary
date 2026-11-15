@@ -163,6 +163,8 @@ namespace AbstractPixel.SceneManagement
                     }
                 }
 
+                await SceneLoader.ReleaseUnusedMemory();
+
                 if (activeSceneGroup.ForceReloadContextualScenes)
                 {
                     foreach (SceneReference scene in activeContextualScenesSet)
@@ -265,6 +267,8 @@ namespace AbstractPixel.SceneManagement
                         await SceneLoader.UnloadScene(scene);
                     }
                 }
+
+                await SceneLoader.ReleaseUnusedMemory();
             }
             catch (Exception ex)
             {

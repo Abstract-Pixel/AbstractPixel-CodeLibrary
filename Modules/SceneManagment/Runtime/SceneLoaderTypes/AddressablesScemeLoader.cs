@@ -1,6 +1,7 @@
 using AbstractPixel.Core;
 using System;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace AbstractPixel.SceneManagement
@@ -15,6 +16,11 @@ namespace AbstractPixel.SceneManagement
         public Task UnloadScene(SceneReference sceneReference)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task ReleaseUnusedMemory()
+        {
+            await Resources.UnloadUnusedAssets().AsTask();
         }
     }
 }
