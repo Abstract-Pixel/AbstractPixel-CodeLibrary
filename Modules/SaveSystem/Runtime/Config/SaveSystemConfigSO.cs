@@ -124,10 +124,16 @@ namespace AbstractPixel.SaveSystem
 #if UNITY_EDITOR
         void OnValidate()
         {
-            // A new row gets its storage name once, from its name, so renaming it later keeps old data readable.
+            // A row gets its storage name once, from its name, so renaming it later keeps old data readable. Only a
+            // row with a class can have saved data. A row still being typed has none yet; the inspector applies every
+            // keystroke, so fixing its storage name now would keep the first letter. Update save file classes gives
+            // it one when it writes its class.
             foreach (SaveFileDefinition row in EditableSaveFileList)
             {
-                bool needsStorageName = row != null && string.IsNullOrEmpty(row.StorageName) && !string.IsNullOrEmpty(row.Name);
+                bool needsStorageName = row != null
+                    && string.IsNullOrEmpty(row.StorageName)
+                    && !string.IsNullOrEmpty(row.Name)
+                    && !string.IsNullOrEmpty(row.ClassFullName);
                 if (needsStorageName)
                 {
                     row.StorageName = row.Name;
