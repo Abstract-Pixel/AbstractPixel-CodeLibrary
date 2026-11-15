@@ -5,7 +5,9 @@ namespace AbstractPixel.SaveSystem.Editor
 {
     /// <summary>
     /// Draws the small "Saved" badge at the right of a Hierarchy row, red when a saved script there has a mistake,
-    /// and a grey dot on a parent whose children save. The Hierarchy only offers an IMGUI hook for drawing on rows.
+    /// and a grey dot on a parent whose children save. The classic Hierarchy window draws rows with IMGUI and calls
+    /// the row hook below. The UI Toolkit Hierarchy window (Unity 6.7 and 7) never calls that hook, so
+    /// <see cref="HierarchyBadgeRows"/> adds the badge to its rows instead.
     /// </summary>
     [InitializeOnLoad]
     internal static class HierarchySavedBadge
@@ -14,9 +16,9 @@ namespace AbstractPixel.SaveSystem.Editor
         const float DotSize = 6f;
         const float RightMargin = 4f;
 
-        static readonly Color SavedColor = new Color(0.24f, 0.46f, 0.64f, 1f);
-        static readonly Color MistakeColor = new Color(0.74f, 0.24f, 0.24f, 1f);
-        static readonly Color DotColor = new Color(0.55f, 0.55f, 0.55f, 1f);
+        internal static readonly Color SavedColor = new Color(0.24f, 0.46f, 0.64f, 1f);
+        internal static readonly Color MistakeColor = new Color(0.74f, 0.24f, 0.24f, 1f);
+        internal static readonly Color DotColor = new Color(0.55f, 0.55f, 0.55f, 1f);
 
         static GUIStyle badgeStyle;
 
@@ -29,13 +31,31 @@ namespace AbstractPixel.SaveSystem.Editor
 #else
             EditorApplication.hierarchyWindowItemOnGUI += DrawRowByInstanceId;
 #endif
-            EditorApplication.hierarchyChanged += HierarchyBadgeCache.Clear;
+#if UNITY_6000_7_OR_NEWER
+            HierarchyBadgeRows.Register();
+#endif
+            EditorApplication.hierarchyChanged += OnHierarchyChanged;
             ObjectChangeEvents.changesPublished += OnObjectChanged;
+        }
+
+        static void OnHierarchyChanged()
+        {
+            Forget();
         }
 
         static void OnObjectChanged(ref ObjectChangeEventStream stream)
         {
+            Forget();
+        }
+
+        // IMGUI rows redraw on their own. UI Toolkit rows keep their badge until they are bound again,
+        // so the ones on screen are redrawn here.
+        static void Forget()
+        {
             HierarchyBadgeCache.Clear();
+#if UNITY_6000_7_OR_NEWER
+            HierarchyBadgeRows.RefreshAll();
+#endif
         }
 
 #if UNITY_7000_0_OR_NEWER

@@ -6,12 +6,12 @@ using UnityEngine;
 
 namespace AbstractPixel.SaveSystem.Tests
 {
-    // T4: which Hierarchy rows get a badge, a red badge or a dot. The cache decides; drawing is checked by hand.
+    // T4: which Hierarchy rows get a badge, a red badge or a dot. The cache decides; HierarchyBadgeRowsTests checks the drawing.
     public class HierarchyBadgeTests
     {
         sealed class UnlistedSaveFile : ISaveFile { }
 
-        class ChestScript : MonoBehaviour
+        internal class ChestScript : MonoBehaviour
         {
             [Save] public int gold;
         }
@@ -161,7 +161,7 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         // Puts the script on the GameObject and in its bridge's target list, the way the bridge's own sync would.
-        static void AddSavedScript<TScript>(GameObject gameObject) where TScript : MonoBehaviour
+        internal static void AddSavedScript<TScript>(GameObject gameObject) where TScript : MonoBehaviour
         {
             SavableBridge bridge = gameObject.GetComponent<SavableBridge>();
             if (bridge == null)
