@@ -15,6 +15,7 @@ namespace AbstractPixel.SaveSystem
         const string GameProfileManifestName = "GameProfileManifest";
         const string SaveSystemMetaDataName = "SaveSystemMetaData";
         const string BackupsFolder = "Backups";
+        const string UnreadableFolder = "Unreadable";
 
         /// <summary>
         /// The key of a save file in its save location. Throws when the save location needs an open game profile
@@ -62,6 +63,15 @@ namespace AbstractPixel.SaveSystem
         public static string GetBackupKey(string key)
         {
             return $"{BackupsFolder}/{key}";
+        }
+
+        /// <summary>
+        /// Where the text of a save file that couldn't be read is kept before the file is saved over, so the player's
+        /// data can still be recovered by hand. Outside GameProfiles/, so it is never mistaken for a game profile.
+        /// </summary>
+        public static string GetUnreadableCopyKey(string key)
+        {
+            return $"{UnreadableFolder}/{key}";
         }
 
         /// <summary>The prefix shared by every key of one game profile, for deleting or listing it.</summary>

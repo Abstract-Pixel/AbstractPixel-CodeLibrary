@@ -71,11 +71,22 @@ namespace AbstractPixel.SaveSystem
 
         bool WriteCheckedText<T>(string key, string newText, bool keepBackup) where T : IVersionedSaveData
         {
+            if (!TryReadCurrentText(key, out string currentText))
+            {
+                return false;
+            }
+            bool isCurrentTextValid = currentText != null && serializer.TryDeserialize(currentText, out T _);
+            bool isCurrentTextUnreadable = currentText != null && !isCurrentTextValid;
+            if (isCurrentTextUnreadable && !KeepUnreadableTextAside(key, currentText))
+            {
+                return false;
+            }
+
             string backupKey = SavePathGenerator.GetBackupKey(key);
             if (keepBackup)
             {
                 // Back up the current text only if it is valid, so a corrupt file never replaces a good backup.
-                if (storage.TryRead(key, out string currentText) && serializer.TryDeserialize(currentText, out T _))
+                if (isCurrentTextValid)
                 {
                     storage.Write(backupKey, currentText);
                 }
@@ -85,6 +96,37 @@ namespace AbstractPixel.SaveSystem
                 storage.Delete(backupKey);
             }
             return storage.Write(key, newText);
+        }
+
+        // The text stored under the key now, or null when there is none. False when a file is there but can't be
+        // opened: what it holds is unknown, so writing over it could destroy the player's data.
+        bool TryReadCurrentText(string key, out string currentText)
+        {
+            if (storage.TryRead(key, out currentText))
+            {
+                return true;
+            }
+            currentText = null;
+            if (!storage.Exists(key))
+            {
+                return true;
+            }
+            Debug.LogError($"[SaveSystem] The save key '{key}' exists but couldn't be read, so nothing was written, to keep whatever it holds. Check that no other program has the file open. The next save tries again.");
+            return false;
+        }
+
+        // A file that loaded as empty because it couldn't be read still holds the player's data, so its text is kept
+        // before it is saved over.
+        bool KeepUnreadableTextAside(string key, string unreadableText)
+        {
+            string unreadableCopyKey = SavePathGenerator.GetUnreadableCopyKey(key);
+            if (!storage.Write(unreadableCopyKey, unreadableText))
+            {
+                Debug.LogError($"[SaveSystem] The save key '{key}' couldn't be read as a save file, and its text couldn't be kept as '{unreadableCopyKey}', so nothing was written over it. Check the save folder can be written to.");
+                return false;
+            }
+            Debug.LogWarning($"[SaveSystem] The save key '{key}' couldn't be read as a save file, so its text was kept as '{unreadableCopyKey}' before saving over it. Open that copy to recover the data by hand.");
+            return true;
         }
 
         bool TryReadChecked<T>(string key, bool useBackup, out string text, out T content) where T : IVersionedSaveData
@@ -100,7 +142,7 @@ namespace AbstractPixel.SaveSystem
             {
                 if (mainExists)
                 {
-                    Debug.LogError($"[SaveSystem] The save file '{key}' is corrupt, so its saved data was not loaded. Its save file row has Backup unticked, so there is no backup to fall back to. Delete the file to start fresh, or fix the JSON by hand.");
+                    Debug.LogError($"[SaveSystem] The save file '{key}' is corrupt, so its saved data was not loaded. Its save file row has Backup unticked, so there is no backup to fall back to. The next save keeps its text as '{SavePathGenerator.GetUnreadableCopyKey(key)}' before replacing it; fix the JSON there by hand to recover the data.");
                 }
                 return Nothing(out text, out content);
             }
@@ -117,7 +159,7 @@ namespace AbstractPixel.SaveSystem
             // Nothing stored yet is normal on a first launch, so it isn't an error.
             if (mainExists || storage.Exists(backupKey))
             {
-                Debug.LogError($"[SaveSystem] The save key '{key}' and its backup are both unreadable, so its saved data was not loaded. Delete the file to start fresh, or fix the JSON by hand.");
+                Debug.LogError($"[SaveSystem] The save key '{key}' and its backup are both unreadable, so its saved data was not loaded. The next save keeps its text as '{SavePathGenerator.GetUnreadableCopyKey(key)}' before replacing it; fix the JSON there by hand to recover the data.");
             }
             return Nothing(out text, out content);
         }
