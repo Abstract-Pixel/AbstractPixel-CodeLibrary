@@ -6,8 +6,9 @@ using UnityEngine.UIElements;
 namespace AbstractPixel.SaveSystem.Editor
 {
     /// <summary>
-    /// The save system config's inspector. When the save file list changes, the built-in and module rows are put
-    /// back if they were removed. GameSaveFiles.cs is written only when Update save file classes is pressed.
+    /// The save system config's inspector. Update save file classes shows while the list has changes that aren't
+    /// applied: a game row added, renamed or removed, or a default row removed. Pressing it writes GameSaveFiles.cs
+    /// and keeps removed default rows out; Bring back removed rows puts them back.
     /// </summary>
     [CustomEditor(typeof(SaveSystemConfigSO))]
     public class SaveSystemConfigEditor : UnityEditor.Editor
@@ -37,7 +38,7 @@ namespace AbstractPixel.SaveSystem.Editor
                 }
             }
 
-            root.Add(new HelpBox("The save file list. Each row is one save file. GameProfile, Scene, Settings, Input and Achievements are built in: their classes ship with the library, such as SaveFiles.Settings. Press Update save file classes to write a class for each row you add into GameSaveFiles.cs, so game code writes SaveActions.Save<GameSaveFiles.Ghosts>(). Library modules add their own rows.", HelpBoxMessageType.Info));
+            root.Add(new HelpBox("The save file list. Each row is one save file. GameProfile, Scene, Settings, Input and Achievements are built in: their classes ship with the library, such as SaveFiles.Settings. Press Update save file classes to write a class for each row you add into GameSaveFiles.cs, so game code writes SaveActions.Save<GameSaveFiles.Ghosts>(). Library modules add their own rows. You can remove any row but GameProfile; press Update save file classes to keep it removed.", HelpBoxMessageType.Info));
 
             SerializedProperty listProperty = serializedObject.FindProperty("saveFileList");
             // The list is what people come here for, so it starts open.
@@ -52,6 +53,10 @@ namespace AbstractPixel.SaveSystem.Editor
             // correct regardless of what any future list control change does internally, matching the same
             // defensive polling SavedObjectCard already uses for its own similarly externally-driven refresh.
             root.schedule.Execute(() => RefreshUpdateArea(config, updateArea)).Every(200);
+
+            VisualElement removedArea = BuildRemovedArea(config, updateArea);
+            root.Add(removedArea);
+            root.schedule.Execute(() => RefreshRemovedArea(config, removedArea)).Every(200);
 
             return root;
         }
@@ -102,7 +107,7 @@ namespace AbstractPixel.SaveSystem.Editor
         {
             VisualElement area = new VisualElement();
 
-            Label waitingLabel = new Label("The save file list has changes that GameSaveFiles.cs doesn't have yet.");
+            Label waitingLabel = new Label("The save file list has changes that aren't applied yet.");
             waitingLabel.AddToClassList("save-file-list__waiting");
             area.Add(waitingLabel);
 
@@ -120,7 +125,12 @@ namespace AbstractPixel.SaveSystem.Editor
             // A row just added or removed through the list's own buttons is still only on the SerializedObject
             // side until this runs, so config.SaveFileList (the actual object) would otherwise read stale data.
             serializedObject.ApplyModifiedProperties();
-            bool isOutOfDate = SaveFileListStatus.IsOutOfDate(config.SaveFileList, config.GameSaveFilesScriptPath);
+            // Remembering the default rows on show makes taking one out later count as removing it, on any config.
+            if (SaveFileListSync.RememberDefaults(config.SaveFileList, config.EditableKnownDefaultSaveFiles))
+            {
+                EditorUtility.SetDirty(config);
+            }
+            bool isOutOfDate = SaveFileListStatus.IsOutOfDate(config);
             area.style.display = isOutOfDate ? DisplayStyle.Flex : DisplayStyle.None;
             // Disabled, not hidden, while a clash blocks the write: the row above already says why.
             area.Q<Button>().SetEnabled(SaveFileClash.FindAll(config.SaveFileList).Count == 0);
@@ -131,6 +141,40 @@ namespace AbstractPixel.SaveSystem.Editor
             SaveFilesCodeWriter.WriteFile(config);
             serializedObject.Update();
             RefreshUpdateArea(config, area);
+        }
+
+        // Lists the default rows the owner removed, with a way to put them all back.
+        VisualElement BuildRemovedArea(SaveSystemConfigSO config, VisualElement updateArea)
+        {
+            VisualElement area = new VisualElement();
+
+            Label removedLabel = new Label();
+            removedLabel.AddToClassList("save-file-list__waiting");
+            area.Add(removedLabel);
+
+            Button bringBackButton = new Button(() =>
+            {
+                Undo.RecordObject(config, "Bring back removed save file rows");
+                SaveFileListSync.BringBackRemovedRows(config.EditableSaveFileList, config.EditableRemovedDefaultSaveFiles, SaveFileListSync.FindModuleSaveFileClasses());
+                WriteNow(config, updateArea);
+                RefreshRemovedArea(config, area);
+            }) { text = "Bring back removed rows" };
+            bringBackButton.AddToClassList("save-file-list__actions");
+            area.Add(bringBackButton);
+
+            RefreshRemovedArea(config, area);
+            return area;
+        }
+
+        static void RefreshRemovedArea(SaveSystemConfigSO config, VisualElement area)
+        {
+            IReadOnlyList<string> removed = config.RemovedDefaultSaveFiles;
+            area.style.display = removed.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            if (removed.Count > 0)
+            {
+                List<string> names = SaveFileListSync.NamesOfRemoved(new List<string>(removed), SaveFileListSync.FindModuleSaveFileClasses());
+                area.Q<Label>().text = $"Removed default rows: {string.Join(", ", names)}.";
+            }
         }
     }
 }

@@ -7,7 +7,7 @@ namespace AbstractPixel.SaveSystem
 {
     /// <summary>
     /// Finds the save file list row for a save file class, and the save file a saved object uses.
-    /// The built-in rows always exist, even when a config leaves them out.
+    /// The built-in rows always exist, even when a config leaves them out, unless the owner removed them in the config.
     /// </summary>
     internal sealed class SaveFileLookup
     {
@@ -25,6 +25,9 @@ namespace AbstractPixel.SaveSystem
         // Each missing class is reported once per session, so a busy scene doesn't fill the console.
         readonly HashSet<string> reportedClasses = new HashSet<string>();
 
+        // Default rows the owner removed in the config: they get no fallback row.
+        readonly HashSet<string> removedClasses = new HashSet<string>();
+
         public SaveFileLookup(SaveSystemConfigSO config)
         {
             if (config != null)
@@ -36,10 +39,16 @@ namespace AbstractPixel.SaveSystem
                         definitions.Add(row);
                     }
                 }
+                removedClasses.UnionWith(config.RemovedDefaultSaveFiles);
             }
             foreach (BuiltInSaveFile builtIn in BuiltInSaveFiles)
             {
-                AddMissingBuiltIn(builtIn);
+                // GameProfile is where everything without a save file goes, so it can't be removed.
+                bool isRemoved = builtIn != BuiltInSaveFile.GameProfile && removedClasses.Contains(SaveFileDefinition.ClassOf(builtIn).FullName);
+                if (!isRemoved)
+                {
+                    AddMissingBuiltIn(builtIn);
+                }
             }
             ReportClashes();
         }
@@ -67,6 +76,16 @@ namespace AbstractPixel.SaveSystem
             if (definition != null)
             {
                 return true;
+            }
+
+            if (removedClasses.Contains(saveFileClass.FullName))
+            {
+                if (reportedClasses.Add(saveFileClass.FullName))
+                {
+                    Debug.LogError($"[SaveSystem] The save file '{saveFileClass.FullName}' was removed from the save file list, so nothing in it is saved. Select the save system config and press Bring back removed rows to use it again.");
+                }
+                definition = null;
+                return false;
             }
 
             // A library module's class can still save before the editor has added its row, using the module's defaults.

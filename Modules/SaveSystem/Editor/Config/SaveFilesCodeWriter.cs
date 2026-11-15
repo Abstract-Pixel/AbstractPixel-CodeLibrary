@@ -19,14 +19,15 @@ namespace AbstractPixel.SaveSystem.Editor
         const string GeneratedHeader = "// GameSaveFiles.cs. Written by the editor. Don't edit; change the list in the config.";
 
         /// <summary>
-        /// Writes GameSaveFiles.cs if its text changed, and points every game row at its class. Returns true if the
-        /// file changed.
+        /// Records default rows the owner took out as removed, writes GameSaveFiles.cs if its text changed, points
+        /// every game row at its class and saves the config. Returns true if the file changed.
         /// </summary>
         public static bool WriteFile(SaveSystemConfigSO config)
         {
             string scriptPath = config.GameSaveFilesScriptPath;
             List<SaveFileDefinition> rows = config.EditableSaveFileList;
-            SaveFileListSync.AddMissingRows(rows, SaveFileListSync.FindModuleSaveFileClasses());
+            // Default rows the owner took out stay out from now on.
+            SaveFileListSync.ApplyRemovals(rows, config.EditableRemovedDefaultSaveFiles, config.EditableKnownDefaultSaveFiles, SaveFileListSync.FindModuleSaveFileClasses());
 
             // A clash would write a file that doesn't compile, or two save files into one file on disk.
             if (!CanWrite(rows))
@@ -132,7 +133,7 @@ namespace AbstractPixel.SaveSystem.Editor
         static bool CanWriteFromMenu()
         {
             SaveSystemConfigSO config = SaveSystemConfigFinder.FindInProject();
-            return config != null && SaveFileListStatus.IsOutOfDate(config.SaveFileList, config.GameSaveFilesScriptPath);
+            return config != null && SaveFileListStatus.IsOutOfDate(config);
         }
     }
 }

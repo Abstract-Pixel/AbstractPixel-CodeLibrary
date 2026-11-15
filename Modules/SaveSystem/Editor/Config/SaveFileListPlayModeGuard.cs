@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace AbstractPixel.SaveSystem.Editor
 {
-    /// <summary>Blocks play mode from starting while the save file list has changes GameSaveFiles.cs doesn't have yet.</summary>
+    /// <summary>Blocks play mode from starting while the save file list has changes that aren't applied yet.</summary>
     [InitializeOnLoad]
     public static class SaveFileListPlayModeGuard
     {
@@ -20,7 +20,7 @@ namespace AbstractPixel.SaveSystem.Editor
             }
 
             SaveSystemConfigSO config = SaveSystemConfigFinder.FindInProject();
-            if (config == null || !SaveFileListStatus.IsOutOfDate(config.SaveFileList, config.GameSaveFilesScriptPath))
+            if (config == null || !SaveFileListStatus.IsOutOfDate(config))
             {
                 return;
             }

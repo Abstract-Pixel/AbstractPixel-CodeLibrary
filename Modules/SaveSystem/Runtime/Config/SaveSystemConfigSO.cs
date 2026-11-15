@@ -45,6 +45,16 @@ namespace AbstractPixel.SaveSystem
         [SerializeField, FormerlySerializedAs("categoryDefinitionList")]
         List<SaveFileDefinition> saveFileList = new List<SaveFileDefinition>();
 
+        // The class full names of default rows (Scene, Settings, Input, Achievements, a module's row) the owner
+        // removed and applied with Update save file classes, so the editor doesn't put them back.
+        [SerializeField, HideInInspector]
+        List<string> removedDefaultSaveFiles = new List<string>();
+
+        // The class full names of default rows this list has had, so taking one out counts as removing it, while a
+        // default it never had (a brand-new config, a module just installed) is only missing and gets added.
+        [SerializeField, HideInInspector]
+        List<string> knownDefaultSaveFiles = new List<string>();
+
         internal const string DefaultGameSaveFilesScriptPath = "Assets/SaveSystem/GameSaveFiles.cs";
 
         /// <summary>The save file list: one row per save file, with its name, save location and Backup box.</summary>
@@ -74,6 +84,34 @@ namespace AbstractPixel.SaveSystem
                     saveFileList = new List<SaveFileDefinition>();
                 }
                 return saveFileList;
+            }
+        }
+
+        /// <summary>Default rows the owner removed, by class full name. They have no row, so nothing saves to them.</summary>
+        internal IReadOnlyList<string> RemovedDefaultSaveFiles => EditableRemovedDefaultSaveFiles;
+
+        internal List<string> EditableRemovedDefaultSaveFiles
+        {
+            get
+            {
+                if (removedDefaultSaveFiles == null)
+                {
+                    removedDefaultSaveFiles = new List<string>();
+                }
+                return removedDefaultSaveFiles;
+            }
+        }
+
+        /// <summary>Default rows this list has had, by class full name. Editor bookkeeping only.</summary>
+        internal List<string> EditableKnownDefaultSaveFiles
+        {
+            get
+            {
+                if (knownDefaultSaveFiles == null)
+                {
+                    knownDefaultSaveFiles = new List<string>();
+                }
+                return knownDefaultSaveFiles;
             }
         }
 

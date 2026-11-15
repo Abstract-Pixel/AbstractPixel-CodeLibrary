@@ -41,7 +41,8 @@ namespace AbstractPixel.SaveSystem.Editor
                 return;
             }
 
-            bool changed = AddMissingRows(config.EditableSaveFileList, FindModuleSaveFileClasses());
+            bool changed = AddMissingRows(config.EditableSaveFileList, FindModuleSaveFileClasses(), config.RemovedDefaultSaveFiles);
+            changed |= RememberDefaults(config.SaveFileList, config.EditableKnownDefaultSaveFiles);
             if (changed)
             {
                 SaveFilesCodeWriter.WriteFile(config);
@@ -49,11 +50,12 @@ namespace AbstractPixel.SaveSystem.Editor
         }
 
         /// <summary>
-        /// Removes module rows whose class is gone, adds the missing built-in
-        /// rows and a row per module save file class that has none, and puts the built-in rows first in a fixed order.
-        /// Rows that exist keep the owner's changes to their location and Backup box. Returns true if anything changed.
+        /// Removes module rows whose class is gone, adds the missing built-in rows and a row per module save file class
+        /// that has none, except the ones in <paramref name="removedDefaults"/>, and puts the built-in rows first in a
+        /// fixed order. Rows that exist keep the owner's changes to their location and Backup box. Returns true if
+        /// anything changed.
         /// </summary>
-        internal static bool AddMissingRows(List<SaveFileDefinition> rows, IEnumerable<Type> moduleSaveFileClasses)
+        internal static bool AddMissingRows(List<SaveFileDefinition> rows, IEnumerable<Type> moduleSaveFileClasses, IReadOnlyCollection<string> removedDefaults = null)
         {
             bool changed = rows.RemoveAll(row => row == null) > 0;
             changed |= RemoveModuleRowsWhoseClassIsGone(rows);
@@ -62,7 +64,7 @@ namespace AbstractPixel.SaveSystem.Editor
             foreach (BuiltInSaveFile builtIn in BuiltInOrder)
             {
                 bool exists = rows.Exists(row => row.IsBuiltIn && row.BuiltIn == builtIn);
-                if (!exists)
+                if (!exists && !IsRemoved(ClassOfBuiltIn(builtIn), removedDefaults))
                 {
                     rows.Add(SaveFileDefinition.CreateBuiltIn(builtIn));
                     changed = true;
@@ -72,7 +74,7 @@ namespace AbstractPixel.SaveSystem.Editor
             foreach (Type moduleSaveFileClass in moduleSaveFileClasses)
             {
                 bool hasRow = rows.Exists(row => row.StandsFor(moduleSaveFileClass));
-                if (hasRow)
+                if (hasRow || IsRemoved(moduleSaveFileClass.FullName, removedDefaults))
                 {
                     continue;
                 }
@@ -86,6 +88,148 @@ namespace AbstractPixel.SaveSystem.Editor
 
             changed |= PutBuiltInRowsFirst(rows);
             return changed;
+        }
+
+        /// <summary>
+        /// The default rows in the list (built-in rows but GameProfile, and module rows), by class full name.
+        /// GameProfile is left out because it is never removed: it always comes back.
+        /// </summary>
+        internal static List<string> DefaultsIn(IReadOnlyList<SaveFileDefinition> rows)
+        {
+            List<string> defaults = new List<string>();
+            foreach (SaveFileDefinition row in rows)
+            {
+                if (row == null)
+                {
+                    continue;
+                }
+                bool isRemovableBuiltIn = row.IsBuiltIn && !row.IsLocked && Array.IndexOf(BuiltInOrder, row.BuiltIn) >= 0;
+                if (isRemovableBuiltIn)
+                {
+                    defaults.Add(ClassOfBuiltIn(row.BuiltIn));
+                }
+                else if (!row.IsBuiltIn && row.IsAddedByModule && !string.IsNullOrEmpty(row.ClassFullName))
+                {
+                    defaults.Add(row.ClassFullName);
+                }
+            }
+            return defaults;
+        }
+
+        /// <summary>
+        /// Adds the default rows the list has now to <paramref name="knownDefaults"/>, so taking one out later counts
+        /// as removing it. A default the list never had is just missing, and the next sync adds it. Returns true if
+        /// anything was added.
+        /// </summary>
+        internal static bool RememberDefaults(IReadOnlyList<SaveFileDefinition> rows, List<string> knownDefaults)
+        {
+            bool changed = false;
+            foreach (string className in DefaultsIn(rows))
+            {
+                if (!knownDefaults.Contains(className))
+                {
+                    knownDefaults.Add(className);
+                    changed = true;
+                }
+            }
+            return changed;
+        }
+
+        /// <summary>
+        /// Default rows the list had that the owner took out and that aren't recorded as removed yet, by class full
+        /// name: the change Update save file classes applies.
+        /// </summary>
+        internal static List<string> FindUnappliedRemovals(IReadOnlyList<SaveFileDefinition> rows, IReadOnlyCollection<string> removedDefaults, IReadOnlyCollection<string> knownDefaults)
+        {
+            List<string> present = DefaultsIn(rows);
+            List<string> unapplied = new List<string>();
+            foreach (string className in knownDefaults)
+            {
+                if (!present.Contains(className) && !IsRemoved(className, removedDefaults))
+                {
+                    unapplied.Add(className);
+                }
+            }
+            return unapplied;
+        }
+
+        /// <summary>Records the default rows the owner took out as removed, then completes the list. Returns true if anything changed.</summary>
+        internal static bool ApplyRemovals(List<SaveFileDefinition> rows, List<string> removedDefaults, List<string> knownDefaults, IEnumerable<Type> moduleSaveFileClasses)
+        {
+            List<string> unapplied = FindUnappliedRemovals(rows, removedDefaults, knownDefaults);
+            removedDefaults.AddRange(unapplied);
+            bool changed = unapplied.Count > 0;
+            changed |= AddMissingRows(rows, moduleSaveFileClasses, removedDefaults);
+            changed |= RememberDefaults(rows, knownDefaults);
+            return changed;
+        }
+
+        /// <summary>Puts every removed default row back into the list and forgets the removals. Returns true if anything changed.</summary>
+        internal static bool BringBackRemovedRows(List<SaveFileDefinition> rows, List<string> removedDefaults, IEnumerable<Type> moduleSaveFileClasses)
+        {
+            bool changed = removedDefaults.Count > 0;
+            removedDefaults.Clear();
+            changed |= AddMissingRows(rows, moduleSaveFileClasses, removedDefaults);
+            return changed;
+        }
+
+        /// <summary>The row names of removed default rows, for the config inspector: "Settings", "Sample Settings".</summary>
+        internal static List<string> NamesOfRemoved(IReadOnlyCollection<string> removedDefaults, IEnumerable<Type> moduleSaveFileClasses)
+        {
+            List<string> names = new List<string>();
+            foreach (string className in removedDefaults)
+            {
+                string name = className;
+                foreach (BuiltInSaveFile builtIn in BuiltInOrder)
+                {
+                    if (ClassOfBuiltIn(builtIn) == className)
+                    {
+                        name = builtIn.ToString();
+                    }
+                }
+                foreach (Type moduleSaveFileClass in moduleSaveFileClasses)
+                {
+                    if (moduleSaveFileClass.FullName == className)
+                    {
+                        name = moduleSaveFileClass.GetCustomAttribute<SaveFileDefaultsAttribute>().Name;
+                    }
+                }
+                names.Add(name);
+            }
+            return names;
+        }
+
+        static string ClassOfBuiltIn(BuiltInSaveFile builtIn)
+        {
+            return SaveFileDefinition.ClassOf(builtIn).FullName;
+        }
+
+        static bool IsRemoved(string className, IReadOnlyCollection<string> removedDefaults)
+        {
+            if (removedDefaults == null)
+            {
+                return false;
+            }
+            foreach (string removed in removedDefaults)
+            {
+                if (removed == className)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        static bool Exists(IReadOnlyList<SaveFileDefinition> rows, Predicate<SaveFileDefinition> match)
+        {
+            foreach (SaveFileDefinition row in rows)
+            {
+                if (row != null && match(row))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>Every save file class a library module ships: an ISaveFile with [SaveFileDefaults].</summary>
@@ -164,7 +308,12 @@ namespace AbstractPixel.SaveSystem.Editor
             List<SaveFileDefinition> ordered = new List<SaveFileDefinition>();
             foreach (BuiltInSaveFile builtIn in BuiltInOrder)
             {
-                ordered.Add(rows.Find(row => row.IsBuiltIn && row.BuiltIn == builtIn));
+                // A built-in row the owner removed has no row to put first.
+                SaveFileDefinition builtInRow = rows.Find(row => row.IsBuiltIn && row.BuiltIn == builtIn);
+                if (builtInRow != null)
+                {
+                    ordered.Add(builtInRow);
+                }
             }
             // Everything else keeps its order, including a second copy of a built-in row, which the config inspector warns about.
             ordered.AddRange(rows.FindAll(row => !ordered.Contains(row)));
