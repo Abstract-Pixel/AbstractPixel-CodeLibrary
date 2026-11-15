@@ -42,6 +42,18 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.Throws<BuildFailedException>(() => SavableBridgeSceneBuildGuard.CheckScene(gameObject.scene));
         }
 
+        // Unity also calls the build hook for every scene loaded in play mode in the Editor, with no build report.
+        // The play mode check already logs that scene, so the build hook must not throw there too.
+        [Test]
+        public void ASceneLoadedInPlayMode_IsLeftToThePlayModeCheck()
+        {
+            GameObject gameObject = new GameObject("Chest");
+            gameObjects.Add(gameObject);
+            gameObject.AddComponent<FieldScript>();
+
+            Assert.DoesNotThrow(() => new SavableBridgeSceneBuildGuard().OnProcessScene(gameObject.scene, null));
+        }
+
         [Test]
         public void ASceneWhereEveryScriptHasABridge_DoesNotFailTheBuild()
         {

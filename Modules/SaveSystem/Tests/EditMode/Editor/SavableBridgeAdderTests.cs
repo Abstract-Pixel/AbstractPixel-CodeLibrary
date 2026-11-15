@@ -30,6 +30,7 @@ namespace AbstractPixel.SaveSystem.Tests
                 }
             }
             gameObjects.Clear();
+            SavableBridgeAdder.IsPlayingOverrideForTests = null;
 
             foreach (string folder in createdFolders)
             {
@@ -39,6 +40,21 @@ namespace AbstractPixel.SaveSystem.Tests
                 }
             }
             createdFolders.Clear();
+        }
+
+        // A bridge added in play mode never gets its ID (OnValidate skips play mode) and is thrown away at Stop.
+        // The scene check reports the scene instead.
+        [Test]
+        public void InPlayMode_NoBridgeIsAdded()
+        {
+            GameObject gameObject = new GameObject("Chest");
+            gameObjects.Add(gameObject);
+            gameObject.AddComponent<FieldScript>();
+            SavableBridgeAdder.IsPlayingOverrideForTests = true;
+
+            SavableBridgeAdder.EnsureBridges(new[] { gameObject });
+
+            Assert.IsNull(gameObject.GetComponent<SavableBridge>());
         }
 
         [Test]

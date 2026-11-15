@@ -21,9 +21,21 @@ namespace AbstractPixel.SaveSystem.Editor
         // warning to a plain "added" log once per domain reload.
         static readonly HashSet<GameObject> knownToHaveABridge = new HashSet<GameObject>();
 
+        /// <summary>Lets a test stand in for play mode, which an EditMode test can't enter.</summary>
+        internal static bool? IsPlayingOverrideForTests;
+
         /// <summary>Adds a bridge to every GameObject among these that has a saved script and none, and logs what it did.</summary>
         public static void EnsureBridges(IEnumerable<GameObject> gameObjects)
         {
+            // Entering play mode reloads scripts, and objects change while playing, but a bridge added then never
+            // gets its ID (OnValidate skips play mode) and is lost at Stop. SavableBridgePlayModeCheck reports the
+            // scene instead.
+            bool isPlaying = IsPlayingOverrideForTests ?? EditorApplication.isPlayingOrWillChangePlaymode;
+            if (isPlaying)
+            {
+                return;
+            }
+
             List<(string Context, string Name)> added = new List<(string Context, string Name)>();
             List<string> broughtBack = new List<string>();
             HashSet<Scene> scenesToDirty = new HashSet<Scene>();

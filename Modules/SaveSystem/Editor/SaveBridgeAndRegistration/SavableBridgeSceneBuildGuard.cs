@@ -13,7 +13,13 @@ namespace AbstractPixel.SaveSystem.Editor
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
-            CheckScene(scene);
+            // Unity also calls this for every scene loaded in play mode in the Editor, with no report. Throwing
+            // there would break the scene load; SavableBridgePlayModeCheck already logs that scene.
+            bool isABuild = report != null;
+            if (isABuild)
+            {
+                CheckScene(scene);
+            }
         }
 
         /// <summary>Thrown as a test fixture, instead of needing a real build to exercise this.</summary>
