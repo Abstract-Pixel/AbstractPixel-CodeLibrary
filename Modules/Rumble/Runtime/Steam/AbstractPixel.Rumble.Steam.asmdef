@@ -20,7 +20,8 @@
     "autoReferenced": true,
     "defineConstraints": [
         "ABSTRACTPIXEL_STEAMWORKS",
-        "!DISABLESTEAMWORKS"
+        "!DISABLESTEAMWORKS",
+        "UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX"
     ],
     "versionDefines": [
         {
