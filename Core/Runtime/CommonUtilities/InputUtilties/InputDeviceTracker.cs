@@ -3,7 +3,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.DualShock;
+// The Input System leaves its Switch Pro support out of builds for other platforms (WebGL), so this uses its guard.
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_WSA
 using UnityEngine.InputSystem.Switch;
+#endif
 using UnityEngine.InputSystem.XInput;
 
 namespace AbstractPixel.Core
@@ -156,10 +159,12 @@ namespace AbstractPixel.Core
                 return DeviceFamily.Xbox;
             }
 
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_WSA
             if (_device is SwitchProControllerHID)
             {
                 return DeviceFamily.Nintendo;
             }
+#endif
 
             if (productName.Contains("playstation") || productName.Contains("dualshock") || productName.Contains("dualsense") || manufacturerName.Contains("sony"))
             {
