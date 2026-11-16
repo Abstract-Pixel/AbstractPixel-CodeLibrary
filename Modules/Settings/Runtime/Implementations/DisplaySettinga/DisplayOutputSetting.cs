@@ -25,8 +25,7 @@ namespace AbstractPixel.Settings
 
         private void GenerateDisplayData()
         {
-            List<DisplayInfo> displayLayout = new List<DisplayInfo>();
-            Screen.GetDisplayLayout(displayLayout);
+            List<DisplayInfo> displayLayout = ReadDisplayLayout();
 
             int displaysLength = displayLayout.Count;
             OptionValues = new int[displaysLength];
@@ -46,8 +45,7 @@ namespace AbstractPixel.Settings
                 return;
             }
 
-            List<DisplayInfo> displayLayoutList = new List<DisplayInfo>();
-            Screen.GetDisplayLayout(displayLayoutList);
+            List<DisplayInfo> displayLayoutList = ReadDisplayLayout();
 
             if (CurrentValue < displayLayoutList.Count)
             {
@@ -72,6 +70,16 @@ namespace AbstractPixel.Settings
                 }
                 Screen.MoveMainWindowTo( targetDisplay, new Vector2Int(0, 0));
             }
+        }
+
+        /// <summary>The monitors, in order. Empty where Unity cannot list them (WebGL throws), so no option is offered.</summary>
+        private static List<DisplayInfo> ReadDisplayLayout()
+        {
+            List<DisplayInfo> displayLayout = new List<DisplayInfo>();
+#if UNITY_EDITOR || UNITY_STANDALONE
+            Screen.GetDisplayLayout(displayLayout);
+#endif
+            return displayLayout;
         }
 
 #if UNITY_EDITOR
