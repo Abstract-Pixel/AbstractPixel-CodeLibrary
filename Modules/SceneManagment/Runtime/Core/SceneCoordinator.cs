@@ -31,7 +31,7 @@ namespace AbstractPixel.SceneManagement
             IsStartSceneGroupInitialized = false;
         }
 
-        private void Start() => SetSceneLoader(new DefaultSceneLoader());
+        private void Start() => SetSceneLoader(new SceneLoaderSelector());
 
         internal void InitializeStartSceneGroup(SceneGroup _startGroup)
         {
