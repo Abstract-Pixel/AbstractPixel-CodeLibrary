@@ -57,7 +57,7 @@ namespace AbstractPixel.SaveSystem.Editor
             List<SaveFileClash> clashes = SaveFileClash.FindAll(rows);
             foreach (SaveFileClash clash in clashes)
             {
-                Debug.LogError($"[SaveSystem] GameSaveFiles.cs was not written: {clash.Describe()} Rename one of the rows in the save system config, then press Update save file classes.");
+                SaveLog.Error($"[SaveSystem] GameSaveFiles.cs was not written: {clash.Describe()} Rename one of the rows in the save system config, then press Update save file classes.");
             }
             return clashes.Count == 0;
         }
@@ -125,7 +125,7 @@ namespace AbstractPixel.SaveSystem.Editor
                 return;
             }
             WriteFile(config);
-            Debug.Log($"[SaveSystem] Wrote {config.GameSaveFilesScriptPath} from the save file list.");
+            SaveLog.Info($"[SaveSystem] Wrote {config.GameSaveFilesScriptPath} from the save file list.");
         }
 
         // Greyed out once the list matches GameSaveFiles.cs, or while there is no config to read it from.

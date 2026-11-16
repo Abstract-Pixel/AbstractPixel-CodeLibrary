@@ -52,7 +52,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void TwoObjectsWithTheSameCustomSaveId_OnlyTheFirstIsSaved()
         {
             SaveActions.Register(new PlayerHealth { Current = 40 }, "hero");
-            LogAssert.Expect(LogType.Error, new Regex("Two saved objects use the save ID 'hero'"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("Two saved objects use the save ID 'hero'"));
             SaveActions.Register(new PlayerHealth { Current = 70 }, "hero");
 
             SaveActions.SaveAll();

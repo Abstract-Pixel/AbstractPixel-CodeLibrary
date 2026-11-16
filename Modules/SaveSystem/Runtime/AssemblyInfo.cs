@@ -9,3 +9,5 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("AbstractPixel.Settings.Editor")]
 // The editor menu's Load All re-reads save files through the internal session.
 [assembly: InternalsVisibleTo("AbstractPixel.SaveSystem.Editor")]
+// The sample tests expect the save system's messages without printing them (SaveLog.Expect).
+[assembly: InternalsVisibleTo("AbstractPixel.SaveSystem.Samples.Tests")]

@@ -14,11 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <UseDebugPath>k__BackingField: 0
   <GameProfileGuidLength>k__BackingField: 6
+  <DefaultGameProfileName>k__BackingField: Game Profile
   <StartupPolicy>k__BackingField: 1
   <PrimaryFileExtension>k__BackingField: 1
   <SaveOnQuit>k__BackingField: 0
   <SaveOnFocusLoss>k__BackingField: 0
-  saveFilesScriptPath: Assets/SaveSystem/SaveFiles.cs
+  <SaveOnSceneUnload>k__BackingField: 0
+  <AutosaveIntervalMinutes>k__BackingField: 0
+  gameSaveFilesScriptPath: Assets/SaveSystem/GameSaveFiles.cs
   saveFileList:
   - Name: Global
     Location: 1
@@ -47,3 +50,6 @@ MonoBehaviour:
     BuiltIn: 3
     AddedBy: 
     EncryptFile: 0
+  removedDefaultSaveFiles: []
+  knownDefaultSaveFiles:
+  - AbstractPixel.SaveSystem.SaveFiles+Scene

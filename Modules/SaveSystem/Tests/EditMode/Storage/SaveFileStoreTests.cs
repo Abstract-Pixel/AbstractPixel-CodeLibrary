@@ -66,7 +66,7 @@ namespace AbstractPixel.SaveSystem.Tests
             store.Write(Key, SaveFileWithVolume(1));
             store.Write(Key, SaveFileWithVolume(2));
             storage.Write(Key, CorruptText);
-            LogAssert.Expect(LogType.Warning, new Regex(Regex.Escape(Key)));
+            SaveLogAssert.Expect(LogType.Warning, new Regex(Regex.Escape(Key)));
 
             Assert.IsTrue(store.TryRead(Key, out SaveFileData loaded));
 
@@ -91,7 +91,7 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             storage.Write(Key, CorruptText);
             storage.Write(BackupKey, CorruptText);
-            LogAssert.Expect(LogType.Error, new Regex(Regex.Escape(Key)));
+            SaveLogAssert.Expect(LogType.Error, new Regex(Regex.Escape(Key)));
 
             Assert.IsFalse(store.TryRead(Key, out SaveFileData _));
         }
@@ -113,7 +113,7 @@ namespace AbstractPixel.SaveSystem.Tests
             store.Write(Key, SaveFileWithVolume(1));
             store.Write(Key, SaveFileWithVolume(2));
             storage.Write(Key, CorruptText);
-            LogAssert.Expect(LogType.Error, new Regex(Regex.Escape(Key)));
+            SaveLogAssert.Expect(LogType.Error, new Regex(Regex.Escape(Key)));
 
             Assert.IsFalse(store.TryRead(Key, out SaveFileData _, useBackup: false));
             LogAssert.NoUnexpectedReceived();
@@ -125,7 +125,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveFileData olderFile = SaveFileWithVolume(5);
             olderFile.FormatVersion = 1;
             store.Write(Key, olderFile);
-            LogAssert.Expect(LogType.Warning, new Regex("FormatVersion"));
+            SaveLogAssert.Expect(LogType.Warning, new Regex("FormatVersion"));
 
             Assert.IsTrue(store.TryRead(Key, out SaveFileData loaded));
 

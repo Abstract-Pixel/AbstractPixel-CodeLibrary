@@ -15,6 +15,7 @@ namespace AbstractPixel.SaveSystem
     /// </summary>
     // Runs before other scripts, so registering in Start restores data after every Awake and before any other Start.
     [DefaultExecutionOrder(-10000)]
+    [SaveSystemHelp("api/SavableBridge.html")]
     public class SavableBridge : MonoBehaviour
     {
         [field: SerializeField, ReadOnly(true)] public string UniqueId { get; private set; }
@@ -194,7 +195,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (string.IsNullOrEmpty(saveId))
             {
-                Debug.LogError($"[SaveSystem] SetSaveId on '{gameObject.name}' needs a non-empty ID.");
+                SaveLog.Error($"[SaveSystem] SetSaveId on '{gameObject.name}' needs a non-empty ID.");
                 return;
             }
             spawnedCopySaveId = saveId;
@@ -208,7 +209,7 @@ namespace AbstractPixel.SaveSystem
 
             if (spawnedCopySaveId == null && isSpawnedCopy)
             {
-                Debug.LogWarning($"[SaveSystem] '{gameObject.name}' was spawned after its scene was already loaded, with no SetSaveId call, so it isn't saved. Call its SetSaveId right after Instantiate, before Start: goblin.SetSaveId(\"a unique id\");");
+                SaveLog.Warning($"[SaveSystem] '{gameObject.name}' was spawned after its scene was already loaded, with no SetSaveId call, so it isn't saved. Call its SetSaveId right after Instantiate, before Start: goblin.SetSaveId(\"a unique id\");");
                 return;
             }
 

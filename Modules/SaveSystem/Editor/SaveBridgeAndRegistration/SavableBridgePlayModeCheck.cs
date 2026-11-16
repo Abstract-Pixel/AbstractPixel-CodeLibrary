@@ -38,7 +38,7 @@ namespace AbstractPixel.SaveSystem.Editor
             List<GameObject> missing = SavableBridgeSceneCheck.FindMissingBridges(scene);
             if (missing.Count > 0)
             {
-                Debug.LogError(SavableBridgeSceneCheck.Describe(scene, missing, "press Play again"));
+                SaveLog.Error(SavableBridgeSceneCheck.Describe(scene, missing, "press Play again"));
             }
         }
     }

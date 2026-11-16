@@ -1,7 +1,7 @@
 # Changelog
 
 ## [Unreleased] - Save System v2 (branch save-system)
-**Save System v2.** It can't read v1 save files. Shipped games stay on the `save-system-v1` tag. Guide: `Documentation~/save-system.html`. Changes since v1: `Documentation~/save-system-v2-handoff.html`.
+**Save System v2.** It can't read v1 save files. Shipped games stay on the `save-system-v1` tag. Guide: `Documentation~/save-system.html`. Changes since v1: `Documentation~/save-system-v1-to-v2.html`.
 - **Feature:** No manager in the scene. Make the config with Tools > External Project Tools > Save System > Create Config.
 - **Feature:** Scripts get saved data before `Start`. Plain C# classes and ScriptableObjects can save.
 - **Feature:** Save files are classes. Five built-in ones ship with the library (`SaveFiles.GameProfile`, `Scene`, `Settings`, `Input`, `Achievements`), and your own rows are written into `GameSaveFiles.cs`. Pick one with `ISavable<TData, TFile>`.
@@ -24,6 +24,13 @@
 - **Feature:** A "Saved" badge on Hierarchy rows with saved scripts, red on a mistake, and a grey dot on a parent whose children save. It has not been seen on screen: Unity 7000.0.0a16's new Hierarchy window never called the row hook.
 - **Fix:** A save file row added through the config's list no longer copies the row before it. It used to keep that row's class and storage name, which blocked `GameSaveFiles.cs` from ever picking it up.
 - **Samples:** Eight samples in ladder order: Save A Field, Buttons With No Code, Save Slots And Continue, Pick A Save File, Spawned Copies, Custom Data With ISavable, Whole Files With SaveStorage, ScriptableObject.
+- **Samples:** The samples now live in the package at `Modules/SaveSystem/Samples`, next to Runtime, Editor and Tests, with nothing to import. They are one Editor-only assembly, `AbstractPixel.SaveSystem.Samples` (plus `AbstractPixel.SaveSystem.Samples.Tests`), instead of fifteen. Namespaces moved from `SaveSystemSamples.*` to `AbstractPixel.SaveSystem.Samples.*`. A build that includes a sample scene, or a scene using a sample script, stops and names it. Samples load their scenes in the Editor, so they no longer need to be in the build's scene list. Sample 04 uses the built-in `SaveFiles.Settings` instead of shipping its own save file, so no sample row reaches a project's config. Each sample has a one-page `README.html`.
+- **Docs:** The guide is grouped as Start, Do, Look up, Understand and Fix, with an install section, a 5-minute first saved value, an API table, a troubleshooting table, diagrams, ladder levels and links to every sample. Tools > External Project Tools > Save System > Open Guide opens it. Status moved to `save-system-roadmap.html` (was `save-system-v2-plan.html`); `save-system-v2-handoff.html` is now `save-system-v1-to-v2.html`. `SaveSystemDocsTests` checks links, anchors and sample code lines.
+- **Docs:** A **?** button in the header of the config, Savable Bridge, Mono Save Actions, Save Transform, Save Active State and Save Destroyed inspectors, and in the Saved Objects window's tab bar, opens the guide at that object's section.
+- **Fix:** A save system test run no longer leaves errors in the Console. Tests that make a mistake on purpose expect the message with `SaveLogAssert.Expect`, which checks it without printing it. Every save system message now goes through one internal `SaveLog`.
+- **Docs:** The guide has screenshots of the config inspector, a Savable Bridge card in play mode and the Saved Objects window.
+- **Samples:** The sample tests run on a save system kept in memory, so they never write into the save files you play the samples with.
+- **Fix:** When a module or sample deletes its save file class, the sync removes its row and forgets it. It used to also record the row as "removed by you" in the config's hidden lists.
 - **Fix:** Listing and deleting game profiles works. Saving no longer erases data of objects that aren't loaded. A Savable Bridge keeps its save ID when a new scene is first saved. A saved scene object switched off and on keeps saving.
 - **Cleanup:** Only the public types game code uses show in autocomplete. Save data, rows and storage internals are internal.
 - **Settings:** Saves into the built-in `SaveFiles.Settings`. The debug toolbar uses `SaveStorage`.

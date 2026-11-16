@@ -76,7 +76,7 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             SaveHealthTheOldWay(42);
 
-            LogAssert.Expect(LogType.Error, new Regex("single value.*ISavable.*exactly one \\[Save\\] field"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("single value.*ISavable.*exactly one \\[Save\\] field"));
             HealthAsTwoFields health = new HealthAsTwoFields();
             SaveActions.Register(health, "player-health");
 

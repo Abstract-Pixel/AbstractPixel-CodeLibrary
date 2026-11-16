@@ -95,7 +95,7 @@ A component that saves one common thing about a GameObject with no code: Save Tr
 _Avoid_: save component, preset
 
 **Save ID**:
-The name that identifies one saved object's data inside a save file. No two saved objects in the same save file share one. A plain class uses its class name, and later live instances of the same class get "Inventory 2", "Inventory 3" in the order they register, unless it picks a custom save ID. A scene object uses its Savable Bridge's ID; a spawned copy gets one from `SetSaveId`.
+The name a saved object's data is filed under in its save file. Only one live object can hold a given save ID in a given save file at a time. A plain class's save ID is its class name by default ("Inventory", then "Inventory 2" for a second live instance); a scene object's comes from its Savable Bridge; a spawned copy needs one from `SetSaveId`.
 _Avoid_: unique ID, GUID, composite key
 
 **Spawned copy**:

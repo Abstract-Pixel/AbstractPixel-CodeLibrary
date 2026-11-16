@@ -28,7 +28,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (!serializer.TrySerialize(content, out string newText))
             {
-                Debug.LogError($"[SaveSystem] Could not turn the data for save key '{key}' into text, so nothing was written. Check that every saved field is serializable.");
+                SaveLog.Error($"[SaveSystem] Could not turn the data for save key '{key}' into text, so nothing was written. Check that every saved field is serializable.");
                 return false;
             }
             return WriteCheckedText<T>(key, newText, keepBackup);
@@ -39,7 +39,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (!serializer.TryDeserialize(text, out T _))
             {
-                Debug.LogError($"[SaveSystem] The text given for '{key}' is not a valid save file, so nothing was written. Pass the JSON of a whole save file, such as text read with SaveStorage.ReadText.");
+                SaveLog.Error($"[SaveSystem] The text given for '{key}' is not a valid save file, so nothing was written. Pass the JSON of a whole save file, such as text read with SaveStorage.ReadText.");
                 return false;
             }
             return WriteCheckedText<T>(key, text, keepBackup);
@@ -111,7 +111,7 @@ namespace AbstractPixel.SaveSystem
             {
                 return true;
             }
-            Debug.LogError($"[SaveSystem] The save key '{key}' exists but couldn't be read, so nothing was written, to keep whatever it holds. Check that no other program has the file open. The next save tries again.");
+            SaveLog.Error($"[SaveSystem] The save key '{key}' exists but couldn't be read, so nothing was written, to keep whatever it holds. Check that no other program has the file open. The next save tries again.");
             return false;
         }
 
@@ -122,10 +122,10 @@ namespace AbstractPixel.SaveSystem
             string unreadableCopyKey = SavePathGenerator.GetUnreadableCopyKey(key);
             if (!storage.Write(unreadableCopyKey, unreadableText))
             {
-                Debug.LogError($"[SaveSystem] The save key '{key}' couldn't be read as a save file, and its text couldn't be kept as '{unreadableCopyKey}', so nothing was written over it. Check the save folder can be written to.");
+                SaveLog.Error($"[SaveSystem] The save key '{key}' couldn't be read as a save file, and its text couldn't be kept as '{unreadableCopyKey}', so nothing was written over it. Check the save folder can be written to.");
                 return false;
             }
-            Debug.LogWarning($"[SaveSystem] The save key '{key}' couldn't be read as a save file, so its text was kept as '{unreadableCopyKey}' before saving over it. Open that copy to recover the data by hand.");
+            SaveLog.Warning($"[SaveSystem] The save key '{key}' couldn't be read as a save file, so its text was kept as '{unreadableCopyKey}' before saving over it. Open that copy to recover the data by hand.");
             return true;
         }
 
@@ -142,7 +142,7 @@ namespace AbstractPixel.SaveSystem
             {
                 if (mainExists)
                 {
-                    Debug.LogError($"[SaveSystem] The save file '{key}' is corrupt, so its saved data was not loaded. Its save file row has Backup unticked, so there is no backup to fall back to. The next save keeps its text as '{SavePathGenerator.GetUnreadableCopyKey(key)}' before replacing it; fix the JSON there by hand to recover the data.");
+                    SaveLog.Error($"[SaveSystem] The save file '{key}' is corrupt, so its saved data was not loaded. Its save file row has Backup unticked, so there is no backup to fall back to. The next save keeps its text as '{SavePathGenerator.GetUnreadableCopyKey(key)}' before replacing it; fix the JSON there by hand to recover the data.");
                 }
                 return Nothing(out text, out content);
             }
@@ -151,7 +151,7 @@ namespace AbstractPixel.SaveSystem
             if (TryReadAndParse(backupKey, out text, out content))
             {
                 string problem = mainExists ? "is corrupt" : "is missing";
-                Debug.LogWarning($"[SaveSystem] The save key '{key}' {problem}, so its backup was loaded instead. The next save replaces it.");
+                SaveLog.Warning($"[SaveSystem] The save key '{key}' {problem}, so its backup was loaded instead. The next save replaces it.");
                 CheckFormatVersion(key, content);
                 return true;
             }
@@ -159,7 +159,7 @@ namespace AbstractPixel.SaveSystem
             // Nothing stored yet is normal on a first launch, so it isn't an error.
             if (mainExists || storage.Exists(backupKey))
             {
-                Debug.LogError($"[SaveSystem] The save key '{key}' and its backup are both unreadable, so its saved data was not loaded. The next save keeps its text as '{SavePathGenerator.GetUnreadableCopyKey(key)}' before replacing it; fix the JSON there by hand to recover the data.");
+                SaveLog.Error($"[SaveSystem] The save key '{key}' and its backup are both unreadable, so its saved data was not loaded. The next save keeps its text as '{SavePathGenerator.GetUnreadableCopyKey(key)}' before replacing it; fix the JSON there by hand to recover the data.");
             }
             return Nothing(out text, out content);
         }
@@ -188,7 +188,7 @@ namespace AbstractPixel.SaveSystem
             {
                 return;
             }
-            Debug.LogWarning($"[SaveSystem] The save key '{key}' has FormatVersion {content.FormatVersion}, but this save system writes {CurrentFormatVersion}. It was loaded as is; it will be saved in the current format.");
+            SaveLog.Warning($"[SaveSystem] The save key '{key}' has FormatVersion {content.FormatVersion}, but this save system writes {CurrentFormatVersion}. It was loaded as is; it will be saved in the current format.");
             Migrate(content, content.FormatVersion);
         }
 

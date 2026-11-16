@@ -169,7 +169,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void TryRestore_ExceptionInRestore_IsLoggedWithTheSaveIdAndType()
         {
             StoreFile(GameFile, ("broken", 1));
-            LogAssert.Expect(LogType.Error, new Regex("broken.*Broken.*restore exploded"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("broken.*Broken.*restore exploded"));
 
             Assert.IsFalse(loadedData.TryRestore(EntryFor(new Broken(), "broken", GameFile), GameFile));
         }
@@ -198,7 +198,7 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             StoreFile(GameFile, ("player", 7));
             SavedObjectEntry entry = EntryFor(new FailsOnce(), "player", GameFile);
-            LogAssert.Expect(LogType.Error, new Regex("player.*restore exploded"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("player.*restore exploded"));
             loadedData.TryRestore(entry, GameFile);
 
             loadedData.Capture(entry, GameFile);
@@ -213,7 +213,7 @@ namespace AbstractPixel.SaveSystem.Tests
             StoreFile(GameFile, ("player", 7));
             FailsOnce savable = new FailsOnce();
             SavedObjectEntry entry = EntryFor(savable, "player", GameFile);
-            LogAssert.Expect(LogType.Error, new Regex("player.*restore exploded"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("player.*restore exploded"));
             loadedData.TryRestore(entry, GameFile);
             loadedData.TryRestore(entry, GameFile);
 

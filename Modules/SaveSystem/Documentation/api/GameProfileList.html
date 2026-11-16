@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GameProfileList</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="GameProfileList is every game profile, from SaveActions.GameProfiles: list, create, find and close them.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/GameProfileList.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>GameProfileList <span class="lv lv2">2 choices</span></h1>
+<p class="lede">Every <a class="type" href="GameProfile.html">GameProfile</a>, as <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.GameProfiles</code>. Never null: without a save system config it is an empty list whose methods log one clear error.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Class (sealed)</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/GameProfiles/GameProfileList.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/GameProfileList.cs" title="Ping Modules/SaveSystem/Runtime/GameProfiles/GameProfileList.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/GameProfileList.cs" title="Open Modules/SaveSystem/Runtime/GameProfiles/GameProfileList.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-gameprofiles">Game profiles</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-slots.html">Game profiles and save slots</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity">Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity</button></div>
+<a class="try-open" href="../../Samples/03 Save Slots And Continue/README.html" target="_blank" rel="noopener">Open sample 03: Save Slots And Continue &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 03 &middot; Save Slots And Continue</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>A Continue button</figcaption>
+<pre><code class="cs">GameProfile last = SaveActions.GameProfiles.LastOpened;
+if (last != null)
+{
+    last.Open();
+}</code></pre>
+</figure>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Properties</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public IReadOnlyList&lt;GameProfile&gt; All</code><span class="desc"><span class="kind k-prop">property</span> Every game profile, sorted by slot number.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public int Count</code><span class="desc"><span class="kind k-prop">property</span> How many game profiles exist.</span></summary>
+<div class="body">For a save slot screen that only needs the count.</div>
+</details>
+<details>
+<summary><code class="cs">public GameProfile Current</code><span class="desc"><span class="kind k-prop">property</span> The open game profile, or null when none is open.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public GameProfile LastOpened</code><span class="desc"><span class="kind k-prop">property</span> The game profile that was open the last time the game quit, or null for a first launch or if it was deleted since.</span></summary>
+<div class="body">For a Continue button. A New Game button uses <code>CreateNew</code> instead.</div>
+</details>
+</div>
+<h3>Methods</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public void CloseCurrent()</code><span class="desc"><span class="kind k-method">method</span> Closes the open game profile, for example when the player goes back to the main menu.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public GameProfile CreateNew()</code><span class="desc"><span class="kind k-method">method</span> Creates a game profile named with the default game profile name and slot number, in the lowest free slot. It doesn't open it.</span></summary>
+<div class="body">An overload takes a custom <code>displayName</code> instead.</div>
+</details>
+<details>
+<summary><code class="cs">public GameProfile Get(int slotNumber)</code><span class="desc"><span class="kind k-method">method</span> The game profile in this slot, or null if the slot is empty.</span></summary>
+<div class="body"></div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>All is always empty</dt>
+<dd>There's no save system config yet. Run Tools &gt; External Project Tools &gt; Save System &gt; Create Config.</dd>
+<dt>CreateNew reuses a slot you just deleted</dt>
+<dd>That's by design: deleting a slot frees its number, and the next <code>CreateNew</code> takes the lowest free one.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="GameProfile.html">GameProfile</a>, <a class="type" href="SaveActions.html">SaveActions</a>, <a href="../Pages/save-slots.html">Game profiles and save slots</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

@@ -13,47 +13,5 @@
         "com.unity.nuget.newtonsoft-json": "3.2.2",
         "com.unity.addressables": "2.7.6",
         "com.unity.inputsystem": "1.19.0"
-    },
-    "samples": [
-        {
-            "displayName": "Save System 01 Save A Field",
-            "description": "The daily way: [Save] on a MonoBehaviour's field, and on a plain C# class with one SaveActions.Register(this) line.",
-            "path": "Modules/SaveSystem/Samples~/01 Save A Field"
-        },
-        {
-            "displayName": "Save System 02 Buttons With No Code",
-            "description": "Save Transform, Save Active State and Save Destroyed on level objects, and uGUI buttons wired to Mono Save Actions.",
-            "path": "Modules/SaveSystem/Samples~/02 Buttons With No Code"
-        },
-        {
-            "displayName": "Save System 03 Save Slots And Continue",
-            "description": "A save slot screen: create, open and delete game profiles by slot number, plus a Continue button.",
-            "path": "Modules/SaveSystem/Samples~/03 Save Slots And Continue"
-        },
-        {
-            "displayName": "Save System 04 Pick A Save File",
-            "description": "ISaveIn<TFile> puts data in a Global, GameProfile or Scene file; Save<TFile>() and a typed load listener.",
-            "path": "Modules/SaveSystem/Samples~/04 Pick A Save File"
-        },
-        {
-            "displayName": "Save System 05 Spawned Copies",
-            "description": "Goblins spawned from one prefab, each with its own save ID from SetSaveId; defeated ones stay defeated.",
-            "path": "Modules/SaveSystem/Samples~/05 Spawned Copies"
-        },
-        {
-            "displayName": "Save System 06 Custom Data With ISavable",
-            "description": "A plain C# Inventory that moves its own data with ISavable<T>, for data that isn't plain fields.",
-            "path": "Modules/SaveSystem/Samples~/06 Custom Data With ISavable"
-        },
-        {
-            "displayName": "Save System 07 Whole Files With SaveStorage",
-            "description": "A debug screen that reads, copies, pastes and deletes a whole save file as JSON text.",
-            "path": "Modules/SaveSystem/Samples~/07 Whole Files With SaveStorage"
-        },
-        {
-            "displayName": "Save System 08 ScriptableObject",
-            "description": "A GameProgress asset with [Save] fields that registers itself with the save system.",
-            "path": "Modules/SaveSystem/Samples~/08 ScriptableObject"
-        }
-    ]
+    }
 }

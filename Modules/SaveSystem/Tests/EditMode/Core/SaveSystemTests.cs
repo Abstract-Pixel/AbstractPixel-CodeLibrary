@@ -235,7 +235,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Register(new ExplodingRestore(), "exploding");
             PlayerHealth health = new PlayerHealth();
             SaveActions.Register(health, "player-health");
-            LogAssert.Expect(LogType.Error, new Regex("exploding.*ExplodingRestore.*restore exploded"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("exploding.*ExplodingRestore.*restore exploded"));
 
             SaveActions.GameProfiles.GetById(gameProfileId).Open();
 

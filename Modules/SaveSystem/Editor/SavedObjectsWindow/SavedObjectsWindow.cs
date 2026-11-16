@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace AbstractPixel.SaveSystem.Editor
@@ -9,8 +10,9 @@ namespace AbstractPixel.SaveSystem.Editor
     /// Every saved object that registered while the game runs, grouped by save file, each as the same card the
     /// bridge inspector draws. Read only: no Reset, Forget or Open save folder buttons.
     /// </summary>
-    internal sealed class SavedObjectsWindow : EditorWindow
+    internal sealed class SavedObjectsWindow : EditorWindow, IHasCustomMenu
     {
+        const string GuideSection = "Pages/debug.html#saved-objects";
         const string StyleSheetPath = "Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectsWindow.uss";
         internal const string EditModeMessage = "Enter play mode to see every saved object that registered.";
         internal const string NothingRegisteredMessage = "No saved objects have registered yet.";
@@ -22,6 +24,23 @@ namespace AbstractPixel.SaveSystem.Editor
         static void Open()
         {
             GetWindow<SavedObjectsWindow>("Saved Objects");
+        }
+
+        // Unity calls this to draw a small button in the window's tab bar, next to its menu, where its own
+        // windows put their help and lock buttons.
+        void ShowButton(Rect position)
+        {
+            GUIContent help = EditorGUIUtility.IconContent("_Help");
+            help.tooltip = "Open the save system guide";
+            if (GUI.Button(position, help, GUIStyle.none))
+            {
+                SaveSystemGuide.Open(GuideSection);
+            }
+        }
+
+        public void AddItemsToMenu(GenericMenu menu)
+        {
+            menu.AddItem(new GUIContent("Open Guide"), false, () => SaveSystemGuide.Open(GuideSection));
         }
 
         void CreateGUI()

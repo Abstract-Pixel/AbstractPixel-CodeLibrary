@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Save plain classes, ScriptableObjects and spawned copies</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Save a plain C# class, a ScriptableObject, or a spawned copy, with SaveActions.Register and SetSaveId.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/save-objects.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Save plain classes, ScriptableObjects and spawned copies <span class="lv lv1">1 daily code</span></h1>
+<p class="lede">A plain class, a ScriptableObject, and a spawned copy each save with one line beyond <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code>.</p>
+
+<section id="plain">
+<h2>Save a plain C# class<a class="anchor" href="#plain">#</a></h2>
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity">Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity</button></div>
+<a class="try-open" href="../../Samples/01 Save A Field/README.html" target="_blank" rel="noopener">Open sample 01: Save A Field →</a>
+</summary>
+<div class="try-body">
+<p>Sample 01 · Save A Field</p>
+<ol>
+<li>Open the <b>Save A Field</b> scene and press Play.</li>
+<li>Press <b>Find an item</b> a few times, then <b>Save</b> and <b>Reload scene</b>.</li>
+</ol>
+</div>
+</details>
+<p>Any class can save. It registers itself, and needs no <a class="term" href="../api/SavableBridge.html#save-id">save ID</a> of its own.</p>
+<figure class="code">
+<figcaption>Backpack.cs: a plain class that registers itself</figcaption>
+<pre><code class="cs">public class Backpack
+{
+    [Save] List&lt;string&gt; items = new List&lt;string&gt; { "Wooden Sword" };
+
+    public Backpack()
+    {
+        SaveActions.Register(this);
+    }
+}</code></pre>
+</figure>
+<p>Register on the last line, because saved data may arrive inside that call. The owner unregisters it when it's done, which captures the latest values for the next save:</p>
+<pre class="out"><code>void OnDestroy() =&gt; SaveActions.Unregister(backpack);</code></pre>
+<p>The class name is the <a class="term" href="../api/SavableBridge.html#save-id">save ID</a>. A second live instance gets "Inventory 2", then "Inventory 3", in the order they register; see <a href="custom-data.html#numbering">Saving complex data with ISavable</a> for an example. Renaming the class would change its save ID, so put <code>[SaveId("Backpack")]</code> on it first and old saves keep their data.</p>
+<div class="note warn"><strong>Two live objects with the same save ID in one save file would overwrite each other.</strong> The save system refuses to register the second one and names both in the Console. Give one a different save ID, or, for a GameObject, remove its Savable Bridge and add it again for a new ID.</div>
+<details class="wrong"><summary>If it goes wrong</summary>
+<dl>
+<dt>"can't register... another object already uses save ID" in the Console</dt>
+<dd>Two live objects share a save ID. Pass a custom ID to <code>Register</code>, or fix the duplicate Savable Bridge.</dd>
+<dt>Data isn't there after Register</dt>
+<dd>Register runs last in the constructor on purpose. Read saved values after it returns, not before.</dd>
+</dl>
+</details>
+</section>
+
+<section id="scriptable">
+<h2>Save a ScriptableObject<a class="anchor" href="#scriptable">#</a></h2>
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/08 ScriptableObject/ScriptableObject.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/08 ScriptableObject/ScriptableObject.unity">Modules/SaveSystem/Samples/08 ScriptableObject/ScriptableObject.unity</button></div>
+<a class="try-open" href="../../Samples/08 ScriptableObject/README.html" target="_blank" rel="noopener">Open sample 08: ScriptableObject →</a>
+</summary>
+<div class="try-body">
+<p>Sample 08 · ScriptableObject</p>
+<ol>
+<li>Open the <b>ScriptableObject</b> scene and press Play.</li>
+<li>Complete a level, then <b>Save</b> and <b>Reload scene</b>.</li>
+</ol>
+</div>
+</details>
+<p>An asset registers itself, like a plain class, from its own <code>OnEnable</code>.</p>
+<figure class="code">
+<figcaption>GameProgress.cs: a saved asset</figcaption>
+<pre><code class="cs">public class GameProgress : ScriptableObject
+{
+    [Save] public int LevelsCompleted;
+    [Save] public int Stars;
+
+    void OnEnable() =&gt; RegisterWithSaveSystem();
+    void OnDisable() =&gt; SaveActions.Unregister(this);
+
+    public void RegisterWithSaveSystem()
+    {
+        SaveActions.Register(this, "game-progress");
+    }
+}</code></pre>
+</figure>
+<div class="note">In the editor, Unity can load the asset before play mode starts the save system, so that first <code>OnEnable</code> call does nothing. A scene script calls <code>RegisterWithSaveSystem()</code> again in its own <code>Awake</code> to cover that; registering twice with the same ID is harmless.</div>
+</section>
+
+<section id="spawned">
+<h2>Save spawned copies<a class="anchor" href="#spawned">#</a></h2>
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/05 Spawned Copies/Spawned Copies.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/05 Spawned Copies/Spawned Copies.unity">Modules/SaveSystem/Samples/05 Spawned Copies/Spawned Copies.unity</button></div>
+<a class="try-open" href="../../Samples/05 Spawned Copies/README.html" target="_blank" rel="noopener">Open sample 05: Spawned Copies →</a>
+</summary>
+<div class="try-body">
+<p>Sample 05 · Spawned Copies</p>
+<ol>
+<li>Open the <b>Spawned Copies</b> scene and press Play.</li>
+<li>Defeat a goblin, then <b>Save</b> and <b>Reload scene</b>.</li>
+</ol>
+</div>
+</details>
+<p>Every copy of a prefab starts with the same <a class="term" href="../api/SavableBridge.html#save-id">save ID</a>, so give each <a class="term" href="../api/SavedScriptExtensions.html#spawned-copy">spawned copy</a> its own right after <code>Instantiate</code>.</p>
+<figure class="code">
+<figcaption>GoblinSpawner.cs: a save ID from the spawn point, not a random number</figcaption>
+<pre><code class="cs">Goblin goblin = Instantiate(goblinPrefab, spawnPoint.position, spawnPoint.rotation);
+goblin.SetSaveId($"goblin-{spawnPoint.name}");</code></pre>
+</figure>
+<p>The ID must be the same every time the game runs, which is why it comes from the spawn point's name instead of a random number. <code><a class="term" href="../api/SavedScriptExtensions.html">SetSaveId</a></code> restores the copy's saved data inside that call, right after <code>Instantiate</code> and before its own <code>Start</code>.</p>
+<div class="note warn"><strong>A copy spawned with no SetSaveId isn't saved</strong> and logs one warning naming it.</div>
+<p><code><a class="term" href="../api/SaveActions.html">SaveActions</a>.Forget</code> on a spawned copy removes its data outright, unlike a scene object's <a class="term" href="../api/SaveDestroyed.html#gone-marker">gone marker</a>; see <a href="remove-for-good.html">Forgetting saved data for good</a>.</p>
+</section>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

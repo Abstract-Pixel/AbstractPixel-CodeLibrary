@@ -131,7 +131,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveActions.Unregister(first);
 
             ExplodingOnRestored second = new ExplodingOnRestored();
-            UnityEngine.TestTools.LogAssert.Expect(UnityEngine.LogType.Error, new System.Text.RegularExpressions.Regex("OnRestored.*ExplodingOnRestored.*exploding.*OnRestored exploded"));
+            SaveLogAssert.Expect(UnityEngine.LogType.Error, new System.Text.RegularExpressions.Regex("OnRestored.*ExplodingOnRestored.*exploding.*OnRestored exploded"));
             Assert.DoesNotThrow(() => SaveActions.Register(second, "exploding"));
         }
     }

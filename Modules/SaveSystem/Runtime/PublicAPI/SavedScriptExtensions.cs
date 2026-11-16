@@ -15,7 +15,7 @@ namespace AbstractPixel.SaveSystem
             SavableBridge bridge = savedScript.GetComponent<SavableBridge>();
             if (bridge == null)
             {
-                Debug.LogError($"[SaveSystem] SetSaveId on '{savedScript.gameObject.name}' needs a Savable Bridge on the same GameObject.");
+                SaveLog.Error($"[SaveSystem] SetSaveId on '{savedScript.gameObject.name}' needs a Savable Bridge on the same GameObject.");
                 return;
             }
             bridge.SetSaveId(saveId);

@@ -25,7 +25,7 @@ namespace AbstractPixel.SaveSystem.Editor
                 return;
             }
 
-            Debug.LogError(SaveFileListStatus.OutOfDateMessage);
+            SaveLog.Error(SaveFileListStatus.OutOfDateMessage);
             EditorApplication.isPlaying = false;
         }
     }

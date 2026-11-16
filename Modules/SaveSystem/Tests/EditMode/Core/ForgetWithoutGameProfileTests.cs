@@ -40,7 +40,7 @@ namespace AbstractPixel.SaveSystem.Tests
             StartSession();
             PlayerHealth health = new PlayerHealth();
             SaveActions.Register(health, "player-health");
-            LogAssert.Expect(LogType.Error, new Regex("Forget.*PlayerHealth.*no game profile is open.*Open one"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("Forget.*PlayerHealth.*no game profile is open.*Open one"));
 
             SaveActions.Forget(health);
             SaveActions.GameProfiles.GetById(profile.Id).Open();

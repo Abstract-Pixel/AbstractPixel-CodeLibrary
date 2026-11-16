@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GameProfile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="GameProfile is one playthrough of the game: hold it, show it on a save slot screen, and call Open or Delete on it.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/GameProfile.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>GameProfile <span class="lv lv2">2 choices</span></h1>
+<p class="lede" id="game-profile">One game profile, such as "Game Profile 1": one playthrough of the game, and the <a class="term" href="../api/SaveLocation.html#save-location">save location</a> for data about that playthrough, such as the player's health and inventory. Hold it, show it on a save slot screen, and call <code>Open()</code> or <code>Delete()</code> on it. You never type its ID.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Class (sealed)</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/GameProfiles/GameProfile.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/GameProfile.cs" title="Ping Modules/SaveSystem/Runtime/GameProfiles/GameProfile.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/GameProfile.cs" title="Open Modules/SaveSystem/Runtime/GameProfiles/GameProfile.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-gameprofiles">Game profiles</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-slots.html">Game profiles and save slots</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity">Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity</button></div>
+<a class="try-open" href="../../Samples/03 Save Slots And Continue/README.html" target="_blank" rel="noopener">Open sample 03: Save Slots And Continue &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 03 &middot; Save Slots And Continue</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>Opening a game profile from a save slot screen</figcaption>
+<pre><code class="cs">foreach (GameProfile profile in SaveActions.GameProfiles.All)
+{
+    Debug.Log($"Slot {profile.SlotNumber}: {profile.DisplayName}");
+}
+
+GameProfile first = SaveActions.GameProfiles.Get(1);
+first?.Open();</code></pre>
+</figure>
+<p>A <a class="type" href="GameProfileList.html">GameProfileList</a> (from <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.GameProfiles</code>) hands out every <code>GameProfile</code> instance. You never construct one yourself.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<p id="game-profile-manifest">The properties below are the game profile manifest: the summary a save slot screen shows for one game profile, such as its name, slot number, last saved time, playtime and last scene.</p>
+<h3>Properties</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public Dictionary&lt;string, string&gt; Custom</code><span class="desc"><span class="kind k-prop">property</span> Your own fields for the save slot screen, such as difficulty or chapter.</span></summary>
+<div class="body">Written on the next save. Read and write it like any dictionary.</div>
+</details>
+<details id="default-game-profile-name">
+<summary><code class="cs">public string DisplayName</code><span class="desc"><span class="kind k-prop">property</span> The name players see, such as "Game Profile 1" or a custom name.</span></summary>
+<div class="body">"Game Profile" plus its slot number is the default game profile name, set by the config. Call <code>Rename</code> to give it a custom name instead.</div>
+</details>
+<details>
+<summary><code class="cs">public bool IsOpen</code><span class="desc"><span class="kind k-prop">property</span> True while this is the open game profile.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public string LastScene</code><span class="desc"><span class="kind k-prop">property</span> The scene that was active at the last save.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public DateTime? LastSaved</code><span class="desc"><span class="kind k-prop">property</span> When this game profile was last saved, in local time, or null if it was never saved.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public TimeSpan Playtime</code><span class="desc"><span class="kind k-prop">property</span> How long this game profile has been played, counted up to its last save.</span></summary>
+<div class="body"></div>
+</details>
+<details id="slot-number">
+<summary><code class="cs">public int SlotNumber</code><span class="desc"><span class="kind k-prop">property</span> The number the save slot screen shows. It never changes.</span></summary>
+<div class="body">Deleting slot 2 leaves slot 3 as slot 3 — slot numbers never shift. The next new game profile takes the lowest free number.</div>
+</details>
+</div>
+<h3>Methods</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public void Delete()</code><span class="desc"><span class="kind k-method">method</span> Deletes this game profile and all of its save files.</span></summary>
+<div class="body">If it was open, no game profile is open afterwards.</div>
+</details>
+<details>
+<summary><code class="cs">public void Open()</code><span class="desc"><span class="kind k-method">method</span> Opens this game profile: its saved objects are restored and its data is saved from now on.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public void Rename(string newDisplayName)</code><span class="desc"><span class="kind k-method">method</span> Changes the name players see. The slot number stays the same.</span></summary>
+<div class="body"></div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>Open() seems to do nothing</dt>
+<dd>Check there's a save system config (Tools &gt; External Project Tools &gt; Save System &gt; Create Config). Without one, <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.GameProfiles</code> is always empty.</dd>
+<dt>Delete() removes slot 2, and slot 3 becomes slot 2</dt>
+<dd>It doesn't. Slot numbers never shift; the next new game profile takes the lowest free number instead.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="GameProfileList.html">GameProfileList</a>, <a class="type" href="SaveActions.html">SaveActions</a>, <a href="../Pages/save-slots.html">Game profiles and save slots</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

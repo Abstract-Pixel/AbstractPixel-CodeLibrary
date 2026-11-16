@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ISaveFile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ISaveFile marks a save file class, such as SaveFiles.Settings or GameSaveFiles.Ghosts.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/ISaveFile.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>ISaveFile <span class="lv lv2">2 choices</span></h1>
+<p class="lede" id="save-file-class">Marks a save file class, such as <code><a class="term" href="../api/SaveFiles.html">SaveFiles</a>.Settings</code> or <code>GameSaveFiles.Ghosts</code>. You write the class wherever you mean that save file, so a typo doesn't compile.</p>
+<p id="save-file">A <strong>save file</strong> is a named file of saved data that lives in exactly one <a class="term" href="SaveLocation.html#save-location">save location</a>. Every game has the built-in save files; designers add game save files of their own.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Interface (marker)</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/ISaveFile.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISaveFile.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/ISaveFile.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISaveFile.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/ISaveFile.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-config">Save system config</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-files.html#choose-file">Choose where data goes</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity">Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity</button></div>
+<a class="try-open" href="../../Samples/04 Pick A Save File/README.html" target="_blank" rel="noopener">Open sample 04: Pick A Save File &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 04 &middot; Pick A Save File</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>The built-in save files</figcaption>
+<pre><code class="cs">SaveActions.Save&lt;SaveFiles.Settings&gt;();
+SaveActions.Save&lt;GameSaveFiles.Ghosts&gt;();</code></pre>
+</figure>
+<p>The built-in save files ship with the library in <a class="type" href="SaveFiles.html">SaveFiles</a>. Game save files come from <code>GameSaveFiles.cs</code>, which the editor writes from the config's save file list. A library module ships its own class with <a class="type" href="SaveFileDefaultsAttribute.html">SaveFileDefaultsAttribute</a>.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<p>No members. <code>ISaveFile</code> is a marker interface: a save file class implements it with an empty body, and its type is the only thing the save system reads.</p>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>"No such save file" at runtime</dt>
+<dd>The class implements <code>ISaveFile</code> but isn't in the config's save file list. Add a row for it.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="SaveFiles.html">SaveFiles</a>, <a class="type" href="ISaveIn.html">ISaveIn&lt;TFile&gt;</a>, <a class="type" href="SaveFileReference.html">SaveFileReference</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

@@ -74,7 +74,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void WriteText_TextThatIsNotASaveFile_WritesNothingAndSaysWhy()
         {
-            LogAssert.Expect(LogType.Error, new Regex("Global/Settings.*not a valid save file"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("Global/Settings.*not a valid save file"));
 
             Assert.IsFalse(SaveStorage.WriteText<SaveFiles.Settings>("{ this is not json"));
 
@@ -106,7 +106,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void GameProfileSaveFile_NoGameProfileOpen_LogsAnErrorThatSaysToPassOne()
         {
-            LogAssert.Expect(LogType.Error, new Regex("no game profile is open.*SaveStorage.ReadText<TestGameFile>\\(profile, out json\\)"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("no game profile is open.*SaveStorage.ReadText<TestGameFile>\\(profile, out json\\)"));
 
             Assert.IsFalse(SaveStorage.ReadText<TestGameFile>(out string _));
         }
@@ -154,7 +154,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void SceneForAFileThatIsNotASceneFile_LogsOneError_AndDoesNothing()
         {
-            LogAssert.Expect(LogType.Error, new Regex("SaveStorage.WriteText<Settings>.*not a Scene save file.*leave the scene out"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("SaveStorage.WriteText<Settings>.*not a Scene save file.*leave the scene out"));
 
             Assert.IsFalse(SaveStorage.WriteText<SaveFiles.Settings>(forest, SaveFileText(SettingsFile, 1)));
 
@@ -165,7 +165,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void GameProfileForAGlobalFile_LogsOneError_AndDoesNothing()
         {
             GameProfile profile = SaveActions.GameProfiles.CreateNew();
-            LogAssert.Expect(LogType.Error, new Regex("SaveStorage.WriteText<Settings>.*Global.*every game profile shares it.*leave the game profile out"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("SaveStorage.WriteText<Settings>.*Global.*every game profile shares it.*leave the game profile out"));
 
             Assert.IsFalse(SaveStorage.WriteText<SaveFiles.Settings>(profile, SaveFileText(SettingsFile, 1)));
 
@@ -177,7 +177,7 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             GameProfile profile = SaveActions.GameProfiles.CreateNew();
             profile.Open();
-            LogAssert.Expect(LogType.Error, new Regex("SaveStorage.ReadText.*TestChestsFile.*kept per scene.*SceneField"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("SaveStorage.ReadText.*TestChestsFile.*kept per scene.*SceneField"));
 
             Assert.IsFalse(SaveStorage.ReadText<TestChestsFile>(out string _));
         }
@@ -187,7 +187,7 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             GameProfile profile = SaveActions.GameProfiles.CreateNew();
             profile.Open();
-            LogAssert.Expect(LogType.Error, new Regex("SaveStorage.ReadText.*TestChestsFile.*SceneField is null"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("SaveStorage.ReadText.*TestChestsFile.*SceneField is null"));
 
             Assert.IsFalse(SaveStorage.ReadText<TestChestsFile>((SceneField)null, out string _));
         }
@@ -197,7 +197,7 @@ namespace AbstractPixel.SaveSystem.Tests
         {
             GameProfile profile = SaveActions.GameProfiles.CreateNew();
             profile.Open();
-            LogAssert.Expect(LogType.Error, new Regex("SaveStorage.ReadText.*TestChestsFile.*SceneField has no scene"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("SaveStorage.ReadText.*TestChestsFile.*SceneField has no scene"));
 
             Assert.IsFalse(SaveStorage.ReadText<TestChestsFile>(new SceneField(string.Empty), out string _));
         }

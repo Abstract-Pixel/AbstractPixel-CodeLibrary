@@ -79,7 +79,7 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
             sceneInfo.SignalReady(SceneName);
 
             InventoryForTests copy = CreateSpawnedCopy();
-            LogAssert.Expect(LogType.Warning, new Regex("Inventory.*spawned after its scene was already loaded.*SetSaveId"));
+            SaveLogAssert.Expect(LogType.Warning, new Regex("Inventory.*spawned after its scene was already loaded.*SetSaveId"));
             yield return null;
 
             copy.gold = 999;
@@ -124,7 +124,7 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
             yield return null;
             original.gold = 7;
 
-            LogAssert.Expect(LogType.Error, new Regex(@"Two saved objects use the save ID 'same-guid/script-guid'.*'Chest'.*'Chest'"));
+            SaveLogAssert.Expect(LogType.Error, new Regex(@"Two saved objects use the save ID 'same-guid/script-guid'.*'Chest'.*'Chest'"));
             InventoryForTests reloadedCopy = CreateSceneObject("Chest GameObject #[same-guid]");
             yield return null;
 

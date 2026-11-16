@@ -6,6 +6,7 @@ namespace AbstractPixel.SaveSystem
 {
     /// <summary>Lets designers save, load and manage game profiles from UnityEvents, with no code.</summary>
     [DisallowMultipleComponent]
+    [SaveSystemHelp("api/MonoSaveActions.html")]
     public class MonoSaveActions : MonoBehaviour
     {
         /// <summary>A UnityEvent with the save-failed reason, so a designer can wire it straight to a Text component.</summary>
@@ -78,7 +79,7 @@ namespace AbstractPixel.SaveSystem
             GameProfile profile = SaveActions.GameProfiles.Get(slotNumber);
             if (profile == null)
             {
-                Debug.LogWarning($"[SaveSystem] '{name}' was asked to open slot {slotNumber}, but it is empty. Call NewGame instead, or check SaveActions.GameProfiles.Count first.", this);
+                SaveLog.Warning($"[SaveSystem] '{name}' was asked to open slot {slotNumber}, but it is empty. Call NewGame instead, or check SaveActions.GameProfiles.Count first.", this);
                 return;
             }
             profile.Open();
@@ -93,7 +94,7 @@ namespace AbstractPixel.SaveSystem
             {
                 return true;
             }
-            Debug.LogError($"[SaveSystem] '{name}' was asked to {methodName}, but no save file is picked. Pick one in its MonoSaveActions inspector.", this);
+            SaveLog.Error($"[SaveSystem] '{name}' was asked to {methodName}, but no save file is picked. Pick one in its MonoSaveActions inspector.", this);
             return false;
         }
 

@@ -22,7 +22,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void FieldWithAProblem_LogsOneErrorAndReportsFound()
         {
-            LogAssert.Expect(LogType.Error, new Regex("BadField.unityObjectField.*holds a GameObject.*Play mode won't start, and builds will fail"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("BadField.unityObjectField.*holds a GameObject.*Play mode won't start, and builds will fail"));
             bool foundAProblem = SavedFieldScan.Scan(new List<FieldInfo> { FieldNamed("unityObjectField") });
             Assert.IsTrue(foundAProblem);
         }

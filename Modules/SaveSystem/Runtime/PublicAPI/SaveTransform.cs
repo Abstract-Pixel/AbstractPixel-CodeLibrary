@@ -3,6 +3,7 @@ using UnityEngine;
 namespace AbstractPixel.SaveSystem
 {
     /// <summary>Saves this GameObject's position, rotation and local scale, with no other code.</summary>
+    [SaveSystemHelp("api/SaveTransform.html")]
     public class SaveTransform : MonoBehaviour, IOnRestored
     {
         [Save] Vector3 position;

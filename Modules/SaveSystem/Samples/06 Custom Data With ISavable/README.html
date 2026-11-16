@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 Custom Data With ISavable - Save System Samples</title>
+<meta name="description" content="A plain C# Inventory that moves its own data with ISavable&lt;T&gt;, for data that isn&#x27;t plain fields.">
+<link rel="stylesheet" href="../../Documentation/assets/docs.css">
+</head>
+<body data-root="../../Documentation/">
+<main class="solo">
+<p class="crumbs"><a href="../../Documentation/index.html">Save System</a> › <a href="../README.html">Samples</a> › 06</p>
+<h1>06 Custom Data With ISavable <span class="lv lv3">3 full control</span></h1>
+<p class="lede">When <code><a class="type" href="../../Documentation/api/SaveAttribute.html">[Save]</a></code> fields aren't enough, a class implements <a class="type" href="../../Documentation/api/ISavable.html">ISavable&lt;TData&gt;</a> and moves its data in and out itself. This <code>Inventory</code> is a plain C# class that saves a copy of its items.</p>
+<p>Use it when the saved shape differs from the live fields, when the data needs converting on the way in or out, or when the fields hold things JSON can't store. For everything else, <code>[Save]</code> (sample 01) is shorter.</p>
+<dl>
+<dt>Scene</dt><dd>Custom Data With <a class="term" href="../../Documentation/api/ISavable.html">ISavable</a></dd>
+<dt>Scripts</dt><dd>Inventory.cs, InventoryData.cs, InventorySampleScreen.cs</dd>
+<dt>Save file</dt><dd>Built-in <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">GameProfile</a> (nothing to add to the config)</dd>
+<dt>Guide</dt><dd><a href="../../Documentation/Pages/custom-data.html">Saving complex data with ISavable</a></dd>
+</dl>
+
+<h2>Try it</h2>
+<ol>
+<li><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/06 Custom Data With ISavable/Custom Data With ISavable.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/06 Custom Data With ISavable/Custom Data With ISavable.unity">Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/06 Custom Data With ISavable/Custom Data With ISavable.unity</button> opens the scene in Unity, then press Play.</li>
+<li>Press <b>Find an item</b> a few times, then <b>Save</b>.</li>
+<li>Press <b>Reload scene</b>, or stop and press Play again.</li>
+</ol>
+<div class="see"><strong>You should see</strong>The same items come back.</div>
+
+<h2>The lines that matter</h2>
+<figure class="code">
+<figcaption>Inventory.cs, InventorySampleScreen.cs</figcaption>
+<pre data-source="Scripts/Inventory.cs Scripts/InventorySampleScreen.cs"><code>public class Inventory : ISavable&lt;InventoryData&gt;    // CaptureData and RestoreData move the data
+public InventoryData CaptureData()                  // hand the save system a copy
+public void RestoreData(InventoryData _loadedData)  // put the saved data back
+SaveActions.Register(this, "player-inventory");     // the last line of the constructor; the ID is optional
+SaveActions.Unregister(Inventory);                  // the owner calls this when the scene ends</code></pre>
+</figure>
+<p>With no save file class named, the data goes into the GameProfile file. To use another file, add its class: <code>ISavable&lt;InventoryData, <a class="term" href="../../Documentation/api/SaveFiles.html">SaveFiles</a>.Scene&gt;</code>. A class uses either <code>ISavable</code> or <code>[Save]</code> fields, never both. The editor blocks play mode if it finds both.</p>
+
+<nav>
+<a href="../05%20Spawned%20Copies/README.html">← 05 Spawned Copies</a>
+<a href="../README.html">All samples</a>
+<a href="../../Documentation/index.html">Save system guide</a>
+<a href="../07%20Whole%20Files%20With%20SaveStorage/README.html">07 Whole Files With SaveStorage →</a>
+</nav>
+<p class="crumbs">The guide also opens from <b>Tools &gt; External Project Tools &gt; Save System &gt; Open Guide</b>.</p>
+</main>
+<script src="../../Documentation/assets/glossary-data.js" defer></script>
+<script src="../../Documentation/assets/docs.js"></script>
+</body>
+</html>

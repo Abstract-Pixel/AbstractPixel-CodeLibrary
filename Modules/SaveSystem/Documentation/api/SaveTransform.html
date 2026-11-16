@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SaveTransform</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveTransform saves a GameObject's position, rotation and local scale, with no code.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SaveTransform.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SaveTransform <span class="lv lv0">0 no code</span></h1>
+<p class="lede">Saves this GameObject's position, rotation and local scale, with no other code.</p>
+<p id="ready-made-saver">A <strong>ready-made saver</strong> is a component that saves one common thing about a GameObject with no code: Save Transform, <a class="term" href="SaveActiveState.html">Save Active State</a> or <a class="term" href="SaveDestroyed.html">Save Destroyed</a>.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Component (MonoBehaviour)</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveTransform.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveTransform.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveTransform.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveTransform.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveTransform.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#ready-made-savers">Ready-made savers</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-data.html#restored">React after a restore: IOnRestored</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity">Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity</button></div>
+<a class="try-open" href="../../Samples/02 Buttons With No Code/README.html" target="_blank" rel="noopener">Open sample 02: Buttons With No Code &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 02 &middot; Buttons With No Code</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<p>Add the component in the Inspector. Nothing else to call: it saves on every save and restores itself through <a class="type" href="IOnRestored.html">IOnRestored</a>.</p>
+<figure class="code">
+<figcaption>Adding Save Transform</figcaption>
+<pre><code class="cs">GameObject enemy = Instantiate(enemyPrefab);
+enemy.AddComponent&lt;SaveTransform&gt;();</code></pre>
+</figure>
+<p>A scene object usually gets it from the Inspector instead. A spawned copy, like the enemy above, still needs its own <a class="term" href="../api/SavableBridge.html#save-id">save ID</a>: see <a href="../Pages/save-objects.html">Save plain classes, ScriptableObjects and spawned copies</a>.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Methods</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public void OnRestored()</code><span class="desc"><span class="kind k-method">method</span> Copies the saved position, rotation and local scale back onto this GameObject's Transform.</span></summary>
+<div class="body">Implements <a class="type" href="IOnRestored.html">IOnRestored</a>. Runs right after a restore, including when new-game values apply.</div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>The GameObject snaps to its old position for one frame, then moves</dt>
+<dd>Something else sets <code>transform.position</code> in <code>Start</code>, after <code>OnRestored</code> already set it. Move that code to read the Transform instead of a hardcoded value.</dd>
+<dt>A spawned copy doesn't restore</dt>
+<dd>Give it a <a class="term" href="../api/SavableBridge.html#save-id">save ID</a> with <code><a class="term" href="../api/SavedScriptExtensions.html">SetSaveId</a></code> right after <code>Instantiate</code>. See <a href="../Pages/save-objects.html">Save plain classes, ScriptableObjects and spawned copies</a>.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="SaveActiveState.html">SaveActiveState</a>, <a class="type" href="SaveDestroyed.html">SaveDestroyed</a>, <a href="../Pages/save-data.html#restored">React after a restore: IOnRestored</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

@@ -53,13 +53,13 @@ namespace AbstractPixel.SaveSystem
         {
             if (_data == null)
             {
-                Debug.LogError("[SaveSystem] SaveJson: Cannot serialize null data.");
+                SaveLog.Error("[SaveSystem] SaveJson: Cannot serialize null data.");
                 _output = null;
                 return false;
             }
             if (_data is UnityEngine.Object)
             {
-                Debug.LogError("[SaveSystem] SaveJson: Cannot serialize UnityEngine.Object types.");
+                SaveLog.Error("[SaveSystem] SaveJson: Cannot serialize UnityEngine.Object types.");
                 _output = null;
                 return false;
             }
@@ -72,7 +72,7 @@ namespace AbstractPixel.SaveSystem
             }
             catch (Exception e)
             {
-                Debug.LogError($"[SaveSystem] SaveJson: Serialization failed with exception: {e.Message} {e.StackTrace}");
+                SaveLog.Error($"[SaveSystem] SaveJson: Serialization failed with exception: {e.Message} {e.StackTrace}");
                 _output = null;
                 return false;
             }

@@ -16,7 +16,7 @@ namespace AbstractPixel.SaveSystem.Editor
             }
             else if (AssetDatabase.GetAssetPath(config) != SaveSystemConfigFinder.ConfigAssetPath)
             {
-                Debug.LogWarning($"[SaveSystem] A save system config already exists at '{AssetDatabase.GetAssetPath(config)}', so none was created. The game only loads it from '{SaveSystemConfigFinder.ConfigAssetPath}'; move it there.");
+                SaveLog.Warning($"[SaveSystem] A save system config already exists at '{AssetDatabase.GetAssetPath(config)}', so none was created. The game only loads it from '{SaveSystemConfigFinder.ConfigAssetPath}'; move it there.");
             }
             Selection.activeObject = config;
             EditorGUIUtility.PingObject(config);
@@ -39,7 +39,7 @@ namespace AbstractPixel.SaveSystem.Editor
             SaveFileListSync.AddMissingRows(config.EditableSaveFileList, SaveFileListSync.FindModuleSaveFileClasses());
             AssetDatabase.CreateAsset(config, assetPath);
             AssetDatabase.SaveAssets();
-            Debug.Log($"[SaveSystem] Created the save system config at '{assetPath}'.");
+            SaveLog.Info($"[SaveSystem] Created the save system config at '{assetPath}'.");
             return config;
         }
 

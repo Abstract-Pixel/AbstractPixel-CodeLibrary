@@ -229,7 +229,7 @@ namespace AbstractPixel.SaveSystem
             }
             catch (Exception exception)
             {
-                Debug.LogError($"[SaveSystem] Capturing {whatIsCaptured} '{entry.SaveId}' from {entry.Owner.GetType().Name} failed: {exception.Message} {consequence}");
+                SaveLog.Error($"[SaveSystem] Capturing {whatIsCaptured} '{entry.SaveId}' from {entry.Owner.GetType().Name} failed: {exception.Message} {consequence}");
                 return false;
             }
         }
@@ -242,7 +242,7 @@ namespace AbstractPixel.SaveSystem
             }
             catch (Exception exception)
             {
-                Debug.LogError($"[SaveSystem] Restoring {whatIsRestored} '{entry.SaveId}' into {entry.Owner.GetType().Name} failed: {exception.Message} {consequence}");
+                SaveLog.Error($"[SaveSystem] Restoring {whatIsRestored} '{entry.SaveId}' into {entry.Owner.GetType().Name} failed: {exception.Message} {consequence}");
                 return false;
             }
 
@@ -266,7 +266,7 @@ namespace AbstractPixel.SaveSystem
             }
             catch (Exception exception)
             {
-                Debug.LogError($"[SaveSystem] OnRestored on {entry.Owner.GetType().Name} (save ID '{entry.SaveId}') failed: {exception.Message} The restored data is kept.");
+                SaveLog.Error($"[SaveSystem] OnRestored on {entry.Owner.GetType().Name} (save ID '{entry.SaveId}') failed: {exception.Message} The restored data is kept.");
             }
         }
 

@@ -72,7 +72,7 @@ namespace AbstractPixel.SaveSystem.Tests
             gameObjects.Add(gameObject);
             gameObject.AddComponent<FieldScript>();
 
-            LogAssert.Expect(LogType.Error, new Regex("no Savable Bridge.*Chest"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("no Savable Bridge.*Chest"));
             SavableBridgePlayModeCheck.CheckScene(gameObject.scene);
         }
     }

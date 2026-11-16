@@ -7,6 +7,7 @@ namespace AbstractPixel.SaveSystem
     /// Call DestroyAndForget instead of Destroy: Forget must run first, while the Savable Bridge still has this
     /// object's entry; Destroy's own teardown unregisters it before a later, separate Forget call could find it.
     /// </summary>
+    [SaveSystemHelp("api/SaveDestroyed.html")]
     public class SaveDestroyed : MonoBehaviour
     {
         // Forget needs a registered entry, and only a script with a [Save] field gets a Savable Bridge and an entry.

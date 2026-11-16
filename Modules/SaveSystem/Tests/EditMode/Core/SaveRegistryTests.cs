@@ -34,7 +34,7 @@ namespace AbstractPixel.SaveSystem.Tests
             Counter second = new Counter();
             registry.Add(EntryFor(first, "chest-1"));
 
-            LogAssert.Expect(LogType.Error, new Regex("Two saved objects use the save ID 'chest-1' in the save file 'Game'.*Counter.*Counter.*was not registered.*different save ID to SaveActions.Register"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("Two saved objects use the save ID 'chest-1' in the save file 'Game'.*Counter.*Counter.*was not registered.*different save ID to SaveActions.Register"));
             bool added = registry.Add(EntryFor(second, "chest-1"));
 
             Assert.IsFalse(added);
@@ -91,7 +91,7 @@ namespace AbstractPixel.SaveSystem.Tests
             GameObject second = new GameObject("Chest (copy)");
             registry.Add(EntryOwnedBy(first.transform, "chest-1"));
 
-            LogAssert.Expect(LogType.Error, new Regex(@"'Chest'.*'Chest \(copy\)'.*remove the Savable Bridge from one of them and add it again"));
+            SaveLogAssert.Expect(LogType.Error, new Regex(@"'Chest'.*'Chest \(copy\)'.*remove the Savable Bridge from one of them and add it again"));
             Assert.IsFalse(registry.Add(EntryOwnedBy(second.transform, "chest-1")));
 
             Object.DestroyImmediate(first);

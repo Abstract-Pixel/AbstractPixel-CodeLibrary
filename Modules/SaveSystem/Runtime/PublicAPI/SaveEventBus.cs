@@ -192,7 +192,7 @@ namespace AbstractPixel.SaveSystem
             }
             catch (Exception exception)
             {
-                Debug.LogError($"[SaveSystem] A handler of SaveEventBus.{eventName} in {DescribeHandler(handler)} threw: {exception.Message} The other handlers still ran. Fix the handler; the save system itself is fine.");
+                SaveLog.Error($"[SaveSystem] A handler of SaveEventBus.{eventName} in {DescribeHandler(handler)} threw: {exception.Message} The other handlers still ran. Fix the handler; the save system itself is fine.");
             }
         }
 

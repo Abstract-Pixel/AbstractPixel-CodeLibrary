@@ -50,7 +50,7 @@ namespace AbstractPixel.SaveSystem
             SaveSystemConfigSO config = Resources.Load<SaveSystemConfigSO>(SaveSystemConfigName.ResourceName);
             if (config == null)
             {
-                Debug.LogError($"[SaveSystem] SaveStorage found no save system config, so it did nothing. Create one with {SaveSystemConfigName.CreateConfigMenuPath}.");
+                SaveLog.Error($"[SaveSystem] SaveStorage found no save system config, so it did nothing. Create one with {SaveSystemConfigName.CreateConfigMenuPath}.");
                 return null;
             }
             return FromConfig(config, new DiskStorageService(config));
@@ -111,7 +111,7 @@ namespace AbstractPixel.SaveSystem
             bool isSceneFile = definition.Location == SaveLocation.Scene;
             if (target.NamesScene && !isSceneFile)
             {
-                Debug.LogError($"[SaveSystem] {call} was given a scene, but {saveFileClass.Name} is not a Scene save file (it lives in {definition.Location}), so nothing was done. Call it again and leave the scene out.");
+                SaveLog.Error($"[SaveSystem] {call} was given a scene, but {saveFileClass.Name} is not a Scene save file (it lives in {definition.Location}), so nothing was done. Call it again and leave the scene out.");
                 return false;
             }
 
@@ -119,7 +119,7 @@ namespace AbstractPixel.SaveSystem
             {
                 if (target.NamesGameProfile && target.GameProfile != null)
                 {
-                    Debug.LogError($"[SaveSystem] {call} was given a game profile, but {saveFileClass.Name} lives in Global, where every game profile shares it, so nothing was done. Call it again and leave the game profile out.");
+                    SaveLog.Error($"[SaveSystem] {call} was given a game profile, but {saveFileClass.Name} lives in Global, where every game profile shares it, so nothing was done. Call it again and leave the game profile out.");
                     return false;
                 }
                 key = SavePathGenerator.GetSaveFileKey(definition.FileName, SaveLocation.Global, null, null);
@@ -135,7 +135,7 @@ namespace AbstractPixel.SaveSystem
             if (gameProfile == null)
             {
                 string example = isSceneFile ? $"{call}(scene, profile, out json)" : $"{call}(profile, out json)";
-                Debug.LogError($"[SaveSystem] {call} can't reach the save file {saveFileClass.Name}: it lives in a game profile, and no game profile is open. Open one, or pass one: {example}.");
+                SaveLog.Error($"[SaveSystem] {call} can't reach the save file {saveFileClass.Name}: it lives in a game profile, and no game profile is open. Open one, or pass one: {example}.");
                 return false;
             }
 
@@ -148,17 +148,17 @@ namespace AbstractPixel.SaveSystem
         {
             if (!target.NamesScene)
             {
-                Debug.LogError($"[SaveSystem] {call} can't reach the save file {saveFileClass.Name}: it is kept per scene, and no scene was given. Pass the scene as a SceneField: {call}(forestScene, out json).");
+                SaveLog.Error($"[SaveSystem] {call} can't reach the save file {saveFileClass.Name}: it is kept per scene, and no scene was given. Pass the scene as a SceneField: {call}(forestScene, out json).");
                 return false;
             }
             if (target.Scene == null)
             {
-                Debug.LogError($"[SaveSystem] {call} was called for the Scene save file {saveFileClass.Name}, but the SceneField is null, so nothing was done. Assign the SceneField in the inspector, or make one with new SceneField(\"Forest\").");
+                SaveLog.Error($"[SaveSystem] {call} was called for the Scene save file {saveFileClass.Name}, but the SceneField is null, so nothing was done. Assign the SceneField in the inspector, or make one with new SceneField(\"Forest\").");
                 return false;
             }
             if (string.IsNullOrEmpty(target.Scene.SceneName))
             {
-                Debug.LogError($"[SaveSystem] {call} was called for the Scene save file {saveFileClass.Name}, but the SceneField has no scene in it, so nothing was done. Pick a scene in the inspector.");
+                SaveLog.Error($"[SaveSystem] {call} was called for the Scene save file {saveFileClass.Name}, but the SceneField has no scene in it, so nothing was done. Pick a scene in the inspector.");
                 return false;
             }
             return true;

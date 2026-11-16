@@ -65,7 +65,7 @@ namespace AbstractPixel.SaveSystem.Editor
 
             UnityEngine.Object scriptAsset = GetScriptAssetFromType(savedType);
             string scriptLink = GetHyperlink(scriptAsset, savedType.Name);
-            Debug.LogWarning($"[SaveSystem] {scriptLink} {problem}", scriptAsset);
+            SaveLog.Warning($"[SaveSystem] {scriptLink} {problem}", scriptAsset);
         }
 
         private static string GetHyperlink(UnityEngine.Object asset, string fallbackName)

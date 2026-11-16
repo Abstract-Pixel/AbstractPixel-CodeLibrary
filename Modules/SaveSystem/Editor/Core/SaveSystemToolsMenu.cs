@@ -16,18 +16,22 @@ namespace AbstractPixel.SaveSystem.Editor
             return new[] { DiskStorageService.GetRootFolder(false), DiskStorageService.GetRootFolder(true) };
         }
 
+        // Opens the guide from the Editor; double-clicking index.html in the Project window does the same thing.
+        [MenuItem(MenuRoot + "Open Guide", priority = 0)]
+        public static void OpenGuide() => SaveSystemGuide.Open();
+
         [MenuItem(MenuRoot + "Save All")]
         public static void SaveAll()
         {
             SaveActions.SaveAll();
-            Debug.Log("[SaveSystem] Saved every registered object (Save All from the Tools menu).");
+            SaveLog.Info("[SaveSystem] Saved every registered object (Save All from the Tools menu).");
         }
 
         [MenuItem(MenuRoot + "Load All")]
         public static void LoadAll()
         {
             SaveActions.Session?.ReloadAll();
-            Debug.Log("[SaveSystem] Re-read every save file and restored every registered object (Load All from the Tools menu).");
+            SaveLog.Info("[SaveSystem] Re-read every save file and restored every registered object (Load All from the Tools menu).");
         }
 
         // Save All and Load All act on the running game, so they're greyed out outside play mode.
@@ -67,7 +71,7 @@ namespace AbstractPixel.SaveSystem.Editor
                     Directory.Delete(folder, true);
                 }
             }
-            Debug.Log($"[SaveSystem] Deleted all save files in: {string.Join(", ", GetSaveFolders())}");
+            SaveLog.Info($"[SaveSystem] Deleted all save files in: {string.Join(", ", GetSaveFolders())}");
         }
 
         static void OpenFolder(string folder)

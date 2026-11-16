@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Save System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Save and restore game data with [Save] fields, ready-made savers, and full control when you need it.">
+<link rel="stylesheet" href="assets/docs.css">
+<script src="assets/glossary-data.js" defer></script>
+</head>
+<body data-root="" data-page="index.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Save System</h1>
+<p class="lede">Save and restore game data. Put <code><a class="type" href="api/SaveAttribute.html">[Save]</a></code> on a field, or add a ready-made saver, and the rest happens on its own.</p>
+
+<section id="map">
+<h2>The parts<a class="anchor" href="#map">#</a></h2>
+<figure class="pic">
+<svg viewBox="0 0 680 250" role="img" aria-labelledby="map-title">
+<title id="map-title">Save System at the center, linking out to save data, choose where data goes, save objects, custom data, remove things, save slots, events, whole files, and debug.</title>
+<rect class="svg-key" x="270" y="8" width="140" height="38" rx="8"/>
+<text class="svg-h" x="285" y="32">Save System</text>
+<path class="svg-arrow" d="M150 46 L330 70"/>
+<path class="svg-arrow" d="M340 46 L340 70"/>
+<path class="svg-arrow" d="M530 46 L350 70"/>
+<path class="svg-arrow" d="M150 46 L220 130"/>
+<path class="svg-arrow" d="M340 46 L340 130"/>
+<path class="svg-arrow" d="M530 46 L460 130"/>
+<path class="svg-arrow" d="M150 46 L130 190"/>
+<path class="svg-arrow" d="M340 46 L340 190"/>
+<path class="svg-arrow" d="M530 46 L550 190"/>
+<a href="Pages/save-data.html"><rect class="svg-box" x="10" y="70" width="190" height="40" rx="8"/><text class="svg-h" x="24" y="95">Save &amp; restore data</text></a>
+<a href="Pages/save-files.html"><rect class="svg-box" x="230" y="70" width="190" height="40" rx="8"/><text class="svg-h" x="244" y="95">Choose where data goes</text></a>
+<a href="Pages/save-objects.html"><rect class="svg-box" x="450" y="70" width="220" height="40" rx="8"/><text class="svg-h" x="464" y="95">Save objects</text></a>
+<a href="Pages/custom-data.html"><rect class="svg-box" x="10" y="130" width="190" height="40" rx="8"/><text class="svg-h" x="24" y="155">Custom data (ISavable)</text></a>
+<a href="Pages/remove-for-good.html"><rect class="svg-box" x="230" y="130" width="190" height="40" rx="8"/><text class="svg-h" x="244" y="155">Remove for good</text></a>
+<a href="Pages/save-slots.html"><rect class="svg-box" x="450" y="130" width="220" height="40" rx="8"/><text class="svg-h" x="464" y="155">Save slots</text></a>
+<a href="Pages/events.html"><rect class="svg-box" x="10" y="190" width="190" height="40" rx="8"/><text class="svg-h" x="24" y="215">Events</text></a>
+<a href="Pages/whole-files.html"><rect class="svg-box" x="230" y="190" width="190" height="40" rx="8"/><text class="svg-h" x="244" y="215">Whole files</text></a>
+<a href="Pages/debug.html"><rect class="svg-box" x="450" y="190" width="220" height="40" rx="8"/><text class="svg-h" x="464" y="215">Debug</text></a>
+</svg>
+<figcaption>Every part links to its own page. The full map, with every script, is on the <a href="Pages/code-map.html">code map</a>.</figcaption>
+</figure>
+</section>
+
+<section id="ways-in">
+<h2>Three ways in<a class="anchor" href="#ways-in">#</a></h2>
+<div class="cards">
+<a class="card" href="Pages/get-started.html"><strong>Get started</strong><p>Create the config, save your first value, and find the sample that matches what you need.</p></a>
+<a class="card" href="../Samples/README.html"><strong>Learn by playing</strong><p>Eight sample scenes, from a single saved field to full control over the data.</p></a>
+<a class="card" href="Pages/code-map.html"><strong>Look something up</strong><p>Every script, grouped by folder, color-coded, with every public type's own page a click away.</p></a>
+</div>
+</section>
+
+<section id="what-it-does">
+<h2>What it does<a class="anchor" href="#what-it-does">#</a></h2>
+<p>Put <a class="term" href="api/SaveAttribute.html#saved-field">[Save]</a> on a field and the save system captures it, writes it to a save file, and puts it back the next time that <a class="term" href="Pages/code-map.html#saved-object">saved object</a> exists. There is no Load call: a script gets its data when it registers, before its own <code>Start</code> runs.</p>
+<p>Data lives in one of three <a class="term" href="api/SaveLocation.html#save-location">save locations</a>: shared by every <a class="term" href="api/GameProfile.html#game-profile">game profile</a>, inside one game profile, or inside one scene. See <a href="Pages/save-files.html">Choose where data goes</a>.</p>
+<p>Something broken? Start at <a href="Pages/problems.html">Find a problem</a>.</p>
+</section>
+
+<div class="pager" id="pager"></div>
+<footer><a href="Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

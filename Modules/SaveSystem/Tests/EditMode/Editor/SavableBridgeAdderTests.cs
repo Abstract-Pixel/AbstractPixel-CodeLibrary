@@ -132,7 +132,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SavableBridgeAdder.EnsureBridges(new[] { gameObject });
             Object.DestroyImmediate(gameObject.GetComponent<SavableBridge>());
 
-            LogAssert.Expect(LogType.Warning, new Regex("Chest.*still saves.*Savable Bridge"));
+            SaveLogAssert.Expect(LogType.Warning, new Regex("Chest.*still saves.*Savable Bridge"));
             SavableBridgeAdder.EnsureBridges(new[] { gameObject });
 
             Assert.IsNotNull(gameObject.GetComponent<SavableBridge>());

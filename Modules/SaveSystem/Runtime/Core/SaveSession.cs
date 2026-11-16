@@ -126,7 +126,7 @@ namespace AbstractPixel.SaveSystem
             }
             foreach (string problem in fields.Problems)
             {
-                Debug.LogError($"{problem} {savedObjectType.Name} is not registered.");
+                SaveLog.Error($"{problem} {savedObjectType.Name} is not registered.");
             }
             return true;
         }
@@ -159,7 +159,7 @@ namespace AbstractPixel.SaveSystem
                 sceneName = string.IsNullOrEmpty(sceneName) ? sceneInfo.ActiveSceneName : sceneName;
                 if (string.IsNullOrEmpty(sceneName))
                 {
-                    Debug.LogError($"[SaveSystem] Save ID '{saveId}' ({scriptType.Name}) uses the Scene save file '{saveFileName}', but no scene is active. Register it from inside a loaded scene.");
+                    SaveLog.Error($"[SaveSystem] Save ID '{saveId}' ({scriptType.Name}) uses the Scene save file '{saveFileName}', but no scene is active. Register it from inside a loaded scene.");
                     return;
                 }
             }

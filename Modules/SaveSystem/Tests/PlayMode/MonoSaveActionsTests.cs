@@ -85,7 +85,7 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
         [Test]
         public void SaveChosenFile_WithNoFilePicked_LogsOneError()
         {
-            LogAssert.Expect(LogType.Error, new Regex("no save file is picked"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("no save file is picked"));
 
             actions.SaveChosenFile();
         }
@@ -109,7 +109,7 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
         [Test]
         public void ReloadChosenFile_WithNoFilePicked_LogsOneError()
         {
-            LogAssert.Expect(LogType.Error, new Regex("no save file is picked"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("no save file is picked"));
 
             actions.ReloadChosenFile();
         }
@@ -127,7 +127,7 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
         [Test]
         public void OpenSlot_OnAnEmptySlot_LogsOneWarning_AndOpensNothing()
         {
-            LogAssert.Expect(LogType.Warning, new Regex("slot 3.*empty"));
+            SaveLogAssert.Expect(LogType.Warning, new Regex("slot 3.*empty"));
 
             actions.OpenSlot(3);
 

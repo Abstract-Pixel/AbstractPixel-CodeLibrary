@@ -63,7 +63,7 @@ namespace AbstractPixel.SaveSystem.Tests
                 SaveFileDefinition.CreateForList("Ghost Runs", SaveLocation.GameProfile),
                 SaveFileDefinition.CreateForList("GhostRuns", SaveLocation.GameProfile)
             };
-            LogAssert.Expect(LogType.Error, new Regex("GameSaveFiles.cs was not written.*'Ghost Runs'.*'GhostRuns'.*Rename one"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("GameSaveFiles.cs was not written.*'Ghost Runs'.*'GhostRuns'.*Rename one"));
 
             bool canWrite = SaveFilesCodeWriter.CanWrite(rows);
 
@@ -95,7 +95,7 @@ namespace AbstractPixel.SaveSystem.Tests
             second.Backup = false;
             SaveSystemConfigSO config = ScriptableObject.CreateInstance<SaveSystemConfigSO>();
             config.ReplaceSaveFileList(new List<SaveFileDefinition> { first, second });
-            LogAssert.Expect(LogType.Error, new Regex("both stored as 'Ghosts' in Global.*first row is used"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("both stored as 'Ghosts' in Global.*first row is used"));
 
             SaveFileLookup lookup = new SaveFileLookup(config);
             lookup.TryGetDefinitionByFileName("Ghosts", out SaveFileDefinition used);

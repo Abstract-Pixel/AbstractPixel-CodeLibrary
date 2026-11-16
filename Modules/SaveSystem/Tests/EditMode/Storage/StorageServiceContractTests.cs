@@ -107,7 +107,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void Write_KeyThatLeavesTheSaveFolder_IsRejectedWithAnError()
         {
-            LogAssert.Expect(LogType.Error, new Regex(Regex.Escape("../Escape")));
+            SaveLogAssert.Expect(LogType.Error, new Regex(Regex.Escape("../Escape")));
 
             Assert.IsFalse(storage.Write("../Escape", "a"));
         }

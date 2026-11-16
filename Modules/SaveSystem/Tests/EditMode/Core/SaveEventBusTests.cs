@@ -271,7 +271,7 @@ namespace AbstractPixel.SaveSystem.Tests
             StartSaveSystem();
             SaveEventBus.OnLoadAllCompleted += () => throw new InvalidOperationException("handler exploded");
             SaveEventBus.OnLoadAllCompleted += RecordLoadAll;
-            UnityEngine.TestTools.LogAssert.Expect(UnityEngine.LogType.Error, new System.Text.RegularExpressions.Regex("OnLoadAllCompleted.*handler exploded"));
+            SaveLogAssert.Expect(UnityEngine.LogType.Error, new System.Text.RegularExpressions.Regex("OnLoadAllCompleted.*handler exploded"));
 
             SaveActions.GameProfiles.CreateNew().Open();
 

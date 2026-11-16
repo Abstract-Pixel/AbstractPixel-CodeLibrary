@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SaveActions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveActions is the one class game code calls to save, reload, register and forget saved objects.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SaveActions.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SaveActions <span class="lv lv1">1 daily code</span></h1>
+<p class="lede">The one class game code calls to save and load. Register a saved object once, and it gets its data back as soon as both the object and its data exist, whichever comes second. Until the save system has started, every call is a safe no-op.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Static class</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveActions.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveActions.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveActions.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveActions.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveActions.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-publicapi">Public API</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-data.html">Save, restore and react to data</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity">Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity</button></div>
+<a class="try-open" href="../../Samples/02 Buttons With No Code/README.html" target="_blank" rel="noopener">Open sample 02: Buttons With No Code &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 02 &middot; Buttons With No Code</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>The calls you'll use most</figcaption>
+<pre><code class="cs">SaveActions.SaveAll();
+SaveActions.Save&lt;SaveFiles.Settings&gt;();
+SaveActions.Reload&lt;SaveFiles.Settings&gt;();
+SaveActions.Forget(coin.gameObject);</code></pre>
+</figure>
+<p>There is no Load call. A script gets its data when it registers, which for a <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> field happens automatically through its <a class="term" href="../api/SavableBridge.html#savable-bridge">Savable Bridge</a>.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Properties</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public static GameProfileList GameProfiles</code><span class="desc"><span class="kind k-prop">property</span> Every game profile, plus CreateNew, Current and Get(slot). Never null.</span></summary>
+<div class="body">Without a save system config it is an empty list whose methods log one clear error.</div>
+</details>
+</div>
+<h3>Methods</h3>
+<div class="members">
+<details id="forget">
+<summary><code class="cs">public static void Forget(object savedObject)</code><span class="desc"><span class="kind k-method">method</span> Makes one saved object's data go away on purpose, so it doesn't come back.</span></summary>
+<div class="body">Pass the saved object itself: a plain class, a saved script, or its GameObject. Call it before <code>Destroy</code>. Forgetting a scene object writes a gone marker, so the object turns itself off the next time its scene loads; forgetting a spawned copy or a plain class removes its data outright. See <a href="../Pages/remove-for-good.html">Forgetting saved data for good</a>.</div>
+</details>
+<details id="reload">
+<summary><code class="cs">public static void Reload&lt;TFile&gt;()</code><span class="desc"><span class="kind k-method">method</span> Reads one save file from disk again and restores every saved object in it, throwing away unsaved changes.</span></summary>
+<div class="body">An overload takes a <a class="type" href="SaveFileReference.html">SaveFileReference</a> instead of a type argument.</div>
+</details>
+<details>
+<summary><code class="cs">public static void Register(object savedObject)</code><span class="desc"><span class="kind k-method">method</span> Registers a plain class whose saved data is its <code>[Save]</code> fields.</span></summary>
+<div class="body">Its <a class="term" href="../api/SavableBridge.html#save-id">save ID</a> is its class name, unless <a class="type" href="SaveIdAttribute.html">SaveIdAttribute</a> names one. Overloads take an <code><a class="term" href="../api/ISavable.html">ISavable</a>&lt;T&gt;</code> object, or an explicit save ID string. Call it last in the constructor, after new-game values are set.</div>
+</details>
+<details>
+<summary><code class="cs">public static void SaveAll()</code><span class="desc"><span class="kind k-method">method</span> Captures every registered object, then writes every save file that changed.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public static void Save&lt;TFile&gt;()</code><span class="desc"><span class="kind k-method">method</span> Like SaveAll, for one save file only.</span></summary>
+<div class="body">An overload takes a <a class="type" href="SaveFileReference.html">SaveFileReference</a> instead of a type argument.</div>
+</details>
+<details>
+<summary><code class="cs">public static void Unregister(object savedObject)</code><span class="desc"><span class="kind k-method">method</span> Captures the object's current data, then stops tracking it.</span></summary>
+<div class="body">Its data is still written on the next save.</div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>Every call silently does nothing</dt>
+<dd>There's no save system config. Run Tools &gt; External Project Tools &gt; Save System &gt; Create Config.</dd>
+<dt>Two live instances of the same plain class swap data</dt>
+<dd>Their registration order changed between runs. Give each a custom <a class="term" href="../api/SavableBridge.html#save-id">save ID</a> instead of relying on the automatic "ClassName 2", "ClassName 3" numbering.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="MonoSaveActions.html">MonoSaveActions</a>, <a class="type" href="GameProfileList.html">GameProfileList</a>, <a href="../Pages/save-data.html">Save, restore and react to data</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

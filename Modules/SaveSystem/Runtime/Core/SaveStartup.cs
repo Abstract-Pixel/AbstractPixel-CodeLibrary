@@ -45,7 +45,7 @@ namespace AbstractPixel.SaveSystem
             Stop();
             if (config == null)
             {
-                Debug.LogError($"[SaveSystem] No save system config named '{ConfigResourceName}' was found in a Resources folder, so saving is off and every save system call does nothing. Create one with {SaveSystemConfigName.CreateConfigMenuPath}.");
+                SaveLog.Error($"[SaveSystem] No save system config named '{ConfigResourceName}' was found in a Resources folder, so saving is off and every save system call does nothing. Create one with {SaveSystemConfigName.CreateConfigMenuPath}.");
                 return false;
             }
 

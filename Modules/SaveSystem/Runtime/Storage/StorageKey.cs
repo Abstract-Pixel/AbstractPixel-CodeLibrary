@@ -10,7 +10,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (string.IsNullOrEmpty(key))
             {
-                Debug.LogError("[SaveSystem] A save key is empty. Keys are built by SavePathGenerator; check the save file name in the config.");
+                SaveLog.Error("[SaveSystem] A save key is empty. Keys are built by SavePathGenerator; check the save file name in the config.");
                 return false;
             }
 
@@ -18,7 +18,7 @@ namespace AbstractPixel.SaveSystem
             bool leavesSaveFolder = key.Contains("..") || key.StartsWith("/") || key.EndsWith("/");
             if (leavesSaveFolder || HasInvalidCharacter(key))
             {
-                Debug.LogError($"[SaveSystem] The save key '{key}' is not allowed. Use letters, digits, '-', '_', '.' and '/' only, for example 'Global/Settings'.");
+                SaveLog.Error($"[SaveSystem] The save key '{key}' is not allowed. Use letters, digits, '-', '_', '.' and '/' only, for example 'Global/Settings'.");
                 return false;
             }
 

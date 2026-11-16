@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Get started</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Create the config, save your first value in five minutes, and find the ladder level and sample that match what you need.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/get-started.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Get started</h1>
+<p class="lede">Create the config once, save a field, then pick up the ladder level you need.</p>
+
+<section id="install">
+<h2>Install <span class="lv lv0">0 no code</span><a class="anchor" href="#install">#</a></h2>
+<p>The save system is already part of this project, as a module of the Abstract Pixel Library. The one setup step is creating its config: see <a href="save-data.html#setup">Set up a project</a>.</p>
+<p>The eight sample scenes ship with the module under <code>Modules/SaveSystem/Samples/</code>, next to its own <code>Runtime/</code> and <code>Editor/</code> folders. Their scripts sit in one Editor-only assembly, so a sample scene left in a build's scene list fails the build instead of shipping.</p>
+</section>
+
+<section id="quickstart">
+<h2>Your first saved value <span class="lv lv1">1 daily code</span><a class="anchor" href="#quickstart">#</a></h2>
+<p>One script, one saved field, one check that it worked.</p>
+<ol>
+<li>Choose <strong>Tools &gt; External Project Tools &gt; Save System &gt; Create Config</strong>.</li>
+<li>Add this script to any GameObject in a scene. The editor adds a <a class="type" href="../api/SavableBridge.html">Savable Bridge</a> next to it.</li>
+<li>Press Play, press <b>Take 10 damage</b> twice, then <b>Save</b>.</li>
+<li>Stop, then press Play again.</li>
+</ol>
+<figure class="code">
+<figcaption>Health.cs: a saved field with two buttons</figcaption>
+<pre><code class="cs">using AbstractPixel.SaveSystem;
+using UnityEngine;
+
+public class Health : MonoBehaviour
+{
+    [Save] int current = 100;
+
+    void OnGUI()
+    {
+        GUILayout.Label($"Health: {current}");
+        if (GUILayout.Button("Take 10 damage")) current -= 10;
+        if (GUILayout.Button("Save")) SaveActions.SaveAll();
+    }
+}</code></pre>
+</figure>
+<div class="see"><strong>Show the result</strong>"Health: 80" on the second Play. The field came back before <code>Start</code>, with no load call.</div>
+<p>Next, read <a href="#ladder">the ladder</a> for what to learn after this, or play <a href="../../Samples/01 Save A Field/README.html">sample 01</a>.</p>
+</section>
+
+<section id="ladder">
+<h2>The ladder<a class="anchor" href="#ladder">#</a></h2>
+<p>The save system has four levels. Most of a game only needs the first two. Each level builds on the one below it.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Level</th><th>Who</th><th>What you use</th><th>Sample</th></tr></thead>
+<tbody>
+<tr><td class="level"><span class="lv lv0">0</span><span class="name">No code</span></td><td>Designers</td><td><a class="type" href="../api/SaveTransform.html">SaveTransform</a>, <a class="type" href="../api/SaveActiveState.html">SaveActiveState</a> and <a class="type" href="../api/SaveDestroyed.html">SaveDestroyed</a> components; <a class="type" href="../api/MonoSaveActions.html">MonoSaveActions</a> on buttons; autosave in the config.</td><td>02</td></tr>
+<tr><td class="level"><span class="lv lv1">1</span><span class="name">Daily code</span></td><td>Developers</td><td><code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> on a field. A plain class also calls <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.Register(this)</code>. <code>SaveActions.Forget(gameObject)</code> for picked-up things.</td><td>01, 08</td></tr>
+<tr><td class="level"><span class="lv lv2">2</span><span class="name">Choices</span></td><td>Developers</td><td><code><a class="term" href="../api/ISaveIn.html#save-file-choice">ISaveIn</a>&lt;TFile&gt;</code> to pick the save file, <code><a class="term" href="../api/IOnRestored.html#restored-notice">IOnRestored</a></code>, <code><a class="term" href="../api/SavedScriptExtensions.html">SetSaveId</a></code> for spawned copies, save slots with <code>SaveActions.GameProfiles</code>.</td><td>03, 04, 05</td></tr>
+<tr><td class="level"><span class="lv lv3">3</span><span class="name">Full control</span></td><td>Tools, unusual cases</td><td><a class="type" href="../api/ISavable.html">ISavable&lt;TData&gt;</a> for data that isn't plain fields, <a class="type" href="../api/SaveStorage.html">SaveStorage</a> for whole files.</td><td>06, 07</td></tr>
+</tbody>
+</table></div>
+<p>Every how-to page carries its level, so you can skip what you don't need yet.</p>
+</section>
+
+<section id="samples">
+<h2>Samples<a class="anchor" href="#samples">#</a></h2>
+<p>Eight small scenes that follow the ladder. Each has a one-page README, a scene, and a PlayMode test. Start with the <a href="../../Samples/README.html">samples overview</a>.</p>
+<div class="cards">
+<a class="card" href="../../Samples/01 Save A Field/README.html"><span class="lv lv1">1</span><strong>01 Save A Field</strong><p><code>[Save]</code> on a MonoBehaviour, and on a plain class with <code>Register(this)</code>.</p></a>
+<a class="card" href="../../Samples/02 Buttons With No Code/README.html"><span class="lv lv0">0</span><strong>02 Buttons With No Code</strong><p>Save Transform, Save Active State, Save Destroyed, and buttons wired to MonoSaveActions.</p></a>
+<a class="card" href="../../Samples/03 Save Slots And Continue/README.html"><span class="lv lv2">2</span><strong>03 Save Slots And Continue</strong><p>A save slot screen with a Continue button.</p></a>
+<a class="card" href="../../Samples/04 Pick A Save File/README.html"><span class="lv lv2">2</span><strong>04 Pick A Save File</strong><p><code>ISaveIn&lt;TFile&gt;</code> for Global, GameProfile and Scene files.</p></a>
+<a class="card" href="../../Samples/05 Spawned Copies/README.html"><span class="lv lv2">2</span><strong>05 Spawned Copies</strong><p>Goblins from one prefab with <code>SetSaveId</code>; defeated ones stay defeated.</p></a>
+<a class="card" href="../../Samples/06 Custom Data With ISavable/README.html"><span class="lv lv3">3</span><strong>06 Custom Data With ISavable</strong><p>An inventory that moves its own data with <code>ISavable&lt;T&gt;</code>.</p></a>
+<a class="card" href="../../Samples/07 Whole Files With SaveStorage/README.html"><span class="lv lv3">3</span><strong>07 Whole Files With SaveStorage</strong><p>A debug screen that reads, copies, pastes and deletes a save file.</p></a>
+<a class="card" href="../../Samples/08 ScriptableObject/README.html"><span class="lv lv1">1</span><strong>08 ScriptableObject</strong><p>A saved progress asset with <code>[Save]</code> fields.</p></a>
+</div>
+</section>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

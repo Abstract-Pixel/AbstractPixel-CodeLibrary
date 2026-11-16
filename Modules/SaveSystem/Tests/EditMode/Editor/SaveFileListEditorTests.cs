@@ -36,7 +36,7 @@ namespace AbstractPixel.SaveSystem.Tests
             staleModuleRow.ClassAssemblyName = "AbstractPixel.Settings";
             staleModuleRow.AddedBy = "Added by the Settings module";
             List<SaveFileDefinition> rows = new List<SaveFileDefinition> { staleModuleRow };
-            UnityEngine.TestTools.LogAssert.Expect(UnityEngine.LogType.Log, new System.Text.RegularExpressions.Regex("Removed the save file row 'Settings'.*AbstractPixel.Settings.SettingsSaveFile"));
+            SaveLogAssert.Expect(UnityEngine.LogType.Log, new System.Text.RegularExpressions.Regex("Removed the save file row 'Settings'.*AbstractPixel.Settings.SettingsSaveFile"));
 
             SaveFileListSync.AddMissingRows(rows, Array.Empty<Type>());
 

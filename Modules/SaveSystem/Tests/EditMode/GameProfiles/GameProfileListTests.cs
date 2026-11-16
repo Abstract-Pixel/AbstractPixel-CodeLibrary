@@ -185,13 +185,13 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void WithNoConfig_GameProfilesIsAnEmptyList_WhoseMethodsLogOneClearError()
         {
-            LogAssert.Expect(LogType.Error, new Regex("SaveSystemConfig"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("SaveSystemConfig"));
             SaveStartup.Start(null, null, scene, clock.Now);
 
             Assert.IsNotNull(SaveActions.GameProfiles);
             Assert.IsEmpty(SaveActions.GameProfiles.All);
             Assert.IsNull(SaveActions.GameProfiles.Current);
-            LogAssert.Expect(LogType.Error, new Regex("no save system config.*Create Config"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("no save system config.*Create Config"));
             Assert.IsNull(SaveActions.GameProfiles.CreateNew());
         }
 

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 Buttons With No Code - Save System Samples</title>
+<meta name="description" content="A level saved with no code: Save Transform, Save Active State and Save Destroyed components, and uGUI buttons wired to Mono Save Actions.">
+<link rel="stylesheet" href="../../Documentation/assets/docs.css">
+</head>
+<body data-root="../../Documentation/">
+<main class="solo">
+<p class="crumbs"><a href="../../Documentation/index.html">Save System</a> › <a href="../README.html">Samples</a> › 02</p>
+<h1>02 Buttons With No Code <span class="lv lv0">0 no code</span></h1>
+<p class="lede">A level saved with no code at all: three ready-made saver components and buttons wired in the Inspector.</p>
+<dl>
+<dt>Scene</dt><dd>Buttons With No Code</dd>
+<dt>Scripts</dt><dd>none (library components only)</dd>
+<dt>Save file</dt><dd>Built-in <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">GameProfile</a> (nothing to add to the config)</dd>
+<dt>Needs</dt><dd>uGUI and the Input System's UI input module.</dd>
+<dt>Guide</dt><dd><a href="../../Documentation/Pages/save-data.html#saving">Save, reload and autosave</a></dd>
+</dl>
+
+<div class="table-wrap">
+<table>
+<tr><th>Object</th><th>Component</th><th>What it saves</th></tr>
+<tr><td>Crate</td><td><a class="type" href="../../Documentation/api/SaveTransform.html">Save Transform</a></td><td>position, rotation and scale</td></tr>
+<tr><td>Lamp</td><td><a class="type" href="../../Documentation/api/SaveActiveState.html">Save Active State</a></td><td>whether it's on or off</td></tr>
+<tr><td>Coin</td><td><a class="type" href="../../Documentation/api/SaveDestroyed.html">Save Destroyed</a></td><td>that it was picked up, so it stays gone</td></tr>
+<tr><td>Save Actions</td><td><a class="type" href="../../Documentation/api/MonoSaveActions.html">Mono Save Actions</a></td><td>nothing; its methods and events are what the buttons use</td></tr>
+</table>
+</div>
+
+<h2>Try it</h2>
+<ol>
+<li><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity">Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity</button> opens the scene in Unity, then press Play.</li>
+<li>Drag the <b>Crate</b> somewhere else in the Scene view. Press <b>Turn the lamp off</b> and <b>Pick up the coin</b>.</li>
+<li>Press <b>Save</b>. "Saved!" appears. It comes from the <b>On Saved</b> event.</li>
+<li>Stop, then press Play again.</li>
+</ol>
+<div class="see"><strong>You should see</strong>The crate is where you left it, the lamp is off and the coin is gone. <b>Turn the lamp on</b> and <b>Save</b> to put the lamp back. A picked-up coin stays gone in this game profile for good.</div>
+
+<h2>How it's wired</h2>
+<p>Select each button and look at its <b>On Click</b> list.</p>
+<ul>
+<li><b>Save</b>: <code><a class="term" href="../../Documentation/api/MonoSaveActions.html">MonoSaveActions</a>.SaveAll</code>.</li>
+<li><b>Turn the lamp off / on</b>: <code>GameObject.SetActive</code> on the Lamp. Save Active State notices by itself.</li>
+<li><b>Pick up the coin</b>: <code><a class="term" href="../../Documentation/api/SaveDestroyed.html">SaveDestroyed</a>.DestroyAndForget</code> on the Coin. Don't use a plain Destroy: the coin would come back.</li>
+</ul>
+<p>On the <b>Save Actions</b> object, <b>On Saved</b> turns the "Saved!" label on. <b>On Save Failed</b> passes the reason, so it can go straight into a Text. Its other buttons are <b>Save Chosen File</b>, <b>Reload Chosen File</b>, <b>Open Slot</b> and <b>New Game</b>.</p>
+<p>Each saved object has a <a class="type" href="../../Documentation/api/SavableBridge.html">Savable Bridge</a>. The editor adds one for you when you add a saver component.</p>
+
+<h2>Next steps</h2>
+<ul>
+<li>Autosave needs no code either: tick <b>Save On Scene Unload</b> or set <b>Autosave Interval Minutes</b> in the save system config.</li>
+<li>When a component isn't enough, write <code><a class="type" href="../../Documentation/api/SaveAttribute.html">[Save]</a></code> on a field (sample 01).</li>
+</ul>
+
+<nav>
+<a href="../01%20Save%20A%20Field/README.html">← 01 Save A Field</a>
+<a href="../README.html">All samples</a>
+<a href="../../Documentation/index.html">Save system guide</a>
+<a href="../03%20Save%20Slots%20And%20Continue/README.html">03 Save Slots And Continue →</a>
+</nav>
+<p class="crumbs">The guide also opens from <b>Tools &gt; External Project Tools &gt; Save System &gt; Open Guide</b>.</p>
+</main>
+<script src="../../Documentation/assets/glossary-data.js" defer></script>
+<script src="../../Documentation/assets/docs.js"></script>
+</body>
+</html>

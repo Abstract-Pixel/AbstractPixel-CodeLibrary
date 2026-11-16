@@ -198,7 +198,7 @@ namespace AbstractPixel.SaveSystem
             {
                 return true;
             }
-            Debug.LogError($"[SaveSystem] SaveActions.GameProfiles.{methodName} did nothing: there is no save system config, so there are no game profiles. Use Tools > External Project Tools > Save System > Create Config.");
+            SaveLog.Error($"[SaveSystem] SaveActions.GameProfiles.{methodName} did nothing: there is no save system config, so there are no game profiles. Use Tools > External Project Tools > Save System > Create Config.");
             return false;
         }
     }

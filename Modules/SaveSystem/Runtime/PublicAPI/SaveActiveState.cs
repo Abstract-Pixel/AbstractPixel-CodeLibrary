@@ -6,6 +6,7 @@ namespace AbstractPixel.SaveSystem
     // Earlier than the Savable Bridge's own -10000, so this field is already up to date with gameObject.activeSelf
     // by the time the bridge's OnDisable (also triggered when the whole GameObject deactivates) captures it.
     [DefaultExecutionOrder(-20000)]
+    [SaveSystemHelp("api/SaveActiveState.html")]
     public class SaveActiveState : MonoBehaviour, IOnRestored
     {
         [Save] bool isActive = true;

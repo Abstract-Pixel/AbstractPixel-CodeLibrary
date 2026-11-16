@@ -78,7 +78,7 @@ namespace AbstractPixel.SaveSystem
             }
             catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
             {
-                Debug.LogError($"[SaveSystem] Could not write the save key '{key}' to '{path}': {exception.Message} Check that the folder is writable and the disk isn't full. The previous save is untouched.");
+                SaveLog.Error($"[SaveSystem] Could not write the save key '{key}' to '{path}': {exception.Message} Check that the folder is writable and the disk isn't full. The previous save is untouched.");
                 return false;
             }
         }
@@ -103,7 +103,7 @@ namespace AbstractPixel.SaveSystem
             }
             catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
             {
-                Debug.LogError($"[SaveSystem] Could not read the save key '{key}' from '{path}': {exception.Message} Check that no other program has the file open.");
+                SaveLog.Error($"[SaveSystem] Could not read the save key '{key}' from '{path}': {exception.Message} Check that no other program has the file open.");
                 return false;
             }
         }
@@ -129,7 +129,7 @@ namespace AbstractPixel.SaveSystem
             }
             catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
             {
-                Debug.LogError($"[SaveSystem] Could not delete the save key '{key}' at '{path}': {exception.Message} Check that no other program has the file open.");
+                SaveLog.Error($"[SaveSystem] Could not delete the save key '{key}' at '{path}': {exception.Message} Check that no other program has the file open.");
                 return false;
             }
         }

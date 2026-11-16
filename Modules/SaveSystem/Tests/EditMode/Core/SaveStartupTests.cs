@@ -39,7 +39,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void MissingConfig_LogsOneError_AndSaveSystemCallsAreSafeNoOps()
         {
-            LogAssert.Expect(LogType.Error, new Regex("SaveSystemConfig"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("SaveSystemConfig"));
 
             Assert.IsFalse(SaveStartup.Start(null, null, scene, clock.Now));
 

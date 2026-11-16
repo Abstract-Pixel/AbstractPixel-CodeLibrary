@@ -99,7 +99,7 @@ namespace AbstractPixel.SaveSystem.Tests
             StartSession(ConfigWithBackup(SettingsFile, true));
             SaveVolumeTwice(1, 2);
             storage.Write(SettingsKey, CorruptText);
-            LogAssert.Expect(LogType.Error, new Regex(Regex.Escape(SettingsKey) + ".*Backup"));
+            SaveLogAssert.Expect(LogType.Error, new Regex(Regex.Escape(SettingsKey) + ".*Backup"));
 
             StartSession(ConfigWithBackup(SettingsFile, false));
             VolumeSetting volume = new VolumeSetting();

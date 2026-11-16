@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ISavable&lt;TData&gt;</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ISavable<TData> hands a saved object's data to the save system and takes it back: CaptureData and RestoreData.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/ISavable.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>ISavable&lt;TData&gt; <span class="lv lv3">3 full control</span></h1>
+<p class="lede">A saved object that hands its data to the save system and takes it back. With no save file class, its data lives in the <a class="term" href="../api/GameProfile.html#game-profile">GameProfile</a> save file. Use <code>ISavable&lt;TData, TFile&gt;</code> to pick another file.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Interface (generic)</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/ISavable.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISavable.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/ISavable.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISavable.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/ISavable.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-core">Core restore pipeline</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/custom-data.html">Saving complex data with ISavable</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/06 Custom Data With ISavable/Custom Data With ISavable.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/06 Custom Data With ISavable/Custom Data With ISavable.unity">Modules/SaveSystem/Samples/06 Custom Data With ISavable/Custom Data With ISavable.unity</button></div>
+<a class="try-open" href="../../Samples/06 Custom Data With ISavable/README.html" target="_blank" rel="noopener">Open sample 06: Custom Data With ISavable &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 06 &middot; Custom Data With ISavable</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<p>Use <code>ISavable&lt;TData&gt;</code> when your saved data isn't plain <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> fields, for example a struct you build from several pieces of live state. Use <code>ISavable&lt;TData, TFile&gt;</code> to say what and where in one line.</p>
+<figure class="code">
+<figcaption>Inventory.cs: custom capture and restore</figcaption>
+<pre><code class="cs">public class Inventory : ISavable&lt;InventoryData&gt;
+{
+    List&lt;string&gt; items = new List&lt;string&gt;();
+
+    public Inventory()
+    {
+        SaveActions.Register(this);
+    }
+
+    public InventoryData CaptureData()
+    {
+        return new InventoryData { Items = items.ToArray() };
+    }
+
+    public void RestoreData(InventoryData loadedData)
+    {
+        items = new List&lt;string&gt;(loadedData.Items);
+    }
+}</code></pre>
+</figure>
+<p>See <a href="../Pages/custom-data.html">Saving complex data with ISavable</a> for the full Inventory, Inventory 2, Inventory 3 walkthrough, including how several live instances of the same class get their own save IDs.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Methods</h3>
+<div class="members">
+<details id="capture">
+<summary><code class="cs">TData CaptureData()</code><span class="desc"><span class="kind k-method">method</span> Returns this object's current data, to be written to the save file.</span></summary>
+<div class="body"><strong>Capture</strong> is reading the current data out of a saved object so it can be written to a save file. Called on every save that includes this object's save file.</div>
+</details>
+<details id="restore">
+<summary><code class="cs">void RestoreData(TData loadedData)</code><span class="desc"><span class="kind k-method">method</span> Puts loaded data back into this object.</span></summary>
+<div class="body"><strong>Restore</strong> is putting saved data back into a saved object. It happens as soon as both the object and its data exist, whichever comes second — normally right after every Awake and before any Start, whether the data comes from a save file or from <span id="new-game-values">new-game values</span> (this object's values when it first registers, before anything is restored; they're put back when a <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> with no data for this object opens).</div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>Two instances of the same class share one <a class="term" href="../api/SavableBridge.html#save-id">save ID</a></dt>
+<dd>Later instances get "ClassName 2", "ClassName 3" automatically, in registration order. Give a custom save ID if that order can change between runs.</dd>
+<dt>RestoreData throws</dt>
+<dd>The save system logs it and keeps the previous saved data on disk untouched. Fix <code>RestoreData</code>, then reload.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="ISaveIn.html">ISaveIn&lt;TFile&gt;</a>, <a class="type" href="SaveIdAttribute.html">SaveIdAttribute</a>, <a href="../Pages/custom-data.html">Saving complex data with ISavable</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

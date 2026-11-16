@@ -51,7 +51,7 @@ namespace AbstractPixel.SaveSystem.Tests
             MemoryStorageService storage = new MemoryStorageService();
             SaveFileStore store = new SaveFileStore(storage, new SaveJson());
             storage.Write(Key, CorruptText);
-            LogAssert.Expect(LogType.Warning, new Regex(Regex.Escape(UnreadableCopyKey)));
+            SaveLogAssert.Expect(LogType.Warning, new Regex(Regex.Escape(UnreadableCopyKey)));
 
             Assert.IsTrue(store.Write(Key, NewFile(), keepBackup: false));
 
@@ -65,7 +65,7 @@ namespace AbstractPixel.SaveSystem.Tests
             MemoryStorageService storage = new MemoryStorageService();
             SaveFileStore store = new SaveFileStore(storage, new SaveJson());
             storage.Write(Key, CorruptText);
-            LogAssert.Expect(LogType.Warning, new Regex(Regex.Escape(UnreadableCopyKey)));
+            SaveLogAssert.Expect(LogType.Warning, new Regex(Regex.Escape(UnreadableCopyKey)));
 
             Assert.IsTrue(store.Write(Key, NewFile()));
 
@@ -93,7 +93,7 @@ namespace AbstractPixel.SaveSystem.Tests
             SaveFileStore store = new SaveFileStore(storage, new SaveJson());
             storage.Write(Key, "{ \"some\": \"data this save system can't see right now\" }");
             storage.IsLocked = true;
-            LogAssert.Expect(LogType.Error, new Regex(Regex.Escape(Key) + ".*couldn't be read.*nothing was written"));
+            SaveLogAssert.Expect(LogType.Error, new Regex(Regex.Escape(Key) + ".*couldn't be read.*nothing was written"));
 
             Assert.IsFalse(store.Write(Key, NewFile(), keepBackup: false));
 

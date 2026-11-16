@@ -114,7 +114,7 @@ namespace AbstractPixel.SaveSystem.Tests
         [Test]
         public void Open_UnknownGameProfile_ReturnsFalseAndLogsAnError()
         {
-            LogAssert.Expect(LogType.Error, new Regex("missing"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("missing"));
 
             Assert.IsFalse(gameProfiles.Open("missing"));
             Assert.IsNull(gameProfiles.CurrentGameProfileId);
@@ -152,7 +152,7 @@ namespace AbstractPixel.SaveSystem.Tests
             {
                 shortIds.CreateNew("Game Profile " + i);
             }
-            LogAssert.Expect(LogType.Error, new Regex("GameProfileGuidLength"));
+            SaveLogAssert.Expect(LogType.Error, new Regex("GameProfileGuidLength"));
 
             Assert.IsNull(shortIds.CreateNew("One too many"));
         }

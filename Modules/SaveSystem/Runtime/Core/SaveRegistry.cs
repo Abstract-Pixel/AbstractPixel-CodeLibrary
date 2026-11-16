@@ -38,7 +38,7 @@ namespace AbstractPixel.SaveSystem
             bool isDuplicate = isTaken && !ReferenceEquals(registered.Owner, entry.Owner) && !isLeaving(registered.Owner);
             if (isDuplicate)
             {
-                Debug.LogError(DescribeDuplicate(registered, entry));
+                SaveLog.Error(DescribeDuplicate(registered, entry));
                 return false;
             }
             entries[entry.SaveId] = entry;

@@ -1,0 +1,25 @@
+{
+    "name": "AbstractPixel.SaveSystem.Samples.Tests",
+    "rootNamespace": "AbstractPixel.SaveSystem.Samples",
+    "references": [
+        "AbstractPixel.SaveSystem",
+        "AbstractPixel.SaveSystem.Samples",
+        "UnityEngine.UI",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_EDITOR",
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -96,7 +96,7 @@ namespace AbstractPixel.SaveSystem
             bool isGameProfileOpen = profileManager.CurrentGameProfileId != null;
             if (needsGameProfile && !isGameProfileOpen)
             {
-                Debug.LogError($"[SaveSystem] Forget({SavedObjectEntry.Describe(savedObject)}) did nothing: its data lives in a game profile, and no game profile is open, so there is nowhere to forget it from. Open one first, for example SaveActions.GameProfiles.Get(1).Open(), then call Forget.");
+                SaveLog.Error($"[SaveSystem] Forget({SavedObjectEntry.Describe(savedObject)}) did nothing: its data lives in a game profile, and no game profile is open, so there is nowhere to forget it from. Open one first, for example SaveActions.GameProfiles.Get(1).Open(), then call Forget.");
                 return;
             }
 

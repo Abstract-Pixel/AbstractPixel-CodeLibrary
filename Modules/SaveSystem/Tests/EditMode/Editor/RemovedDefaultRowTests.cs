@@ -141,6 +141,22 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
+        public void AModuleClassThatIsDeleted_IsForgotten_NotRecordedAsRemovedByTheOwner()
+        {
+            List<SaveFileDefinition> rows = FullList();
+            List<string> known = Known(rows);
+            List<string> removed = new List<string> { "Deleted.Module.OldSaveFile" };
+            Remove(rows, "Module Stats");
+
+            // The module deleted ModuleStatsSaveFile, so the sync no longer finds it.
+            SaveFileListSync.ApplyRemovals(rows, removed, known, Array.Empty<Type>());
+
+            CollectionAssert.IsEmpty(removed);
+            CollectionAssert.DoesNotContain(known, typeof(ModuleStatsSaveFile).FullName);
+            CollectionAssert.IsEmpty(SaveFileListSync.FindUnappliedRemovals(rows, removed, known));
+        }
+
+        [Test]
         public void ARemovedSaveFile_HasNoRowAtRuntime()
         {
             SaveSystemConfigSO config = UnityEngine.ScriptableObject.CreateInstance<SaveSystemConfigSO>();
@@ -150,7 +166,7 @@ namespace AbstractPixel.SaveSystem.Tests
                 Remove(rows, "Settings");
                 config.ReplaceSaveFileList(rows);
                 config.EditableRemovedDefaultSaveFiles.Add(typeof(SaveFiles.Settings).FullName);
-                UnityEngine.TestTools.LogAssert.Expect(UnityEngine.LogType.Error, new System.Text.RegularExpressions.Regex("SaveFiles\\+Settings' was removed from the save file list"));
+                SaveLogAssert.Expect(UnityEngine.LogType.Error, new System.Text.RegularExpressions.Regex("SaveFiles\\+Settings' was removed from the save file list"));
 
                 SaveFileLookup lookup = new SaveFileLookup(config);
 

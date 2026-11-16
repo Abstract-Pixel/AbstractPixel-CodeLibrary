@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SaveFileReference</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveFileReference is a save file picked in the Inspector from a dropdown of the config's save file list.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SaveFileReference.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SaveFileReference <span class="lv lv2">2 choices</span></h1>
+<p class="lede">A save file picked in the Inspector from a dropdown of the config's save file list. It stores the save file class's full name, the same name the list's rows are found by.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Struct</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveFileReference.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveFileReference.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveFileReference.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveFileReference.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveFileReference.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-publicapi">Public API</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-files.html">Choose where data goes</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity">Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity</button></div>
+<a class="try-open" href="../../Samples/04 Pick A Save File/README.html" target="_blank" rel="noopener">Open sample 04: Pick A Save File &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 04 &middot; Pick A Save File</p>
+</div>
+</details>
+</section>
+
+<section id="inspector">
+<h2>In the Inspector<a class="anchor" href="#inspector">#</a></h2>
+<p>A field of this type draws as a dropdown of the save files in the config's save file list, through <code>SaveFileReferenceDrawer</code>. Picking "(none)" leaves it unset.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Inspector label</th><th>API member</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>(the field's own label)</td><td><a href="#member-classfullname"><code>ClassFullName</code></a></td><td>The picked save file's full class name, or empty.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>Building one in code</figcaption>
+<pre><code class="cs">SaveFileReference reference = SaveFileReference.To&lt;GameSaveFiles.Ghosts&gt;();</code></pre>
+</figure>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Properties</h3>
+<div class="members">
+<details id="member-classfullname">
+<summary><code class="cs">public string ClassFullName</code><span class="desc"><span class="kind k-prop">property</span> The picked save file class's full name.</span></summary>
+<div class="body">The same name the save file list's rows are found by.</div>
+</details>
+<details>
+<summary><code class="cs">public bool IsSet</code><span class="desc"><span class="kind k-prop">property</span> True once a save file has been picked.</span></summary>
+<div class="body"></div>
+</details>
+</div>
+<h3>Static</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public static SaveFileReference To&lt;TFile&gt;()</code><span class="desc"><span class="kind k-method">method</span> Builds a reference to <code>TFile</code> in code.</span></summary>
+<div class="body"></div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>The dropdown only shows "(none)"</dt>
+<dd>There's no save system config yet, or its save file list is empty. Use the Create Config button the drawer shows.</dd>
+<dt>IsSet is false after picking a file</dt>
+<dd>The field was set from code with <code>default</code> instead of <code>SaveFileReference.To&lt;TFile&gt;()</code>.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="SaveFiles.html">SaveFiles</a>, <a href="../Pages/save-files.html">Choose where data goes</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

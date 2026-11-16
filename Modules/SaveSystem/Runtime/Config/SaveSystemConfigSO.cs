@@ -10,6 +10,7 @@ namespace AbstractPixel.SaveSystem
     /// Tools > External Project Tools > Save System > Create Config makes it.
     /// </summary>
     [CreateAssetMenu(fileName = "SaveSystemConfig", menuName = "Utility/SaveSystemConfigSO")]
+    [SaveSystemHelp("api/SaveSystemConfigSO.html")]
     public class SaveSystemConfigSO : ScriptableObject
     {
         [field: SerializeField, Tooltip("Save into a folder inside the project instead of the player's save folder, so you can read the files while you work.")]

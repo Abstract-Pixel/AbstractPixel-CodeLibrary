@@ -58,7 +58,7 @@ namespace AbstractPixel.SaveSystem
         {
             foreach (SaveFileClash clash in SaveFileClash.FindAll(definitions))
             {
-                Debug.LogError($"[SaveSystem] {clash.Describe()} The first row is used. Rename one of them in the save system config.");
+                SaveLog.Error($"[SaveSystem] {clash.Describe()} The first row is used. Rename one of them in the save system config.");
             }
         }
 
@@ -82,7 +82,7 @@ namespace AbstractPixel.SaveSystem
             {
                 if (reportedClasses.Add(saveFileClass.FullName))
                 {
-                    Debug.LogError($"[SaveSystem] The save file '{saveFileClass.FullName}' was removed from the save file list, so nothing in it is saved. Select the save system config and press Bring back removed rows to use it again.");
+                    SaveLog.Error($"[SaveSystem] The save file '{saveFileClass.FullName}' was removed from the save file list, so nothing in it is saved. Select the save system config and press Bring back removed rows to use it again.");
                 }
                 definition = null;
                 return false;
@@ -94,7 +94,7 @@ namespace AbstractPixel.SaveSystem
             {
                 definition = SaveFileDefinition.ForClass(saveFileClass, defaults.Name, defaults.Location);
                 definitions.Add(definition);
-                Debug.LogWarning($"[SaveSystem] The save file class '{saveFileClass.FullName}' has no row in the save system config yet, so its defaults are used ({defaults.Name}, {defaults.Location}). Select the config in the editor once to add the row, then change it there if you like.");
+                SaveLog.Warning($"[SaveSystem] The save file class '{saveFileClass.FullName}' has no row in the save system config yet, so its defaults are used ({defaults.Name}, {defaults.Location}). Select the config in the editor once to add the row, then change it there if you like.");
                 return true;
             }
 
@@ -102,7 +102,7 @@ namespace AbstractPixel.SaveSystem
             bool isFirstReport = reportedClasses.Add(saveFileClass.FullName);
             if (isFirstReport)
             {
-                Debug.LogError($"[SaveSystem] The save file class '{saveFileClass.FullName}' has no row in the save system config, so nothing in it is saved. Select the config (Tools > External Project Tools > Save System > Create Config selects it) and press Update save file classes, or add a row named '{saveFileClass.Name}' to the save file list.");
+                SaveLog.Error($"[SaveSystem] The save file class '{saveFileClass.FullName}' has no row in the save system config, so nothing in it is saved. Select the config (Tools > External Project Tools > Save System > Create Config selects it) and press Update save file classes, or add a row named '{saveFileClass.Name}' to the save file list.");
             }
             return false;
         }
@@ -141,7 +141,7 @@ namespace AbstractPixel.SaveSystem
             {
                 return true;
             }
-            Debug.LogError($"[SaveSystem] The save file list has no row for the class '{classFullName}'. Pick the save file again in the inspector, or check the list in the save system config.");
+            SaveLog.Error($"[SaveSystem] The save file list has no row for the class '{classFullName}'. Pick the save file again in the inspector, or check the list in the save system config.");
             return false;
         }
 

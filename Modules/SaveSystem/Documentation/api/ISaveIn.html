@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ISaveIn&lt;TFile&gt;</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ISaveIn<TFile> picks the save file for a class whose saved data is its [Save] fields.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/ISaveIn.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>ISaveIn&lt;TFile&gt; <span class="lv lv2">2 choices</span></h1>
+<p class="lede" id="save-file-choice">Picks the save file a class's data goes in, for a class whose saved data is its <a class="term" href="../api/SaveAttribute.html#saved-field">[Save]</a> fields. With neither this nor <code><a class="term" href="../api/ISavable.html">ISavable</a>&lt;TData, TFile&gt;</code>, the data goes in <code><a class="term" href="../api/SaveFiles.html">SaveFiles</a>.<a class="term" href="../api/GameProfile.html#game-profile">GameProfile</a></code>.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Interface (generic)</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/ISaveIn.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISaveIn.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/ISaveIn.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISaveIn.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/ISaveIn.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-config">Save system config</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-files.html#choose-file">Choose where data goes</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity">Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity</button></div>
+<a class="try-open" href="../../Samples/04 Pick A Save File/README.html" target="_blank" rel="noopener">Open sample 04: Pick A Save File &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 04 &middot; Pick A Save File</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>Chest.cs: saving into the Scene file instead of GameProfile</figcaption>
+<pre><code class="cs">public class Chest : MonoBehaviour, ISaveIn&lt;SaveFiles.Scene&gt;
+{
+    [Save] bool isOpen;
+}</code></pre>
+</figure>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<p><code>ISaveIn&lt;TFile&gt;</code> has no members. Writing <code>: ISaveIn&lt;SaveFiles.Scene&gt;</code>, as <code>Chest</code> does above, is the whole API: the save system reads which file class fills in <code>TFile</code>. There's no method to call.</p>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>"TFile must implement <a class="term" href="../api/ISaveFile.html">ISaveFile</a>" at compile time</dt>
+<dd>Pass a real save file class, such as <code><a class="term" href="../api/SaveFiles.html">SaveFiles</a>.Scene</code> or one from <code>GameSaveFiles</code>, not an arbitrary type.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="ISaveFile.html">ISaveFile</a>, <a class="type" href="ISavable.html">ISavable&lt;TData, TFile&gt;</a>, <a href="../Pages/save-files.html">Choose where data goes</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

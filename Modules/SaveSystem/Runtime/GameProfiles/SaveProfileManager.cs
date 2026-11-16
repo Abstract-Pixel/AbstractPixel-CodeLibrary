@@ -67,7 +67,7 @@ namespace AbstractPixel.SaveSystem
                 return null;
             }
 
-            Debug.LogError($"[SaveSystem] Could not create the game profile '{name}': every game profile ID of length {gameProfileIdLength} is taken. Raise GameProfileGuidLength in the save system config.");
+            SaveLog.Error($"[SaveSystem] Could not create the game profile '{name}': every game profile ID of length {gameProfileIdLength} is taken. Raise GameProfileGuidLength in the save system config.");
             return null;
         }
 
@@ -76,7 +76,7 @@ namespace AbstractPixel.SaveSystem
         {
             if (string.IsNullOrEmpty(gameProfileId) || !Exists(gameProfileId))
             {
-                Debug.LogError($"[SaveSystem] Could not open the game profile '{gameProfileId}' because it doesn't exist. Use SaveActions.GameProfiles.All to list existing game profiles, or CreateNew() to make one.");
+                SaveLog.Error($"[SaveSystem] Could not open the game profile '{gameProfileId}' because it doesn't exist. Use SaveActions.GameProfiles.All to list existing game profiles, or CreateNew() to make one.");
                 return false;
             }
 

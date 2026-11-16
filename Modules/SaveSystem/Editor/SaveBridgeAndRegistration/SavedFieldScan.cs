@@ -69,7 +69,7 @@ namespace AbstractPixel.SaveSystem.Editor
 
         static void LogProblem(string problem)
         {
-            Debug.LogError($"{problem} Play mode won't start, and builds will fail, until this is fixed.");
+            SaveLog.Error($"{problem} Play mode won't start, and builds will fail, until this is fixed.");
         }
     }
 }

@@ -61,11 +61,11 @@ namespace AbstractPixel.SaveSystem.Editor
             foreach (IGrouping<string, (string Context, string Name)> group in added.GroupBy(entry => entry.Context))
             {
                 string names = string.Join(" and ", group.Select(entry => entry.Name));
-                Debug.Log($"[SaveSystem] Added a Savable Bridge to {names} in {group.Key}.");
+                SaveLog.Info($"[SaveSystem] Added a Savable Bridge to {names} in {group.Key}.");
             }
             foreach (string name in broughtBack)
             {
-                Debug.LogWarning($"[SaveSystem] {name} still saves, so it needs its Savable Bridge. It came back with a new ID, so this object's save data from before no longer loads under it. Remove the saved scripts first if you don't want {name} saved.");
+                SaveLog.Warning($"[SaveSystem] {name} still saves, so it needs its Savable Bridge. It came back with a new ID, so this object's save data from before no longer loads under it. Remove the saved scripts first if you don't want {name} saved.");
             }
         }
 

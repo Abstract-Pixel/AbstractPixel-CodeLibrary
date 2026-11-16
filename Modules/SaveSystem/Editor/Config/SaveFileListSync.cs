@@ -41,7 +41,9 @@ namespace AbstractPixel.SaveSystem.Editor
                 return;
             }
 
-            bool changed = AddMissingRows(config.EditableSaveFileList, FindModuleSaveFileClasses(), config.RemovedDefaultSaveFiles);
+            IEnumerable<Type> moduleSaveFileClasses = FindModuleSaveFileClasses();
+            bool changed = ForgetDefaultsWhoseClassIsGone(config.EditableKnownDefaultSaveFiles, config.EditableRemovedDefaultSaveFiles, moduleSaveFileClasses);
+            changed |= AddMissingRows(config.EditableSaveFileList, moduleSaveFileClasses, config.RemovedDefaultSaveFiles);
             changed |= RememberDefaults(config.SaveFileList, config.EditableKnownDefaultSaveFiles);
             if (changed)
             {
@@ -156,12 +158,35 @@ namespace AbstractPixel.SaveSystem.Editor
         /// <summary>Records the default rows the owner took out as removed, then completes the list. Returns true if anything changed.</summary>
         internal static bool ApplyRemovals(List<SaveFileDefinition> rows, List<string> removedDefaults, List<string> knownDefaults, IEnumerable<Type> moduleSaveFileClasses)
         {
+            bool changed = ForgetDefaultsWhoseClassIsGone(knownDefaults, removedDefaults, moduleSaveFileClasses);
             List<string> unapplied = FindUnappliedRemovals(rows, removedDefaults, knownDefaults);
             removedDefaults.AddRange(unapplied);
-            bool changed = unapplied.Count > 0;
+            changed |= unapplied.Count > 0;
             changed |= AddMissingRows(rows, moduleSaveFileClasses, removedDefaults);
             changed |= RememberDefaults(rows, knownDefaults);
             return changed;
+        }
+
+        /// <summary>
+        /// Forgets known and removed default rows whose class no longer exists (a module or sample deleted its save
+        /// file class). Its row is removed by the sync, and that must not count as the owner removing it.
+        /// Returns true if anything changed.
+        /// </summary>
+        internal static bool ForgetDefaultsWhoseClassIsGone(List<string> knownDefaults, List<string> removedDefaults, IEnumerable<Type> moduleSaveFileClasses)
+        {
+            HashSet<string> defaults = new HashSet<string>();
+            foreach (BuiltInSaveFile builtIn in BuiltInOrder)
+            {
+                defaults.Add(ClassOfBuiltIn(builtIn));
+            }
+            foreach (Type moduleSaveFileClass in moduleSaveFileClasses)
+            {
+                defaults.Add(moduleSaveFileClass.FullName);
+            }
+
+            int forgotten = knownDefaults.RemoveAll(className => !defaults.Contains(className));
+            forgotten += removedDefaults.RemoveAll(className => !defaults.Contains(className));
+            return forgotten > 0;
         }
 
         /// <summary>Puts every removed default row back into the list and forgets the removals. Returns true if anything changed.</summary>
@@ -277,7 +302,7 @@ namespace AbstractPixel.SaveSystem.Editor
 
                 rows.RemoveAt(index);
                 changed = true;
-                Debug.Log($"[SaveSystem] Removed the save file row '{row.Name}' from the save system config: its class '{row.ClassFullName}' ({row.AddedBy}) no longer exists. Data already saved under the storage name '{row.FileName}' stays on disk.");
+                SaveLog.Info($"[SaveSystem] Removed the save file row '{row.Name}' from the save system config: its class '{row.ClassFullName}' ({row.AddedBy}) no longer exists. Data already saved under the storage name '{row.FileName}' stays on disk.");
             }
             return changed;
         }
@@ -298,7 +323,7 @@ namespace AbstractPixel.SaveSystem.Editor
 
                 rows.RemoveAt(index);
                 changed = true;
-                Debug.Log($"[SaveSystem] Removed the save file row '{row.Name}': the library no longer ships a built-in save file for it. Data already saved under the storage name '{row.FileName}' stays on disk.");
+                SaveLog.Info($"[SaveSystem] Removed the save file row '{row.Name}': the library no longer ships a built-in save file for it. Data already saved under the storage name '{row.FileName}' stays on disk.");
             }
             return changed;
         }

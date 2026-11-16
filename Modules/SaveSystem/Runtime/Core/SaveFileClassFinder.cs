@@ -53,7 +53,7 @@ namespace AbstractPixel.SaveSystem
             bool isFirstReport = reportedRows.Add(definition.ClassFullName);
             if (isFirstReport)
             {
-                Debug.LogWarning($"[SaveSystem] The save file '{definition.Name}' points at the class '{assemblyQualifiedName}', which can't be found, so its load and save events aren't raised. Select the save system config and press Update save file classes.");
+                SaveLog.Warning($"[SaveSystem] The save file '{definition.Name}' points at the class '{assemblyQualifiedName}', which can't be found, so its load and save events aren't raised. Select the save system config and press Update save file classes.");
             }
             return null;
         }

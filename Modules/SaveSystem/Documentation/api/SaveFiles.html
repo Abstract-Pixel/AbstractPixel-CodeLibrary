@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SaveFiles</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveFiles holds the five built-in save file classes every game has.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SaveFiles.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SaveFiles <span class="lv lv1">1 daily code</span></h1>
+<p class="lede" id="built-in-save-file">The five built-in save files every game has: <a class="term" href="../api/GameProfile.html#game-profile">GameProfile</a> and Scene, which live in their own save locations, and Settings, Input and Achievements, which live in Global. Library modules and game code both use them, such as <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.Save&lt;SaveFiles.Settings&gt;()</code>. Only GameProfile's name and <a class="term" href="../api/SaveLocation.html#save-location">save location</a> are locked; every other built-in file can be renamed, moved and backed up like any row in the save file list.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Static class</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveFiles.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveFiles.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveFiles.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveFiles.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveFiles.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-publicapi">Public API</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-files.html">Choose where data goes</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity">Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity</button></div>
+<a class="try-open" href="../../Samples/04 Pick A Save File/README.html" target="_blank" rel="noopener">Open sample 04: Pick A Save File &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 04 &middot; Pick A Save File</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>Using a built-in save file class</figcaption>
+<pre><code class="cs">public class Chest : MonoBehaviour, ISavable&lt;ChestData, SaveFiles.Scene&gt;
+{
+}
+
+SaveActions.Save&lt;SaveFiles.Settings&gt;();</code></pre>
+</figure>
+<p id="game-save-file">A <strong>game save file</strong> is one the game adds to the save file list, such as Ghosts. The game's own save files live in <code>GameSaveFiles</code>, a class the editor writes from the config's save file list.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Nested types</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public sealed class GameProfile : ISaveFile</code><span class="desc"><span class="kind k-type">type</span> Data about one playthrough, such as health and inventory.</span></summary>
+<div class="body">Saved objects with no save file choice use it. Lives in the <a class="term" href="../api/GameProfile.html#game-profile">game profile</a>'s own <a class="term" href="../api/SaveLocation.html#save-location">save location</a>.</div>
+</details>
+<details>
+<summary><code class="cs">public sealed class Scene : ISaveFile</code><span class="desc"><span class="kind k-type">type</span> Data about one scene within one game profile.</span></summary>
+<div class="body">Such as which chests in the Forest scene are open.</div>
+</details>
+<details>
+<summary><code class="cs">public sealed class Settings : ISaveFile</code><span class="desc"><span class="kind k-type">type</span> The player's settings.</span></summary>
+<div class="body">Lives in Global, so every game profile shares it.</div>
+</details>
+<details>
+<summary><code class="cs">public sealed class Input : ISaveFile</code><span class="desc"><span class="kind k-type">type</span> The player's input bindings.</span></summary>
+<div class="body">Lives in Global.</div>
+</details>
+<details>
+<summary><code class="cs">public sealed class Achievements : ISaveFile</code><span class="desc"><span class="kind k-type">type</span> The player's achievements.</span></summary>
+<div class="body">Lives in Global.</div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>Data saved to SaveFiles.Scene doesn't show up for another scene</dt>
+<dd>That's expected. Each scene gets its own Scene save file within a <a class="term" href="../api/GameProfile.html#game-profile">game profile</a>.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="ISaveFile.html">ISaveFile</a>, <a class="type" href="SaveLocation.html">SaveLocation</a>, <a href="../Pages/save-files.html">Choose where data goes</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>
