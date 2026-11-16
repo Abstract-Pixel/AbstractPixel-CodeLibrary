@@ -17,6 +17,9 @@ namespace AbstractPixel.SceneManagement.Tests
 
         public readonly List<string> Calls = new List<string>();
 
+        /// <summary>The scenes that were asked to load without activating (held back).</summary>
+        public readonly List<string> HeldLoads = new List<string>();
+
         /// <summary>While set, every unload waits for this task. Lets a test hold a scene change half way.</summary>
         public Task UnloadGate;
 
@@ -26,6 +29,11 @@ namespace AbstractPixel.SceneManagement.Tests
         public Task LoadScene(SceneReference sceneReference, bool isAdditive, bool sceneActivatedByDefault = true, bool isMainScene = false)
         {
             Calls.Add(LoadPrefix + sceneReference.SceneName);
+            if (!sceneActivatedByDefault)
+            {
+                HeldLoads.Add(sceneReference.SceneName);
+            }
+
             if (sceneReference.SceneName == FailLoadOfScene)
             {
                 return Task.FromException(new InvalidOperationException("test load failure for " + FailLoadOfScene));
@@ -54,6 +62,32 @@ namespace AbstractPixel.SceneManagement.Tests
         public int CountCalls(string _call)
         {
             return Calls.FindAll(call => call == _call).Count;
+        }
+
+        /// <summary>
+        /// Replays the calls and returns the most copies of a scene that were open at once.
+        /// A scene that was open before the first call is passed as <paramref name="_copiesOpenAtStart"/>.
+        /// </summary>
+        public int MostCopiesOpenAtOnce(string _sceneName, int _copiesOpenAtStart)
+        {
+            int open = _copiesOpenAtStart;
+            int most = open;
+            foreach (string call in Calls)
+            {
+                if (call == LoadPrefix + _sceneName)
+                {
+                    open++;
+                }
+
+                if (call == UnloadPrefix + _sceneName)
+                {
+                    open--;
+                }
+
+                most = Math.Max(most, open);
+            }
+
+            return most;
         }
     }
 }

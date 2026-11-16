@@ -100,6 +100,83 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.AreEqual(SceneCoordinatorTestRig.ManagerScene, Names(plan.ManagerialToOpen));
         }
 
+        // A preload opens only what is not open yet, even for a group that force reloads its shared scenes.
+        // Nothing is closed: the player is still in the old level.
+        [TestCase("Car", "Car", true, "")]
+        [TestCase("Car", "Car,Rain", true, "Rain")]
+        [TestCase("Car", "Car,Rain", false, "Rain")]
+        [TestCase("", "Car", true, "Car")]
+        public void PreloadOpensOnlySharedScenesThatAreNotOpen(string _open, string _target, bool _forceReload, string _expectedOpen)
+        {
+            SceneGroup openGroup = rig.CreateGroup("Level1", Split(_open), _forceReload);
+            SceneGroup targetGroup = rig.CreateGroup("Level2", Split(_target), _forceReload);
+
+            SceneChangePlan plan = SceneChangePlan.ForPreload(targetGroup, CreateOpenScenes(openGroup));
+
+            Assert.AreEqual(_expectedOpen, Names(plan.ContextualToOpen));
+            Assert.AreEqual("", Names(plan.ContextualToClose));
+            Assert.IsNull(plan.MainSceneToClose, "a preload closes nothing");
+            Assert.AreEqual("", Names(plan.ManagerialToOpen), "the manager scene is already open");
+            Assert.AreEqual("Level2", plan.MainSceneToOpen.SceneName);
+        }
+
+        // Shared scenes the preload opened stay as they are. Open ones follow the group's force reload setting.
+        [TestCase("Car", "Car,Rain", "Rain", true, "Car", "Car", "Car,Rain")]
+        [TestCase("Car,Hud", "Car,Rain", "Rain", false, "Hud", "", "Car,Rain")]
+        [TestCase("Car", "Car", "", true, "Car", "Car", "Car")]
+        [TestCase("Car", "Rain", "Rain", true, "Car", "", "Rain")]
+        public void SwitchToPreloadedKeepsWhatThePreloadOpened(string _open, string _target, string _preloaded, bool _forceReload,
+            string _expectedClose, string _expectedOpen, string _expectedOpenAfter)
+        {
+            SceneGroup openGroup = rig.CreateGroup("Level1", Split(_open), _forceReload);
+            SceneGroup targetGroup = rig.CreateGroup("Level2", Split(_target), _forceReload);
+            SceneChangePlan.OpenScenes open = CreateOpenScenes(openGroup);
+            open.PreloadedScenes = CreatePreloadedScenes("Level2", _preloaded);
+
+            SceneChangePlan plan = new SceneChangePlan(targetGroup, open);
+
+            Assert.AreEqual("Level1", plan.MainSceneToClose.SceneName);
+            Assert.AreEqual("Level2", plan.MainSceneToOpen.SceneName);
+            Assert.AreEqual(_expectedClose, Names(plan.ContextualToClose));
+            Assert.AreEqual(_expectedOpen, Names(plan.ContextualToOpen));
+            Assert.AreEqual(_expectedOpenAfter, Names(plan.ContextualOpenAfter), "the preloaded shared scenes join the open list (B2)");
+        }
+
+        [Test]
+        public void SwitchToPreloadedDoesNotOpenAPreloadedManagerSceneAgain()
+        {
+            SceneGroup targetGroup = rig.CreateGroup("Level2", new[] { "Car" }, true);
+            SceneChangePlan.OpenScenes open = new SceneChangePlan.OpenScenes();
+            open.PreloadedScenes = CreatePreloadedScenes("Level2", SceneCoordinatorTestRig.ManagerScene);
+
+            SceneChangePlan plan = new SceneChangePlan(targetGroup, open);
+
+            Assert.AreEqual("", Names(plan.ManagerialToOpen));
+            Assert.AreEqual(SceneCoordinatorTestRig.ManagerScene, Names(plan.ManagerialOpenAfter));
+        }
+
+        [Test]
+        public void PlanWithoutPreloadedScenesIsNotAPreloadedSwitch()
+        {
+            SceneGroup targetGroup = rig.CreateGroup("Level2", new[] { "Car" }, true);
+
+            SceneChangePlan plan = new SceneChangePlan(targetGroup, CreateOpenScenes(rig.StartGroup));
+
+            Assert.IsFalse(plan.UsesPreloadedScenes);
+        }
+
+        private static HashSet<SceneReference> CreatePreloadedScenes(string _mainScene, string _otherSceneNames)
+        {
+            HashSet<SceneReference> preloaded = new HashSet<SceneReference>();
+            preloaded.Add(new SceneReference(_mainScene));
+            foreach (string sceneName in Split(_otherSceneNames))
+            {
+                preloaded.Add(new SceneReference(sceneName));
+            }
+
+            return preloaded;
+        }
+
         private SceneChangePlan CreatePlan(string _openLevel, string _openShared, string _targetLevel, string _targetShared, bool _forceReload)
         {
             SceneGroup openGroup = rig.CreateGroup(_openLevel, Split(_openShared), _forceReload);
