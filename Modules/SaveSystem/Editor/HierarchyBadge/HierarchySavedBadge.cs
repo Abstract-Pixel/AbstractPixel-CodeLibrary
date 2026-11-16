@@ -61,17 +61,12 @@ namespace AbstractPixel.SaveSystem.Editor
             Forget();
         }
 
-        /// <summary>
-        /// Clears every cached badge, so the next repaint works each one out again. Every one of these events can
-        /// fire from inside a saved script's own code during play mode (a restore creating an object, a save
-        /// writing a file), so redecorating the Hierarchy right here would walk GameObjects and read
-        /// SaveActions.Session reentrantly, inside that same call. The redecorate waits for a delayCall instead.
-        /// </summary>
+        /// <summary>Clears every cached badge, so the next repaint works each one out again.</summary>
         internal static void Forget()
         {
             HierarchyBadgeCache.Clear();
 #if UNITY_6000_7_OR_NEWER
-            EditorApplication.delayCall += HierarchyBadgeRows.RefreshAll;
+            HierarchyBadgeRows.RefreshAll();
 #endif
         }
 
