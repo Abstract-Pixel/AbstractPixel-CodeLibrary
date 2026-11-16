@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AbstractPixel.Core;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
 
@@ -33,21 +34,22 @@ namespace AbstractPixel.SceneManagement.Tests
         /// <summary>The handles that were handed out and not yet released by an unload.</summary>
         public int HandlesInUse { get; private set; }
 
-        public Task<ISceneHandle> LoadScene(string _key, LoadSceneMode _mode, bool _activateOnLoad)
+        public Task<ISceneHandle> LoadScene(SceneReference _scene, LoadSceneMode _mode, bool _activateOnLoad)
         {
-            LoadedKeys.Add(_key);
-            if (IsStalledByHeldScene(_key))
+            string key = _scene.SceneGuid;
+            LoadedKeys.Add(key);
+            if (IsStalledByHeldScene(key))
             {
                 return NeverCompletes<ISceneHandle>();
             }
 
             if (!_activateOnLoad)
             {
-                HeldKey = _key;
+                HeldKey = key;
             }
 
             HandlesInUse++;
-            ISceneHandle handle = new FakeHandle(_key);
+            ISceneHandle handle = new FakeHandle(key);
             return Task.FromResult(handle);
         }
 

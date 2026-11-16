@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using AbstractPixel.Core;
 using UnityEngine.SceneManagement;
 
 namespace AbstractPixel.SceneManagement
@@ -10,10 +11,10 @@ namespace AbstractPixel.SceneManagement
     internal interface IAddressablesSceneApi
     {
         /// <summary>
-        /// Opens the scene with this key. With <paramref name="_activateOnLoad"/> false the task finishes when the scene
+        /// Opens the scene by its asset GUID. With <paramref name="_activateOnLoad"/> false the task finishes when the scene
         /// is ready to activate, and the scene waits (it is held) until <see cref="Activate"/>.
         /// </summary>
-        Task<ISceneHandle> LoadScene(string _key, LoadSceneMode _mode, bool _activateOnLoad);
+        Task<ISceneHandle> LoadScene(SceneReference _scene, LoadSceneMode _mode, bool _activateOnLoad);
 
         /// <summary>Lets a held scene activate. Finishes when it is active.</summary>
         Task Activate(ISceneHandle _handle);

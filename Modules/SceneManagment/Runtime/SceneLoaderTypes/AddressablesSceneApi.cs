@@ -12,11 +12,13 @@ namespace AbstractPixel.SceneManagement
     /// <summary>The real Addressables calls behind <see cref="IAddressablesSceneApi"/>.</summary>
     internal sealed class AddressablesSceneApi : IAddressablesSceneApi
     {
-        public async Task<ISceneHandle> LoadScene(string _key, LoadSceneMode _mode, bool _activateOnLoad)
+        public async Task<ISceneHandle> LoadScene(SceneReference _scene, LoadSceneMode _mode, bool _activateOnLoad)
         {
-            AsyncOperationHandle<SceneInstance> operation = Addressables.LoadSceneAsync(_key, _mode, _activateOnLoad);
+            // The handle is only released by hand: Addressables' own release on scene unload matches the scene it reported,
+            // which is wrong for a held scene (see AddressablesSceneHandle).
+            AsyncOperationHandle<SceneInstance> operation = Addressables.LoadSceneAsync(_scene.SceneGuid, _mode, SceneReleaseMode.OnlyReleaseSceneOnHandleRelease, _activateOnLoad);
             await WaitFor(operation);
-            return new AddressablesSceneHandle(_key, operation);
+            return new AddressablesSceneHandle(_scene, operation);
         }
 
         public async Task Activate(ISceneHandle _handle)
@@ -29,15 +31,27 @@ namespace AbstractPixel.SceneManagement
         public async Task Unload(ISceneHandle _handle)
         {
             AddressablesSceneHandle handle = (AddressablesSceneHandle)_handle;
-            // The last argument releases the handle once the scene has closed.
-            AsyncOperationHandle<SceneInstance> unload = Addressables.UnloadSceneAsync(handle.Operation, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects, true);
-            await WaitFor(unload);
+            Scene openScene = handle.FindOpenScene();
+            if (openScene.IsValid() && openScene.isLoaded)
+            {
+                AsyncOperation close = SceneManager.UnloadSceneAsync(openScene, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
+                if (close != null)
+                {
+                    await close.AsTask();
+                }
+            }
+
+            // Releasing the handle lets the scene's assets leave memory.
+            if (handle.Operation.IsValid())
+            {
+                Addressables.Release(handle.Operation);
+            }
         }
 
         public void SetActive(ISceneHandle _handle)
         {
             AddressablesSceneHandle handle = (AddressablesSceneHandle)_handle;
-            SceneManager.SetActiveScene(handle.Operation.Result.Scene);
+            SceneManager.SetActiveScene(handle.FindOpenScene());
         }
 
         // AsyncOperationHandle.Task is avoided: a completion callback also works in the browser.

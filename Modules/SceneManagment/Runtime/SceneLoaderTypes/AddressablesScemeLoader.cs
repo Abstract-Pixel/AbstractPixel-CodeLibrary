@@ -61,7 +61,7 @@ namespace AbstractPixel.SceneManagement
             }
 
             // Rule 1: without activation the scene is held, and the handle comes back once it is ready to activate.
-            ISceneHandle handle = await api.LoadScene(key, loadMode, sceneActivatedByDefault);
+            ISceneHandle handle = await api.LoadScene(sceneReference, loadMode, sceneActivatedByDefault);
             OpenScene openScene = new OpenScene { Handle = handle, IsHeld = !sceneActivatedByDefault };
             openScenes[key] = openScene;
 
