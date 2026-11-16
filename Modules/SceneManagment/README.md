@@ -1,18 +1,18 @@
 # Scene messages
 
 What `SceneEventBus` sends, in what order, and who listens in Project Rally Shift. Read from the code as of the
-`scene-system-rework` branch, after session 2A. Go to a level and Retry share one start step and one finish step. Items
-marked **B4**, **B5** and **B10** remain in the preload route. Session 2B fixes them.
+`scene-system-rework` branch, after session 2B. Go to a level, Retry, Preload and Switch to preloaded share one start step
+and one finish step. Nothing in Rally Shift calls preload yet.
 
 ## The messages
 
 | Message | Argument | Sent by |
 |---|---|---|
-| `OnNewSceneGroupTransitionTo` | the new group | Start-up, go to a level, Retry. Not sent when a scene fails to load |
-| `OnMainSceneLoaded` | the main scene | `DefaultSceneLoader`, after it activates a main scene and makes it the active scene |
-| `OnSceneGroupUnloaded` | the **new** group, not the one that closed | Go to a level, Retry, switch to preloaded |
-| `OnSceneGroupPreloaded` | the preloaded group | Preload |
-| `OnPreloadedSceneGroupActivated` | the preloaded group | Switch to preloaded |
+| `OnNewSceneGroupTransitionTo` | the new group | Start-up, go to a level, Retry, switch to preloaded. Not sent when a scene fails to load |
+| `OnMainSceneLoaded` | the main scene | `DefaultSceneLoader`, after it activates a main scene and makes it the active scene. A held (preloaded) main scene fires it when the switch activates it |
+| `OnSceneGroupUnloaded` | the group that **closed** (the one that was active when the change started) | Go to a level, Retry, switch to preloaded. Not sent when there was no previous group. Not sent when a preload replaces an earlier preload |
+| `OnSceneGroupPreloaded` | the preloaded group | Preload, when it finished |
+| `OnPreloadedSceneGroupActivated` | the preloaded group | Switch to preloaded, after `OnNewSceneGroupTransitionTo` |
 
 ## Order, per entry point
 
@@ -32,27 +32,37 @@ missing boot scenes without waiting for them, then the coordinator records the g
 2. Close the old main scene, then the shared scenes (all of them with `ForceReloadContextualScenes`, otherwise only the
    ones the new group does not use). Manager scenes stay open.
 3. Release unused memory once.
-4. `OnSceneGroupUnloaded`.
+4. `OnSceneGroupUnloaded` with the group that closed.
 5. Open manager scenes, shared scenes, then the main scene. `OnMainSceneLoaded` fires as the main scene becomes active.
    A scene that throws is logged by name and stops the change.
 6. Finish step (`EndSceneChange`): clear "busy", then record the open shared and manager scenes, make the group the active
    one, then `OnNewSceneGroupTransitionTo` once. A listener that reads `SceneActions.ActiveSceneGroup` sees the new group.
    After a failed load nothing is recorded and `OnNewSceneGroupTransitionTo` is not sent.
 
-**Preload** (`PreloadSceneGroup`): closes any earlier preloaded scenes, opens the group's scenes held at 90% without
-activating them (no `OnMainSceneLoaded`), then `OnSceneGroupPreloaded`. Nothing in Rally Shift preloads today, but
-`RallyLevelTranistioner` switches to a preloaded group when one exists.
+**Preload** (`PreloadSceneGroup`):
+1. Nothing happens when the group is the open level or is already preloaded.
+2. Start step, as above. A preload is refused while any scene change runs.
+3. An earlier preload is closed first: its held main scene first, then its other scenes, then unused memory is released
+   once. Replacing a preload counts as a scene change for the memory release.
+4. Open the manager and shared scenes that are not open yet, then the main scene, held at 90% without activating it (no
+   `OnMainSceneLoaded`). Only the main scene is held, because Unity holds every later scene operation while a scene
+   waits. A shared scene that is already open is never opened a second time, even with `ForceReloadContextualScenes`.
+5. `OnSceneGroupPreloaded`. A preload that fails closes what it opened and raises nothing.
 
 **Switch to preloaded** (`TransitionToPreloadedSceneGroup`):
-1. No "busy" check (**B5**).
-2. Activate the held scenes. The loader's shortcut for held scenes returns early, so the level is **not** made the active
-   scene and `OnMainSceneLoaded` does not fire (**B4**).
-3. Close the old main and shared scenes, release unused memory once, `OnSceneGroupUnloaded`.
-4. `OnPreloadedSceneGroupActivated` instead of `OnNewSceneGroupTransitionTo`, so its listeners never hear of the new
-   level (**B10**).
+1. Start step, as above. Refused while any scene change runs.
+2. Activate the held main scene. The loader makes it the active scene and raises `OnMainSceneLoaded`. This comes first
+   because Unity holds the close and open steps below while the main scene waits.
+3. Close the old main scene and the shared scenes that must reload (all open ones with `ForceReloadContextualScenes`,
+   otherwise the ones the new group does not use), release unused memory once, `OnSceneGroupUnloaded` with the group
+   that closed.
+4. Open the shared scenes that are still missing. The ones the preload opened stay as they are.
+5. Finish step (`EndSceneChange`): as for go to a level, and the preload record is cleared before the event. Then
+   `OnNewSceneGroupTransitionTo` once, then `OnPreloadedSceneGroupActivated`.
 
-Go to a level and Retry raise "new level" at the same point, once, after everything has loaded. Switch to preloaded
-still raises a different message (**B10**).
+Known limits of preload, on `.scratch/scene-coordinator/map.md`: go to a level while a preload is held stalls the change
+(Unity holds the unloads), so nothing may call preload until ticket 04 settles that. A force-reloaded shared scene opens
+after the level is active in a switch, not before.
 
 ## Who listens in Rally Shift
 
@@ -62,7 +72,7 @@ still raises a different message (**B10**).
 | | `GameplaySystems/Car/CarSubsystems/CarGhostRecorder/LevelGhostSaveLibrary.cs` | Writes ghosts to disk if a run changed them |
 | | `ProjectServices/levelMusicPlayer/LevelMusicPlayer.cs` | Fades out the current level music |
 | | `ProjectServices/PlatformServices/Achievements/Core/AchievementManager.cs` | Sends pending achievements to Steam |
-| `OnMainSceneLoaded` | `Assets/SceneUtility/SceneToObjectChanger.cs` | Turns objects on or off for the scene that just became active. Misses a preloaded switch (**B4**) |
+| `OnMainSceneLoaded` | `Assets/SceneUtility/SceneToObjectChanger.cs` | Turns objects on or off for the scene that just became active. Also hears a preloaded switch now |
 | `OnSceneGroupUnloaded`, `OnSceneGroupPreloaded`, `OnPreloadedSceneGroupActivated` | none | |
 
 Rally paths are under `Assets/[1]Project/` unless shown otherwise. Many other systems read
