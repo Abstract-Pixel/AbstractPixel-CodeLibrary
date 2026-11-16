@@ -8,15 +8,29 @@ namespace AbstractPixel.SceneManagement
     /// scene API, so it can be tested without opening a scene.
     /// Manager scenes are never closed. Going to the group that is already open (Retry) gives a plan that closes and
     /// reopens the main scene, and the shared scenes too when the group force reloads them.
+    /// Two more cases exist for preload: <see cref="ForPreload"/> opens only what is not open, and a plan made while
+    /// <see cref="OpenScenes.PreloadedScenes"/> is filled skips the scenes the preload already opened.
     /// </summary>
     internal class SceneChangePlan
     {
-        /// <summary>The scenes that are open before the change.</summary>
+        private enum Kind
+        {
+            Change,
+            Preload,
+        }
+
+        /// <summary>The scenes that exist before the change.</summary>
         internal class OpenScenes
         {
             public SceneReference MainScene;
             public HashSet<SceneReference> ManagerialScenes = new HashSet<SceneReference>();
             public HashSet<SceneReference> ContextualScenes = new HashSet<SceneReference>();
+
+            /// <summary>
+            /// Scenes a preload of the target group opened and is holding. The main scene is among them. Filled only when
+            /// the change is a switch to a preloaded group.
+            /// </summary>
+            public HashSet<SceneReference> PreloadedScenes = new HashSet<SceneReference>();
         }
 
         public SceneGroup TargetGroup { get; }
@@ -32,18 +46,43 @@ namespace AbstractPixel.SceneManagement
         /// <summary>The manager scenes that are open once the change has finished.</summary>
         public HashSet<SceneReference> ManagerialOpenAfter { get; }
 
-        public SceneChangePlan(SceneGroup _targetGroup, OpenScenes _open)
+        /// <summary>True when a preload already opened some of the target's scenes (a switch to a preloaded group).</summary>
+        public bool UsesPreloadedScenes { get; }
+
+        public SceneChangePlan(SceneGroup _targetGroup, OpenScenes _open) : this(_targetGroup, _open, Kind.Change)
         {
+        }
+
+        /// <summary>
+        /// The scenes a preload opens: the main scene (held back by the coordinator) and every manager or shared scene
+        /// that is not open yet. A shared scene that is open stays as it is, even when the group force reloads it,
+        /// because a second copy of it must never open. Nothing is closed.
+        /// </summary>
+        public static SceneChangePlan ForPreload(SceneGroup _targetGroup, OpenScenes _open)
+        {
+            return new SceneChangePlan(_targetGroup, _open, Kind.Preload);
+        }
+
+        private SceneChangePlan(SceneGroup _targetGroup, OpenScenes _open, Kind _kind)
+        {
+            bool isPreload = _kind == Kind.Preload;
+            HashSet<SceneReference> preloaded = _open.PreloadedScenes;
+            UsesPreloadedScenes = preloaded.Count > 0;
             TargetGroup = _targetGroup;
-            MainSceneToClose = _open.MainScene;
+            MainSceneToClose = null;
+            if (!isPreload)
+            {
+                MainSceneToClose = _open.MainScene;
+            }
             MainSceneToOpen = _targetGroup.MainScene;
 
             HashSet<SceneReference> targetContextual = new HashSet<SceneReference>(_targetGroup.ContextualBootScenesList);
-            if (_targetGroup.ForceReloadContextualScenes)
+            bool reloadSharedScenes = _targetGroup.ForceReloadContextualScenes && !isPreload;
+            if (reloadSharedScenes)
             {
                 // Shared scenes hold per-run state, so every one is closed and opened again.
                 ContextualToClose = new HashSet<SceneReference>(_open.ContextualScenes);
-                ContextualToOpen = targetContextual;
+                ContextualToOpen = new HashSet<SceneReference>(targetContextual);
             }
             else
             {
@@ -54,15 +93,30 @@ namespace AbstractPixel.SceneManagement
                 ContextualToOpen.ExceptWith(_open.ContextualScenes);
             }
 
+            if (isPreload)
+            {
+                ContextualToClose.Clear();
+            }
+            ContextualToOpen.ExceptWith(preloaded);
+
             ManagerialToOpen = new HashSet<SceneReference>(_targetGroup.ManagerialBootScenesList);
             ManagerialToOpen.ExceptWith(_open.ManagerialScenes);
+            ManagerialToOpen.ExceptWith(preloaded);
+
+            // Scenes the preload opened are already part of the target group, so they are open once the change ends.
+            HashSet<SceneReference> preloadedContextual = new HashSet<SceneReference>(targetContextual);
+            preloadedContextual.IntersectWith(preloaded);
+            HashSet<SceneReference> preloadedManagerial = new HashSet<SceneReference>(_targetGroup.ManagerialBootScenesList);
+            preloadedManagerial.IntersectWith(preloaded);
 
             ContextualOpenAfter = new HashSet<SceneReference>(_open.ContextualScenes);
             ContextualOpenAfter.ExceptWith(ContextualToClose);
             ContextualOpenAfter.UnionWith(ContextualToOpen);
+            ContextualOpenAfter.UnionWith(preloadedContextual);
 
             ManagerialOpenAfter = new HashSet<SceneReference>(_open.ManagerialScenes);
             ManagerialOpenAfter.UnionWith(ManagerialToOpen);
+            ManagerialOpenAfter.UnionWith(preloadedManagerial);
         }
     }
 }

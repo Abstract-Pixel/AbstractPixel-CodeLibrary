@@ -49,7 +49,7 @@ namespace AbstractPixel.SceneManagement
             bool isManagerialNull = ManagerialBootScenesList == null || ManagerialBootScenesList.Count == 0;
             bool isContextualNull = ContextualBootScenesList == null || ContextualBootScenesList.Count == 0;
 
-            bool isSceneGroupNull = isContextualNull && isManagerialNull && isManagerialNull;
+            bool isSceneGroupNull = isMainSceneNull && isManagerialNull && isContextualNull;
             return isSceneGroupNull;
         }
 

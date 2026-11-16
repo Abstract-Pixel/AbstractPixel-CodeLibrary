@@ -12,7 +12,10 @@ namespace AbstractPixel.SceneManagement
     {
         internal HashSet<SceneReference> activeManagerialScenesSet = new HashSet<SceneReference>();
         internal HashSet<SceneReference> activeContextualScenesSet = new HashSet<SceneReference>();
+
+        /// <summary>Every scene the current preload opened, the held main scene included. Cleared, never null.</summary>
         internal HashSet<SceneReference> preloadedContextualScenesSet = new HashSet<SceneReference>();
+        private SceneReference preloadedMainScene = null;
         [field: SerializeField, ReadOnly] internal SceneReference activeMainScene = null;
         [field: SerializeField, ReadOnly] internal SceneGroup preloadedSceneGroup = null;
         [field: SerializeField, ReadOnly] internal SceneGroup activeSceneGroup = null;
@@ -49,17 +52,38 @@ namespace AbstractPixel.SceneManagement
                 Debug.LogError("No preloaded scene group available for transition.");
                 return;
             }
-            if (preloadedSceneGroup.MainScene == activeMainScene || SceneManager.GetActiveScene().name == preloadedSceneGroup.MainScene.SceneName)
+            if (!TryBeginSceneChange())
             {
-                preloadedSceneGroup = null;
-                preloadedContextualScenesSet.Clear();
+                return;
+            }
+
+            SceneGroup groupToActivate = preloadedSceneGroup;
+            bool isAlreadyActive = groupToActivate.MainScene == activeMainScene
+                                   || SceneManager.GetActiveScene().name == groupToActivate.MainScene.SceneName;
+            if (isAlreadyActive)
+            {
+                ClearPreload();
+                MarkSceneChangeFinished();
                 Debug.LogWarning("Preloaded scene group is already active. Transition skipped and preloaded scene group cleared.");
                 return;
             }
-            await ExecuteTransitionToPreloaded(preloadedSceneGroup);
-            SceneEventBus.RaiseOnPreloadedSceneGroupActivated(preloadedSceneGroup);
-            preloadedContextualScenesSet = null;
-            preloadedContextualScenesSet?.Clear();
+
+            currentLoadingSceneGroup = groupToActivate;
+            SceneChangePlan plan = CreatePlanForPreloaded(groupToActivate);
+            bool succeeded = false;
+            try
+            {
+                succeeded = await ExecuteSwitchToPreloaded(plan);
+            }
+            finally
+            {
+                EndSceneChange(groupToActivate, plan, succeeded);
+            }
+
+            if (succeeded)
+            {
+                SceneEventBus.RaiseOnPreloadedSceneGroupActivated(groupToActivate);
+            }
         }
 
         internal async Task TransitionToSceneGroup(SceneGroup _sceneGroup)
@@ -88,53 +112,49 @@ namespace AbstractPixel.SceneManagement
             }
         }
 
+        /// <summary>
+        /// Opens the group in the background and holds back only its main scene. A group that is already preloaded is
+        /// kept. A different earlier preload is closed first.
+        /// </summary>
         internal async Task PreloadSceneGroup(SceneGroup _sceneGroup)
         {
-            if (IsLoadingSceneGroup || IsUnloadingSceneGroup)
-            {
-                Debug.LogWarning("A scene transition is already in progress! Ignoring preloading request.");
-                return;
-            }
-            if (_sceneGroup.MainScene == activeMainScene || _sceneGroup == preloadedSceneGroup ||
-                            SceneManager.GetActiveScene().name == _sceneGroup.MainScene.SceneName)
+            bool isAlreadyActiveOrPreloaded = _sceneGroup.MainScene == activeMainScene
+                                              || _sceneGroup == preloadedSceneGroup
+                                              || SceneManager.GetActiveScene().name == _sceneGroup.MainScene.SceneName;
+            if (isAlreadyActiveOrPreloaded)
             {
                 return;
             }
-
-            if (preloadedSceneGroup != null)
+            if (!TryBeginSceneChange())
             {
-                foreach (SceneReference scene in preloadedContextualScenesSet)
-                {
-                    await SceneLoader.UnloadScene(scene);
-
-                }
-                preloadedContextualScenesSet.Clear();
-                preloadedSceneGroup = null;
+                return;
             }
-            SceneTransitionContext transitionContext = new SceneTransitionContext(this, _sceneGroup, false);
-            transitionContext.GetTransitionContext(out HashSet<SceneReference> contextualToUnload,
-                                                   out HashSet<SceneReference> contextualToLoad,
-                                                   out HashSet<SceneReference> managerialToLoad);
 
-            SceneChangePlan plan = CreatePlanFor(_sceneGroup);
             ThreadPriority defaultPriority = Application.backgroundLoadingPriority;
             Application.backgroundLoadingPriority = ThreadPriority.Low;
-            IsLoadingSceneGroup = true;
+            bool succeeded = false;
             try
             {
-                await LoadSceneGroup(plan, transitionContext.doImmediateSceneActivation);
+                await DiscardPreload();
+                SceneChangePlan plan = CreatePreloadPlanFor(_sceneGroup);
+                RememberPreloadedScenes(plan);
+                succeeded = await LoadSceneGroup(plan, false);
+                if (!succeeded)
+                {
+                    await DiscardPreload();
+                }
             }
             finally
             {
-                IsLoadingSceneGroup = false;
                 Application.backgroundLoadingPriority = defaultPriority;
+                MarkSceneChangeFinished();
             }
 
-            preloadedContextualScenesSet.UnionWith(contextualToLoad);
-            preloadedContextualScenesSet.UnionWith(managerialToLoad);
-            preloadedContextualScenesSet.Add(_sceneGroup.MainScene);
-            preloadedSceneGroup = _sceneGroup;
-            SceneEventBus.RaiseOnSceneGroupPreloaded(_sceneGroup);
+            if (succeeded)
+            {
+                preloadedSceneGroup = _sceneGroup;
+                SceneEventBus.RaiseOnSceneGroupPreloaded(_sceneGroup);
+            }
         }
 
         /// <summary>
@@ -190,9 +210,7 @@ namespace AbstractPixel.SceneManagement
         /// </summary>
         private void EndSceneChange(SceneGroup _group, SceneChangePlan _plan, bool _succeeded)
         {
-            currentLoadingSceneGroup = null;
-            IsLoadingSceneGroup = false;
-            IsUnloadingSceneGroup = false;
+            MarkSceneChangeFinished();
 
             if (!_succeeded)
             {
@@ -204,45 +222,120 @@ namespace AbstractPixel.SceneManagement
             activeContextualScenesSet = new HashSet<SceneReference>(_plan.ContextualOpenAfter);
             activeMainScene = _group.MainScene;
             activeSceneGroup = _group;
+            if (_plan.UsesPreloadedScenes)
+            {
+                // The preload is used up. It is cleared before the event, so a listener may preload the next level.
+                ClearPreload();
+            }
             SceneEventBus.RaiseOnNewSceneTransitionedTo(_group);
         }
 
+        private void MarkSceneChangeFinished()
+        {
+            currentLoadingSceneGroup = null;
+            IsLoadingSceneGroup = false;
+            IsUnloadingSceneGroup = false;
+        }
+
         private SceneChangePlan CreatePlanFor(SceneGroup _targetGroup)
+        {
+            SceneChangePlan.OpenScenes openScenes = CreateOpenScenes();
+            return new SceneChangePlan(_targetGroup, openScenes);
+        }
+
+        private SceneChangePlan CreatePreloadPlanFor(SceneGroup _targetGroup)
+        {
+            SceneChangePlan.OpenScenes openScenes = CreateOpenScenes();
+            return SceneChangePlan.ForPreload(_targetGroup, openScenes);
+        }
+
+        private SceneChangePlan CreatePlanForPreloaded(SceneGroup _targetGroup)
+        {
+            SceneChangePlan.OpenScenes openScenes = CreateOpenScenes();
+            openScenes.PreloadedScenes = new HashSet<SceneReference>(preloadedContextualScenesSet);
+            return new SceneChangePlan(_targetGroup, openScenes);
+        }
+
+        private SceneChangePlan.OpenScenes CreateOpenScenes()
         {
             SceneChangePlan.OpenScenes openScenes = new SceneChangePlan.OpenScenes();
             openScenes.MainScene = activeMainScene;
             openScenes.ManagerialScenes = new HashSet<SceneReference>(activeManagerialScenesSet);
             openScenes.ContextualScenes = new HashSet<SceneReference>(activeContextualScenesSet);
-            return new SceneChangePlan(_targetGroup, openScenes);
+            return openScenes;
         }
 
-        private async Task ExecuteTransitionToPreloaded(SceneGroup _sceneGroup)
+        /// <summary>
+        /// Switch to a preloaded group. The held main scene activates first, because Unity holds every later scene
+        /// operation while it waits. Then the old level and the shared scenes that must reload close, and the shared
+        /// scenes that are still missing open. Scenes the preload opened are left alone.
+        /// </summary>
+        private async Task<bool> ExecuteSwitchToPreloaded(SceneChangePlan _plan)
         {
-            SceneChangePlan plan = CreatePlanFor(_sceneGroup);
-            IsLoadingSceneGroup = true;
-            IsUnloadingSceneGroup = true;
+            bool mainSceneActivated = await TryLoadScene(_plan.MainSceneToOpen, true, true);
+            if (!mainSceneActivated)
+            {
+                return false;
+            }
+
+            await UnloadSceneGroup(_plan);
+            return await LoadSharedScenes(_plan);
+        }
+
+        /// <summary>Remembers the scenes a preload is about to open, so they can be closed again if it is replaced.</summary>
+        private void RememberPreloadedScenes(SceneChangePlan _plan)
+        {
+            preloadedContextualScenesSet.UnionWith(_plan.ManagerialToOpen);
+            preloadedContextualScenesSet.UnionWith(_plan.ContextualToOpen);
+            preloadedContextualScenesSet.Add(_plan.MainSceneToOpen);
+            preloadedMainScene = _plan.MainSceneToOpen;
+        }
+
+        private void ClearPreload()
+        {
+            preloadedContextualScenesSet.Clear();
+            preloadedMainScene = null;
+            preloadedSceneGroup = null;
+        }
+
+        /// <summary>
+        /// Closes the scenes of an earlier preload. Replacing a preload counts as a scene change for the memory release:
+        /// without it the old level's assets would stay in memory next to the new preload.
+        /// </summary>
+        private async Task DiscardPreload()
+        {
+            if (preloadedContextualScenesSet.Count == 0)
+            {
+                preloadedSceneGroup = null;
+                return;
+            }
+
+            // The held main scene closes first. Unity holds every later scene operation, unloads included, while it waits.
+            HashSet<SceneReference> otherScenes = new HashSet<SceneReference>(preloadedContextualScenesSet);
+            otherScenes.Remove(preloadedMainScene);
+            List<SceneReference> scenesToClose = new List<SceneReference>();
+            scenesToClose.Add(preloadedMainScene);
+            scenesToClose.AddRange(otherScenes);
+            ClearPreload();
             try
             {
-                await LoadSceneGroup(plan, true);
-                await UnloadSceneGroup(plan);
-            }
-            finally
-            {
-                IsLoadingSceneGroup = false;
-                IsUnloadingSceneGroup = false;
-                currentLoadingSceneGroup = null;
-            }
+                foreach (SceneReference scene in scenesToClose)
+                {
+                    await SceneLoader.UnloadScene(scene);
+                }
 
-            activeContextualScenesSet.ExceptWith(plan.ContextualToClose);
-            preloadedContextualScenesSet.Clear();
-            preloadedSceneGroup = null;
-            activeManagerialScenesSet.UnionWith(plan.ManagerialToOpen);
-            activeMainScene = _sceneGroup.MainScene;
-            activeSceneGroup = _sceneGroup;
+                await SceneLoader.ReleaseUnusedMemory();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
+        /// <remarks>Raises <see cref="SceneEventBus.OnSceneGroupUnloaded"/> with the group that closed.</remarks>
         private async Task UnloadSceneGroup(SceneChangePlan _plan)
         {
+            SceneGroup groupThatCloses = activeSceneGroup;
             // Managerial scenes are never unloaded by the coordinator, it is expected to be unloaded after game exit
             try
             {
@@ -268,34 +361,60 @@ namespace AbstractPixel.SceneManagement
             {
                 Debug.LogException(ex);
             }
-            SceneEventBus.RaiseOnSceneGroupUnloaded(_plan.TargetGroup);
+
+            if (groupThatCloses != null)
+            {
+                SceneEventBus.RaiseOnSceneGroupUnloaded(groupThatCloses);
+            }
         }
 
+        /// <summary>Opens the manager scenes, the shared scenes and then the main scene.</summary>
+        /// <param name="_activateMainScene">False holds the main scene back (preload). Other scenes always activate.</param>
         /// <returns>False when a scene failed to load. The failing scene is logged.</returns>
-        private async Task<bool> LoadSceneGroup(SceneChangePlan _plan, bool _activateImmediately)
+        private async Task<bool> LoadSceneGroup(SceneChangePlan _plan, bool _activateMainScene)
         {
-            SceneReference sceneBeingLoaded = null;
+            bool sharedScenesLoaded = await LoadSharedScenes(_plan);
+            if (!sharedScenesLoaded)
+            {
+                return false;
+            }
+
+            return await TryLoadScene(_plan.MainSceneToOpen, _activateMainScene, true);
+        }
+
+        private async Task<bool> LoadSharedScenes(SceneChangePlan _plan)
+        {
+            foreach (SceneReference scene in _plan.ManagerialToOpen)
+            {
+                bool loaded = await TryLoadScene(scene, true, false);
+                if (!loaded)
+                {
+                    return false;
+                }
+            }
+            foreach (SceneReference scene in _plan.ContextualToOpen)
+            {
+                bool loaded = await TryLoadScene(scene, true, false);
+                if (!loaded)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private async Task<bool> TryLoadScene(SceneReference _scene, bool _activate, bool _isMainScene)
+        {
             try
             {
-                foreach (SceneReference scene in _plan.ManagerialToOpen)
-                {
-                    sceneBeingLoaded = scene;
-                    await SceneLoader.LoadScene(scene, true, _activateImmediately);
-                }
-                foreach (SceneReference scene in _plan.ContextualToOpen)
-                {
-                    sceneBeingLoaded = scene;
-                    await SceneLoader.LoadScene(scene, true, _activateImmediately);
-                }
-
-                sceneBeingLoaded = _plan.MainSceneToOpen;
-                await SceneLoader.LoadScene(sceneBeingLoaded, true, _activateImmediately, true);
+                await SceneLoader.LoadScene(_scene, true, _activate, _isMainScene);
                 return true;
             }
             catch (Exception ex)
             {
                 Debug.LogException(ex);
-                Debug.LogError($"[SceneCoordinator] Failed to load scene '{sceneBeingLoaded.SceneName}'.");
+                Debug.LogError($"[SceneCoordinator] Failed to load scene '{_scene.SceneName}'.");
                 return false;
             }
         }

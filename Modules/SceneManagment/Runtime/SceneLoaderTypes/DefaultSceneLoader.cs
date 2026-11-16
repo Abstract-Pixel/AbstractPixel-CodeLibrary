@@ -3,7 +3,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
-using System;
 
 
 namespace AbstractPixel.SceneManagement
@@ -21,11 +20,14 @@ namespace AbstractPixel.SceneManagement
 
             if (sceneLoadHandles.TryGetValue(sceneReference.SceneName, out AsyncOperation operationHandle))
             {
+                // The scene is already loaded and held back by an earlier preload. Asking for it again activates it.
                 if (sceneActivatedByDefault && !operationHandle.allowSceneActivation)
                 {
-                    operationHandle.allowSceneActivation = true;
-                    await operationHandle.AsTask();
-                    sceneLoadHandles.Remove(sceneReference.SceneName);
+                    await ActivateHeldScene(sceneReference, operationHandle);
+                    if (isMainScene)
+                    {
+                        MakeActiveMainScene(sceneReference);
+                    }
                 }
                 return;
             }
@@ -41,12 +43,10 @@ namespace AbstractPixel.SceneManagement
 
             if (sceneLoadHandle.allowSceneActivation)
             {
-   
                 await sceneLoadHandle.AsTask();
-                if(isMainScene)
+                if (isMainScene)
                 {
-                    SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneReference.SceneName));
-                    SceneEventBus.RaiseOnMainSceneLoaded(sceneReference);
+                    MakeActiveMainScene(sceneReference);
                 }
             }
             else
@@ -66,16 +66,32 @@ namespace AbstractPixel.SceneManagement
                 Debug.LogError(" scene reference provided to unload is null.");
                 return;
             }
+            if (sceneLoadHandles.TryGetValue(sceneReference.SceneName, out AsyncOperation heldHandle))
+            {
+                // Unity cannot cancel a held load and the scene is not unloadable until it has activated. It opens
+                // without becoming the active scene, and is closed again below.
+                await ActivateHeldScene(sceneReference, heldHandle);
+            }
+
             AsyncOperation sceneUnLoadHandle = SceneManager.UnloadSceneAsync(sceneReference.SceneName, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
             if (sceneUnLoadHandle == null)
             {
                 return;
             }
-            if (sceneLoadHandles.TryGetValue(sceneReference.SceneName, out AsyncOperation operationHandle))
-            {
-                sceneLoadHandles.Remove(sceneReference.SceneName);
-            }
             await sceneUnLoadHandle.AsTask();
+        }
+
+        private async Task ActivateHeldScene(SceneReference _sceneReference, AsyncOperation _heldHandle)
+        {
+            sceneLoadHandles.Remove(_sceneReference.SceneName);
+            _heldHandle.allowSceneActivation = true;
+            await _heldHandle.AsTask();
+        }
+
+        private static void MakeActiveMainScene(SceneReference _sceneReference)
+        {
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(_sceneReference.SceneName));
+            SceneEventBus.RaiseOnMainSceneLoaded(_sceneReference);
         }
 
         public async Task ReleaseUnusedMemory()
