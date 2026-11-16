@@ -27,6 +27,7 @@ namespace AbstractPixel.SceneManagement.Tests
             rig.Coordinator = coordinatorObject.AddComponent<SceneCoordinator>();
             rig.Loader = new RecordingSceneLoader();
             rig.Coordinator.SetSceneLoader(rig.Loader);
+            PinSingletonInstance(rig.Coordinator);
             rig.StartGroup = rig.CreateLevelGroup(_levelName);
             rig.Coordinator.InitializeStartSceneGroup(rig.StartGroup);
             return rig;
@@ -52,6 +53,14 @@ namespace AbstractPixel.SceneManagement.Tests
 
             group.Initialize(managerialScenes, contextualScenes, new SceneReference(_levelName), _forceReload);
             return group;
+        }
+
+        // Awake does nothing in EditMode, so SceneCoordinator.Instance would search the open scenes and could find the
+        // game's own coordinator (ManagerBootScene has one) instead of this test's. Pinning makes the test's the instance.
+        private static void PinSingletonInstance(SceneCoordinator _coordinator)
+        {
+            System.Reflection.FieldInfo instanceField = typeof(PersistentSingleton<SceneCoordinator>).GetField("instance", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            instanceField.SetValue(null, _coordinator);
         }
 
         public void Dispose()
