@@ -29,6 +29,13 @@ namespace AbstractPixel.SaveSystem
 
         void OnDisable()
         {
+            // While its scene unloads, Unity reports every object as switched off. That isn't the player turning it
+            // off, so keep the last real value; otherwise reloading the scene would always bring the object back off.
+            bool isSceneUnloading = !gameObject.scene.isLoaded;
+            if (isSceneUnloading)
+            {
+                return;
+            }
             isActive = gameObject.activeSelf;
         }
 

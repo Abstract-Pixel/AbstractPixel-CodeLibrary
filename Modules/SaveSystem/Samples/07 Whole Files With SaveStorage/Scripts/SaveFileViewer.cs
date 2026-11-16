@@ -63,45 +63,43 @@ namespace AbstractPixel.SaveSystem.Samples.WholeFiles
 
         void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(20, 20, 700, 700));
-            GUILayout.Label($"Visits (a [Save] field in this file): {VisitCounter.Visits}");
-            GUILayout.Label("File: " + (IsGameProfileOpen ? SaveStorage.GetFilePath<SaveFiles.GameProfile>() : "none, no game profile is open"));
-
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Count a visit"))
+            SampleGui.BeginPanel(20, 20, 820, "The GameProfile file, as text", IsGameProfileOpen ? SaveStorage.GetFilePath<SaveFiles.GameProfile>() : "No game profile is open, so there is no file.");
+            SampleGui.BeginRow();
+            SampleGui.Value("Visits, a [Save] field in this file: ", VisitCounter.Visits.ToString());
+            GUILayout.FlexibleSpace();
+            if (SampleGui.SmallButton("Count a visit", 200))
             {
                 VisitCounter.CountAVisit();
             }
-            if (GUILayout.Button("Save"))
-            {
-                SaveActions.SaveAll();
-                ReadFile();
-            }
-            if (GUILayout.Button("Read the file again"))
-            {
-                ReadFile();
-            }
-            GUILayout.EndHorizontal();
+            SampleGui.EndRow();
 
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Copy the file's text"))
+            SampleGui.Section("Whole file with SaveStorage");
+            SampleGui.BeginRow();
+            if (SampleGui.Button("Read the file again"))
+            {
+                ReadFile();
+            }
+            if (SampleGui.Button("Copy the file's text"))
             {
                 GUIUtility.systemCopyBuffer = FileText;
             }
-            if (GUILayout.Button("Paste text into the file"))
+            if (SampleGui.Button("Paste text into the file"))
             {
                 WriteFile(GUIUtility.systemCopyBuffer);
             }
-            if (GUILayout.Button("Delete the file"))
+            if (SampleGui.Button("Delete the file"))
             {
                 DeleteFile();
             }
-            GUILayout.EndHorizontal();
+            SampleGui.EndRow();
 
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Height(520));
-            GUILayout.TextArea(FileText);
+            // Read-only: the file changes only through the buttons above, so nothing typed here is silently lost.
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Height(300));
+            SampleGui.Code(FileText);
             GUILayout.EndScrollView();
-            GUILayout.EndArea();
+
+            SampleGui.Footer(ReadFile);
+            SampleGui.EndPanel();
         }
     }
 }

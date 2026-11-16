@@ -252,6 +252,22 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.AreEqual(1, saveAllCount, "Saving one file doesn't count as Save All.");
         }
 
+        // A Save button must always answer, even when nothing changed since the last save.
+        [Test]
+        public void SaveAll_TellsAnOpenFileItIsSaved_EvenWithNothingNewToWrite()
+        {
+            StartSaveSystem();
+            SaveActions.GameProfiles.CreateNew().Open();
+            SaveActions.Register(new PlayerHealth { Current = 30 }, "player-health");
+            SaveActions.SaveAll();
+            List<Type> savedFiles = new List<Type>();
+            SaveEventBus.OnSaveCompleted += saveFileClass => savedFiles.Add(saveFileClass);
+
+            SaveActions.SaveAll();
+
+            CollectionAssert.Contains(savedFiles, typeof(TestGameFile));
+        }
+
         [Test]
         public void GameProfileOpened_IsSticky_AndHandsOutTheGameProfile()
         {

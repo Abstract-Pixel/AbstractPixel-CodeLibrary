@@ -38,6 +38,14 @@ namespace AbstractPixel.SaveSystem
 
         public bool IsRead(string key) => filesByKey.ContainsKey(key);
 
+        // Open files that hold saved data, one name per save file even when a Scene save file is open for several
+        // scenes. A file nothing was ever saved in (Input, Achievements in a game that doesn't use them) is left out.
+        public IReadOnlyList<string> FileNamesWithSavedData => filesByKey.Values
+            .Where(file => file.Data.Entries.Count > 0)
+            .Select(file => file.Data.FileName)
+            .Distinct()
+            .ToList();
+
         /// <summary>Reads the save file the first time anything needs it. Later calls use the copy in memory.</summary>
         public void EnsureRead(SaveFileAddress address)
         {

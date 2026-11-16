@@ -76,20 +76,22 @@ namespace AbstractPixel.SaveSystem.Samples.SaveSlots
 
         void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(20, 20, 640, 700));
             bool isAnyGameProfileOpen = SaveActions.GameProfiles.Current != null;
             if (isAnyGameProfileOpen)
             {
-                GUILayout.Label($"Points in the open game profile: {score.Points}");
-                if (GUILayout.Button("Add 100 points"))
+                SampleGui.BeginPanel(20, 20, 600, "Playing", "Each game profile keeps its own points.");
+                SampleGui.Value("Points: ", score.Points.ToString());
+                SampleGui.BeginRow();
+                if (SampleGui.Button("Add 100 points"))
                 {
                     AddPoints();
                 }
-                if (GUILayout.Button("Save"))
+                if (SampleGui.Button("Save"))
                 {
                     Save();
                 }
-                if (GUILayout.Button("Back to the main menu (save and close)"))
+                SampleGui.EndRow();
+                if (SampleGui.Button("Back to the main menu"))
                 {
                     BackToMainMenu();
                 }
@@ -99,46 +101,49 @@ namespace AbstractPixel.SaveSystem.Samples.SaveSlots
                 DrawMainMenu();
             }
 
-            GUILayout.Space(10);
-            GUILayout.Label($"Game profiles, by slot number ({SaveActions.GameProfiles.Count} in total)");
+            SampleGui.Section($"Game profiles ({SaveActions.GameProfiles.Count})");
             foreach (GameProfile profile in SaveActions.GameProfiles.All)
             {
                 DrawSlot(profile);
             }
-            if (GUILayout.Button("Create game profile"))
+            if (SampleGui.Button("Create game profile"))
             {
                 CreateGameProfile();
             }
-            GUILayout.EndArea();
+            SampleGui.EndPanel();
         }
 
         void DrawMainMenu()
         {
-            GUILayout.Label("Main menu: no game profile is open.");
+            SampleGui.BeginPanel(20, 20, 600, "Main menu", "No game profile is open. Continue opens the last one.");
             GameProfile lastOpened = SaveActions.GameProfiles.LastOpened;
             GUI.enabled = lastOpened != null;
             string continueLabel = lastOpened == null ? "Continue (no saves yet)" : $"Continue {lastOpened.DisplayName}";
-            if (GUILayout.Button(continueLabel))
+            if (SampleGui.Button(continueLabel))
             {
                 Continue();
             }
             GUI.enabled = true;
         }
 
+        // Two lines per slot: its name, then when it was last saved and how long it was played.
         void DrawSlot(GameProfile profile)
         {
-            string openMarker = profile.IsOpen ? "> " : "";
-            GUILayout.BeginHorizontal();
-            GUILayout.Label($"{openMarker}Slot {profile.SlotNumber}: {profile.DisplayName}   last saved: {FormatLastSaved(profile.LastSaved)}   playtime: {FormatPlaytime(profile.Playtime)}");
-            if (!profile.IsOpen && GUILayout.Button("Open", GUILayout.Width(60)))
+            string openMarker = profile.IsOpen ? "  (open)" : "";
+            SampleGui.BeginRow();
+            GUILayout.BeginVertical();
+            SampleGui.Value($"Slot {profile.SlotNumber}: ", profile.DisplayName + openMarker);
+            SampleGui.Hint($"Last saved {FormatLastSaved(profile.LastSaved)} · played {FormatPlaytime(profile.Playtime)}");
+            GUILayout.EndVertical();
+            if (!profile.IsOpen && SampleGui.SmallButton("Open", 100))
             {
                 OpenSlot(profile.SlotNumber);
             }
-            if (GUILayout.Button("Delete", GUILayout.Width(60)))
+            if (SampleGui.SmallButton("Delete", 100))
             {
                 DeleteSlot(profile.SlotNumber);
             }
-            GUILayout.EndHorizontal();
+            SampleGui.EndRow();
         }
 
         static string FormatLastSaved(DateTime? lastSaved)

@@ -12,6 +12,24 @@ namespace AbstractPixel.SaveSystem.Samples.ButtonsWithNoCode.Tests
     {
         const string SceneName = "Buttons With No Code";
 
+        // The hint tells the player to drag the crate in the Game view, so the crate must follow the pointer there.
+        [UnityTest]
+        public IEnumerator TheCrate_FollowsThePointer_WhenDraggedInTheGameView()
+        {
+            yield return SampleScenes.LoadAndWait(SceneName);
+            DragInGameView crate = GameObject.Find("Crate").GetComponent<DragInGameView>();
+            Camera viewCamera = Camera.main;
+            Vector3 startPosition = crate.transform.position;
+            Vector3 crateOnScreen = viewCamera.WorldToScreenPoint(startPosition);
+
+            crate.StartDragging(viewCamera.ScreenPointToRay(crateOnScreen), viewCamera.transform.forward);
+            crate.DragAlong(viewCamera.ScreenPointToRay(crateOnScreen + new Vector3(200f, 0f, 0f)));
+            crate.StopDragging();
+
+            Assert.Greater(crate.transform.position.x, startPosition.x + 0.5f, "Dragging right moves the crate right.");
+            Assert.AreEqual(startPosition.z, crate.transform.position.z, 0.001f, "The crate moves across the screen, not toward the camera.");
+        }
+
         [UnityTest]
         public IEnumerator TheCrateLampAndCoin_KeepTheirState_AfterSavingWithAButton()
         {
@@ -39,10 +57,18 @@ namespace AbstractPixel.SaveSystem.Samples.ButtonsWithNoCode.Tests
             Assert.IsFalse(FindIncludingInactive("Lamp").activeSelf, "Save Active State keeps the lamp off.");
             Assert.IsNull(GameObject.Find("Coin"), "Save Destroyed keeps the picked-up coin gone.");
 
-            // Turning the lamp back on works after a reload too.
+            // Turning the lamp back on works after a reload too, and saving remembers it.
             Press("Turn The Lamp On Button");
             yield return null;
             Assert.IsTrue(FindIncludingInactive("Lamp").activeSelf);
+            savedLabel = FindIncludingInactive("Saved Label");
+            savedLabel.SetActive(false);
+            Press("Save Button");
+            Assert.IsTrue(savedLabel.activeSelf, "Saving after turning the lamp back on shows the Saved label.");
+
+            yield return SampleScenes.LoadAndWait(SceneName);
+
+            Assert.IsTrue(FindIncludingInactive("Lamp").activeSelf, "The lamp was turned back on and saved, so it stays on.");
 
             testGameProfile.Delete();
             if (previousGameProfile != null)
@@ -54,10 +80,7 @@ namespace AbstractPixel.SaveSystem.Samples.ButtonsWithNoCode.Tests
         static void Press(string buttonName)
         {
             GameObject buttonObject = GameObject.Find(buttonName);
-            if (buttonObject == null)
-            {
-                return;
-            }
+            Assert.IsNotNull(buttonObject, $"The sample scene has no active button named '{buttonName}'.");
             buttonObject.GetComponent<Button>().onClick.Invoke();
         }
 

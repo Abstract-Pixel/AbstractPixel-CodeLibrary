@@ -213,7 +213,11 @@ namespace AbstractPixel.SaveSystem
                 return;
             }
 
-            isRegistered = RegisterTargets();
+            bool registeredEveryTarget = RegisterTargets();
+            // A restore can switch this object off in the middle of registering (Save Active State, a gone marker).
+            // Its OnDisable has already unregistered it, so it must count as unregistered and register again when
+            // it is switched back on. Otherwise it stays switched on but is never saved again.
+            isRegistered = registeredEveryTarget && isActiveAndEnabled;
         }
 
         // A Savable Bridge Awoken after its own scene already became ready is a spawned copy, not one of the

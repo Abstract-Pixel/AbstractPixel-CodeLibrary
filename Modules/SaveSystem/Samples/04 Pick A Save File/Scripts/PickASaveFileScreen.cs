@@ -67,57 +67,67 @@ namespace AbstractPixel.SaveSystem.Samples.PickASaveFile
 
         void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(20, 20, 460, 640));
-            GUILayout.Label($"Scene: {SceneManager.GetActiveScene().name}   Game profile: {OpenGameProfileName()}");
-            GUILayout.Label($"This scene's Scene file loaded {SceneFileLoadCount} time(s)");
+            // Left: one value per save file, each with the one button that changes it. Right: what to do with them.
+            SampleGui.BeginPanel(20, 20, 440, SceneManager.GetActiveScene().name, $"Game profile: {OpenGameProfileName()} · Scene file loaded {SceneFileLoadCount}×");
 
-            GUILayout.Label($"Settings (Global) - volume: {volume.Volume}");
-            if (GUILayout.Button("Volume up"))
+            SampleGui.Section("Settings file (Global)");
+            SampleGui.BeginRow();
+            SampleGui.Value("Volume: ", volume.Volume.ToString());
+            if (SampleGui.SmallButton("Volume up", 160))
             {
                 volume.VolumeUp();
             }
+            SampleGui.EndRow();
 
-            GUILayout.Label($"GameProfile - coins: {coins.Coins}");
-            if (GUILayout.Button("Add 5 coins"))
+            SampleGui.Section("GameProfile file");
+            SampleGui.BeginRow();
+            SampleGui.Value("Coins: ", coins.Coins.ToString());
+            if (SampleGui.SmallButton("Add 5 coins", 160))
             {
                 coins.Add(5);
             }
+            SampleGui.EndRow();
 
+            SampleGui.Section("Scene file");
             foreach (Chest chest in chests)
             {
-                GUILayout.Label($"Scene - {chest.name}: {(chest.IsOpen ? "open" : "closed")}");
-                if (!chest.IsOpen && GUILayout.Button($"Open {chest.name}"))
+                SampleGui.BeginRow();
+                SampleGui.Value($"{chest.name}: ", chest.IsOpen ? "open" : "closed");
+                if (!chest.IsOpen && SampleGui.SmallButton("Open", 160))
                 {
                     chest.Open();
                 }
+                SampleGui.EndRow();
             }
+            SampleGui.EndPanel();
 
-            GUILayout.Space(10);
-            if (GUILayout.Button("Save everything"))
+            SampleGui.BeginPanel(480, 20, 360, "Save and switch");
+            if (SampleGui.Button("Save everything"))
             {
                 SaveEverything();
             }
-            if (GUILayout.Button("Save only the settings"))
+            if (SampleGui.Button("Save only the settings"))
             {
                 SaveOnlyTheSettings();
             }
-            if (GUILayout.Button("Undo unsaved coins"))
+            if (SampleGui.Button("Undo unsaved coins"))
             {
                 UndoUnsavedCoins();
             }
-            if (GUILayout.Button($"Go to {otherSceneName}"))
+            SampleGui.Section("Switch");
+            if (SampleGui.Button($"Go to {otherSceneName}"))
             {
                 GoToOtherScene();
             }
-            if (GUILayout.Button("New game profile"))
+            if (SampleGui.Button("New game profile"))
             {
                 NewGameProfile();
             }
-            if (GUILayout.Button("Next game profile"))
+            if (SampleGui.Button("Next game profile"))
             {
                 NextGameProfile();
             }
-            GUILayout.EndArea();
+            SampleGui.EndPanel();
         }
 
         // Reloading the scene resets every object to its new-game values, then restores the opened game profile's data.

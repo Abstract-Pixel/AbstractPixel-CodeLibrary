@@ -46,7 +46,8 @@ namespace AbstractPixel.SaveSystem.Editor
         public Func<JToken> CaptureLiveValues;
 
         public Func<string> GetSaveId;
-        public bool IsWaitingForSetSaveId;
+        // Asked on every refresh, because a spawned copy stops waiting the moment SetSaveId is called.
+        public Func<bool> IsWaitingForSetSaveId = () => false;
         public bool ShowsSpawnedCopyNote;
 
         /// <summary>What the card's Ping button selects in the Editor. Null for a plain class, which has nothing to ping.</summary>
@@ -71,7 +72,7 @@ namespace AbstractPixel.SaveSystem.Editor
             {
                 ViewDataKey = target.Identification.GUID,
                 GetSaveId = () => bridge.GetSaveId(target),
-                IsWaitingForSetSaveId = bridge.IsWaitingForSetSaveId,
+                IsWaitingForSetSaveId = () => bridge != null && bridge.IsWaitingForSetSaveId,
                 ShowsSpawnedCopyNote = IsPrefabAssetOrPrefabMode(bridge.gameObject),
                 BlockingMistakes = SavedScriptMistakes.BlockingMistakesOf(scriptType, fields),
                 MissingConfigRowWarning = SaveFileRowCheck.ProblemWith(scriptType, SaveSystemConfigFinder.FindInProject())

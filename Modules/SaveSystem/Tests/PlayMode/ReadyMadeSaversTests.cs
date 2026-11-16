@@ -94,6 +94,53 @@ namespace AbstractPixel.SaveSystem.PlayModeTests
             Assert.IsTrue(lampNextTime.gameObject.activeSelf);
         }
 
+        // The lamp bug: a lamp restored "off" while it registered could be switched on again, but was never saved again.
+        [UnityTest]
+        public IEnumerator SaveActiveState_RestoredOff_CanBeTurnedBackOn_AndRemembersBeingOn()
+        {
+            SaveActiveState lamp = CreateSceneObject<SaveActiveState>();
+            yield return null;
+            lamp.gameObject.SetActive(false);
+            SaveActions.SaveAll();
+            yield return null;
+
+            Relaunch();
+            SaveActiveState lampNextTime = CreateSceneObject<SaveActiveState>();
+            yield return null;
+            Assert.IsFalse(lampNextTime.gameObject.activeSelf, "The lamp was saved off, so it starts off.");
+            lampNextTime.gameObject.SetActive(true);
+            yield return null;
+            SaveActions.SaveAll();
+
+            Relaunch();
+            SaveActiveState lampThirdTime = CreateSceneObject<SaveActiveState>();
+            yield return null;
+            Assert.IsTrue(lampThirdTime.gameObject.activeSelf, "The lamp was turned back on and saved, so it starts on.");
+        }
+
+        // Unity reports every object as switched off while its scene unloads, so reloading a scene must not turn
+        // an object that was on into one that comes back off.
+        [UnityTest]
+        public IEnumerator SaveActiveState_StaysOn_AfterItsSceneUnloadsAndLoadsAgain()
+        {
+            UnityEngine.SceneManagement.Scene lampScene = UnityEngine.SceneManagement.SceneManager.CreateScene("Lamp Scene For Tests");
+            GameObject lampObject = CreateSceneGameObject<SaveActiveState>();
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(lampObject, lampScene);
+            lampObject.SetActive(true);
+            yield return null;
+            yield return null;
+
+            AsyncOperation unloading = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(lampScene);
+            while (!unloading.isDone)
+            {
+                yield return null;
+            }
+
+            SaveActiveState lampAfterTheReload = CreateSceneObject<SaveActiveState>();
+            yield return null;
+            Assert.IsTrue(lampAfterTheReload.gameObject.activeSelf, "The lamp was on when its scene unloaded, so it comes back on.");
+        }
+
         [UnityTest]
         public IEnumerator SaveActiveState_StaysOn_WhenItWasNeverTurnedOff()
         {

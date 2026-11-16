@@ -25,30 +25,14 @@ namespace AbstractPixel.SaveSystem.Samples.CustomData
 
         void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(20, 20, 360, 500));
-            GUILayout.Label("Inventory (a plain C# class, saved in the game profile)");
-            foreach (string item in Inventory.Items)
-            {
-                GUILayout.Label("  - " + item);
-            }
-
-            if (GUILayout.Button("Find an item"))
+            SampleGui.BeginPanel(20, 20, 440, "Inventory", "A plain C# class with ISavable, saved in the game profile.");
+            SampleGui.Label(Inventory.Items.Count == 0 ? "(empty)" : string.Join(", ", Inventory.Items));
+            if (SampleGui.Button("Find an item"))
             {
                 Inventory.Add(FindableItems[Random.Range(0, FindableItems.Length)]);
             }
-            if (GUILayout.Button("Drop the last item") && Inventory.Items.Count > 0)
-            {
-                Inventory.Remove(Inventory.Items[Inventory.Items.Count - 1]);
-            }
-            if (GUILayout.Button("Save"))
-            {
-                SaveActions.SaveAll();
-            }
-            if (GUILayout.Button("Reload scene"))
-            {
-                SampleScenes.Reload();   // in your game: SceneManager.LoadScene(SceneManager.GetActiveScene().name)
-            }
-            GUILayout.EndArea();
+            SampleGui.Footer();
+            SampleGui.EndPanel();
         }
     }
 }

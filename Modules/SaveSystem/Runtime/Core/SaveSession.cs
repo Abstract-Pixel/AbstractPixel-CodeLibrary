@@ -180,13 +180,17 @@ namespace AbstractPixel.SaveSystem
         public void SaveAll()
         {
             SavedObjects.CaptureAll();
-            List<string> writtenFileNames = new List<string>();
             List<string> failedFileNames = new List<string>();
-            loadedData.WriteChanged(null, writtenFileNames, failedFileNames);
+            loadedData.WriteChanged(null, null, failedFileNames);
             FinishSave();
-            foreach (string fileName in writtenFileNames)
+            // Like Save(definition): a file with nothing new to write counts as saved, so a Save button always
+            // answers. Only a failed write is left out.
+            foreach (string fileName in loadedData.FileNamesWithSavedData)
             {
-                events.RaiseSaveCompleted(fileName);
+                if (!failedFileNames.Contains(fileName))
+                {
+                    events.RaiseSaveCompleted(fileName);
+                }
             }
             foreach (string fileName in failedFileNames)
             {

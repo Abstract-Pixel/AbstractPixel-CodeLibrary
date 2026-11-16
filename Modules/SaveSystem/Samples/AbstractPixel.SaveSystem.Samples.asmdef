@@ -2,7 +2,8 @@
     "name": "AbstractPixel.SaveSystem.Samples",
     "rootNamespace": "AbstractPixel.SaveSystem.Samples",
     "references": [
-        "AbstractPixel.SaveSystem"
+        "AbstractPixel.SaveSystem",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

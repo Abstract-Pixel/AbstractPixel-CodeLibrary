@@ -277,7 +277,7 @@ namespace AbstractPixel.SaveSystem.Editor
             }
 
             UpdateRevealedSaveId();
-            waitingHelpBox.style.display = description.IsWaitingForSetSaveId && IsPlaying ? DisplayStyle.Flex : DisplayStyle.None;
+            waitingHelpBox.style.display = description.IsWaitingForSetSaveId() && IsPlaying ? DisplayStyle.Flex : DisplayStyle.None;
 
             if (!foldout.value || !IsPlaying)
             {

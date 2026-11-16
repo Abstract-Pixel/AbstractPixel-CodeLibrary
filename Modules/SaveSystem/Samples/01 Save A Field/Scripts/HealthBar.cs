@@ -17,11 +17,10 @@ namespace AbstractPixel.SaveSystem.Samples.SaveAField
 
         void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(20, 20, 360, 120));
-            GUILayout.Label($"Health: {health.Current} / {Health.Max}");
-            GUILayout.HorizontalSlider(health.Current, 0, Health.Max);
-            GUILayout.Label($"Health read in Start: {ValueReadInStart}");
-            GUILayout.EndArea();
+            SampleGui.BeginPanel(20, 20, 380, "Health", "A [Save] field on a MonoBehaviour.");
+            SampleGui.Value("Health: ", $"{health.Current} / {Health.Max}");
+            SampleGui.Value("Read in Start: ", ValueReadInStart.ToString());
+            SampleGui.EndPanel();
         }
     }
 }

@@ -19,28 +19,21 @@ namespace AbstractPixel.SaveSystem.Samples.ScriptableObjectSample
 
         void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(20, 20, 360, 300));
-            GUILayout.Label("Game Progress (a ScriptableObject asset, saved in the game profile)");
-            GUILayout.Label($"Levels completed: {progress.LevelsCompleted}");
-            GUILayout.Label($"Stars: {progress.Stars}");
-
-            if (GUILayout.Button("Complete a level"))
+            SampleGui.BeginPanel(20, 20, 440, "Game Progress", "A ScriptableObject asset, saved in the game profile.");
+            SampleGui.Value("Levels completed: ", progress.LevelsCompleted.ToString());
+            SampleGui.Value("Stars: ", progress.Stars.ToString());
+            SampleGui.BeginRow();
+            if (SampleGui.Button("Complete a level"))
             {
                 progress.LevelsCompleted++;
             }
-            if (GUILayout.Button("Earn a star"))
+            if (SampleGui.Button("Earn a star"))
             {
                 progress.Stars++;
             }
-            if (GUILayout.Button("Save"))
-            {
-                SaveActions.SaveAll();
-            }
-            if (GUILayout.Button("Reload scene"))
-            {
-                SampleScenes.Reload();   // in your game: SceneManager.LoadScene(SceneManager.GetActiveScene().name)
-            }
-            GUILayout.EndArea();
+            SampleGui.EndRow();
+            SampleGui.Footer();
+            SampleGui.EndPanel();
         }
     }
 }

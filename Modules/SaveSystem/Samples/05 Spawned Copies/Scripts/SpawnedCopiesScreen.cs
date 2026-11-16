@@ -13,44 +13,36 @@ namespace AbstractPixel.SaveSystem.Samples.SpawnedCopies
 
         void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(20, 20, 420, 600));
-            GUILayout.Label("Goblins (spawned copies of one prefab, each with its own save ID)");
+            SampleGui.BeginPanel(20, 20, 520, "Goblins", "Spawned copies of one prefab, each with its own save ID.");
 
             // A copy of the keys, because Defeat changes the dictionary while the buttons are drawn.
             List<KeyValuePair<string, Goblin>> goblins = spawner.LivingGoblins.ToList();
             foreach (KeyValuePair<string, Goblin> pair in goblins)
             {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label($"{pair.Key}: health {pair.Value.Health} / {Goblin.MaxHealth}");
-                if (GUILayout.Button("Hit", GUILayout.Width(60)))
+                SampleGui.BeginRow();
+                SampleGui.Value($"{pair.Key}: ", $"{pair.Value.Health} / {Goblin.MaxHealth}");
+                if (SampleGui.SmallButton("Hit", 80))
                 {
                     pair.Value.Hit();
                 }
-                if (GUILayout.Button("Defeat", GUILayout.Width(70)))
+                if (SampleGui.SmallButton("Defeat", 110))
                 {
                     spawner.Defeat(pair.Key);
                 }
-                GUILayout.EndHorizontal();
+                SampleGui.EndRow();
             }
             if (goblins.Count == 0)
             {
-                GUILayout.Label("  Every goblin is defeated.");
+                SampleGui.Label("Every goblin is defeated.");
             }
 
-            GUILayout.Space(10);
-            if (GUILayout.Button("Bring every goblin back"))
+            GUILayout.Space(6f);
+            if (SampleGui.Button("Bring every goblin back"))
             {
                 spawner.BringEveryGoblinBack();
             }
-            if (GUILayout.Button("Save"))
-            {
-                SaveActions.SaveAll();
-            }
-            if (GUILayout.Button("Reload scene"))
-            {
-                SampleScenes.Reload();   // in your game: SceneManager.LoadScene(SceneManager.GetActiveScene().name)
-            }
-            GUILayout.EndArea();
+            SampleGui.Footer();
+            SampleGui.EndPanel();
         }
     }
 }
