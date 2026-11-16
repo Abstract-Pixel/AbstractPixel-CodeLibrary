@@ -33,17 +33,23 @@ namespace AbstractPixel.Core.Editor
                 // 2. NOW, re-fetch the asset to get the NEW value.
                 sceneAsset = GetSceneAsset(sceneAssetProperty);
 
-                // 3. Run your logic using the NEW asset.
-                if (sceneAsset == null)
+                // 3. Copy the asset's name, GUID and path, so the scene is known by its asset.
+                SerializedProperty sceneGuidProperty = property.FindPropertyRelative("sceneGuid");
+                SerializedProperty scenePathProperty = property.FindPropertyRelative("scenePath");
+                string assetPath = string.Empty;
+                if (sceneAsset != null)
                 {
-                    sceneNameProperty.stringValue = string.Empty;
+                    assetPath = AssetDatabase.GetAssetPath(sceneAsset);
                 }
-                else
+                sceneNameProperty.stringValue = string.Empty;
+                if (sceneAsset != null)
                 {
                     sceneNameProperty.stringValue = sceneAsset.name;
                 }
+                scenePathProperty.stringValue = assetPath;
+                sceneGuidProperty.stringValue = AssetDatabase.AssetPathToGUID(assetPath);
 
-                // 4. It's good practice to apply this final modification as well.
+                // 4. Apply the copied values as well.
                 sceneNameProperty.serializedObject.ApplyModifiedProperties();
 
             }
