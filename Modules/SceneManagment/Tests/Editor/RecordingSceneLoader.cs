@@ -29,6 +29,15 @@ namespace AbstractPixel.SceneManagement.Tests
         /// <summary>Follow Unity's rule for a held scene. On by default, so every test is realistic.</summary>
         public bool FollowHeldSceneRule = true;
 
+        /// <summary>Every held scene that was let through activation (by loading it again, or by closing it), in order.</summary>
+        public readonly List<string> ActivatedScenes = new List<string>();
+
+        /// <summary>Every scene that was closed, in order.</summary>
+        public readonly List<string> ClosedScenes = new List<string>();
+
+        /// <summary>The main scene the loader made active, or null.</summary>
+        public string ActiveSceneName { get; private set; }
+
         /// <summary>The name of the scene that waits for activation, or null.</summary>
         public string HeldScene { get; private set; }
 
@@ -62,6 +71,14 @@ namespace AbstractPixel.SceneManagement.Tests
             if (isAskingForTheHeldScene && sceneActivatedByDefault)
             {
                 HeldScene = null;
+                ActivatedScenes.Add(sceneName);
+            }
+
+            if (sceneActivatedByDefault && isMainScene)
+            {
+                // Contract rule 3: an activated main scene becomes the active scene and is announced.
+                ActiveSceneName = sceneName;
+                SceneEventBus.RaiseOnMainSceneLoaded(sceneReference);
             }
 
             if (!sceneActivatedByDefault && FollowHeldSceneRule)
@@ -86,6 +103,13 @@ namespace AbstractPixel.SceneManagement.Tests
             {
                 // Unity activates a held scene before it can close it.
                 HeldScene = null;
+                ActivatedScenes.Add(sceneName);
+            }
+
+            ClosedScenes.Add(sceneName);
+            if (sceneName == ActiveSceneName)
+            {
+                ActiveSceneName = null;
             }
 
             if (UnloadGate != null)
