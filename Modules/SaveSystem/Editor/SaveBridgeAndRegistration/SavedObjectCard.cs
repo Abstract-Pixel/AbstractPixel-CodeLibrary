@@ -40,6 +40,11 @@ namespace AbstractPixel.SaveSystem.Editor
         SavedObjectDescription description;
         bool saveIdRevealed;
 
+        Foldout dataFoldout;
+        Label nowValueLabel;
+        Label lastLoadedValueLabel;
+        Label inFileValueLabel;
+
         public SavedObjectCard()
         {
             AddToClassList("saved-object-card");
@@ -137,8 +142,99 @@ namespace AbstractPixel.SaveSystem.Editor
             body.Add(waitingHelpBox);
             BuildSaveIdArea();
             BuildPingButton();
+            BuildDataFoldout();
 
             RefreshLiveValues();
+        }
+
+        // Play-mode only: "Now" (CaptureLiveValues again, in full, un-truncated), "Last loaded" (SaveActivity's
+        // record of the last restore) and "In the save file" (SaveSession.TryGetEntryJson, read-only: it never
+        // marks LoadedSaveData.ChangedKeys dirty). Closed by default, so opening it is always a deliberate look.
+        void BuildDataFoldout()
+        {
+            dataFoldout = new Foldout { text = "Data", value = false };
+            dataFoldout.AddToClassList("saved-object-card__data-foldout");
+            dataFoldout.viewDataKey = $"AbstractPixel.SaveSystem.SavedObjectCard.Data.{description.ViewDataKey}";
+            dataFoldout.RegisterValueChangedCallback(_ => RefreshDataFoldout());
+            body.Add(dataFoldout);
+
+            (VisualElement Row, Label Value) nowRow = BuildDataRow("Now");
+            (VisualElement Row, Label Value) lastLoadedRow = BuildDataRow("Last loaded");
+            (VisualElement Row, Label Value) inFileRow = BuildDataRow("In the save file");
+            nowValueLabel = nowRow.Value;
+            lastLoadedValueLabel = lastLoadedRow.Value;
+            inFileValueLabel = inFileRow.Value;
+            dataFoldout.Add(nowRow.Row);
+            dataFoldout.Add(lastLoadedRow.Row);
+            dataFoldout.Add(inFileRow.Row);
+        }
+
+        (VisualElement Row, Label Value) BuildDataRow(string title)
+        {
+            VisualElement row = new VisualElement();
+            row.AddToClassList("saved-object-card__data-row");
+
+            Label titleLabel = new Label(title);
+            titleLabel.AddToClassList("saved-object-card__data-row-title");
+            row.Add(titleLabel);
+
+            Label value = new Label();
+            value.AddToClassList("saved-object-card__data-row-value");
+            row.Add(value);
+
+            Button copy = new Button(() => EditorGUIUtility.systemCopyBuffer = value.text) { text = "Copy" };
+            copy.AddToClassList("saved-object-card__data-row-copy");
+            row.Add(copy);
+
+            return (row, value);
+        }
+
+        void RefreshDataFoldout()
+        {
+            if (dataFoldout == null)
+            {
+                return;
+            }
+
+            dataFoldout.style.display = IsPlaying ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!IsPlaying || !dataFoldout.value)
+            {
+                return;
+            }
+
+            nowValueLabel.text = SafeJson(description.CaptureLiveValues);
+
+            SavedObjectEntry entry = description.FindRegisteredEntry();
+            if (entry != null && SaveActivity.TryGet(entry.SaveFileName, entry.SaveId, out SaveActivity.Record record) && record.LastRestoredJson != null)
+            {
+                lastLoadedValueLabel.text = record.LastRestoredJson;
+            }
+            else
+            {
+                lastLoadedValueLabel.text = "Not loaded this session.";
+            }
+
+            if (entry != null && SaveActions.Session != null && SaveActions.Session.TryGetEntryJson(entry, out string fileJson))
+            {
+                inFileValueLabel.text = fileJson;
+            }
+            else
+            {
+                inFileValueLabel.text = "Not in the save file.";
+            }
+        }
+
+        static string SafeJson(Func<JToken> captureLiveValues)
+        {
+            try
+            {
+                JToken captured = captureLiveValues();
+                return captured?.ToString(Newtonsoft.Json.Formatting.Indented) ?? "null";
+            }
+            catch (Exception exception)
+            {
+                return $"Couldn't read the values: {exception.Message}";
+            }
         }
 
         // Only the Saved Objects window gives a description something to ping.
@@ -277,6 +373,7 @@ namespace AbstractPixel.SaveSystem.Editor
             }
 
             UpdateRevealedSaveId();
+            RefreshDataFoldout();
             waitingHelpBox.style.display = description.IsWaitingForSetSaveId() && IsPlaying ? DisplayStyle.Flex : DisplayStyle.None;
 
             if (!foldout.value || !IsPlaying)

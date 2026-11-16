@@ -224,6 +224,29 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.AreEqual(9, StoredValue(GameFile, "player"));
         }
 
+        // 2.1: the runtime previewer's "In the save file" row reads this. It must never dirty a file merely by
+        // being looked at, or opening the previewer would make the next Save All write files nothing actually changed.
+        [Test]
+        public void TryGetEntryJson_ReturnsTheStoredJson_AndNeverMarksTheFileChanged()
+        {
+            StoreFile(GameFile, ("counter", 5));
+
+            Assert.IsTrue(loadedData.TryGetEntryJson(GameFile, "counter", out string json));
+
+            Assert.AreEqual("5", json);
+            CollectionAssert.IsEmpty(loadedData.ChangedKeys);
+        }
+
+        [Test]
+        public void TryGetEntryJson_NothingStoredForThatSaveId_ReturnsFalse()
+        {
+            StoreFile(GameFile, ("other", 5));
+
+            Assert.IsFalse(loadedData.TryGetEntryJson(GameFile, "counter", out string json));
+
+            Assert.IsNull(json);
+        }
+
         [Test]
         public void WrittenFile_UsesTheNameAndDataEntryShape()
         {

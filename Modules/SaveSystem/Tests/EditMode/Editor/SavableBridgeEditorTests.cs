@@ -108,7 +108,9 @@ namespace AbstractPixel.SaveSystem.Tests
 
             VisualElement root = CreateInspectorFor(bridge);
 
-            List<Foldout> foldouts = root.Query<Foldout>().ToList();
+            // 2.1: each card also has its own (closed) Data foldout, which this query is not about.
+            List<Foldout> foldouts = root.Query<Foldout>().ToList()
+                .Where(foldout => !foldout.ClassListContains("saved-object-card__data-foldout")).ToList();
             Assert.AreEqual(2, foldouts.Count);
             Assert.IsTrue(foldouts[0].text.StartsWith("FieldScript (1)"));
             Assert.IsTrue(foldouts[1].text.StartsWith("FieldScript (2)"));

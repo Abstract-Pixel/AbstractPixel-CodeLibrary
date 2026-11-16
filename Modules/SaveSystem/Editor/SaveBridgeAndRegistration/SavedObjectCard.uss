@@ -106,3 +106,27 @@
     white-space: nowrap;
     color: rgb(150, 150, 150);
 }
+
+.saved-object-card__data-foldout {
+    margin-top: 6px;
+}
+
+.saved-object-card__data-row {
+    margin-top: 2px;
+    margin-bottom: 4px;
+}
+
+.saved-object-card__data-row-title {
+    color: rgb(190, 190, 190);
+}
+
+.saved-object-card__data-row-value {
+    white-space: pre;
+    color: rgb(150, 150, 150);
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.saved-object-card__data-row-copy {
+    align-self: flex-start;
+}

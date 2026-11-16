@@ -53,6 +53,13 @@ namespace AbstractPixel.SaveSystem.Editor
         /// <summary>What the card's Ping button selects in the Editor. Null for a plain class, which has nothing to ping.</summary>
         public UnityEngine.Object PingTarget;
 
+        /// <summary>
+        /// The live SavedObjectEntry this script is registered under this play session, or null if it isn't
+        /// registered (edit mode, or a spawned copy still waiting for SetSaveId). The Data foldout reads
+        /// SaveActivity and the loaded save file through it.
+        /// </summary>
+        public Func<SavedObjectEntry> FindRegisteredEntry = () => null;
+
         /// <summary>Every blocking mistake on this saved script, with the same text the Console gets.</summary>
         public IReadOnlyList<string> BlockingMistakes;
 
@@ -77,6 +84,7 @@ namespace AbstractPixel.SaveSystem.Editor
                 BlockingMistakes = SavedScriptMistakes.BlockingMistakesOf(scriptType, fields),
                 MissingConfigRowWarning = SaveFileRowCheck.ProblemWith(scriptType, SaveSystemConfigFinder.FindInProject())
             };
+            description.FindRegisteredEntry = () => FindEntryFor(bridge, target);
 
             Type savableInterface = SavedScript.FindSavableInterface(scriptType);
             if (savableInterface != null)
@@ -110,7 +118,8 @@ namespace AbstractPixel.SaveSystem.Editor
                 GetSaveId = () => entry.SaveId,
                 BlockingMistakes = new List<string>(),
                 PingTarget = PingTargetOf(savedObject),
-                CaptureLiveValues = () => ToToken(entry.Capture(), serializer)
+                CaptureLiveValues = () => ToToken(entry.Capture(), serializer),
+                FindRegisteredEntry = () => entry
             };
 
             Type savableInterface = SavedScript.FindSavableInterface(savedType);
@@ -144,6 +153,25 @@ namespace AbstractPixel.SaveSystem.Editor
             }
             UnityEngine.Object unityObject = savedObject as UnityEngine.Object;
             return unityObject != null ? $"{className} ({unityObject.name})" : className;
+        }
+
+        // The bridge target registers itself under a save ID worked out only once play mode is running (a spawned
+        // copy's isn't known until SetSaveId), so the Data foldout looks the entry up by it instead of keeping one.
+        static SavedObjectEntry FindEntryFor(SavableBridge bridge, SavableTarget target)
+        {
+            if (SaveActions.Session == null)
+            {
+                return null;
+            }
+            string saveId = bridge.GetSaveId(target);
+            foreach (SavedObjectEntry entry in SaveActions.Session.SavedObjects.AllEntries)
+            {
+                if (entry.SaveId == saveId && ReferenceEquals(entry.Owner, bridge))
+                {
+                    return entry;
+                }
+            }
+            return null;
         }
 
         static UnityEngine.Object PingTargetOf(object savedObject)
