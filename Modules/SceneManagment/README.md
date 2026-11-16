@@ -1,16 +1,16 @@
 # Scene messages
 
 What `SceneEventBus` sends, in what order, and who listens in Project Rally Shift. Read from the code as of the
-`scene-system-rework` branch, session 1. Items marked **B4**, **B5**, **B6**, **B10** and **B13** are known
-inconsistencies. Session 2 of the scene system plan fixes them.
+`scene-system-rework` branch, after session 2A. Go to a level and Retry share one start step and one finish step. Items
+marked **B4**, **B5** and **B10** remain in the preload route. Session 2B fixes them.
 
 ## The messages
 
 | Message | Argument | Sent by |
 |---|---|---|
-| `OnNewSceneGroupTransitionTo` | the new group | Start-up, go to a level, Retry |
+| `OnNewSceneGroupTransitionTo` | the new group | Start-up, go to a level, Retry. Not sent when a scene fails to load |
 | `OnMainSceneLoaded` | the main scene | `DefaultSceneLoader`, after it activates a main scene and makes it the active scene |
-| `OnSceneGroupUnloaded` | the **new** group, not the one that closed | Go to a level, switch to preloaded |
+| `OnSceneGroupUnloaded` | the **new** group, not the one that closed | Go to a level, Retry, switch to preloaded |
 | `OnSceneGroupPreloaded` | the preloaded group | Preload |
 | `OnPreloadedSceneGroupActivated` | the preloaded group | Switch to preloaded |
 
@@ -24,15 +24,20 @@ messages from the fade system, not scene messages.
 missing boot scenes without waiting for them, then the coordinator records the group and sends
 `OnNewSceneGroupTransitionTo`. The boot scenes may still be loading at that moment.
 
-**Go to a level** (`TransitionToSceneGroup`):
-1. Close the old main scene, then the shared scenes. The "busy" flag is set only after the old main scene has closed, so a
-   second request in that window starts a second change (**B5**).
-2. Release unused memory once.
-3. `OnSceneGroupUnloaded`.
-4. Open manager scenes, shared scenes, then the main scene. `OnMainSceneLoaded` fires as the main scene becomes active.
-5. `OnNewSceneGroupTransitionTo`. It fires before `ActiveSceneGroup` is updated, so a listener that reads
-   `SceneActions.ActiveSceneGroup` sees the old group (**B13**). Load errors are logged and swallowed, so it also fires
-   after a failed load (**B6**).
+**Go to a level** (`TransitionToSceneGroup`) and **Retry** (`ReloadActiveSceneGroup`) share the same steps. A
+`SceneChangePlan` works out first which scenes to close and open. Retry is "go to the group that is already open".
+1. Start step (`TryBeginSceneChange`): if a scene change is already running, log a warning and refuse. Otherwise set
+   "busy" (`IsLoadingSceneGroup` and `IsUnloadingSceneGroup`) before the first `await`, so a second request in the same
+   frame is refused.
+2. Close the old main scene, then the shared scenes (all of them with `ForceReloadContextualScenes`, otherwise only the
+   ones the new group does not use). Manager scenes stay open.
+3. Release unused memory once.
+4. `OnSceneGroupUnloaded`.
+5. Open manager scenes, shared scenes, then the main scene. `OnMainSceneLoaded` fires as the main scene becomes active.
+   A scene that throws is logged by name and stops the change.
+6. Finish step (`EndSceneChange`): clear "busy", then record the open shared and manager scenes, make the group the active
+   one, then `OnNewSceneGroupTransitionTo` once. A listener that reads `SceneActions.ActiveSceneGroup` sees the new group.
+   After a failed load nothing is recorded and `OnNewSceneGroupTransitionTo` is not sent.
 
 **Preload** (`PreloadSceneGroup`): closes any earlier preloaded scenes, opens the group's scenes held at 90% without
 activating them (no `OnMainSceneLoaded`), then `OnSceneGroupPreloaded`. Nothing in Rally Shift preloads today, but
@@ -46,12 +51,8 @@ activating them (no `OnMainSceneLoaded`), then `OnSceneGroupPreloaded`. Nothing 
 4. `OnPreloadedSceneGroupActivated` instead of `OnNewSceneGroupTransitionTo`, so its listeners never hear of the new
    level (**B10**).
 
-**Retry** (`ReloadActiveSceneGroup`): sets "busy" first. Closes the main scene, then the shared scenes if the group has
-`ForceReloadContextualScenes`. Releases unused memory once. Reopens the shared scenes, then the main scene
-(`OnMainSceneLoaded`). Then `OnNewSceneGroupTransitionTo`, even if a step threw (**B6**). No `OnSceneGroupUnloaded`.
-Manager scenes stay open.
-
-So "new level" arrives at a different point in each entry point, or not at all (**B10**).
+Go to a level and Retry raise "new level" at the same point, once, after everything has loaded. Switch to preloaded
+still raises a different message (**B10**).
 
 ## Who listens in Rally Shift
 
