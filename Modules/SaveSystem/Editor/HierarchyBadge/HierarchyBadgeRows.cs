@@ -16,7 +16,6 @@ namespace AbstractPixel.SaveSystem.Editor
         /// <summary>USS class on every badge element. The probe and tests find badges by it.</summary>
         internal const string BadgeClass = "ap-hierarchy-badge";
 
-        const float BadgeWidth = 40f;
         const float BadgeHeight = 14f;
         const float DotSize = 6f;
 
@@ -81,9 +80,9 @@ namespace AbstractPixel.SaveSystem.Editor
 
         static VisualElement CreateLabel(HierarchyBadgeInfo badge)
         {
-            Label label = new Label("Saved") { tooltip = badge.Tooltip };
+            Label label = new Label(HierarchySavedBadge.LabelFor(badge.Kind)) { tooltip = badge.Tooltip };
             label.AddToClassList(BadgeClass);
-            label.style.width = BadgeWidth;
+            label.style.width = HierarchySavedBadge.BadgeWidth();
             label.style.height = BadgeHeight;
             label.style.alignSelf = Align.Center;
             label.style.marginLeft = 2f;
@@ -95,7 +94,7 @@ namespace AbstractPixel.SaveSystem.Editor
             label.style.fontSize = 9f;
             label.style.unityTextAlign = TextAnchor.MiddleCenter;
             label.style.color = Color.white;
-            label.style.backgroundColor = badge.Kind == HierarchyBadgeKind.Mistake ? HierarchySavedBadge.MistakeColor : HierarchySavedBadge.SavedColor;
+            label.style.backgroundColor = HierarchySavedBadge.ColorFor(badge.Kind);
             SetRadius(label.style, 3f);
             return label;
         }

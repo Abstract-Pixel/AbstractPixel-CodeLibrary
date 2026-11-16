@@ -9,8 +9,6 @@ namespace AbstractPixel.SaveSystem.Tests
     // T4: which Hierarchy rows get a badge, a red badge or a dot. The cache decides; HierarchyBadgeRowsTests checks the drawing.
     public class HierarchyBadgeTests
     {
-        sealed class UnlistedSaveFile : ISaveFile { }
-
         internal class ChestScript : MonoBehaviour
         {
             [Save] public int gold;
@@ -21,9 +19,9 @@ namespace AbstractPixel.SaveSystem.Tests
             [Save] public int count;
         }
 
-        class UnlistedFileScript : MonoBehaviour, ISaveIn<UnlistedSaveFile>
+        class UnbridgedScript : MonoBehaviour
         {
-            [Save] public int count;
+            [Save] public int gold;
         }
 
         readonly List<GameObject> gameObjects = new List<GameObject>();
@@ -32,6 +30,7 @@ namespace AbstractPixel.SaveSystem.Tests
         public void SetUp()
         {
             HierarchyBadgeCache.Clear();
+            SetupCheck.Forget();
         }
 
         [TearDown]
@@ -46,6 +45,7 @@ namespace AbstractPixel.SaveSystem.Tests
             }
             gameObjects.Clear();
             HierarchyBadgeCache.Clear();
+            SetupCheck.Forget();
         }
 
         [Test]
@@ -65,15 +65,16 @@ namespace AbstractPixel.SaveSystem.Tests
             Assert.AreEqual(HierarchyBadgeKind.None, HierarchyBadgeCache.Get(empty).Kind);
         }
 
+        // Edit mode has no running save system, so a script that was never saved to disk shows "Set up".
         [Test]
-        public void ASavedScript_GetsASavedBadge_NamingWhatItSaves()
+        public void ASavedScript_GetsASetUpBadge_NamingWhatItSaves()
         {
             GameObject chest = NewGameObject("Chest", null);
             AddSavedScript<ChestScript>(chest);
 
             HierarchyBadgeInfo badge = HierarchyBadgeCache.Get(chest);
 
-            Assert.AreEqual(HierarchyBadgeKind.Saved, badge.Kind);
+            Assert.AreEqual(HierarchyBadgeKind.SetUp, badge.Kind);
             Assert.AreEqual("Saves: Chest Script", badge.Tooltip);
         }
 
@@ -88,12 +89,13 @@ namespace AbstractPixel.SaveSystem.Tests
         }
 
         [Test]
-        public void AMistakeOnTheGameObject_GetsARedBadge()
+        public void AScriptWithNoBridge_GetsASetupWrongBadge()
         {
             GameObject broken = NewGameObject("Broken", null);
-            AddSavedScript<UnlistedFileScript>(broken);
+            broken.AddComponent<UnbridgedScript>();
+            SetupCheck.Forget();
 
-            Assert.AreEqual(HierarchyBadgeKind.Mistake, HierarchyBadgeCache.Get(broken).Kind);
+            Assert.AreEqual(HierarchyBadgeKind.SetupWrong, HierarchyBadgeCache.Get(broken).Kind);
         }
 
         [Test]
@@ -118,7 +120,7 @@ namespace AbstractPixel.SaveSystem.Tests
             AddSavedScript<ChestScript>(parent);
             AddSavedScript<ChestScript>(NewGameObject("Lid", parent));
 
-            Assert.AreEqual(HierarchyBadgeKind.Saved, HierarchyBadgeCache.Get(parent).Kind);
+            Assert.AreEqual(HierarchyBadgeKind.SetUp, HierarchyBadgeCache.Get(parent).Kind);
         }
 
         [Test]
@@ -146,7 +148,7 @@ namespace AbstractPixel.SaveSystem.Tests
             AddSavedScript<ChestScript>(chest);
             HierarchyBadgeCache.Clear();
 
-            Assert.AreEqual(HierarchyBadgeKind.Saved, HierarchyBadgeCache.Get(chest).Kind);
+            Assert.AreEqual(HierarchyBadgeKind.SetUp, HierarchyBadgeCache.Get(chest).Kind);
         }
 
         GameObject NewGameObject(string name, GameObject parent)

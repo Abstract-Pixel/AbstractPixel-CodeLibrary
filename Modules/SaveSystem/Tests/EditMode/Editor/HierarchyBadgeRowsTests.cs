@@ -46,8 +46,9 @@ namespace AbstractPixel.SaveSystem.Tests
             HierarchyBadgeCache.Clear();
         }
 
+        // Edit mode has no running save system, so a script that was never saved to disk shows "Set up", not "Saved".
         [UnityTest]
-        public IEnumerator ASavedGameObject_ShowsASavedBadgeOnItsRow()
+        public IEnumerator ASetUpGameObject_ShowsASetUpBadgeOnItsRow()
         {
             GameObject chest = NewSavedGameObject("Chest");
             EditorGUIUtility.PingObject(chest);
@@ -56,7 +57,7 @@ namespace AbstractPixel.SaveSystem.Tests
             Label badge = BadgeOn(chest) as Label;
 
             Assert.IsNotNull(badge, "The Chest row has no badge.");
-            Assert.AreEqual("Saved", badge.text);
+            Assert.AreEqual("Set up", badge.text);
             Assert.AreEqual("Saves: Chest Script", badge.tooltip);
             Assert.Greater(badge.worldBound.width, 0f, "The badge takes no space on the row.");
         }

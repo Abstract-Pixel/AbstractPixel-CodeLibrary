@@ -71,6 +71,9 @@ namespace AbstractPixel.SaveSystem.Editor
                     Directory.Delete(folder, true);
                 }
             }
+            // The Hierarchy badge's edit-mode "Saved" reading comes from these files; forget it so deleted
+            // objects go back to "Set up" without waiting for an unrelated hierarchy or object change.
+            HierarchySavedBadge.Forget();
             SaveLog.Info($"[SaveSystem] Deleted all save files in: {string.Join(", ", GetSaveFolders())}");
         }
 
