@@ -1,8 +1,8 @@
 # Scene messages
 
 What `SceneEventBus` sends, in what order, and who listens in Project Rally Shift. Read from the code as of the
-`scene-system-rework` branch, after session 2B. Go to a level, Retry, Preload and Switch to preloaded share one start step
-and one finish step. Nothing in Rally Shift calls preload yet.
+`scene-system-rework` branch, after session 3A. Go to a level, Retry, Preload and Switch to preloaded share one start step
+and one finish step. A preload is settled before any other scene change starts. Nothing in Rally Shift calls preload yet.
 
 ## The messages
 
@@ -29,13 +29,19 @@ missing boot scenes without waiting for them, then the coordinator records the g
 1. Start step (`TryBeginSceneChange`): if a scene change is already running, log a warning and refuse. Otherwise set
    "busy" (`IsLoadingSceneGroup` and `IsUnloadingSceneGroup`) before the first `await`, so a second request in the same
    frame is refused.
-2. Close the old main scene, then the shared scenes (all of them with `ForceReloadContextualScenes`, otherwise only the
+2. **Settle the preload** (`SettlePreloadBeforeChange`), before any scene closes. Unity holds every later scene
+   operation, unloads included, while a preloaded main scene waits, so a change that starts with a preload held would
+   never finish. With no preload this does nothing. When go to a level targets the preloaded group, the whole change
+   runs as **Switch to preloaded** below (one "new level", then `OnPreloadedSceneGroupActivated`) and the steps after
+   this one are skipped. For anything else (a different level, or Retry) the preload is discarded: the held main scene
+   closes first, then its other scenes. That discard does not release memory, because the change releases it once.
+3. Close the old main scene, then the shared scenes (all of them with `ForceReloadContextualScenes`, otherwise only the
    ones the new group does not use). Manager scenes stay open.
-3. Release unused memory once.
-4. `OnSceneGroupUnloaded` with the group that closed.
-5. Open manager scenes, shared scenes, then the main scene. `OnMainSceneLoaded` fires as the main scene becomes active.
+4. Release unused memory once.
+5. `OnSceneGroupUnloaded` with the group that closed.
+6. Open manager scenes, shared scenes, then the main scene. `OnMainSceneLoaded` fires as the main scene becomes active.
    A scene that throws is logged by name and stops the change.
-6. Finish step (`EndSceneChange`): clear "busy", then record the open shared and manager scenes, make the group the active
+7. Finish step (`EndSceneChange`): clear "busy", then record the open shared and manager scenes, make the group the active
    one, then `OnNewSceneGroupTransitionTo` once. A listener that reads `SceneActions.ActiveSceneGroup` sees the new group.
    After a failed load nothing is recorded and `OnNewSceneGroupTransitionTo` is not sent.
 
@@ -50,7 +56,9 @@ missing boot scenes without waiting for them, then the coordinator records the g
 5. `OnSceneGroupPreloaded`. A preload that fails closes what it opened and raises nothing.
 
 **Switch to preloaded** (`TransitionToPreloadedSceneGroup`):
-1. Start step, as above. Refused while any scene change runs.
+1. Start step, as above. Refused while any scene change runs. Go to a level to the preloaded group joins here, after its
+   own start step. If the preloaded group is already the open level, the held scene is closed, a warning is logged and
+   nothing else changes.
 2. Activate the held main scene. The loader makes it the active scene and raises `OnMainSceneLoaded`. This comes first
    because Unity holds the close and open steps below while the main scene waits.
 3. Close the old main scene and the shared scenes that must reload (all open ones with `ForceReloadContextualScenes`,
@@ -60,9 +68,11 @@ missing boot scenes without waiting for them, then the coordinator records the g
 5. Finish step (`EndSceneChange`): as for go to a level, and the preload record is cleared before the event. Then
    `OnNewSceneGroupTransitionTo` once, then `OnPreloadedSceneGroupActivated`.
 
-Known limits of preload, on `.scratch/scene-coordinator/map.md`: go to a level while a preload is held stalls the change
-(Unity holds the unloads), so nothing may call preload until ticket 04 settles that. A force-reloaded shared scene opens
-after the level is active in a switch, not before.
+The coordinator makes no scene load or unload call of its own: every open and close goes through `ISceneLoader`, whose
+four-rule held-scene contract is written on the interface and tested with the recording loader in `Tests/Editor`.
+
+Known limits of preload, on `.scratch/scene-coordinator/map.md`: a force-reloaded shared scene opens after the level is
+active in a switch, not before, and discarding a held preload lets its level wake for a moment before it closes.
 
 ## Who listens in Rally Shift
 
