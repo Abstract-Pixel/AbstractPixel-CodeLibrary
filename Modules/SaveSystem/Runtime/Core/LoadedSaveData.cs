@@ -141,6 +141,19 @@ namespace AbstractPixel.SaveSystem
             return GetOrRead(address).Data.Entries.TryGetValue(saveId, out SaveFileEntry stored) && stored.Gone;
         }
 
+        /// <summary>The entry's stored JSON for save ID, if its save file holds one. For the inspector's runtime previewer.</summary>
+        public bool TryGetEntryJson(SaveFileAddress address, string saveId, out string json)
+        {
+            LoadedFile file = GetOrRead(address);
+            if (file.Data.Entries.TryGetValue(saveId, out SaveFileEntry stored) && stored.Data != null)
+            {
+                json = stored.Data.ToString(Newtonsoft.Json.Formatting.Indented);
+                return true;
+            }
+            json = null;
+            return false;
+        }
+
         /// <summary>Removes one save ID's data on purpose, for example a coin that was picked up.</summary>
         public void Forget(SaveFileAddress address, string saveId)
         {
@@ -178,6 +191,7 @@ namespace AbstractPixel.SaveSystem
                     continue;
                 }
                 file.Changed = false;
+                SaveActivity.RecordWrite(file.Data.FileName, file.Data.Entries.Keys);
                 bool isFirstWriteOfThisFile = writtenFileNames != null && !writtenFileNames.Contains(file.Data.FileName);
                 if (isFirstWriteOfThisFile)
                 {
@@ -253,6 +267,8 @@ namespace AbstractPixel.SaveSystem
                 SaveLog.Error($"[SaveSystem] Restoring {whatIsRestored} '{entry.SaveId}' into {entry.Owner.GetType().Name} failed: {exception.Message} {consequence}");
                 return false;
             }
+
+            SaveActivity.RecordRestore(entry.SaveFileName, entry.SaveId, data.ToString(Newtonsoft.Json.Formatting.Indented));
 
             // Every restore path funnels through here, so this is the one place IOnRestored needs to fire from.
             NotifyRestored(entry);

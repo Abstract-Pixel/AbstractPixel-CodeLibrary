@@ -14,7 +14,7 @@ namespace AbstractPixel.SaveSystem.Editor
         public void OnProcessScene(Scene scene, BuildReport report)
         {
             // Unity also calls this for every scene loaded in play mode in the Editor, with no report. Throwing
-            // there would break the scene load; SavableBridgePlayModeCheck already logs that scene.
+            // there would break the scene load; SetupPlayModeGuard already blocked play mode for that scene.
             bool isABuild = report != null;
             if (isABuild)
             {

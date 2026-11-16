@@ -177,6 +177,17 @@ namespace AbstractPixel.SaveSystem
             SavedObjects.Track(entry);
         }
 
+        /// <summary>The entry's stored JSON, if its save file holds data for it. For the inspector's runtime previewer.</summary>
+        public bool TryGetEntryJson(SavedObjectEntry entry, out string json)
+        {
+            if (!addresses.TryGetAddress(entry, out SaveFileAddress address))
+            {
+                json = null;
+                return false;
+            }
+            return loadedData.TryGetEntryJson(address, entry.SaveId, out json);
+        }
+
         public void SaveAll()
         {
             SavedObjects.CaptureAll();

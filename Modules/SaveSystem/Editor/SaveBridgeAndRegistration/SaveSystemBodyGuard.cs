@@ -6,31 +6,15 @@ using UnityEngine;
 namespace AbstractPixel.SaveSystem.Editor
 {
     /// <summary>
-    /// Checks the project's saved scripts after every compile and before play mode: a script whose save file class
-    /// has no row in the save system config would save nothing, so it is reported with a link to the script.
+    /// Checks the project's saved scripts after every compile: a script whose save file class has no row in the
+    /// save system config would save nothing, so it is reported with a link to the script. SetupPlayModeGuard
+    /// blocks play mode on the same problem instead of only reporting it there.
     /// </summary>
-    [InitializeOnLoad]
     public static class SaveSystemBodyGuard
     {
-        static SaveSystemBodyGuard()
-        {
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-        }
-
         [DidReloadScripts]
         public static void OnScriptsReloaded()
         {
-            ValidateCodebase();
-        }
-
-        private static void OnPlayModeStateChanged(PlayModeStateChange _state)
-        {
-            if (_state != PlayModeStateChange.ExitingEditMode)
-            {
-                return;
-            }
-
-            // Only report. A dialog here would stop play mode for everyone, including automated test runs.
             ValidateCodebase();
         }
 

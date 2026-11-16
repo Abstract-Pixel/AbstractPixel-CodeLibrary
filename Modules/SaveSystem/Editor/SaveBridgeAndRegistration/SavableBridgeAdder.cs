@@ -11,7 +11,7 @@ namespace AbstractPixel.SaveSystem.Editor
     /// <summary>
     /// Adds a Savable Bridge to a GameObject with a saved script and none, while editing: SavableBridgeEditTimeWatcher
     /// calls this right after a saved script is added and after each compile. Never at play time or build time;
-    /// SavableBridgeSceneBuildGuard and SavableBridgePlayModeCheck report a scene that still needs one instead.
+    /// SavableBridgeSceneBuildGuard and SetupCheck report a scene that still needs one instead.
     /// </summary>
     internal static class SavableBridgeAdder
     {
@@ -28,8 +28,8 @@ namespace AbstractPixel.SaveSystem.Editor
         public static void EnsureBridges(IEnumerable<GameObject> gameObjects)
         {
             // Entering play mode reloads scripts, and objects change while playing, but a bridge added then never
-            // gets its ID (OnValidate skips play mode) and is lost at Stop. SavableBridgePlayModeCheck reports the
-            // scene instead.
+            // gets its ID (OnValidate skips play mode) and is lost at Stop. SetupCheck and SetupPlayModeGuard
+            // block play mode for that scene instead.
             bool isPlaying = IsPlayingOverrideForTests ?? EditorApplication.isPlayingOrWillChangePlaymode;
             if (isPlaying)
             {

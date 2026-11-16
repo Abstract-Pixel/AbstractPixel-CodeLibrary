@@ -100,6 +100,7 @@ namespace AbstractPixel.SaveSystem
             session?.Dispose();
             session = null;
             SaveEventBus.Clear();
+            SaveActivity.Reset();
         }
     }
 }

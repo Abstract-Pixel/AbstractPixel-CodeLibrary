@@ -1,15 +1,13 @@
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using AbstractPixel.SaveSystem.Editor;
 using NUnit.Framework;
 using UnityEditor.Build;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace AbstractPixel.SaveSystem.Tests
 {
-    // T3: a loaded scene with a saved script and no bridge fails the build and logs an error in play mode, instead
-    // of getting a bridge added for it there.
+    // T3: a loaded scene with a saved script and no bridge fails the build, instead of getting a bridge added for
+    // it there. 2.0: the same scene blocks play mode through SetupCheck and SetupPlayModeGuard; see SetupCheckTests.
     public class SavableBridgeSceneGuardTests
     {
         class FieldScript : MonoBehaviour
@@ -63,17 +61,6 @@ namespace AbstractPixel.SaveSystem.Tests
             gameObject.AddComponent<SavableBridge>();
 
             Assert.DoesNotThrow(() => SavableBridgeSceneBuildGuard.CheckScene(gameObject.scene));
-        }
-
-        [Test]
-        public void ASceneWithNoBridge_LogsOneErrorForPlayMode()
-        {
-            GameObject gameObject = new GameObject("Chest");
-            gameObjects.Add(gameObject);
-            gameObject.AddComponent<FieldScript>();
-
-            SaveLogAssert.Expect(LogType.Error, new Regex("no Savable Bridge.*Chest"));
-            SavableBridgePlayModeCheck.CheckScene(gameObject.scene);
         }
     }
 }
