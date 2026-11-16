@@ -1,6 +1,7 @@
 using AbstractPixel.Core;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
@@ -64,6 +65,7 @@ namespace AbstractPixel.SceneManagement
             bool isAddressable = await addressableCheck.IsAddressable(_scene);
             if (isAddressable)
             {
+                Debug.Log("[SceneLoader] '" + _scene.SceneName + "' is Addressable, opening it through Addressables.");
                 return addressablesLoader;
             }
 
