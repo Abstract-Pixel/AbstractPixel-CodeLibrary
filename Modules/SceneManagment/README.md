@@ -1,7 +1,7 @@
 # Scene messages
 
 What `SceneEventBus` sends, in what order, and who listens in Project Rally Shift. Read from the code as of the
-`scene-system-rework` branch, after session 3A. Go to a level, Retry, Preload and Switch to preloaded share one start step
+`scene-system-rework` branch, after session 3B. Go to a level, Retry, Preload and Switch to preloaded share one start step
 and one finish step. A preload is settled before any other scene change starts. Nothing in Rally Shift calls preload yet.
 
 ## The messages
@@ -70,6 +70,48 @@ missing boot scenes without waiting for them, then the coordinator records the g
 
 The coordinator makes no scene load or unload call of its own: every open and close goes through `ISceneLoader`, whose
 four-rule held-scene contract is written on the interface and tested with the recording loader in `Tests/Editor`.
+
+## Which loader opens a scene
+
+The coordinator starts with a `SceneLoaderSelector`. Each scene picks its loader from the scene asset's state, not from a
+field you fill in:
+
+| The scene is | Loader | How it is found |
+|---|---|---|
+| In Build Settings (or known only by name, like the active scene or a scene restored from a save) | `DefaultSceneLoader` | `SceneManager.LoadSceneAsync(name)` |
+| Addressable | `AddressablesSceneLoader` | `Addressables.LoadSceneAsync(guid)`, so the scene needs its asset GUID |
+
+- **One scene field.** `SceneReference` wraps a `SceneField`, which stores the scene asset's GUID, path and name. Two
+  references match by GUID when both have one, otherwise by name. The Editor refreshes the three strings every time the
+  field is saved, so a rename or move follows the asset. A scene is either in Build Settings or Addressable, never both.
+- **The choice is made once per open scene.** The selector asks Addressables (`AddressableSceneCheck`) whether the GUID has
+  an entry, remembers which loader opened the scene (by GUID and by name), and sends a close, or a second request for a
+  held scene, to that same loader. Memory is released through the Build Settings loader (it is one `Resources.UnloadUnusedAssets`).
+- **Only the loader talks to Unity.** `AddressablesSceneLoader` calls Addressables through `IAddressablesSceneApi`, so the
+  contract tests can run it on a fake.
+- **The handle is kept.** The loader keeps the Addressables handle of every open scene and releases it when the scene
+  closes. That is what lets the level's assets leave memory. Scenes are requested with
+  `SceneReleaseMode.OnlyReleaseSceneOnHandleRelease` and released by hand, because Addressables reports a held scene as
+  the last scene that was in the list when the load was asked for, and would otherwise release or close the wrong one.
+  The loader finds the open scene again by its path, then by its name.
+- **Addresses must not contain `[` or `]`.** Addressables reads them as runtime variables, so a scene whose address is its
+  asset path under `Assets/[1]Project/...` never resolves ("No Location found"). Give an Addressable scene a plain address.
+- **Starting Addressables.** The first check for a scene with a GUID calls `Addressables.InitializeAsync()`. A game with no
+  Addressables content logs a warning and loads every scene from Build Settings.
+
+### Contract tests
+
+`SceneLoaderContractTests` (in `Tests/Editor`) is the four-rule held scene contract on `ISceneLoader`, written once and run
+by every loader's fake through an `ILoaderContractHarness`:
+
+| Subclass | What it runs on |
+|---|---|
+| `RecordingSceneLoaderContractTests` | `RecordingSceneLoader`, the fake the coordinator tests use |
+| `AddressablesSceneLoaderContractTests` | `AddressablesSceneLoader` on `FakeAddressablesApi`, which follows Unity's rule for a held scene |
+
+A new loader adds one harness and one subclass. `AddressablesSceneLoaderTests` and `SceneLoaderSelectorTests` hold what is
+specific to the Addressables loader and the selector (one open copy per scene, the handle kept until close, the loader a
+scene closes with).
 
 Known limits of preload, on `.scratch/scene-coordinator/map.md`: a force-reloaded shared scene opens after the level is
 active in a switch, not before, and discarding a held preload lets its level wake for a moment before it closes.
