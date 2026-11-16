@@ -90,17 +90,17 @@ namespace AbstractPixel.Rumble
                 return ReadSteamModel(_backendName) + " through Steam Input";
             }
 
-            if (_device is DualSenseGamepadHID)
+            if (PlayStationHidPad.IsDualSense(_device))
             {
                 return "DualSense (PS5)";
             }
 
-            if (_device is DualShock4GamepadHID)
+            if (PlayStationHidPad.IsDualShock4(_device))
             {
                 return "DualShock 4 (PS4)";
             }
 
-            if (_device is DualShock3GamepadHID)
+            if (PlayStationHidPad.IsDualShock3(_device))
             {
                 return "DualShock 3 (PS3)";
             }

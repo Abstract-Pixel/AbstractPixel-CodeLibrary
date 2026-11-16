@@ -72,7 +72,7 @@ namespace AbstractPixel.Rumble
         {
             get
             {
-                if (boundDualShock is DualSenseGamepadHID)
+                if (PlayStationHidPad.IsDualSense(boundDualShock))
                 {
                     return rawWriter;
                 }
@@ -116,7 +116,7 @@ namespace AbstractPixel.Rumble
                 capabilities |= RumbleCapabilities.LightBar;
             }
 
-            isRawDualSenseReportUsable = _activeDevice is DualSenseGamepadHID;
+            isRawDualSenseReportUsable = PlayStationHidPad.IsDualSense(_activeDevice);
             displayName = "Unity (" + _activeDevice.GetType().Name + ")";
             if (isRawDualSenseReportUsable)
             {
@@ -270,14 +270,10 @@ namespace AbstractPixel.Rumble
                     return true;
                 }
 
-                if (boundDualShock is DualSenseGamepadHID dualSense)
+                if (PlayStationHidPad.HasLightBar(boundDualShock))
                 {
-                    return dualSense.SetMotorSpeedsAndLightBarColor(lastLow, lastHigh, lastColor);
-                }
-
-                if (boundDualShock is DualShock4GamepadHID dualShock4)
-                {
-                    return dualShock4.SetMotorSpeedsAndLightBarColor(lastLow, lastHigh, lastColor);
+                    Vector2 lowHighMotors = new Vector2(lastLow, lastHigh);
+                    return PlayStationHidPad.SetMotorsAndLightBar(boundDualShock, lowHighMotors, lastColor);
                 }
 
                 boundRumble.SetMotorSpeeds(lastLow, lastHigh);
@@ -355,7 +351,7 @@ namespace AbstractPixel.Rumble
         /// <summary>Only the raw-HID PlayStation classes can set the light bar.</summary>
         private static DualShockGamepad ReadLightBarPad(InputDevice _device)
         {
-            if (_device is DualSenseGamepadHID || _device is DualShock4GamepadHID)
+            if (PlayStationHidPad.HasLightBar(_device))
             {
                 return (DualShockGamepad)_device;
             }
