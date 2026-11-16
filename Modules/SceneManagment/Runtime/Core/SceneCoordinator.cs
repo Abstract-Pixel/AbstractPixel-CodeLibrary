@@ -57,12 +57,23 @@ namespace AbstractPixel.SceneManagement
                 return;
             }
 
+            await SwitchToPreloadedSceneGroup();
+        }
+
+        /// <summary>
+        /// The one copy of the preloaded route. The caller has already started the scene change (busy is set) and has
+        /// checked that a preloaded group exists. Clears busy in every case.
+        /// </summary>
+        private async Task SwitchToPreloadedSceneGroup()
+        {
             SceneGroup groupToActivate = preloadedSceneGroup;
             bool isAlreadyActive = groupToActivate.MainScene == activeMainScene
                                    || SceneManager.GetActiveScene().name == groupToActivate.MainScene.SceneName;
             if (isAlreadyActive)
             {
-                ClearPreload();
+                // Clearing the record is not enough: the held main scene would keep waiting and Unity would hold every
+                // later scene operation. It is closed, as when a preload is replaced.
+                await DiscardPreload(true);
                 MarkSceneChangeFinished();
                 Debug.LogWarning("Preloaded scene group is already active. Transition skipped and preloaded scene group cleared.");
                 return;
@@ -94,6 +105,12 @@ namespace AbstractPixel.SceneManagement
                 return;
             }
             if (!TryBeginSceneChange())
+            {
+                return;
+            }
+
+            bool preloadedRouteDidTheChange = await SettlePreloadBeforeChange(_sceneGroup);
+            if (preloadedRouteDidTheChange)
             {
                 return;
             }
@@ -135,13 +152,13 @@ namespace AbstractPixel.SceneManagement
             bool succeeded = false;
             try
             {
-                await DiscardPreload();
+                await DiscardPreload(true);
                 SceneChangePlan plan = CreatePreloadPlanFor(_sceneGroup);
                 RememberPreloadedScenes(plan);
                 succeeded = await LoadSceneGroup(plan, false);
                 if (!succeeded)
                 {
-                    await DiscardPreload();
+                    await DiscardPreload(true);
                 }
             }
             finally
@@ -174,6 +191,7 @@ namespace AbstractPixel.SceneManagement
             }
 
             SceneGroup groupToReload = activeSceneGroup;
+            await SettlePreloadBeforeChange(groupToReload);
             SceneChangePlan plan = CreatePlanFor(groupToReload);
             bool succeeded = false;
             try
@@ -299,10 +317,40 @@ namespace AbstractPixel.SceneManagement
         }
 
         /// <summary>
-        /// Closes the scenes of an earlier preload. Replacing a preload counts as a scene change for the memory release:
-        /// without it the old level's assets would stay in memory next to the new preload.
+        /// Settles a preload before a scene change closes anything. Unity holds every later scene operation, unloads
+        /// included, while a preloaded main scene waits, so a change that starts with a preload still held never finishes.
         /// </summary>
-        private async Task DiscardPreload()
+        /// <returns>
+        /// True when the target is the preloaded group and the preloaded route has made the whole change, so the caller
+        /// stops. False when there was no preload, or it was closed and the caller goes on with its own change.
+        /// </returns>
+        private async Task<bool> SettlePreloadBeforeChange(SceneGroup _targetGroup)
+        {
+            bool hasPreload = preloadedSceneGroup != null || preloadedContextualScenesSet.Count > 0;
+            if (!hasPreload)
+            {
+                return false;
+            }
+
+            // A Retry targets the open level, which is never the preloaded group, so it always closes the preload.
+            bool targetIsPreloadedGroup = _targetGroup == preloadedSceneGroup && _targetGroup != activeSceneGroup;
+            if (targetIsPreloadedGroup)
+            {
+                await SwitchToPreloadedSceneGroup();
+                return true;
+            }
+
+            // The change that follows releases memory once, so the close does not release it a second time.
+            await DiscardPreload(false);
+            return false;
+        }
+
+        /// <summary>
+        /// Closes the scenes of an earlier preload. Replacing a preload counts as a scene change for the memory release:
+        /// without it the old level's assets would stay in memory next to the new preload. A scene change that follows
+        /// releases memory itself, so it passes false.
+        /// </summary>
+        private async Task DiscardPreload(bool _releaseMemory)
         {
             if (preloadedContextualScenesSet.Count == 0)
             {
@@ -324,7 +372,10 @@ namespace AbstractPixel.SceneManagement
                     await SceneLoader.UnloadScene(scene);
                 }
 
-                await SceneLoader.ReleaseUnusedMemory();
+                if (_releaseMemory)
+                {
+                    await SceneLoader.ReleaseUnusedMemory();
+                }
             }
             catch (Exception ex)
             {
@@ -342,8 +393,10 @@ namespace AbstractPixel.SceneManagement
                 SceneReference mainSceneToClose = _plan.MainSceneToClose;
                 if (mainSceneToClose == null || string.IsNullOrEmpty(mainSceneToClose.SceneName))
                 {
+                    // No main scene on record: close the scene Unity says is active. Only the loader closes scenes.
                     string currentActiveSceneName = SceneManager.GetActiveScene().name;
-                    await SceneManager.UnloadSceneAsync(currentActiveSceneName).AsTask();
+                    SceneReference activeSceneReference = new SceneReference(currentActiveSceneName);
+                    await SceneLoader.UnloadScene(activeSceneReference);
                 }
                 else
                 {

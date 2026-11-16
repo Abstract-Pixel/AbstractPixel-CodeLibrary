@@ -50,6 +50,7 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.AreEqual("unload Level2", rig.Loader.Calls[0], "the held main scene closes before anything else: " + Calls());
             Assert.AreEqual(0, rig.Loader.CountCalls("load Level2"), "the discarded level is closed, not activated as a level: " + Calls());
             Assert.AreEqual(1, rig.Loader.CountCalls("load Level3"), Calls());
+            Assert.AreEqual(1, rig.Loader.CountCalls(RecordingSceneLoader.ReleaseCall), "the change releases memory once, the discard adds none: " + Calls());
             Assert.AreEqual(1, newLevelGroups.Count, "one 'new level'");
             Assert.AreSame(levelThree, rig.Coordinator.activeSceneGroup);
             Assert.AreEqual(0, preloadedActivatedGroups.Count, "a discarded preload is not 'activated'");
@@ -68,6 +69,7 @@ namespace AbstractPixel.SceneManagement.Tests
             await retry;
             Assert.AreEqual("unload Level2", rig.Loader.Calls[0], "the held main scene closes first: " + Calls());
             Assert.AreEqual(1, rig.Loader.CountCalls("load Level1"), "the level opens again: " + Calls());
+            Assert.AreEqual(1, rig.Loader.CountCalls(RecordingSceneLoader.ReleaseCall), "the Retry releases memory once, the discard adds none: " + Calls());
             Assert.AreEqual(1, newLevelGroups.Count, "one 'new level'");
             Assert.AreSame(rig.StartGroup, rig.Coordinator.activeSceneGroup);
             await AssertSettledAndNextPreloadWorks();
