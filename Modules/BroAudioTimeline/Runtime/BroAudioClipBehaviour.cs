@@ -66,6 +66,7 @@ namespace AbstractPixel.BroAudioTimeline
             voice = CreateVoice();
             float startOffsetSeconds = (float)_playable.GetTime();
             voice.Start(clipAsset.SoundEntity, _followTarget, startOffsetSeconds);
+            voice.ApplyEcho(clipAsset.Echo);
 
             // The first frame always applies the volume curve's starting value (a fade-in curve starts at 0).
             hasAppliedVolume = false;

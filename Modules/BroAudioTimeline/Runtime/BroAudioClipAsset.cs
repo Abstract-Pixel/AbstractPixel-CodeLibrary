@@ -22,6 +22,12 @@ namespace AbstractPixel.BroAudioTimeline
         [Tooltip("Pitch across the clip, multiplied by the entity's pitch. A flat 1 leaves the entity's pitch untouched.")]
         [SerializeField] private AnimationCurve pitchCurve = AnimationCurve.Constant(0f, 1f, 1f);
 
+        [Tooltip("Optional echo on this clip's sound only.")]
+        [SerializeField] private BroAudioEchoSettings echo = new BroAudioEchoSettings();
+
+        /// <summary>The clip's echo settings (off unless enabled).</summary>
+        public BroAudioEchoSettings Echo => echo;
+
         /// <summary>The sound asset, readable in edit mode (BroAudio keeps SoundID's entity internal).</summary>
         public AudioEntity SoundEntity => sound;
 

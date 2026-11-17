@@ -1,5 +1,6 @@
 using Ami.BroAudio;
 using Ami.BroAudio.Data;
+using Ami.Extension;
 using UnityEngine;
 
 namespace AbstractPixel.BroAudioTimeline
@@ -25,6 +26,25 @@ namespace AbstractPixel.BroAudioTimeline
             }
 
             player = BroAudio.Play(soundId);
+        }
+
+        public void ApplyEcho(BroAudioEchoSettings _echo)
+        {
+            bool wantsEcho = _echo != null && _echo.Enabled;
+            if (player == null || wantsEcho == false)
+            {
+                return;
+            }
+
+            player.AddEchoEffect(_proxy => CopyEcho(_echo, _proxy));
+        }
+
+        private static void CopyEcho(BroAudioEchoSettings _echo, IAudioEchoFilterProxy _proxy)
+        {
+            _proxy.delay = _echo.DelayMilliseconds;
+            _proxy.decayRatio = _echo.DecayRatio;
+            _proxy.wetMix = _echo.WetMix;
+            _proxy.dryMix = _echo.DryMix;
         }
 
         public void SetVolume(float _volume)

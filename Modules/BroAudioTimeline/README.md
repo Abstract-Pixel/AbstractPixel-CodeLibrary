@@ -14,6 +14,8 @@ The module compiles only when both BroAudio (`com.ami.broaudio`) and Timeline 1.
 4. Shape the clip with:
    - **Volume Curve:** 0–1 across the clip. It multiplies the entity's volume and the player's saved volumes.
    - **Pitch Curve:** multiplies the entity's pitch. A flat 1 keeps the entity's own random pitch.
+   - **Echo (optional):** an `AudioEchoFilter` added to this clip's player only (BroAudio's `AddEchoEffect`). It is
+     removed when the player is recycled, so no mixer group or other sound is touched.
 
 ## Behaviour
 

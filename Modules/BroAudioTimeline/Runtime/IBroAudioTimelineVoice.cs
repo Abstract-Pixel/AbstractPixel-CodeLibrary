@@ -8,6 +8,9 @@ namespace AbstractPixel.BroAudioTimeline
     {
         void Start(AudioEntity _sound, Transform _followTarget, float _startOffsetSeconds);
 
+        /// <summary>Adds the clip's echo to this voice only. Called once, right after Start.</summary>
+        void ApplyEcho(BroAudioEchoSettings _echo);
+
         void SetVolume(float _volume);
 
         void SetPitchMultiplier(float _pitchMultiplier);

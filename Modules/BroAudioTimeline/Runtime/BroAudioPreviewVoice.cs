@@ -47,6 +47,18 @@ namespace AbstractPixel.BroAudioTimeline
             source.Play();
         }
 
+        public void ApplyEcho(BroAudioEchoSettings _echo)
+        {
+            bool wantsEcho = _echo != null && _echo.Enabled;
+            if (source == null || wantsEcho == false)
+            {
+                return;
+            }
+
+            AudioEchoFilter filter = source.gameObject.AddComponent<AudioEchoFilter>();
+            _echo.ApplyTo(filter);
+        }
+
         public void SetVolume(float _volume)
         {
             if (source == null)
