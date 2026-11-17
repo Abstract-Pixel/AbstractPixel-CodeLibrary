@@ -7,8 +7,16 @@ namespace AbstractPixel.Settings
     public static class SettingsActions
     {
         public static event Action OnSettingsLoaded = delegate { };
+
+        /// <summary>
+        /// True once settings were restored from the save or seeded with defaults this session. Lets late subscribers
+        /// (OnSettingsLoaded is not sticky) know the values they read are the player's real ones.
+        /// </summary>
+        public static bool HasLoaded { get; private set; }
+
         internal static void RaiseSettingsLoaded()
         {
+            HasLoaded = true;
             OnSettingsLoaded?.Invoke();
         }
 
@@ -16,6 +24,7 @@ namespace AbstractPixel.Settings
         static void ResetEvents()
         {
             OnSettingsLoaded = delegate { };
+            HasLoaded = false;
         }
 
 
