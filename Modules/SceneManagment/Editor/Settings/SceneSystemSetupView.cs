@@ -36,6 +36,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private int pageIndex;
         private string setupError = string.Empty;
         private VisualElement folderStatus;
+        private SceneSystemSettings createdSettings;
 
         public SceneSystemSetupView(Action<SceneSystemSettings> _onDone)
         {
@@ -318,8 +319,6 @@ namespace AbstractPixel.SceneManagement.Editor
             createdSettings = settings;
             Go(1);
         }
-
-        private SceneSystemSettings createdSettings;
 
         private void Finish()
         {

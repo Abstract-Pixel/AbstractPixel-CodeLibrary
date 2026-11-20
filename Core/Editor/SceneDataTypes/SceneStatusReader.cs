@@ -61,19 +61,12 @@ namespace AbstractPixel.Core.Editor
         /// <summary>Applies the report's fix to the project, with one console line naming the scene.</summary>
         public static void ApplyFix(SceneStatusReport _report)
         {
-            if (_report == null)
+            if (_report == null || _report.Fix == SceneFix.None)
             {
                 return;
             }
-            switch (_report.Fix)
-            {
-                case SceneFix.AddToBuild:
-                    AddToBuild(_report);
-                    break;
-                case SceneFix.MakeAddressable:
-                    MakeAddressable(_report);
-                    break;
-            }
+            ScenePlace place = _report.Fix == SceneFix.MakeAddressable ? ScenePlace.Addressables : ScenePlace.BuildSettings;
+            MoveTo(_report, place);
         }
 
         /// <summary>True when the scene can move to this place: it has an asset, is not there yet, and Addressables is installed if needed.</summary>

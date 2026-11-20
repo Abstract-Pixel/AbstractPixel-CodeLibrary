@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -20,30 +19,6 @@ namespace AbstractPixel.SceneManagement.Editor
         public const long LargestFileBytes = 16L * 1024L * 1024L;
         private const string LogPrefix = "[Scene system]";
         private static readonly byte[] YamlHeader = Encoding.ASCII.GetBytes("%YAML");
-
-        public static bool IsCandidate(string _path)
-        {
-            if (string.IsNullOrEmpty(_path) || !_path.StartsWith("Assets/", StringComparison.Ordinal))
-            {
-                return false;
-            }
-            string extension = Path.GetExtension(_path).ToLowerInvariant();
-            return extension == ".asset" || extension == ".prefab" || extension == ".unity";
-        }
-
-        public static List<string> PathsContainingGuid(IEnumerable<string> _paths, string _guid, string _exceptPath, Func<string, byte[]> _readBytes)
-        {
-            Dictionary<string, List<string>> byGuid = PathsContainingGuids(_paths, new[] { _guid }, _readBytes);
-            List<string> found = new List<string>();
-            foreach (string path in byGuid[_guid])
-            {
-                if (path != _exceptPath)
-                {
-                    found.Add(path);
-                }
-            }
-            return found;
-        }
 
         /// <summary>For each GUID, the files whose bytes contain it. Files &lt;paramref name="_readBytes"/&gt; returns null for are skipped.</summary>
         public static Dictionary<string, List<string>> PathsContainingGuids(IEnumerable<string> _paths, IReadOnlyList<string> _guids, Func<string, byte[]> _readBytes)

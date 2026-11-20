@@ -2,7 +2,6 @@ using AbstractPixel.Core;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 namespace AbstractPixel.SceneManagement
 {
@@ -54,25 +53,6 @@ namespace AbstractPixel.SceneManagement
                 default:
                     resetSharedScenesOverride = _isOverride;
                     break;
-            }
-        }
-
-        public List<string> AllSceneNamesList
-        {
-            get
-            {
-                List<SceneReference> allSceneReferencesInGroup = new List<SceneReference>();
-                allSceneReferencesInGroup.AddRange(ManagerialBootScenesList);
-                allSceneReferencesInGroup.AddRange(ContextualBootScenesList);
-                allSceneReferencesInGroup.Add(MainScene);
-
-                List<string> sceneNames = new List<string>();
-                sceneNames.AddRange(allSceneReferencesInGroup
-                    .Where(sceneReference => sceneReference != null &&!string.IsNullOrEmpty(sceneReference.SceneName))
-                    .Select(sceneReference => sceneReference.SceneName)
-                    .ToList());
-
-                return sceneNames;
             }
         }
 

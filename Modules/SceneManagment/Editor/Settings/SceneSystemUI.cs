@@ -87,16 +87,6 @@ namespace AbstractPixel.SceneManagement.Editor
             return card;
         }
 
-        /// <summary>A small bold heading inside a card, such as "1. Where to save the settings asset".</summary>
-        public static Label Step(string _text)
-        {
-            Label step = new Label(_text);
-            step.style.unityFontStyleAndWeight = FontStyle.Bold;
-            step.style.marginTop = 6;
-            step.style.marginBottom = 2;
-            return step;
-        }
-
         public static Label Hint(string _text)
         {
             Label hint = new Label(_text);
@@ -156,16 +146,6 @@ namespace AbstractPixel.SceneManagement.Editor
             Button button = new Button(_clicked);
             button.text = _text;
             button.tooltip = _tooltip;
-            return button;
-        }
-
-        /// <summary>The one main action of a card: taller and bold.</summary>
-        public static Button PrimaryButton(string _text, string _tooltip, Action _clicked)
-        {
-            Button button = Button(_text, _tooltip, _clicked);
-            button.style.height = 28;
-            button.style.marginTop = 8;
-            button.style.unityFontStyleAndWeight = FontStyle.Bold;
             return button;
         }
 
