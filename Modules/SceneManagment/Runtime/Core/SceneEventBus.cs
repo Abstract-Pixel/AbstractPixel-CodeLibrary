@@ -15,6 +15,9 @@ namespace AbstractPixel.SceneManagement
         /// <summary>Raised once per session, right after start-up's <see cref="OnNewSceneGroupTransitionTo"/>, when every scene of the first scene group has loaded.</summary>
         public static event Action<SceneGroup> OnGameStarted = delegate { };
 
+        /// <summary>Raised once, when the launch scene hands over to the start scene group (SceneActions.ReleaseLaunchScene).</summary>
+        public static event Action OnLaunchSceneReleased = delegate { };
+
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void ResetStatics()
@@ -25,6 +28,7 @@ namespace AbstractPixel.SceneManagement
             OnPreloadedSceneGroupActivated = delegate { };
             OnMainSceneLoaded = delegate { };
             OnGameStarted = delegate { };
+            OnLaunchSceneReleased = delegate { };
         }
 
         public static void RaiseOnSceneGroupUnloaded(SceneGroup newSceneGroup)
@@ -50,6 +54,11 @@ namespace AbstractPixel.SceneManagement
         public static void RaiseOnGameStarted(SceneGroup _startedGroup)
         {
             OnGameStarted.Invoke(_startedGroup);
+        }
+
+        public static void RaiseOnLaunchSceneReleased()
+        {
+            OnLaunchSceneReleased.Invoke();
         }
 
         public static void RaiseOnMainSceneLoaded(SceneReference mainScene)

@@ -36,7 +36,7 @@ namespace AbstractPixel.SceneManagement
                 return choice;
             }
 
-            bool launchSceneIsOpen = _settings.HasLaunchScene && StartUpSceneMatch.ListHolds(_openScenesActiveFirst, _settings.LaunchScene);
+            bool launchSceneIsOpen = ShouldHoldLaunchScene(_settings, _openScenesActiveFirst);
             if (launchSceneIsOpen)
             {
                 return ChooseStartSceneGroup(_settings, StartUpChoiceKind.BehindLaunchScene, _settings.LaunchScene);
@@ -60,6 +60,23 @@ namespace AbstractPixel.SceneManagement
             }
 
             return ChooseTemporaryGroup(_settings, activeScene);
+        }
+
+        /// <summary>
+        /// Whether start-up holds the launch scene hold: only when the settings name a launch scene and it is among the
+        /// scenes Unity is opening. Play from a level or the start scene group never holds.
+        /// </summary>
+        public static bool ShouldHoldLaunchScene(SceneSystemSettings _settings, List<SceneReference> _openScenes)
+        {
+            if (_settings == null || _settings.HasLaunchScene == false)
+            {
+                return false;
+            }
+            if (_openScenes == null || _openScenes.Count == 0)
+            {
+                return false;
+            }
+            return StartUpSceneMatch.ListHolds(_openScenes, _settings.LaunchScene);
         }
 
         private static StartUpChoice ChooseStartSceneGroup(SceneSystemSettings _settings, StartUpChoiceKind _kind, SceneReference _reasonScene)

@@ -7,7 +7,7 @@ Opens, closes and switches groups of scenes for a single-player Unity game: a ma
 - **Words:** [GLOSSARY.md](GLOSSARY.md). Use these terms in code, docs and issues.
 - **Why it is built this way:** [docs/adr/](docs/adr/). One short file per decision that is hard to reverse.
 - **How a scene change runs today:** the sections below (messages, order per entry point, loader choice, contract tests).
-- **How the game starts:** no start-up object is needed in any scene. Set the start scene group (and an optional launch scene, such as a splash) in Project Settings > Abstract Pixel > Scene System > Start-up. When the game launches or Play is pressed, start-up (`SceneSystemStartUp`) opens the right scene group, then raises `OnNewSceneGroupTransitionTo` once and `OnGameStarted` once. A launch scene waits for `SceneActions.HasGameStarted` instead of loading scenes itself (ADR 0009).
+- **How the game starts:** no start-up object is needed in any scene. Set the start scene group (and an optional launch scene, such as a splash) in Project Settings > Abstract Pixel > Scene System > Start-up. When the game launches or Play is pressed, start-up (`SceneSystemStartUp`) opens the right scene group, then raises `OnNewSceneGroupTransitionTo` once and `OnGameStarted` once. A launch scene waits for `SceneActions.HasGameStarted` instead of loading scenes itself (ADR 0009). While it plays, the **launch scene hold** keeps the start scene group back: its scenes load and wake behind the launch scene, and scripts that show something (camera, music, entrance) wait with `SceneActions.RunWhenLaunchSceneReleased` (or read `SceneActions.IsLaunchSceneHeld`). The launch scene calls `SceneActions.ReleaseLaunchScene()` at its hand-off. Start-up holds only when the launch scene is one of the scenes Unity opens, so Play from a level or the start scene group never waits.
 - **Work in progress:** the rework plan lives in the game that tests this module, Project Rally Shift, at `.scratch/scene-coordinator/plan.md` (with `map.md` and `issues/`). Parts of the glossary and the ADRs (scene sets, loading scene, scene transition executor, placement) describe decisions for sessions that are not built yet; the plan says which.
 
 ## Editor tools (sessions 3C, 4A and 4B)
@@ -41,6 +41,7 @@ and one finish step. A preload is settled before any other scene change starts. 
 |---|---|---|
 | `OnNewSceneGroupTransitionTo` | the new group | Start-up, go to a level, Retry, switch to preloaded. Not sent when a scene fails to load |
 | `OnGameStarted` | the first group | Start-up only, once per session, right after its `OnNewSceneGroupTransitionTo` |
+| `OnLaunchSceneReleased` | none | `SceneActions.ReleaseLaunchScene()`, once, when the launch scene hands over. Never sent when nothing was held (Play from a level or the start scene group) |
 | `OnMainSceneLoaded` | the main scene | `DefaultSceneLoader`, after it activates a main scene and makes it the active scene. A held (preloaded) main scene fires it when the switch activates it |
 | `OnSceneGroupUnloaded` | the group that **closed** (the one that was active when the change started) | Go to a level, Retry, switch to preloaded. Not sent when there was no previous group. Not sent when a preload replaces an earlier preload |
 | `OnSceneGroupPreloaded` | the preloaded group | Preload, when it finished |
@@ -54,6 +55,12 @@ messages from the fade system, not scene messages.
 
 **Start-up** (`SceneSystemStartUp`, `[RuntimeInitializeOnLoadMethod]`): scene changes are refused from before the first
 scene loads (BeforeSceneLoad) until start-up ends, with a logged reason.
+0. Before any scene's Awake (BeforeSceneLoad) it holds the **launch scene hold** when the settings name a launch scene and
+   Unity is opening it (`StartUpRule.ShouldHoldLaunchScene`), with one log line. Unity has the first scenes' objects in
+   memory by then, so the open scenes are known. With no settings found yet it decides again after the first scenes
+   load, before any `Start`. The hold lasts until the launch scene calls `SceneActions.ReleaseLaunchScene()` (after
+   `OnGameStarted`, or after `HasStartUpFailed` to recover); that runs the waiting actions, raises
+   `OnLaunchSceneReleased` once and logs one line. Released before `OnGameStarted`: one warning, and it still releases.
 1. After the first scenes load (AfterSceneLoad) it reads the scene system settings (Preloaded Assets in a build; found by
    type in the Editor) and picks a group from the scenes Unity opened (`StartUpRule`): the launch scene open means the
    start scene group behind it, one frame later; otherwise the first open scene, active first, that is a group's main

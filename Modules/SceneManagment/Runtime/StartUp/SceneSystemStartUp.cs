@@ -26,10 +26,14 @@ namespace AbstractPixel.SceneManagement
             StaticsResetter.OnResetStatics += ResetState;
         }
 
+        /// <summary>True when the launch scene hold was decided before the first scene's Awake (the settings were found then).</summary>
+        private static bool decidedLaunchSceneHold;
+
         private static void ResetState()
         {
             IsPending = false;
             HasFailed = false;
+            decidedLaunchSceneHold = false;
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -37,12 +41,40 @@ namespace AbstractPixel.SceneManagement
         {
             ResetState();
             IsPending = true;
+            HoldLaunchSceneIfOpening();
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void RunAfterFirstScenesLoaded()
         {
+            if (decidedLaunchSceneHold == false)
+            {
+                HoldLaunchSceneIfOpening();
+            }
             RunAsync().ForgetTask();
+        }
+
+        // The first scenes are known at BeforeSceneLoad: their objects are in memory, but no Awake has run. So the hold is
+        // in place before any scene's Awake, and only when the launch scene is one of them. Settings not found yet (none
+        // in the project): decided again after the first scenes load, before any Start.
+        private static void HoldLaunchSceneIfOpening()
+        {
+            SceneSystemSettings settings = SceneSystemSettingsSource.Find();
+            if (settings == null)
+            {
+                return;
+            }
+
+            decidedLaunchSceneHold = true;
+            List<SceneReference> openScenes = OpenScenesActiveFirst();
+            bool shouldHold = StartUpRule.ShouldHoldLaunchScene(settings, openScenes);
+            if (shouldHold == false)
+            {
+                return;
+            }
+
+            LaunchSceneHold.Hold();
+            Debug.Log("[Scene system] Start-up: the launch scene '" + settings.LaunchScene.SceneName + "' holds the start scene group until it calls SceneActions.ReleaseLaunchScene().");
         }
 
         private static async Task RunAsync()

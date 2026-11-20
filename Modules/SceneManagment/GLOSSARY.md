@@ -68,6 +68,10 @@ _Avoid_: first scene group, boot group, entry group
 An optional scene, such as a splash screen, that Unity opens before the start scene group. Start-up opens the start scene group behind it, and the launch scene closes itself.
 _Avoid_: splash scene (as the general word), boot scene, intro scene
 
+**Launch scene hold**:
+The wait that keeps the start scene group from showing itself while the launch scene plays. Start-up holds it when Unity opens the launch scene; the launch scene releases it at its hand-off, and scenes waiting for it then start.
+_Avoid_: entrance gate, splash gate, menu gate
+
 ## Changing scene
 
 **Scene change**:
