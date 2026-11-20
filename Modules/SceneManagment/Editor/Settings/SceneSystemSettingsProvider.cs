@@ -36,6 +36,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private static string pendingSection;
         private static int scrollAttempts;
         private static string moveError;
+        private static string settingsError;
         private const string PreloadedTooltip = "The settings asset is in Player Settings > Preloaded Assets, the list of assets a build loads before its first scene, so the scene system can read it in a build. The scene system keeps it there.";
         private const int MaxScrollAttempts = 10;
 
@@ -46,7 +47,8 @@ namespace AbstractPixel.SceneManagement.Editor
         private static readonly HashSet<string> openSetGuids = new HashSet<string>();
         private static readonly Dictionary<string, VisualElement> setCards = new Dictionary<string, VisualElement>();
         private static Button removeSetButton;
-        private static Label removeSetBlocked;
+        private const string DeleteNoteName = "delete-note";
+        private const string NoteNameColour = "#F2B27A";
 
         [SettingsProvider]
         public static SettingsProvider Create()
@@ -145,7 +147,6 @@ namespace AbstractPixel.SceneManagement.Editor
             sections.Clear();
             setCards.Clear();
             removeSetButton = null;
-            removeSetBlocked = null;
         }
 
         private static void UnsubscribeFromProjectChanges()
@@ -229,6 +230,10 @@ namespace AbstractPixel.SceneManagement.Editor
             if (_settings == null)
             {
                 setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Yellow, "Not set up yet", string.Empty));
+                HelpBox missing = new HelpBox("Settings asset missing: this project has no scene system settings asset, so scene sets and checks are off. Click Get started below to create one.", HelpBoxMessageType.Warning);
+                missing.style.marginTop = 4;
+                missing.style.marginBottom = 8;
+                setupCard.Add(missing);
                 setupCard.Add(new SceneSystemSetupView(_created => Refresh()));
                 if (SceneSystemOnboardingWindow.IsTurnedOff)
                 {
@@ -243,8 +248,12 @@ namespace AbstractPixel.SceneManagement.Editor
                 return;
             }
 
-            setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Green, "Set up", string.Empty));
+            setupCard.Add(SetUpRow(_settings));
             setupCard.Add(SettingsAssetRow(_settings));
+            if (!string.IsNullOrEmpty(settingsError))
+            {
+                setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Red, settingsError, string.Empty));
+            }
             if (!string.IsNullOrEmpty(moveError))
             {
                 setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Red, moveError, string.Empty));
@@ -262,14 +271,49 @@ namespace AbstractPixel.SceneManagement.Editor
             }));
         }
 
-        // "Settings asset  [Assets/…/SceneSystemSettings.asset]  [Move…]"
+        // "● Set up   [SceneSystemSettings (Scene System Settings)]"
+        private static VisualElement SetUpRow(SceneSystemSettings _settings)
+        {
+            VisualElement row = SceneSystemUI.StatusRow(SceneSystemUI.Green, "Set up", string.Empty);
+            row.Q<Label>().style.width = 106;
+            row.Q<Label>().style.flexShrink = 0;
+            ObjectField reference = new ObjectField();
+            reference.objectType = typeof(SceneSystemSettings);
+            reference.allowSceneObjects = false;
+            reference.SetValueWithoutNotify(_settings);
+            reference.tooltip = "The scene system settings asset this project uses. Pick or drop another one to use that instead. The choice is kept in Preloaded Assets and follows the asset when it moves.";
+            reference.style.marginLeft = 0;
+            reference.RegisterValueChangedCallback(_change =>
+            {
+                SceneSystemSettings picked = _change.newValue as SceneSystemSettings;
+                if (picked == _settings)
+                {
+                    return;
+                }
+                string error = SceneSystemSettingsAssets.Use(picked);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    reference.SetValueWithoutNotify(_settings);
+                }
+                settingsError = error;
+                RequestRefresh();
+            });
+            reference.style.flexGrow = 1;
+            reference.style.flexShrink = 1;
+            reference.style.minWidth = 60;
+            reference.style.marginRight = 0;
+            row.Add(reference);
+            return row;
+        }
+
+        // "Asset path  [Assets/…/SceneSystemSettings.asset]  [Move…]"
         private static VisualElement SettingsAssetRow(SceneSystemSettings _settings)
         {
             VisualElement row = SceneSystemUI.Row();
             row.style.marginTop = 2;
             row.style.marginBottom = 2;
-            Label label = new Label("Settings asset");
-            label.tooltip = "The scene system settings asset. It can live in any folder: the scene system finds it by type.";
+            Label label = new Label("Asset path");
+            label.tooltip = "Where the settings asset is. Move… puts it in another folder inside Assets/.";
             label.style.width = 120;
             label.style.flexShrink = 0;
             row.Add(label);
@@ -358,7 +402,6 @@ namespace AbstractPixel.SceneManagement.Editor
             setsCard.Clear();
             setCards.Clear();
             removeSetButton = null;
-            removeSetBlocked = null;
             if (_settings == null)
             {
                 setsCard.Add(SceneSystemUI.Hint("Available once the scene system is set up."));
@@ -461,7 +504,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
             VisualElement header = SceneSystemUI.Row();
             Foldout foldout = new Foldout();
-            foldout.text = _number + "   " + _set.name;
+            foldout.text = _number + ".  " + _set.name;
             foldout.value = isOpen;
             foldout.tooltip = "Changes to a scene set reach every scene group using it, except the parts a group overrides. Click to show its scenes.";
             foldout.style.width = 190;
@@ -472,6 +515,10 @@ namespace AbstractPixel.SceneManagement.Editor
             if (foldoutText != null)
             {
                 foldoutText.style.unityFontStyleAndWeight = FontStyle.Bold;
+                if (isDefault)
+                {
+                    foldoutText.style.color = SceneSystemUI.DefaultAccent;
+                }
                 foldoutText.style.overflow = Overflow.Hidden;
                 foldoutText.style.textOverflow = TextOverflow.Ellipsis;
                 foldoutText.style.flexShrink = 1;
@@ -487,13 +534,13 @@ namespace AbstractPixel.SceneManagement.Editor
             });
             header.Add(foldout);
 
-            Label path = SceneSystemUI.AssetPathField(_set);
-            path.style.flexGrow = 1;
-            path.style.flexShrink = 1;
-            path.style.minWidth = 60;
-            path.style.marginLeft = 4;
-            path.style.marginRight = 8;
-            header.Add(path);
+            ObjectField reference = SceneSystemUI.ReadOnlyObjectField(_set, typeof(SceneSet), AssetDatabase.GetAssetPath(_set) + "\nClick to show it in the Project window.");
+            reference.style.flexGrow = 1;
+            reference.style.flexShrink = 1;
+            reference.style.minWidth = 60;
+            reference.style.marginLeft = 4;
+            reference.style.marginRight = 8;
+            header.Add(reference);
 
             header.Add(DefaultCell(_settings, _set, isDefault));
 
@@ -504,9 +551,60 @@ namespace AbstractPixel.SceneManagement.Editor
             usage.style.unityTextAlign = TextAnchor.MiddleRight;
             header.Add(usage);
 
+            if (isDefault)
+            {
+                card.Add(DefaultTag());
+            }
             card.Add(header);
+            card.Add(DeleteNote());
             card.Add(body);
             return card;
+        }
+
+        // Under a selected card's header, says what − will ask when scene groups use the set. Hidden until then.
+        private static Label DeleteNote()
+        {
+            Label note = new Label();
+            note.name = DeleteNoteName;
+            note.enableRichText = true;
+            note.style.whiteSpace = WhiteSpace.Normal;
+            note.style.fontSize = 11;
+            note.style.marginLeft = 16;
+            note.style.marginTop = 3;
+            note.style.marginBottom = 3;
+            note.style.display = DisplayStyle.None;
+            return note;
+        }
+
+        // "NOTE: Scene set 'Level' is used by 12 scene groups. Removing it asks …"
+        private static string DeleteNoteText(SceneSet _set)
+        {
+            int users = SceneSetSync.GroupsUsing(_set).Count;
+            string groupWord = "scene groups";
+            if (users == 1)
+            {
+                groupWord = "scene group";
+            }
+            string name = "<color=" + NoteNameColour + ">'" + _set.name + "'</color>";
+            return "<b>NOTE:</b> Scene set " + name + " is used by " + users + " " + groupWord + ". Removing it asks whether they move to another scene set or keep their scenes as overrides.";
+        }
+
+        // "Chosen default scene set" in the default accent, above the default card's name.
+        private static VisualElement DefaultTag()
+        {
+            Label chosen = SceneSystemUI.Badge("Chosen default scene set", false, "New scene groups start with this scene set.");
+            Color accent = SceneSystemUI.DefaultAccent;
+            chosen.style.color = accent;
+            chosen.style.borderTopColor = accent;
+            chosen.style.borderBottomColor = accent;
+            chosen.style.borderLeftColor = accent;
+            chosen.style.borderRightColor = accent;
+            chosen.style.unityFontStyleAndWeight = FontStyle.Bold;
+            chosen.style.alignSelf = Align.FlexStart;
+            chosen.style.marginLeft = 16;
+            chosen.style.marginTop = 4;
+            chosen.style.marginBottom = 4;
+            return chosen;
         }
 
         private static VisualElement DefaultCell(SceneSystemSettings _settings, SceneSet _set, bool _isDefault)
@@ -519,9 +617,7 @@ namespace AbstractPixel.SceneManagement.Editor
             cell.style.alignItems = Align.FlexStart;
             if (_isDefault)
             {
-                Label chosen = SceneSystemUI.Badge("Chosen default scene set", false, "New scene groups start with this scene set.");
-                chosen.style.marginLeft = 3;
-                cell.Add(chosen);
+                // The default set's tag sits above its name instead; the empty cell keeps the columns lined up.
                 return cell;
             }
             Button makeDefault = SceneSystemUI.Button("Make default", "New scene groups will start with this scene set.", () =>
@@ -577,14 +673,10 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             VisualElement footer = SceneSystemUI.Row();
             footer.style.marginTop = 2;
-            removeSetBlocked = SceneSystemUI.Hint(string.Empty);
-            removeSetBlocked.style.flexGrow = 1;
-            removeSetBlocked.style.flexShrink = 1;
-            removeSetBlocked.style.marginRight = 8;
-            footer.Add(removeSetBlocked);
+            footer.style.justifyContent = Justify.FlexEnd;
             VisualElement buttons = SceneSystemUI.AddRemoveFooter(
                 "Makes a new scene set next to the settings asset.", () => CreateSceneSet(_settings),
-                "Deletes the selected scene set, after asking. A scene set that scene groups use can't be deleted.", () => DeleteSelectedSet(_settings),
+                "Removes the selected scene set, after asking. When scene groups use it, you choose whether they move to another set or keep their scenes as overrides.", () => DeleteSelectedSet(_settings),
                 out Button remove);
             removeSetButton = remove;
             footer.Add(buttons);
@@ -601,27 +693,33 @@ namespace AbstractPixel.SceneManagement.Editor
             RefreshSetSelection();
         }
 
-        // The selected card's background, and the − button: enabled only for a selected set that no scene group uses.
+        // The selected card's background and its note, and the − button: enabled while a scene set is selected. The note
+        // sits in the selected card, so it stays in view however many scene sets there are.
         private static void RefreshSetSelection()
         {
+            SceneSet selected = SelectedSet();
+            bool isUsed = selected != null && SceneSetSync.GroupsUsing(selected).Count > 0;
             foreach (KeyValuePair<string, VisualElement> card in setCards)
             {
-                SceneSystemUI.ShowSelected(card.Value, card.Key == selectedSetGuid);
+                bool isSelected = card.Key == selectedSetGuid;
+                SceneSystemUI.ShowSelected(card.Value, isSelected);
+                Label note = card.Value.Q<Label>(DeleteNoteName);
+                if (note == null)
+                {
+                    continue;
+                }
+                bool showNote = isSelected && isUsed;
+                note.style.display = showNote ? DisplayStyle.Flex : DisplayStyle.None;
+                if (showNote)
+                {
+                    note.text = DeleteNoteText(selected);
+                }
             }
-            if (removeSetButton == null || removeSetBlocked == null)
+            if (removeSetButton == null)
             {
                 return;
             }
-            SceneSet selected = SelectedSet();
-            if (selected == null)
-            {
-                removeSetButton.SetEnabled(false);
-                removeSetBlocked.text = string.Empty;
-                return;
-            }
-            bool canDelete = SceneSetDeletion.CanDelete(selected, out string reason);
-            removeSetButton.SetEnabled(canDelete);
-            removeSetBlocked.text = reason;
+            removeSetButton.SetEnabled(selected != null);
         }
 
         private static SceneSet SelectedSet()
@@ -638,6 +736,8 @@ namespace AbstractPixel.SceneManagement.Editor
             return AssetDatabase.LoadAssetAtPath<SceneSet>(path);
         }
 
+        // An unused set that is not the default: a plain confirmation. Otherwise the removal window asks what happens to
+        // the scene groups using it and which set becomes the default.
         private static void DeleteSelectedSet(SceneSystemSettings _settings)
         {
             SceneSet set = SelectedSet();
@@ -645,23 +745,26 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 return;
             }
-            if (!SceneSetDeletion.CanDelete(set, out string _))
+            bool isUsed = SceneSetSync.GroupsUsing(set).Count > 0;
+            bool isDefault = _settings.DefaultSceneSet == set;
+            if (isUsed || isDefault)
             {
-                RefreshSetSelection();
+                SceneSetRemovalWindow.Open(_settings, set, AfterSetRemoved);
                 return;
             }
             string path = AssetDatabase.GetAssetPath(set);
-            string message = "Delete scene set '" + set.name + "'? It moves to your system's trash.\n\n" + path;
-            if (_settings.DefaultSceneSet == set)
-            {
-                message += "\n\nIt is the default scene set, so new scene groups will start without one until you pick another default.";
-            }
-            bool confirmed = EditorUtility.DisplayDialog("Delete scene set", message, "Delete", "Cancel");
+            string message = "Remove scene set '" + set.name + "'? No scene group uses it. It moves to your system's trash; this can't be undone.\n\n" + path;
+            bool confirmed = EditorUtility.DisplayDialog("Remove scene set", message, "Remove", "Cancel");
             if (!confirmed)
             {
                 return;
             }
-            SceneSetDeletion.Delete(_settings, set);
+            SceneSetRemoval.Remove(_settings, set, SceneSetRemovalMode.ConvertToOverride, null, null);
+            AfterSetRemoved();
+        }
+
+        private static void AfterSetRemoved()
+        {
             openSetGuids.Remove(selectedSetGuid);
             selectedSetGuid = null;
             SceneSystemSettingsAssets.NotifyChanged();

@@ -26,7 +26,7 @@ namespace AbstractPixel.SceneManagement.Editor
             Done
         }
 
-        private const float LogoHeight = 64;
+        private const float LogoHeight = 88;
 
         private readonly Action<SceneSystemSettings> onDone;
         private readonly SceneSystemSetupChoices choices = new SceneSystemSetupChoices();
@@ -57,10 +57,13 @@ namespace AbstractPixel.SceneManagement.Editor
 
             style.flexGrow = 1;
             style.minHeight = 340;
-            style.paddingTop = 4;
+            style.paddingTop = 18;
             VisualElement logo = SceneSystemUI.Logo(LogoHeight);
             logo.style.marginBottom = 14;
             Add(logo);
+            VisualElement separator = SceneSystemUI.Separator();
+            separator.style.marginBottom = 18;
+            Add(separator);
             content = new VisualElement();
             content.style.flexGrow = 1;
             content.style.justifyContent = Justify.FlexStart;

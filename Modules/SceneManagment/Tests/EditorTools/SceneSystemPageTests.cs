@@ -259,6 +259,119 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             Assert.IsNotEmpty(SceneSystemSettingsAssets.MoveTo(null, "Assets"));
         }
 
+        private SceneSet SetAsset(string _name, string _manager, string _shared, bool _reset)
+        {
+            SceneSet set = ScriptableObject.CreateInstance<SceneSet>();
+            set.ManagerScenes.Add(Scene(_manager));
+            set.SharedScenes.Add(Scene(_shared));
+            set.ResetSharedScenes = _reset;
+            AssetDatabase.CreateAsset(set, Folder + "/" + _name + ".asset");
+            return set;
+        }
+
+        private static SceneGroup GroupAssetOn(string _name, SceneSet _set)
+        {
+            SceneGroup group = ScriptableObject.CreateInstance<SceneGroup>();
+            group.Initialize(new SceneReference[0], new SceneReference[0], Scene("Main " + _name));
+            group.SceneSet = _set;
+            SceneSetSync.ApplySet(group);
+            AssetDatabase.CreateAsset(group, Folder + "/" + _name + ".asset");
+            return group;
+        }
+
+        private SceneSystemSettings SettingsWith(params SceneSet[] _sets)
+        {
+            SceneSystemSettings settings = ScriptableObject.CreateInstance<SceneSystemSettings>();
+            created.Add(settings);
+            settings.SceneSets.AddRange(_sets);
+            return settings;
+        }
+
+        [Test]
+        public void Remove_MoveToAnotherSet_MovesEveryGroupKeepsOverridesAndDeletesTheSet()
+        {
+            SceneSet level = SetAsset("Level", "Managers", "Car", true);
+            SceneSet menu = SetAsset("Menu", "MenuManagers", "MenuCar", false);
+            SceneGroup plain = GroupAssetOn("plainGroup", level);
+            SceneGroup overridden = GroupAssetOn("overriddenGroup", level);
+            overridden.ManagerialBootScenesList = new List<SceneReference> { Scene("OwnManagers") };
+            SceneSetSync.UpdateOverrideAfterEdit(overridden, SceneSetPart.ManagerScenes);
+            SceneSystemSettings settings = SettingsWith(level, menu);
+            string levelPath = AssetDatabase.GetAssetPath(level);
+
+            string error = SceneSetRemoval.Remove(settings, level, SceneSetRemovalMode.MoveToAnotherSet, menu, null);
+
+            Assert.IsEmpty(error);
+            Assert.IsNull(AssetDatabase.LoadAssetAtPath<SceneSet>(levelPath));
+            Assert.AreSame(menu, plain.SceneSet);
+            Assert.AreEqual("MenuCar", SceneSetSync.Describe(plain.ContextualBootScenesList));
+            Assert.AreSame(menu, overridden.SceneSet);
+            Assert.AreEqual("OwnManagers", SceneSetSync.Describe(overridden.ManagerialBootScenesList));
+            CollectionAssert.AreEqual(new[] { menu }, settings.SceneSets);
+        }
+
+        [Test]
+        public void Remove_ConvertToOverride_KeepsTheScenesAndClearsTheSet()
+        {
+            SceneSet level = SetAsset("Level", "Managers", "Car", true);
+            SceneGroup group = GroupAssetOn("levelGroup", level);
+            SceneSystemSettings settings = SettingsWith(level);
+
+            string error = SceneSetRemoval.Remove(settings, level, SceneSetRemovalMode.ConvertToOverride, null, null);
+
+            Assert.IsEmpty(error);
+            Assert.IsNull(group.SceneSet);
+            Assert.AreEqual("Managers", SceneSetSync.Describe(group.ManagerialBootScenesList));
+            Assert.AreEqual("Car", SceneSetSync.Describe(group.ContextualBootScenesList));
+            Assert.IsTrue(group.ForceReloadContextualScenes);
+            Assert.IsFalse(group.IsOverride(SceneSetPart.ManagerScenes));
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void Remove_MoveWithoutAUsableReplacement_ChangesNothing(bool _replacementIsTheSameSet)
+        {
+            SceneSet level = SetAsset("Level", "Managers", "Car", true);
+            SceneGroup group = GroupAssetOn("levelGroup", level);
+            SceneSystemSettings settings = SettingsWith(level);
+            SceneSet replacement = _replacementIsTheSameSet ? level : null;
+
+            string error = SceneSetRemoval.Remove(settings, level, SceneSetRemovalMode.MoveToAnotherSet, replacement, null);
+
+            Assert.IsNotEmpty(error);
+            Assert.AreSame(level, group.SceneSet);
+            Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<SceneSet>(Folder + "/Level.asset"));
+        }
+
+        [Test]
+        public void Remove_TheDefaultSet_MakesThePickedSetTheDefault()
+        {
+            SceneSet level = SetAsset("Level", "Managers", "Car", true);
+            SceneSet menu = SetAsset("Menu", "MenuManagers", "MenuCar", false);
+            SceneSystemSettings settings = SettingsWith(level, menu);
+            settings.DefaultSceneSet = level;
+
+            string error = SceneSetRemoval.Remove(settings, level, SceneSetRemovalMode.ConvertToOverride, null, menu);
+
+            Assert.IsEmpty(error);
+            Assert.AreSame(menu, settings.DefaultSceneSet);
+        }
+
+        [Test]
+        public void WithOnlyTheseSettingsPreloaded_SwapsOtherSettingsAndKeepsEverythingElse()
+        {
+            SceneSystemSettings oldSettings = ScriptableObject.CreateInstance<SceneSystemSettings>();
+            SceneSystemSettings newSettings = ScriptableObject.CreateInstance<SceneSystemSettings>();
+            SceneSet other = ScriptableObject.CreateInstance<SceneSet>();
+            created.Add(oldSettings);
+            created.Add(newSettings);
+            created.Add(other);
+
+            Object[] result = SceneSystemSettingsAssets.WithOnlyTheseSettingsPreloaded(new Object[] { other, null, oldSettings }, newSettings);
+
+            CollectionAssert.AreEqual(new Object[] { other, newSettings }, result);
+        }
+
         [TestCase(SceneGroupListKind.ManagerScenes, 0, "Manager scenes (Scene 1)")]
         [TestCase(SceneGroupListKind.SharedScenes, 2, "Shared scenes (Scene 3)")]
         public void Where_CountsRowsFromOne(SceneGroupListKind _list, int _index, string _expected)

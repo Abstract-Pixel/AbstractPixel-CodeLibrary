@@ -60,7 +60,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static Color DefaultCardBorder
         {
-            get { return EditorGUIUtility.isProSkin ? new Color(0.36f, 0.48f, 0.62f) : new Color(0.42f, 0.56f, 0.74f); }
+            get { return EditorGUIUtility.isProSkin ? new Color(0.40f, 0.68f, 0.44f) : new Color(0.20f, 0.50f, 0.26f); }
         }
 
         private static Color HeaderHoverText
@@ -78,14 +78,14 @@ namespace AbstractPixel.SceneManagement.Editor
             get { return EditorGUIUtility.isProSkin ? new Color(0.31f, 0.40f, 0.51f) : new Color(0.85f, 0.91f, 0.98f); }
         }
 
-        private static Color FieldBackground
+        private static Color ReadOnlyBackground
         {
-            get { return EditorGUIUtility.isProSkin ? new Color(0.165f, 0.165f, 0.165f) : new Color(0.94f, 0.94f, 0.94f); }
+            get { return EditorGUIUtility.isProSkin ? new Color(0.21f, 0.21f, 0.21f) : new Color(0.84f, 0.84f, 0.84f); }
         }
 
-        private static Color FieldBorder
+        private static Color ReadOnlyBorder
         {
-            get { return EditorGUIUtility.isProSkin ? new Color(0.13f, 0.13f, 0.13f) : new Color(0.70f, 0.70f, 0.70f); }
+            get { return EditorGUIUtility.isProSkin ? new Color(0.27f, 0.27f, 0.27f) : new Color(0.76f, 0.76f, 0.76f); }
         }
 
         /// <summary>A page title. What the page is for goes in its tooltip.</summary>
@@ -223,7 +223,7 @@ namespace AbstractPixel.SceneManagement.Editor
         }
 
         /// <summary>Selects the asset and shows it in the Project window.</summary>
-        private static void PingAndSelect(UnityEngine.Object _asset)
+        public static void PingAndSelect(UnityEngine.Object _asset)
         {
             if (_asset == null)
             {
@@ -246,15 +246,81 @@ namespace AbstractPixel.SceneManagement.Editor
             field.style.paddingLeft = 4;
             field.style.paddingRight = 4;
             field.style.unityTextAlign = TextAnchor.MiddleLeft;
-            field.style.backgroundColor = FieldBackground;
+            // Flat and muted, so it reads as information and not as a field to type in.
+            field.style.color = MutedText;
+            field.style.backgroundColor = ReadOnlyBackground;
             field.style.overflow = Overflow.Hidden;
             field.style.whiteSpace = WhiteSpace.NoWrap;
             field.style.textOverflow = TextOverflow.Ellipsis;
             field.style.unityTextOverflowPosition = TextOverflowPosition.Start;
-            SetBorder(field, FieldBorder, 1);
+            SetBorder(field, ReadOnlyBorder, 1);
             SetRadius(field, 3);
             field.RegisterCallback<ClickEvent>(_event => PingAndSelect(_asset));
             return field;
+        }
+
+        /// <summary>
+        /// A reference to an asset in Unity's object field, shown but not changeable: a click pings the asset, a double
+        /// click selects it, and anything dropped or picked is put back. The picker button is hidden.
+        /// </summary>
+        public static ObjectField ReadOnlyObjectField(UnityEngine.Object _asset, Type _type, string _tooltip)
+        {
+            ObjectField field = new ObjectField();
+            field.objectType = _type;
+            field.allowSceneObjects = false;
+            field.SetValueWithoutNotify(_asset);
+            field.tooltip = _tooltip;
+            field.style.marginLeft = 0;
+            field.RegisterValueChangedCallback(_change =>
+            {
+                if (_change.newValue == _asset)
+                {
+                    return;
+                }
+                field.SetValueWithoutNotify(_asset);
+            });
+            VisualElement picker = field.Q(className: ObjectField.selectorUssClassName);
+            if (picker != null)
+            {
+                picker.style.display = DisplayStyle.None;
+            }
+            // The same flat, muted look as the path box, so it doesn't look editable.
+            VisualElement input = field.Q(className: ObjectField.inputUssClassName);
+            if (input != null)
+            {
+                input.style.backgroundColor = ReadOnlyBackground;
+                SetBorder(input, ReadOnlyBorder, 1);
+            }
+            Label display = field.Q<Label>(className: "unity-object-field-display__label");
+            if (display != null)
+            {
+                display.style.color = MutedText;
+            }
+            return field;
+        }
+
+        /// <summary>A centred line, a little narrower than its parent, that sets a header apart from what follows.</summary>
+        public static VisualElement Separator()
+        {
+            VisualElement line = new VisualElement();
+            line.style.height = 2;
+            line.style.width = Length.Percent(80);
+            line.style.alignSelf = Align.Center;
+            line.style.flexShrink = 0;
+            line.style.backgroundColor = SeparatorColour;
+            SetRadius(line, 1);
+            return line;
+        }
+
+        private static Color SeparatorColour
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.78f, 0.78f, 0.80f, 0.75f) : new Color(0.35f, 0.35f, 0.37f, 0.75f); }
+        }
+
+        /// <summary>The default scene set's accent: its name and its "Chosen default scene set" tag.</summary>
+        public static Color DefaultAccent
+        {
+            get { return DefaultCardBorder; }
         }
 
         /// <summary>An asset's name as a link: a click selects it and shows it in the Project window.</summary>
@@ -270,7 +336,7 @@ namespace AbstractPixel.SceneManagement.Editor
             return link;
         }
 
-        /// <summary>A scene set's card on the page. The default set's card has a quiet blue outline.</summary>
+        /// <summary>A scene set's card on the page. The default set's card has a green outline with a thick left edge.</summary>
         public static VisualElement SetCard(bool _isDefault)
         {
             VisualElement card = new VisualElement();
@@ -280,12 +346,17 @@ namespace AbstractPixel.SceneManagement.Editor
             card.style.paddingTop = 3;
             card.style.paddingBottom = 3;
             SetRadius(card, 4);
-            Color border = CardBorder;
             if (_isDefault)
             {
-                border = DefaultCardBorder;
+                // A green outline with a thick left edge, so the default card stands out at a glance and never looks
+                // like the blue of a selected card.
+                SetBorder(card, DefaultCardBorder, 1);
+                card.style.borderLeftWidth = 4;
             }
-            SetBorder(card, border, 1);
+            else
+            {
+                SetBorder(card, CardBorder, 1);
+            }
             ShowSelected(card, false);
             return card;
         }

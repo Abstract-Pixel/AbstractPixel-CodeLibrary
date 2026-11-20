@@ -80,7 +80,15 @@ namespace AbstractPixel.SceneManagement.Editor
 
         public static SceneSystemSettings Find()
         {
-            string guid = PickSettingsGuid(CachedGuid, AssetDatabase.GUIDToAssetPath, FindAllGuids);
+            // Without a cache (a new Editor session), the settings in Preloaded Assets win: that is the project's choice,
+            // shared through version control, and it follows the asset by GUID when it moves.
+            string preferredGuid = CachedGuid;
+            bool cacheLeadsNowhere = string.IsNullOrEmpty(preferredGuid) || string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath(preferredGuid));
+            if (cacheLeadsNowhere)
+            {
+                preferredGuid = PreloadedSettingsGuid();
+            }
+            string guid = PickSettingsGuid(preferredGuid, AssetDatabase.GUIDToAssetPath, FindAllGuids);
             SceneSystemSettings settings = LoadByGuid(guid);
             if (settings == null && guid == CachedGuid && !string.IsNullOrEmpty(guid))
             {
@@ -91,6 +99,77 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             CachedGuid = settings == null ? string.Empty : guid;
             return settings;
+        }
+
+        /// <summary>The GUID of the scene system settings asset in Preloaded Assets, or empty.</summary>
+        public static string PreloadedSettingsGuid()
+        {
+            foreach (UnityEngine.Object item in PlayerSettings.GetPreloadedAssets())
+            {
+                SceneSystemSettings settings = item as SceneSystemSettings;
+                if (settings == null)
+                {
+                    continue;
+                }
+                return AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(settings));
+            }
+            return string.Empty;
+        }
+
+        /// <summary>The preloaded list without empty entries and without other scene system settings, with these settings once.</summary>
+        public static UnityEngine.Object[] WithOnlyTheseSettingsPreloaded(UnityEngine.Object[] _preloaded, SceneSystemSettings _settings)
+        {
+            List<UnityEngine.Object> kept = new List<UnityEngine.Object>();
+            if (_preloaded != null)
+            {
+                foreach (UnityEngine.Object item in _preloaded)
+                {
+                    if (item == null)
+                    {
+                        continue;
+                    }
+                    bool otherSettings = item is SceneSystemSettings && item != _settings;
+                    if (otherSettings)
+                    {
+                        continue;
+                    }
+                    kept.Add(item);
+                }
+            }
+            if (_settings != null && !kept.Contains(_settings))
+            {
+                kept.Add(_settings);
+            }
+            return kept.ToArray();
+        }
+
+        /// <summary>
+        /// Makes this asset the project's scene system settings: cached for this session, and the only settings in
+        /// Preloaded Assets, so builds and later sessions use it too. Returns why it can't, or empty.
+        /// </summary>
+        public static string Use(SceneSystemSettings _settings)
+        {
+            if (_settings == null)
+            {
+                return "The scene system needs a settings asset. Pick one, or keep the one it has.";
+            }
+            if (!AssetDatabase.Contains(_settings))
+            {
+                return "Pick a settings asset from the project.";
+            }
+            Remember(_settings);
+            UnityEngine.Object[] current = PlayerSettings.GetPreloadedAssets();
+            UnityEngine.Object[] wanted = WithOnlyTheseSettingsPreloaded(current, _settings);
+            bool unchanged = SameItems(new List<UnityEngine.Object>(current), new List<UnityEngine.Object>(wanted));
+            if (!unchanged)
+            {
+                PlayerSettings.SetPreloadedAssets(wanted);
+                AssetDatabase.SaveAssets();
+            }
+            RefreshLists(_settings);
+            Debug.Log(LogPrefix + " The scene system now uses the settings at " + AssetDatabase.GetAssetPath(_settings) + ".", _settings);
+            NotifyChanged();
+            return string.Empty;
         }
 
         /// <summary>Caches this asset as the project's scene system settings.</summary>

@@ -17,19 +17,41 @@ namespace AbstractPixel.SceneManagement.Editor
         public const string Title = "Scene Groups Debugger";
         public const string Tooltip = "Every scene group in the project in one place: change its main scene or scene set, see its problems and fix them, and choose whether a build checks them first. Changes have Undo.";
 
-        private const float NameWidth = 150;
-        private const float MainSceneMinWidth = 90;
-        private const float MainSceneMaxWidth = 300;
+        // Columns start at their width and share the spare width in proportion to their grow, up to their maximum; in a
+        // narrow window they give way down to their minimum. Header and rows use the same numbers, so they line up.
         private const float ColumnGap = 14;
-        private const float MinColumnWidth = 70;
-        private const float SetWidth = 140;
-        private const float StatusWidth = 150;
-        private const float OpenWidth = 84;
+        private const float IndexWidth = 30;
+        private const float NameWidth = 170;
+        private const float NameMinWidth = 60;
+        private const float NameMaxWidth = 280;
+        private const float MainSceneWidth = 220;
+        private const float MainSceneMinWidth = 60;
+        private const float MainSceneMaxWidth = 420;
+        private const float SetWidth = 220;
+        private const float SetMinWidth = 200;
+        private const float SetMaxWidth = 320;
+        private const float StatusWidth = 170;
+        private const float StatusMinWidth = 90;
+        private const float StatusMaxWidth = 210;
+        private const float StatusGrow = 0.5f;
+        private const float ButtonGap = 6;
+        // Below this card width the two buttons move to a second line under their row, so nothing leaves the card.
+        private const float CompactBelowWidth = 1100;
+        private const string BlockName = "group-block";
+        private const string RowName = "group-row";
+        private const string ButtonsName = "row-buttons";
+        private const string HeaderButtonsName = "header-buttons";
+        private const float ButtonWidth = 92;
+        private const float ProblemsIndent = IndexWidth + ColumnGap;
 
         /// <summary>Fills the section's card and the summary next to its title ("16 groups, 0 problems").</summary>
         public static void Fill(VisualElement _card, VisualElement _summary, SceneSystemSettings _settings, Action _requestRefresh)
         {
             _card.Clear();
+            _card.style.overflow = Overflow.Hidden;
+            _card.userData = null;
+            _card.UnregisterCallback<GeometryChangedEvent>(OnCardResized);
+            _card.RegisterCallback<GeometryChangedEvent>(OnCardResized);
             if (_settings != null)
             {
                 _card.Add(BeforeBuildToggle(_settings));
@@ -51,11 +73,62 @@ namespace AbstractPixel.SceneManagement.Editor
             }
 
             int problemCount = 0;
+            int number = 1;
             foreach (SceneGroup group in groups)
             {
-                problemCount += AddGroupRow(_card, group, _settings, _requestRefresh);
+                problemCount += AddGroupRow(_card, group, number, _settings, _requestRefresh);
+                number++;
             }
             FillSummary(_summary, groups.Count, problemCount);
+        }
+
+        private static void OnCardResized(GeometryChangedEvent _event)
+        {
+            VisualElement card = _event.currentTarget as VisualElement;
+            if (card == null)
+            {
+                return;
+            }
+            bool compact = card.contentRect.width < CompactBelowWidth;
+            bool alreadyInThatMode = card.userData is bool && (bool)card.userData == compact;
+            if (alreadyInThatMode)
+            {
+                return;
+            }
+            card.userData = compact;
+            ApplyLayout(card, compact);
+        }
+
+        // Wide: the buttons end each row. Compact: they move under the row, below the scene group's name.
+        private static void ApplyLayout(VisualElement _card, bool _compact)
+        {
+            VisualElement headerButtons = _card.Q(HeaderButtonsName);
+            if (headerButtons != null)
+            {
+                headerButtons.style.display = _compact ? DisplayStyle.None : DisplayStyle.Flex;
+            }
+            foreach (VisualElement block in _card.Query(BlockName).ToList())
+            {
+                VisualElement row = block.Q(RowName);
+                VisualElement buttons = block.Q(ButtonsName);
+                if (row == null || buttons == null)
+                {
+                    continue;
+                }
+                buttons.RemoveFromHierarchy();
+                if (_compact)
+                {
+                    buttons.style.marginLeft = ProblemsIndent;
+                    buttons.style.marginTop = 2;
+                    buttons.style.marginBottom = 4;
+                    block.Insert(1, buttons);
+                    continue;
+                }
+                buttons.style.marginLeft = 0;
+                buttons.style.marginTop = 0;
+                buttons.style.marginBottom = 0;
+                row.Add(buttons);
+            }
         }
 
         private static Toggle BeforeBuildToggle(SceneSystemSettings _settings)
@@ -91,75 +164,94 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             VisualElement row = SceneSystemUI.Row();
             row.style.marginBottom = 3;
-            row.Add(HeaderCell("Scene group", NameWidth, SceneSystemUI.SceneGroupTooltip));
-            Label mainScene = HeaderCell("Main scene", MainSceneMinWidth, SceneSystemUI.MainSceneTooltip);
-            mainScene.style.flexGrow = 1;
-            mainScene.style.flexShrink = 1;
-            mainScene.style.maxWidth = MainSceneMaxWidth;
-            mainScene.style.minWidth = MainSceneMinWidth;
-            row.Add(mainScene);
-            row.Add(HeaderCell("Scene set", SetWidth, SceneSystemUI.SceneSetTooltip));
-            row.Add(HeaderCell("Status", StatusWidth, "Whether the scene group check finds problems in this group. Each problem is listed under the row with its fix."));
-            VisualElement openColumn = new VisualElement();
-            FixWidth(openColumn, OpenWidth);
-            openColumn.style.flexShrink = 0;
-            openColumn.style.marginRight = 0;
-            row.Add(openColumn);
+            Label number = HeaderCell("#", IndexWidth, 0, IndexWidth, IndexWidth, "The scene group's number in this list.");
+            number.style.unityTextAlign = TextAnchor.MiddleRight;
+            row.Add(number);
+            row.Add(HeaderCell("Scene group", NameWidth, 1, NameMinWidth, NameMaxWidth, SceneSystemUI.SceneGroupTooltip));
+            row.Add(HeaderCell("Main scene", MainSceneWidth, 1.5f, MainSceneMinWidth, MainSceneMaxWidth, SceneSystemUI.MainSceneTooltip));
+            row.Add(HeaderCell("Scene set", SetWidth, 1, SetMinWidth, SetMaxWidth, SceneSystemUI.SceneSetTooltip));
+            row.Add(HeaderCell("Status", StatusWidth, StatusGrow, StatusMinWidth, StatusMaxWidth, "Whether the scene group check finds problems in this group. Each problem is listed under the row with its fix."));
+            VisualElement buttonsColumn = new VisualElement();
+            buttonsColumn.name = HeaderButtonsName;
+            float buttonsWidth = ButtonWidth * 2 + ButtonGap;
+            Column(buttonsColumn, buttonsWidth, 0, buttonsWidth, buttonsWidth);
+            buttonsColumn.style.marginRight = 0;
+            row.Add(buttonsColumn);
             return row;
         }
 
-        private static Label HeaderCell(string _text, float _width, string _tooltip)
+        private static Label HeaderCell(string _text, float _width, float _grow, float _minWidth, float _maxWidth, string _tooltip)
         {
             Label cell = new Label(_text);
             cell.tooltip = _tooltip;
             cell.style.unityFontStyleAndWeight = FontStyle.Bold;
             cell.style.whiteSpace = WhiteSpace.NoWrap;
             cell.style.textOverflow = TextOverflow.Ellipsis;
-            FixWidth(cell, _width);
+            Column(cell, _width, _grow, _minWidth, _maxWidth);
             return cell;
         }
 
-        // Every column but the main scene starts at its width and gives way only in a narrow window, down to a minimum,
-        // the same in the header and the rows, so they stay lined up.
-        private static void FixWidth(VisualElement _cell, float _width)
+        private static void Column(VisualElement _cell, float _width, float _grow, float _minWidth, float _maxWidth)
         {
             _cell.style.width = _width;
+            _cell.style.flexGrow = _grow;
             _cell.style.flexShrink = 1;
-            _cell.style.minWidth = MinColumnWidth;
+            _cell.style.minWidth = _minWidth;
+            _cell.style.maxWidth = _maxWidth;
             _cell.style.overflow = Overflow.Hidden;
+            _cell.style.marginLeft = 0;
             _cell.style.marginRight = ColumnGap;
         }
 
         // Adds the group's row and, under it, its problems with their fixes. Returns the number of problems.
-        private static int AddGroupRow(VisualElement _card, SceneGroup _group, SceneSystemSettings _settings, Action _requestRefresh)
+        private static int AddGroupRow(VisualElement _card, SceneGroup _group, int _number, SceneSystemSettings _settings, Action _requestRefresh)
         {
             VisualElement block = new VisualElement();
+            block.name = BlockName;
             block.style.marginTop = 1;
             block.style.marginBottom = 1;
 
             SceneGroupProblemsView problemsView = new SceneGroupProblemsView(false);
-            problemsView.style.marginLeft = NameWidth;
+            problemsView.style.marginLeft = ProblemsIndent;
             problemsView.style.marginBottom = 2;
             int problemCount = problemsView.Refresh(_group, _requestRefresh);
 
             VisualElement row = SceneSystemUI.Row();
+            row.name = RowName;
+            Label index = SceneSystemUI.Hint(_number + ".");
+            index.style.unityTextAlign = TextAnchor.MiddleRight;
+            Column(index, IndexWidth, 0, IndexWidth, IndexWidth);
+            row.Add(index);
+
             Label name = SceneSystemUI.AssetLink(_group, _group.name);
-            FixWidth(name, NameWidth);
+            Column(name, NameWidth, 1, NameMinWidth, NameMaxWidth);
             row.Add(name);
             row.Add(MainSceneField(_group, _requestRefresh));
             row.Add(SetField(_group, _settings, _requestRefresh));
             row.Add(StatusCell(_group, problemCount));
-            Button open = SceneSystemUI.Button("Open group", SceneSystemUI.OpenGroupTooltip, () => SceneGroupOpener.Open(_group));
-            FixWidth(open, OpenWidth);
-            open.style.flexShrink = 0;
-            open.style.marginLeft = 0;
-            open.style.marginRight = 0;
-            row.Add(open);
+            VisualElement buttons = SceneSystemUI.Row();
+            buttons.name = ButtonsName;
+            buttons.style.flexShrink = 0;
+            buttons.Add(RowButton("Select group", "Selects this scene group in the Project window and shows it in the Inspector.", () => SceneSystemUI.PingAndSelect(_group)));
+            Button open = RowButton("Open group", SceneSystemUI.OpenGroupTooltip, () => SceneGroupOpener.Open(_group));
+            open.style.marginLeft = ButtonGap;
+            buttons.Add(open);
+            row.Add(buttons);
 
             block.Add(row);
             block.Add(problemsView);
             _card.Add(block);
             return problemCount;
+        }
+
+        private static Button RowButton(string _text, string _tooltip, Action _clicked)
+        {
+            Button button = SceneSystemUI.Button(_text, _tooltip, _clicked);
+            button.style.width = ButtonWidth;
+            button.style.flexShrink = 0;
+            button.style.marginLeft = 0;
+            button.style.marginRight = 0;
+            return button;
         }
 
         // A small object field with the main scene (its path in the tooltip) that takes a new scene by drag or picker.
@@ -177,12 +269,9 @@ namespace AbstractPixel.SceneManagement.Editor
             field.objectType = typeof(SceneAsset);
             field.allowSceneObjects = false;
             field.SetValueWithoutNotify(current);
-            field.style.flexGrow = 1;
-            field.style.flexShrink = 1;
-            field.style.minWidth = MainSceneMinWidth;
-            field.style.maxWidth = MainSceneMaxWidth;
-            field.style.marginLeft = 0;
-            field.style.marginRight = ColumnGap;
+            // A fixed starting width, so an empty field ("None (Scene Asset)", longer text) sizes exactly like a filled
+            // one and every row keeps the same column width.
+            Column(field, MainSceneWidth, 1.5f, MainSceneMinWidth, MainSceneMaxWidth);
             field.tooltip = SceneSystemUI.MainSceneTooltip;
             if (!string.IsNullOrEmpty(path))
             {
@@ -204,9 +293,14 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             if (_settings == null)
             {
-                Label none = new Label("—");
-                none.tooltip = "Scene sets need the scene system to be set up.";
-                FixWidth(none, SetWidth);
+                string setName = "—";
+                if (_group.SceneSet != null)
+                {
+                    setName = _group.SceneSet.name;
+                }
+                Label none = new Label(setName);
+                none.tooltip = "Changing the scene set needs the scene system to be set up.";
+                Column(none, SetWidth, 1, SetMinWidth, SetMaxWidth);
                 return none;
             }
             PopupField<SceneSet> field = SceneSystemUI.SceneSetPopup(null, _settings, _group.SceneSet, _picked =>
@@ -214,8 +308,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 SceneSetSync.PickSet(_group, _picked);
                 _requestRefresh();
             });
-            FixWidth(field, SetWidth);
-            field.style.marginLeft = 0;
+            Column(field, SetWidth, 1, SetMinWidth, SetMaxWidth);
             return field;
         }
 
@@ -235,7 +328,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 text = "Boot group, unused";
             }
             VisualElement cell = SceneSystemUI.StatusRow(colour, text, text);
-            FixWidth(cell, StatusWidth);
+            Column(cell, StatusWidth, StatusGrow, StatusMinWidth, StatusMaxWidth);
             Label label = cell.Q<Label>();
             if (label != null)
             {

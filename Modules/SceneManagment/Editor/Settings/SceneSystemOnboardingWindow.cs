@@ -19,7 +19,14 @@ namespace AbstractPixel.SceneManagement.Editor
         private const string ShownThisSessionKey = "AbstractPixel.SceneSystem.OnboardingShown";
         private const string TurnedOffKey = "AbstractPixel.SceneSystem.OnboardingTurnedOff";
 
+        // Only queues the check: a window restored after a domain reload runs this from inside a ScriptableObject
+        // constructor, where Unity forbids most API calls (Application.isBatchMode among them).
         static SceneSystemOnboardingWindow()
+        {
+            EditorApplication.delayCall += QueueOpenIfNeeded;
+        }
+
+        private static void QueueOpenIfNeeded()
         {
             if (Application.isBatchMode)
             {
@@ -39,8 +46,8 @@ namespace AbstractPixel.SceneManagement.Editor
         public static void Open()
         {
             SceneSystemOnboardingWindow window = GetWindow<SceneSystemOnboardingWindow>(true, "Set up the scene system", true);
-            window.minSize = new Vector2(460, 420);
-            window.maxSize = new Vector2(690, 630);
+            window.minSize = new Vector2(460, 520);
+            window.maxSize = new Vector2(690, 780);
             window.Show();
         }
 
