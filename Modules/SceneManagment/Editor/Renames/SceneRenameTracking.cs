@@ -125,6 +125,44 @@ namespace AbstractPixel.SceneManagement.Editor
             RefreshFiles(new List<string>(toRefresh), what, skippedLarge);
         }
 
+        /// <summary>
+        /// Re-saves the scene groups whose stored scene names or paths are stale, so a build (which reads the stored
+        /// names) opens renamed scenes. Returns how many were refreshed.
+        /// </summary>
+        public static int RefreshStaleSceneGroups()
+        {
+            List<string> stalePaths = new List<string>();
+            foreach (SceneGroup group in SceneGroupAssets.FindAll())
+            {
+                if (HasStaleScene(group))
+                {
+                    stalePaths.Add(AssetDatabase.GetAssetPath(group));
+                }
+            }
+            if (stalePaths.Count == 0)
+            {
+                return 0;
+            }
+            RefreshFiles(stalePaths, "Some scenes were renamed or moved since their scene groups were saved", 0);
+            return stalePaths.Count;
+        }
+
+        private static bool HasStaleScene(SceneGroup _group)
+        {
+            List<AbstractPixel.Core.SceneReference> scenes = new List<AbstractPixel.Core.SceneReference>();
+            scenes.Add(_group.MainScene);
+            scenes.AddRange(_group.ManagerialBootScenesList);
+            scenes.AddRange(_group.ContextualBootScenesList);
+            foreach (AbstractPixel.Core.SceneReference scene in scenes)
+            {
+                if (scene != null && scene.SceneFieldReference.HasStaleIdentity)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>Re-saves the files so their scene fields copy each scene's current name and path. One console line.</summary>
         public static void RefreshFiles(List<string> _paths, string _what, int _skippedLarge)
         {

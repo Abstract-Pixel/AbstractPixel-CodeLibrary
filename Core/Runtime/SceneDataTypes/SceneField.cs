@@ -94,6 +94,21 @@ namespace AbstractPixel.Core
 
         public SceneAsset SceneAssetInEditor => sceneAsset;
 
+        /// <summary>True when the stored name or path no longer match the scene asset (it was renamed or moved since the last save).</summary>
+        public bool HasStaleIdentity
+        {
+            get
+            {
+                if (sceneAsset == null)
+                {
+                    return false;
+                }
+                bool nameChanged = sceneName != sceneAsset.name;
+                bool pathChanged = scenePath != AssetDatabase.GetAssetPath(sceneAsset);
+                return nameChanged || pathChanged;
+            }
+        }
+
         private void CopyIdentityFromAsset()
         {
             if (sceneAsset == null)
