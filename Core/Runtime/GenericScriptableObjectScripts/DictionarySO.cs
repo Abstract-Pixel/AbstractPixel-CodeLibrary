@@ -1,11 +1,12 @@
-using CustomInspector;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AbstractPixel.Core
 {
-    public class DictionarySO<Tkey, Tvalue> : ScriptableObject
+    // The base abstract class remains generic
+    public abstract class DictionarySO<Tkey, Tvalue> : ScriptableObject
     {
-        [field: SerializeField] public ReorderableDictionary<Tkey, Tvalue> Dictionary { get; private set; }
-
+        // Unity skips a Dictionary field without [SerializeField], even a public one, so the asset would never keep its entries.
+        [SerializeField] public Dictionary<Tkey, Tvalue> dictionary = new Dictionary<Tkey, Tvalue>();
     }
 }

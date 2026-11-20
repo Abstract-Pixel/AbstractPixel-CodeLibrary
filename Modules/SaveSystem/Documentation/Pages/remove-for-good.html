@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Forgetting saved data for good</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Forget a saved object so it stays gone after a reload, and see the gone marker it writes to the save file.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/remove-for-good.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Forgetting saved data for good <span class="lv lv1">1 daily code</span></h1>
+<p class="lede">A coin that was picked up should stay picked up. Destroy alone isn't enough.</p>
+
+<section id="story">
+<h2>Why a plain Destroy isn't enough<a class="anchor" href="#story">#</a></h2>
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity">Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity</button></div>
+<a class="try-open" href="../../Samples/02 Buttons With No Code/README.html" target="_blank" rel="noopener">Open sample 02: Buttons With No Code →</a>
+</summary>
+<div class="try-body">
+<p>Sample 02 · Buttons With No Code</p>
+<ol>
+<li>Open the <b>Buttons With No Code</b> scene and press Play.</li>
+<li>Press <b>Pick up the coin</b>, then <b>Save</b>.</li>
+<li>Stop, then press Play again.</li>
+</ol>
+</div>
+</details>
+<p>The coin is a GameObject placed in the scene. Every time the scene loads, Unity creates it fresh from the scene file, with its collider and its sprite intact. Plain <code>Destroy</code> only removes it from the running game. It leaves no trace the save system can find on the next load, so the coin comes back.</p>
+<p>A coin that was picked up needs a note that says so. That note is the <a class="term" href="../api/SaveDestroyed.html#gone-marker">gone marker</a>, written by <a class="term" href="../api/SaveActions.html#forget">Forget</a>.</p>
+</section>
+
+<section id="fix">
+<h2>Forget it, then destroy it<a class="anchor" href="#fix">#</a></h2>
+<p>With a line of code, call <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.Forget</code> before <code>Destroy</code>. Forget needs the <a class="term" href="../api/SavableBridge.html#savable-bridge">Savable Bridge</a> still on the GameObject, so it has to run first.</p>
+<figure class="code">
+<figcaption>Coin.cs: forgetting before destroying</figcaption>
+<pre><code class="cs">void OnPickedUp()
+{
+    SaveActions.Forget(gameObject);
+    Destroy(gameObject);
+}</code></pre>
+</figure>
+<p>With no code, add the <a class="type" href="../api/SaveDestroyed.html">SaveDestroyed</a> component and call its <code>DestroyAndForget</code> from a UnityEvent, such as a button's On Click.</p>
+<div class="note warn"><strong>Always forget before you destroy.</strong> Destroy's own teardown unregisters the object first, so a separate, later Forget call can no longer find its entry.</div>
+</section>
+
+<section id="entry">
+<h2>What the save file keeps<a class="anchor" href="#entry">#</a></h2>
+<p>Forgetting a scene object doesn't remove its entry. It replaces it with a gone marker, so the save system remembers the object should stay off.</p>
+<div class="see"><strong>Show the result</strong>
+<pre class="out"><code>"9b1c44d0-.../a7e2f310-...": {
+  "name": "Assets/Scenes/Level.unity/Coin (3)/Coin",
+  "gone": true
+}</code></pre>
+Next time the scene loads, the coin's <a class="term" href="../api/SavableBridge.html#savable-bridge">Savable Bridge</a> reads the gone marker and turns the GameObject off before any other script's <code>Start</code> runs.</div>
+<p>A plain class or a spawned copy works differently: Forget removes its entry outright, since nothing will create that object again on its own. A gone marker belongs to one <a class="term" href="../api/GameProfile.html#game-profile">game profile</a>, so a new game has the coin again.</p>
+<details class="wrong"><summary>If it goes wrong</summary>
+<dl>
+<dt>A picked-up coin comes back after a reload</dt>
+<dd>Something called <code>Destroy</code> without <code>Forget</code> first. Use <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.Forget(gameObject)</code> or <code><a class="term" href="../api/SaveDestroyed.html">SaveDestroyed</a>.DestroyAndForget</code>.</dd>
+<dt>Forget logs an error and changes nothing</dt>
+<dd>No game profile is open. Forgetting <a class="term" href="../api/GameProfile.html#game-profile">GameProfile</a> or Scene data needs one.</dd>
+</dl>
+</details>
+</section>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

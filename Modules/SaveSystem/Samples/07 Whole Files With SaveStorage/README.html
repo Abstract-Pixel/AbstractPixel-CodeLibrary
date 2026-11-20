@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 Whole Files With SaveStorage - Save System Samples</title>
+<meta name="description" content="A debug screen that reads, copies, pastes and deletes a whole save file as JSON text with SaveStorage.">
+<link rel="stylesheet" href="../../Documentation/assets/docs.css">
+</head>
+<body data-root="../../Documentation/">
+<main class="solo">
+<p class="crumbs"><a href="../../Documentation/index.html">Save System</a> › <a href="../README.html">Samples</a> › 07</p>
+<h1>07 Whole Files With SaveStorage <span class="lv lv3">3 full control</span></h1>
+<p class="lede">A debug screen that reads, copies, pastes and deletes the open <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">game profile</a>'s <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">GameProfile</a> save file as JSON text.</p>
+<p><a class="type" href="../../Documentation/api/SaveStorage.html">SaveStorage</a> is for tools and debug buttons: look inside a save, copy a player's save to reproduce a bug, reset one file. Game code saves through <code><a class="type" href="../../Documentation/api/SaveAttribute.html">[Save]</a></code> fields and <code><a class="term" href="../../Documentation/api/SaveActions.html">SaveActions</a></code> instead.</p>
+<dl>
+<dt>Scene</dt><dd>Whole Files With <a class="term" href="../../Documentation/api/SaveStorage.html">SaveStorage</a></dd>
+<dt>Scripts</dt><dd>SaveFileViewer.cs, VisitCounter.cs</dd>
+<dt>Save file</dt><dd>Built-in GameProfile (nothing to add to the config)</dd>
+<dt>Guide</dt><dd><a href="../../Documentation/Pages/whole-files.html">Read or write a whole file</a></dd>
+</dl>
+
+<h2>Try it</h2>
+<ol>
+<li><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/07 Whole Files With SaveStorage/Whole Files With SaveStorage.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/07 Whole Files With SaveStorage/Whole Files With SaveStorage.unity">Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/07 Whole Files With SaveStorage/Whole Files With SaveStorage.unity</button> opens the scene in Unity, then press Play.</li>
+<li>Press <b>Count a visit</b>, then <b>Save</b>. The file's text shows the visit count under <code>visits</code>.</li>
+<li>Press <b>Copy the file's text</b>. Count two more visits.</li>
+<li>Press <b>Paste text into the file</b>. The visits go back to what the copied text says, in the running game.</li>
+<li>Press <b>Delete the file</b> to start this game profile's file over.</li>
+</ol>
+<div class="see"><strong>You should see</strong>Pasting text that isn't a whole save file logs an error and changes nothing.</div>
+
+<h2>The lines that matter</h2>
+<figure class="code">
+<figcaption>SaveFileViewer.cs</figcaption>
+<pre data-source="Scripts/SaveFileViewer.cs"><code>bool found = SaveStorage.ReadText&lt;SaveFiles.GameProfile&gt;(out string json);  // the open game profile's file
+bool written = SaveStorage.WriteText&lt;SaveFiles.GameProfile&gt;(json);  // in play mode, restores the objects in it too
+SaveStorage.Delete&lt;SaveFiles.GameProfile&gt;();        // the file and its backup
+SaveStorage.GetFilePath&lt;SaveFiles.GameProfile&gt;()    // where it is on disk</code></pre>
+</figure>
+<figure class="code">
+<figcaption>Other shapes (not used in this sample)</figcaption>
+<pre><code class="cs">SaveStorage.ReadText&lt;SaveFiles.GameProfile&gt;(otherProfile, out json);  // another game profile's file
+SaveStorage.ReadText&lt;SaveFiles.Scene&gt;(forestScene, out json);  // a Scene file always needs its scene</code></pre>
+</figure>
+<p><code>SaveStorage</code> also works in edit mode, so an editor window can read and fix save files without pressing Play.</p>
+
+<nav>
+<a href="../06%20Custom%20Data%20With%20ISavable/README.html">← 06 Custom Data With ISavable</a>
+<a href="../README.html">All samples</a>
+<a href="../../Documentation/index.html">Save system guide</a>
+<a href="../08%20ScriptableObject/README.html">08 ScriptableObject →</a>
+</nav>
+<p class="crumbs">The guide also opens from <b>Tools &gt; External Project Tools &gt; Save System &gt; Open Guide</b>.</p>
+</main>
+<script src="../../Documentation/assets/glossary-data.js" defer></script>
+<script src="../../Documentation/assets/docs.js"></script>
+</body>
+</html>

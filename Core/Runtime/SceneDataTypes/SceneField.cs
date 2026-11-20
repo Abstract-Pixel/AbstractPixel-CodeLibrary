@@ -1,6 +1,5 @@
 using UnityEngine;
 using System;
-using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;

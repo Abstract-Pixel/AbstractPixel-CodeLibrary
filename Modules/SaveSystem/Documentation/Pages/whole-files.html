@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Read or write a whole file</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveStorage reads or writes a whole save file as JSON text in one line, for editor tools and debug buttons.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/whole-files.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Read or write a whole file <span class="lv lv3">3 full control</span></h1>
+<p class="lede"><a class="type" href="../api/SaveStorage.html">SaveStorage</a> reads or writes a whole save file as JSON text in one line. Game code should save through <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> fields and <code><a class="term" href="../api/SaveActions.html">SaveActions</a></code> instead; this is for editor tools and debug buttons.</p>
+
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/07 Whole Files With SaveStorage/Whole Files With SaveStorage.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/07 Whole Files With SaveStorage/Whole Files With SaveStorage.unity">Modules/SaveSystem/Samples/07 Whole Files With SaveStorage/Whole Files With SaveStorage.unity</button></div>
+<a class="try-open" href="../../Samples/07 Whole Files With SaveStorage/README.html" target="_blank" rel="noopener">Open sample 07: Whole Files With SaveStorage →</a>
+</summary>
+<div class="try-body">
+<p>Sample 07 · Whole Files With <a class="term" href="../api/SaveStorage.html">SaveStorage</a></p>
+<ol>
+<li>Open the <b>Whole Files With SaveStorage</b> scene and press Play.</li>
+<li>Press <b>Count a visit</b>, then <b>Save</b>. The shown text includes the new <code>visits</code> count.</li>
+<li>Press <b>Copy the file's text</b>, count two more visits, then press <b>Paste text into the file</b>. The count goes back to the copied text.</li>
+</ol>
+</div>
+</details>
+
+<section id="read-write">
+<h2>Read, write, and find the file<a class="anchor" href="#read-write">#</a></h2>
+<figure class="code">
+<figcaption>SaveFileViewer.cs: the open game profile's file</figcaption>
+<pre><code class="cs">bool found = SaveStorage.ReadText&lt;SaveFiles.GameProfile&gt;(out string json);
+bool written = SaveStorage.WriteText&lt;SaveFiles.GameProfile&gt;(json);
+SaveStorage.Delete&lt;SaveFiles.GameProfile&gt;();
+string path = SaveStorage.GetFilePath&lt;SaveFiles.GameProfile&gt;();</code></pre>
+</figure>
+<p><code>ReadText</code>, <code>WriteText</code>, <code>Delete</code> and <code>GetFilePath</code> all take the same four shapes: nothing, a <a class="term" href="../api/GameProfile.html#game-profile">game profile</a>, a scene, or both. A Scene file always needs its scene, as a <code>SceneField</code> picked in the inspector, so the save system never has to guess which one.</p>
+<figure class="code">
+<figcaption>The other shapes</figcaption>
+<pre><code class="cs">SaveStorage.ReadText&lt;SaveFiles.GameProfile&gt;(otherProfile, out string json);
+SaveStorage.ReadText&lt;SaveFiles.Scene&gt;(forestScene, out string json);
+SaveStorage.ReadText&lt;SaveFiles.Scene&gt;(forestScene, otherProfile, out string json);</code></pre>
+</figure>
+<div class="note"><strong>Works in edit mode too.</strong> An editor window can read and fix a save file without pressing Play. In play mode, <code>WriteText</code> and <code>Delete</code> also update the running game: the registered objects in that file restore from the new text, so you don't need to call <code>Reload</code>.</div>
+<details class="wrong"><summary>If it goes wrong</summary>
+<dl>
+<dt>One error names the right call, and nothing happens</dt>
+<dd>A wrong combination, such as a scene argument for a Global file. Match the save file's own <a class="term" href="../api/SaveLocation.html#save-location">save location</a>.</dd>
+<dt>Pasted text does nothing</dt>
+<dd>The text isn't a whole, valid save file. <code>WriteText</code> logs an error and leaves the file untouched.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a href="save-files.html">Choose where data goes</a>, <a href="debug.html#disk">Files on disk</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

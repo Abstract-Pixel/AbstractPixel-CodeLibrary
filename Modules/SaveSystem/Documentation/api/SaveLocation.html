@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SaveLocation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveLocation is one of the three places saved data can live: Global, Game Profile or Scene.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SaveLocation.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SaveLocation <span class="lv lv2">2 choices</span></h1>
+<p class="lede" id="save-location">One of the three places saved data can live: Global, <a class="term" href="../api/GameProfile.html#game-profile">Game Profile</a> or Scene. There are never more than three, and developers can't add their own.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Enum</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/Config/SaveLocation.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveLocation.cs" title="Ping Modules/SaveSystem/Runtime/Config/SaveLocation.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveLocation.cs" title="Open Modules/SaveSystem/Runtime/Config/SaveLocation.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-config">Config</a></dd>
+</dl>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>Picking a save location for a module's save file</figcaption>
+<pre><code class="cs">[SaveFileDefaults("Ghost Runs", SaveLocation.GameProfile)]
+public sealed class GhostRunsSaveFile : ISaveFile
+{
+}</code></pre>
+</figure>
+<p>See <a href="../Pages/save-files.html#locations">Save locations</a> for what each value holds.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Values</h3>
+<div class="members">
+<details id="global">
+<summary><code class="cs">Global = 1</code><span class="desc"><span class="kind k-attr">value</span> Belongs to the player's machine, shared by every game profile.</span></summary>
+<div class="body">Settings and input bindings live here. Global is only ever a save location, never the name of a save file.</div>
+</details>
+<details>
+<summary><code class="cs">GameProfile = 2</code><span class="desc"><span class="kind k-attr">value</span> Belongs to one playthrough. The default save location.</span></summary>
+<div class="body">See <a class="type" href="GameProfile.html">GameProfile</a> for what one playthrough holds.</div>
+</details>
+<details id="scene">
+<summary><code class="cs">Scene = 3</code><span class="desc"><span class="kind k-attr">value</span> Belongs to one scene within one game profile.</span></summary>
+<div class="body">For data about one scene within one game profile, such as which chests in the Forest scene are open — always nested inside a game profile, never on its own. Not to be confused with a Unity scene asset, which is a different thing with the same name.</div>
+</details>
+</div>
+</section>
+
+<p>See also: <a href="../Pages/save-files.html#locations">Save locations</a>, <a class="type" href="SaveFileDefaultsAttribute.html">SaveFileDefaultsAttribute</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

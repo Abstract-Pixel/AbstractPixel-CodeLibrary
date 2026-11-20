@@ -6,8 +6,7 @@ using AbstractPixel.SaveSystem;
 
 namespace AbstractPixel.Settings
 {
-    [Savable(SaveCategory.Settings)]
-    public class SettingsManager : PersistentSingleton<SettingsManager>, ISavable<SettingsDTO>
+    public class SettingsManager : PersistentSingleton<SettingsManager>, ISavable<SettingsDTO, SaveFiles.Settings>
     {
 
         [SerializeField] private SettingsRegistry activeRegistry;
@@ -34,7 +33,7 @@ namespace AbstractPixel.Settings
             InitializeSettingsDictionary();
         }
 
-        // SaveManager's Start runs first (execution order -1200) and restores the save if one can be read.
+        // The Savable Bridge's Start runs first (execution order -10000) and restores the save if one can be read.
         private void Start()
         {
             if (hasRestoredFromSave == true)

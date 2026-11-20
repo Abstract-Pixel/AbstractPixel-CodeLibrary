@@ -1,76 +1,87 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 namespace AbstractPixel.SaveSystem.Editor
 {
+    /// <summary>Editor menu items for finding and clearing save files.</summary>
     public static class SaveSystemToolsMenu
     {
-        [MenuItem("Tools/External Project Tools/Save System/Open Release Folder")]
-        public static void OpenReleaseFolderFromMenu()
+        const string MenuRoot = "Tools/External Project Tools/Save System/";
+
+        /// <summary>The release and debug save folders, the same ones the game writes to.</summary>
+        public static IReadOnlyList<string> GetSaveFolders()
         {
-            if (TryInitializeGenerator())
+            return new[] { DiskStorageService.GetRootFolder(false), DiskStorageService.GetRootFolder(true) };
+        }
+
+        // Opens the guide from the Editor; double-clicking index.html in the Project window does the same thing.
+        [MenuItem(MenuRoot + "Open Guide", priority = 0)]
+        public static void OpenGuide() => SaveSystemGuide.Open();
+
+        [MenuItem(MenuRoot + "Save All")]
+        public static void SaveAll()
+        {
+            SaveActions.SaveAll();
+            SaveLog.Info("[SaveSystem] Saved every registered object (Save All from the Tools menu).");
+        }
+
+        [MenuItem(MenuRoot + "Load All")]
+        public static void LoadAll()
+        {
+            SaveActions.Session?.ReloadAll();
+            SaveLog.Info("[SaveSystem] Re-read every save file and restored every registered object (Load All from the Tools menu).");
+        }
+
+        // Save All and Load All act on the running game, so they're greyed out outside play mode.
+        [MenuItem(MenuRoot + "Save All", true)]
+        [MenuItem(MenuRoot + "Load All", true)]
+        static bool IsPlaying() => EditorApplication.isPlaying;
+
+        [MenuItem(MenuRoot + "Open Release Folder")]
+        public static void OpenReleaseFolder()
+        {
+            OpenFolder(DiskStorageService.GetRootFolder(false));
+        }
+
+        [MenuItem(MenuRoot + "Open Debug Folder")]
+        public static void OpenDebugFolder()
+        {
+            OpenFolder(DiskStorageService.GetRootFolder(true));
+        }
+
+        [MenuItem(MenuRoot + "Delete All Save Files")]
+        public static void DeleteAllSaveFiles()
+        {
+            bool confirmed = EditorUtility.DisplayDialog(
+                "Delete all save files?",
+                "This deletes every save file in the release and debug save folders, for every game profile. It can't be undone.",
+                "Delete",
+                "Cancel");
+            if (!confirmed)
             {
-                OpenDirectory(SavePathGenerator.ShipRootPath);
+                return;
             }
-        }
 
-        [MenuItem("Tools/External Project Tools/Save System/Open Debug Folder")]
-        public static void OpenDebugFolderFromMenu()
-        {
-            if (TryInitializeGenerator())
+            foreach (string folder in GetSaveFolders())
             {
-                OpenDirectory(SavePathGenerator.DebugRootPath);
+                if (Directory.Exists(folder))
+                {
+                    Directory.Delete(folder, true);
+                }
             }
+            // The Hierarchy badge's edit-mode "Saved" reading comes from these files; forget it so deleted
+            // objects go back to "Set up" without waiting for an unrelated hierarchy or object change.
+            HierarchySavedBadge.Forget();
+            SaveLog.Info($"[SaveSystem] Deleted all save files in: {string.Join(", ", GetSaveFolders())}");
         }
-        [MenuItem("Tools/External Project Tools/Save System/Delete All Save Files")]
-        public static void DeleteAllSavesFromMenu()
+
+        static void OpenFolder(string folder)
         {
-
-            bool confirm = EditorUtility.DisplayDialog(
-                "Delete All Saves?",
-                "Are you sure you want to delete ALL save files from the Tools menu?",
-                "Yes, Delete",
-                "Cancel"
-            );
-
-            if (confirm)
-            {
-                if (Directory.Exists(SavePathGenerator.ShipRootPath))
-                    Directory.Delete(SavePathGenerator.ShipRootPath, true);
-
-                if (Directory.Exists(SavePathGenerator.DebugRootPath))
-                    Directory.Delete(SavePathGenerator.DebugRootPath, true);
-
-                Debug.Log("[SaveSystem: FORCED] All files deleted via Tools Menu.");
-            }
+            // The folder appears on the first save, so create it to have something to show.
+            Directory.CreateDirectory(folder);
+            EditorUtility.RevealInFinder(folder);
         }
-
-        #region Helpers
-
-        private static bool TryInitializeGenerator()
-        {
-            string[] guids = AssetDatabase.FindAssets("t:SaveSystemConfigSO");
-
-            if (guids.Length == 0)
-            {
-                Debug.LogError("[SaveSystem] Could not find a SaveSystemConfigSO in the project! Menu item failed.");
-                return false;
-            }
-
-            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
-            SaveSystemConfigSO config = AssetDatabase.LoadAssetAtPath<SaveSystemConfigSO>(path);
-
-            SavePathGenerator.Initialize(config);
-            return true;
-        }
-
-        private static void OpenDirectory(string path)
-        {
-            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-            EditorUtility.RevealInFinder(path);
-        }
-
-        #endregion
     }
 }

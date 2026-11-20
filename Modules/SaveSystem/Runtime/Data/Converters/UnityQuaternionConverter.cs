@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
 {
-    public sealed class UnityQuaternionConverter : JsonConverter<Quaternion>
+    internal sealed class UnityQuaternionConverter : JsonConverter<Quaternion>
     {
         public override void WriteJson(JsonWriter _writer, Quaternion _value, Newtonsoft.Json.JsonSerializer _serializer)
         {

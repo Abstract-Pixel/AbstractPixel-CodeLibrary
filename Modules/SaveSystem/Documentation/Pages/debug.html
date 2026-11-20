@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Debug and inspect</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Where to see what the save system holds: the bridge inspector, the Saved Objects window, the Hierarchy badge, and the save files on disk.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/debug.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Debug and inspect <span class="lv lv0">0 no code</span></h1>
+<p class="lede">Four places show what the save system holds. None of them has a button that changes your data.</p>
+
+<section id="object">
+<h2>On the object<a class="anchor" href="#object">#</a></h2>
+<p>Select a GameObject with a <a class="type" href="../api/SavableBridge.html">Savable Bridge</a>. Its inspector draws one card per saved script, in component order. Each header reads like "Chest · Scene · 3 fields"; a script that appears twice reads "Chest (1)" and "Chest (2)".</p>
+<figure class="pic">
+<img src="../images/save-system-bridge-inspector.png" width="784" height="336" loading="lazy" alt="A Player with Health and a Savable Bridge. The bridge card reads Health, GameProfile, 1 field, and lists current (int) = 90.">
+<figcaption>Sample 01 in play mode: the bridge card lists Health's saved field and its current value.</figcaption>
+</figure>
+<p>Open a card to see each saved field with its type, and "was: hp" under a field renamed with <code>[Save(Formerly = "hp")]</code>. In play mode, an open card also shows each field's current value, refreshed twice a second. The <em>Show save ID</em> button reveals the ID the object registered under, with a <em>Copy save ID</em> button next to it.</p>
+</section>
+
+<section id="saved-objects">
+<h2>The Saved Objects window<a class="anchor" href="#saved-objects">#</a></h2>
+<p>Open <strong>Tools &gt; External Project Tools &gt; Save System &gt; Saved Objects</strong>. In edit mode it only says to enter play mode. In play mode it lists every registered saved object, grouped by save file, with Scene files split by scene.</p>
+<figure class="pic">
+<img src="../images/save-system-saved-objects-window.png" width="731" height="178" loading="lazy" alt="The Saved Objects window: a GameProfile group with two cards, Backpack with items = Wooden Sword, and Health on Player with current = 90.">
+<figcaption>Sample 01 in play mode. Backpack is a plain C# class, so it shows here but on no GameObject.</figcaption>
+</figure>
+<p>Each object is the same card as on the GameObject, named "Chest on Chest 2" for a script on a GameObject or by class name for a plain class. Objects that are Unity objects get a <em>Ping</em> button. Plain classes and ScriptableObjects show up here and nowhere else; the window is read only.</p>
+</section>
+
+<section id="hierarchy">
+<h2>In the Hierarchy<a class="anchor" href="#hierarchy">#</a></h2>
+<p>A GameObject with at least one saved script gets a small <em>Saved</em> badge at the right of its row. Its tooltip lists what it saves, such as "Saves: Chest, Save Transform (Scene)". The badge turns red when a saved script on that GameObject has a mistake.</p>
+<figure class="pic">
+<img src="../images/save-system-hierarchy-badge.png" loading="lazy" alt="The Hierarchy window showing a small Saved badge at the right edge of a GameObject's row.">
+<figcaption>The Saved badge in the Hierarchy. A parent that saves nothing itself but has saving children gets a grey dot, with the children named in its tooltip.</figcaption>
+</figure>
+</section>
+
+<section id="editor-tools">
+<h2>Editor tools<a class="anchor" href="#editor-tools">#</a></h2>
+<p>Every save system tool lives under <strong>Tools &gt; External Project Tools &gt; Save System</strong>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Menu item</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>Open Guide</td><td>Opens this guide.</td></tr>
+<tr><td>Create Config</td><td>Creates the save system config, or selects it if it already exists.</td></tr>
+<tr><td>Update Glossary Data</td><td>Writes <code>assets/glossary-data.js</code> (the term tooltips) from <code>GLOSSARY.md</code>. Run it after editing the glossary.</td></tr>
+<tr><td>Saved Objects</td><td>Opens the window above.</td></tr>
+<tr><td>Save All, Load All</td><td>Saves or reloads everything. Play mode only.</td></tr>
+<tr><td>Open Release Folder, Open Debug Folder</td><td>Opens the save folder for that build type.</td></tr>
+<tr><td>Delete All Save Files</td><td>Asks first, then deletes every save file and backup.</td></tr>
+</tbody>
+</table></div>
+<p>The <strong>?</strong> button in a component's inspector header opens this guide at the right page, the way Unity's own components open their manual page. It's also in the Saved Objects window's tab bar.</p>
+</section>
+
+<section id="disk">
+<h2>Files on disk<a class="anchor" href="#disk">#</a></h2>
+<p>A save never leaves a half-written file. The save system writes a temporary file first, then swaps it in. Backups sit in their own folder with the same layout.</p>
+<figure class="code">
+<figcaption>Folder layout</figcaption>
+<pre><code class="cs">SaveFiles/
+  Global/
+    Settings.json
+    SaveSystemMetaData.json
+  GameProfiles/
+    a1b2c3/
+      GameProfileManifest.json
+      GameProfile.json
+      Scenes/Forest/Scene.json
+  Backups/
+    Global/Settings.json
+    GameProfiles/a1b2c3/GameProfile.json</code></pre>
+</figure>
+<figure class="code">
+<figcaption>One save file</figcaption>
+<pre><code class="cs">{
+  "FormatVersion": 2,
+  "ProfileID": "a1b2c3",
+  "FileName": "GameProfile",
+  "Entries": {
+    "5eecb91f.../27062df3...": {
+      "name": "Assets/Scenes/Level.unity/Player/Health",
+      "data": { "current": 40 }
+    },
+    "9b1c44d0.../a7e2f310...": {
+      "name": "Assets/Scenes/Level.unity/Coin (3)/Coin",
+      "gone": true
+    }
+  }
+}</code></pre>
+</figure>
+<p>The save system matches entries by <a class="term" href="../api/SavableBridge.html#save-id">save ID</a>; the <code>name</code> field is only for people reading the file. With Backup ticked, a broken file loads its backup and logs a warning; with Backup unticked, a broken file logs one error and loads nothing.</p>
+</section>
+
+<section id="mistakes">
+<h2>Mistakes the editor blocks<a class="anchor" href="#mistakes">#</a></h2>
+<p>A <a class="term" href="../api/SaveAttribute.html#blocking-mistake">blocking mistake</a> logs one error naming the type, the field and the fix, stops play mode from starting, and fails the build. The save system blocks:</p>
+<ul>
+<li><code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> on a field holding a GameObject, a component or an asset.</li>
+<li><code>[Save]</code> on a <code>static</code>, <code>const</code> or <code>readonly</code> field.</li>
+<li><code>[Save]</code> on a delegate, an interface, an abstract class or an <code>object</code> field.</li>
+<li>A class with both <code>[Save]</code> fields and <code><a class="term" href="../api/ISavable.html">ISavable</a></code>.</li>
+</ul>
+<p>The same text appears on the saved script's card in the inspector, as a red box.</p>
+</section>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

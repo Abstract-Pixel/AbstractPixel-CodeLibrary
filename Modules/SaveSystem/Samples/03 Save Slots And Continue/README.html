@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 Save Slots And Continue - Save System Samples</title>
+<meta name="description" content="A save slot screen: create, open, list and delete game profiles by slot number, plus a Continue button.">
+<link rel="stylesheet" href="../../Documentation/assets/docs.css">
+</head>
+<body data-root="../../Documentation/">
+<main class="solo">
+<p class="crumbs"><a href="../../Documentation/index.html">Save System</a> › <a href="../README.html">Samples</a> › 03</p>
+<h1>03 Save Slots And Continue <span class="lv lv2">2 choices</span></h1>
+<p class="lede">A simple save slot screen with a Continue button. Create, open, list and delete <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">game profiles</a>. Each one shows its name, last saved time and playtime.</p>
+<dl>
+<dt>Scene</dt><dd>Save Slots And Continue</dd>
+<dt>Scripts</dt><dd>SaveSlotScreen.cs, Score.cs</dd>
+<dt>Save file</dt><dd>Built-in <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">GameProfile</a> (nothing to add to the config)</dd>
+<dt>Guide</dt><dd><a href="../../Documentation/Pages/save-slots.html">Game profiles and save slots</a></dd>
+</dl>
+
+<h2>Try it</h2>
+<ol>
+<li><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity">Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity</button> opens the scene in Unity, then press Play.</li>
+<li>Press <b>Add 100 points</b>, then <b>Save</b>. The open game profile (marked with &gt;) shows a last saved time and playtime.</li>
+<li>Press <b>Create game profile</b>, then <b>Open</b> on the new one. The points go back to 0.</li>
+<li><b>Open</b> the first one again. Its points come back.</li>
+<li>Press <b>Back to the main menu</b>. Nothing is open now. <b>Continue</b> opens the game profile you just left.</li>
+<li><b>Delete</b> a game profile you don't need.</li>
+</ol>
+<div class="see"><strong>You should see</strong>Each game profile keeps its own points, and Continue reopens the last one.</div>
+
+<h2>The lines that matter</h2>
+<figure class="code">
+<figcaption>SaveSlotScreen.cs, Score.cs</figcaption>
+<pre data-source="Scripts/SaveSlotScreen.cs Scripts/Score.cs"><code>[Save] int points;                                  // Score: each game profile has its own
+SaveActions.GameProfiles.CreateNew();               // named "Game Profile 3", not opened yet
+GameProfile profile = SaveActions.GameProfiles.Get(slotNumber);  // by the slot number the screen shows
+profile.Open();                                     // then reload the scene
+GameProfile lastOpened = SaveActions.GameProfiles.LastOpened;  // Continue; null on a first launch
+SaveActions.GameProfiles.Count                      // grey out Load when it's 0
+SaveActions.GameProfiles.CloseCurrent();            // back to the main menu
+foreach (GameProfile profile in SaveActions.GameProfiles.All)  // SlotNumber, DisplayName, LastSaved, Playtime
+profile.Delete();</code></pre>
+</figure>
+<p>You never type a <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">game profile</a>'s ID. You hold a <a class="type" href="../../Documentation/api/GameProfile.html">GameProfile</a> and call its methods. Slot numbers never change.</p>
+
+<h2>Next steps</h2>
+<ul>
+<li>A real main menu usually sets the config's Startup Policy to <b>Manual</b>, so nothing opens until the player picks Continue, Load or New Game. <b>AutoSetUp</b> opens the last game profile at startup.</li>
+<li>Designers can wire the same buttons with no code: <b>Open Slot</b>, <b>New Game</b> and the <b>On Game Profile Opened</b> event on the <b>Mono Save Actions</b> component (sample 02).</li>
+</ul>
+
+<nav>
+<a href="../02%20Buttons%20With%20No%20Code/README.html">← 02 Buttons With No Code</a>
+<a href="../README.html">All samples</a>
+<a href="../../Documentation/index.html">Save system guide</a>
+<a href="../04%20Pick%20A%20Save%20File/README.html">04 Pick A Save File →</a>
+</nav>
+<p class="crumbs">The guide also opens from <b>Tools &gt; External Project Tools &gt; Save System &gt; Open Guide</b>.</p>
+</main>
+<script src="../../Documentation/assets/glossary-data.js" defer></script>
+<script src="../../Documentation/assets/docs.js"></script>
+</body>
+</html>

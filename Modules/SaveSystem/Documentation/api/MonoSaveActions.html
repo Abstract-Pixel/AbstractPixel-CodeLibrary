@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MonoSaveActions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="MonoSaveActions lets designers save, load and manage game profiles from UnityEvents, with no code.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/MonoSaveActions.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>MonoSaveActions <span class="lv lv0">0 no code</span></h1>
+<p class="lede">Lets designers save, load and manage <a class="term" href="../api/GameProfile.html#game-profile">game profiles</a> from UnityEvents, with no code.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Component (MonoBehaviour)</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/MonoSaveActions.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/MonoSaveActions.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/MonoSaveActions.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/MonoSaveActions.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/MonoSaveActions.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-publicapi">Public API</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-data.html">Save, restore and react to data</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity">Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity</button></div>
+<a class="try-open" href="../../Samples/02 Buttons With No Code/README.html" target="_blank" rel="noopener">Open sample 02: Buttons With No Code &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 02 &middot; Buttons With No Code</p>
+</div>
+</details>
+</section>
+
+<section id="inspector">
+<h2>In the Inspector<a class="anchor" href="#inspector">#</a></h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Inspector label</th><th>API member</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>Chosen Save File</td><td><code>SaveChosenFile</code>, <code>ReloadChosenFile</code></td><td>The save file those two buttons and the four events below act on.</td></tr>
+<tr><td>On Loaded</td><td><a href="#code">OnLoaded</a></td><td>The chosen save file loaded, or was reloaded. Fires right away if it already happened.</td></tr>
+<tr><td>On Saved</td><td><a href="#code">OnSaved</a></td><td>The chosen save file was written successfully.</td></tr>
+<tr><td>On Save Failed</td><td><a href="#code">OnSaveFailed</a></td><td>The chosen save file could not be written. Carries a reason string to show the player.</td></tr>
+<tr><td>On <a class="term" href="../api/GameProfile.html#game-profile">Game Profile</a> Opened</td><td><a href="#code">OnGameProfileOpened</a></td><td>A game profile opened.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<p>Usually wired entirely in the Inspector. A UI script can still read its events directly:</p>
+<figure class="code">
+<figcaption>Wiring a save-failed label from code</figcaption>
+<pre><code class="cs">monoSaveActions.OnSaveFailed.AddListener(reason =&gt; errorLabel.text = reason);</code></pre>
+</figure>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Properties</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public UnityEvent OnGameProfileOpened</code><span class="desc"><span class="kind k-event">event</span> A game profile opened.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public UnityEvent OnLoaded</code><span class="desc"><span class="kind k-event">event</span> The chosen save file loaded, or was reloaded. Sticky: fires right away if it already loaded.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public UnityEvent OnSaved</code><span class="desc"><span class="kind k-event">event</span> The chosen save file was written successfully.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public SaveFailedEvent OnSaveFailed</code><span class="desc"><span class="kind k-event">event</span> The chosen save file could not be written. Gives a reason to show the player.</span></summary>
+<div class="body"></div>
+</details>
+</div>
+<h3>Methods</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public void NewGame()</code><span class="desc"><span class="kind k-method">method</span> Creates a new game profile in the lowest free slot and opens it.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public void OpenSlot(int slotNumber)</code><span class="desc"><span class="kind k-method">method</span> Opens the game profile in this slot. Does nothing, and logs a warning, if the slot is empty.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public void ReloadChosenFile()</code><span class="desc"><span class="kind k-method">method</span> Reloads the save file picked in the inspector, throwing away unsaved changes.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public void Save(SaveFileReference saveFile)</code><span class="desc"><span class="kind k-method">method</span> Saves one save file, passed in from code.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public void SaveAll()</code><span class="desc"><span class="kind k-method">method</span> Saves every save file that changed.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public void SaveChosenFile()</code><span class="desc"><span class="kind k-method">method</span> Saves the save file picked in the inspector.</span></summary>
+<div class="body"></div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>"was asked to SaveChosenFile, but no save file is picked"</dt>
+<dd>Open the component's inspector and pick a save file under Chosen Save File.</dd>
+<dt>On Loaded never fires</dt>
+<dd>It's sticky but still only fires for the chosen save file. Check it's the one your game actually loads.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="SaveActions.html">SaveActions</a>, <a class="type" href="SaveFileReference.html">SaveFileReference</a>, <a href="../Pages/save-data.html">Save, restore and react to data</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>
