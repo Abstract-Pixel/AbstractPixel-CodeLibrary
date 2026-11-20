@@ -1,0 +1,19 @@
+{
+    "name": "AbstractPixel.Tooltip.Editor",
+    "rootNamespace": "AbstractPixel.Tooltip.Editor",
+    "references": [
+        "GUID:c8b3db747bf4bab49ac9f4079bc7b8e5",
+        "GUID:4b7c18f338855c44983065d6654d15b5"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
