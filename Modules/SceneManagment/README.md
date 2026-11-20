@@ -9,6 +9,13 @@ Opens, closes and switches groups of scenes for a single-player Unity game: a ma
 - **How a scene change runs today:** the sections below (messages, order per entry point, loader choice, contract tests).
 - **Work in progress:** the rework plan lives in the game that tests this module, Project Rally Shift, at `.scratch/scene-coordinator/plan.md` (with `map.md` and `issues/`). Parts of the glossary and the ADRs (scene sets, loading scene, scene transition executor, placement) describe decisions for sessions that are not built yet; the plan says which.
 
+## Editor tools (session 3C)
+
+- **Scene field.** Every scene field shows its scene status once, in one box: In build, Addressable, Not in build, or Missing (the asset is gone; the box shows the old path). A scene that is Not in build gets one fix button, "Add to build" (the project default is Build Settings until Project Settings exists). Each fix also removes the scene's entry from the other place, so a scene is never In build and Addressable. Core never references Addressables: this module registers an `IAddressableSceneProvider` when the package is installed (`ABSTRACTPIXEL_ADDRESSABLES`, from the editor assembly's `versionDefines`). Without it no scene counts as Addressable and only "Add to build" is offered.
+- **Create Scene Group.** Right-click a scene in the Project window, Create > Scene Group: a new `<scene>Group.asset` next to the scene with it as the main scene, and the scene put into Build Settings unless it is Addressable. If another group already has the scene as its main scene, that group is selected instead.
+- **Saving a group** puts its scenes that are Not in build into Build Settings, with one console line. Addressable scenes are left alone; so is "Add scenes to Build Settings".
+- **Group check.** The scene group inspector lists problems only when there are some: no main scene, a Missing scene, a scene Not in build, the same scene listed twice. Each names the group and the scene and has a one-click fix where one exists ("Add to build", "Remove from group"). Tools > External Project Tools > Scene System > Check All Scene Groups lists every group. "Check Scene Groups Before Build" in the same menu (off by default, an editor preference on this machine) stops a build on any problem, naming each group and scene.
+
 ---
 
 # Scene messages

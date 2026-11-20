@@ -4,7 +4,9 @@
     "references": [
         "AbstractPixel.Core",
         "AbstractPixel.Core.Editor",
-        "AbstractPixel.SceneManagment"
+        "AbstractPixel.SceneManagment",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor"
     ],
     "includePlatforms": [
         "Editor"
@@ -15,6 +17,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.addressables",
+            "expression": "1.0.0",
+            "define": "ABSTRACTPIXEL_ADDRESSABLES"
+        }
+    ],
     "noEngineReferences": false
 }

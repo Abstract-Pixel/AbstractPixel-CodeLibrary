@@ -106,6 +106,16 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
         }
 
         [Test]
+        public void WithoutAddressableScenes_LeavesOutAddressableScenes_KeepsOrder()
+        {
+            string[] paths = { ManagerPath, SharedPath, LevelPath };
+
+            List<string> forBuild = SceneGroupBuildSettings.WithoutAddressableScenes(paths, _path => _path == SharedPath);
+
+            CollectionAssert.AreEqual(new[] { ManagerPath, LevelPath }, forBuild);
+        }
+
+        [Test]
         public void GroupScenePaths_ListsManagerThenSharedThenMainScene_SkippingEmptyOnes()
         {
             SceneGroup group = ScriptableObject.CreateInstance<SceneGroup>();

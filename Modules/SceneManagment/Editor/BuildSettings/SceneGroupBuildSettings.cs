@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AbstractPixel.Core;
+using AbstractPixel.Core.Editor;
 using UnityEditor;
 using UnityEngine;
 
@@ -64,15 +65,40 @@ namespace AbstractPixel.SceneManagement.Editor
             return new BuildSettingsChange(scenes.ToArray(), addedPaths, enabledPaths, missingPaths);
         }
 
-        /// <summary>What adding this group's scenes to the project's Build Settings would change.</summary>
+        /// <summary>The scene paths without the Addressable ones: an Addressable scene already loads and must not also go into Build Settings.</summary>
+        public static List<string> WithoutAddressableScenes(IReadOnlyList<string> _scenePaths, Func<string, bool> _isAddressable)
+        {
+            List<string> paths = new List<string>();
+            foreach (string scenePath in _scenePaths)
+            {
+                if (_isAddressable(scenePath))
+                {
+                    continue;
+                }
+                paths.Add(scenePath);
+            }
+            return paths;
+        }
+
+        /// <summary>What adding this group's scenes that are not Addressable to the project's Build Settings would change.</summary>
         public static BuildSettingsChange PreviewForProject(SceneGroup _group)
         {
             List<string> groupPaths = GroupScenePaths(_group);
-            return AddScenes(groupPaths, EditorBuildSettings.scenes, SceneFileExists);
+            List<string> pathsForBuild = WithoutAddressableScenes(groupPaths, IsAddressableInProject);
+            return AddScenes(pathsForBuild, EditorBuildSettings.scenes, SceneFileExists);
         }
 
         /// <summary>Adds this group's scenes to the project's Build Settings, with one console line for what changed.</summary>
         public static BuildSettingsChange ApplyToProject(SceneGroup _group)
+        {
+            return ApplyToProject(_group, true);
+        }
+
+        /// <summary>
+        /// Adds this group's scenes to the project's Build Settings. With &lt;paramref name="_logChange"/&gt; false the caller
+        /// writes the console line itself; a missing scene file is always reported.
+        /// </summary>
+        public static BuildSettingsChange ApplyToProject(SceneGroup _group, bool _logChange)
         {
             BuildSettingsChange change = PreviewForProject(_group);
 
@@ -87,6 +113,10 @@ namespace AbstractPixel.SceneManagement.Editor
             }
 
             EditorBuildSettings.scenes = change.Scenes;
+            if (!_logChange)
+            {
+                return change;
+            }
             Debug.Log($"{LogPrefix} Scene group '{_group.name}': {DescribeChange(change)}", _group);
             return change;
         }
@@ -113,6 +143,17 @@ namespace AbstractPixel.SceneManagement.Editor
                 names.Add("'" + System.IO.Path.GetFileNameWithoutExtension(path) + "'");
             }
             return string.Join(", ", names);
+        }
+
+        private static bool IsAddressableInProject(string _scenePath)
+        {
+            IAddressableSceneProvider provider = AddressableScenes.Provider;
+            if (provider == null)
+            {
+                return false;
+            }
+            string sceneGuid = AssetDatabase.AssetPathToGUID(_scenePath);
+            return provider.IsAddressable(sceneGuid);
         }
 
         private static bool SceneFileExists(string _scenePath)

@@ -1,6 +1,5 @@
-using AbstractPixel.SceneManagement;
+using AbstractPixel.Core.Editor;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
@@ -8,22 +7,29 @@ namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
     /// Main scene, manager scenes, shared scenes, reset shared scenes and Open group, with Unity's own controls.
-    /// Each scene is drawn by the scene field drawer, which is the one place that shows whether a scene is in Build Settings.
+    /// Each scene is drawn by the scene field drawer, which shows the scene's status. A problems list at the top
+    /// appears only when the group check finds something wrong.
     /// </summary>
     [CustomEditor(typeof(SceneGroup))]
     public class SceneGroupEditor : UnityEditor.Editor
     {
         private Button addToBuildButton;
+        private SceneGroupProblemsView problemsView;
         private const string MainSceneTooltip = "The one scene that makes this place, such as 'Level 7'. It becomes Unity's active scene.";
         private const string ManagerScenesTooltip = "Scenes that open once and stay open across scene changes, such as the scene holding audio and save managers.";
         private const string SharedScenesTooltip = "Scenes several scene groups use next to their main scene, such as the scene holding the player's car.";
         private const string ResetSharedScenesTooltip = "Closes and reopens every shared scene on each scene change, so state kept in them starts fresh.";
         private const string AddToBuildTooltip = "Adds this group's manager scenes, shared scenes and main scene to Build Settings. Scenes already there are not added again; a scene that is switched off is switched on.";
         private const string OpenGroupTooltip = "Opens the main scene with its manager scenes and shared scenes, as they are in Play.";
+        private const string CheckAllGroupsTooltip = "Opens a window listing every scene group in the project with its problems and their fixes.";
 
         public override VisualElement CreateInspectorGUI()
         {
             VisualElement root = new VisualElement();
+
+            problemsView = new SceneGroupProblemsView(true);
+            problemsView.style.marginBottom = 6;
+            root.Add(problemsView);
 
             SerializedProperty mainSceneProperty = serializedObject.FindProperty("MainScene");
             PropertyField mainScene = MakeSceneField(mainSceneProperty, "Main scene", MainSceneTooltip);
@@ -43,17 +49,66 @@ namespace AbstractPixel.SceneManagement.Editor
             addToBuildButton.tooltip = AddToBuildTooltip;
             addToBuildButton.style.marginTop = 10;
             root.Add(addToBuildButton);
-            RefreshAddToBuildButton();
-            root.TrackSerializedObjectValue(serializedObject, _changedObject => RefreshAddToBuildButton());
-            root.RegisterCallback<AttachToPanelEvent>(_event => EditorBuildSettings.sceneListChanged += RefreshAddToBuildButton);
-            root.RegisterCallback<DetachFromPanelEvent>(_event => EditorBuildSettings.sceneListChanged -= RefreshAddToBuildButton);
+            RefreshGroupState();
+            root.TrackSerializedObjectValue(serializedObject, _changedObject => RefreshGroupState());
+            root.RegisterCallback<AttachToPanelEvent>(_event => SubscribeToProjectChanges());
+            root.RegisterCallback<DetachFromPanelEvent>(_event => UnsubscribeFromProjectChanges());
 
             Button openGroup = new Button(OpenGroup);
             openGroup.text = "Open group";
             openGroup.tooltip = OpenGroupTooltip;
             openGroup.style.marginTop = 4;
             root.Add(openGroup);
+
+            Button checkAllGroups = new Button(CheckAllSceneGroupsWindow.Open);
+            checkAllGroups.text = "Check all groups";
+            checkAllGroups.tooltip = CheckAllGroupsTooltip;
+            checkAllGroups.style.marginTop = 4;
+            root.Add(checkAllGroups);
             return root;
+        }
+
+        private void SubscribeToProjectChanges()
+        {
+            EditorBuildSettings.sceneListChanged += RefreshGroupState;
+            IAddressableSceneProvider provider = AddressableScenes.Provider;
+            if (provider != null)
+            {
+                provider.Changed += RefreshGroupState;
+            }
+        }
+
+        private void UnsubscribeFromProjectChanges()
+        {
+            EditorBuildSettings.sceneListChanged -= RefreshGroupState;
+            IAddressableSceneProvider provider = AddressableScenes.Provider;
+            if (provider != null)
+            {
+                provider.Changed -= RefreshGroupState;
+            }
+        }
+
+        // The problems list and the Add scenes button both follow the group and the project.
+        private void RefreshGroupState()
+        {
+            RefreshAddToBuildButton();
+            RefreshProblems();
+        }
+
+        private void RefreshProblems()
+        {
+            if (problemsView == null || target == null)
+            {
+                return;
+            }
+            SceneGroup group = (SceneGroup)target;
+            problemsView.Refresh(group, AfterProblemFix);
+        }
+
+        private void AfterProblemFix()
+        {
+            serializedObject.Update();
+            RefreshGroupState();
         }
 
         // A scene reference wraps one SceneField; binding to it uses the scene field drawer as it is.
@@ -96,7 +151,7 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             SceneGroup group = (SceneGroup)target;
             SceneGroupBuildSettings.ApplyToProject(group);
-            RefreshAddToBuildButton();
+            RefreshGroupState();
         }
 
         // The button is clickable only when Build Settings would change; the scene field shows which scenes are missing.
@@ -114,42 +169,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private void OpenGroup()
         {
             SceneGroup group = (SceneGroup)target;
-            bool userKeptGoing = EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-            if (!userKeptGoing)
-            {
-                return;
-            }
-            bool isFirstScene = true;
-            foreach (AbstractPixel.Core.SceneReference reference in group.ManagerialBootScenesList)
-            {
-                OpenScene(reference.SceneFieldReference.ScenePath, ref isFirstScene);
-            }
-            foreach (AbstractPixel.Core.SceneReference reference in group.ContextualBootScenesList)
-            {
-                OpenScene(reference.SceneFieldReference.ScenePath, ref isFirstScene);
-            }
-            string mainScenePath = group.MainScene.SceneFieldReference.ScenePath;
-            OpenScene(mainScenePath, ref isFirstScene);
-            UnityEngine.SceneManagement.Scene mainScene = EditorSceneManager.GetSceneByPath(mainScenePath);
-            if (mainScene.IsValid())
-            {
-                EditorSceneManager.SetActiveScene(mainScene);
-            }
-        }
-
-        private static void OpenScene(string _scenePath, ref bool _isFirstScene)
-        {
-            if (string.IsNullOrEmpty(_scenePath))
-            {
-                return;
-            }
-            OpenSceneMode mode = OpenSceneMode.Additive;
-            if (_isFirstScene)
-            {
-                mode = OpenSceneMode.Single;
-            }
-            EditorSceneManager.OpenScene(_scenePath, mode);
-            _isFirstScene = false;
+            SceneGroupOpener.Open(group);
         }
     }
 }

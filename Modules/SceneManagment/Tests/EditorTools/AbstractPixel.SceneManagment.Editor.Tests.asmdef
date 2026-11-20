@@ -3,6 +3,7 @@
     "rootNamespace": "AbstractPixel.SceneManagement.Editor.Tests",
     "references": [
         "AbstractPixel.Core",
+        "AbstractPixel.Core.Editor",
         "AbstractPixel.SceneManagment",
         "AbstractPixel.SceneManagment.Editor",
         "UnityEngine.TestRunner",
