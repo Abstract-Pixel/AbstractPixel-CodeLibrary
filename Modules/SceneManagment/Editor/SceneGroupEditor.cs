@@ -1,4 +1,3 @@
-// PROTOTYPE for scene system session 3C: the short scene group inspector. Replaced by the real inspector after review.
 using AbstractPixel.SceneManagement;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -12,12 +11,14 @@ namespace AbstractPixel.SceneManagement.Editor
     /// Each scene is drawn by the scene field drawer, which is the one place that shows whether a scene is in Build Settings.
     /// </summary>
     [CustomEditor(typeof(SceneGroup))]
-    public class SceneGroupEditorPrototype : UnityEditor.Editor
+    public class SceneGroupEditor : UnityEditor.Editor
     {
+        private Button addToBuildButton;
         private const string MainSceneTooltip = "The one scene that makes this place, such as 'Level 7'. It becomes Unity's active scene.";
         private const string ManagerScenesTooltip = "Scenes that open once and stay open across scene changes, such as the scene holding audio and save managers.";
         private const string SharedScenesTooltip = "Scenes several scene groups use next to their main scene, such as the scene holding the player's car.";
         private const string ResetSharedScenesTooltip = "Closes and reopens every shared scene on each scene change, so state kept in them starts fresh.";
+        private const string AddToBuildTooltip = "Adds this group's manager scenes, shared scenes and main scene to Build Settings. Scenes already there are not added again; a scene that is switched off is switched on.";
         private const string OpenGroupTooltip = "Opens the main scene with its manager scenes and shared scenes, as they are in Play.";
 
         public override VisualElement CreateInspectorGUI()
@@ -37,10 +38,20 @@ namespace AbstractPixel.SceneManagement.Editor
             resetSharedScenes.style.marginTop = 6;
             root.Add(resetSharedScenes);
 
+            addToBuildButton = new Button(AddScenesToBuildSettings);
+            addToBuildButton.text = "Add scenes to Build Settings";
+            addToBuildButton.tooltip = AddToBuildTooltip;
+            addToBuildButton.style.marginTop = 10;
+            root.Add(addToBuildButton);
+            RefreshAddToBuildButton();
+            root.TrackSerializedObjectValue(serializedObject, _changedObject => RefreshAddToBuildButton());
+            root.RegisterCallback<AttachToPanelEvent>(_event => EditorBuildSettings.sceneListChanged += RefreshAddToBuildButton);
+            root.RegisterCallback<DetachFromPanelEvent>(_event => EditorBuildSettings.sceneListChanged -= RefreshAddToBuildButton);
+
             Button openGroup = new Button(OpenGroup);
             openGroup.text = "Open group";
             openGroup.tooltip = OpenGroupTooltip;
-            openGroup.style.marginTop = 10;
+            openGroup.style.marginTop = 4;
             root.Add(openGroup);
             return root;
         }
@@ -79,6 +90,25 @@ namespace AbstractPixel.SceneManagement.Editor
             };
             list.BindProperty(listProperty);
             return list;
+        }
+
+        private void AddScenesToBuildSettings()
+        {
+            SceneGroup group = (SceneGroup)target;
+            SceneGroupBuildSettings.ApplyToProject(group);
+            RefreshAddToBuildButton();
+        }
+
+        // The button is clickable only when Build Settings would change; the scene field shows which scenes are missing.
+        private void RefreshAddToBuildButton()
+        {
+            if (addToBuildButton == null || target == null)
+            {
+                return;
+            }
+            SceneGroup group = (SceneGroup)target;
+            BuildSettingsChange change = SceneGroupBuildSettings.PreviewForProject(group);
+            addToBuildButton.SetEnabled(change.HasChanges);
         }
 
         private void OpenGroup()
