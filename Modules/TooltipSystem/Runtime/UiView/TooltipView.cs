@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace AbstractPixel.Tooltip
 {
-    [RequireComponent(typeof(TooltipPositioner),typeof(DynamicPanelWidthController))]
+    [RequireComponent(typeof(TooltipPositioner),typeof(DynamicPanelWidthController), typeof(CanvasGroup))]
     public class TooltipView : MonoBehaviour, IInitializable<TooltipData>
     {
         [field: SerializeField] public RectTransform tooltipHolder { get; private set; }
@@ -15,7 +15,7 @@ namespace AbstractPixel.Tooltip
 
         [SerializeField] TooltipFeedback tooltipFeedback;
         [SerializeField,ReadOnly] TooltipPositioner tooltipPositioner;
-
+        private CanvasGroup canvasGroup;
         private void OnValidate()
         {
             if(tooltipPositioner == null)
@@ -26,10 +26,17 @@ namespace AbstractPixel.Tooltip
 
         private void Awake()
         {
-            if(tooltipPositioner == null)
+            if (tooltipPositioner == null)
             {
-                tooltipPositioner= GetComponent<TooltipPositioner>();
+                tooltipPositioner = GetComponent<TooltipPositioner>();
             }
+
+            canvasGroup = GetComponent<CanvasGroup>();
+
+            // Proactive Flicker Fix: This guarantees the tooltip can NEVER block the mouse raycast, 
+            // preventing the infinite OnPointerEnter/Exit loop regardless of designer setup.
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
         }
         public void Initialize(TooltipData _hoveredData)
         {
