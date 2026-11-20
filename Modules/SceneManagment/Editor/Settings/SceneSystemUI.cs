@@ -18,7 +18,7 @@ namespace AbstractPixel.SceneManagement.Editor
         public static readonly Color Green = new Color(0.30f, 0.75f, 0.36f);
         public static readonly Color Yellow = new Color(0.96f, 0.74f, 0.19f);
         public static readonly Color Red = new Color(0.89f, 0.29f, 0.24f);
-        public static readonly Color OverrideBlue = new Color(0.17f, 0.52f, 0.92f);
+        private static readonly Color OverrideBlue = new Color(0.17f, 0.52f, 0.92f);
 
         public const string SceneGroupTooltip = "An asset that describes one place the player can be, such as a level or the main menu. Click a name to select it.";
         public const string MainSceneTooltip = "The one scene that makes this place, such as 'Level 7'. It becomes Unity's active scene. A scene is the main scene of at most one scene group.";
@@ -30,7 +30,7 @@ namespace AbstractPixel.SceneManagement.Editor
         public const string FromSetTooltip = "This part follows the scene set: changing the set changes it here too. Editing it here makes it an override.";
         public const string RevertTooltip = "Ends the override: the part takes the scene set's value again and follows the set from now on.";
         public const string OpenGroupTooltip = "Opens the main scene with its manager scenes and shared scenes, as they are in Play.";
-        public const string NoSetLabel = "None (the group's own scenes)";
+        private const string NoSetLabel = "None (the group's own scenes)";
         private const string LogoResource = "AbstractPixelLogo";
 
         private static Color MutedText
@@ -223,7 +223,7 @@ namespace AbstractPixel.SceneManagement.Editor
         }
 
         /// <summary>Selects the asset and shows it in the Project window.</summary>
-        public static void PingAndSelect(UnityEngine.Object _asset)
+        private static void PingAndSelect(UnityEngine.Object _asset)
         {
             if (_asset == null)
             {

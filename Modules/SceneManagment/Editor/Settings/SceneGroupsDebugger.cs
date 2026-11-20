@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using AbstractPixel.Core.Editor;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -79,8 +78,8 @@ namespace AbstractPixel.SceneManagement.Editor
             row.Add(HeaderCell("Scene set", SetWidth, SceneSystemUI.SceneSetTooltip));
             row.Add(HeaderCell("Status", StatusWidth, "Whether the scene group check finds problems in this group. Each problem is listed under the row with its fix."));
             VisualElement openColumn = new VisualElement();
-            openColumn.style.width = OpenWidth;
-            openColumn.style.flexShrink = 0;
+            FixWidth(openColumn, OpenWidth);
+            openColumn.style.marginRight = 0;
             row.Add(openColumn);
             return row;
         }
@@ -89,11 +88,17 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             Label cell = new Label(_text);
             cell.tooltip = _tooltip;
-            cell.style.width = _width;
-            cell.style.flexShrink = 0;
             cell.style.unityFontStyleAndWeight = FontStyle.Bold;
-            cell.style.marginRight = 6;
+            FixWidth(cell, _width);
             return cell;
+        }
+
+        // Every column but the main scene keeps its width, so the rows line up under the header.
+        private static void FixWidth(VisualElement _cell, float _width)
+        {
+            _cell.style.width = _width;
+            _cell.style.flexShrink = 0;
+            _cell.style.marginRight = 6;
         }
 
         // Adds the group's row and, under it, its problems with their fixes. Returns the number of problems.
@@ -110,16 +115,13 @@ namespace AbstractPixel.SceneManagement.Editor
 
             VisualElement row = SceneSystemUI.Row();
             Label name = SceneSystemUI.AssetLink(_group, _group.name);
-            name.style.width = NameWidth;
-            name.style.flexShrink = 0;
-            name.style.marginRight = 6;
+            FixWidth(name, NameWidth);
             row.Add(name);
             row.Add(MainSceneField(_group, _requestRefresh));
             row.Add(SetField(_group, _settings, _requestRefresh));
             row.Add(StatusCell(_group, problemCount));
             Button open = SceneSystemUI.Button("Open group", SceneSystemUI.OpenGroupTooltip, () => SceneGroupOpener.Open(_group));
-            open.style.width = OpenWidth;
-            open.style.flexShrink = 0;
+            FixWidth(open, OpenWidth);
             open.style.marginLeft = 0;
             open.style.marginRight = 0;
             row.Add(open);
@@ -194,9 +196,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 Label none = new Label("—");
                 none.tooltip = "Scene sets need the scene system to be set up.";
-                none.style.width = SetWidth;
-                none.style.flexShrink = 0;
-                none.style.marginRight = 6;
+                FixWidth(none, SetWidth);
                 return none;
             }
             PopupField<SceneSet> field = SceneSystemUI.SceneSetPopup(null, _settings, _group.SceneSet, _picked =>
@@ -204,15 +204,14 @@ namespace AbstractPixel.SceneManagement.Editor
                 SceneSetSync.PickSet(_group, _picked);
                 _requestRefresh();
             });
-            field.style.width = SetWidth;
-            field.style.flexShrink = 0;
+            FixWidth(field, SetWidth);
             field.style.marginLeft = 0;
-            field.style.marginRight = 6;
             return field;
         }
 
         private static VisualElement StatusCell(SceneGroup _group, int _problemCount)
         {
+            bool isBootGroup = SceneGroupCheck.IsBootGroup(_group);
             Color colour = SceneSystemUI.Green;
             string text = "No problems";
             if (_problemCount > 0)
@@ -220,16 +219,14 @@ namespace AbstractPixel.SceneManagement.Editor
                 colour = SceneSystemUI.Red;
                 text = _problemCount + " problem(s)";
             }
-            else if (SceneGroupCheck.IsBootGroup(_group))
+            else if (isBootGroup)
             {
                 colour = SceneSystemUI.Yellow;
                 text = "Boot group, unused";
             }
             VisualElement cell = SceneSystemUI.StatusRow(colour, text, string.Empty);
-            cell.style.width = StatusWidth;
-            cell.style.flexShrink = 0;
-            cell.style.marginRight = 6;
-            if (SceneGroupCheck.IsBootGroup(_group))
+            FixWidth(cell, StatusWidth);
+            if (isBootGroup)
             {
                 cell.tooltip = "A boot group from before scene sets: no main scene and no scene set. It is not a place the player can go.";
             }
