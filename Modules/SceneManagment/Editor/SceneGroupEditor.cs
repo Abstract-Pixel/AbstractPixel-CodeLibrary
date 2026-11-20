@@ -1,76 +1,253 @@
+using System.Collections.Generic;
 using AbstractPixel.Core.Editor;
 using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
-    /// Main scene, manager scenes, shared scenes, reset shared scenes and Open group, with Unity's own controls.
-    /// Each scene is drawn by the scene field drawer, which shows the scene's status. A problems list at the top
-    /// appears only when the group check finds something wrong.
+    /// The short scene group inspector: problems at the top (only when the group check finds some), the main scene, the
+    /// scene set, then an Advanced foldout with manager scenes, shared scenes and Reset shared scenes. Each of those says
+    /// whether it follows the set or is an override, with Revert to set. Editing a part makes it an override; editing it
+    /// back to the set's value ends the override. Every scene is drawn by the scene field drawer, which shows its status.
     /// </summary>
     [CustomEditor(typeof(SceneGroup))]
     public class SceneGroupEditor : UnityEditor.Editor
     {
-        private Button addToBuildButton;
-        private SceneGroupProblemsView problemsView;
-        private const string MainSceneTooltip = "The one scene that makes this place, such as 'Level 7'. It becomes Unity's active scene.";
-        private const string ManagerScenesTooltip = "Scenes that open once and stay open across scene changes, such as the scene holding audio and save managers.";
-        private const string SharedScenesTooltip = "Scenes several scene groups use next to their main scene, such as the scene holding the player's car.";
-        private const string ResetSharedScenesTooltip = "Closes and reopens every shared scene on each scene change, so state kept in them starts fresh.";
+        private const string AdvancedOpenKey = "AbstractPixel.SceneSystem.GroupInspectorAdvancedOpen";
+        private const string NoSetLabel = "None (the group's own scenes)";
         private const string AddToBuildTooltip = "Adds this group's manager scenes, shared scenes and main scene to Build Settings. Scenes already there are not added again; a scene that is switched off is switched on.";
         private const string OpenGroupTooltip = "Opens the main scene with its manager scenes and shared scenes, as they are in Play.";
         private const string CheckAllGroupsTooltip = "Opens a window listing every scene group in the project with its problems and their fixes.";
+        private const string MoveToAddressablesTooltip = "Gives each of this group's scenes an Addressables entry and removes it from Build Settings, so it loads from one place.";
+
+        private static readonly SceneSetPart[] Parts = { SceneSetPart.ManagerScenes, SceneSetPart.SharedScenes, SceneSetPart.ResetSharedScenes };
+
+        private Button addToBuildButton;
+        private SceneGroupProblemsView problemsView;
+        private HelpBox bootGroupBox;
+        private readonly Dictionary<SceneSetPart, VisualElement> partHeaders = new Dictionary<SceneSetPart, VisualElement>();
 
         public override VisualElement CreateInspectorGUI()
         {
             VisualElement root = new VisualElement();
+            SceneGroup group = (SceneGroup)target;
 
             problemsView = new SceneGroupProblemsView(true);
             problemsView.style.marginBottom = 6;
             root.Add(problemsView);
+            bootGroupBox = new HelpBox("This scene group has no main scene and no scene set: a boot group from before scene sets. It is not a place the player can go, and scene sets now hold its scenes.", HelpBoxMessageType.Info);
+            root.Add(bootGroupBox);
 
-            SerializedProperty mainSceneProperty = serializedObject.FindProperty("MainScene");
-            PropertyField mainScene = MakeSceneField(mainSceneProperty, "Main scene", MainSceneTooltip);
-            root.Add(mainScene);
+            root.Add(SceneSystemUI.SceneField(serializedObject.FindProperty("MainScene"), "Main scene", SceneSystemUI.MainSceneTooltip));
+            root.Add(MakeSceneSetField(group));
+            root.Add(MakeAdvanced());
+            root.Add(MakeButtons(group));
 
-            root.Add(MakeSceneList("ManagerialBootScenesList", "Manager scenes", ManagerScenesTooltip));
-            root.Add(MakeSceneList("ContextualBootScenesList", "Shared scenes", SharedScenesTooltip));
-
-            SerializedProperty resetProperty = serializedObject.FindProperty("ForceReloadContextualScenes");
-            PropertyField resetSharedScenes = new PropertyField(resetProperty, "Reset shared scenes");
-            resetSharedScenes.tooltip = ResetSharedScenesTooltip;
-            resetSharedScenes.style.marginTop = 6;
-            root.Add(resetSharedScenes);
-
-            addToBuildButton = new Button(AddScenesToBuildSettings);
-            addToBuildButton.text = "Add scenes to Build Settings";
-            addToBuildButton.tooltip = AddToBuildTooltip;
-            addToBuildButton.style.marginTop = 10;
-            root.Add(addToBuildButton);
             RefreshGroupState();
             root.TrackSerializedObjectValue(serializedObject, _changedObject => RefreshGroupState());
+            root.TrackPropertyValue(serializedObject.FindProperty("ManagerialBootScenesList"), _property => OnPartEdited(SceneSetPart.ManagerScenes));
+            root.TrackPropertyValue(serializedObject.FindProperty("ContextualBootScenesList"), _property => OnPartEdited(SceneSetPart.SharedScenes));
+            root.TrackPropertyValue(serializedObject.FindProperty("ForceReloadContextualScenes"), _property => OnPartEdited(SceneSetPart.ResetSharedScenes));
             root.RegisterCallback<AttachToPanelEvent>(_event => SubscribeToProjectChanges());
             root.RegisterCallback<DetachFromPanelEvent>(_event => UnsubscribeFromProjectChanges());
-
-            Button openGroup = new Button(OpenGroup);
-            openGroup.text = "Open group";
-            openGroup.tooltip = OpenGroupTooltip;
-            openGroup.style.marginTop = 4;
-            root.Add(openGroup);
-
-            Button checkAllGroups = new Button(CheckAllSceneGroupsWindow.Open);
-            checkAllGroups.text = "Check all groups";
-            checkAllGroups.tooltip = CheckAllGroupsTooltip;
-            checkAllGroups.style.marginTop = 4;
-            root.Add(checkAllGroups);
             return root;
+        }
+
+        private VisualElement MakeSceneSetField(SceneGroup _group)
+        {
+            VisualElement container = new VisualElement();
+            container.style.marginTop = 4;
+            SceneSystemSettings settings = SceneSystemSettingsAssets.Find();
+            if (settings == null)
+            {
+                container.Add(SceneSystemUI.HelpBoxWithButton("Scene sets need the scene system to be set up.", HelpBoxMessageType.Info, "Open Project Settings", "Opens Project Settings > Abstract Pixel > Scenes, where the setup is.", SceneSystemSettingsProvider.Open));
+                return container;
+            }
+
+            List<SceneSet> choices = new List<SceneSet> { null };
+            foreach (SceneSet set in settings.SceneSets)
+            {
+                if (set != null)
+                {
+                    choices.Add(set);
+                }
+            }
+            if (_group.SceneSet != null && !choices.Contains(_group.SceneSet))
+            {
+                choices.Add(_group.SceneSet);
+            }
+
+            PopupField<SceneSet> field = new PopupField<SceneSet>("Scene set", choices, _group.SceneSet, SetLabel, SetLabel);
+            field.tooltip = SceneSystemUI.SceneSetTooltip;
+            field.AddToClassList(PopupField<SceneSet>.alignedFieldUssClassName);
+            field.RegisterValueChangedCallback(_change =>
+            {
+                // Binding and refreshes raise change events too; only a different set is the designer's choice.
+                if (_change.newValue == _change.previousValue)
+                {
+                    return;
+                }
+                foreach (Object item in targets)
+                {
+                    SceneSetSync.PickSet((SceneGroup)item, _change.newValue);
+                }
+                serializedObject.Update();
+                RefreshGroupState();
+            });
+            container.Add(field);
+            return container;
+        }
+
+        private static string SetLabel(SceneSet _set)
+        {
+            if (_set == null)
+            {
+                return NoSetLabel;
+            }
+            return _set.name;
+        }
+
+        private VisualElement MakeAdvanced()
+        {
+            Foldout advanced = new Foldout();
+            advanced.text = "Advanced";
+            advanced.value = SessionState.GetBool(AdvancedOpenKey, false);
+            advanced.tooltip = "Manager scenes, shared scenes and Reset shared scenes. The scene set fills them; a part changed here becomes an override.";
+            advanced.style.marginTop = 6;
+            advanced.RegisterValueChangedCallback(_change =>
+            {
+                if (_change.target == advanced)
+                {
+                    SessionState.SetBool(AdvancedOpenKey, _change.newValue);
+                }
+            });
+
+            advanced.Add(MakePartHeader(SceneSetPart.ManagerScenes, "Manager scenes", SceneSystemUI.ManagerScenesTooltip));
+            advanced.Add(SceneSystemUI.SceneList(serializedObject, "ManagerialBootScenesList", string.Empty, SceneSystemUI.ManagerScenesTooltip));
+            advanced.Add(MakePartHeader(SceneSetPart.SharedScenes, "Shared scenes", SceneSystemUI.SharedScenesTooltip));
+            advanced.Add(SceneSystemUI.SceneList(serializedObject, "ContextualBootScenesList", string.Empty, SceneSystemUI.SharedScenesTooltip));
+            // The toggle sits in its own header row, so the words "Reset shared scenes" appear once.
+            VisualElement resetHeader = MakePartHeader(SceneSetPart.ResetSharedScenes, "Reset shared scenes", SceneSystemUI.ResetSharedScenesTooltip);
+            Toggle reset = new Toggle();
+            reset.name = "reset-shared-scenes";
+            reset.tooltip = SceneSystemUI.ResetSharedScenesTooltip;
+            reset.style.marginLeft = 8;
+            reset.BindProperty(serializedObject.FindProperty("ForceReloadContextualScenes"));
+            resetHeader.Insert(1, reset);
+            advanced.Add(resetHeader);
+            return advanced;
+        }
+
+        // "Manager scenes   [From set 'Level']" or "Manager scenes   [Override] [Revert to set]".
+        private VisualElement MakePartHeader(SceneSetPart _part, string _title, string _tooltip)
+        {
+            VisualElement header = SceneSystemUI.Row();
+            header.style.marginTop = 8;
+            header.style.marginBottom = 2;
+            Label title = new Label(_title);
+            title.tooltip = _tooltip;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            header.Add(title);
+            header.Add(SceneSystemUI.Spacer());
+            VisualElement state = SceneSystemUI.Row();
+            header.Add(state);
+            partHeaders[_part] = state;
+            return header;
+        }
+
+        private VisualElement MakeButtons(SceneGroup _group)
+        {
+            VisualElement buttons = new VisualElement();
+            buttons.style.marginTop = 10;
+
+            addToBuildButton = SceneSystemUI.Button("Add scenes to Build Settings", AddToBuildTooltip, AddScenesToBuildSettings);
+            buttons.Add(addToBuildButton);
+
+            bool addressablesInstalled = AddressableScenes.IsInstalled;
+            string moveTooltip = addressablesInstalled ? MoveToAddressablesTooltip : SceneMoves.NeedsAddressablesTooltip;
+            Button moveToAddressables = SceneSystemUI.Button("Move this group's scenes to Addressables", moveTooltip, () =>
+            {
+                SceneMoves.MoveGroupToAddressables((SceneGroup)target);
+                RefreshGroupState();
+            });
+            moveToAddressables.SetEnabled(addressablesInstalled);
+            buttons.Add(moveToAddressables);
+
+            buttons.Add(SceneSystemUI.Button("Open group", OpenGroupTooltip, () => SceneGroupOpener.Open((SceneGroup)target)));
+            buttons.Add(SceneSystemUI.Button("Check All Scene Groups", CheckAllGroupsTooltip, CheckAllSceneGroupsWindow.Open));
+            return buttons;
+        }
+
+        // A tracked change is a real change of the value (binding alone raises none), so it is safe to treat as an edit.
+        private void OnPartEdited(SceneSetPart _part)
+        {
+            bool anyChanged = false;
+            foreach (Object item in targets)
+            {
+                SceneGroup group = (SceneGroup)item;
+                bool changed = SceneSetSync.UpdateOverrideAfterEdit(group, _part);
+                if (changed)
+                {
+                    EditorUtility.SetDirty(group);
+                    anyChanged = true;
+                }
+            }
+            if (anyChanged)
+            {
+                serializedObject.Update();
+            }
+            RefreshPartHeaders();
+        }
+
+        private void RefreshPartHeaders()
+        {
+            if (target == null)
+            {
+                return;
+            }
+            SceneGroup group = (SceneGroup)target;
+            foreach (SceneSetPart part in Parts)
+            {
+                if (!partHeaders.TryGetValue(part, out VisualElement state))
+                {
+                    continue;
+                }
+                state.Clear();
+                if (group.SceneSet == null)
+                {
+                    state.Add(SceneSystemUI.Badge("Own value", false, "This group has no scene set, so every part is its own."));
+                    continue;
+                }
+                if (!group.IsOverride(part))
+                {
+                    state.Add(SceneSystemUI.Badge("From set '" + group.SceneSet.name + "'", false, SceneSystemUI.FromSetTooltip));
+                    continue;
+                }
+                state.Add(SceneSystemUI.Badge("Override", true, SceneSystemUI.OverrideTooltip));
+                SceneSetPart revertedPart = part;
+                Button revert = SceneSystemUI.Button("Revert to set", SceneSystemUI.RevertTooltip, () => RevertToSet(revertedPart));
+                revert.style.marginLeft = 4;
+                state.Add(revert);
+            }
+        }
+
+        private void RevertToSet(SceneSetPart _part)
+        {
+            foreach (Object item in targets)
+            {
+                SceneSetSync.RevertToSetInProject((SceneGroup)item, _part);
+            }
+            serializedObject.Update();
+            RefreshGroupState();
         }
 
         private void SubscribeToProjectChanges()
         {
             EditorBuildSettings.sceneListChanged += RefreshGroupState;
+            SceneSystemSettingsAssets.Changed += RefreshGroupState;
             IAddressableSceneProvider provider = AddressableScenes.Provider;
             if (provider != null)
             {
@@ -81,6 +258,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private void UnsubscribeFromProjectChanges()
         {
             EditorBuildSettings.sceneListChanged -= RefreshGroupState;
+            SceneSystemSettingsAssets.Changed -= RefreshGroupState;
             IAddressableSceneProvider provider = AddressableScenes.Provider;
             if (provider != null)
             {
@@ -88,21 +266,28 @@ namespace AbstractPixel.SceneManagement.Editor
             }
         }
 
-        // The problems list and the Add scenes button both follow the group and the project.
+        // The problems list, the boot group note, the part headers and the Add scenes button follow the group and the project.
         private void RefreshGroupState()
         {
-            RefreshAddToBuildButton();
-            RefreshProblems();
-        }
-
-        private void RefreshProblems()
-        {
-            if (problemsView == null || target == null)
+            if (target == null)
             {
                 return;
             }
             SceneGroup group = (SceneGroup)target;
-            problemsView.Refresh(group, AfterProblemFix);
+            if (addToBuildButton != null)
+            {
+                BuildSettingsChange change = SceneGroupBuildSettings.PreviewForProject(group);
+                addToBuildButton.SetEnabled(change.HasChanges);
+            }
+            if (problemsView != null)
+            {
+                problemsView.Refresh(group, AfterProblemFix);
+            }
+            if (bootGroupBox != null)
+            {
+                bootGroupBox.style.display = SceneGroupCheck.IsBootGroup(group) ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+            RefreshPartHeaders();
         }
 
         private void AfterProblemFix()
@@ -111,65 +296,11 @@ namespace AbstractPixel.SceneManagement.Editor
             RefreshGroupState();
         }
 
-        // A scene reference wraps one SceneField; binding to it uses the scene field drawer as it is.
-        private static PropertyField MakeSceneField(SerializedProperty _sceneReferenceProperty, string _label, string _tooltip)
-        {
-            SerializedProperty sceneFieldProperty = _sceneReferenceProperty.FindPropertyRelative("scene");
-            PropertyField field = new PropertyField(sceneFieldProperty, _label);
-            field.tooltip = _tooltip;
-            return field;
-        }
-
-        private ListView MakeSceneList(string _propertyName, string _title, string _tooltip)
-        {
-            SerializedProperty listProperty = serializedObject.FindProperty(_propertyName);
-            ListView list = new ListView();
-            list.headerTitle = _title;
-            list.tooltip = _tooltip;
-            list.showFoldoutHeader = true;
-            list.showAddRemoveFooter = true;
-            list.reorderable = true;
-            list.reorderMode = ListViewReorderMode.Animated;
-            list.showBoundCollectionSize = false;
-            list.virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;
-            list.style.marginTop = 6;
-            list.makeItem = () => new PropertyField();
-            list.bindItem = (_element, _index) =>
-            {
-                PropertyField field = (PropertyField)_element;
-                SerializedProperty elementProperty = listProperty.GetArrayElementAtIndex(_index);
-                SerializedProperty sceneFieldProperty = elementProperty.FindPropertyRelative("scene");
-                field.label = "Scene " + _index;
-                field.tooltip = _tooltip;
-                field.BindProperty(sceneFieldProperty);
-            };
-            list.BindProperty(listProperty);
-            return list;
-        }
-
         private void AddScenesToBuildSettings()
         {
             SceneGroup group = (SceneGroup)target;
             SceneGroupBuildSettings.ApplyToProject(group);
             RefreshGroupState();
-        }
-
-        // The button is clickable only when Build Settings would change; the scene field shows which scenes are missing.
-        private void RefreshAddToBuildButton()
-        {
-            if (addToBuildButton == null || target == null)
-            {
-                return;
-            }
-            SceneGroup group = (SceneGroup)target;
-            BuildSettingsChange change = SceneGroupBuildSettings.PreviewForProject(group);
-            addToBuildButton.SetEnabled(change.HasChanges);
-        }
-
-        private void OpenGroup()
-        {
-            SceneGroup group = (SceneGroup)target;
-            SceneGroupOpener.Open(group);
         }
     }
 }

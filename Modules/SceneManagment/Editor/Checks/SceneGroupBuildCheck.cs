@@ -5,8 +5,9 @@ using UnityEditor.Build.Reporting;
 namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
-    /// The optional pre-build check: when Check Scene Groups Before Build is on, a build stops if any scene group has a
-    /// problem, with a message naming each group and scene.
+    /// Before a build: puts the scene system settings back into Preloaded Assets if they went missing, then, when
+    /// Check scene groups before a build is on in the settings, stops the build if any scene group has a problem, with a
+    /// message naming each group and scene.
     /// </summary>
     public class SceneGroupBuildCheck : IPreprocessBuildWithReport
     {
@@ -17,7 +18,13 @@ namespace AbstractPixel.SceneManagement.Editor
 
         public void OnPreprocessBuild(BuildReport _report)
         {
-            if (!SceneGroupBuildCheckPreference.IsOn)
+            SceneSystemSettings settings = SceneSystemSettingsAssets.Find();
+            if (settings == null)
+            {
+                return;
+            }
+            SceneSystemSettingsAssets.EnsurePreloaded(settings);
+            if (!settings.CheckSceneGroupsBeforeBuild)
             {
                 return;
             }

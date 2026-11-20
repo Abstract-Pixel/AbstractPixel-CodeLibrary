@@ -49,6 +49,7 @@ namespace AbstractPixel.SceneManagement.Editor
             SceneReference mainScene = new SceneReference(_scene.name, sceneGuid, scenePath);
             mainScene.SceneFieldReference.SetSceneAsset(_scene);
             group.Initialize(new SceneReference[0], new SceneReference[0], mainScene);
+            UseDefaultSceneSet(group);
             AssetDatabase.CreateAsset(group, groupPath);
 
             // Build Settings change before the save, so the save-time fix finds nothing left to do and logs nothing.
@@ -58,6 +59,18 @@ namespace AbstractPixel.SceneManagement.Editor
             Debug.Log(LogPrefix + " Created scene group '" + group.name + "' with main scene '" + _scene.name + "'; " + DescribeBuild(_scene.name, change), group);
             SelectAndPing(group);
             return group;
+        }
+
+        // A new group starts on the default scene set, which fills its manager scenes and shared scenes.
+        private static void UseDefaultSceneSet(SceneGroup _group)
+        {
+            SceneSystemSettings settings = SceneSystemSettingsAssets.Find();
+            if (settings == null || settings.DefaultSceneSet == null)
+            {
+                return;
+            }
+            _group.SceneSet = settings.DefaultSceneSet;
+            SceneSetSync.ApplySet(_group);
         }
 
         private static string DescribeBuild(string _sceneName, BuildSettingsChange _change)

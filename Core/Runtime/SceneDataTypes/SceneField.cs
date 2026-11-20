@@ -39,13 +39,38 @@ namespace AbstractPixel.Core
             scenePath = _scenePath;
         }
 
-        public string SceneName => sceneName;
+        /// <summary>The scene's name. In the Editor it is read from the scene asset, so a renamed scene loads before any re-save.</summary>
+        public string SceneName
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (sceneAsset != null)
+                {
+                    return sceneAsset.name;
+                }
+#endif
+                return sceneName;
+            }
+        }
 
         /// <summary>The scene asset's GUID. Empty for a scene known only by name.</summary>
         public string SceneGuid => ReadGuid();
 
         /// <summary>The scene asset's path in the project. Empty for a scene known only by name.</summary>
-        public string ScenePath => scenePath;
+        public string ScenePath
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (sceneAsset != null)
+                {
+                    return AssetDatabase.GetAssetPath(sceneAsset);
+                }
+#endif
+                return scenePath;
+            }
+        }
 
         private string ReadGuid()
         {

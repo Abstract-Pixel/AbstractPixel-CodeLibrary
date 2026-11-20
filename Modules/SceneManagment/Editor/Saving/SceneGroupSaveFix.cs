@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AbstractPixel.Core.Editor;
 using UnityEditor;
 
 namespace AbstractPixel.SceneManagement.Editor
@@ -42,7 +43,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 return _paths;
             }
             // Build Settings change after the save, not in the middle of it.
-            EditorApplication.delayCall += () => PutScenesIntoBuild(groupPaths);
+            EditorIdleQueue.Run(() => PutScenesIntoBuild(groupPaths));
             return _paths;
         }
 

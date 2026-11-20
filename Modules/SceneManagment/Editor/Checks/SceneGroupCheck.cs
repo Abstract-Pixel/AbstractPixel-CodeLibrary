@@ -31,7 +31,15 @@ namespace AbstractPixel.SceneManagement.Editor
 
             List<SceneReference> seenScenes = new List<SceneReference>();
             SceneReference mainScene = _group.MainScene;
-            if (IsEmpty(mainScene))
+            bool noMainScene = IsEmpty(mainScene);
+            if (noMainScene && IsBootGroup(_group))
+            {
+                // A boot group from before scene sets: not a place, but not a mistake either. Its scenes are still checked.
+                CheckList(_group, _group.ManagerialBootScenesList, SceneGroupListKind.ManagerScenes, seenScenes, _statusOf, problems);
+                CheckList(_group, _group.ContextualBootScenesList, SceneGroupListKind.SharedScenes, seenScenes, _statusOf, problems);
+                return problems;
+            }
+            if (noMainScene)
             {
                 string message = "Scene group '" + _group.name + "' has no main scene. Pick the scene that makes this place.";
                 problems.Add(new SceneGroupProblem(SceneGroupProblemKind.NoMainScene, SceneGroupProblemFix.None, SceneGroupListKind.MainScene, 0, null, message));
@@ -44,6 +52,22 @@ namespace AbstractPixel.SceneManagement.Editor
             CheckList(_group, _group.ManagerialBootScenesList, SceneGroupListKind.ManagerScenes, seenScenes, _statusOf, problems);
             CheckList(_group, _group.ContextualBootScenesList, SceneGroupListKind.SharedScenes, seenScenes, _statusOf, problems);
             return problems;
+        }
+
+        /// <summary>
+        /// A scene group with no main scene and no scene set that still lists manager or shared scenes: a boot group from
+        /// before scene sets. Migration leaves it alone and lists it as unused. A group with a scene set always needs a
+        /// main scene, so a forgotten main scene is still caught.
+        /// </summary>
+        public static bool IsBootGroup(SceneGroup _group)
+        {
+            if (_group == null || _group.SceneSet != null || !IsEmpty(_group.MainScene))
+            {
+                return false;
+            }
+            bool hasManagers = HasAnyScene(_group.ManagerialBootScenesList);
+            bool hasShared = HasAnyScene(_group.ContextualBootScenesList);
+            return hasManagers || hasShared;
         }
 
         /// <summary>
@@ -72,7 +96,7 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             string header = LogPrefix + " The build stopped: the scene group check found " + problemCount + " problem(s). "
                 + "Fix them in each scene group's Inspector or in Tools > External Project Tools > Scene System > Check All Scene Groups, "
-                + "or turn off Check Scene Groups Before Build in the same menu.";
+                + "or turn off Check scene groups before a build in Project Settings > Abstract Pixel > Scenes.";
             return header + lines;
         }
 
@@ -145,6 +169,22 @@ namespace AbstractPixel.SceneManagement.Editor
                 string message = "Scene group '" + groupName + "': scene '" + sceneName + "' in " + where + " is not in build, so it can't load.";
                 _problems.Add(new SceneGroupProblem(SceneGroupProblemKind.NotInBuild, fix, _list, _index, _scene, message));
             }
+        }
+
+        private static bool HasAnyScene(List<SceneReference> _scenes)
+        {
+            if (_scenes == null)
+            {
+                return false;
+            }
+            foreach (SceneReference scene in _scenes)
+            {
+                if (!IsEmpty(scene))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static bool IsEmpty(SceneReference _scene)

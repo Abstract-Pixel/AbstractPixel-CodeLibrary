@@ -10,8 +10,11 @@ namespace AbstractPixel.Core.Editor
     /// </summary>
     public static class SceneStatusReader
     {
-        /// <summary>Where a scene that is Not in build goes. Session 4A moves this choice to Project Settings.</summary>
-        public const ScenePlace ProjectDefaultPlace = ScenePlace.BuildSettings;
+        /// <summary>
+        /// Where a scene that is Not in build goes. The scene module sets it from the scene system settings (Core never
+        /// references the scene module); Build Settings until it does.
+        /// </summary>
+        public static ScenePlace ProjectDefaultPlace { get; set; } = ScenePlace.BuildSettings;
 
         private const string LogPrefix = "[Scene system]";
 
@@ -71,6 +74,45 @@ namespace AbstractPixel.Core.Editor
                     MakeAddressable(_report);
                     break;
             }
+        }
+
+        /// <summary>True when the scene can move to this place: it has an asset, is not there yet, and Addressables is installed if needed.</summary>
+        public static bool CanMoveTo(SceneStatusReport _report, ScenePlace _place)
+        {
+            if (_report == null)
+            {
+                return false;
+            }
+            bool hasAsset = _report.Status != SceneStatus.Missing && _report.Status != SceneStatus.NoScene;
+            if (!hasAsset)
+            {
+                return false;
+            }
+            if (_place == ScenePlace.Addressables)
+            {
+                return AddressableScenes.IsInstalled && _report.Status != SceneStatus.Addressable;
+            }
+            IAddressableSceneProvider provider = AddressableScenes.Provider;
+            bool alsoAddressable = provider != null && provider.IsAddressable(_report.SceneGuid);
+            return _report.Status != SceneStatus.InBuild || alsoAddressable;
+        }
+
+        /// <summary>
+        /// Moves the scene to Build Settings or Addressables and removes its entry from the other place, so it loads from
+        /// one place. Does nothing when &lt;see cref="CanMoveTo"/&gt; says no.
+        /// </summary>
+        public static void MoveTo(SceneStatusReport _report, ScenePlace _place)
+        {
+            if (!CanMoveTo(_report, _place))
+            {
+                return;
+            }
+            if (_place == ScenePlace.Addressables)
+            {
+                MakeAddressable(_report);
+                return;
+            }
+            AddToBuild(_report);
         }
 
         private static void AddToBuild(SceneStatusReport _report)

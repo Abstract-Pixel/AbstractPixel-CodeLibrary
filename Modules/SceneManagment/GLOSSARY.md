@@ -15,8 +15,16 @@ The one scene in a scene group that makes it that place, such as "Level 7". It b
 _Avoid_: level scene, primary scene, active scene (when meaning the asset)
 
 **Scene set**:
-An asset that lists the manager scenes and shared scenes that come with a scene group. Many scene groups share one scene set, and Project Settings names the default one.
+An asset that holds the default manager scenes, shared scenes and Reset shared scenes choice for the scene groups that use it. Many scene groups share one scene set, and Project Settings names the default one.
 _Avoid_: boot profile, boot group, boot scenes
+
+**Override**:
+A part of a scene group (its manager scenes, its shared scenes, or its Reset shared scenes choice) that keeps the group's own value instead of following its scene set. An override stays until the designer reverts it.
+_Avoid_: custom value, local change, exception
+
+**Scene system settings**:
+The one asset per project that holds the scene sets, the default scene set, where new scenes go, whether builds check scene groups, and the list of scene groups. It can live in any folder.
+_Avoid_: boot profile, scene config, settings file
 
 **Manager scene**:
 A scene that opens once and stays open across scene changes, such as the scene holding audio and save managers.

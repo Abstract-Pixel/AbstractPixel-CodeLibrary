@@ -46,12 +46,8 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static VisualElement MakeRow(SceneGroup _group, SceneGroupProblem _problem, Action _afterFix)
         {
-            HelpBoxMessageType messageType = HelpBoxMessageType.Error;
-            if (_problem.Kind == SceneGroupProblemKind.ListedTwice)
-            {
-                messageType = HelpBoxMessageType.Warning;
-            }
-            HelpBox box = new HelpBox(_problem.Message, messageType);
+            // Every problem stops a build with the pre-build check on, a scene listed twice included (decision Q5).
+            HelpBox box = new HelpBox(_problem.Message, HelpBoxMessageType.Error);
             box.style.alignItems = Align.Center;
             if (!_problem.HasFix)
             {

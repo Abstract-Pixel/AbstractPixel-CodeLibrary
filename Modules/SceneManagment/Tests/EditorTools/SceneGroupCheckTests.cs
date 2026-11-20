@@ -54,6 +54,28 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
         }
 
         [Test]
+        public void Find_BootGroupWithoutMainSceneOrSceneSet_IsNotAProblem()
+        {
+            SceneGroup group = Group("LevelBootGroup", new[] { Scene("Managers", SceneStatus.InBuild) }, new[] { Scene("Car", SceneStatus.InBuild) }, new SceneReference(string.Empty));
+
+            Assert.IsEmpty(Check(group));
+        }
+
+        [Test]
+        public void Find_GroupWithASceneSetButNoMainScene_IsAProblem()
+        {
+            SceneGroup group = Group("level9Group", new[] { Scene("Managers", SceneStatus.InBuild) }, new SceneReference[0], new SceneReference(string.Empty));
+            SceneSet set = ScriptableObject.CreateInstance<SceneSet>();
+            group.SceneSet = set;
+
+            List<SceneGroupProblem> problems = Check(group);
+            Object.DestroyImmediate(set);
+
+            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual(SceneGroupProblemKind.NoMainScene, problems[0].Kind);
+        }
+
+        [Test]
         public void Find_HealthyGroup_HasNoProblems()
         {
             SceneGroup group = Group("level1Group", new[] { Scene("Managers", SceneStatus.InBuild) }, new[] { Scene("Car", SceneStatus.Addressable) }, Scene("Level 1", SceneStatus.InBuild));

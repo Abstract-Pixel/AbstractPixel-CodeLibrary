@@ -74,6 +74,7 @@ namespace AbstractPixel.Core.Editor
                 Refresh();
             }
 
+            root.AddManipulator(new ContextualMenuManipulator(_event => AddMoveItems(_event, serializedObject, propertyPath, Refresh)));
             sceneAssetField.RegisterValueChangedCallback(_change => OnSceneAssetChanged(serializedObject, propertyPath, _change.previousValue as SceneAsset, _change.newValue as SceneAsset));
             root.TrackPropertyValue(property, _changed => Refresh());
             root.RegisterCallback<AttachToPanelEvent>(_event =>
@@ -261,6 +262,35 @@ namespace AbstractPixel.Core.Editor
             sceneGuidProperty.stringValue = sceneGuid;
             scenePathProperty.stringValue = assetPath;
             _serializedObject.ApplyModifiedProperties();
+        }
+
+        // Right-click: "Move to Addressables" and "Move to Build Settings". Each move removes the other entry.
+        private static void AddMoveItems(ContextualMenuPopulateEvent _event, SerializedObject _serializedObject, string _propertyPath, System.Action _afterMove)
+        {
+            if (_serializedObject == null || _serializedObject.targetObject == null)
+            {
+                return;
+            }
+            SerializedProperty property = _serializedObject.FindProperty(_propertyPath);
+            if (property == null)
+            {
+                return;
+            }
+            SceneStatusReport report = ReadReport(property);
+            string addressablesLabel = AddressableScenes.IsInstalled ? "Move to Addressables" : "Move to Addressables (needs the Addressables package)";
+            AddMoveItem(_event, addressablesLabel, report, ScenePlace.Addressables, _afterMove);
+            AddMoveItem(_event, "Move to Build Settings", report, ScenePlace.BuildSettings, _afterMove);
+        }
+
+        private static void AddMoveItem(ContextualMenuPopulateEvent _event, string _label, SceneStatusReport _report, ScenePlace _place, System.Action _afterMove)
+        {
+            bool canMove = SceneStatusReader.CanMoveTo(_report, _place);
+            DropdownMenuAction.Status status = canMove ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled;
+            _event.menu.AppendAction(_label, _action =>
+            {
+                SceneStatusReader.MoveTo(_report, _place);
+                _afterMove();
+            }, status);
         }
 
         private static void SubscribeToAddressables(System.Action _onChanged)

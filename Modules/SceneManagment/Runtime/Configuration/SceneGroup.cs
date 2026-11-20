@@ -14,6 +14,49 @@ namespace AbstractPixel.SceneManagement
         public SceneReference MainScene;
         public bool ForceReloadContextualScenes = false;
 
+        // The scene set that fills the three parts below, and which of them are overrides (ADR 0008). The loader does
+        // not read these: it reads the lists above, which the Editor keeps in step with the set.
+        [SerializeField] private SceneSet sceneSet = null;
+        [SerializeField] private bool managerScenesOverride = false;
+        [SerializeField] private bool sharedScenesOverride = false;
+        [SerializeField] private bool resetSharedScenesOverride = false;
+
+        public SceneSet SceneSet
+        {
+            get { return sceneSet; }
+            set { sceneSet = value; }
+        }
+
+        /// <summary>True when this part keeps the group's own value instead of following its scene set.</summary>
+        public bool IsOverride(SceneSetPart _part)
+        {
+            switch (_part)
+            {
+                case SceneSetPart.ManagerScenes:
+                    return managerScenesOverride;
+                case SceneSetPart.SharedScenes:
+                    return sharedScenesOverride;
+                default:
+                    return resetSharedScenesOverride;
+            }
+        }
+
+        public void SetOverride(SceneSetPart _part, bool _isOverride)
+        {
+            switch (_part)
+            {
+                case SceneSetPart.ManagerScenes:
+                    managerScenesOverride = _isOverride;
+                    break;
+                case SceneSetPart.SharedScenes:
+                    sharedScenesOverride = _isOverride;
+                    break;
+                default:
+                    resetSharedScenesOverride = _isOverride;
+                    break;
+            }
+        }
+
         public List<string> AllSceneNamesList
         {
             get
