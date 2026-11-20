@@ -1,20 +1,44 @@
 using System.Collections.Generic;
+using AbstractPixel.Core;
 using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
     /// <summary>
-    /// The one scene system settings asset per project: the scene sets and the default one, where new scenes go,
+    /// The one scene system settings asset per project: the start scene group and launch scene, the scene sets and
+    /// the default one, where new scenes go,
     /// whether builds check scene groups, and the list of scene groups. It can live in any folder; the Editor finds it
     /// by type and keeps it in Player Settings' Preloaded Assets. Edited in Project Settings &gt; Abstract Pixel &gt; Scene System.
     /// </summary>
     public class SceneSystemSettings : ScriptableObject
     {
+        [SerializeField] private SceneGroup startSceneGroup = null;
+        [SerializeField] private SceneReference launchScene = new SceneReference(string.Empty);
         [SerializeField] private List<SceneSet> sceneSets = new List<SceneSet>();
         [SerializeField] private SceneSet defaultSceneSet = null;
         [SerializeField] private bool newScenesAreAddressable = false;
         [SerializeField] private bool checkSceneGroupsBeforeBuild = true;
         [SerializeField] private List<SceneGroup> sceneGroups = new List<SceneGroup>();
+
+        /// <summary>The scene group the game opens at launch. Start-up needs it, except when Play starts in a main scene.</summary>
+        public SceneGroup StartSceneGroup
+        {
+            get { return startSceneGroup; }
+            set { startSceneGroup = value; }
+        }
+
+        /// <summary>Optional scene, such as a splash, that Unity opens first. Start-up opens the start scene group behind it.</summary>
+        public SceneReference LaunchScene
+        {
+            get { return launchScene; }
+            set { launchScene = value; }
+        }
+
+        /// <summary>True when a launch scene is set.</summary>
+        public bool HasLaunchScene
+        {
+            get { return launchScene != null && !string.IsNullOrEmpty(launchScene.SceneName); }
+        }
 
         public List<SceneSet> SceneSets
         {

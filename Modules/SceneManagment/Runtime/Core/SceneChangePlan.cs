@@ -63,6 +63,39 @@ namespace AbstractPixel.SceneManagement
             return new SceneChangePlan(_targetGroup, _open, Kind.Preload);
         }
 
+        /// <summary>
+        /// The scenes start-up opens: every scene of the group that Unity has not opened yet. Nothing is closed: a
+        /// launch scene closes itself. Once it ends, the group's manager and shared scenes are open. The main scene to
+        /// open is null when it is already open.
+        /// </summary>
+        public static SceneChangePlan ForStartUp(SceneGroup _targetGroup, HashSet<SceneReference> _scenesAlreadyOpen)
+        {
+            return new SceneChangePlan(_targetGroup, _scenesAlreadyOpen);
+        }
+
+        private SceneChangePlan(SceneGroup _targetGroup, HashSet<SceneReference> _scenesAlreadyOpen)
+        {
+            TargetGroup = _targetGroup;
+            UsesPreloadedScenes = false;
+            MainSceneToClose = null;
+            ContextualToClose = new HashSet<SceneReference>();
+
+            MainSceneToOpen = _targetGroup.MainScene;
+            bool mainSceneIsOpen = MainSceneToOpen != null && _scenesAlreadyOpen.Contains(MainSceneToOpen);
+            if (mainSceneIsOpen)
+            {
+                MainSceneToOpen = null;
+            }
+
+            ManagerialToOpen = new HashSet<SceneReference>(_targetGroup.ManagerialBootScenesList);
+            ManagerialToOpen.ExceptWith(_scenesAlreadyOpen);
+            ContextualToOpen = new HashSet<SceneReference>(_targetGroup.ContextualBootScenesList);
+            ContextualToOpen.ExceptWith(_scenesAlreadyOpen);
+
+            ManagerialOpenAfter = new HashSet<SceneReference>(_targetGroup.ManagerialBootScenesList);
+            ContextualOpenAfter = new HashSet<SceneReference>(_targetGroup.ContextualBootScenesList);
+        }
+
         private SceneChangePlan(SceneGroup _targetGroup, OpenScenes _open, Kind _kind)
         {
             bool isPreload = _kind == Kind.Preload;

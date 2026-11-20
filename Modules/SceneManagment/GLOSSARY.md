@@ -54,6 +54,20 @@ _Avoid_: loading screen (when meaning the scene asset), interstitial
 Where a scene can be loaded from: In build, Addressable, Not in build, or Missing. A scene is In build or Addressable, never both.
 _Avoid_: build state, scene state
 
+## Starting the game
+
+**Start-up**:
+The first scene change of a session, made by the scene system itself when the game launches or Play is pressed. It ends with the game started.
+_Avoid_: boot, bootstrap, initialization
+
+**Start scene group**:
+The scene group the game opens at launch, named in the scene system settings.
+_Avoid_: first scene group, boot group, entry group
+
+**Launch scene**:
+An optional scene, such as a splash screen, that Unity opens before the start scene group. Start-up opens the start scene group behind it, and the launch scene closes itself.
+_Avoid_: splash scene (as the general word), boot scene, intro scene
+
 ## Changing scene
 
 **Scene change**:

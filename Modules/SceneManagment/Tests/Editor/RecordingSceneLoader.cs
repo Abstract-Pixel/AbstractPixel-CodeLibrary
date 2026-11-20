@@ -44,6 +44,9 @@ namespace AbstractPixel.SceneManagement.Tests
         /// <summary>While set, every unload waits for this task. Lets a test hold a scene change half way.</summary>
         public Task UnloadGate;
 
+        /// <summary>While set, every load waits for this task. Lets a test hold start-up half way.</summary>
+        public Task LoadGate;
+
         /// <summary>Loading the scene with this name fails with an exception.</summary>
         public string FailLoadOfScene;
 
@@ -84,6 +87,11 @@ namespace AbstractPixel.SceneManagement.Tests
             if (!sceneActivatedByDefault && FollowHeldSceneRule)
             {
                 HeldScene = sceneName;
+            }
+
+            if (LoadGate != null)
+            {
+                return LoadGate;
             }
 
             return Task.CompletedTask;

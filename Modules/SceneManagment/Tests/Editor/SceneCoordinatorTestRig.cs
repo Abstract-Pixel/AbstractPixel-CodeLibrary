@@ -19,6 +19,19 @@ namespace AbstractPixel.SceneManagement.Tests
         public RecordingSceneLoader Loader { get; private set; }
         public SceneGroup StartGroup { get; private set; }
 
+        /// <summary>A coordinator with a recording loader that has not started the game yet.</summary>
+        public static SceneCoordinatorTestRig BeforeStartUp()
+        {
+            SceneCoordinatorTestRig rig = new SceneCoordinatorTestRig();
+            GameObject coordinatorObject = new GameObject("SceneCoordinator under test");
+            rig.createdObjects.Add(coordinatorObject);
+            rig.Coordinator = coordinatorObject.AddComponent<SceneCoordinator>();
+            rig.Loader = new RecordingSceneLoader();
+            rig.Coordinator.SetSceneLoader(rig.Loader);
+            PinSingletonInstance(rig.Coordinator);
+            return rig;
+        }
+
         public static SceneCoordinatorTestRig StartInLevel(string _levelName)
         {
             SceneCoordinatorTestRig rig = new SceneCoordinatorTestRig();

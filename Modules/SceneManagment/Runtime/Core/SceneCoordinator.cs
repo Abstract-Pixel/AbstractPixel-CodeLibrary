@@ -23,27 +23,148 @@ namespace AbstractPixel.SceneManagement
 
         [field: SerializeField, ReadOnly] public bool IsLoadingSceneGroup { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsUnloadingSceneGroup { get; private set; }
-        [field: SerializeField, ReadOnly] public bool IsStartSceneGroupInitialized { get; private set; } = false;
-        public ISceneLoader SceneLoader { get; private set; }
+        /// <summary>True once start-up has opened every scene of the first scene group and raised OnGameStarted.</summary>
+        [field: SerializeField, ReadOnly] public bool HasGameStarted { get; private set; } = false;
+
+        /// <summary>Old name of <see cref="HasGameStarted"/>, kept until Rally Shift's bootstrapper is gone.</summary>
+        public bool IsStartSceneGroupInitialized
+        {
+            get { return HasGameStarted; }
+        }
+
+        private ISceneLoader sceneLoader;
+        private bool isStartUpRunning;
+
+        /// <summary>The loader, created with the coordinator, so a scene change in its first frame has one.</summary>
+        public ISceneLoader SceneLoader
+        {
+            get
+            {
+                if (sceneLoader == null)
+                {
+                    sceneLoader = new SceneLoaderSelector();
+                }
+                return sceneLoader;
+            }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+            if (sceneLoader == null)
+            {
+                sceneLoader = new SceneLoaderSelector();
+            }
+        }
 
         private void OnDisable()
         {
-            IsStartSceneGroupInitialized = false;
+            HasGameStarted = false;
         }
 
-        private void Start() => SetSceneLoader(new SceneLoaderSelector());
+        /// <summary>
+        /// The coordinator start-up uses: the one that exists (a manager scene may hold it), otherwise a new one. Never
+        /// creates one outside Play mode.
+        /// </summary>
+        internal static SceneCoordinator FindOrCreate()
+        {
+            SceneCoordinator existing = TryGetInstance();
+            if (existing != null)
+            {
+                return existing;
+            }
 
+            existing = FindAnyObjectByType<SceneCoordinator>(FindObjectsInactive.Include);
+            if (existing != null)
+            {
+                instance = existing;
+                return existing;
+            }
+
+            if (!Application.isPlaying)
+            {
+                return null;
+            }
+
+            GameObject coordinatorObject = new GameObject("SceneCoordinator");
+            return coordinatorObject.AddComponent<SceneCoordinator>();
+        }
+
+        /// <summary>Records a group as open without loading anything. Used by tests to start in a level.</summary>
         internal void InitializeStartSceneGroup(SceneGroup _startGroup)
         {
             activeManagerialScenesSet.UnionWith(_startGroup.ManagerialBootScenesList);
             activeContextualScenesSet.UnionWith(_startGroup.ContextualBootScenesList);
             activeMainScene = _startGroup.MainScene;
             activeSceneGroup = _startGroup;
-            IsStartSceneGroupInitialized = true;
+            HasGameStarted = true;
             SceneEventBus.RaiseOnNewSceneTransitionedTo(activeSceneGroup);
         }
 
-        internal void SetSceneLoader(ISceneLoader _sceneLoader) => SceneLoader = _sceneLoader;
+        internal void SetSceneLoader(ISceneLoader _sceneLoader) => sceneLoader = _sceneLoader;
+
+        /// <summary>
+        /// Start-up: the first scene change of a session. It goes through the same start and finish steps as any scene
+        /// change. It opens only the group's scenes that are not open yet: the main scene first (it becomes the active
+        /// scene as soon as it loads), then manager scenes, then shared scenes. When all have loaded it raises "new
+        /// level" once, then "game started". Other scene changes are refused while it runs.
+        /// </summary>
+        /// <param name="_scenesAlreadyOpen">The scenes Unity has open, which are not loaded again.</param>
+        /// <param name="_waitOneFrame">True behind a launch scene, so it shows its first frame before loading starts.</param>
+        /// <returns>True when every scene loaded and the game started.</returns>
+        internal async Task<bool> RunStartUp(SceneGroup _group, HashSet<SceneReference> _scenesAlreadyOpen, bool _waitOneFrame)
+        {
+            if (HasGameStarted)
+            {
+                Debug.LogWarning("[SceneCoordinator] The game has already started. Start-up runs once per session.");
+                return false;
+            }
+            if (!TryBeginSceneChange())
+            {
+                return false;
+            }
+
+            isStartUpRunning = true;
+            currentLoadingSceneGroup = _group;
+            SceneChangePlan plan = SceneChangePlan.ForStartUp(_group, _scenesAlreadyOpen);
+            bool succeeded = false;
+            try
+            {
+                if (_waitOneFrame)
+                {
+                    await Awaitable.NextFrameAsync();
+                }
+                succeeded = await LoadStartUpScenes(plan);
+            }
+            finally
+            {
+                isStartUpRunning = false;
+                EndSceneChange(_group, plan, succeeded);
+            }
+
+            if (!succeeded)
+            {
+                return false;
+            }
+
+            HasGameStarted = true;
+            SceneEventBus.RaiseOnGameStarted(_group);
+            return true;
+        }
+
+        private async Task<bool> LoadStartUpScenes(SceneChangePlan _plan)
+        {
+            if (_plan.MainSceneToOpen != null)
+            {
+                bool mainSceneLoaded = await TryLoadScene(_plan.MainSceneToOpen, true, true);
+                if (!mainSceneLoaded)
+                {
+                    return false;
+                }
+            }
+
+            return await LoadSharedScenes(_plan);
+        }
 
         internal async Task TransitionToPreloadedSceneGroup()
         {
@@ -211,6 +332,12 @@ namespace AbstractPixel.SceneManagement
         /// <remarks>Called before the first await, so a second request in the same frame is refused.</remarks>
         private bool TryBeginSceneChange()
         {
+            bool startUpIsComing = SceneSystemStartUp.IsPending;
+            if (isStartUpRunning || startUpIsComing)
+            {
+                Debug.LogWarning("[SceneCoordinator] Start-up is still opening the first scene group. The scene change asked for now is refused; ask again after SceneEventBus.OnGameStarted.");
+                return false;
+            }
             if (IsLoadingSceneGroup || IsUnloadingSceneGroup)
             {
                 Debug.LogWarning("[SceneCoordinator] A scene change is already in progress. Ignoring the request.");

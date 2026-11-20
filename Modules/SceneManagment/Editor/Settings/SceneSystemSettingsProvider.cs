@@ -11,7 +11,7 @@ namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
     /// The Scene System page (Project Settings &gt; Abstract Pixel &gt; Scene System), in UI Toolkit. Five sections in this
-    /// order: Setup, Scene sets, New scenes, Scene Groups Debugger (which also holds the pre-build check). Explanations are in tooltips; names, values,
+    /// order: Setup, Start-up, Scene sets, New scenes, Scene Groups Debugger (which also holds the pre-build check). Explanations are in tooltips; names, values,
     /// status and problems are always visible. It refreshes itself when scene groups, scene sets or the settings change,
     /// and after Undo or Redo.
     /// </summary>
@@ -20,6 +20,7 @@ namespace AbstractPixel.SceneManagement.Editor
         public const string PagePath = "Project/Abstract Pixel/Scene System";
         public const string PageTitle = "Scene System";
         public const string SetupSection = "Setup";
+        public const string StartUpSection = SceneSystemStartUpSection.Title;
         public const string SceneSetsSection = "Scene sets";
         public const string NewScenesSection = "New scenes";
         public const string DebuggerSection = SceneGroupsDebugger.Title;
@@ -28,6 +29,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private static ScrollView pageScroll;
         private static readonly Dictionary<string, VisualElement> sections = new Dictionary<string, VisualElement>();
         private static VisualElement setupCard;
+        private static VisualElement startUpCard;
         private static VisualElement setsCard;
         private static VisualElement newScenesCard;
         private static VisualElement debuggerCard;
@@ -55,7 +57,7 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             SettingsProvider provider = new SettingsProvider(PagePath, SettingsScope.Project);
             provider.label = PageTitle;
-            provider.keywords = new HashSet<string> { "scene", "scene system", "scene set", "scene group", "manager scene", "shared scene", "Addressables", "Build Settings", "Preloaded Assets", "migration", "debugger", "check" };
+            provider.keywords = new HashSet<string> { "scene", "scene system", "scene set", "scene group", "manager scene", "shared scene", "Addressables", "Build Settings", "Preloaded Assets", "start-up", "start scene group", "launch scene", "migration", "debugger", "check" };
             provider.activateHandler = (_search, _root) => Activate(_root);
             provider.deactivateHandler = Deactivate;
             return provider;
@@ -112,6 +114,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
             page.Add(SceneSystemUI.PageTitle(PageTitle, "How this project opens and switches scenes."));
             setupCard = AddSection(page, SetupSection, "Where this page's settings are saved.");
+            startUpCard = AddSection(page, StartUpSection, SceneSystemStartUpSection.Tooltip);
             setsCard = AddSection(page, SceneSetsSection, "Scenes that come with every scene group using the set. Click a scene set to select it; the + and − under the list add and delete scene sets.");
             newScenesCard = AddSection(page, NewScenesSection, "Where scenes go so they load in a build.");
             debuggerCard = SceneSystemUI.Section(page, DebuggerSection, SceneGroupsDebugger.Tooltip, out VisualElement debuggerHeader);
@@ -179,6 +182,7 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             SceneSystemSettings settings = SceneSystemSettingsAssets.Find();
             FillSetup(settings);
+            SceneSystemStartUpSection.Fill(startUpCard, settings);
             FillSceneSets(settings);
             FillNewScenes(settings);
             SceneGroupsDebugger.Fill(debuggerCard, debuggerSummary, settings, RequestRefresh);
