@@ -1,0 +1,20 @@
+{
+    "name": "AbstractPixel.SceneManagment.Editor",
+    "rootNamespace": "AbstractPixel.SceneManagement.Editor",
+    "references": [
+        "AbstractPixel.Core",
+        "AbstractPixel.Core.Editor",
+        "AbstractPixel.SceneManagment"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
