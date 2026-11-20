@@ -1,3 +1,16 @@
+# Scene Management
+
+Opens, closes and switches groups of scenes for a single-player Unity game: a main scene plus the manager scenes and shared scenes that come with it, with optional preload, Addressables and a screen effect around each change.
+
+## Start here
+
+- **Words:** [GLOSSARY.md](GLOSSARY.md). Use these terms in code, docs and issues.
+- **Why it is built this way:** [docs/adr/](docs/adr/). One short file per decision that is hard to reverse.
+- **How a scene change runs today:** the sections below (messages, order per entry point, loader choice, contract tests).
+- **Work in progress:** the rework plan lives in the game that tests this module, Project Rally Shift, at `.scratch/scene-coordinator/plan.md` (with `map.md` and `issues/`). Parts of the glossary and the ADRs (scene sets, loading scene, scene transition executor, placement) describe decisions for sessions that are not built yet; the plan says which.
+
+---
+
 # Scene messages
 
 What `SceneEventBus` sends, in what order, and who listens in Project Rally Shift. Read from the code as of the
