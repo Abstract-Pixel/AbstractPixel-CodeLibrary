@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using AbstractPixel.Core.Editor;
 using UnityEditor;
@@ -10,7 +11,7 @@ namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
     /// The Scene System page (Project Settings &gt; Abstract Pixel &gt; Scene System), in UI Toolkit. Five sections in this
-    /// order: Setup, Scene sets, New scenes, Checks, Scene Groups Debugger. Explanations are in tooltips; names, values,
+    /// order: Setup, Scene sets, New scenes, Scene Groups Debugger (which also holds the pre-build check). Explanations are in tooltips; names, values,
     /// status and problems are always visible. It refreshes itself when scene groups, scene sets or the settings change,
     /// and after Undo or Redo.
     /// </summary>
@@ -21,7 +22,6 @@ namespace AbstractPixel.SceneManagement.Editor
         public const string SetupSection = "Setup";
         public const string SceneSetsSection = "Scene sets";
         public const string NewScenesSection = "New scenes";
-        public const string ChecksSection = "Checks";
         public const string DebuggerSection = SceneGroupsDebugger.Title;
 
         private static VisualElement pageRoot;
@@ -30,11 +30,14 @@ namespace AbstractPixel.SceneManagement.Editor
         private static VisualElement setupCard;
         private static VisualElement setsCard;
         private static VisualElement newScenesCard;
-        private static VisualElement checksCard;
         private static VisualElement debuggerCard;
         private static VisualElement debuggerSummary;
         private static bool refreshQueued;
         private static string pendingSection;
+        private static int scrollAttempts;
+        private static string moveError;
+        private const string PreloadedTooltip = "The settings asset is in Player Settings > Preloaded Assets, the list of assets a build loads before its first scene, so the scene system can read it in a build. The scene system keeps it there.";
+        private const int MaxScrollAttempts = 10;
 
         // Scene sets section state. The cards are rebuilt only when the sets, their names, paths, default or users change,
         // so editing a set's scenes keeps the focus in its field.
@@ -72,8 +75,12 @@ namespace AbstractPixel.SceneManagement.Editor
         public static void OpenAt(string _section)
         {
             pendingSection = _section;
+            scrollAttempts = 0;
+            bool wasOpen = pageRoot != null;
             SettingsService.OpenProjectSettings(PagePath);
-            if (pageRoot != null)
+            // A page built just now scrolls from Activate; one that was already open scrolls from here. Asking twice
+            // would let the second request find nothing pending.
+            if (wasOpen)
             {
                 ScrollToPendingSectionSoon();
             }
@@ -105,13 +112,14 @@ namespace AbstractPixel.SceneManagement.Editor
             setupCard = AddSection(page, SetupSection, "Where this page's settings are saved.");
             setsCard = AddSection(page, SceneSetsSection, "Scenes that come with every scene group using the set. Click a scene set to select it; the + and − under the list add and delete scene sets.");
             newScenesCard = AddSection(page, NewScenesSection, "Where scenes go so they load in a build.");
-            checksCard = AddSection(page, ChecksSection, "Catch broken scene groups before they ship.");
             debuggerCard = SceneSystemUI.Section(page, DebuggerSection, SceneGroupsDebugger.Tooltip, out VisualElement debuggerHeader);
             sections[DebuggerSection] = debuggerCard.parent;
             debuggerSummary = new VisualElement();
             debuggerHeader.Add(debuggerSummary);
             debuggerHeader.Add(SceneSystemUI.Button("Check again", "Checks every scene group in the project again.", Refresh));
 
+            // Never subscribed twice, even if Unity activates the page again without deactivating it first.
+            UnsubscribeFromProjectChanges();
             SceneSystemSettingsAssets.Changed += RequestRefresh;
             EditorBuildSettings.sceneListChanged += RequestRefresh;
             Undo.undoRedoPerformed += RequestRefresh;
@@ -131,15 +139,20 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static void Deactivate()
         {
-            SceneSystemSettingsAssets.Changed -= RequestRefresh;
-            EditorBuildSettings.sceneListChanged -= RequestRefresh;
-            Undo.undoRedoPerformed -= RequestRefresh;
+            UnsubscribeFromProjectChanges();
             pageRoot = null;
             pageScroll = null;
             sections.Clear();
             setCards.Clear();
             removeSetButton = null;
             removeSetBlocked = null;
+        }
+
+        private static void UnsubscribeFromProjectChanges()
+        {
+            SceneSystemSettingsAssets.Changed -= RequestRefresh;
+            EditorBuildSettings.sceneListChanged -= RequestRefresh;
+            Undo.undoRedoPerformed -= RequestRefresh;
         }
 
         // Many changes arrive together (a save, an import, Undo); they rebuild the page once, after the current event.
@@ -167,7 +180,6 @@ namespace AbstractPixel.SceneManagement.Editor
             FillSetup(settings);
             FillSceneSets(settings);
             FillNewScenes(settings);
-            FillChecks(settings);
             SceneGroupsDebugger.Fill(debuggerCard, debuggerSummary, settings, RequestRefresh);
         }
 
@@ -184,16 +196,24 @@ namespace AbstractPixel.SceneManagement.Editor
         private static void ScrollToPendingSection()
         {
             string section = pendingSection;
+            if (string.IsNullOrEmpty(section) || pageScroll == null)
+            {
+                return;
+            }
+            if (!sections.TryGetValue(section, out VisualElement target))
+            {
+                pendingSection = null;
+                return;
+            }
+            // Not laid out yet: try again shortly, a few times at most.
+            bool laidOut = target.layout.height > 0 && !float.IsNaN(target.worldBound.yMin);
+            if (!laidOut && scrollAttempts < MaxScrollAttempts)
+            {
+                scrollAttempts++;
+                ScrollToPendingSectionSoon();
+                return;
+            }
             pendingSection = null;
-            if (pageScroll == null)
-            {
-                return;
-            }
-            if (string.IsNullOrEmpty(section) || !sections.TryGetValue(section, out VisualElement target))
-            {
-                pageScroll.scrollOffset = Vector2.zero;
-                return;
-            }
             float top = target.worldBound.yMin - pageScroll.contentContainer.worldBound.yMin;
             pageScroll.scrollOffset = new Vector2(0, Mathf.Max(0, top - 6));
         }
@@ -223,27 +243,63 @@ namespace AbstractPixel.SceneManagement.Editor
                 return;
             }
 
-            string path = AssetDatabase.GetAssetPath(_settings);
             setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Green, "Set up", string.Empty));
-            ObjectField asset = new ObjectField("Settings asset");
-            asset.objectType = typeof(SceneSystemSettings);
-            asset.value = _settings;
-            asset.tooltip = "The scene system settings asset. Move it to any folder: the scene system finds it by type.";
-            asset.SetEnabled(false);
-            asset.AddToClassList(ObjectField.alignedFieldUssClassName);
-            setupCard.Add(asset);
-            setupCard.Add(SceneSystemUI.Hint(path));
+            setupCard.Add(SettingsAssetRow(_settings));
+            if (!string.IsNullOrEmpty(moveError))
+            {
+                setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Red, moveError, string.Empty));
+            }
 
             if (SceneSystemSettingsAssets.IsPreloaded(_settings))
             {
-                setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Green, "Included in builds (Preloaded Assets)", string.Empty));
+                setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Green, "Builds can read these settings", PreloadedTooltip));
                 return;
             }
-            setupCard.Add(SceneSystemUI.HelpBoxWithButton("The settings asset is not in Player Settings > Preloaded Assets, so a build can't read it. The next build puts it back, or fix it now.", HelpBoxMessageType.Warning, "Add to Preloaded Assets", "Adds the settings asset to Preloaded Assets and drops empty entries.", () =>
+            setupCard.Add(SceneSystemUI.HelpBoxWithButton("Builds can't read these settings yet: the settings asset is missing from Player Settings > Preloaded Assets, the list a build loads before its first scene. The next build adds it back, or fix it now.", HelpBoxMessageType.Warning, "Fix now", "Adds the settings asset to Player Settings > Preloaded Assets and drops empty entries there.", () =>
             {
                 SceneSystemSettingsAssets.EnsurePreloaded(_settings);
                 Refresh();
             }));
+        }
+
+        // "Settings asset  [Assets/…/SceneSystemSettings.asset]  [Move…]"
+        private static VisualElement SettingsAssetRow(SceneSystemSettings _settings)
+        {
+            VisualElement row = SceneSystemUI.Row();
+            row.style.marginTop = 2;
+            row.style.marginBottom = 2;
+            Label label = new Label("Settings asset");
+            label.tooltip = "The scene system settings asset. It can live in any folder: the scene system finds it by type.";
+            label.style.width = 120;
+            label.style.flexShrink = 0;
+            row.Add(label);
+            Label path = SceneSystemUI.AssetPathField(_settings);
+            path.style.flexGrow = 1;
+            path.style.flexShrink = 1;
+            path.style.minWidth = 60;
+            path.style.marginRight = 4;
+            row.Add(path);
+            row.Add(SceneSystemUI.Button("Move…", "Moves the settings asset to another folder inside Assets/. New scene sets are made next to it.", () => PickFolderAndMove(_settings)));
+            return row;
+        }
+
+        private static void PickFolderAndMove(SceneSystemSettings _settings)
+        {
+            string current = SceneSystemSettingsAssets.FolderOf(_settings);
+            string picked = EditorUtility.OpenFolderPanel("Move the scene system settings", current, string.Empty);
+            if (string.IsNullOrEmpty(picked))
+            {
+                return;
+            }
+            string projectRoot = Path.GetDirectoryName(Application.dataPath).Replace('\\', '/');
+            string folder = picked.Replace('\\', '/');
+            if (folder.StartsWith(projectRoot + "/", System.StringComparison.OrdinalIgnoreCase))
+            {
+                folder = folder.Substring(projectRoot.Length + 1);
+            }
+            moveError = SceneSystemSettingsAssets.MoveTo(_settings, folder);
+            SceneSystemSettingsAssets.NotifyChanged();
+            Refresh();
         }
 
         private static VisualElement TwoSettingsWarning(List<string> _paths)
@@ -409,7 +465,8 @@ namespace AbstractPixel.SceneManagement.Editor
             foldout.value = isOpen;
             foldout.tooltip = "Changes to a scene set reach every scene group using it, except the parts a group overrides. Click to show its scenes.";
             foldout.style.width = 190;
-            foldout.style.flexShrink = 0;
+            foldout.style.flexShrink = 1;
+            foldout.style.minWidth = 100;
             foldout.contentContainer.style.display = DisplayStyle.None;
             Label foldoutText = foldout.Q<Label>(className: Toggle.textUssClassName);
             if (foldoutText != null)
@@ -456,7 +513,9 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             VisualElement cell = new VisualElement();
             cell.style.width = 160;
-            cell.style.flexShrink = 0;
+            cell.style.flexShrink = 1;
+            cell.style.minWidth = 100;
+            cell.style.overflow = Overflow.Hidden;
             cell.style.alignItems = Align.FlexStart;
             if (_isDefault)
             {
@@ -659,40 +718,6 @@ namespace AbstractPixel.SceneManagement.Editor
             moveAll.style.marginTop = 6;
             moveAll.style.alignSelf = Align.FlexStart;
             newScenesCard.Add(moveAll);
-        }
-
-        private static void FillChecks(SceneSystemSettings _settings)
-        {
-            checksCard.Clear();
-            if (_settings != null)
-            {
-                Toggle beforeBuild = new Toggle("Check scene groups before a build");
-                beforeBuild.value = _settings.CheckSceneGroupsBeforeBuild;
-                beforeBuild.tooltip = "A build stops when any scene group has a problem, a scene listed twice included, with a message naming each group and scene. Saved in the settings asset, so it is shared through version control.";
-                beforeBuild.AddToClassList(Toggle.alignedFieldUssClassName);
-                beforeBuild.RegisterValueChangedCallback(_change =>
-                {
-                    _settings.CheckSceneGroupsBeforeBuild = _change.newValue;
-                    SceneSystemSettingsAssets.Save(_settings);
-                });
-                checksCard.Add(beforeBuild);
-            }
-
-            Dictionary<string, List<SceneGroupProblem>> problemsByGroup = SceneGroupAssets.ProblemsByGroupPath();
-            int problemCount = 0;
-            foreach (List<SceneGroupProblem> problems in problemsByGroup.Values)
-            {
-                problemCount += problems.Count;
-            }
-            int groupCount = SceneGroupAssets.FindAll().Count;
-            if (problemCount == 0)
-            {
-                checksCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Green, "No problems in " + groupCount + " scene group(s).", string.Empty));
-            }
-            else
-            {
-                checksCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Red, problemCount + " problem(s) in " + problemsByGroup.Count + " of " + groupCount + " scene group(s).", string.Empty));
-            }
         }
     }
 }

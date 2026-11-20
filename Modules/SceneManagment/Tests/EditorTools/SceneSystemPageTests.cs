@@ -222,6 +222,43 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             Assert.AreEqual("Level 1", group.MainScene.SceneName);
         }
 
+        [Test]
+        public void MoveTo_AnotherFolder_MovesTheSettingsKeepingTheirName()
+        {
+            AssetDatabase.CreateFolder(Folder, "Moved");
+            SceneSystemSettings settings = ScriptableObject.CreateInstance<SceneSystemSettings>();
+            AssetDatabase.CreateAsset(settings, Folder + "/TestSettings.asset");
+
+            string error = SceneSystemSettingsAssets.MoveTo(settings, Folder + "/Moved/");
+
+            Assert.IsEmpty(error);
+            Assert.AreEqual(Folder + "/Moved/TestSettings.asset", AssetDatabase.GetAssetPath(settings));
+        }
+
+        [TestCase("Assets/_SceneSystemPageTests/Editor")]
+        [TestCase("Packages/Somewhere")]
+        [TestCase("Assets/_SceneSystemPageTests/NotThere")]
+        public void MoveTo_FolderThatCannotHoldTheSettings_IsRefusedAndNothingMoves(string _folder)
+        {
+            if (_folder.EndsWith("/Editor"))
+            {
+                AssetDatabase.CreateFolder(Folder, "Editor");
+            }
+            SceneSystemSettings settings = ScriptableObject.CreateInstance<SceneSystemSettings>();
+            AssetDatabase.CreateAsset(settings, Folder + "/TestSettings.asset");
+
+            string error = SceneSystemSettingsAssets.MoveTo(settings, _folder);
+
+            Assert.IsNotEmpty(error);
+            Assert.AreEqual(Folder + "/TestSettings.asset", AssetDatabase.GetAssetPath(settings));
+        }
+
+        [Test]
+        public void MoveTo_NoSettings_SaysSo()
+        {
+            Assert.IsNotEmpty(SceneSystemSettingsAssets.MoveTo(null, "Assets"));
+        }
+
         [TestCase(SceneGroupListKind.ManagerScenes, 0, "Manager scenes (Scene 1)")]
         [TestCase(SceneGroupListKind.SharedScenes, 2, "Shared scenes (Scene 3)")]
         public void Where_CountsRowsFromOne(SceneGroupListKind _list, int _index, string _expected)

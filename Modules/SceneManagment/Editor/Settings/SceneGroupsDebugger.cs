@@ -15,19 +15,25 @@ namespace AbstractPixel.SceneManagement.Editor
     public static class SceneGroupsDebugger
     {
         public const string Title = "Scene Groups Debugger";
-        public const string Tooltip = "Every scene group in the project in one place: change its main scene or scene set, see its problems and fix them. Changes have Undo.";
+        public const string Tooltip = "Every scene group in the project in one place: change its main scene or scene set, see its problems and fix them, and choose whether a build checks them first. Changes have Undo.";
 
         private const float NameWidth = 150;
-        private const float MainSceneMinWidth = 120;
+        private const float MainSceneMinWidth = 90;
+        private const float MainSceneMaxWidth = 300;
+        private const float ColumnGap = 14;
+        private const float MinColumnWidth = 70;
         private const float SetWidth = 140;
         private const float StatusWidth = 150;
         private const float OpenWidth = 84;
-        private const string ObjectFieldLabelClass = "unity-object-field-display__label";
 
         /// <summary>Fills the section's card and the summary next to its title ("16 groups, 0 problems").</summary>
         public static void Fill(VisualElement _card, VisualElement _summary, SceneSystemSettings _settings, Action _requestRefresh)
         {
             _card.Clear();
+            if (_settings != null)
+            {
+                _card.Add(BeforeBuildToggle(_settings));
+            }
             List<SceneGroup> groups = SceneGroupAssets.FindAll();
             SceneGroupMigrationPlan plan = SceneGroupMigration.Plan(groups);
             if (_settings != null && plan.HasWork)
@@ -52,6 +58,21 @@ namespace AbstractPixel.SceneManagement.Editor
             FillSummary(_summary, groups.Count, problemCount);
         }
 
+        private static Toggle BeforeBuildToggle(SceneSystemSettings _settings)
+        {
+            Toggle beforeBuild = new Toggle("Check scene groups before a build");
+            beforeBuild.value = _settings.CheckSceneGroupsBeforeBuild;
+            beforeBuild.tooltip = "A build stops when any scene group below has a problem, a scene listed twice included, with a message naming each group and scene. Saved in the settings asset, so it is shared through version control.";
+            beforeBuild.style.marginLeft = 0;
+            beforeBuild.style.marginBottom = 8;
+            beforeBuild.RegisterValueChangedCallback(_change =>
+            {
+                _settings.CheckSceneGroupsBeforeBuild = _change.newValue;
+                SceneSystemSettingsAssets.Save(_settings);
+            });
+            return beforeBuild;
+        }
+
         private static void FillSummary(VisualElement _summary, int _groupCount, int _problemCount)
         {
             _summary.Clear();
@@ -74,11 +95,14 @@ namespace AbstractPixel.SceneManagement.Editor
             Label mainScene = HeaderCell("Main scene", MainSceneMinWidth, SceneSystemUI.MainSceneTooltip);
             mainScene.style.flexGrow = 1;
             mainScene.style.flexShrink = 1;
+            mainScene.style.maxWidth = MainSceneMaxWidth;
+            mainScene.style.minWidth = MainSceneMinWidth;
             row.Add(mainScene);
             row.Add(HeaderCell("Scene set", SetWidth, SceneSystemUI.SceneSetTooltip));
             row.Add(HeaderCell("Status", StatusWidth, "Whether the scene group check finds problems in this group. Each problem is listed under the row with its fix."));
             VisualElement openColumn = new VisualElement();
             FixWidth(openColumn, OpenWidth);
+            openColumn.style.flexShrink = 0;
             openColumn.style.marginRight = 0;
             row.Add(openColumn);
             return row;
@@ -89,16 +113,21 @@ namespace AbstractPixel.SceneManagement.Editor
             Label cell = new Label(_text);
             cell.tooltip = _tooltip;
             cell.style.unityFontStyleAndWeight = FontStyle.Bold;
+            cell.style.whiteSpace = WhiteSpace.NoWrap;
+            cell.style.textOverflow = TextOverflow.Ellipsis;
             FixWidth(cell, _width);
             return cell;
         }
 
-        // Every column but the main scene keeps its width, so the rows line up under the header.
+        // Every column but the main scene starts at its width and gives way only in a narrow window, down to a minimum,
+        // the same in the header and the rows, so they stay lined up.
         private static void FixWidth(VisualElement _cell, float _width)
         {
             _cell.style.width = _width;
-            _cell.style.flexShrink = 0;
-            _cell.style.marginRight = 6;
+            _cell.style.flexShrink = 1;
+            _cell.style.minWidth = MinColumnWidth;
+            _cell.style.overflow = Overflow.Hidden;
+            _cell.style.marginRight = ColumnGap;
         }
 
         // Adds the group's row and, under it, its problems with their fixes. Returns the number of problems.
@@ -122,6 +151,7 @@ namespace AbstractPixel.SceneManagement.Editor
             row.Add(StatusCell(_group, problemCount));
             Button open = SceneSystemUI.Button("Open group", SceneSystemUI.OpenGroupTooltip, () => SceneGroupOpener.Open(_group));
             FixWidth(open, OpenWidth);
+            open.style.flexShrink = 0;
             open.style.marginLeft = 0;
             open.style.marginRight = 0;
             row.Add(open);
@@ -132,7 +162,7 @@ namespace AbstractPixel.SceneManagement.Editor
             return problemCount;
         }
 
-        // A small object field that shows the main scene's path and takes a new scene by drag or picker.
+        // A small object field with the main scene (its path in the tooltip) that takes a new scene by drag or picker.
         private static VisualElement MainSceneField(SceneGroup _group, Action _requestRefresh)
         {
             SceneAsset current = null;
@@ -150,15 +180,14 @@ namespace AbstractPixel.SceneManagement.Editor
             field.style.flexGrow = 1;
             field.style.flexShrink = 1;
             field.style.minWidth = MainSceneMinWidth;
+            field.style.maxWidth = MainSceneMaxWidth;
             field.style.marginLeft = 0;
-            field.style.marginRight = 6;
+            field.style.marginRight = ColumnGap;
             field.tooltip = SceneSystemUI.MainSceneTooltip;
             if (!string.IsNullOrEmpty(path))
             {
                 field.tooltip = path + "\n\n" + SceneSystemUI.MainSceneTooltip;
             }
-            ShowPathInField(field, path);
-            field.RegisterCallback<AttachToPanelEvent>(_event => ShowPathInField(field, path));
             field.RegisterValueChangedCallback(_change =>
             {
                 if (_change.newValue == _change.previousValue)
@@ -169,25 +198,6 @@ namespace AbstractPixel.SceneManagement.Editor
                 _requestRefresh();
             });
             return field;
-        }
-
-        // The object field shows "Level 7 (Scene Asset)"; the path says which "Level 7" it is. The end stays visible.
-        private static void ShowPathInField(ObjectField _field, string _path)
-        {
-            if (string.IsNullOrEmpty(_path))
-            {
-                return;
-            }
-            Label label = _field.Q<Label>(className: ObjectFieldLabelClass);
-            if (label == null)
-            {
-                return;
-            }
-            label.text = _path;
-            label.style.overflow = Overflow.Hidden;
-            label.style.whiteSpace = WhiteSpace.NoWrap;
-            label.style.textOverflow = TextOverflow.Ellipsis;
-            label.style.unityTextOverflowPosition = TextOverflowPosition.Start;
         }
 
         private static VisualElement SetField(SceneGroup _group, SceneSystemSettings _settings, Action _requestRefresh)
@@ -224,8 +234,16 @@ namespace AbstractPixel.SceneManagement.Editor
                 colour = SceneSystemUI.Yellow;
                 text = "Boot group, unused";
             }
-            VisualElement cell = SceneSystemUI.StatusRow(colour, text, string.Empty);
+            VisualElement cell = SceneSystemUI.StatusRow(colour, text, text);
             FixWidth(cell, StatusWidth);
+            Label label = cell.Q<Label>();
+            if (label != null)
+            {
+                // One line in a narrow window; the whole text is in the tooltip.
+                label.style.whiteSpace = WhiteSpace.NoWrap;
+                label.style.overflow = Overflow.Hidden;
+                label.style.textOverflow = TextOverflow.Ellipsis;
+            }
             if (isBootGroup)
             {
                 cell.tooltip = "A boot group from before scene sets: no main scene and no scene set. It is not a place the player can go.";

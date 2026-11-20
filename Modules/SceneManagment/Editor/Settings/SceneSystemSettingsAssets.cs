@@ -198,6 +198,45 @@ namespace AbstractPixel.SceneManagement.Editor
             return sets;
         }
 
+        /// <summary>
+        /// Moves the settings asset into another folder inside Assets/, keeping its name. Returns why it can't, or empty
+        /// when it moved (or was already there).
+        /// </summary>
+        public static string MoveTo(SceneSystemSettings _settings, string _folder)
+        {
+            if (_settings == null)
+            {
+                return "There is no settings asset to move.";
+            }
+            string problem = SceneSystemSetup.FolderProblemInProject(_folder);
+            if (!string.IsNullOrEmpty(problem))
+            {
+                return problem;
+            }
+            string folder = SceneSystemSetup.NormalizeFolder(_folder);
+            if (!AssetDatabase.IsValidFolder(folder))
+            {
+                return "That folder is not in the project.";
+            }
+            string from = AssetDatabase.GetAssetPath(_settings);
+            string to = folder + "/" + System.IO.Path.GetFileName(from);
+            if (from == to)
+            {
+                return string.Empty;
+            }
+            if (AssetDatabase.LoadMainAssetAtPath(to) != null)
+            {
+                return "That folder already has a file named " + System.IO.Path.GetFileName(from) + ".";
+            }
+            string error = AssetDatabase.MoveAsset(from, to);
+            if (!string.IsNullOrEmpty(error))
+            {
+                return error;
+            }
+            Debug.Log(LogPrefix + " Moved the scene system settings to " + to + ".", _settings);
+            return string.Empty;
+        }
+
         /// <summary>Saves a change made on the page and tells open windows.</summary>
         public static void Save(SceneSystemSettings _settings)
         {
