@@ -62,6 +62,13 @@ namespace AbstractPixel.SceneManagement
                 return openedBy;
             }
 
+            // A scene is In build or Addressable, never both. Answering an In-build scene without the Addressables
+            // check (which waits for Addressables to start) lets start-up ask for its scenes before any Start runs.
+            if (IsInBuildSettings(_scene))
+            {
+                return buildSettingsLoader;
+            }
+
             bool isAddressable = await addressableCheck.IsAddressable(_scene);
             if (isAddressable)
             {
@@ -70,6 +77,16 @@ namespace AbstractPixel.SceneManagement
             }
 
             return buildSettingsLoader;
+        }
+
+        private static bool IsInBuildSettings(SceneReference _scene)
+        {
+            if (_scene == null || string.IsNullOrEmpty(_scene.ScenePath))
+            {
+                return false;
+            }
+            int buildIndex = UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath(_scene.ScenePath);
+            return buildIndex >= 0;
         }
 
         private ISceneLoader FindOpenSceneLoader(SceneReference _scene)

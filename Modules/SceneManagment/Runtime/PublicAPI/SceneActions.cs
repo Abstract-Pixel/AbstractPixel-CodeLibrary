@@ -43,16 +43,6 @@ namespace AbstractPixel.SceneManagement
         }
 
 
-        /// <summary>Initializes the start scene data with the specified managerial and contextual scenes, and sets the main
-        /// scene.</summary>
-        /// <param name="managerialScenes">A collection of scene references representing managerial scenes to be included in the initialization.</param>
-        /// <param name="contextualScenes">A collection of scene references representing contextual scenes to be included in the initialization.</param>
-        /// <param name="mainScene">The scene reference that identifies the main scene to be set during initialization. Cannot be null.</param>
-        public static void InitializeStartSceneData(SceneGroup _startSceneGroup)
-        {
-            SceneCoordinator.FindOrCreate()?.InitializeStartSceneGroup(_startSceneGroup);
-        }
-
         /// <summary>Transitions asynchronously to the specified scene group.This will be active when loaded</summary>
         /// <param name="_sceneGroup">The scene group to transition to. Cannot be null.</param>
         /// <returns>A task that represents the asynchronous transition operation.</returns>

@@ -26,12 +26,6 @@ namespace AbstractPixel.SceneManagement
         /// <summary>True once start-up has opened every scene of the first scene group and raised OnGameStarted.</summary>
         [field: SerializeField, ReadOnly] public bool HasGameStarted { get; private set; } = false;
 
-        /// <summary>Old name of <see cref="HasGameStarted"/>, kept until Rally Shift's bootstrapper is gone.</summary>
-        public bool IsStartSceneGroupInitialized
-        {
-            get { return HasGameStarted; }
-        }
-
         private ISceneLoader sceneLoader;
         private bool isStartUpRunning;
 
@@ -152,18 +146,37 @@ namespace AbstractPixel.SceneManagement
             return true;
         }
 
+        /// <summary>
+        /// Asks for every missing scene at once, in order: the main scene, then manager scenes, then shared scenes. Unity
+        /// opens additive scenes in the order they were asked for, so the main scene still opens first and becomes active
+        /// before the others wake. Asking for all of them before the first frame's Start, as the old start-up did, lets
+        /// an open scene find the others in its Start.
+        /// </summary>
         private async Task<bool> LoadStartUpScenes(SceneChangePlan _plan)
         {
+            List<Task<bool>> loads = new List<Task<bool>>();
             if (_plan.MainSceneToOpen != null)
             {
-                bool mainSceneLoaded = await TryLoadScene(_plan.MainSceneToOpen, true, true);
-                if (!mainSceneLoaded)
+                loads.Add(TryLoadScene(_plan.MainSceneToOpen, true, true));
+            }
+            foreach (SceneReference scene in _plan.ManagerialToOpen)
+            {
+                loads.Add(TryLoadScene(scene, true, false));
+            }
+            foreach (SceneReference scene in _plan.ContextualToOpen)
+            {
+                loads.Add(TryLoadScene(scene, true, false));
+            }
+
+            bool[] results = await Task.WhenAll(loads);
+            foreach (bool loaded in results)
+            {
+                if (!loaded)
                 {
                     return false;
                 }
             }
-
-            return await LoadSharedScenes(_plan);
+            return true;
         }
 
         internal async Task TransitionToPreloadedSceneGroup()
