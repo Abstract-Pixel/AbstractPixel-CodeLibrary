@@ -95,20 +95,20 @@ namespace AbstractPixel.SceneManagement.Editor
                 return string.Empty;
             }
             string header = LogPrefix + " The build stopped: the scene group check found " + problemCount + " problem(s). "
-                + "Fix them in each scene group's Inspector or in Tools > External Project Tools > Scene System > Check All Scene Groups, "
-                + "or turn off Check scene groups before a build in Project Settings > Abstract Pixel > Scenes.";
+                + "Fix them in each scene group's Inspector or in Project Settings > Abstract Pixel > Scene System > Scene Groups Debugger, "
+                + "or turn off Check scene groups before a build on that page.";
             return header + lines;
         }
 
-        /// <summary>Where a scene sits, in the words the inspector shows: "Main scene", "Shared scenes (Scene 1)".</summary>
+        /// <summary>Where a scene sits, in the words the inspector shows: "Main scene", "Shared scenes (Scene 1)". Rows count from 1.</summary>
         public static string Where(SceneGroupListKind _list, int _index)
         {
             switch (_list)
             {
                 case SceneGroupListKind.ManagerScenes:
-                    return "Manager scenes (Scene " + _index + ")";
+                    return "Manager scenes (Scene " + (_index + 1) + ")";
                 case SceneGroupListKind.SharedScenes:
-                    return "Shared scenes (Scene " + _index + ")";
+                    return "Shared scenes (Scene " + (_index + 1) + ")";
                 default:
                     return "Main scene";
             }

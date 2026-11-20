@@ -17,10 +17,8 @@ namespace AbstractPixel.SceneManagement.Editor
     public class SceneGroupEditor : UnityEditor.Editor
     {
         private const string AdvancedOpenKey = "AbstractPixel.SceneSystem.GroupInspectorAdvancedOpen";
-        private const string NoSetLabel = "None (the group's own scenes)";
         private const string AddToBuildTooltip = "Adds this group's manager scenes, shared scenes and main scene to Build Settings. Scenes already there are not added again; a scene that is switched off is switched on.";
-        private const string OpenGroupTooltip = "Opens the main scene with its manager scenes and shared scenes, as they are in Play.";
-        private const string CheckAllGroupsTooltip = "Opens a window listing every scene group in the project with its problems and their fixes.";
+        private const string OpenSceneSystemTooltip = "Opens Project Settings > Abstract Pixel > Scene System at the Scene Groups Debugger, which lists every scene group with its problems and their fixes.";
         private const string MoveToAddressablesTooltip = "Gives each of this group's scenes an Addressables entry and removes it from Build Settings, so it loads from one place.";
 
         private static readonly SceneSetPart[] Parts = { SceneSetPart.ManagerScenes, SceneSetPart.SharedScenes, SceneSetPart.ResetSharedScenes };
@@ -63,51 +61,24 @@ namespace AbstractPixel.SceneManagement.Editor
             SceneSystemSettings settings = SceneSystemSettingsAssets.Find();
             if (settings == null)
             {
-                container.Add(SceneSystemUI.HelpBoxWithButton("Scene sets need the scene system to be set up.", HelpBoxMessageType.Info, "Open Project Settings", "Opens Project Settings > Abstract Pixel > Scenes, where the setup is.", SceneSystemSettingsProvider.Open));
+                container.Add(SceneSystemUI.HelpBoxWithButton("Scene sets need the scene system to be set up.", HelpBoxMessageType.Info, "Open Scene System", "Opens Project Settings > Abstract Pixel > Scene System, where the setup is.", SceneSystemSettingsProvider.Open));
                 return container;
             }
 
-            List<SceneSet> choices = new List<SceneSet> { null };
-            foreach (SceneSet set in settings.SceneSets)
-            {
-                if (set != null)
-                {
-                    choices.Add(set);
-                }
-            }
-            if (_group.SceneSet != null && !choices.Contains(_group.SceneSet))
-            {
-                choices.Add(_group.SceneSet);
-            }
-
-            PopupField<SceneSet> field = new PopupField<SceneSet>("Scene set", choices, _group.SceneSet, SetLabel, SetLabel);
-            field.tooltip = SceneSystemUI.SceneSetTooltip;
+            PopupField<SceneSet> field = SceneSystemUI.SceneSetPopup("Scene set", settings, _group.SceneSet, OnSetPicked);
             field.AddToClassList(PopupField<SceneSet>.alignedFieldUssClassName);
-            field.RegisterValueChangedCallback(_change =>
-            {
-                // Binding and refreshes raise change events too; only a different set is the designer's choice.
-                if (_change.newValue == _change.previousValue)
-                {
-                    return;
-                }
-                foreach (Object item in targets)
-                {
-                    SceneSetSync.PickSet((SceneGroup)item, _change.newValue);
-                }
-                serializedObject.Update();
-                RefreshGroupState();
-            });
             container.Add(field);
             return container;
         }
 
-        private static string SetLabel(SceneSet _set)
+        private void OnSetPicked(SceneSet _set)
         {
-            if (_set == null)
+            foreach (Object item in targets)
             {
-                return NoSetLabel;
+                SceneSetSync.PickSet((SceneGroup)item, _set);
             }
-            return _set.name;
+            serializedObject.Update();
+            RefreshGroupState();
         }
 
         private VisualElement MakeAdvanced()
@@ -150,6 +121,7 @@ namespace AbstractPixel.SceneManagement.Editor
             Label title = new Label(_title);
             title.tooltip = _tooltip;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            SceneSystemUI.AddHoverTint(title);
             header.Add(title);
             header.Add(SceneSystemUI.Spacer());
             VisualElement state = SceneSystemUI.Row();
@@ -176,8 +148,13 @@ namespace AbstractPixel.SceneManagement.Editor
             moveToAddressables.SetEnabled(addressablesInstalled);
             buttons.Add(moveToAddressables);
 
-            buttons.Add(SceneSystemUI.Button("Open group", OpenGroupTooltip, () => SceneGroupOpener.Open((SceneGroup)target)));
-            buttons.Add(SceneSystemUI.Button("Check All Scene Groups", CheckAllGroupsTooltip, CheckAllSceneGroupsWindow.Open));
+            buttons.Add(SceneSystemUI.Button("Open group", SceneSystemUI.OpenGroupTooltip, () => SceneGroupOpener.Open((SceneGroup)target)));
+
+            // Its own row under the three group buttons.
+            VisualElement pageRow = new VisualElement();
+            pageRow.style.marginTop = 6;
+            pageRow.Add(SceneSystemUI.PrimaryButton("Open Scene System", OpenSceneSystemTooltip, SceneSystemSettingsProvider.OpenAtDebugger));
+            buttons.Add(pageRow);
             return buttons;
         }
 

@@ -6,7 +6,7 @@ namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
     /// A scene group's problems as Unity help boxes, each with its one-click fix. Hidden when the group has none.
-    /// Used by the scene group inspector and the Check All Scene Groups window.
+    /// Used by the scene group inspector and the Scene System page's Scene Groups Debugger.
     /// </summary>
     public class SceneGroupProblemsView : VisualElement
     {

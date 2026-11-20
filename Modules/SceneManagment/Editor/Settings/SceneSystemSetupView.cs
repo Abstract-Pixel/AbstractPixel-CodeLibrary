@@ -9,7 +9,8 @@ using UnityEngine.UIElements;
 namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
-    /// The setup wizard, shared by the setup window and the page's Setup section. One question per page, few words:
+    /// The setup wizard, shared by the setup window and the page's Setup section. The Abstract Pixel logo sits on top;
+    /// under it, one question per page, few words:
     /// Welcome, Settings folder, New scenes, Scene groups (only when the project has some), Ready, Done. Details are in
     /// tooltips. Next stays disabled while the page's answer can't work.
     /// </summary>
@@ -24,6 +25,8 @@ namespace AbstractPixel.SceneManagement.Editor
             Ready,
             Done
         }
+
+        private const float LogoHeight = 64;
 
         private readonly Action<SceneSystemSettings> onDone;
         private readonly SceneSystemSetupChoices choices = new SceneSystemSetupChoices();
@@ -53,18 +56,24 @@ namespace AbstractPixel.SceneManagement.Editor
             pages.Add(Page.Done);
 
             style.flexGrow = 1;
-            style.minHeight = 300;
+            style.minHeight = 340;
+            style.paddingTop = 4;
+            VisualElement logo = SceneSystemUI.Logo(LogoHeight);
+            logo.style.marginBottom = 14;
+            Add(logo);
             content = new VisualElement();
             content.style.flexGrow = 1;
-            content.style.justifyContent = Justify.Center;
+            content.style.justifyContent = Justify.FlexStart;
+            content.style.paddingTop = 6;
             Add(content);
 
             VisualElement footer = new VisualElement();
-            footer.style.marginTop = 10;
+            footer.style.marginTop = 14;
             stepLabel = new Label();
             stepLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             stepLabel.style.fontSize = 10;
             stepLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
+            stepLabel.style.marginBottom = 6;
             footer.Add(stepLabel);
             VisualElement buttons = SceneSystemUI.Row();
             backButton = SceneSystemUI.Button("Back", string.Empty, () => Go(-1));
@@ -163,8 +172,8 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             if (isDone)
             {
-                nextButton.text = "Open settings";
-                nextButton.tooltip = "Opens Project Settings > Abstract Pixel > Scenes.";
+                nextButton.text = "Open Scene System";
+                nextButton.tooltip = "Opens Project Settings > Abstract Pixel > Scene System.";
             }
         }
 
@@ -246,7 +255,7 @@ namespace AbstractPixel.SceneManagement.Editor
             content.Add(SceneSystemUI.ChoiceCard("Organize them (recommended)", "Into " + plan.SetNames.Count + " scene sets: " + string.Join(", ", plan.SetNames) + ".", choices.MigrateGroups, true,
                 "Groups that share the same manager and shared scenes get one scene set. Every group keeps every scene; nothing is deleted. A report lists each group.", () => PickMigrate(true)));
             content.Add(SceneSystemUI.ChoiceCard("Leave them as they are", "Start with an empty scene set instead.", !choices.MigrateGroups, true,
-                "You can organize them later from Project Settings > Abstract Pixel > Scenes.", () => PickMigrate(false)));
+                "You can organize them later from Project Settings > Abstract Pixel > Scene System.", () => PickMigrate(false)));
         }
 
         private void PickMigrate(bool _migrate)

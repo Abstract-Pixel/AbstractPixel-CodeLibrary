@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -7,9 +8,10 @@ using UnityEngine.UIElements;
 namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
-    /// The scene system's look in one place: section headers with a one-line explanation, cards, status rows with a
-    /// coloured dot (green fine, yellow needs attention, red broken), help boxes with a fix button, scene lists, and the
-    /// tooltips in glossary words. Used by the Project Settings page, the setup window and the inspectors.
+    /// The scene system's look in one place: section headers (explanations in their tooltips), cards, status rows with a
+    /// coloured dot (green fine, yellow needs attention, red broken), help boxes with a fix button, scene lists, the
+    /// scene set dropdown, and the tooltips in glossary words. Used by the Scene System page, the setup window and the
+    /// inspectors.
     /// </summary>
     public static class SceneSystemUI
     {
@@ -18,6 +20,7 @@ namespace AbstractPixel.SceneManagement.Editor
         public static readonly Color Red = new Color(0.89f, 0.29f, 0.24f);
         public static readonly Color OverrideBlue = new Color(0.17f, 0.52f, 0.92f);
 
+        public const string SceneGroupTooltip = "An asset that describes one place the player can be, such as a level or the main menu. Click a name to select it.";
         public const string MainSceneTooltip = "The one scene that makes this place, such as 'Level 7'. It becomes Unity's active scene. A scene is the main scene of at most one scene group.";
         public const string ManagerScenesTooltip = "Scenes that open once and stay open across scene changes, such as the scene holding audio and save managers.";
         public const string SharedScenesTooltip = "Scenes several scene groups use next to their main scene, such as the scene holding the player's car. They stay open between two groups that both use them, unless the group resets shared scenes.";
@@ -26,6 +29,9 @@ namespace AbstractPixel.SceneManagement.Editor
         public const string OverrideTooltip = "This part keeps the group's own value instead of following its scene set, until you click Revert to set.";
         public const string FromSetTooltip = "This part follows the scene set: changing the set changes it here too. Editing it here makes it an override.";
         public const string RevertTooltip = "Ends the override: the part takes the scene set's value again and follows the set from now on.";
+        public const string OpenGroupTooltip = "Opens the main scene with its manager scenes and shared scenes, as they are in Play.";
+        public const string NoSetLabel = "None (the group's own scenes)";
+        private const string LogoResource = "AbstractPixelLogo";
 
         private static Color MutedText
         {
@@ -42,36 +48,93 @@ namespace AbstractPixel.SceneManagement.Editor
             get { return EditorGUIUtility.isProSkin ? new Color(0.13f, 0.13f, 0.13f) : new Color(0.66f, 0.66f, 0.66f); }
         }
 
-        /// <summary>A page or window title with a short line under it.</summary>
-        public static VisualElement Title(string _title, string _subtitle)
+        private static Color InnerCardBackground
         {
-            VisualElement header = new VisualElement();
-            header.style.marginBottom = 4;
+            get { return EditorGUIUtility.isProSkin ? new Color(0.235f, 0.235f, 0.235f) : new Color(0.92f, 0.92f, 0.92f); }
+        }
+
+        private static Color SelectedCardBackground
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.24f, 0.29f, 0.35f) : new Color(0.76f, 0.83f, 0.92f); }
+        }
+
+        private static Color DefaultCardBorder
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.36f, 0.48f, 0.62f) : new Color(0.42f, 0.56f, 0.74f); }
+        }
+
+        private static Color HeaderHoverText
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.62f, 0.78f, 0.98f) : new Color(0.10f, 0.33f, 0.66f); }
+        }
+
+        private static Color PrimaryButtonBackground
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.27f, 0.35f, 0.45f) : new Color(0.79f, 0.86f, 0.95f); }
+        }
+
+        private static Color PrimaryButtonHover
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.31f, 0.40f, 0.51f) : new Color(0.85f, 0.91f, 0.98f); }
+        }
+
+        private static Color FieldBackground
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.165f, 0.165f, 0.165f) : new Color(0.94f, 0.94f, 0.94f); }
+        }
+
+        private static Color FieldBorder
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.13f, 0.13f, 0.13f) : new Color(0.70f, 0.70f, 0.70f); }
+        }
+
+        /// <summary>A page title. What the page is for goes in its tooltip.</summary>
+        public static Label PageTitle(string _title, string _tooltip)
+        {
             Label title = new Label(_title);
+            title.tooltip = _tooltip;
             title.style.fontSize = 19;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
             title.style.marginBottom = 2;
-            header.Add(title);
-            header.Add(Hint(_subtitle));
-            return header;
+            title.style.alignSelf = Align.FlexStart;
+            return title;
         }
 
-        /// <summary>Adds a section (header, one-line explanation, card) to the parent and returns the card to fill.</summary>
-        public static VisualElement Section(VisualElement _parent, string _title, string _explanation)
+        /// <summary>Adds a section (header, card) to the parent and returns the card to fill. The explanation is the header's tooltip.</summary>
+        public static VisualElement Section(VisualElement _parent, string _title, string _tooltip)
+        {
+            return Section(_parent, _title, _tooltip, out VisualElement _);
+        }
+
+        /// <summary>Same, and hands back the header row, so a section can put a summary or a button next to its title.</summary>
+        public static VisualElement Section(VisualElement _parent, string _title, string _tooltip, out VisualElement _headerRow)
         {
             VisualElement section = new VisualElement();
             section.style.marginTop = 14;
+            VisualElement headerRow = Row();
+            headerRow.style.marginBottom = 5;
+            headerRow.style.minHeight = 20;
             Label header = new Label(_title);
+            header.tooltip = _tooltip;
             header.style.fontSize = 14;
             header.style.unityFontStyleAndWeight = FontStyle.Bold;
-            section.Add(header);
-            Label explanation = Hint(_explanation);
-            explanation.style.marginBottom = 5;
-            section.Add(explanation);
+            AddHoverTint(header);
+            headerRow.Add(header);
+            headerRow.Add(Spacer());
+            section.Add(headerRow);
             VisualElement card = Card();
             section.Add(card);
             _parent.Add(section);
+            _headerRow = headerRow;
             return card;
+        }
+
+        /// <summary>A header's slight colour change while the pointer is over it, so its tooltip is easy to find.</summary>
+        public static void AddHoverTint(VisualElement _header)
+        {
+            _header.RegisterCallback<PointerEnterEvent>(_event => _header.style.color = HeaderHoverText);
+            _header.RegisterCallback<PointerLeaveEvent>(_event => _header.style.color = StyleKeyword.Null);
+            _header.RegisterCallback<DetachFromPanelEvent>(_event => _header.style.color = StyleKeyword.Null);
         }
 
         public static VisualElement Card()
@@ -149,6 +212,190 @@ namespace AbstractPixel.SceneManagement.Editor
             return button;
         }
 
+        /// <summary>The button that matters most in its row, such as Open Scene System: the same button, slightly blue.</summary>
+        public static Button PrimaryButton(string _text, string _tooltip, Action _clicked)
+        {
+            Button button = Button(_text, _tooltip, _clicked);
+            button.style.backgroundColor = PrimaryButtonBackground;
+            button.RegisterCallback<PointerEnterEvent>(_event => button.style.backgroundColor = PrimaryButtonHover);
+            button.RegisterCallback<PointerLeaveEvent>(_event => button.style.backgroundColor = PrimaryButtonBackground);
+            return button;
+        }
+
+        /// <summary>Selects the asset and shows it in the Project window.</summary>
+        public static void PingAndSelect(UnityEngine.Object _asset)
+        {
+            if (_asset == null)
+            {
+                return;
+            }
+            Selection.activeObject = _asset;
+            EditorGUIUtility.PingObject(_asset);
+        }
+
+        /// <summary>
+        /// An asset's path in a read-only box that looks like a field, ending visible ("…/Scene Sets/Level.asset"). A
+        /// click selects the asset and shows it in the Project window, which a disabled object field can't do.
+        /// </summary>
+        public static Label AssetPathField(UnityEngine.Object _asset)
+        {
+            string path = AssetDatabase.GetAssetPath(_asset);
+            Label field = new Label(path);
+            field.tooltip = path + "\nClick to show it in the Project window.";
+            field.style.height = 18;
+            field.style.paddingLeft = 4;
+            field.style.paddingRight = 4;
+            field.style.unityTextAlign = TextAnchor.MiddleLeft;
+            field.style.backgroundColor = FieldBackground;
+            field.style.overflow = Overflow.Hidden;
+            field.style.whiteSpace = WhiteSpace.NoWrap;
+            field.style.textOverflow = TextOverflow.Ellipsis;
+            field.style.unityTextOverflowPosition = TextOverflowPosition.Start;
+            SetBorder(field, FieldBorder, 1);
+            SetRadius(field, 3);
+            field.RegisterCallback<ClickEvent>(_event => PingAndSelect(_asset));
+            return field;
+        }
+
+        /// <summary>An asset's name as a link: a click selects it and shows it in the Project window.</summary>
+        public static Label AssetLink(UnityEngine.Object _asset, string _text)
+        {
+            Label link = new Label(_text);
+            link.tooltip = AssetDatabase.GetAssetPath(_asset) + "\nClick to select it.";
+            link.style.overflow = Overflow.Hidden;
+            link.style.whiteSpace = WhiteSpace.NoWrap;
+            link.style.textOverflow = TextOverflow.Ellipsis;
+            AddHoverTint(link);
+            link.RegisterCallback<ClickEvent>(_event => PingAndSelect(_asset));
+            return link;
+        }
+
+        /// <summary>A scene set's card on the page. The default set's card has a quiet blue outline.</summary>
+        public static VisualElement SetCard(bool _isDefault)
+        {
+            VisualElement card = new VisualElement();
+            card.style.marginBottom = 4;
+            card.style.paddingLeft = 4;
+            card.style.paddingRight = 6;
+            card.style.paddingTop = 3;
+            card.style.paddingBottom = 3;
+            SetRadius(card, 4);
+            Color border = CardBorder;
+            if (_isDefault)
+            {
+                border = DefaultCardBorder;
+            }
+            SetBorder(card, border, 1);
+            ShowSelected(card, false);
+            return card;
+        }
+
+        /// <summary>The background of a selected scene set card, like a selected row in a list.</summary>
+        public static void ShowSelected(VisualElement _card, bool _isSelected)
+        {
+            Color background = InnerCardBackground;
+            if (_isSelected)
+            {
+                background = SelectedCardBackground;
+            }
+            _card.style.backgroundColor = background;
+        }
+
+        /// <summary>The + and − buttons under a list, as Unity's lists have them.</summary>
+        public static VisualElement AddRemoveFooter(string _addTooltip, Action _add, string _removeTooltip, Action _remove, out Button _removeButton)
+        {
+            VisualElement footer = Row();
+            footer.style.alignSelf = Align.FlexEnd;
+            footer.style.backgroundColor = InnerCardBackground;
+            footer.style.paddingLeft = 2;
+            footer.style.paddingRight = 2;
+            SetBorder(footer, CardBorder, 1);
+            footer.style.borderTopWidth = 0;
+            footer.style.borderBottomLeftRadius = 4;
+            footer.style.borderBottomRightRadius = 4;
+            Button add = Button("+", _addTooltip, _add);
+            Button remove = Button("−", _removeTooltip, _remove);
+            foreach (Button button in new[] { add, remove })
+            {
+                button.style.width = 25;
+                button.style.height = 16;
+                button.style.marginTop = 1;
+                button.style.marginBottom = 2;
+                button.style.unityFontStyleAndWeight = FontStyle.Bold;
+                footer.Add(button);
+            }
+            _removeButton = remove;
+            return footer;
+        }
+
+        /// <summary>
+        /// The scene set dropdown of the scene group inspector and the Scene Groups Debugger: None plus every scene set,
+        /// plus the group's own set when the settings don't list it. Calls back only when the designer picks another set.
+        /// </summary>
+        public static PopupField<SceneSet> SceneSetPopup(string _label, SceneSystemSettings _settings, SceneSet _current, Action<SceneSet> _picked)
+        {
+            List<SceneSet> choices = new List<SceneSet> { null };
+            if (_settings != null)
+            {
+                foreach (SceneSet set in _settings.SceneSets)
+                {
+                    if (set != null)
+                    {
+                        choices.Add(set);
+                    }
+                }
+            }
+            if (_current != null && !choices.Contains(_current))
+            {
+                choices.Add(_current);
+            }
+
+            // The index form, because the value form refuses null, and None is a real choice.
+            int currentIndex = choices.IndexOf(_current);
+            PopupField<SceneSet> field = new PopupField<SceneSet>(_label, choices, currentIndex, SetLabel, SetLabel);
+            field.tooltip = SceneSetTooltip;
+            field.RegisterValueChangedCallback(_change =>
+            {
+                // Binding and refreshes raise change events too; only a different set is the designer's choice.
+                if (_change.newValue == _change.previousValue)
+                {
+                    return;
+                }
+                _picked(_change.newValue);
+            });
+            return field;
+        }
+
+        private static string SetLabel(SceneSet _set)
+        {
+            if (_set == null)
+            {
+                return NoSetLabel;
+            }
+            return _set.name;
+        }
+
+        /// <summary>The Abstract Pixel logo, centred. Nothing shows when the image is missing from Resources.</summary>
+        public static VisualElement Logo(float _height)
+        {
+            Texture2D texture = Resources.Load<Texture2D>(LogoResource);
+            if (texture == null)
+            {
+                VisualElement nothing = new VisualElement();
+                nothing.style.display = DisplayStyle.None;
+                return nothing;
+            }
+            float aspect = (float)texture.width / texture.height;
+            Image logo = new Image();
+            logo.image = texture;
+            logo.scaleMode = ScaleMode.ScaleToFit;
+            logo.style.height = _height;
+            logo.style.width = _height * aspect;
+            logo.style.flexShrink = 0;
+            logo.style.alignSelf = Align.Center;
+            return logo;
+        }
+
         public static HelpBox HelpBoxWithButton(string _message, HelpBoxMessageType _type, string _buttonText, string _tooltip, Action _clicked)
         {
             HelpBox box = new HelpBox(_message, _type);
@@ -168,11 +415,11 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             VisualElement header = new VisualElement();
             header.style.alignItems = Align.Center;
-            header.style.marginBottom = 14;
+            header.style.marginBottom = 16;
             Label title = new Label(_title);
-            title.style.fontSize = 22;
+            title.style.fontSize = 20;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            title.style.marginBottom = 4;
+            title.style.marginBottom = 6;
             header.Add(title);
             Label line = new Label(_line);
             line.enableRichText = true;
@@ -264,7 +511,7 @@ namespace AbstractPixel.SceneManagement.Editor
             return field;
         }
 
-        /// <summary>A reorderable list of scenes, each drawn by the scene field drawer.</summary>
+        /// <summary>A reorderable list of scenes numbered from 1, each drawn by the scene field drawer. Select a row and click − to remove it.</summary>
         public static ListView SceneList(SerializedObject _serializedObject, string _propertyName, string _title, string _tooltip)
         {
             SerializedProperty listProperty = _serializedObject.FindProperty(_propertyName);
@@ -276,6 +523,7 @@ namespace AbstractPixel.SceneManagement.Editor
             list.reorderable = true;
             list.reorderMode = ListViewReorderMode.Animated;
             list.showBoundCollectionSize = false;
+            list.selectionType = SelectionType.Single;
             list.virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;
             list.style.marginTop = 2;
             list.makeItem = () => new PropertyField();
@@ -284,7 +532,8 @@ namespace AbstractPixel.SceneManagement.Editor
                 PropertyField field = (PropertyField)_element;
                 SerializedProperty elementProperty = listProperty.GetArrayElementAtIndex(_index);
                 SerializedProperty sceneFieldProperty = elementProperty.FindPropertyRelative("scene");
-                field.label = "Scene " + _index;
+                int rowNumber = _index + 1;
+                field.label = rowNumber.ToString();
                 field.tooltip = _tooltip;
                 field.BindProperty(sceneFieldProperty);
             };

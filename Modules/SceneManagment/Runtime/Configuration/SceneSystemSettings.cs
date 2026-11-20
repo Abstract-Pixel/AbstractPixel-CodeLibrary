@@ -6,7 +6,7 @@ namespace AbstractPixel.SceneManagement
     /// <summary>
     /// The one scene system settings asset per project: the scene sets and the default one, where new scenes go,
     /// whether builds check scene groups, and the list of scene groups. It can live in any folder; the Editor finds it
-    /// by type and keeps it in Player Settings' Preloaded Assets. Edited in Project Settings &gt; Abstract Pixel &gt; Scenes.
+    /// by type and keeps it in Player Settings' Preloaded Assets. Edited in Project Settings &gt; Abstract Pixel &gt; Scene System.
     /// </summary>
     public class SceneSystemSettings : ScriptableObject
     {

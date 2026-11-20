@@ -26,6 +26,10 @@ _Avoid_: custom value, local change, exception
 The one asset per project that holds the scene sets, the default scene set, where new scenes go, whether builds check scene groups, and the list of scene groups. It can live in any folder.
 _Avoid_: boot profile, scene config, settings file
 
+**Scene System page**:
+The page in Project Settings where a project sets up its scene system and looks after it: the scene sets and the default one, where new scenes go, the checks before a build, and every scene group with its problems and their fixes. In the Editor it is titled "Scene System".
+_Avoid_: Scenes page, scene settings window, Check All Scene Groups
+
 **Manager scene**:
 A scene that opens once and stays open across scene changes, such as the scene holding audio and save managers.
 _Avoid_: managerial scene, boot scene, persistent scene

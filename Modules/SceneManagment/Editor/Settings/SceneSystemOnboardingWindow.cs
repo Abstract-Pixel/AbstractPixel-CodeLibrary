@@ -39,8 +39,8 @@ namespace AbstractPixel.SceneManagement.Editor
         public static void Open()
         {
             SceneSystemOnboardingWindow window = GetWindow<SceneSystemOnboardingWindow>(true, "Set up the scene system", true);
-            window.minSize = new Vector2(440, 380);
-            window.maxSize = new Vector2(660, 570);
+            window.minSize = new Vector2(460, 420);
+            window.maxSize = new Vector2(690, 630);
             window.Show();
         }
 
@@ -67,14 +67,14 @@ namespace AbstractPixel.SceneManagement.Editor
             VisualElement root = rootVisualElement;
             root.style.paddingLeft = 14;
             root.style.paddingRight = 14;
-            root.style.paddingTop = 12;
+            root.style.paddingTop = 16;
             root.style.paddingBottom = 10;
             root.Add(new SceneSystemSetupView(OnSetupDone));
 
             Toggle dontShow = new Toggle();
             dontShow.text = "Don't show again";
             dontShow.value = IsTurnedOff;
-            dontShow.tooltip = "For this project. Project Settings > Abstract Pixel > Scenes can turn it back on.";
+            dontShow.tooltip = "For this project. Project Settings > Abstract Pixel > Scene System can turn it back on.";
             dontShow.style.marginTop = 6;
             dontShow.style.fontSize = 10;
             dontShow.RegisterValueChangedCallback(_change => IsTurnedOff = _change.newValue);

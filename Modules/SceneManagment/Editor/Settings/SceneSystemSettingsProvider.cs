@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.IO;
+using System.Text;
 using AbstractPixel.Core.Editor;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -9,40 +9,80 @@ using UnityEngine.UIElements;
 namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
-    /// Project Settings &gt; Abstract Pixel &gt; Scenes, in UI Toolkit. Five sections in this order: Setup, Scene sets,
-    /// New scenes, Checks, Scene groups. It refreshes itself when scene groups, scene sets or the settings change.
+    /// The Scene System page (Project Settings &gt; Abstract Pixel &gt; Scene System), in UI Toolkit. Five sections in this
+    /// order: Setup, Scene sets, New scenes, Checks, Scene Groups Debugger. Explanations are in tooltips; names, values,
+    /// status and problems are always visible. It refreshes itself when scene groups, scene sets or the settings change,
+    /// and after Undo or Redo.
     /// </summary>
     public static class SceneSystemSettingsProvider
     {
-        public const string PagePath = "Project/Abstract Pixel/Scenes";
-        private const string CheckAllTooltip = "Opens a window listing every scene group in the project with its problems and their fixes.";
+        public const string PagePath = "Project/Abstract Pixel/Scene System";
+        public const string PageTitle = "Scene System";
+        public const string SetupSection = "Setup";
+        public const string SceneSetsSection = "Scene sets";
+        public const string NewScenesSection = "New scenes";
+        public const string ChecksSection = "Checks";
+        public const string DebuggerSection = SceneGroupsDebugger.Title;
 
         private static VisualElement pageRoot;
+        private static ScrollView pageScroll;
+        private static readonly Dictionary<string, VisualElement> sections = new Dictionary<string, VisualElement>();
         private static VisualElement setupCard;
         private static VisualElement setsCard;
-        private static VisualElement setsList;
-        private static VisualElement setEditor;
-        private static SceneSet editedSet;
         private static VisualElement newScenesCard;
         private static VisualElement checksCard;
-        private static VisualElement groupsCard;
-        private static SceneSet selectedSet;
-        private static bool groupsOpen;
+        private static VisualElement debuggerCard;
+        private static VisualElement debuggerSummary;
+        private static bool refreshQueued;
+        private static string pendingSection;
+
+        // Scene sets section state. The cards are rebuilt only when the sets, their names, paths, default or users change,
+        // so editing a set's scenes keeps the focus in its field.
+        private static string setsSignature;
+        private static string selectedSetGuid;
+        private static readonly HashSet<string> openSetGuids = new HashSet<string>();
+        private static readonly Dictionary<string, VisualElement> setCards = new Dictionary<string, VisualElement>();
+        private static Button removeSetButton;
+        private static Label removeSetBlocked;
 
         [SettingsProvider]
         public static SettingsProvider Create()
         {
             SettingsProvider provider = new SettingsProvider(PagePath, SettingsScope.Project);
-            provider.label = "Scenes";
-            provider.keywords = new HashSet<string> { "scene", "scene set", "scene group", "manager scene", "shared scene", "Addressables", "Build Settings", "Preloaded Assets", "migration" };
+            provider.label = PageTitle;
+            provider.keywords = new HashSet<string> { "scene", "scene system", "scene set", "scene group", "manager scene", "shared scene", "Addressables", "Build Settings", "Preloaded Assets", "migration", "debugger", "check" };
             provider.activateHandler = (_search, _root) => Activate(_root);
             provider.deactivateHandler = Deactivate;
             return provider;
         }
 
+        /// <summary>Opens Project Settings at the Scene System page.</summary>
         public static void Open()
         {
+            OpenAt(null);
+        }
+
+        /// <summary>Opens the Scene System page scrolled to the Scene Groups Debugger.</summary>
+        public static void OpenAtDebugger()
+        {
+            OpenAt(DebuggerSection);
+        }
+
+        /// <summary>Opens the Scene System page scrolled to the section with this title (the top when null).</summary>
+        public static void OpenAt(string _section)
+        {
+            pendingSection = _section;
             SettingsService.OpenProjectSettings(PagePath);
+            if (pageRoot != null)
+            {
+                ScrollToPendingSectionSoon();
+            }
+        }
+
+        /// <summary>True while the page is open in Project Settings.</summary>
+        public static bool IsOpen
+        {
+            get { return pageRoot != null; }
         }
 
         private static void Activate(VisualElement _root)
@@ -56,29 +96,65 @@ namespace AbstractPixel.SceneManagement.Editor
             page.style.paddingBottom = 16;
             _root.Add(scroll);
             pageRoot = page;
+            pageScroll = scroll;
+            sections.Clear();
+            setsSignature = null;
+            refreshQueued = false;
 
-            page.Add(SceneSystemUI.Title("Scenes", "How this project opens and switches scenes."));
-            setupCard = SceneSystemUI.Section(page, "Setup", "Where this page's settings are saved.");
-            setsCard = SceneSystemUI.Section(page, "Scene sets", "Scenes that come with every scene group using the set.");
-            setsList = new VisualElement();
-            setsCard.Add(setsList);
-            setEditor = new VisualElement();
-            setsCard.Add(setEditor);
-            editedSet = null;
-            newScenesCard = SceneSystemUI.Section(page, "New scenes", "Where scenes go so they load in a build.");
-            checksCard = SceneSystemUI.Section(page, "Checks", "Catch broken scene groups before they ship.");
-            groupsCard = SceneSystemUI.Section(page, "Scene groups", "Every scene group in the project.");
+            page.Add(SceneSystemUI.PageTitle(PageTitle, "How this project opens and switches scenes."));
+            setupCard = AddSection(page, SetupSection, "Where this page's settings are saved.");
+            setsCard = AddSection(page, SceneSetsSection, "Scenes that come with every scene group using the set. Click a scene set to select it; the + and − under the list add and delete scene sets.");
+            newScenesCard = AddSection(page, NewScenesSection, "Where scenes go so they load in a build.");
+            checksCard = AddSection(page, ChecksSection, "Catch broken scene groups before they ship.");
+            debuggerCard = SceneSystemUI.Section(page, DebuggerSection, SceneGroupsDebugger.Tooltip, out VisualElement debuggerHeader);
+            sections[DebuggerSection] = debuggerCard.parent;
+            debuggerSummary = new VisualElement();
+            debuggerHeader.Add(debuggerSummary);
+            debuggerHeader.Add(SceneSystemUI.Button("Check again", "Checks every scene group in the project again.", Refresh));
 
-            SceneSystemSettingsAssets.Changed += Refresh;
-            EditorBuildSettings.sceneListChanged += Refresh;
+            SceneSystemSettingsAssets.Changed += RequestRefresh;
+            EditorBuildSettings.sceneListChanged += RequestRefresh;
+            Undo.undoRedoPerformed += RequestRefresh;
             Refresh();
+            if (!string.IsNullOrEmpty(pendingSection))
+            {
+                ScrollToPendingSectionSoon();
+            }
+        }
+
+        private static VisualElement AddSection(VisualElement _page, string _title, string _tooltip)
+        {
+            VisualElement card = SceneSystemUI.Section(_page, _title, _tooltip);
+            sections[_title] = card.parent;
+            return card;
         }
 
         private static void Deactivate()
         {
-            SceneSystemSettingsAssets.Changed -= Refresh;
-            EditorBuildSettings.sceneListChanged -= Refresh;
+            SceneSystemSettingsAssets.Changed -= RequestRefresh;
+            EditorBuildSettings.sceneListChanged -= RequestRefresh;
+            Undo.undoRedoPerformed -= RequestRefresh;
             pageRoot = null;
+            pageScroll = null;
+            sections.Clear();
+            setCards.Clear();
+            removeSetButton = null;
+            removeSetBlocked = null;
+        }
+
+        // Many changes arrive together (a save, an import, Undo); they rebuild the page once, after the current event.
+        private static void RequestRefresh()
+        {
+            if (pageRoot == null || refreshQueued)
+            {
+                return;
+            }
+            refreshQueued = true;
+            pageRoot.schedule.Execute(() =>
+            {
+                refreshQueued = false;
+                Refresh();
+            });
         }
 
         private static void Refresh()
@@ -92,7 +168,34 @@ namespace AbstractPixel.SceneManagement.Editor
             FillSceneSets(settings);
             FillNewScenes(settings);
             FillChecks(settings);
-            FillSceneGroups(settings);
+            SceneGroupsDebugger.Fill(debuggerCard, debuggerSummary, settings, RequestRefresh);
+        }
+
+        private static void ScrollToPendingSectionSoon()
+        {
+            if (pageRoot == null)
+            {
+                return;
+            }
+            // The sections need a layout pass before their positions are known.
+            pageRoot.schedule.Execute(ScrollToPendingSection).ExecuteLater(50);
+        }
+
+        private static void ScrollToPendingSection()
+        {
+            string section = pendingSection;
+            pendingSection = null;
+            if (pageScroll == null)
+            {
+                return;
+            }
+            if (string.IsNullOrEmpty(section) || !sections.TryGetValue(section, out VisualElement target))
+            {
+                pageScroll.scrollOffset = Vector2.zero;
+                return;
+            }
+            float top = target.worldBound.yMin - pageScroll.contentContainer.worldBound.yMin;
+            pageScroll.scrollOffset = new Vector2(0, Mathf.Max(0, top - 6));
         }
 
         private static void FillSetup(SceneSystemSettings _settings)
@@ -189,109 +292,320 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static void FillSceneSets(SceneSystemSettings _settings)
         {
-            setsList.Clear();
-            if (_settings == null)
+            string signature = SceneSetsSignature(_settings);
+            if (signature == setsSignature)
             {
-                setsList.Add(SceneSystemUI.Hint("Available once the scene system is set up."));
-                selectedSet = null;
-                FillSetEditor();
+                RefreshSetSelection();
                 return;
             }
-            if (_settings.SceneSets.Count == 0)
+            setsSignature = signature;
+            setsCard.Clear();
+            setCards.Clear();
+            removeSetButton = null;
+            removeSetBlocked = null;
+            if (_settings == null)
             {
-                setsList.Add(SceneSystemUI.StatusRow(SceneSystemUI.Yellow, "No scene sets yet.", string.Empty));
+                setsCard.Add(SceneSystemUI.Hint("Available once the scene system is set up."));
+                return;
+            }
+
+            List<SceneSet> sets = ListedSets(_settings);
+            if (sets.Count == 0)
+            {
+                setsCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Yellow, "No scene sets yet. Click + to make one.", string.Empty));
             }
             else if (_settings.DefaultSceneSet == null)
             {
-                setsList.Add(SceneSystemUI.StatusRow(SceneSystemUI.Yellow, "No default scene set: a new scene group starts without one. Pick a default below.", string.Empty));
+                setsCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Yellow, "No default scene set: a new scene group starts without one. Click Make default on a scene set.", string.Empty));
             }
 
-            if (selectedSet != null && !_settings.SceneSets.Contains(selectedSet))
+            bool selectionStillListed = false;
+            int number = 1;
+            foreach (SceneSet set in sets)
             {
-                selectedSet = null;
+                string guid = GuidOf(set);
+                if (guid == selectedSetGuid)
+                {
+                    selectionStillListed = true;
+                }
+                setsCard.Add(SceneSetCard(_settings, set, number, guid));
+                number++;
             }
+            if (!selectionStillListed)
+            {
+                selectedSetGuid = null;
+            }
+            setsCard.Add(SetsFooter(_settings));
+            RefreshSetSelection();
+        }
+
+        private static List<SceneSet> ListedSets(SceneSystemSettings _settings)
+        {
+            List<SceneSet> sets = new List<SceneSet>();
             foreach (SceneSet set in _settings.SceneSets)
             {
-                if (set == null)
+                if (set != null)
                 {
-                    continue;
+                    sets.Add(set);
                 }
-                setsList.Add(SceneSetRow(_settings, set));
             }
-
-            Button newSet = SceneSystemUI.Button("New scene set", "Creates a scene set next to the settings asset and opens it below for editing.", () => CreateSceneSet(_settings));
-            newSet.style.marginTop = 6;
-            newSet.style.alignSelf = Align.FlexStart;
-            setsList.Add(newSet);
-            FillSetEditor();
+            return sets;
         }
 
-        private static VisualElement SceneSetRow(SceneSystemSettings _settings, SceneSet _set)
+        // Everything the cards show apart from the scenes (which are bound): sets, names, paths, default and users.
+        private static string SceneSetsSignature(SceneSystemSettings _settings)
         {
-            VisualElement row = SceneSystemUI.Row();
-            row.style.marginTop = 2;
-            row.style.marginBottom = 2;
-
-            Label name = new Label(_set.name);
-            name.style.width = 160;
-            name.style.unityFontStyleAndWeight = _set == selectedSet ? FontStyle.Bold : FontStyle.Normal;
-            name.tooltip = AssetDatabase.GetAssetPath(_set);
-            row.Add(name);
-
-            VisualElement defaultCell = new VisualElement();
-            defaultCell.style.width = 110;
-            if (_settings.DefaultSceneSet == _set)
+            if (_settings == null)
             {
-                defaultCell.Add(SceneSystemUI.Badge("Default", true, "New scene groups start with this scene set."));
-                defaultCell.style.alignItems = Align.FlexStart;
+                return "no settings";
             }
-            else
+            StringBuilder signature = new StringBuilder();
+            foreach (SceneSet set in ListedSets(_settings))
             {
-                defaultCell.Add(SceneSystemUI.Button("Make default", "New scene groups will start with this scene set.", () =>
+                signature.Append(GuidOf(set)).Append('|').Append(set.name).Append('|').Append(AssetDatabase.GetAssetPath(set));
+                if (_settings.DefaultSceneSet == set)
                 {
-                    _settings.DefaultSceneSet = _set;
-                    SceneSystemSettingsAssets.Save(_settings);
-                }));
+                    signature.Append("|default");
+                }
+                foreach (SceneGroup group in SceneSetSync.GroupsUsing(set))
+                {
+                    signature.Append('|').Append(group.name);
+                }
+                signature.Append('\n');
             }
-            row.Add(defaultCell);
-
-            int users = SceneSetSync.GroupsUsing(_set).Count;
-            Label usage = SceneSystemUI.Hint(users + " groups");
-            usage.style.flexGrow = 1;
-            usage.style.flexShrink = 1;
-            row.Add(usage);
-
-            Button select = SceneSystemUI.Button("Select", "Shows this scene set's scenes below for editing, and selects the asset in the Project window.", () =>
-            {
-                selectedSet = _set;
-                EditorGUIUtility.PingObject(_set);
-                Refresh();
-            });
-            row.Add(select);
-            return row;
+            return signature.ToString();
         }
 
-        // Rebuilt only when another set is selected, so editing a set (which refreshes the page) keeps its focus.
-        private static void FillSetEditor()
+        private static string GuidOf(Object _asset)
         {
-            if (selectedSet == editedSet)
+            string path = AssetDatabase.GetAssetPath(_asset);
+            return AssetDatabase.AssetPathToGUID(path);
+        }
+
+        // Collapsed: number, name, path, Make default (or "Chosen default scene set") and "N groups".
+        // Expanded: manager scenes, shared scenes, Reset shared scenes, and the scene groups using the set.
+        private static VisualElement SceneSetCard(SceneSystemSettings _settings, SceneSet _set, int _number, string _guid)
+        {
+            bool isDefault = _settings.DefaultSceneSet == _set;
+            List<SceneGroup> users = SceneSetSync.GroupsUsing(_set);
+            VisualElement card = SceneSystemUI.SetCard(isDefault);
+            card.RegisterCallback<PointerDownEvent>(_event => SelectSet(_guid), TrickleDown.TrickleDown);
+            setCards[_guid] = card;
+
+            bool isOpen = openSetGuids.Contains(_guid);
+            VisualElement body = new VisualElement();
+            body.style.marginLeft = 16;
+            body.style.marginTop = 2;
+            body.style.marginBottom = 4;
+            body.style.display = isOpen ? DisplayStyle.Flex : DisplayStyle.None;
+            if (isOpen)
+            {
+                FillSetBody(body, _set, users);
+            }
+
+            VisualElement header = SceneSystemUI.Row();
+            Foldout foldout = new Foldout();
+            foldout.text = _number + "   " + _set.name;
+            foldout.value = isOpen;
+            foldout.tooltip = "Changes to a scene set reach every scene group using it, except the parts a group overrides. Click to show its scenes.";
+            foldout.style.width = 190;
+            foldout.style.flexShrink = 0;
+            foldout.contentContainer.style.display = DisplayStyle.None;
+            Label foldoutText = foldout.Q<Label>(className: Toggle.textUssClassName);
+            if (foldoutText != null)
+            {
+                foldoutText.style.unityFontStyleAndWeight = FontStyle.Bold;
+                foldoutText.style.overflow = Overflow.Hidden;
+                foldoutText.style.textOverflow = TextOverflow.Ellipsis;
+                foldoutText.style.flexShrink = 1;
+            }
+            SceneSystemUI.AddHoverTint(foldout.Q<Toggle>());
+            foldout.RegisterValueChangedCallback(_change =>
+            {
+                if (_change.target != foldout)
+                {
+                    return;
+                }
+                OnSetCardToggled(_guid, _change.newValue, body, _set, users);
+            });
+            header.Add(foldout);
+
+            Label path = SceneSystemUI.AssetPathField(_set);
+            path.style.flexGrow = 1;
+            path.style.flexShrink = 1;
+            path.style.minWidth = 60;
+            path.style.marginLeft = 4;
+            path.style.marginRight = 8;
+            header.Add(path);
+
+            header.Add(DefaultCell(_settings, _set, isDefault));
+
+            Label usage = SceneSystemUI.Hint(users.Count + " groups");
+            usage.tooltip = "How many scene groups use this scene set. Open the card to list them.";
+            usage.style.width = 62;
+            usage.style.flexShrink = 0;
+            usage.style.unityTextAlign = TextAnchor.MiddleRight;
+            header.Add(usage);
+
+            card.Add(header);
+            card.Add(body);
+            return card;
+        }
+
+        private static VisualElement DefaultCell(SceneSystemSettings _settings, SceneSet _set, bool _isDefault)
+        {
+            VisualElement cell = new VisualElement();
+            cell.style.width = 160;
+            cell.style.flexShrink = 0;
+            cell.style.alignItems = Align.FlexStart;
+            if (_isDefault)
+            {
+                Label chosen = SceneSystemUI.Badge("Chosen default scene set", false, "New scene groups start with this scene set.");
+                chosen.style.marginLeft = 3;
+                cell.Add(chosen);
+                return cell;
+            }
+            Button makeDefault = SceneSystemUI.Button("Make default", "New scene groups will start with this scene set.", () =>
+            {
+                _settings.DefaultSceneSet = _set;
+                SceneSystemSettingsAssets.Save(_settings);
+            });
+            cell.Add(makeDefault);
+            return cell;
+        }
+
+        private static void OnSetCardToggled(string _guid, bool _isOpen, VisualElement _body, SceneSet _set, List<SceneGroup> _users)
+        {
+            if (_isOpen)
+            {
+                openSetGuids.Add(_guid);
+                if (_body.childCount == 0)
+                {
+                    FillSetBody(_body, _set, _users);
+                }
+                _body.style.display = DisplayStyle.Flex;
+                return;
+            }
+            openSetGuids.Remove(_guid);
+            _body.style.display = DisplayStyle.None;
+        }
+
+        private static void FillSetBody(VisualElement _body, SceneSet _set, List<SceneGroup> _users)
+        {
+            _body.Add(SceneSystemUI.SceneSetFields(new SerializedObject(_set)));
+
+            Foldout usersFoldout = new Foldout();
+            usersFoldout.text = "Scene groups using this set (" + _users.Count + ")";
+            usersFoldout.tooltip = "Every scene group whose scene set is this one. Click a name to select it.";
+            usersFoldout.value = false;
+            usersFoldout.style.marginTop = 6;
+            if (_users.Count == 0)
+            {
+                usersFoldout.Add(SceneSystemUI.Hint("No scene group uses this set."));
+            }
+            foreach (SceneGroup group in _users)
+            {
+                Label link = SceneSystemUI.AssetLink(group, group.name);
+                link.style.marginTop = 1;
+                link.style.marginBottom = 1;
+                link.style.alignSelf = Align.FlexStart;
+                usersFoldout.Add(link);
+            }
+            _body.Add(usersFoldout);
+        }
+
+        private static VisualElement SetsFooter(SceneSystemSettings _settings)
+        {
+            VisualElement footer = SceneSystemUI.Row();
+            footer.style.marginTop = 2;
+            removeSetBlocked = SceneSystemUI.Hint(string.Empty);
+            removeSetBlocked.style.flexGrow = 1;
+            removeSetBlocked.style.flexShrink = 1;
+            removeSetBlocked.style.marginRight = 8;
+            footer.Add(removeSetBlocked);
+            VisualElement buttons = SceneSystemUI.AddRemoveFooter(
+                "Makes a new scene set next to the settings asset.", () => CreateSceneSet(_settings),
+                "Deletes the selected scene set, after asking. A scene set that scene groups use can't be deleted.", () => DeleteSelectedSet(_settings),
+                out Button remove);
+            removeSetButton = remove;
+            footer.Add(buttons);
+            return footer;
+        }
+
+        private static void SelectSet(string _guid)
+        {
+            if (selectedSetGuid == _guid)
             {
                 return;
             }
-            editedSet = selectedSet;
-            setEditor.Clear();
-            if (selectedSet == null)
+            selectedSetGuid = _guid;
+            RefreshSetSelection();
+        }
+
+        // The selected card's background, and the − button: enabled only for a selected set that no scene group uses.
+        private static void RefreshSetSelection()
+        {
+            foreach (KeyValuePair<string, VisualElement> card in setCards)
+            {
+                SceneSystemUI.ShowSelected(card.Value, card.Key == selectedSetGuid);
+            }
+            if (removeSetButton == null || removeSetBlocked == null)
             {
                 return;
             }
-            VisualElement card = SceneSystemUI.Card();
-            card.style.marginTop = 8;
-            Label title = new Label("Scene set '" + selectedSet.name + "'");
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            card.Add(title);
-            card.Add(SceneSystemUI.Hint("Changes reach every group using this set, except its overrides."));
-            card.Add(SceneSystemUI.SceneSetFields(new SerializedObject(selectedSet)));
-            setEditor.Add(card);
+            SceneSet selected = SelectedSet();
+            if (selected == null)
+            {
+                removeSetButton.SetEnabled(false);
+                removeSetBlocked.text = string.Empty;
+                return;
+            }
+            bool canDelete = SceneSetDeletion.CanDelete(selected, out string reason);
+            removeSetButton.SetEnabled(canDelete);
+            removeSetBlocked.text = reason;
+        }
+
+        private static SceneSet SelectedSet()
+        {
+            if (string.IsNullOrEmpty(selectedSetGuid))
+            {
+                return null;
+            }
+            string path = AssetDatabase.GUIDToAssetPath(selectedSetGuid);
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+            return AssetDatabase.LoadAssetAtPath<SceneSet>(path);
+        }
+
+        private static void DeleteSelectedSet(SceneSystemSettings _settings)
+        {
+            SceneSet set = SelectedSet();
+            if (set == null)
+            {
+                return;
+            }
+            if (!SceneSetDeletion.CanDelete(set, out string _))
+            {
+                RefreshSetSelection();
+                return;
+            }
+            string path = AssetDatabase.GetAssetPath(set);
+            string message = "Delete scene set '" + set.name + "'? It moves to your system's trash.\n\n" + path;
+            if (_settings.DefaultSceneSet == set)
+            {
+                message += "\n\nIt is the default scene set, so new scene groups will start without one until you pick another default.";
+            }
+            bool confirmed = EditorUtility.DisplayDialog("Delete scene set", message, "Delete", "Cancel");
+            if (!confirmed)
+            {
+                return;
+            }
+            SceneSetDeletion.Delete(_settings, set);
+            openSetGuids.Remove(selectedSetGuid);
+            selectedSetGuid = null;
+            SceneSystemSettingsAssets.NotifyChanged();
         }
 
         private static void CreateSceneSet(SceneSystemSettings _settings)
@@ -301,7 +615,9 @@ namespace AbstractPixel.SceneManagement.Editor
             SceneSet set = ScriptableObject.CreateInstance<SceneSet>();
             AssetDatabase.CreateAsset(set, path);
             _settings.SceneSets.Add(set);
-            selectedSet = set;
+            string guid = AssetDatabase.AssetPathToGUID(path);
+            selectedSetGuid = guid;
+            openSetGuids.Add(guid);
             SceneSystemSettingsAssets.Save(_settings);
             Debug.Log("[Scene system] Created scene set '" + set.name + "' at " + path + ".", set);
         }
@@ -377,128 +693,6 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 checksCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Red, problemCount + " problem(s) in " + problemsByGroup.Count + " of " + groupCount + " scene group(s).", string.Empty));
             }
-            Button checkAll = SceneSystemUI.Button("Check All Scene Groups", CheckAllTooltip, CheckAllSceneGroupsWindow.Open);
-            checkAll.style.alignSelf = Align.FlexStart;
-            checksCard.Add(checkAll);
-        }
-
-        private static void FillSceneGroups(SceneSystemSettings _settings)
-        {
-            groupsCard.Clear();
-            List<SceneGroup> groups = SceneGroupAssets.FindAll();
-            SceneGroupMigrationPlan plan = SceneGroupMigration.Plan(groups);
-            if (_settings != null && plan.HasWork)
-            {
-                groupsCard.Add(MigrationBox(_settings, plan));
-            }
-
-            Foldout list = new Foldout();
-            list.text = "Scene groups (" + groups.Count + ")";
-            list.value = groupsOpen;
-            list.RegisterValueChangedCallback(_change =>
-            {
-                if (_change.target == list)
-                {
-                    groupsOpen = _change.newValue;
-                }
-            });
-            list.Add(GroupHeaderRow());
-            foreach (SceneGroup group in groups)
-            {
-                list.Add(GroupRow(group));
-            }
-            groupsCard.Add(list);
-
-            Button checkAll = SceneSystemUI.Button("Check All Scene Groups", CheckAllTooltip, CheckAllSceneGroupsWindow.Open);
-            checkAll.style.alignSelf = Align.FlexStart;
-            checkAll.style.marginTop = 6;
-            groupsCard.Add(checkAll);
-        }
-
-        private static VisualElement MigrationBox(SceneSystemSettings _settings, SceneGroupMigrationPlan _plan)
-        {
-            VisualElement box = new VisualElement();
-            box.style.marginBottom = 8;
-            string message = _plan.GroupsToMigrateCount + " scene groups have no scene set yet. Organize them into: " + string.Join(", ", _plan.SetNames) + ".";
-            box.Add(new HelpBox(message, HelpBoxMessageType.Info));
-            VisualElement buttons = SceneSystemUI.Row();
-            buttons.Add(SceneSystemUI.Button("Preview migration", "Writes the migration report next to the settings asset without changing anything.", () => RunMigration(_settings, true)));
-            buttons.Add(SceneSystemUI.Button("Migrate", "Makes the scene sets and points each scene group at its set. Every group keeps every scene. A report lists each group before and after.", () => RunMigration(_settings, false)));
-            box.Add(buttons);
-            return box;
-        }
-
-        private static void RunMigration(SceneSystemSettings _settings, bool _isPreview)
-        {
-            string reportPath = SceneGroupMigration.Run(_settings, _isPreview, null, null);
-            SceneSystemSettingsAssets.RefreshLists(_settings);
-            SceneSystemSettingsAssets.NotifyChanged();
-            EditorGUIUtility.PingObject(AssetDatabase.LoadMainAssetAtPath(reportPath));
-        }
-
-        private static VisualElement GroupHeaderRow()
-        {
-            VisualElement row = GroupRowLayout("Scene group", "Main scene", "Scene set", "Problems");
-            foreach (Label label in row.Query<Label>().ToList())
-            {
-                label.style.unityFontStyleAndWeight = FontStyle.Bold;
-            }
-            return row;
-        }
-
-        private static VisualElement GroupRow(SceneGroup _group)
-        {
-            string mainScene = SceneGroupMigration.HasMainScene(_group) ? _group.MainScene.SceneName : "(none)";
-            string set = _group.SceneSet != null ? _group.SceneSet.name : "—";
-            int problemCount = SceneGroupCheck.Find(_group).Count;
-            VisualElement row = GroupRowLayout(_group.name, mainScene, set, string.Empty);
-            row.tooltip = AssetDatabase.GetAssetPath(_group);
-
-            VisualElement problems = row.Q<VisualElement>("problems");
-            Color colour = problemCount == 0 ? SceneSystemUI.Green : SceneSystemUI.Red;
-            string text = problemCount == 0 ? "None" : problemCount.ToString();
-            if (problemCount == 0 && SceneGroupCheck.IsBootGroup(_group))
-            {
-                colour = SceneSystemUI.Yellow;
-                text = "Boot group, unused";
-            }
-            problems.Add(SceneSystemUI.StatusRow(colour, text, string.Empty));
-
-            row.Add(SceneSystemUI.Button("Select", "Selects this scene group and shows it in the Inspector.", () =>
-            {
-                Selection.activeObject = _group;
-                EditorGUIUtility.PingObject(_group);
-            }));
-            return row;
-        }
-
-        private static VisualElement GroupRowLayout(string _group, string _mainScene, string _set, string _problems)
-        {
-            VisualElement row = SceneSystemUI.Row();
-            row.style.marginTop = 1;
-            row.style.marginBottom = 1;
-            row.Add(Cell(_group, 190));
-            row.Add(Cell(_mainScene, 150));
-            row.Add(Cell(_set, 110));
-            VisualElement problems = new VisualElement();
-            problems.name = "problems";
-            problems.style.width = 150;
-            if (!string.IsNullOrEmpty(_problems))
-            {
-                problems.Add(new Label(_problems));
-            }
-            row.Add(problems);
-            row.Add(SceneSystemUI.Spacer());
-            return row;
-        }
-
-        private static Label Cell(string _text, float _width)
-        {
-            Label cell = new Label(_text);
-            cell.style.width = _width;
-            cell.style.overflow = Overflow.Hidden;
-            cell.style.textOverflow = TextOverflow.Ellipsis;
-            return cell;
         }
     }
 }
