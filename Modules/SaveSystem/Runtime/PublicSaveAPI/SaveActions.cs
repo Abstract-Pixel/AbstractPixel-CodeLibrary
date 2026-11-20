@@ -16,6 +16,12 @@ namespace AbstractPixel.SaveSystem
             SaveManager.Instance.SaveDataOf(_category);
         }
 
+        /// <summary>Saves the category a couple of frames from now; requests in between become one save.</summary>
+        public static void SaveDataOfDeferred(SaveCategory _category)
+        {
+            SaveManager.Instance.SaveDataOfDeferred(_category);
+        }
+
         public static void SaveDataOfScope(SaveScope _scope)
         {
             SaveManager.Instance.SaveAllDataByScope(_scope);

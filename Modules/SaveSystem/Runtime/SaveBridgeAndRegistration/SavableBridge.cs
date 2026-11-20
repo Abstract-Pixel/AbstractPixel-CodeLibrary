@@ -195,6 +195,25 @@ namespace AbstractPixel.SaveSystem
             return combinedCapturedDataMap;
         }
 
+        public Dictionary<string, Type> GetRestoreTypes(SaveCategory _categoryFilter)
+        {
+            Dictionary<string, Type> typesByGuid = new Dictionary<string, Type>();
+            if (savableTargetsRegistry == null || !savableTargetsRegistry.TryGetValue(_categoryFilter, out List<SavableTarget> targetsList))
+            {
+                return typesByGuid;
+            }
+
+            foreach (SavableTarget target in targetsList)
+            {
+                bool hasGuid = target.Identification != null && !string.IsNullOrEmpty(target.Identification.GUID);
+                if (hasGuid && target.DataToSaveType != null)
+                {
+                    typesByGuid[target.Identification.GUID] = target.DataToSaveType;
+                }
+            }
+            return typesByGuid;
+        }
+
         public void RestoreState(object data, SaveCategory categoryFilter)
         {
             Dictionary<string, object> combinedCapturedDataMap = SaveDataConverter.Convert<Dictionary<string, object>>(data);
