@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 Save A Field - Save System Samples</title>
+<meta name="description" content="The daily way to save: [Save] on a field of a MonoBehaviour, and on a plain C# class that calls SaveActions.Register(this).">
+<link rel="stylesheet" href="../../Documentation/assets/docs.css">
+</head>
+<body data-root="../../Documentation/">
+<main class="solo">
+<p class="crumbs"><a href="../../Documentation/index.html">Save System</a> › <a href="../README.html">Samples</a> › 01</p>
+<h1>01 Save A Field <span class="lv lv1">1 daily code</span></h1>
+<p class="lede">The daily way to save. Put <code><a class="type" href="../../Documentation/api/SaveAttribute.html">[Save]</a></code> on a field. On a MonoBehaviour that's all. A plain C# class also calls <code><a class="term" href="../../Documentation/api/SaveActions.html">SaveActions</a>.Register(this)</code>.</p>
+<dl>
+<dt>Scene</dt><dd>Save A Field</dd>
+<dt>Scripts</dt><dd>Health.cs, Backpack.cs, HealthBar.cs, SaveAFieldScreen.cs</dd>
+<dt>Save file</dt><dd>Built-in <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">GameProfile</a> (nothing to add to the config)</dd>
+<dt>Guide</dt><dd><a href="../../Documentation/Pages/save-data.html#field">Save a field on a script</a></dd>
+</dl>
+
+<h2>Try it</h2>
+<ol>
+<li><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity">Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity</button> opens the scene in Unity, then press Play.</li>
+<li>Press <b>Take 10 damage</b> a few times and <b>Find an item</b> once or twice, then <b>Save</b>.</li>
+<li>Press <b>Reload scene</b>, or stop and press Play again.</li>
+</ol>
+<div class="see"><strong>You should see</strong>The health and the backpack come back. "Health read in Start" shows the saved health, not 100.</div>
+
+<h2>The lines that matter</h2>
+<figure class="code">
+<figcaption>Health.cs, Backpack.cs, SaveAFieldScreen.cs</figcaption>
+<pre data-source="Scripts/Health.cs Scripts/Backpack.cs Scripts/SaveAFieldScreen.cs"><code>[Save] int current = Max;                           // Health, a MonoBehaviour: the Savable Bridge saves it
+[Save] List&lt;string&gt; items = new List&lt;string&gt; { "Wooden Sword" };  // Backpack, a plain C# class...
+SaveActions.Register(this);                         // ...registers itself on the last line of its constructor
+SaveActions.Unregister(Backpack);                   // its owner unregisters it when the scene ends</code></pre>
+</figure>
+<p>The <b><a class="term" href="../../Documentation/api/SavableBridge.html#savable-bridge">Savable Bridge</a></b> on the Player connects <code>Health</code> to the save system. The editor adds it for you when a script has a <code>[Save]</code> field. The value a field starts with is its new-game value. Saved data is restored after every <code>Awake</code> and before any <code>Start</code>, so don't reset a saved field in <code>Start</code>.</p>
+
+<h2>Next steps</h2>
+<ul>
+<li>A pickup that should stay gone: <code>SaveActions.Forget(gameObject); Destroy(gameObject);</code>, or the <b>Save Destroyed</b> component in sample 02.</li>
+<li>Renaming a saved field: <code>[Save(Formerly = "hp")] int health;</code> keeps the old data.</li>
+<li>Renaming a class registered with <code>Register(this)</code>: put <code>[SaveId("Backpack")]</code> on it first.</li>
+<li>Saving into another file: sample 04. Data that isn't plain fields: sample 06.</li>
+</ul>
+
+<nav>
+<a href="../README.html">All samples</a>
+<a href="../../Documentation/index.html">Save system guide</a>
+<a href="../02%20Buttons%20With%20No%20Code/README.html">02 Buttons With No Code →</a>
+</nav>
+<p class="crumbs">The guide also opens from <b>Tools &gt; External Project Tools &gt; Save System &gt; Open Guide</b>.</p>
+</main>
+<script src="../../Documentation/assets/glossary-data.js" defer></script>
+<script src="../../Documentation/assets/docs.js"></script>
+</body>
+</html>

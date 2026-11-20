@@ -1,0 +1,1502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Code map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Every script in the save system, grouped by folder: its job, its file path, when to use it, and for every public type, a link to its own page.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/code-map.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Code map</h1>
+<p class="lede">Every script under <code>Runtime</code> and <code>Editor</code>, grouped by folder: its job, its file path, and when you'd touch it yourself.</p>
+<p id="saved-object">A <strong>saved object</strong> is anything whose data the save system captures and restores: a MonoBehaviour, a plain C# class or a ScriptableObject.</p>
+<p id="saved-script">A <strong>saved script</strong> is a MonoBehaviour with saved fields or <a class="term" href="../api/ISavable.html">ISavable</a>. Each saved script on a GameObject is its own saved object with its own <a class="term" href="../api/SavableBridge.html#save-id">save ID</a>, and the GameObject's <a class="term" href="../api/SavableBridge.html#savable-bridge">Savable Bridge</a> connects them all. A GameObject can hold any number of saved scripts, including two of the same script.</p>
+
+<section id="map">
+<h2>How the parts fit together<a class="anchor" href="#map">#</a></h2>
+<figure class="pic">
+<svg class="map-diagram" viewBox="0 0 760 620" role="img" aria-labelledby="map-title">
+<title id="map-title">PublicAPI, SavedObjects, Config and GameProfiles all feed Core, which reads and writes through Storage and Serialization to files on disk. Scenes signals Core when a scene is ready. Editor tools sit beside Runtime and generate or check its files. Hover or focus a box to trace its connections; click one to jump to that folder below.</title>
+<g class="map-node drill-toggle" data-node="publicapi" tabindex="0" role="button" aria-expanded="false" aria-label="Runtime/PublicAPI: click to see how its parts connect"><rect class="svg-box" x="20" y="20" width="150" height="56" rx="8"/><text class="svg-h" x="34" y="44">PublicAPI</text><text class="svg-m" x="34" y="62">SaveActions, [Save]</text></g>
+<g class="map-node drill-toggle" data-node="savedobjects" tabindex="0" role="button" aria-expanded="false" aria-label="Runtime/SavedObjects: click to see how its parts connect"><rect class="svg-box" x="20" y="100" width="150" height="56" rx="8"/><text class="svg-h" x="34" y="124">SavedObjects</text><text class="svg-m" x="34" y="142">Savable Bridge</text></g>
+<g class="map-node drill-toggle" data-node="config" tabindex="0" role="button" aria-expanded="false" aria-label="Runtime/Config: click to see how its parts connect"><rect class="svg-box" x="20" y="180" width="150" height="56" rx="8"/><text class="svg-h" x="34" y="204">Config</text><text class="svg-m" x="34" y="222">the config asset</text></g>
+<g class="map-node drill-toggle" data-node="gameprofiles" tabindex="0" role="button" aria-expanded="false" aria-label="Runtime/GameProfiles: click to see how its parts connect"><rect class="svg-box" x="20" y="260" width="150" height="56" rx="8"/><text class="svg-h" x="34" y="284">GameProfiles</text><text class="svg-m" x="34" y="302">slots, Continue</text></g>
+<g class="map-node drill-toggle" data-node="core" tabindex="0" role="button" aria-expanded="false" aria-label="Runtime/Core: click to see how its parts connect"><rect class="svg-key" x="280" y="140" width="150" height="56" rx="8"/><text class="svg-h" x="294" y="164">Core</text><text class="svg-m" x="294" y="182">session, registry</text></g>
+<g class="map-node drill-toggle" data-node="scenes" tabindex="0" role="button" aria-expanded="false" aria-label="Runtime/Scenes: click to see how its parts connect"><rect class="svg-box" x="280" y="20" width="150" height="56" rx="8"/><text class="svg-h" x="294" y="44">Scenes</text><text class="svg-m" x="294" y="62">ready signal</text></g>
+<g class="map-node drill-toggle" data-node="storage" tabindex="0" role="button" aria-expanded="false" aria-label="Runtime/Storage: click to see how its parts connect"><rect class="svg-box" x="530" y="140" width="100" height="56" rx="8"/><text class="svg-h" x="544" y="164">Storage</text><text class="svg-m" x="544" y="182">keys, backups</text></g>
+<g class="map-node drill-toggle" data-node="serialization" tabindex="0" role="button" aria-expanded="false" aria-label="Runtime/Serialization: click to see how its parts connect"><rect class="svg-box" x="530" y="220" width="100" height="56" rx="8"/><text class="svg-h" x="544" y="244">Serialization</text><text class="svg-m" x="544" y="262">JSON</text></g>
+<g class="map-node" data-node="disk" aria-label="Save files on disk"><rect class="svg-file" x="680" y="180" width="60" height="56" rx="8"/><text class="svg-m" x="690" y="212">disk</text></g>
+<g class="map-node drill-toggle" data-node="editor" tabindex="0" role="button" aria-expanded="false" aria-label="Editor: click to see how its parts connect"><rect class="svg-box" x="280" y="320" width="400" height="70" rx="8"/><text class="svg-h" x="296" y="346">Editor</text><text class="svg-m" x="296" y="366">generates and checks the files above, in play mode and at build time</text></g>
+<path class="svg-arrow map-edge" data-from="publicapi" data-to="scenes" d="M170 48 H270" marker-end="url(#map-arrow)"/>
+<path class="svg-arrow map-edge" data-from="savedobjects" data-to="core" d="M170 128 C 230 128, 230 160, 276 163" marker-end="url(#map-arrow)"/>
+<path class="svg-arrow map-edge" data-from="config" data-to="core" d="M170 208 C 230 208, 230 172, 276 168" marker-end="url(#map-arrow)"/>
+<path class="svg-arrow map-edge" data-from="gameprofiles" data-to="core" d="M170 288 C 240 288, 240 180, 276 170" marker-end="url(#map-arrow)"/>
+<path class="svg-arrow map-edge" data-from="scenes" data-to="core" d="M355 76 V134" marker-end="url(#map-arrow)"/>
+<path class="svg-arrow map-edge" data-from="core" data-to="storage" d="M430 160 H524" marker-end="url(#map-arrow)"/>
+<path class="svg-arrow map-edge" data-from="storage" data-to="serialization" d="M580 196 V214" marker-end="url(#map-arrow)"/>
+<path class="svg-arrow map-edge" data-from="serialization" data-to="disk" d="M630 248 H676" marker-end="url(#map-arrow)"/>
+<defs>
+<marker id="map-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+<marker id="drill-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+</defs>
+<g class="drill" data-for="core" hidden>
+<g class="map-node"><rect class="svg-key" x="270" y="440" width="220" height="50" rx="8"/><text class="svg-h" x="380" y="461" text-anchor="middle">SaveSession</text><text class="svg-m" x="380" y="479" text-anchor="middle">the running session</text></g>
+<path class="svg-arrow" d="M380 490 C 380 515, 140.0 525, 140.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 260.0 525, 260.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 380.0 525, 380.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 500.0 525, 500.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 620.0 525, 620.0 550" marker-end="url(#drill-arrow)"/>
+<a class="map-node" href="#runtime-core"><rect class="svg-box" x="85.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="140.0" y="578" text-anchor="middle">SaveRegistry</text></a>
+<a class="map-node" href="#runtime-core"><rect class="svg-box" x="205.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="260.0" y="578" text-anchor="middle">SavedObjectTracker</text></a>
+<a class="map-node" href="#runtime-core"><rect class="svg-box" x="325.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="380.0" y="578" text-anchor="middle">LoadedSaveData</text></a>
+<a class="map-node" href="#runtime-core"><rect class="svg-box" x="445.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="500.0" y="578" text-anchor="middle">SaveStartup</text></a>
+<a class="map-node" href="../api/SaveEventBus.html"><rect class="svg-box" x="565.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="620.0" y="578" text-anchor="middle">SaveEventBus</text></a>
+</g>
+<g class="drill" data-for="publicapi" hidden>
+<a class="map-node" href="../api/SaveActions.html"><rect class="svg-key" x="270" y="440" width="220" height="50" rx="8"/><text class="svg-h" x="380" y="461" text-anchor="middle">SaveActions</text><text class="svg-m" x="380" y="479" text-anchor="middle">the daily API</text></a>
+<path class="svg-arrow" d="M380 490 C 380 515, 80.0 525, 80.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 200.0 525, 200.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 320.0 525, 320.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 440.0 525, 440.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 560.0 525, 560.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 680.0 525, 680.0 550" marker-end="url(#drill-arrow)"/>
+<a class="map-node" href="../api/SaveAttribute.html"><rect class="svg-box" x="25.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="80.0" y="578" text-anchor="middle">[Save] attribute</text></a>
+<a class="map-node" href="../api/ISavable.html"><rect class="svg-box" x="145.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="200.0" y="578" text-anchor="middle">ISavable</text></a>
+<a class="map-node" href="../api/ISaveIn.html"><rect class="svg-box" x="265.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="320.0" y="578" text-anchor="middle">ISaveIn</text></a>
+<a class="map-node" href="../api/IOnRestored.html"><rect class="svg-box" x="385.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="440.0" y="578" text-anchor="middle">IOnRestored</text></a>
+<a class="map-node" href="../api/SaveEventBus.html"><rect class="svg-box" x="505.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="560.0" y="578" text-anchor="middle">SaveEventBus</text></a>
+<a class="map-node" href="#runtime-publicapi"><rect class="svg-box" x="625.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="680.0" y="578" text-anchor="middle">No-code components</text></a>
+</g>
+<g class="drill" data-for="savedobjects" hidden>
+<a class="map-node" href="../api/SavableBridge.html"><rect class="svg-key" x="270" y="440" width="220" height="50" rx="8"/><text class="svg-h" x="380" y="461" text-anchor="middle">SavableBridge</text><text class="svg-m" x="380" y="479" text-anchor="middle">one per GameObject</text></a>
+<path class="svg-arrow" d="M380 490 C 380 515, 200.0 525, 200.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 320.0 525, 320.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 440.0 525, 440.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 560.0 525, 560.0 550" marker-end="url(#drill-arrow)"/>
+<a class="map-node" href="#runtime-savedobjects"><rect class="svg-box" x="145.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="200.0" y="578" text-anchor="middle">SavableTarget</text></a>
+<a class="map-node" href="#runtime-savedobjects"><rect class="svg-box" x="265.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="320.0" y="578" text-anchor="middle">SavedFieldSet</text></a>
+<a class="map-node" href="#runtime-savedobjects"><rect class="svg-box" x="385.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="440.0" y="578" text-anchor="middle">SavableIdentification</text></a>
+<a class="map-node" href="../api/SavedScriptExtensions.html"><rect class="svg-box" x="505.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="560.0" y="578" text-anchor="middle">SavedScriptExtensions</text></a>
+</g>
+<g class="drill" data-for="config" hidden>
+<a class="map-node" href="../api/SaveSystemConfigSO.html"><rect class="svg-key" x="270" y="440" width="220" height="50" rx="8"/><text class="svg-h" x="380" y="461" text-anchor="middle">SaveSystemConfigSO</text><text class="svg-m" x="380" y="479" text-anchor="middle">the one settings asset</text></a>
+<path class="svg-arrow" d="M380 490 C 380 515, 200.0 525, 200.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 320.0 525, 320.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 440.0 525, 440.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 560.0 525, 560.0 550" marker-end="url(#drill-arrow)"/>
+<a class="map-node" href="#runtime-config"><rect class="svg-box" x="145.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="200.0" y="578" text-anchor="middle">SaveFileDefinition</text></a>
+<a class="map-node" href="../api/SaveLocation.html"><rect class="svg-box" x="265.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="320.0" y="578" text-anchor="middle">SaveLocation</text></a>
+<a class="map-node" href="../api/FileExtension.html"><rect class="svg-box" x="385.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="440.0" y="578" text-anchor="middle">FileExtension</text></a>
+<a class="map-node" href="../api/SaveStartupPolicy.html"><rect class="svg-box" x="505.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="560.0" y="578" text-anchor="middle">SaveStartupPolicy</text></a>
+</g>
+<g class="drill" data-for="gameprofiles" hidden>
+<a class="map-node" href="#runtime-gameprofiles"><rect class="svg-key" x="270" y="440" width="220" height="50" rx="8"/><text class="svg-h" x="380" y="461" text-anchor="middle">SaveProfileManager</text><text class="svg-m" x="380" y="479" text-anchor="middle">creates, opens, lists, deletes</text></a>
+<path class="svg-arrow" d="M380 490 C 380 515, 200.0 525, 200.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 320.0 525, 320.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 440.0 525, 440.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 560.0 525, 560.0 550" marker-end="url(#drill-arrow)"/>
+<a class="map-node" href="../api/GameProfile.html"><rect class="svg-box" x="145.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="200.0" y="578" text-anchor="middle">GameProfile</text></a>
+<a class="map-node" href="../api/GameProfileList.html"><rect class="svg-box" x="265.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="320.0" y="578" text-anchor="middle">GameProfileList</text></a>
+<a class="map-node" href="#runtime-gameprofiles"><rect class="svg-box" x="385.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="440.0" y="578" text-anchor="middle">GameProfileManifest</text></a>
+<a class="map-node" href="#runtime-gameprofiles"><rect class="svg-box" x="505.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="560.0" y="578" text-anchor="middle">SaveSystemMetaData</text></a>
+</g>
+<g class="drill" data-for="storage" hidden>
+<a class="map-node" href="../api/SaveStorage.html"><rect class="svg-key" x="270" y="440" width="220" height="50" rx="8"/><text class="svg-h" x="380" y="461" text-anchor="middle">SaveStorage</text><text class="svg-m" x="380" y="479" text-anchor="middle">the public way in</text></a>
+<path class="svg-arrow" d="M380 490 C 380 515, 200.0 525, 200.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 320.0 525, 320.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 440.0 525, 440.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 560.0 525, 560.0 550" marker-end="url(#drill-arrow)"/>
+<a class="map-node" href="#runtime-storage"><rect class="svg-box" x="145.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="200.0" y="578" text-anchor="middle">SaveFileAccess</text></a>
+<a class="map-node" href="#runtime-storage"><rect class="svg-box" x="265.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="320.0" y="578" text-anchor="middle">IDataStorageService</text></a>
+<a class="map-node" href="#runtime-storage"><rect class="svg-box" x="385.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="440.0" y="578" text-anchor="middle">SaveFileStore</text></a>
+<a class="map-node" href="../api/SaveFileReference.html"><rect class="svg-box" x="505.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="560.0" y="578" text-anchor="middle">SaveFileReference</text></a>
+</g>
+<g class="drill" data-for="scenes" hidden>
+<a class="map-node" href="#runtime-scenes"><rect class="svg-key" x="270" y="440" width="220" height="50" rx="8"/><text class="svg-h" x="380" y="461" text-anchor="middle">ISceneInfo</text><text class="svg-m" x="380" y="479" text-anchor="middle">which scenes are loaded</text></a>
+<path class="svg-arrow" d="M380 490 C 380 515, 320.0 525, 320.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 440.0 525, 440.0 550" marker-end="url(#drill-arrow)"/>
+<a class="map-node" href="#runtime-scenes"><rect class="svg-box" x="265.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="320.0" y="578" text-anchor="middle">UnitySceneInfo</text></a>
+<a class="map-node" href="#runtime-scenes"><rect class="svg-box" x="385.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="440.0" y="578" text-anchor="middle">SceneReadySignal</text></a>
+</g>
+<g class="drill" data-for="editor" hidden>
+<a class="map-node" href="#editor-core"><rect class="svg-key" x="270" y="440" width="220" height="50" rx="8"/><text class="svg-h" x="380" y="461" text-anchor="middle">Editor tools</text><text class="svg-m" x="380" y="479" text-anchor="middle">generate and check the files above</text></a>
+<path class="svg-arrow" d="M380 490 C 380 515, 140.0 525, 140.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 260.0 525, 260.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 380.0 525, 380.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 500.0 525, 500.0 550" marker-end="url(#drill-arrow)"/>
+<path class="svg-arrow" d="M380 490 C 380 515, 620.0 525, 620.0 550" marker-end="url(#drill-arrow)"/>
+<a class="map-node" href="#editor-core"><rect class="svg-box" x="85.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="140.0" y="578" text-anchor="middle">Core tools</text></a>
+<a class="map-node" href="#editor-config"><rect class="svg-box" x="205.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="260.0" y="578" text-anchor="middle">Config inspector</text></a>
+<a class="map-node" href="#editor-bridge"><rect class="svg-box" x="325.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="380.0" y="578" text-anchor="middle">Bridge &amp; Registration</text></a>
+<a class="map-node" href="#editor-window"><rect class="svg-box" x="445.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="500.0" y="578" text-anchor="middle">Saved Objects window</text></a>
+<a class="map-node" href="#editor-hierarchy"><rect class="svg-box" x="565.0" y="550" width="110" height="46" rx="7"/><text class="svg-m" x="620.0" y="578" text-anchor="middle">Hierarchy badges</text></a>
+</g>
+<g class="drill" data-for="serialization" hidden>
+<a class="map-node" href="#runtime-serialization"><rect class="svg-key" x="270" y="440" width="220" height="50" rx="8"></rect><text class="svg-h" x="380" y="461" text-anchor="middle">SaveJson</text><text class="svg-m" x="380" y="479" text-anchor="middle">the only serializer</text></a>
+<path class="svg-arrow" d="M380 490 V 550" marker-end="url(#drill-arrow)"/>
+<rect class="svg-box" x="130" y="550" width="500" height="56" rx="7"/>
+<text class="svg-m" x="380" y="572" text-anchor="middle">Converts one saved object's data to JSON text when writing a save file,</text>
+<text class="svg-m" x="380" y="588" text-anchor="middle">and back into real values when reading one. Internal: nothing to call.</text>
+</g>
+</svg>
+<figcaption>PublicAPI, SavedObjects, Config and GameProfiles all feed Core. Core reads and writes through Storage and Serialization to disk. Editor tools sit beside Runtime, generating and checking its files. Hover or focus a box to trace its connections; click one to see how its parts connect.</figcaption>
+</figure>
+</section>
+
+<section id="runtime-publicapi">
+<h2>Runtime/PublicAPI <span class="lv lv1">the daily API</span><a class="anchor" href="#runtime-publicapi">#</a></h2>
+<p>What game code calls and implements. Open a row below for the full story, or follow its "Full reference" link for the type's own page.</p>
+
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveActions</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveActions.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveActions.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveActions.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveActions.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The class game code calls to save, reload, forget and manage <a class="term" href="../api/GameProfile.html#game-profile">game profiles</a>.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveActions.cs</span>
+</summary>
+<div class="map-body">
+<p>Every game that uses this save system calls into <code>SaveActions</code>: it's the one class your game code talks to for saving, reloading a file, forgetting an object, and registering plain classes. If you're writing gameplay code that needs to trigger a save or read back data, this is the entry point you reach for.</p>
+<p><a href="../api/SaveActions.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveAttribute</code> <span class="kind k-attr">attribute</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveAttribute.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveAttribute.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveAttribute.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveAttribute.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum"><code>[Save]</code>: marks a field to save and restore by name.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveAttribute.cs</span>
+</summary>
+<div class="map-body">
+<p>Put <code>[Save]</code> directly on any field you want captured and restored automatically &mdash; a health value, an inventory list, a position you track by hand. This is the first thing to reach for whenever a MonoBehaviour's field needs to survive a save and reload; most saved data in a typical game goes through this attribute rather than a custom <code>ISavable</code> implementation.</p>
+<p><a href="../api/SaveAttribute.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveIdAttribute</code> <span class="kind k-attr">attribute</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveIdAttribute.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveIdAttribute.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveIdAttribute.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveIdAttribute.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum"><code>[SaveId]</code>: keeps a registered class's <a class="term" href="../api/SavableBridge.html#save-id">save ID</a> stable after a rename.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveIdAttribute.cs</span>
+</summary>
+<div class="map-body">
+<p>Use <code>[SaveId]</code> the moment you rename a plain C# class (not a MonoBehaviour) that registers itself with <code>SaveActions</code>, so existing save files keep matching it by its old name instead of losing their data. Skip it for scene scripts &mdash; <code>SavableBridge</code> already gives those a stable ID &mdash; this is specifically for classes that register themselves in code.</p>
+<p><a href="../api/SaveIdAttribute.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">ISavable</code> <span class="kind k-interface">interface</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISavable.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/ISavable.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISavable.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/ISavable.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">A saved object that captures and restores its own data instead of using <code>[Save]</code>.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/ISavable.cs</span>
+</summary>
+<div class="map-body">
+<p>Implement <code>ISavable&lt;TData&gt;</code> when your object's data can't just be captured as a flat set of <code>[Save]</code> fields &mdash; it needs computing on the way out, converting on the way in, or it holds something JSON can't store directly, such as a runtime-only reference. Reach for it instead of <code>[Save]</code> whenever the shape of what you save has to differ from the shape the object actually keeps in memory.</p>
+<p><a href="../api/ISavable.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">ISaveIn</code> <span class="kind k-interface">interface</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISaveIn.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/ISaveIn.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISaveIn.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/ISaveIn.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Picks the save file for a registered class's <code>[Save]</code> data.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/ISaveIn.cs</span>
+</summary>
+<div class="map-body">
+<p>Implement <code>ISaveIn&lt;TFile&gt;</code> on any plain class or <code>ISavable</code> object whose data shouldn't go in the default GameProfile file &mdash; for example persistent unlocks that belong in a Settings-like file, or scene-scoped data. Without it, a registered plain class's data lands in the GameProfile file by default; add this interface the moment you need it somewhere else.</p>
+<p><a href="../api/ISaveIn.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">IOnRestored</code> <span class="kind k-interface">interface</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/IOnRestored.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/IOnRestored.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/IOnRestored.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/IOnRestored.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Runs code right after each restore.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/IOnRestored.cs</span>
+</summary>
+<div class="map-body">
+<p>Implement <code>IOnRestored</code> on a saved object when something needs to happen right after its data comes back &mdash; reapplying a buff, refreshing a UI element, re-subscribing to an event now that real values are in place. It fires after every restore, including the very first one when new-game values are set, so use it for setup that depends on final values rather than constructor-time defaults.</p>
+<p><a href="../api/IOnRestored.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">ISaveFile</code> <span class="kind k-interface">interface</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISaveFile.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/ISaveFile.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/ISaveFile.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/ISaveFile.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Marks a save file class, such as <code><a class="term" href="../api/SaveFiles.html">SaveFiles</a>.Settings</code>.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/ISaveFile.cs</span>
+</summary>
+<div class="map-body">
+<p>Implement this marker interface on a class whenever you need a type-safe way to refer to a save file in code &mdash; as the generic argument to <code>SaveActions.Save&lt;TFile&gt;()</code>, <code>SaveStorage</code>, or <code>ISaveIn&lt;TFile&gt;</code> &mdash; instead of passing the file's name as a loosely-typed string. The built-in <code>SaveFiles</code> nested classes already implement it; add your own only if a library module defines an extra save file.</p>
+<p><a href="../api/ISaveFile.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFiles</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveFiles.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveFiles.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveFiles.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveFiles.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The five built-in save files: <a class="term" href="../api/GameProfile.html#game-profile">GameProfile</a>, Scene, Settings, Input, Achievements.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveFiles.cs</span>
+</summary>
+<div class="map-body">
+<p>Use the five nested classes under <code>SaveFiles</code> (GameProfile, Scene, Settings, Input, Achievements) wherever a type argument or file reference is expected, such as <code>SaveActions.Save&lt;SaveFiles.Settings&gt;()</code>. Every game that uses more than the single default save file reaches for these constantly.</p>
+<p><a href="../api/SaveFiles.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileDefaultsAttribute</code> <span class="kind k-attr">attribute</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveFileDefaultsAttribute.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveFileDefaultsAttribute.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveFileDefaultsAttribute.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveFileDefaultsAttribute.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum"><code>[SaveFileDefaults]</code>: gives a library module's save file class a starting config row.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveFileDefaultsAttribute.cs</span>
+</summary>
+<div class="map-body">
+<p>Put <code>[SaveFileDefaults]</code> on a save file class you're shipping as part of a reusable library module, so the save system config automatically gets a starting row for it the first time a project imports the module, instead of making every consumer add the row by hand.</p>
+<p><a href="../api/SaveFileDefaultsAttribute.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileReference</code> <span class="kind k-struct">struct</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveFileReference.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveFileReference.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveFileReference.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveFileReference.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">A save file picked in the Inspector from a dropdown of the config's save file list.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveFileReference.cs</span>
+</summary>
+<div class="map-body">
+<p>Use a <code>SaveFileReference</code> field on a MonoBehaviour or ScriptableObject when you want a designer to pick a save file from a dropdown in the Inspector, rather than hard-coding a <code>SaveFiles.X</code> type argument in code &mdash; handy for tools and debug buttons that should work against whichever file someone selects.</p>
+<p><a href="../api/SaveFileReference.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveEventBus</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveEventBus.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveEventBus.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveEventBus.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveEventBus.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The load and save events, including the sticky load events.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveEventBus.cs</span>
+</summary>
+<div class="map-body">
+<p>Subscribe to <code>SaveEventBus</code>'s static events whenever code elsewhere in the game needs to react to a load or save happening &mdash; showing a save icon, refreshing a screen after a game profile opens, logging a failed save. Every load event is sticky, so subscribing after the event already fired still calls your handler once, right away.</p>
+<p><a href="../api/SaveEventBus.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveStorage</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveStorage.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveStorage.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveStorage.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveStorage.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Reads and writes a whole save file as JSON text directly.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveStorage.cs</span>
+</summary>
+<div class="map-body">
+<p>Call <code>SaveStorage</code> directly when you need the raw JSON text of a whole save file &mdash; for an editor tool, a debug button that dumps a file's contents, or a migration script &mdash; rather than going through the normal register/capture/restore flow. Most gameplay code never touches this; <code>SaveActions</code> is the everyday entry point instead.</p>
+<p><a href="../api/SaveStorage.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedScriptExtensions</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SavedScriptExtensions.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SavedScriptExtensions.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SavedScriptExtensions.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SavedScriptExtensions.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum"><code><a class="term" href="../api/SavedScriptExtensions.html">SetSaveId</a></code>: gives a spawned copy its own save ID.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SavedScriptExtensions.cs</span>
+</summary>
+<div class="map-body">
+<p>Call the <code>SetSaveId</code> extension method right after <code>Instantiate</code>-ing a prefab that has saved scripts on it, so the spawned copy gets its own distinct save ID instead of colliding with the original or with other copies. Needed any time your game spawns more than one instance of the same saved prefab at runtime.</p>
+<p><a href="../api/SavedScriptExtensions.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row" id="ready-made-savers">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveTransform</code> <span class="kind k-component">component</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveTransform.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveTransform.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveTransform.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveTransform.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Saves this GameObject's position, rotation and local scale, with no code.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveTransform.cs</span>
+</summary>
+<div class="map-body">
+<p>Add this component to a level object whose position, rotation or scale should be exactly where the player left it after a reload &mdash; a pushed crate, a moved platform, anything that can end up somewhere other than its starting Transform. No code required: just add the component.</p>
+<p><a href="../api/SaveTransform.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveActiveState</code> <span class="kind k-component">component</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveActiveState.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveActiveState.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveActiveState.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveActiveState.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Saves whether this GameObject is active, with no code.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveActiveState.cs</span>
+</summary>
+<div class="map-body">
+<p>Add this component to a GameObject you turn on and off at runtime &mdash; a cleared trap, an opened gate, a collected pickup hidden instead of destroyed &mdash; so its active/inactive state survives a reload without writing any save code yourself.</p>
+<p><a href="../api/SaveActiveState.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveDestroyed</code> <span class="kind k-component">component</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveDestroyed.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveDestroyed.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveDestroyed.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveDestroyed.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Forgets this GameObject, then destroys it, so it stays gone after a reload.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveDestroyed.cs</span>
+</summary>
+<div class="map-body">
+<p>Add this component to a scene object you expect the player to permanently destroy &mdash; a chest they loot and discard, an obstacle they clear &mdash; then call its <code>DestroyAndForget</code> method instead of Unity's <code>Destroy</code>, so the object writes a gone marker and stays gone after a reload instead of reappearing.</p>
+<p><a href="../api/SaveDestroyed.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">MonoSaveActions</code> <span class="kind k-component">component</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/MonoSaveActions.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/MonoSaveActions.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/MonoSaveActions.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/MonoSaveActions.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Saving, loading and <a class="term" href="../api/GameProfile.html#game-profile">game profiles</a> from buttons and UnityEvents, with no code.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/MonoSaveActions.cs</span>
+</summary>
+<div class="map-body">
+<p>Add this component when a designer needs to wire Save, Reload or game-profile actions straight from the Inspector &mdash; a UnityEvent on a UI Button, for instance &mdash; without writing a script that calls <code>SaveActions</code> directly. Common on save-slot screens and debug menus built by someone who isn't touching code.</p>
+<p><a href="../api/MonoSaveActions.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="runtime-savedobjects">
+<h2>Runtime/SavedObjects<a class="anchor" href="#runtime-savedobjects">#</a></h2>
+<p>Connects the scripts on a GameObject to the save system.</p>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavableBridge</code> <span class="kind k-component">component</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavableBridge.cs" title="Ping Modules/SaveSystem/Runtime/SavedObjects/SavableBridge.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavableBridge.cs" title="Open Modules/SaveSystem/Runtime/SavedObjects/SavableBridge.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Connects a GameObject's saved scripts to the save system.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/SavedObjects/SavableBridge.cs</span>
+</summary>
+<div class="map-body">
+<p>You won't usually add this yourself &mdash; the editor adds a Savable Bridge automatically the moment a GameObject gains a saved script. Look at it directly when you need the GameObject's save ID at runtime, or when debugging why a scene object's data isn't being found.</p>
+<p><a href="../api/SavableBridge.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavableBridgeIdentity</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavableBridgeIdentity.cs" title="Ping Modules/SaveSystem/Runtime/SavedObjects/SavableBridgeIdentity.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavableBridgeIdentity.cs" title="Open Modules/SaveSystem/Runtime/SavedObjects/SavableBridgeIdentity.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Decides when a bridge needs a new GUID: a blank one, or a copy of another bridge.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/SavedObjects/SavableBridgeIdentity.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: decides whether a Savable Bridge needs a brand-new GUID (a blank bridge, freshly added) or should copy another bridge's identity (duplicating a prefab instance in the editor). You'd only read this while debugging why two copies of the same object ended up sharing &mdash; or not sharing &mdash; a save ID.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavableIdentification</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavableIdentification.cs" title="Ping Modules/SaveSystem/Runtime/SavedObjects/SavableIdentification.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavableIdentification.cs" title="Open Modules/SaveSystem/Runtime/SavedObjects/SavableIdentification.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">One saved script's class name and GUID, as the bridge stores them.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/SavedObjects/SavableIdentification.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the exact pair of values &mdash; class name and GUID &mdash; that a Savable Bridge stores on disk, in the scene file, to identify one saved script. Relevant only if you're debugging a scene file's serialized bridge data or extending how bridges identify saved scripts.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavableTarget</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavableTarget.cs" title="Ping Modules/SaveSystem/Runtime/SavedObjects/SavableTarget.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavableTarget.cs" title="Open Modules/SaveSystem/Runtime/SavedObjects/SavableTarget.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">One saved script found on a GameObject: its reflection data or its <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> field set.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/SavedObjects/SavableTarget.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: represents one saved script the bridge found on its GameObject, holding either its reflected <code>[Save]</code> field set or a reference to its ISavable implementation. You'd look here when tracing exactly what data the save system thinks a particular script exposes.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedScript</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavedScript.cs" title="Ping Modules/SaveSystem/Runtime/SavedObjects/SavedScript.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavedScript.cs" title="Open Modules/SaveSystem/Runtime/SavedObjects/SavedScript.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Whether a script class saves, and which save file its data goes in.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/SavedObjects/SavedScript.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: a quick classification of one script class &mdash; does it save at all, and if so, which save file does its data belong in. The bridge and the registry both consult this before doing any real work, so it's a good starting point when debugging why a script isn't being treated as saved.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedFieldSet</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavedFieldSet.cs" title="Ping Modules/SaveSystem/Runtime/SavedObjects/SavedFieldSet.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavedFieldSet.cs" title="Open Modules/SaveSystem/Runtime/SavedObjects/SavedFieldSet.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Every <code>[Save]</code> field on a class, captured to JSON and restored back.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/SavedObjects/SavedFieldSet.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: holds every <code>[Save]</code> field found on one class, and does the actual work of capturing them to JSON and writing them back on restore. This is the machinery behind the <code>[Save]</code> attribute; read it to understand exactly how field capture and restore work, not to call it directly.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedFieldRules</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavedFieldRules.cs" title="Ping Modules/SaveSystem/Runtime/SavedObjects/SavedFieldRules.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavedFieldRules.cs" title="Open Modules/SaveSystem/Runtime/SavedObjects/SavedFieldRules.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The mistakes a <code>[Save]</code> field or a saved class can make, and their fixes.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/SavedObjects/SavedFieldRules.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the catalog of mistakes a <code>[Save]</code> field or a saved class can make &mdash; an unsupported type, a missing save ID, and so on &mdash; along with the fix text shown in the editor. Look here to see the exact wording of a warning, or to add a new mistake check.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="runtime-core">
+<h2>Runtime/Core<a class="anchor" href="#runtime-core">#</a></h2>
+<p>The running save system: the registry of saved objects, the loaded data, and the timing rules.</p>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSession</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveSession.cs" title="Ping Modules/SaveSystem/Runtime/Core/SaveSession.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveSession.cs" title="Open Modules/SaveSystem/Runtime/Core/SaveSession.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">One running save system: wires the registry, loaded data and <a class="term" href="../api/GameProfile.html#game-profile">game profiles</a> together.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SaveSession.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the one object that exists while the save system is running, wiring together the registry, the loaded data and the open game profile. <code>SaveActions</code> forwards almost every call straight to the current session. Read this to understand how the save system starts up and holds its running state together, not to call it from game code.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveStartup</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveStartup.cs" title="Ping Modules/SaveSystem/Runtime/Core/SaveStartup.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveStartup.cs" title="Open Modules/SaveSystem/Runtime/Core/SaveStartup.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Starts the save system before the first scene loads, and resets it when play mode starts and stops.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SaveStartup.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: boots the save system before the first scene loads, and resets everything when Play mode starts and stops in the editor. Relevant if you're debugging startup order, or figuring out why state did or didn't reset between Play sessions.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveRegistry</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveRegistry.cs" title="Ping Modules/SaveSystem/Runtime/Core/SaveRegistry.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveRegistry.cs" title="Open Modules/SaveSystem/Runtime/Core/SaveRegistry.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Every registered saved object, stored by save file name and <a class="term" href="../api/SavableBridge.html#save-id">save ID</a>.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SaveRegistry.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the live table of every registered saved object, keyed by which save file it belongs to and its save ID. This is what <code>SaveActions.Register</code>/<code>Unregister</code> actually update; read it when debugging whether a particular object is registered at all.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedObjectEntry</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SavedObjectEntry.cs" title="Ping Modules/SaveSystem/Runtime/Core/SavedObjectEntry.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SavedObjectEntry.cs" title="Open Modules/SaveSystem/Runtime/Core/SavedObjectEntry.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">One registered saved object: its owner, where its data lives, and how to capture and restore it.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SavedObjectEntry.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: one row in the registry &mdash; a registered object's owner reference, which save file its data lives in, and the capture/restore functions to call on it. Worth reading if you need to see exactly what the registry remembers about a single saved object.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedObjectTracker</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SavedObjectTracker.cs" title="Ping Modules/SaveSystem/Runtime/Core/SavedObjectTracker.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SavedObjectTracker.cs" title="Open Modules/SaveSystem/Runtime/Core/SavedObjectTracker.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Captures, restores and forgets registered saved objects, following the whichever-second rule.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SavedObjectTracker.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: does the actual capturing, restoring and forgetting of every registered object, applying the "whichever comes second" rule &mdash; an object gets its data as soon as both the object and its data exist. Read this to understand the exact timing of when capture/restore happens relative to registration.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">LoadedSaveData</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/LoadedSaveData.cs" title="Ping Modules/SaveSystem/Runtime/Core/LoadedSaveData.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/LoadedSaveData.cs" title="Open Modules/SaveSystem/Runtime/Core/LoadedSaveData.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The saved data read from disk, kept in memory by key and save ID; also calls <code><a class="term" href="../api/IOnRestored.html#restored-notice">IOnRestored</a></code>.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/LoadedSaveData.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the save data that's been read from disk, kept in memory keyed by save file and save ID, and the thing that actually calls <code>IOnRestored</code> once it hands data back to an object. Relevant when debugging what's currently loaded versus what's on disk.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">LoadEventLog</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/LoadEventLog.cs" title="Ping Modules/SaveSystem/Runtime/Core/LoadEventLog.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/LoadEventLog.cs" title="Open Modules/SaveSystem/Runtime/Core/LoadEventLog.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Remembers which save files have loaded, so a late subscriber's load event still fires (sticky).</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/LoadEventLog.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: remembers which save files have already fired their load event this session, so that a script subscribing late to <code>SaveEventBus</code> still gets called immediately instead of missing the event. Read this if a sticky load event isn't firing when you expect.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSessionEvents</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveSessionEvents.cs" title="Ping Modules/SaveSystem/Runtime/Core/SaveSessionEvents.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveSessionEvents.cs" title="Open Modules/SaveSystem/Runtime/Core/SaveSessionEvents.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Reads save files on startup and raises the load and save events on <code><a class="term" href="../api/SaveEventBus.html">SaveEventBus</a></code>.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SaveSessionEvents.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: reads every save file on startup and raises the corresponding load (and later, save) events on <code>SaveEventBus</code>. This is the piece that actually fires the events other code subscribes to &mdash; read it to trace exactly when and why an event fires.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileLookup</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveFileLookup.cs" title="Ping Modules/SaveSystem/Runtime/Core/SaveFileLookup.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveFileLookup.cs" title="Open Modules/SaveSystem/Runtime/Core/SaveFileLookup.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Finds the config's save file list row for a save file class.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SaveFileLookup.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: given a save file class, finds its matching row in the config's save file list. Used internally whenever the save system needs to turn a <code>SaveFiles.X</code> type into its configured location and backup setting.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileAddress</code> <span class="kind k-struct">struct</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveFileAddress.cs" title="Ping Modules/SaveSystem/Runtime/Core/SaveFileAddress.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveFileAddress.cs" title="Open Modules/SaveSystem/Runtime/Core/SaveFileAddress.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Where one save file lives: its storage key and whether it keeps a backup.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SaveFileAddress.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: a small value &mdash; a storage key plus whether that file keeps a backup &mdash; describing exactly where one save file lives right now. Built fresh whenever the open game profile or scene changes, since both can shift where a file's data actually is.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileAddresses</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveFileAddresses.cs" title="Ping Modules/SaveSystem/Runtime/Core/SaveFileAddresses.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveFileAddresses.cs" title="Open Modules/SaveSystem/Runtime/Core/SaveFileAddresses.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Works out every save file's address right now, which depends on the open game profile and scene.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SaveFileAddresses.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: works out every save file's current address in one place, since the right answer depends on which game profile is open and which scene is loaded. Read this when tracing exactly which physical file a given save file class currently maps to.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileClassFinder</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveFileClassFinder.cs" title="Ping Modules/SaveSystem/Runtime/Core/SaveFileClassFinder.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveFileClassFinder.cs" title="Open Modules/SaveSystem/Runtime/Core/SaveFileClassFinder.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Finds the save file class a config row stands for.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SaveFileClassFinder.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: given a config row, finds the actual save file class it stands for &mdash; reversing what <code>SaveFileLookup</code> does. Used when the save system needs to go from configuration data back to a concrete type.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">AutomaticSaveIds</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/AutomaticSaveIds.cs" title="Ping Modules/SaveSystem/Runtime/Core/AutomaticSaveIds.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/AutomaticSaveIds.cs" title="Open Modules/SaveSystem/Runtime/Core/AutomaticSaveIds.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Gives a plain registered class with no save ID one of its own: its class name, then "Name 2", "Name 3".</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/AutomaticSaveIds.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: when a plain registered class has no explicit save ID, this gives it one automatically &mdash; its class name, then "Name 2", "Name 3" for further live instances in the order they register. Read this if you're seeing unexpected automatic save IDs and want to know exactly how they're assigned.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">LowestFreeNumber</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/LowestFreeNumber.cs" title="Ping Modules/SaveSystem/Runtime/Core/LowestFreeNumber.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/LowestFreeNumber.cs" title="Open Modules/SaveSystem/Runtime/Core/LowestFreeNumber.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Numbers that start at 1 and are reused, for slot numbers and automatic save IDs.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/LowestFreeNumber.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: a small utility that hands out numbers starting at 1 and reuses ones that are freed, used both for save slot numbers and for the "Name 2", "Name 3" automatic save ID numbering. Not specific to saving conceptually &mdash; just counting logic two features share.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">AutosaveTicker</code> <span class="kind k-component">component</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/AutosaveTicker.cs" title="Ping Modules/SaveSystem/Runtime/Core/AutosaveTicker.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/AutosaveTicker.cs" title="Open Modules/SaveSystem/Runtime/Core/AutosaveTicker.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">A hidden object that calls <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.SaveAll</code> on the config's autosave interval.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/AutosaveTicker.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: a hidden runtime object that calls <code>SaveActions.SaveAll</code> on a timer, at the interval configured on the save system config asset. Look here if autosave isn't firing on the interval you expect, or to see exactly how the timer is implemented.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveLog</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveLog.cs" title="Ping Modules/SaveSystem/Runtime/Core/SaveLog.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveLog.cs" title="Open Modules/SaveSystem/Runtime/Core/SaveLog.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Every Console message the save system writes goes through here; tests can expect a message instead of printing it.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SaveLog.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: every Console message the save system itself writes goes through this one choke point, so tests can assert a specific message was logged instead of needing to capture real Console output. Not something game code calls directly.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemHelpAttribute</code> <span class="kind k-attr">attribute</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveSystemHelpAttribute.cs" title="Ping Modules/SaveSystem/Runtime/Core/SaveSystemHelpAttribute.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Core/SaveSystemHelpAttribute.cs" title="Open Modules/SaveSystem/Runtime/Core/SaveSystemHelpAttribute.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The base attribute behind every inspector's "?" button.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Core/SaveSystemHelpAttribute.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the base attribute behind every inspector's "?" help button &mdash; put it on an Editor or Inspector class to give it a button that opens a specific guide page. See <a href="debug.html">Debug and inspect</a> for how the resulting buttons look in practice.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="runtime-config">
+<h2>Runtime/Config<a class="anchor" href="#runtime-config">#</a></h2>
+<p>The save system config asset and the choices it stores.</p>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemConfigSO</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveSystemConfigSO.cs" title="Ping Modules/SaveSystem/Runtime/Config/SaveSystemConfigSO.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveSystemConfigSO.cs" title="Open Modules/SaveSystem/Runtime/Config/SaveSystemConfigSO.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The one settings asset: folders, file type, the save file list and <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> names.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Config/SaveSystemConfigSO.cs</span>
+</summary>
+<div class="map-body">
+<p>Every project using this save system needs exactly one of these: it's the settings asset that defines your folders, file type, save file list and game profile naming. Create it once via Tools &gt; External Project Tools &gt; Save System &gt; Create Config, then come back to it whenever you add a save file or change a setting.</p>
+<p><a href="../api/SaveSystemConfigSO.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileDefinition</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveFileDefinition.cs" title="Ping Modules/SaveSystem/Runtime/Config/SaveFileDefinition.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveFileDefinition.cs" title="Open Modules/SaveSystem/Runtime/Config/SaveFileDefinition.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">One row of the save file list: a name, a <a class="term" href="../api/SaveLocation.html#save-location">save location</a> and a Backup checkbox.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Config/SaveFileDefinition.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: one row of the config's save file list &mdash; a name, a save location and whether it keeps a backup. You never construct these directly; you add and edit them through the config asset's custom inspector, which keeps the list in sync with your save file classes.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveLocation</code> <span class="kind k-enum">enum</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveLocation.cs" title="Ping Modules/SaveSystem/Runtime/Config/SaveLocation.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveLocation.cs" title="Open Modules/SaveSystem/Runtime/Config/SaveLocation.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The three places saved data can live: Global, Game Profile or Scene.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Config/SaveLocation.cs</span>
+</summary>
+<div class="map-body">
+<p>Pick one of these three values whenever you define a save file's location in the config inspector, or whenever code needs to reason about where a particular file's data lives: Global (shared across every game profile), Game Profile (the common case), or Scene (nested inside a game profile, one copy per scene).</p>
+<p><a href="../api/SaveLocation.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">FileExtension</code> <span class="kind k-enum">enum</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/FileExtension.cs" title="Ping Modules/SaveSystem/Runtime/Config/FileExtension.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/FileExtension.cs" title="Open Modules/SaveSystem/Runtime/Config/FileExtension.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The file type save files are written as: json or txt.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Config/FileExtension.cs</span>
+</summary>
+<div class="map-body">
+<p>Pick <code>json</code> (the default) unless a platform or a support tool specifically needs the same JSON content served with a <code>.txt</code> extension instead &mdash; the content written is identical either way, only the file's extension changes.</p>
+<p><a href="../api/FileExtension.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveStartupPolicy</code> <span class="kind k-enum">enum</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveStartupPolicy.cs" title="Ping Modules/SaveSystem/Runtime/Config/SaveStartupPolicy.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveStartupPolicy.cs" title="Open Modules/SaveSystem/Runtime/Config/SaveStartupPolicy.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Whether the save system sets up a game profile automatically at startup.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Config/SaveStartupPolicy.cs</span>
+</summary>
+<div class="map-body">
+<p>Set this on the config asset to control whether the save system opens or creates a game profile for you automatically before the first scene loads, versus leaving that decision to your own title-screen code. Pick Manual for games with an explicit save-slot-select screen; AutoSetUp for games that should just start playing immediately.</p>
+<p><a href="../api/SaveStartupPolicy.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">BuiltInSaveFile</code> <span class="kind k-enum">enum</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/BuiltInSaveFile.cs" title="Ping Modules/SaveSystem/Runtime/Config/BuiltInSaveFile.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/BuiltInSaveFile.cs" title="Open Modules/SaveSystem/Runtime/Config/BuiltInSaveFile.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The built-in save files' stable row numbers.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Config/BuiltInSaveFile.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the stable row numbers used to identify the five built-in save files (GameProfile, Scene, Settings, Input, Achievements) in the config's save file list, independent of display order. Read this if you're tracing how a built-in file keeps its identity even if list rows get reordered.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileClash</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveFileClash.cs" title="Ping Modules/SaveSystem/Runtime/Config/SaveFileClash.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveFileClash.cs" title="Open Modules/SaveSystem/Runtime/Config/SaveFileClash.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Two save file list rows that can't both work, such as two rows writing the same file.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Config/SaveFileClash.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: describes two save file list rows that can't both be valid at once &mdash; most commonly two rows configured to write the same physical file. Shown as a warning in the config inspector; read this to see exactly which combinations it flags.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemConfigName</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveSystemConfigName.cs" title="Ping Modules/SaveSystem/Runtime/Config/SaveSystemConfigName.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveSystemConfigName.cs" title="Open Modules/SaveSystem/Runtime/Config/SaveSystemConfigName.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The exact asset name the save system looks for in Resources.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Config/SaveSystemConfigName.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the exact, hard-coded asset name the save system looks for under Resources when it loads the config at runtime. Read this only if you're debugging why the save system can't find your config asset.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="runtime-gameprofiles">
+<h2>Runtime/GameProfiles<a class="anchor" href="#runtime-gameprofiles">#</a></h2>
+<p><a class="term" href="../api/GameProfile.html#game-profile">Game profiles</a>: creating, opening, listing and deleting them.</p>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">GameProfile</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/GameProfile.cs" title="Ping Modules/SaveSystem/Runtime/GameProfiles/GameProfile.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/GameProfile.cs" title="Open Modules/SaveSystem/Runtime/GameProfiles/GameProfile.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">One game profile: hold it, show it on a save slot screen, call Open or Delete.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/GameProfiles/GameProfile.cs</span>
+</summary>
+<div class="map-body">
+<p>Hold a reference to one of these on a save-slot screen: it's your handle to one playthrough &mdash; its slot number, display name, last-saved time &mdash; plus the <code>Open()</code> and <code>Delete()</code> calls a slot button actually triggers. Get instances from <code>GameProfileList</code>, never construct one yourself.</p>
+<p><a href="../api/GameProfile.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">GameProfileList</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/GameProfileList.cs" title="Ping Modules/SaveSystem/Runtime/GameProfiles/GameProfileList.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/GameProfileList.cs" title="Open Modules/SaveSystem/Runtime/GameProfiles/GameProfileList.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Every game profile, as <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.GameProfiles</code>.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/GameProfiles/GameProfileList.cs</span>
+</summary>
+<div class="map-body">
+<p>Read <code>SaveActions.GameProfiles</code> (which returns one of these) on any save-slot screen to list, create, and manage every game profile the player has. It's the one place game code goes to work with profiles collectively, rather than reaching for the internal profile-management class directly.</p>
+<p><a href="../api/GameProfileList.html">Full reference &rarr;</a></p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveProfileManager</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/SaveProfileManager.cs" title="Ping Modules/SaveSystem/Runtime/GameProfiles/SaveProfileManager.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/SaveProfileManager.cs" title="Open Modules/SaveSystem/Runtime/GameProfiles/SaveProfileManager.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Creates, opens, lists and deletes game profiles by folder ID.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/GameProfiles/SaveProfileManager.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: does the real work of creating, opening, listing and deleting game profiles by their folder ID on disk. <code>GameProfile</code> and <code>GameProfileList</code> are the public wrappers around this; read it only if you need to understand exactly how profiles are stored and found on disk.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">GameProfileManifest</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/GameProfileManifest.cs" title="Ping Modules/SaveSystem/Runtime/GameProfiles/GameProfileManifest.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/GameProfileManifest.cs" title="Open Modules/SaveSystem/Runtime/GameProfiles/GameProfileManifest.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The summary of one game profile a save slot screen shows: name, slot, last saved time.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/GameProfiles/GameProfileManifest.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the small summary record a save-slot screen actually displays for one game profile &mdash; its name, slot number, last-saved time &mdash; kept separate from the profile's full save data so listing profiles doesn't require loading everything in them.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemMetaData</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/SaveSystemMetaData.cs" title="Ping Modules/SaveSystem/Runtime/GameProfiles/SaveSystemMetaData.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/GameProfiles/SaveSystemMetaData.cs" title="Open Modules/SaveSystem/Runtime/GameProfiles/SaveSystemMetaData.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The save system's own record in Global: which game profile was opened most recently.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/GameProfiles/SaveSystemMetaData.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the save system's own bookkeeping record, kept in the Global save file rather than inside any one game profile &mdash; currently just which game profile was opened most recently, so a "Continue" button knows which one to reopen at startup.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="runtime-storage">
+<h2>Runtime/Storage<a class="anchor" href="#runtime-storage">#</a></h2>
+<p>Reads and writes save files safely, with backups.</p>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">IDataStorageService</code> <span class="kind k-interface">interface</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/IDataStorageService.cs" title="Ping Modules/SaveSystem/Runtime/Storage/IDataStorageService.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/IDataStorageService.cs" title="Open Modules/SaveSystem/Runtime/Storage/IDataStorageService.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Stores text under string keys. The storage service decides where it really goes.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Storage/IDataStorageService.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the abstraction every storage backend implements &mdash; store this text under this string key &mdash; leaving the decision of where it really ends up (disk, memory, something else) to whichever implementation is plugged in. Implement this yourself only if you're adding a wholly new storage backend.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">DiskStorageService</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/DiskStorageService.cs" title="Ping Modules/SaveSystem/Runtime/Storage/DiskStorageService.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/DiskStorageService.cs" title="Open Modules/SaveSystem/Runtime/Storage/DiskStorageService.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Writes keys as files on disk, through a temporary file so a crash mid-write can't destroy a save.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Storage/DiskStorageService.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the real, on-disk implementation of <code>IDataStorageService</code> every game actually ships with &mdash; it writes through a temporary file first, so a crash or power loss mid-write can't corrupt or destroy an existing save. You won't call this directly; it's wired in automatically.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">MemoryStorageService</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/MemoryStorageService.cs" title="Ping Modules/SaveSystem/Runtime/Storage/MemoryStorageService.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/MemoryStorageService.cs" title="Open Modules/SaveSystem/Runtime/Storage/MemoryStorageService.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Keeps keys in memory instead of on disk.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Storage/MemoryStorageService.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: an in-memory stand-in for <code>IDataStorageService</code> that never touches the disk at all. Swapped in by the test suite specifically so tests can save and load freely without ever creating or corrupting a real save file on the machine running them.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileStore</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/SaveFileStore.cs" title="Ping Modules/SaveSystem/Runtime/Storage/SaveFileStore.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/SaveFileStore.cs" title="Open Modules/SaveSystem/Runtime/Storage/SaveFileStore.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Reads and writes one key safely: every write backs up the previous good copy first.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Storage/SaveFileStore.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: reads and writes one storage key safely &mdash; every write first backs up whatever was there before, so a failed or interrupted write can't leave you with neither the old data nor the new. Sits directly on top of whichever <code>IDataStorageService</code> is active.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileAccess</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/SaveFileAccess.cs" title="Ping Modules/SaveSystem/Runtime/Storage/SaveFileAccess.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/SaveFileAccess.cs" title="Open Modules/SaveSystem/Runtime/Storage/SaveFileAccess.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Reads and writes a whole save file as text for one config and one storage.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Storage/SaveFileAccess.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: reads and writes an entire save file as text, for one specific config and one specific storage backend. <code>SaveStorage</code> is the public-facing wrapper around this that game code and editor tools actually call; read this only if you need the lower-level mechanics.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileTarget</code> <span class="kind k-struct">struct</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/SaveFileTarget.cs" title="Ping Modules/SaveSystem/Runtime/Storage/SaveFileTarget.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/SaveFileTarget.cs" title="Open Modules/SaveSystem/Runtime/Storage/SaveFileTarget.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Which copy of a save file a <code>SaveStorage</code> call means: this <a class="term" href="../api/GameProfile.html#game-profile">game profile</a>, another one, or a scene.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Storage/SaveFileTarget.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: pins down exactly which physical copy of a save file a <code>SaveStorage</code> call means &mdash; this game profile's copy, a different named one, or a particular scene's copy &mdash; since the same save file class can resolve to different files depending on context.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavePathGenerator</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/SavePathGenerator.cs" title="Ping Modules/SaveSystem/Runtime/Storage/SavePathGenerator.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/SavePathGenerator.cs" title="Open Modules/SaveSystem/Runtime/Storage/SavePathGenerator.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Builds every storage key the save system uses, so saving and loading never disagree.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Storage/SavePathGenerator.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the single place that builds every storage key the save system uses, so that the code saving a file and the code loading it always agree on exactly where it lives. Read this if you're tracking down a mismatch between where something was written and where it's being looked for.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">StorageKey</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/StorageKey.cs" title="Ping Modules/SaveSystem/Runtime/Storage/StorageKey.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Storage/StorageKey.cs" title="Open Modules/SaveSystem/Runtime/Storage/StorageKey.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Checks that a storage key is safe to turn into a file name.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Storage/StorageKey.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: validates that a storage key is safe to turn directly into a file name on disk, rejecting characters a filesystem can't handle. A small guard rail the rest of the storage layer relies on.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="runtime-scenes">
+<h2>Runtime/Scenes<a class="anchor" href="#runtime-scenes">#</a></h2>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">ISceneInfo</code> <span class="kind k-interface">interface</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Scenes/ISceneInfo.cs" title="Ping Modules/SaveSystem/Runtime/Scenes/ISceneInfo.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Scenes/ISceneInfo.cs" title="Open Modules/SaveSystem/Runtime/Scenes/ISceneInfo.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Tells the save system which scenes are loaded and when a newly loaded one is ready.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Scenes/ISceneInfo.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the abstraction the save system uses to ask which scenes are currently loaded and to find out when a newly loaded one is ready. Implement this yourself only if you need to simulate scene state in a test without loading real Unity scenes.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">UnitySceneInfo</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Scenes/UnitySceneInfo.cs" title="Ping Modules/SaveSystem/Runtime/Scenes/UnitySceneInfo.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Scenes/UnitySceneInfo.cs" title="Open Modules/SaveSystem/Runtime/Scenes/UnitySceneInfo.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Reads scenes from Unity's SceneManager.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Scenes/UnitySceneInfo.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the real implementation of <code>ISceneInfo</code> that reads scene state straight from Unity's own <code>SceneManager</code>. This is what every running game actually uses; it's wired in automatically.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SceneReadySignal</code> <span class="kind k-component">component</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Scenes/SceneReadySignal.cs" title="Ping Modules/SaveSystem/Runtime/Scenes/SceneReadySignal.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Scenes/SceneReadySignal.cs" title="Open Modules/SaveSystem/Runtime/Scenes/SceneReadySignal.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">A hidden object that reports its scene ready one frame after every <a class="term" href="../api/SavableBridge.html#savable-bridge">Savable Bridge</a> has registered.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Scenes/SceneReadySignal.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: a hidden object placed in a scene that reports "this scene is ready" one frame after every Savable Bridge in it has had a chance to register. The save system waits for this signal before restoring scene-scoped data, so a bridge added after it won't be missed.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="runtime-serialization">
+<h2>Runtime/Serialization<a class="anchor" href="#runtime-serialization">#</a></h2>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveJson</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Serialization/SaveJson.cs" title="Ping Modules/SaveSystem/Runtime/Serialization/SaveJson.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Serialization/SaveJson.cs" title="Open Modules/SaveSystem/Runtime/Serialization/SaveJson.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Turns save data into JSON text and back. The only serializer the save system uses.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Serialization/SaveJson.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: converts a saved object's captured data to JSON text when writing a save file, and parses it back into real values when reading one. It's the only serializer the save system uses anywhere &mdash; there's no separate step you perform or configure.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="runtime-data">
+<h2>Runtime/Data<a class="anchor" href="#runtime-data">#</a></h2>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileData</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Data/SaveFileData.cs" title="Ping Modules/SaveSystem/Runtime/Data/SaveFileData.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Data/SaveFileData.cs" title="Open Modules/SaveSystem/Runtime/Data/SaveFileData.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The contents of one save file: file facts, and saved data keyed by <a class="term" href="../api/SavableBridge.html#save-id">save ID</a>.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Data/SaveFileData.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the in-memory contents of one whole save file &mdash; its file-level facts, like format version, plus every saved object's data, keyed by save ID. This is what gets serialized to JSON as a unit and written to disk.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileEntry</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Data/SaveFileEntry.cs" title="Ping Modules/SaveSystem/Runtime/Data/SaveFileEntry.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Data/SaveFileEntry.cs" title="Open Modules/SaveSystem/Runtime/Data/SaveFileEntry.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">One saved object's data inside a save file, under its save ID.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Data/SaveFileEntry.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: one saved object's own slice of data inside a <code>SaveFileData</code>, stored under its save ID. Read this to see exactly what gets written for a single object, separate from the rest of the file.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">IVersionedSaveData</code> <span class="kind k-interface">interface</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Data/IVersionedSaveData.cs" title="Ping Modules/SaveSystem/Runtime/Data/IVersionedSaveData.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Data/IVersionedSaveData.cs" title="Open Modules/SaveSystem/Runtime/Data/IVersionedSaveData.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Anything the save system stores records the format version it was written in.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Runtime/Data/IVersionedSaveData.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: marks that a piece of data the save system stores records the format version it was written in, so a future version of the save system can tell an old save apart from a current one. Implement it when adding a new kind of versioned data to the save format.</p>
+</div>
+</details>
+</li>
+</ul>
+<h3>Runtime/Data/Converters</h3>
+<p>One JSON converter per Unity value type the save system knows how to save directly: <code>Vector2</code>, <code>Vector2Int</code>, <code>Vector3</code>, <code>Vector3Int</code>, <code>Quaternion</code>, <code>Color</code> and <code>Rect</code>. Each reads and writes that type's fields as a small JSON object. Internal; add a new one here to support another Unity value type.</p>
+</section>
+
+<section id="editor-core">
+<h2>Editor/Core<a class="anchor" href="#editor-core">#</a></h2>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemToolsMenu</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Core/SaveSystemToolsMenu.cs" title="Ping Modules/SaveSystem/Editor/Core/SaveSystemToolsMenu.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Core/SaveSystemToolsMenu.cs" title="Open Modules/SaveSystem/Editor/Core/SaveSystemToolsMenu.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The Tools &gt; External Project Tools &gt; Save System menu: Open Guide, Save All, Load All, folder shortcuts.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Core/SaveSystemToolsMenu.cs</span>
+</summary>
+<div class="map-body">
+<p>Open it from Tools &gt; External Project Tools &gt; Save System whenever you want to open this guide, trigger a Save All or Load All from the editor, or jump straight to a relevant folder &mdash; it's the menu entry point for every one-off editor action the save system offers.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemGuide</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Core/SaveSystemGuide.cs" title="Ping Modules/SaveSystem/Editor/Core/SaveSystemGuide.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Core/SaveSystemGuide.cs" title="Open Modules/SaveSystem/Editor/Core/SaveSystemGuide.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Finds and opens this guide, and builds the link an inspector's "?" button opens.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Core/SaveSystemGuide.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: finds this documentation on disk and opens it in a browser, and builds the exact URL an inspector's "?" help button opens. Read it if you're changing where the docs live or how help buttons link into them.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemDocsWriter</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Core/SaveSystemDocsWriter.cs" title="Ping Modules/SaveSystem/Editor/Core/SaveSystemDocsWriter.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Core/SaveSystemDocsWriter.cs" title="Open Modules/SaveSystem/Editor/Core/SaveSystemDocsWriter.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Tools &gt; ... &gt; Update Glossary Data: writes glossary-data.js (the term tooltips) from GLOSSARY.md.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Core/SaveSystemDocsWriter.cs</span>
+</summary>
+<div class="map-body">
+<p>Run Tools &gt; External Project Tools &gt; Save System &gt; Update Glossary Data after editing GLOSSARY.md: this is what regenerates assets/glossary-data.js (the term tooltips you see throughout this documentation) from that file, so the two never drift apart.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">DocsPageOpener</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Core/DocsPageOpener.cs" title="Ping Modules/SaveSystem/Editor/Core/DocsPageOpener.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Core/DocsPageOpener.cs" title="Open Modules/SaveSystem/Editor/Core/DocsPageOpener.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Opens a module's Documentation .html page in the browser on double-click.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Core/DocsPageOpener.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: opens a module's Documentation .html page in your browser when you double-click it in the Project window. Read this if you're wiring up double-click behavior for a different file type.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="editor-config">
+<h2>Editor/Config<a class="anchor" href="#editor-config">#</a></h2>
+<p>The config inspector, and keeping <code>GameSaveFiles.cs</code> in sync with the save file list.</p>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemConfigCreator</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveSystemConfigCreator.cs" title="Ping Modules/SaveSystem/Editor/Config/SaveSystemConfigCreator.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveSystemConfigCreator.cs" title="Open Modules/SaveSystem/Editor/Config/SaveSystemConfigCreator.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Tools &gt; ... &gt; Create Config: creates the config asset where the game expects it.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Config/SaveSystemConfigCreator.cs</span>
+</summary>
+<div class="map-body">
+<p>Run Tools &gt; External Project Tools &gt; Save System &gt; Create Config once per project, the first time you set up the save system: it creates the config asset at exactly the path and name the save system expects to find it at runtime.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemConfigFinder</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveSystemConfigFinder.cs" title="Ping Modules/SaveSystem/Editor/Config/SaveSystemConfigFinder.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveSystemConfigFinder.cs" title="Open Modules/SaveSystem/Editor/Config/SaveSystemConfigFinder.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Finds the project's save system config for editor tools.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Config/SaveSystemConfigFinder.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: locates the project's save system config asset for editor tools and inspectors that need to read or modify it &mdash; the Create Config menu item, the config's own custom inspector, and others.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemConfigEditor</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveSystemConfigEditor.cs" title="Ping Modules/SaveSystem/Editor/Config/SaveSystemConfigEditor.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveSystemConfigEditor.cs" title="Open Modules/SaveSystem/Editor/Config/SaveSystemConfigEditor.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The config's custom inspector, including Update save file classes and Bring back removed rows.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Config/SaveSystemConfigEditor.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the config asset's custom inspector &mdash; the UI with "Update save file classes" and "Bring back removed rows" buttons you actually interact with when editing the save file list. Read this to change how the config asset's Inspector looks or behaves.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileDefinitionDrawer</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileDefinitionDrawer.cs" title="Ping Modules/SaveSystem/Editor/Config/SaveFileDefinitionDrawer.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileDefinitionDrawer.cs" title="Open Modules/SaveSystem/Editor/Config/SaveFileDefinitionDrawer.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Draws one save file list row: name, <a class="term" href="../api/SaveLocation.html#save-location">save location</a>, Backup box.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Config/SaveFileDefinitionDrawer.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: draws one row of the save file list in the config inspector &mdash; its name field, save-location dropdown, and Backup checkbox. Read this to change how an individual row is laid out.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileReferenceDrawer</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileReferenceDrawer.cs" title="Ping Modules/SaveSystem/Editor/Config/SaveFileReferenceDrawer.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileReferenceDrawer.cs" title="Open Modules/SaveSystem/Editor/Config/SaveFileReferenceDrawer.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Shows a <code><a class="term" href="../api/SaveFileReference.html">SaveFileReference</a></code> field as a dropdown of the config's save files.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Config/SaveFileReferenceDrawer.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: draws a <code>SaveFileReference</code> field in the Inspector as a dropdown of the config's save files, instead of the default raw-struct view. This is what makes <code>SaveFileReference</code> fields pickable by designers in the first place.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileListStatus</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileListStatus.cs" title="Ping Modules/SaveSystem/Editor/Config/SaveFileListStatus.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileListStatus.cs" title="Open Modules/SaveSystem/Editor/Config/SaveFileListStatus.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Whether the save file list has changes Update save file classes hasn't applied yet.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Config/SaveFileListStatus.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: tracks whether the save file list has pending changes that "Update save file classes" hasn't applied yet, so the config inspector knows when to show its out-of-sync warning.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileListSync</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileListSync.cs" title="Ping Modules/SaveSystem/Editor/Config/SaveFileListSync.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileListSync.cs" title="Open Modules/SaveSystem/Editor/Config/SaveFileListSync.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Keeps the save file list complete: built-in rows first, one row per module save file class.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Config/SaveFileListSync.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: keeps the save file list complete and in order &mdash; built-in rows first, then exactly one row per module save file class found in the project. Runs whenever the list needs reconciling with what the code actually defines.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFilesCodeWriter</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFilesCodeWriter.cs" title="Ping Modules/SaveSystem/Editor/Config/SaveFilesCodeWriter.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFilesCodeWriter.cs" title="Open Modules/SaveSystem/Editor/Config/SaveFilesCodeWriter.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Writes <code>GameSaveFiles.cs</code> from the save file list: one class per game save file.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Config/SaveFilesCodeWriter.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: generates <code>GameSaveFiles.cs</code> from the save file list &mdash; one class per game-defined save file &mdash; whenever "Update save file classes" runs. Read this to see exactly how a config row turns into a real <code>ISaveFile</code> class.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileListBuildGuard</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileListBuildGuard.cs" title="Ping Modules/SaveSystem/Editor/Config/SaveFileListBuildGuard.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileListBuildGuard.cs" title="Open Modules/SaveSystem/Editor/Config/SaveFileListBuildGuard.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Fails the build while the save file list has unapplied changes.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Config/SaveFileListBuildGuard.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: fails the build outright while the save file list has changes that haven't been applied yet, so a stale <code>GameSaveFiles.cs</code> can never ship. Read this if a build is failing with an unapplied-save-file-list error.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileListPlayModeGuard</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileListPlayModeGuard.cs" title="Ping Modules/SaveSystem/Editor/Config/SaveFileListPlayModeGuard.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveFileListPlayModeGuard.cs" title="Open Modules/SaveSystem/Editor/Config/SaveFileListPlayModeGuard.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Blocks play mode while the save file list has unapplied changes.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/Config/SaveFileListPlayModeGuard.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: blocks entering Play mode in the editor for the same reason the build guard blocks a build &mdash; an unapplied save file list change &mdash; catching the problem earlier, before you even press Play.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="editor-bridge">
+<h2>Editor/SaveBridgeAndRegistration<a class="anchor" href="#editor-bridge">#</a></h2>
+<p>Adds and checks Savable Bridges, and the bridge inspector's cards.</p>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavableBridgeEditor</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeEditor.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeEditor.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeEditor.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeEditor.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The <a class="term" href="../api/SavableBridge.html#savable-bridge">Savable Bridge</a>'s inspector: one card per saved script.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeEditor.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the Savable Bridge component's custom inspector &mdash; the one that draws a card per saved script you see when you select a GameObject with a bridge on it. Read this to change what that inspector shows.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavableBridgeAdder</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeAdder.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeAdder.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeAdder.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeAdder.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Adds a Savable Bridge to a GameObject that just gained a saved script, while editing.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeAdder.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: watches for a GameObject gaining a saved script while you're editing, and adds a Savable Bridge to it automatically so you never have to add one by hand.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavableBridgeEditTimeWatcher</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeEditTimeWatcher.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeEditTimeWatcher.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeEditTimeWatcher.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeEditTimeWatcher.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Watches for a saved script showing up while editing, so SavableBridgeAdder can act at once.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeEditTimeWatcher.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the editor-time watcher that notices when a saved script shows up on a GameObject, so <code>SavableBridgeAdder</code> can react immediately instead of waiting for some other trigger.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavableBridgeSceneCheck</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeSceneCheck.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeSceneCheck.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeSceneCheck.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeSceneCheck.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Finds a scene's saved scripts with no Savable Bridge.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeSceneCheck.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: finds every saved script in a scene that has no Savable Bridge on its GameObject &mdash; the shared check both the Play-mode warning and the build guard below are built on.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavableBridgePlayModeCheck</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgePlayModeCheck.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgePlayModeCheck.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgePlayModeCheck.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgePlayModeCheck.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Logs saved scripts with no bridge when Play is pressed.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgePlayModeCheck.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: logs a Console warning for every saved script with no bridge the moment you press Play, so a missing bridge shows up immediately during normal testing rather than only at build time.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavableBridgeSceneBuildGuard</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeSceneBuildGuard.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeSceneBuildGuard.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeSceneBuildGuard.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeSceneBuildGuard.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Fails the build when a scene has a saved script with no bridge.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavableBridgeSceneBuildGuard.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: fails the build if any scene being built has a saved script with no Savable Bridge, so the problem can't ship even if it was missed during Play-mode testing.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedFieldScan</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldScan.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldScan.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldScan.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldScan.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Scans every <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> field after each compile and logs one error per mistake.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldScan.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: scans every <code>[Save]</code> field in the project after each compile and logs one Console error per mistake it finds &mdash; the same checks <code>SavedFieldRules</code> defines. This is what actually surfaces a <code>[Save]</code> mistake to you as soon as you save a script.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedFieldPlayModeGuard</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldPlayModeGuard.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldPlayModeGuard.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldPlayModeGuard.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldPlayModeGuard.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Blocks play mode while a <code>[Save]</code> mistake exists.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldPlayModeGuard.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: blocks entering Play mode while any <code>[Save]</code> field mistake exists in the project, catching the problem before you start testing rather than mid-session.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedFieldBuildGuard</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldBuildGuard.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldBuildGuard.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldBuildGuard.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldBuildGuard.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Fails the build while a <code>[Save]</code> mistake exists.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedFieldBuildGuard.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: fails the build while any <code>[Save]</code> field mistake exists, the build-time counterpart to the Play mode guard, so a known mistake can never make it into a shipped build.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveSystemBodyGuard</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SaveSystemBodyGuard.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SaveSystemBodyGuard.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SaveSystemBodyGuard.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SaveSystemBodyGuard.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Reports a saved script whose save file class has no row in the config.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SaveSystemBodyGuard.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: reports a saved script whose save file class has no matching row in the config &mdash; a mismatch that would otherwise fail silently at runtime. Surfaces as a Console message so it gets caught during development.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SaveFileRowCheck</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SaveFileRowCheck.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SaveFileRowCheck.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SaveFileRowCheck.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SaveFileRowCheck.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Whether a saved script's save file has a config row; shared by the Console check and the card.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SaveFileRowCheck.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: the shared check behind both <code>SaveSystemBodyGuard</code>'s Console message and the warning badge on a saved script's card &mdash; does this script's save file actually have a row in the config.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedScriptMistakes</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedScriptMistakes.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedScriptMistakes.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedScriptMistakes.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedScriptMistakes.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">The mistakes one saved script's class can show on its card.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedScriptMistakes.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: collects the specific mistakes one saved script's class can show on its card in the bridge inspector or the Saved Objects window &mdash; missing config row, invalid <code>[Save]</code> field, and so on &mdash; so the card can display them together.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedObjectCard</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedObjectCard.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedObjectCard.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedObjectCard.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedObjectCard.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">One saved script's card: its fields or custom data, live values in play mode, its save ID.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedObjectCard.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: draws one saved script's full card &mdash; its fields or custom data, live values while the game runs, and its save ID &mdash; reused by both the Savable Bridge inspector and the Saved Objects window so the two show saved scripts identically.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedObjectDescription</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedObjectDescription.cs" title="Ping Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedObjectDescription.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedObjectDescription.cs" title="Open Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedObjectDescription.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Everything a card needs to draw, built from a bridge's saved script or a registered saved object.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SaveBridgeAndRegistration/SavedObjectDescription.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: gathers everything a <code>SavedObjectCard</code> needs to draw, built either from a bridge's saved script (in the editor) or from a live registered saved object (while the game runs) &mdash; the shared data model behind both views.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="editor-window">
+<h2>Editor/SavedObjectsWindow<a class="anchor" href="#editor-window">#</a></h2>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedObjectsWindow</code> <span class="kind k-class">class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectsWindow.cs" title="Ping Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectsWindow.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectsWindow.cs" title="Open Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectsWindow.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Tools &gt; ... &gt; Saved Objects: every registered saved object, grouped by save file, while the game runs.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectsWindow.cs</span>
+</summary>
+<div class="map-body">
+<p>Open it from Tools &gt; External Project Tools &gt; Save System &gt; Saved Objects while the game is running, to see every currently-registered saved object grouped by save file and, for scene data, by scene &mdash; the fastest way to check a specific value without pausing to inspect a GameObject directly. See <a href="debug.html#saved-objects">Debug and inspect</a> for a walkthrough.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">SavedObjectGrouping</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectGrouping.cs" title="Ping Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectGrouping.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectGrouping.cs" title="Open Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectGrouping.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">One header in the window: a save file, or a scene inside a Scene save file.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/SavedObjectsWindow/SavedObjectGrouping.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: one header row inside the Saved Objects window &mdash; either a whole save file, or one scene nested inside the Scene save file's group. Read this to change how that window organizes what it shows.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<section id="editor-hierarchy">
+<h2>Editor/HierarchyBadge<a class="anchor" href="#editor-hierarchy">#</a></h2>
+<ul class="map-tree">
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">HierarchySavedBadge</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/HierarchyBadge/HierarchySavedBadge.cs" title="Ping Modules/SaveSystem/Editor/HierarchyBadge/HierarchySavedBadge.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/HierarchyBadge/HierarchySavedBadge.cs" title="Open Modules/SaveSystem/Editor/HierarchyBadge/HierarchySavedBadge.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Draws the "Saved" badge on a Hierarchy row for the classic IMGUI Hierarchy window.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/HierarchyBadge/HierarchySavedBadge.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: draws the small "Saved" badge next to a GameObject's name in the classic IMGUI Hierarchy window, so you can tell at a glance which objects in a scene are tracked by the save system. See <a href="debug.html#saved-objects">Debug and inspect</a> for what the badge looks like and what its variants mean.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">HierarchyBadgeRows</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/HierarchyBadge/HierarchyBadgeRows.cs" title="Ping Modules/SaveSystem/Editor/HierarchyBadge/HierarchyBadgeRows.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/HierarchyBadge/HierarchyBadgeRows.cs" title="Open Modules/SaveSystem/Editor/HierarchyBadge/HierarchyBadgeRows.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Draws the same badge for the UI Toolkit Hierarchy window (Unity 6.7 and 7).</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/HierarchyBadge/HierarchyBadgeRows.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: draws the same "Saved" badge as <code>HierarchySavedBadge</code>, but for the newer UI Toolkit&ndash;based Hierarchy window used on Unity 6.7 and 7. Exists because Unity's two Hierarchy implementations need separate drawing code.</p>
+</div>
+</details>
+</li>
+<li class="map-row">
+<details>
+<summary>
+<span class="map-head"><code class="map-name">HierarchyBadgeCache</code> <span class="kind k-static">static class</span><span class="map-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/HierarchyBadge/HierarchyBadgeCache.cs" title="Ping Modules/SaveSystem/Editor/HierarchyBadge/HierarchyBadgeCache.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/HierarchyBadge/HierarchyBadgeCache.cs" title="Open Modules/SaveSystem/Editor/HierarchyBadge/HierarchyBadgeCache.cs in your default .cs editor">Open in Visual Studio</button></span></span>
+<span class="map-sum">Works out and caches each row's badge: none, saved, mistake, or children save.</span>
+<span class="map-path">Abstract Pixel Library/Modules/SaveSystem/Editor/HierarchyBadge/HierarchyBadgeCache.cs</span>
+</summary>
+<div class="map-body">
+<p>Internal: works out and caches what badge a Hierarchy row should show &mdash; none, saved, a mistake, or "children save" for a collapsed parent &mdash; so the Hierarchy doesn't recompute this on every repaint. Read this to change what triggers each badge variant.</p>
+</div>
+</details>
+</li>
+</ul>
+</section>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

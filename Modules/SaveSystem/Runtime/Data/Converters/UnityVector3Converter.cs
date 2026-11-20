@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace AbstractPixel.SaveSystem
 {
-    public sealed class UnityVector3Converter : JsonConverter<Vector3>
+    internal sealed class UnityVector3Converter : JsonConverter<Vector3>
     {
         public override void WriteJson(JsonWriter _writer, Vector3 _value, Newtonsoft.Json.JsonSerializer _serializer)
         {

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Save, restore and react to data</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Set up the save system config, put [Save] on a field, call SaveActions, and react after a restore with IOnRestored.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/save-data.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Save, restore and react to data <span class="lv lv1">1 daily code</span></h1>
+<p class="lede">Set up the config once, then put <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> on the fields you want to keep.</p>
+
+<section id="which">
+<h2>Which way to save <a class="anchor" href="#which">#</a></h2>
+<p>Most saved objects just need <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> fields. Reach for the others only when they solve a real problem below.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Way</th><th>Use it when</th></tr></thead>
+<tbody>
+<tr><td><code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> fields</td><td>The default. Your data is already plain fields: numbers, Vector3, lists, or your own <code>[Serializable]</code> classes.</td></tr>
+<tr><td><code>[Save]</code> fields + <a class="type" href="../api/ISaveIn.html">ISaveIn&lt;TFile&gt;</a></td><td>Same as above, but this data belongs in a specific file, not the default <a class="term" href="../api/GameProfile.html#game-profile">GameProfile</a> one: a Global setting, or a Scene file. See <a href="save-files.html">Choose where data goes</a>.</td></tr>
+<tr><td><a class="type" href="../api/IOnRestored.html">IOnRestored</a></td><td>You need to run code right after this object's data comes back, such as pushing a loaded value onto a Transform. Add it alongside <code>[Save]</code> fields or <code><a class="term" href="../api/ISavable.html">ISavable</a></code>; it doesn't hold data on its own.</td></tr>
+<tr><td><a class="type" href="../api/ISavable.html">ISavable&lt;TData&gt;</a></td><td>Your data isn't plain fields: it needs converting on the way in or out, or holds something JSON can't store. See <a href="custom-data.html">Saving complex data with ISavable</a>.</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="setup">
+<h2>Set up a project <span class="lv lv0">0 no code</span><a class="anchor" href="#setup">#</a></h2>
+<p>In the Unity menu, choose <strong>Tools &gt; External Project Tools &gt; Save System &gt; Create Config</strong>. Nothing goes in a scene.</p>
+<div class="see"><strong>Show the result</strong>The menu item creates <code>Assets/Resources/SaveSystemConfig.asset</code>, shown in the <a class="type" href="../api/SaveSystemConfigSO.html">SaveSystemConfigSO</a> inspector. The save system reads it before the first scene loads.</div>
+<div class="note warn"><strong>With no config</strong>, the save system logs one error naming the menu item. Save calls do nothing, and the game keeps running.</div>
+<details class="wrong"><summary>If it goes wrong</summary>
+<dl>
+<dt>"Can't find the save system config" in the Console</dt>
+<dd>Run Create Config. The error names the exact menu path.</dd>
+<dt>Two configs after a merge</dt>
+<dd>Delete the one you don't want. Only the asset at <code>Assets/Resources/SaveSystemConfig.asset</code> is read.</dd>
+</dl>
+</details>
+</section>
+
+<section id="field">
+<h2>Save a field on a script <span class="lv lv1">1 daily code</span><a class="anchor" href="#field">#</a></h2>
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity">Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity</button></div>
+<a class="try-open" href="../../Samples/01 Save A Field/README.html" target="_blank" rel="noopener">Open sample 01: Save A Field →</a>
+</summary>
+<div class="try-body">
+<p>Sample 01 · Save A Field</p>
+<ol>
+<li>Open the <b>Save A Field</b> scene and press Play.</li>
+<li>Press <b>Take 10 damage</b> and <b>Find an item</b> a few times, then press <b>Save</b>.</li>
+<li>Press <b>Reload scene</b>.</li>
+</ol>
+</div>
+</details>
+<p>Put <a class="term" href="../api/SaveAttribute.html#saved-field">[Save]</a> on each field you want to keep. Public, private and inherited fields all work, on numbers, text, bools, enums, and the types below.</p>
+<figure class="code">
+<figcaption>Health.cs: a saved field of each common type</figcaption>
+<pre><code class="cs">public class Health : MonoBehaviour
+{
+    [Save] int current = 100;
+    [Save] Vector3 lastCheckpoint;
+    [Save] Quaternion lastFacing;
+    [Save] List&lt;Vector3&gt; visitedCheckpoints = new List&lt;Vector3&gt;();
+    [Save] Dictionary&lt;string, Quaternion&gt; savedPoses = new Dictionary&lt;string, Quaternion&gt;();
+}</code></pre>
+</figure>
+<p>Saved fields also work on arrays, <code>Color</code>, <code>Rect</code>, and any <code>[Serializable]</code> class. The editor adds a <a class="type" href="../api/SavableBridge.html">Savable Bridge</a> to the GameObject, which connects every saved script on it to the save system.</p>
+<figure class="pic">
+<svg viewBox="0 0 560 90" role="img" aria-labelledby="lifecycle-title">
+<title id="lifecycle-title">Awake sets starting values, then the save system restores saved data, then Start runs using the restored value.</title>
+<rect class="svg-box" x="10" y="25" width="140" height="40" rx="8"/><text class="svg-h" x="40" y="50">Awake</text>
+<path class="svg-arrow" d="M150 45 L195 45"/>
+<rect class="svg-key" x="200" y="25" width="160" height="40" rx="8"/><text class="svg-h" x="222" y="50">Restore</text>
+<path class="svg-arrow" d="M360 45 L405 45"/>
+<rect class="svg-box" x="410" y="25" width="140" height="40" rx="8"/><text class="svg-h" x="440" y="50">Start</text>
+</svg>
+<div class="lifecycle-steps">
+<div><strong>Awake</strong><span>Set starting values.</span></div>
+<div><strong>Restore</strong><span>The saved value loads into the variable.</span></div>
+<div><strong>Start</strong><span>Use the restored value. Don't reset it here.</span></div>
+</div>
+<figcaption>Saved data arrives between Awake and Start. A saved field set in Start loses what was just restored.</figcaption>
+</figure>
+<div class="note warn"><strong>Don't reset a saved field in Start.</strong> The save system restores saved data after every <code>Awake</code> and before any <code>Start</code>, so resetting it in <code>Start</code> overwrites the value just loaded. Set new-game values in the field's initializer or in <code>Awake</code> instead.</div>
+<div class="see"><strong>Show the result</strong>After Play, the Savable Bridge's inspector lists <code>Health</code> and its save ID. The saved JSON holds a field named "current", not "Health" or "100" alone:
+<pre class="out"><code>{ "current": 70, "lastCheckpoint": { "x": 2, "y": 0, "z": -4 } }</code></pre>
+</div>
+<details class="wrong"><summary>If it goes wrong</summary>
+<dl>
+<dt>The field keeps its new-game value after Reload scene</dt>
+<dd>Something in <code>Start</code> or <code>OnEnable</code> is setting the field back to its new-game value, after the save system already restored the loaded one there. Move that assignment to the field's initializer or to <code>Awake</code>.</dd>
+<dt>No Savable Bridge appears on the GameObject</dt>
+<dd>The editor only adds the bridge to a GameObject if its script has a <a class="type" href="../api/SaveAttribute.html">save attribute</a> or implements <a class="type" href="../api/ISavable.html">ISavable</a>. Add one of the two for the bridge to appear.</dd>
+</dl>
+</details>
+</section>
+
+<section id="saving">
+<h2>Save, reload and autosave <span class="lv lv0">0 no code</span> <span class="lv lv1">1 daily code</span><a class="anchor" href="#saving">#</a></h2>
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity">Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity</button></div>
+<a class="try-open" href="../../Samples/02 Buttons With No Code/README.html" target="_blank" rel="noopener">Open sample 02: Buttons With No Code →</a>
+</summary>
+<div class="try-body">
+<p>Sample 02 · Buttons With No Code</p>
+<ol>
+<li>Open the <b>Buttons With No Code</b> scene and press Play.</li>
+<li>Press the <b>Save</b> and <b>Reload</b> buttons and watch the Console.</li>
+</ol>
+</div>
+</details>
+<p>Game code calls <a class="type" href="../api/SaveActions.html">SaveActions</a>. There is no Load call: a script gets its data when it registers.</p>
+<figure class="code">
+<figcaption>SaveActions: the calls you'll use most</figcaption>
+<pre><code class="cs">SaveActions.SaveAll();
+SaveActions.Save&lt;SaveFiles.Settings&gt;();
+SaveActions.Reload&lt;SaveFiles.Settings&gt;();
+SaveActions.Forget(coin.gameObject);</code></pre>
+</figure>
+<p>A save file on disk holds data for objects that aren't loaded right now too, such as a boss in another scene: saving one file never touches data for objects outside it.</p>
+<p>Destroying a GameObject (or one of its saved scripts) without calling <code>Forget</code> first leaves its last saved values on disk untouched. The next time something tries to capture its data, there's no live object left to read, so the save system logs that and keeps what was already saved instead of overwriting it with nothing. To make the data actually go away, call <code>Forget</code> before destroying it, as the samples do.</p>
+<p>For buttons and UnityEvents, add <a class="type" href="../api/MonoSaveActions.html">MonoSaveActions</a> instead of writing this code. The config's autosave checkboxes can save on quit, on focus loss, when a scene unloads, or every few minutes; all are off by default.</p>
+<details class="wrong"><summary>If it goes wrong</summary>
+<dl>
+<dt>SaveAll writes nothing</dt>
+<dd>Nothing changed since the last save. SaveAll only writes a file that changed.</dd>
+<dt><a class="term" href="../api/SaveEventBus.html">SaveEventBus</a>.OnSaveFailed fires</dt>
+<dd>See <a href="events.html">React to loads and saves</a>. The previous good file stays on disk.</dd>
+</dl>
+</details>
+</section>
+
+<section id="renaming">
+<h2>Rename without losing data <span class="lv lv1">1 daily code</span><a class="anchor" href="#renaming">#</a></h2>
+<p>A saved field's name is part of its save data, so renaming a field can lose data. <code>Formerly</code> keeps it, on a MonoBehaviour exactly as on any other saved class:</p>
+<figure class="code">
+<figcaption>Health.cs: renaming a saved field on a MonoBehaviour</figcaption>
+<pre><code class="cs">public class Health : MonoBehaviour
+{
+    [Save(Formerly = "hp")] int current;
+}</code></pre>
+</figure>
+<p>A class's automatic <a class="term" href="../api/SavableBridge.html#save-id">save ID</a> is its class name, so renaming the class can lose data too, unless it has <code>[SaveId]</code>. This only matters for a class registered with <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.Register</code>, a plain class or an <a class="type" href="../api/ISavable.html">ISavable</a> one: both kinds work the same way.</p>
+<figure class="code">
+<figcaption>PlayerBag.cs: keeping a plain class's save ID through a rename</figcaption>
+<pre><code class="cs">[SaveId("Backpack")]
+public class PlayerBag
+{
+    [Save] int gold;
+}</code></pre>
+</figure>
+<div class="note">A MonoBehaviour placed in a scene never needs <code>[SaveId]</code>. Its save ID comes from its Savable Bridge, not its class name, so renaming the class changes nothing.</div>
+<p>Moving a class from <code><a class="term" href="../api/ISavable.html">ISavable</a>&lt;TData&gt;</code> to <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> fields keeps its data too, as long as each field's name matches what <code>ISavable</code> wrote:</p>
+<figure class="code">
+<figcaption>Before and after: the same saved value, two ways</figcaption>
+<pre><code class="cs">// Before: an ISavable class.
+public class Settings : ISavable&lt;int&gt;
+{
+    int volume;
+    public Settings() =&gt; SaveActions.Register(this);
+    public int CaptureData() =&gt; volume;
+    public void RestoreData(int data) =&gt; volume = data;
+}
+
+// After: one [Save] field, same data, same Register call.
+public class Settings
+{
+    [Save] int volume;
+    public Settings() =&gt; SaveActions.Register(this);
+}</code></pre>
+</figure>
+<p>Renaming a save file row in the config keeps its data too; see <a href="save-files.html">Choose where data goes</a>.</p>
+</section>
+
+<section id="restored">
+<h2>React after a restore: IOnRestored <span class="lv lv1">1 daily code</span><a class="anchor" href="#restored">#</a></h2>
+<p>Implement <a class="type" href="../api/IOnRestored.html">IOnRestored</a> to run code right after your saved object's data comes back. Its <code>OnRestored()</code> runs after every restore: after <code>Awake</code>, when new-game values apply, and when a different <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> opens.</p>
+<figure class="code">
+<figcaption>SaveTransform.cs: an IOnRestored example</figcaption>
+<pre><code class="cs">public class SaveTransform : MonoBehaviour, IOnRestored
+{
+    [Save] Vector3 position;
+    [Save] Quaternion rotation;
+    [Save] Vector3 localScale;
+
+    public void OnRestored()
+    {
+        transform.position = position;
+        transform.rotation = rotation;
+        transform.localScale = localScale;
+    }
+}</code></pre>
+</figure>
+<p><a class="type" href="../api/SaveTransform.html">SaveTransform</a> and <a class="type" href="../api/SaveActiveState.html">SaveActiveState</a> both use <code>OnRestored</code> this way: the fields hold the saved numbers, and <code>OnRestored</code> is where those numbers reach the GameObject.</p>
+<div class="note warn"><strong>An exception in OnRestored is logged, not thrown.</strong> The save system catches it, logs the saved object's type and <a class="term" href="../api/SavableBridge.html#save-id">save ID</a>, and keeps the data it already restored. The rest of the restore continues.</div>
+<details class="wrong"><summary>If it goes wrong</summary>
+<dl>
+<dt>OnRestored runs with fields still at their new-game values</dt>
+<dd>A field without <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> never gets restored. Check the field has the attribute.</dd>
+<dt>An error names your type and "OnRestored... failed"</dt>
+<dd>Your <code>OnRestored</code> threw. Fix the exception. The saved data underneath it is still intact.</dd>
+</dl>
+</details>
+</section>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

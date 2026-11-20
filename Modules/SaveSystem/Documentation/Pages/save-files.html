@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Choose where data goes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Pick a save file with ISaveIn<TFile>, the built-in and game save files, the three save locations, and the config fields.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/save-files.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Choose where data goes <span class="lv lv2">2 choices</span></h1>
+<p class="lede">With no choice, data goes in the built-in <a class="term" href="../api/GameProfile.html#game-profile">GameProfile</a> file. Pick another with <code><a class="term" href="../api/ISaveIn.html#save-file-choice">ISaveIn</a>&lt;TFile&gt;</code>.</p>
+
+<section id="choose-file">
+<h2>Choose the save file<a class="anchor" href="#choose-file">#</a></h2>
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity">Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity</button></div>
+<a class="try-open" href="../../Samples/04 Pick A Save File/README.html" target="_blank" rel="noopener">Open sample 04: Pick A Save File →</a>
+</summary>
+<div class="try-body">
+<p>Sample 04 · Pick A Save File</p>
+<ol>
+<li>Open the <b>Pick A Save File</b> scene and press Play.</li>
+<li>Change the volume and open a chest, then press <b>Save</b> and <b>Reload scene</b>.</li>
+</ol>
+</div>
+</details>
+<p>Add <a class="type" href="../api/ISaveIn.html">ISaveIn&lt;TFile&gt;</a> to a script to name its <a class="term" href="../api/ISaveIn.html#save-file-choice">save file choice</a>. A typo in the file's class name won't compile.</p>
+<figure class="code">
+<figcaption>Naming a save file</figcaption>
+<pre><code class="cs">public class VolumeSetting : MonoBehaviour, ISaveIn&lt;SaveFiles.Settings&gt;
+{
+    [Save] int volume = 5;
+}
+
+public class Chest : MonoBehaviour, ISaveIn&lt;SaveFiles.Scene&gt;
+{
+    [Save] bool isOpen;
+}</code></pre>
+</figure>
+<p>Which <a class="term" href="../api/SaveLocation.html#save-location">save location</a> each file lives in is under <a href="#locations">Save locations</a> below. The list of files themselves is under <a href="#files">Save files</a>.</p>
+</section>
+
+<section id="files">
+<h2>Save files<a class="anchor" href="#files">#</a></h2>
+<p>The config holds a <a class="term" href="../api/SaveSystemConfigSO.html#save-file-list">save file list</a>. Each row is one <a class="term" href="../api/ISaveFile.html#save-file">save file</a>, with a name, a <a class="term" href="../api/SaveLocation.html#save-location">save location</a>, and a Backup box.</p>
+<p>Every game has five <a class="term" href="../api/SaveFiles.html#built-in-save-file">built-in save files</a>. Their classes ship with the library, so library modules and game code can both use them. You can't remove or rename them; only their Backup box changes.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Built-in save file</th><th>Save location</th><th>For</th></tr></thead>
+<tbody>
+<tr><td><code><a class="term" href="../api/SaveFiles.html">SaveFiles</a>.<a class="term" href="../api/GameProfile.html#game-profile">GameProfile</a></code></td><td>Game Profile</td><td>One playthrough. The default when a script names no file.</td></tr>
+<tr><td><code>SaveFiles.Scene</code></td><td>Scene</td><td>One scene in one playthrough.</td></tr>
+<tr><td><code>SaveFiles.Settings</code></td><td>Global</td><td>Volume, graphics. The Settings module uses it.</td></tr>
+<tr><td><code>SaveFiles.Input</code></td><td>Global</td><td>Input bindings.</td></tr>
+<tr><td><code>SaveFiles.Achievements</code></td><td>Global</td><td>Achievements.</td></tr>
+</tbody>
+</table></div>
+<p>Add rows for your own <a class="term" href="../api/SaveFiles.html#game-save-file">game save files</a>, such as Ghosts. The editor writes their classes into <code>GameSaveFiles.cs</code>.</p>
+<figure class="code">
+<figcaption>GameSaveFiles.cs: written by the editor</figcaption>
+<pre><code class="cs">public static class GameSaveFiles
+{
+    public sealed class Ghosts : ISaveFile { }
+}</code></pre>
+</figure>
+<pre class="out"><code>SaveActions.Save&lt;SaveFiles.Settings&gt;();
+SaveActions.Save&lt;GameSaveFiles.Ghosts&gt;();</code></pre>
+<p>Renaming a row keeps its old data, because each row remembers the name it was saved under. A library module brings its own <a class="type" href="../api/SaveFileDefaultsAttribute.html">SaveFileDefaults</a> file when no built-in one fits, and the editor adds its row for you.</p>
+<div class="note warn"><strong>Two rows that would share a file on disk get a warning on each row.</strong> "Ghost Runs" and "Ghost_Runs" count as the same file, because Windows file names ignore case and turn spaces into underscores. <code>GameSaveFiles.cs</code> isn't written until you fix it.</div>
+</section>
+
+<section id="locations">
+<h2>Save locations<a class="anchor" href="#locations">#</a></h2>
+<p>Each save file lives in one of three <a class="term" href="../api/SaveLocation.html#save-location">save locations</a>. The row in the config decides which.</p>
+<figure class="pic">
+<svg viewBox="0 0 680 210" role="img" aria-labelledby="loc-title">
+<title id="loc-title">Global holds files every game profile shares. Each game profile holds its GameProfile file and one Scene file per scene.</title>
+<rect class="svg-box" x="10" y="10" width="190" height="190" rx="10"/>
+<text class="svg-h" x="26" y="36">Global</text>
+<text class="svg-m" x="26" y="54">shared by every <a class="term" href="../api/GameProfile.html#game-profile">game profile</a></text>
+<rect class="svg-file" x="26" y="70" width="158" height="28" rx="6"/><text class="svg-t" x="36" y="89">Settings</text>
+<rect class="svg-file" x="26" y="106" width="158" height="28" rx="6"/><text class="svg-t" x="36" y="125">Input</text>
+<rect class="svg-file" x="26" y="142" width="158" height="28" rx="6"/><text class="svg-t" x="36" y="161">Achievements</text>
+<rect class="svg-box" x="220" y="10" width="450" height="190" rx="10"/>
+<text class="svg-h" x="236" y="36">Game Profile 1</text>
+<text class="svg-m" x="236" y="54">one playthrough</text>
+<rect class="svg-file" x="236" y="70" width="170" height="28" rx="6"/><text class="svg-t" x="246" y="89"><a class="term" href="../api/GameProfile.html#game-profile">GameProfile</a></text>
+<text class="svg-m" x="246" y="114">coins, inventory</text>
+<rect class="svg-inner" x="422" y="70" width="228" height="112" rx="8"/>
+<text class="svg-h" x="436" y="90">Scene</text>
+<text class="svg-m" x="436" y="106">one file per scene</text>
+<rect class="svg-file" x="436" y="116" width="198" height="28" rx="6"/><text class="svg-t" x="446" y="135">Forest: open chests</text>
+<rect class="svg-file" x="436" y="150" width="198" height="28" rx="6"/><text class="svg-t" x="446" y="169">Cave: open chests</text>
+</svg>
+<figcaption>Opening another game profile keeps Global and swaps everything on the right.</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead><tr><th><a class="term" href="../api/SaveLocation.html#save-location">Save location</a></th><th>Holds</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><a class="term" href="../api/SaveLocation.html#global">Global</a></td><td>Data every game profile shares</td><td>Settings, input bindings, achievements</td></tr>
+<tr><td><a class="term" href="../api/GameProfile.html#game-profile">Game Profile</a></td><td>One playthrough</td><td>Coins, inventory</td></tr>
+<tr><td><a class="term" href="../api/SaveLocation.html#scene">Scene</a></td><td>One scene in one playthrough</td><td>Open chests in the Forest</td></tr>
+</tbody>
+</table></div>
+<p>Switching game profiles keeps Global data and swaps the rest. An object in an additive scene saves into its own scene's file.</p>
+</section>
+
+<section id="config">
+<h2>Config fields<a class="anchor" href="#config">#</a></h2>
+<p>On <a class="type" href="../api/SaveSystemConfigSO.html">SaveSystemConfigSO</a>, at <code>Assets/Resources/SaveSystemConfig.asset</code>, made by <a href="save-data.html#setup">Create Config</a>.</p>
+<figure class="pic">
+<img src="../images/save-system-config-inspector.png" width="784" height="672" loading="lazy" alt="The config inspector: the fields below, then the save file list with the five built-in rows, each with a Backup box and its SaveFiles class.">
+<figcaption>The config with the five built-in save file rows. The ? at the top right opens this section.</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead><tr><th>Config field</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>Use Debug Path</td><td>Saves into a folder inside the project instead of the player's save folder, so you can read the files while you work.</td></tr>
+<tr><td>Startup Policy</td><td><code>AutoSetUp</code> opens the last <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> before the first scene. <code>Manual</code> waits for your save slot screen.</td></tr>
+<tr><td>Default Game Profile Name</td><td>The name every new game profile gets, followed by its slot number, such as "Game Profile 2".</td></tr>
+<tr><td>Game Profile Guid Length</td><td>How many characters a game profile's folder name has.</td></tr>
+<tr><td>Primary File Extension</td><td>The file type save files are written as.</td></tr>
+<tr><td>Save On Quit, Save On Focus Loss</td><td>Autosave on quit, and when the game loses focus. Both off by default.</td></tr>
+<tr><td>Save On Scene Unload, Autosave Interval Minutes</td><td>Autosave when a scene unloads, and every this many minutes. Both off by default.</td></tr>
+<tr><td>Game Save Files Script Path</td><td>Where the editor writes <code>GameSaveFiles.cs</code>.</td></tr>
+<tr><td>Save file list</td><td>One row per save file. See <a href="#files">Save files</a> above.</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

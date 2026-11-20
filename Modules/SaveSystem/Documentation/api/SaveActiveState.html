@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SaveActiveState</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveActiveState saves whether a GameObject is active, with no other code.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SaveActiveState.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SaveActiveState <span class="lv lv0">0 no code</span></h1>
+<p class="lede">Saves whether this GameObject is active, with no other code.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Component (MonoBehaviour)</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveActiveState.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveActiveState.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveActiveState.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveActiveState.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveActiveState.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#ready-made-savers">Ready-made savers</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-data.html#restored">React after a restore: IOnRestored</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity">Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity</button></div>
+<a class="try-open" href="../../Samples/02 Buttons With No Code/README.html" target="_blank" rel="noopener">Open sample 02: Buttons With No Code &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 02 &middot; Buttons With No Code</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<p>Add the component in the Inspector. Nothing else to call.</p>
+<figure class="code">
+<figcaption>Adding Save Active State</figcaption>
+<pre><code class="cs">door.AddComponent&lt;SaveActiveState&gt;();</code></pre>
+</figure>
+<div class="note warn"><strong>Only an object that starts active can be turned off and restored.</strong> An object that starts inactive never runs its <code>Awake</code>, so it never registers with the save system at all.</div>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Methods</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public void OnRestored()</code><span class="desc"><span class="kind k-method">method</span> Sets this GameObject active or inactive to match the saved value.</span></summary>
+<div class="body">Implements <a class="type" href="IOnRestored.html">IOnRestored</a>. Skips itself for one restore right after you turn the object back on at runtime, so it can't immediately turn itself off again.</div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>An object that starts inactive in the scene never saves</dt>
+<dd>Expected: its <code>Awake</code> never runs, so it never registers. Start it active, or save its state from a parent object instead.</dd>
+<dt>Turning the object on in code doesn't stick after a reload</dt>
+<dd>Make sure you're turning it on through normal GameObject activation, not by disabling this component.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="SaveTransform.html">SaveTransform</a>, <a class="type" href="SaveDestroyed.html">SaveDestroyed</a>, <a href="../Pages/save-data.html#restored">React after a restore: IOnRestored</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SaveDestroyed</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveDestroyed forgets then destroys a GameObject, so a pickup or a broken object stays gone after a reload.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SaveDestroyed.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SaveDestroyed <span class="lv lv1">1 daily code</span></h1>
+<p class="lede">Forgets this GameObject, then destroys it, so a pickup or a broken object stays gone after a reload.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Component (MonoBehaviour)</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveDestroyed.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveDestroyed.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveDestroyed.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveDestroyed.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveDestroyed.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#ready-made-savers">Ready-made savers</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/remove-for-good.html">Forgetting saved data for good</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity">Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity</button></div>
+<a class="try-open" href="../../Samples/02 Buttons With No Code/README.html" target="_blank" rel="noopener">Open sample 02: Buttons With No Code &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 02 &middot; Buttons With No Code</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>Picking up a coin for good</figcaption>
+<pre><code class="cs">void OnTriggerEnter(Collider other)
+{
+    GetComponent&lt;SaveDestroyed&gt;().DestroyAndForget();
+}</code></pre>
+</figure>
+<div class="note warn"><strong>Call DestroyAndForget, never Destroy directly.</strong> Forget must run first, while the <a class="term" href="../api/SavableBridge.html#savable-bridge">Savable Bridge</a> still has this object's entry. Destroy's own teardown unregisters it before a later, separate Forget call could find it.</div>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Methods</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public void DestroyAndForget()</code><span class="desc"><span class="kind k-method">method</span> Forgets this GameObject's saved data, then destroys it.</span></summary>
+<div class="body">Equivalent to <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.Forget(gameObject); Destroy(gameObject);</code> in the right order. Forgetting a scene object writes a <strong id="gone-marker">gone marker</strong>: a note, filed under this object's <a class="term" href="../api/SavableBridge.html#save-id">save ID</a>, that it was removed during play. It belongs to one <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> like any other data, and makes the object turn itself off the next time its scene loads.</div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>The object comes back after a reload</dt>
+<dd>Something called <code>Destroy(gameObject)</code> directly instead of <code>DestroyAndForget()</code>. See <a href="../Pages/remove-for-good.html">Forgetting saved data for good</a>.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="SaveTransform.html">SaveTransform</a>, <a class="type" href="SaveActions.html">SaveActions</a>, <a href="../Pages/remove-for-good.html">Forgetting saved data for good</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

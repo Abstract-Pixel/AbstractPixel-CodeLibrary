@@ -1,0 +1,268 @@
+/* Shared styles for the Abstract Pixel Library docs. Offline: no fonts or files load from the internet.
+   Rules: DOCS-STANDARD.md at the library root. */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --ink: #1b2230; --muted: #5a6475; --line: #dde1e8;
+  --accent: #2d55c8; --term: #0f7f86; --type: #2d55c8; --term-hover: #1a8f4c;
+  --warn: #a24a2a; --warn-soft: #f8ece6; --good: #1c7558; --good-soft: #e5f2ec; --try-soft: #eaf0fd; --try-pink-soft: #fbe9f3; --try-pink-line: #e3a9c8;
+  --code-bg: #f3f5f9; --code-ink: #222a38;
+  --hl-com: #6f7a8b; --hl-key: #8a2ca8; --hl-str: #a3461f; --hl-num: #0f7f86; --hl-type: #1f6f9c; --hl-attr: #6e6a00; --hl-call: #6b4fbb;
+  --hl-mod: #b23a2e; --hl-param: #9c3f6b;
+  --l0: #1c7558; --l1: #2d55c8; --l2: #7a4cc2; --l3: #b0522c;
+  --k-method: #6b4fbb; --k-prop: #1f6f9c; --k-event: #a3461f; --k-attr: #6e6a00; --k-type: #1c7558;
+  --k-class: #2d55c8; --k-struct: #0f7f86; --k-interface: #7a4cc2; --k-enum: #8a6d00; --k-component: #1c7558; --k-static: #b0522c; --k-abstract: #6b4fbb;
+  --font-display: "Segoe UI Semibold", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d; --surface: #1a1f28; --ink: #e5e9f0; --muted: #9aa4b5; --line: #2c3340;
+    --accent: #8aa6ff; --term: #5fd0c8; --type: #8aa6ff; --term-hover: #5fe091;
+    --warn: #e39572; --warn-soft: #2e211c; --good: #6fcfa8; --good-soft: #18291f; --try-soft: #1b2338;
+    --code-bg: #161b23; --code-ink: #dbe1ea; --try-pink-soft: #2e1f28; --try-pink-line: #6b3a52;
+    --hl-com: #8390a3; --hl-key: #d29bf0; --hl-str: #e9a27c; --hl-num: #6fd3cb; --hl-type: #7cc4ef; --hl-attr: #d9d27a; --hl-call: #b6a4ff;
+    --hl-mod: #ef8f82; --hl-param: #e3a0c6;
+    --l0: #6fcfa8; --l1: #8aa6ff; --l2: #c3a3f5; --l3: #e39572;
+    --k-method: #b6a4ff; --k-prop: #7cc4ef; --k-event: #e9a27c; --k-attr: #d9d27a; --k-type: #6fcfa8;
+    --k-class: #8aa6ff; --k-struct: #5fd0c8; --k-interface: #c3a3f5; --k-enum: #e0c468; --k-component: #6fcfa8; --k-static: #e39572; --k-abstract: #b6a4ff;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 16px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; padding: 24px 16px 64px; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code { font-family: var(--font-mono); font-size: 0.88em; }
+p code, li code, td code, dd code, h3 code, figcaption code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+
+/* Layout: nav tree, reading column, "on this page". */
+.page { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 230px minmax(0, 1fr) 190px; gap: 40px; }
+@media (max-width: 1150px) { .page { grid-template-columns: 220px minmax(0, 1fr); } .toc { display: none; } }
+@media (max-width: 820px) { .page { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+.tree, .toc { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; font-size: 0.9rem; }
+@media (max-width: 820px) { .tree { position: static; max-height: none; } }
+.tree .module { display: block; font-family: var(--font-display); font-size: 1.05rem; color: var(--ink); text-decoration: none; margin-bottom: 8px; }
+.tree button.group { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; font: inherit; font-family: var(--font-display); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); background: none; border: none; border-bottom: 1px solid var(--line); text-align: left; cursor: pointer; padding: 14px 10px 6px; margin-top: 4px; }
+.tree button.group .caret { font-size: 1rem; line-height: 1; color: var(--ink); flex: none; transition: transform 0.15s ease; }
+.tree button.group[aria-expanded="false"] .caret { transform: rotate(-90deg); }
+.tree ol { list-style: none; margin: 0; padding: 0; }
+.tree ol.group-items[hidden] { display: none; }
+.tree a.item { display: block; padding: 4px 10px; border-radius: 6px; text-decoration: none; color: var(--ink); }
+.tree a.item:hover { background: var(--surface); }
+.tree a.item.current { background: var(--surface); box-shadow: inset 3px 0 0 var(--accent); font-weight: 600; }
+.tree a.item.sub { padding-left: 22px; font-family: var(--font-mono); font-size: 0.8rem; }
+.tree li.subgroup-item { margin: 2px 0; }
+.tree button.subgroup { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--muted); background: none; border: none; text-align: left; cursor: pointer; padding: 5px 10px 5px 22px; }
+.tree button.subgroup:hover { color: var(--ink); }
+.tree button.subgroup .caret { font-size: 0.85rem; line-height: 1; flex: none; transition: transform 0.15s ease; }
+.tree button.subgroup[aria-expanded="false"] .caret { transform: rotate(-90deg); }
+.tree li.subgroup-item .group-items a.item.sub { padding-left: 34px; }
+.tree li.subgroup-item .group-items[hidden] { display: none; }
+.toc .label { font-family: var(--font-display); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+.toc a { display: block; padding: 3px 0 3px 10px; border-left: 2px solid var(--line); color: var(--muted); text-decoration: none; }
+.toc a.active { border-left-color: var(--accent); color: var(--ink); }
+
+main { min-width: 0; max-width: 820px; }
+/* A page with no nav tree or toc (a sample README) centers main itself instead of relying on the grid. */
+main.solo { margin: 0 auto; }
+.crumbs { font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; }
+.crumbs a { color: var(--muted); }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.8rem, 3.5vw, 2.3rem); line-height: 1.2; margin: 4px 0 8px; }
+.lede { font-size: 1.08rem; color: var(--muted); margin: 0 0 8px; }
+.meta { display: grid; grid-template-columns: max-content 1fr; gap: 2px 14px; font-size: 0.88rem; margin: 12px 0 0; }
+.meta dt { color: var(--muted); }
+.meta dd { margin: 0; }
+.meta .file-actions { display: inline-flex; gap: 6px; margin-left: 8px; flex-wrap: wrap; vertical-align: middle; }
+.meta .file-actions .scene-btn { font-size: 0.78em; padding: 1px 9px; }
+section { padding-top: 28px; margin-top: 28px; border-top: 1px solid var(--line); }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.4rem; margin: 0 0 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+h3 { font-family: var(--font-display); font-size: 1.05rem; margin: 22px 0 6px; }
+h2 .anchor, h3 .anchor { font-size: 0.8em; color: var(--muted); text-decoration: none; opacity: 0; }
+h2:hover .anchor, h3:hover .anchor { opacity: 1; }
+ul, ol { padding-left: 1.3em; }
+li { margin: 3px 0; }
+
+/* Ladder level pills and kind badges. */
+.lv { font-family: var(--font-body); font-size: 0.72rem; font-weight: 700; border-radius: 999px; padding: 1px 9px; color: var(--bg); white-space: nowrap; }
+.lv0 { background: var(--l0); } .lv1 { background: var(--l1); } .lv2 { background: var(--l2); } .lv3 { background: var(--l3); }
+.kind { font-family: var(--font-body); font-size: 0.72rem; font-weight: 600; border: 1px solid currentColor; border-radius: 999px; padding: 0 8px; white-space: nowrap; }
+.k-method { color: var(--k-method); } .k-prop { color: var(--k-prop); } .k-event { color: var(--k-event); } .k-attr { color: var(--k-attr); } .k-type { color: var(--k-type); }
+.k-class { color: var(--k-class); } .k-struct { color: var(--k-struct); } .k-interface { color: var(--k-interface); } .k-enum { color: var(--k-enum); } .k-component { color: var(--k-component); } .k-static { color: var(--k-static); } .k-abstract { color: var(--k-abstract); }
+
+/* Links to glossary terms and to type pages. */
+a.term { color: var(--type); text-decoration: underline; text-underline-offset: 3px; }
+a.term:hover { color: var(--term-hover); }
+a.type { font-family: var(--font-mono); font-size: 0.9em; color: var(--type); text-decoration: none; background: var(--code-bg); padding: 0.05em 0.35em; border-radius: 4px; }
+a.type:hover { text-decoration: underline; }
+.tip { position: absolute; z-index: 10; max-width: 340px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; line-height: 1.45; box-shadow: 0 6px 20px rgba(0,0,0,0.15); pointer-events: none; }
+.tip strong { display: block; color: var(--term); }
+
+/* Boxes: try it in the sample, you should see, warnings, if it goes wrong. */
+.see, .note, .wrong { border-radius: 10px; padding: 12px 16px; margin: 14px 0; }
+.see > strong:first-child, .wrong > strong:first-child { display: block; margin-bottom: 2px; }
+.see { background: var(--good-soft); border-left: 3px solid var(--good); border-radius: 0 10px 10px 0; }
+.note { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; }
+.note.warn { background: var(--warn-soft); border-left-color: var(--warn); }
+.wrong { background: var(--surface); border: 1px solid var(--line); }
+.wrong dl { margin: 6px 0 0; }
+.wrong dt { font-weight: 600; margin-top: 8px; }
+.wrong dd { margin: 0; }
+details.wrong summary { cursor: pointer; font-weight: 600; list-style: none; }
+details.wrong summary::-webkit-details-marker { display: none; }
+details.wrong summary::before { content: "▸ "; display: inline-block; transition: transform 0.15s ease; }
+details.wrong[open] summary::before { transform: rotate(90deg); }
+details.wrong dl { margin: 10px 0 0; }
+details.wrong dt { font-weight: 600; margin-top: 8px; }
+details.wrong dt:first-child { margin-top: 0; }
+details.wrong dd { margin: 0; }
+
+/* Try it in the sample: collapsed by default. Collapsed shows the scene button and the open-page link;
+   expanded adds the setup steps. */
+details.try { background: var(--try-soft); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; margin: 14px 0; }
+details.try summary { cursor: pointer; list-style: none; }
+details.try summary::-webkit-details-marker { display: none; }
+/* The collapse arrow sits on the same line as the "Try it in the sample" label, not above it. */
+.try-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.try-head::before { content: "▸ "; display: inline-block; flex: none; transition: transform 0.15s ease; }
+details.try[open] .try-head::before { transform: rotate(90deg); }
+.try-open { display: block; margin-top: 6px; font-size: 0.9rem; }
+details.try .try-body { margin-top: 10px; }
+details.try .try-body ol { margin: 6px 0 4px; }
+/* The sample sub-section on a Types page: the same try-it box, tinted to stand apart from the
+   guide-link part above it. */
+details.try.pink { background: var(--try-pink-soft); border-color: var(--try-pink-line); }
+
+/* The scene button in a sample's Try it step: pings the scene in Unity, or falls back when Unity isn't running. */
+.scene-btn { font: inherit; font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 3px 10px; cursor: pointer; max-width: 100%; }
+.scene-btn:hover { border-color: var(--accent); }
+.try-head .scene-btn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scene-btn-status { display: block; font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+
+/* Code blocks: a title bar, then the code. docs.js colours C# and adds a Copy button. */
+figure.code { position: relative; margin: 14px 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--code-bg); }
+figure.code figcaption { font-size: 0.82rem; font-weight: 600; padding: 7px 70px 7px 14px; background: var(--surface); color: var(--ink); border-bottom: 1px solid var(--line); }
+figure.code figcaption span { font-weight: 400; color: var(--muted); }
+.copy { position: absolute; top: 5px; right: 6px; font: inherit; font-size: 0.75rem; color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 1px 8px; cursor: pointer; }
+.copy:hover { color: var(--ink); }
+pre { margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.83rem; line-height: 1.55; color: var(--code-ink); }
+pre code { font-size: inherit; background: none; padding: 0; }
+.hl-com { color: var(--hl-com); font-style: italic; } .hl-key { color: var(--hl-key); } .hl-str { color: var(--hl-str); }
+.hl-num { color: var(--hl-num); } .hl-type { color: var(--hl-type); } .hl-attr { color: var(--hl-attr); } .hl-call { color: var(--hl-call); }
+/* public/private/static/... : bolded and its own colour, so a member's access level never needs a trip to Visual Studio. */
+.hl-mod { color: var(--hl-mod); font-weight: 600; }
+/* A method's own parameter names, so they read apart from types and local/field names. */
+.hl-param { color: var(--hl-param); }
+pre.out { background: var(--surface); }
+
+/* Tables. */
+.table-wrap { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; padding: 8px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-family: var(--font-display); font-weight: 600; font-size: 0.8rem; color: var(--muted); background: var(--bg); }
+tr:last-child td { border-bottom: none; }
+td.nowrap, th.nowrap { white-space: nowrap; }
+td.level { white-space: nowrap; text-align: center; }
+td.level .lv { display: inline-block; margin-bottom: 2px; }
+td.level span.name { display: block; font-size: 0.82rem; color: var(--muted); }
+
+/* A tree view of types grouped by responsibility, on the Type reference index page: one row per
+   type, a small branch tick to read as a tree, kind badge inline, one-line summary below. */
+.type-tree { list-style: none; margin: 10px 0 20px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.type-tree li { margin: 0; padding: 10px 14px 10px 30px; border-bottom: 1px solid var(--line); position: relative; }
+.type-tree li:last-child { border-bottom: none; }
+.type-tree li::before { content: ""; position: absolute; left: 13px; top: 19px; width: 9px; height: 1px; background: var(--line); }
+.type-tree .sum { display: block; margin-top: 4px; font-size: 0.88rem; color: var(--muted); }
+
+/* Code map: one collapsible row per script, grouped by folder. Collapsed shows the kind badge, the
+   Ping/Open buttons and the file path; expanded adds the "when to use" text and, for a public type,
+   a link to its own page. Reuses the type-tree's bordered-list look. */
+.map-tree { list-style: none; margin: 10px 0 20px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.map-row { border-bottom: 1px solid var(--line); }
+.map-row:last-child { border-bottom: none; }
+.map-row summary { list-style: none; cursor: pointer; padding: 10px 14px; }
+.map-row summary::-webkit-details-marker { display: none; }
+.map-row details[open] summary { background: var(--bg); }
+.map-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.map-head::before { content: "▸ "; display: inline-block; flex: none; color: var(--muted); transition: transform 0.15s ease; }
+.map-row details[open] .map-head::before { transform: rotate(90deg); }
+.map-name { font-weight: 600; color: var(--ink); }
+.map-actions { margin-left: auto; display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.map-actions .scene-btn { font-size: 0.78em; padding: 1px 9px; }
+.map-sum { display: block; margin-top: 4px; padding-left: 16px; font-size: 0.88rem; color: var(--muted); }
+.map-path { display: block; margin-top: 2px; padding-left: 16px; font-size: 0.78rem; font-family: var(--font-mono); color: var(--muted); opacity: 0.8; }
+.map-body { padding: 0 14px 14px 30px; font-size: 0.92rem; }
+.map-body p { margin: 6px 0; }
+
+/* Members on a type page: one row each, details open in place. */
+.members { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin: 10px 0 18px; }
+.members details { border-bottom: 1px solid var(--line); }
+.members details:last-child { border-bottom: none; }
+.members summary { list-style: none; cursor: pointer; padding: 8px 14px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr); gap: 4px 16px; align-items: baseline; }
+.members summary::-webkit-details-marker { display: none; }
+.members summary code { color: var(--ink); font-weight: 600; }
+.members summary .desc { color: var(--muted); font-size: 0.9rem; }
+@media (max-width: 640px) { .members summary { grid-template-columns: 1fr; } }
+.members .body { padding: 0 14px 12px; font-size: 0.93rem; }
+.members details[open] summary { background: var(--bg); }
+
+/* Cards and the sample chips. */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 14px 0; }
+.card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; text-decoration: none; color: var(--ink); }
+.card:hover { border-color: var(--accent); }
+.card strong { display: block; font-family: var(--font-display); margin: 2px 0 2px; }
+.card p { margin: 4px 0 0; font-size: 0.87rem; color: var(--muted); }
+.chip { display: inline-block; font-size: 0.85rem; text-decoration: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 2px 12px; margin: 2px 4px 2px 0; }
+.chip:hover { border-color: var(--accent); }
+.back { display: inline-block; margin: 0 0 12px; padding: 4px 12px; border-radius: 999px; background: var(--try-soft); border: 1px solid var(--line); text-decoration: none; font-weight: 600; }
+
+/* Pictures and diagrams. */
+figure.pic { margin: 14px 0; }
+figure.pic img { max-width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 8px; }
+figure.pic svg { width: 100%; height: auto; display: block; }
+figure.pic figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 6px; }
+.lifecycle-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
+.lifecycle-steps > div { text-align: center; }
+.lifecycle-steps strong { display: block; font-size: 0.85rem; }
+.lifecycle-steps span { display: block; font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+@media (max-width: 560px) { .lifecycle-steps { grid-template-columns: 1fr; } }
+.svg-box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.svg-inner { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; }
+.svg-file { fill: var(--code-bg); stroke: var(--accent); stroke-width: 1.2; }
+.svg-key { fill: var(--good-soft); stroke: var(--good); stroke-width: 1.5; }
+.svg-t { fill: var(--ink); font-family: var(--font-body); font-size: 13px; }
+.svg-h { fill: var(--ink); font-family: var(--font-display); font-size: 14px; font-weight: 600; }
+.svg-m { fill: var(--muted); font-family: var(--font-body); font-size: 12px; }
+.svg-arrow { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+svg a:hover .svg-box, svg a:hover .svg-file { stroke: var(--accent); }
+
+/* Interactive diagrams: hovering or focusing a node traces its connections by dimming everything
+   else, and each node links to where it's documented. */
+.map-diagram a.map-node, .map-diagram .drill-toggle { cursor: pointer; }
+.map-diagram .map-node:focus { outline: none; }
+.map-diagram .map-node:focus .svg-box, .map-diagram .map-node:focus .svg-key { stroke: var(--accent); stroke-width: 2; }
+.map-diagram.diagram-active .map-node.dim, .map-diagram.diagram-active .map-edge.dim { opacity: 0.3; transition: opacity 0.15s ease; }
+.map-diagram .map-node.lit .svg-box, .map-diagram .map-node.lit .svg-key { stroke: var(--accent); stroke-width: 2.5; }
+.map-diagram .map-edge.lit { stroke: var(--accent); stroke-width: 2.25; }
+.map-diagram .map-node, .map-diagram .map-edge { transition: opacity 0.15s ease; }
+
+/* A drill-down panel: clicking a top-level box shows how its own parts connect, below the main
+   diagram. Only one open at a time. SVG elements don't get the HTML UA stylesheet's [hidden] rule
+   in every browser, so this is spelled out explicitly rather than relied on. */
+.map-diagram .drill[hidden] { display: none; }
+.map-diagram .drill-toggle.active .svg-box, .map-diagram .drill-toggle.active .svg-key { stroke: var(--accent); stroke-width: 2.5; }
+
+/* The floating "where I came from" indicator: a single pointer back to the page you were just on,
+   not a growing trail. An overlay, not part of the page flow, so it never pushes layout around on
+   any of the 40-odd existing pages. Fills its rectangle with one centered arrow and label. */
+.history-trail { position: fixed; top: 10px; right: 10px; z-index: 400; width: 160px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; text-decoration: none; box-shadow: 0 2px 10px rgba(0,0,0,0.12); }
+.history-trail:hover { border-color: var(--accent); }
+.history-trail-arrow { font-size: 1.25rem; line-height: 1; color: var(--ink); }
+.history-trail-label { font-size: 0.78rem; color: var(--muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+.history-trail:hover .history-trail-label { color: var(--accent); }
+@media (max-width: 820px) { .history-trail { position: static; width: auto; min-height: 0; flex-direction: row; justify-content: flex-start; border-radius: 999px; padding: 6px 14px; margin: 0 0 14px; } }
+
+.pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); }
+.pager a { text-decoration: none; }
+footer { margin-top: 24px; color: var(--muted); font-size: 0.85rem; }
+footer a { color: var(--muted); margin-right: 14px; }

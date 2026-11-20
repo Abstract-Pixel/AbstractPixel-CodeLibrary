@@ -1,0 +1,31 @@
+{
+    "name": "AbstractPixel.BroAudioTimeline",
+    "rootNamespace": "AbstractPixel.BroAudioTimeline",
+    "references": [
+        "BroAudio",
+        "Unity.Timeline"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "ABSTRACTPIXEL_BROAUDIO",
+        "ABSTRACTPIXEL_TIMELINE"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.ami.broaudio",
+            "expression": "",
+            "define": "ABSTRACTPIXEL_BROAUDIO"
+        },
+        {
+            "name": "com.unity.timeline",
+            "expression": "1.8.0",
+            "define": "ABSTRACTPIXEL_TIMELINE"
+        }
+    ],
+    "noEngineReferences": false
+}

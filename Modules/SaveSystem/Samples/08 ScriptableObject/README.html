@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>08 ScriptableObject - Save System Samples</title>
+<meta name="description" content="A GameProgress ScriptableObject asset with [Save] fields that registers itself with the save system.">
+<link rel="stylesheet" href="../../Documentation/assets/docs.css">
+</head>
+<body data-root="../../Documentation/">
+<main class="solo">
+<p class="crumbs"><a href="../../Documentation/index.html">Save System</a> › <a href="../README.html">Samples</a> › 08</p>
+<h1>08 ScriptableObject <span class="lv lv1">1 daily code</span></h1>
+<p class="lede">A <code>GameProgress</code> asset with <code><a class="type" href="../../Documentation/api/SaveAttribute.html">[Save]</a></code> fields that registers itself in <code>OnEnable</code>. A later step of the save system makes the registering automatic.</p>
+<dl>
+<dt>Scene</dt><dd>ScriptableObject</dd>
+<dt>Scripts</dt><dd>GameProgress.cs, GameProgressScreen.cs</dd>
+<dt>Asset</dt><dd>Game Progress.asset</dd>
+<dt>Save file</dt><dd>Built-in <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">GameProfile</a> (nothing to add to the config)</dd>
+<dt>Guide</dt><dd><a href="../../Documentation/Pages/save-objects.html">Save plain classes, ScriptableObjects and spawned copies</a></dd>
+</dl>
+
+<h2>Try it</h2>
+<ol>
+<li><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/08 ScriptableObject/ScriptableObject.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/08 ScriptableObject/ScriptableObject.unity">Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/08 ScriptableObject/ScriptableObject.unity</button> opens the scene in Unity, then press Play.</li>
+<li>Press <b>Complete a level</b> and <b>Earn a star</b>, then <b>Save</b>.</li>
+<li>Stop, then press Play again.</li>
+</ol>
+<div class="see"><strong>You should see</strong>The levels and stars come back.</div>
+
+<h2>The lines that matter</h2>
+<figure class="code">
+<figcaption>GameProgress.cs, GameProgressScreen.cs</figcaption>
+<pre data-source="Scripts/GameProgress.cs Scripts/GameProgressScreen.cs"><code>[Save] public int LevelsCompleted;            // saved like any other [Save] field
+RegisterWithSaveSystem();                     // in OnEnable
+SaveActions.Register(this, "game-progress");  // a fixed save ID, so renames never lose data
+progress.RegisterWithSaveSystem();            // GameProgressScreen.Awake registers it again</code></pre>
+</figure>
+<p>In the Editor, Unity can load the asset before play mode starts the save system, so <code>OnEnable</code> runs too early. <code>GameProgressScreen.Awake</code> registers the asset again to cover that. Registering twice is harmless.</p>
+<p>Values you change on an asset in play mode stay in the Editor's memory after you stop, until the save system restores the saved ones on the next Play.</p>
+
+<nav>
+<a href="../07%20Whole%20Files%20With%20SaveStorage/README.html">← 07 Whole Files With SaveStorage</a>
+<a href="../README.html">All samples</a>
+<a href="../../Documentation/index.html">Save system guide</a>
+</nav>
+<p class="crumbs">The guide also opens from <b>Tools &gt; External Project Tools &gt; Save System &gt; Open Guide</b>.</p>
+</main>
+<script src="../../Documentation/assets/glossary-data.js" defer></script>
+<script src="../../Documentation/assets/docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>IOnRestored</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="IOnRestored runs right after a saved object's data is restored, including when new-game values apply.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/IOnRestored.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>IOnRestored <span class="lv lv1">1 daily code</span></h1>
+<p class="lede">Called on a saved object right after each <a class="term" href="../api/ISavable.html#restore">restore</a>: after <code>Awake</code>, when new-game values apply, and when a different <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> opens. Use it to refresh anything that read the data before it was restored.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Interface</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/IOnRestored.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/IOnRestored.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/IOnRestored.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/IOnRestored.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/IOnRestored.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-core">Core restore pipeline</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/events.html">React to loads and saves</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity">Modules/SaveSystem/Samples/02 Buttons With No Code/Buttons With No Code.unity</button></div>
+<a class="try-open" href="../../Samples/02 Buttons With No Code/README.html" target="_blank" rel="noopener">Open sample 02: Buttons With No Code &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 02 &middot; Buttons With No Code</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>SaveActiveState.cs: an IOnRestored example</figcaption>
+<pre><code class="cs">public class SaveActiveState : MonoBehaviour, IOnRestored
+{
+    [Save] bool isActive = true;
+
+    public void OnRestored()
+    {
+        gameObject.SetActive(isActive);
+    }
+}</code></pre>
+</figure>
+<p>Implement <code>IOnRestored</code> on any saved object (a MonoBehaviour, a plain class, or a ScriptableObject). There is nothing else to register: the save system finds it through the interface.</p>
+</section>
+
+<section id="timing">
+<h2>When it runs<a class="anchor" href="#timing">#</a></h2>
+<p><code>OnRestored()</code> fires at the end of every restore path, both a restore from a save file and a restore of new-game values for a fresh <a class="term" href="../api/GameProfile.html#game-profile">game profile</a>. The order on scene load is: <code>Awake</code>, then the restore and <code>OnRestored()</code>, then <code>Start</code>. See <a href="../Pages/save-data.html#restored">Save, restore and react to data</a>.</p>
+<div class="note warn"><strong>An exception in OnRestored is caught and logged, not thrown.</strong> The save system logs the saved object's type and <a class="term" href="../api/SavableBridge.html#save-id">save ID</a>, then keeps going: "OnRestored on &lt;Type&gt; (save ID '&lt;id&gt;') failed: &lt;message&gt; The restored data is kept." The field values your <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> fields already hold are not rolled back, only your <code>OnRestored</code> code didn't finish running.</div>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Methods</h3>
+<div class="members">
+<details id="restored-notice">
+<summary><code class="cs">void OnRestored()</code><span class="desc"><span class="kind k-method">method</span> Runs right after this object's data is restored.</span></summary>
+<div class="body">This call is the <strong>restored notice</strong>: every saved object that implements <code>IOnRestored</code> gets it after each restore, including a restore of new-game values. Takes no arguments and returns nothing. Read the <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> fields or <code><a class="term" href="../api/ISavable.html">ISavable</a></code> data you already have; don't write to them here.</div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>OnRestored never runs</dt>
+<dd>The object has no saved data to restore yet (nothing was ever saved for it), or it has no <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> field and no <code><a class="term" href="../api/ISavable.html">ISavable</a></code> implementation, so the save system never tracks it.</dd>
+<dt>A value read in Start is still the new-game value</dt>
+<dd>Read it in <code>OnRestored</code> instead. <code>Start</code> can run before a load event, but <code>OnRestored</code> always runs before <code>Start</code>.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="SaveTransform.html">SaveTransform</a>, <a class="type" href="SaveActiveState.html">SaveActiveState</a>, <a href="../Pages/events.html">React to loads and saves</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

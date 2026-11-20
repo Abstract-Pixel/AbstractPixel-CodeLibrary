@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SavableBridge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SavableBridge connects the saved scripts on a GameObject to the save system. The editor adds it automatically.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SavableBridge.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SavableBridge <span class="lv lv0">0 no code</span></h1>
+<p class="lede" id="savable-bridge">Connects the saved scripts on this GameObject to the save system. A saved script implements <code><a class="term" href="../api/ISavable.html">ISavable</a>&lt;TData&gt;</code>, or puts <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> on a field. The editor adds this component by itself, and it gives each saved script a save ID.</p>
+<p id="save-id">A <strong>save ID</strong> is the name a saved object's data is filed under in its save file. Only one live object can hold a given save ID in a given save file at a time. A plain class's save ID is its class name by default ("Inventory", then "Inventory 2" for a second live instance); a scene object's comes from its Savable Bridge; a spawned copy needs its own from <code><a class="term" href="../api/SavedScriptExtensions.html">SetSaveId</a></code>, below.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Component (MonoBehaviour)</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/SavedObjects/SavableBridge.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavableBridge.cs" title="Ping Modules/SaveSystem/Runtime/SavedObjects/SavableBridge.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/SavedObjects/SavableBridge.cs" title="Open Modules/SaveSystem/Runtime/SavedObjects/SavableBridge.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-savedobjects">Saved objects</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-objects.html">Save plain classes, ScriptableObjects and spawned copies</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity">Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity</button></div>
+<a class="try-open" href="../../Samples/01 Save A Field/README.html" target="_blank" rel="noopener">Open sample 01: Save A Field &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 01 &middot; Save A Field</p>
+</div>
+</details>
+</section>
+
+<section id="inspector">
+<h2>In the Inspector<a class="anchor" href="#inspector">#</a></h2>
+<figure class="pic">
+<img src="../images/save-system-bridge-inspector.png" alt="The Savable Bridge inspector, showing a card per saved script with its save ID">
+<figcaption>One card per saved script on the GameObject, in component order.</figcaption>
+</figure>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Inspector label</th><th>API member</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>Unique Id</td><td><a href="#member-uniqueid"><code>UniqueId</code></a></td><td>This GameObject's part of every saved script's save ID. Read-only.</td></tr>
+<tr><td>(each saved script's card)</td><td>—</td><td>Shows that script's save ID and its saved fields, read from the save system's own view of it.</td></tr>
+</tbody>
+</table>
+</div>
+<p>The editor adds this component by itself, the first time a script on the GameObject gets a <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> field or implements <code><a class="term" href="../api/ISavable.html">ISavable</a></code>.</p>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<p>A scene object never needs to call this directly. A spawned copy calls <code><a class="term" href="../api/SavedScriptExtensions.html">SetSaveId</a></code> so it doesn't share its prefab's save ID.</p>
+<figure class="code">
+<figcaption>Giving a spawned copy its own save ID</figcaption>
+<pre><code class="cs">Goblin goblin = Instantiate(goblinPrefab);
+goblin.GetComponent&lt;SavableBridge&gt;().SetSaveId($"goblin-{spawnPoint.name}");</code></pre>
+</figure>
+<p>Most scripts call <code>SetSaveId</code> through <a class="type" href="SavedScriptExtensions.html">SavedScriptExtensions</a> instead, directly on the saved script.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Properties</h3>
+<div class="members">
+<details id="member-uniqueid">
+<summary><code class="cs">public string UniqueId</code><span class="desc"><span class="kind k-prop">property</span> This GameObject's part of every saved script's save ID. Read-only.</span></summary>
+<div class="body"></div>
+</details>
+</div>
+<h3>Methods</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public void SetSaveId(string saveId)</code><span class="desc"><span class="kind k-method">method</span> Gives a spawned copy its own save ID.</span></summary>
+<div class="body">Call it right after <code>Instantiate</code>, before the copy's <code>Start</code>. The bridge waits for it instead of registering with the prefab's shared ID.</div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>"was spawned after its scene was already loaded, with no <a class="term" href="../api/SavedScriptExtensions.html">SetSaveId</a> call" in the Console</dt>
+<dd>Call <code>SetSaveId</code> right after <code>Instantiate</code>, before the copy's <code>Start</code>.</dd>
+<dt>No Savable Bridge appears on a GameObject with a <a class="type" href="../api/SaveAttribute.html">[Save]</a> field</dt>
+<dd>Enter or exit Play Mode once, or re-save the scene, so the editor's scan runs again.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="SavedScriptExtensions.html">SavedScriptExtensions</a>, <a href="../Pages/save-objects.html">Save plain classes, ScriptableObjects and spawned copies</a>, <a href="../Pages/debug.html#saved-objects">Debug and inspect</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

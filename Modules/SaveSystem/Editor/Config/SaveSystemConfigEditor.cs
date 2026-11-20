@@ -1,0 +1,180 @@
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
+
+namespace AbstractPixel.SaveSystem.Editor
+{
+    /// <summary>
+    /// The save system config's inspector. Update save file classes shows while the list has changes that aren't
+    /// applied: a game row added, renamed or removed, or a default row removed. Pressing it writes GameSaveFiles.cs
+    /// and keeps removed default rows out; Bring back removed rows puts them back.
+    /// </summary>
+    [CustomEditor(typeof(SaveSystemConfigSO))]
+    public class SaveSystemConfigEditor : UnityEditor.Editor
+    {
+        const string StyleSheetPath = "Packages/com.abstractpixel.library/Modules/SaveSystem/Editor/Config/SaveSystemConfigEditor.uss";
+
+        public static StyleSheet LoadStyleSheet()
+        {
+            return AssetDatabase.LoadAssetAtPath<StyleSheet>(StyleSheetPath);
+        }
+
+        public override VisualElement CreateInspectorGUI()
+        {
+            SaveSystemConfigSO config = (SaveSystemConfigSO)target;
+
+            VisualElement root = new VisualElement();
+            root.styleSheets.Add(LoadStyleSheet());
+
+            SerializedProperty property = serializedObject.GetIterator();
+            property.NextVisible(true);
+            while (property.NextVisible(false))
+            {
+                bool isSaveFileList = property.name == "saveFileList";
+                if (!isSaveFileList)
+                {
+                    root.Add(new PropertyField(property.Copy()));
+                }
+            }
+
+            root.Add(new HelpBox("The save file list. Each row is one save file. GameProfile, Scene, Settings, Input and Achievements are built in: their classes ship with the library, such as SaveFiles.Settings. Press Update save file classes to write a class for each row you add into GameSaveFiles.cs, so game code writes SaveActions.Save<GameSaveFiles.Ghosts>(). Library modules add their own rows. You can remove any row but GameProfile; press Update save file classes to keep it removed.", HelpBoxMessageType.Info));
+
+            SerializedProperty listProperty = serializedObject.FindProperty("saveFileList");
+            // The list is what people come here for, so it starts open.
+            listProperty.isExpanded = true;
+            PropertyField listField = new PropertyField(listProperty, "Save File List");
+            root.Add(listField);
+            HookNewRowReset(listField);
+
+            VisualElement updateArea = BuildUpdateArea(config);
+            root.Add(updateArea);
+            // TrackSerializedObjectValue works for most changes, but a plain interval is unconditionally
+            // correct regardless of what any future list control change does internally, matching the same
+            // defensive polling SavedObjectCard already uses for its own similarly externally-driven refresh.
+            root.schedule.Execute(() => RefreshUpdateArea(config, updateArea)).Every(200);
+
+            VisualElement removedArea = BuildRemovedArea(config, updateArea);
+            root.Add(removedArea);
+            root.schedule.Execute(() => RefreshRemovedArea(config, removedArea)).Every(200);
+
+            return root;
+        }
+
+        // The list's array insert (the same one its own "+" button uses) duplicates the previous element's
+        // values, including BuiltIn/ClassFullName/StorageName - so a new row silently clashes with, and is
+        // mistaken for, whatever row it was inserted after, and never counts as a game save file needing a
+        // class. ListView's own ListView isn't ready the instant this method runs, so this polls briefly for it.
+        void HookNewRowReset(VisualElement listField)
+        {
+            IVisualElementScheduledItem findListView = null;
+            findListView = listField.schedule.Execute(() =>
+            {
+                ListView listView = listField.Q<ListView>();
+                if (listView == null)
+                {
+                    return;
+                }
+                listView.itemsAdded += ResetNewRows;
+                findListView.Pause();
+            }).Every(50);
+        }
+
+        void ResetNewRows(IEnumerable<int> indices)
+        {
+            SerializedProperty list = serializedObject.FindProperty("saveFileList");
+            foreach (int index in indices)
+            {
+                if (index < 0 || index >= list.arraySize)
+                {
+                    continue;
+                }
+                SerializedProperty row = list.GetArrayElementAtIndex(index);
+                row.FindPropertyRelative(nameof(SaveFileDefinition.Name)).stringValue = string.Empty;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.Location)).intValue = (int)SaveLocation.GameProfile;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.Backup)).boolValue = true;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.StorageName)).stringValue = string.Empty;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.ClassFullName)).stringValue = string.Empty;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.ClassAssemblyName)).stringValue = string.Empty;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.BuiltIn)).intValue = (int)BuiltInSaveFile.None;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.AddedBy)).stringValue = string.Empty;
+                row.FindPropertyRelative(nameof(SaveFileDefinition.EncryptFile)).boolValue = false;
+            }
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        VisualElement BuildUpdateArea(SaveSystemConfigSO config)
+        {
+            VisualElement area = new VisualElement();
+
+            Label waitingLabel = new Label("The save file list has changes that aren't applied yet.");
+            waitingLabel.AddToClassList("save-file-list__waiting");
+            area.Add(waitingLabel);
+
+            Button updateButton = new Button(() => WriteNow(config, area)) { text = "Update save file classes" };
+            updateButton.AddToClassList("save-file-list__actions");
+            area.Add(updateButton);
+
+            RefreshUpdateArea(config, area);
+            return area;
+        }
+
+        // The button and its line disappear together once GameSaveFiles.cs matches the list.
+        void RefreshUpdateArea(SaveSystemConfigSO config, VisualElement area)
+        {
+            // A row just added or removed through the list's own buttons is still only on the SerializedObject
+            // side until this runs, so config.SaveFileList (the actual object) would otherwise read stale data.
+            serializedObject.ApplyModifiedProperties();
+            // Remembering the default rows on show makes taking one out later count as removing it, on any config.
+            if (SaveFileListSync.RememberDefaults(config.SaveFileList, config.EditableKnownDefaultSaveFiles))
+            {
+                EditorUtility.SetDirty(config);
+            }
+            bool isOutOfDate = SaveFileListStatus.IsOutOfDate(config);
+            area.style.display = isOutOfDate ? DisplayStyle.Flex : DisplayStyle.None;
+            // Disabled, not hidden, while a clash blocks the write: the row above already says why.
+            area.Q<Button>().SetEnabled(SaveFileClash.FindAll(config.SaveFileList).Count == 0);
+        }
+
+        void WriteNow(SaveSystemConfigSO config, VisualElement area)
+        {
+            SaveFilesCodeWriter.WriteFile(config);
+            serializedObject.Update();
+            RefreshUpdateArea(config, area);
+        }
+
+        // Lists the default rows the owner removed, with a way to put them all back.
+        VisualElement BuildRemovedArea(SaveSystemConfigSO config, VisualElement updateArea)
+        {
+            VisualElement area = new VisualElement();
+
+            Label removedLabel = new Label();
+            removedLabel.AddToClassList("save-file-list__waiting");
+            area.Add(removedLabel);
+
+            Button bringBackButton = new Button(() =>
+            {
+                Undo.RecordObject(config, "Bring back removed save file rows");
+                SaveFileListSync.BringBackRemovedRows(config.EditableSaveFileList, config.EditableRemovedDefaultSaveFiles, SaveFileListSync.FindModuleSaveFileClasses());
+                WriteNow(config, updateArea);
+                RefreshRemovedArea(config, area);
+            }) { text = "Bring back removed rows" };
+            bringBackButton.AddToClassList("save-file-list__actions");
+            area.Add(bringBackButton);
+
+            RefreshRemovedArea(config, area);
+            return area;
+        }
+
+        static void RefreshRemovedArea(SaveSystemConfigSO config, VisualElement area)
+        {
+            IReadOnlyList<string> removed = config.RemovedDefaultSaveFiles;
+            area.style.display = removed.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            if (removed.Count > 0)
+            {
+                List<string> names = SaveFileListSync.NamesOfRemoved(new List<string>(removed), SaveFileListSync.FindModuleSaveFileClasses());
+                area.Q<Label>().text = $"Removed default rows: {string.Join(", ", names)}.";
+            }
+        }
+    }
+}

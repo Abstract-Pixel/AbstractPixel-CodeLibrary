@@ -1,0 +1,76 @@
+using System;
+using System.Linq;
+
+namespace AbstractPixel.SaveSystem
+{
+    /// <summary>
+    /// Reads save files when a session, game profile or scene starts, records that they have loaded, and raises the
+    /// load and save events on <see cref="SaveEventBus"/>. Every event here comes after the data it speaks of.
+    /// </summary>
+    internal sealed class SaveSessionEvents
+    {
+        readonly SaveFileLookup saveFiles;
+        readonly LoadedSaveData loadedData;
+        readonly SaveFileAddresses addresses;
+        readonly ISceneInfo sceneInfo;
+        readonly LoadEventLog loadEvents;
+        readonly SaveFileClassFinder saveFileClasses;
+
+        public SaveSessionEvents(SaveFileLookup saveFiles, LoadedSaveData loadedData, SaveFileAddresses addresses, ISceneInfo sceneInfo, LoadEventLog loadEvents, SaveFileClassFinder saveFileClasses)
+        {
+            this.saveFiles = saveFiles;
+            this.loadedData = loadedData;
+            this.addresses = addresses;
+            this.sceneInfo = sceneInfo;
+            this.loadEvents = loadEvents;
+            this.saveFileClasses = saveFileClasses;
+        }
+
+        /// <summary>Reads every save file in one save location and records that each has loaded.</summary>
+        public void RecordLoads(SaveLocation location, string sceneName)
+        {
+            foreach (SaveFileDefinition definition in saveFiles.AllDefinitions.Where(definition => definition.Location == location))
+            {
+                loadedData.EnsureRead(addresses.AddressOf(definition, sceneName));
+                loadEvents.RecordLoad(saveFileClasses.Find(definition), location, sceneName);
+            }
+        }
+
+        // Every registered object is restored by now, so each GameProfile file, and each loaded scene's Scene files,
+        // can say it has loaded. Then everything has.
+        public void RecordGameProfileLoads()
+        {
+            loadEvents.ForgetGameProfileLoads();
+            RecordLoads(SaveLocation.GameProfile, null);
+            foreach (string sceneName in sceneInfo.LoadedSceneNames)
+            {
+                RecordLoads(SaveLocation.Scene, sceneName);
+            }
+            loadEvents.RecordLoadAll();
+        }
+
+        public void RaiseSaveCompleted(string fileName)
+        {
+            Type saveFileClass = SaveFileClassFor(fileName);
+            if (saveFileClass != null)
+            {
+                SaveEventBus.RaiseSaveCompleted(saveFileClass);
+            }
+        }
+
+        public void RaiseSaveFailed(string fileName, string reason)
+        {
+            Type saveFileClass = SaveFileClassFor(fileName);
+            if (saveFileClass != null)
+            {
+                SaveEventBus.RaiseSaveFailed(saveFileClass, reason);
+            }
+        }
+
+        Type SaveFileClassFor(string fileName)
+        {
+            bool isKnownFile = saveFiles.TryGetDefinitionByFileName(fileName, out SaveFileDefinition definition);
+            return isKnownFile ? saveFileClasses.Find(definition) : null;
+        }
+    }
+}
