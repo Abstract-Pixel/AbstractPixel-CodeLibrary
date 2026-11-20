@@ -115,11 +115,12 @@ namespace AbstractPixel.SceneManagement.Editor
                 return "This project is already set up.";
             }
             bool makesStarterSet = !WillMigrate(_choices, _plan);
-            if (makesStarterSet && HasUntitledOpenScene())
+            bool makesLaunchScene = _choices.LaunchScene == LaunchSceneChoice.CreateNew;
+            if ((makesStarterSet || makesLaunchScene) && HasUntitledOpenScene())
             {
                 return "Save the open scene first.";
             }
-            return string.Empty;
+            return LaunchSceneProblem(_choices);
         }
 
         public static bool WillMigrate(SceneSystemSetupChoices _choices, SceneGroupMigrationPlan _plan)
@@ -157,6 +158,11 @@ namespace AbstractPixel.SceneManagement.Editor
                 }
             }
             lines.Add("New scenes go to " + place + ". Check scene groups before a build: on.");
+            string launchLine = LaunchSceneLine(_choices);
+            if (!string.IsNullOrEmpty(launchLine))
+            {
+                lines.Add(launchLine + ".");
+            }
             return lines;
         }
 
@@ -203,6 +209,7 @@ namespace AbstractPixel.SceneManagement.Editor
                     CreateStarterSet(folder, settings, createdPaths);
                 }
 
+                ApplyLaunchScene(_choices, settings, createdPaths);
                 SceneSystemSettingsAssets.RefreshLists(settings);
                 SceneSystemSettingsAssets.EnsurePreloaded(settings);
                 AssetDatabase.SaveAssets();
@@ -217,6 +224,72 @@ namespace AbstractPixel.SceneManagement.Editor
                 Debug.LogError(LogPrefix + " " + _error + "\n" + exception);
                 return null;
             }
+        }
+
+        /// <summary>"Launch scene 'Splash' at build index 0", or empty when the step was skipped.</summary>
+        public static string LaunchSceneLine(SceneSystemSetupChoices _choices)
+        {
+            if (_choices.LaunchScene == LaunchSceneChoice.Existing && _choices.ExistingLaunchScene != null)
+            {
+                return "Launch scene '" + _choices.ExistingLaunchScene.name + "' at build index 0";
+            }
+            if (_choices.LaunchScene == LaunchSceneChoice.CreateNew)
+            {
+                return "A new launch scene at " + _choices.NewLaunchScenePath + ", at build index 0";
+            }
+            return string.Empty;
+        }
+
+        /// <summary>Why the launch scene choice can't work, or empty. Nothing to check when the step was skipped.</summary>
+        public static string LaunchSceneProblem(SceneSystemSetupChoices _choices)
+        {
+            if (_choices.LaunchScene == LaunchSceneChoice.Existing && _choices.ExistingLaunchScene == null)
+            {
+                return "Pick the scene to open first, or choose No launch scene.";
+            }
+            if (_choices.LaunchScene != LaunchSceneChoice.CreateNew)
+            {
+                return string.Empty;
+            }
+            string path = _choices.NewLaunchScenePath;
+            bool isScenePath = !string.IsNullOrEmpty(path) && path.StartsWith("Assets/") && path.EndsWith(".unity");
+            if (!isScenePath)
+            {
+                return "The new launch scene needs a path inside Assets/ ending in .unity.";
+            }
+            if (AssetDatabase.LoadMainAssetAtPath(path) != null)
+            {
+                return "A file already exists at " + path + ".";
+            }
+            return string.Empty;
+        }
+
+        // Sets the chosen launch scene, making it first when asked, and puts it at build index 0.
+        private static void ApplyLaunchScene(SceneSystemSetupChoices _choices, SceneSystemSettings _settings, List<string> _createdPaths)
+        {
+            SceneAsset launchScene = null;
+            if (_choices.LaunchScene == LaunchSceneChoice.Existing)
+            {
+                launchScene = _choices.ExistingLaunchScene;
+            }
+            if (_choices.LaunchScene == LaunchSceneChoice.CreateNew)
+            {
+                string folder = System.IO.Path.GetDirectoryName(_choices.NewLaunchScenePath).Replace('\\', '/');
+                CreateFolders(folder, _createdPaths);
+                launchScene = LaunchSceneCreation.Create(_choices.NewLaunchScenePath, out string error);
+                if (launchScene == null)
+                {
+                    throw new InvalidOperationException(error);
+                }
+                _createdPaths.Add(_choices.NewLaunchScenePath);
+            }
+            if (launchScene == null)
+            {
+                return;
+            }
+            _settings.LaunchScene.SceneFieldReference.SetSceneAsset(launchScene);
+            EditorUtility.SetDirty(_settings);
+            LaunchSceneBuildOrder.EnsureFirst(_settings);
         }
 
         private static void CreateStarterSet(string _folder, SceneSystemSettings _settings, List<string> _createdPaths)

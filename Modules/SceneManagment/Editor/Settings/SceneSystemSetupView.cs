@@ -11,7 +11,7 @@ namespace AbstractPixel.SceneManagement.Editor
     /// <summary>
     /// The setup wizard, shared by the setup window and the page's Setup section. The Abstract Pixel logo sits on top;
     /// under it, one question per page, few words:
-    /// Welcome, Settings folder, New scenes, Scene groups (only when the project has some), Ready, Done. Details are in
+    /// Welcome, Settings folder, New scenes, Launch scene (optional), Scene groups (only when the project has some), Ready, Done. Details are in
     /// tooltips. Next stays disabled while the page's answer can't work.
     /// </summary>
     public class SceneSystemSetupView : VisualElement
@@ -21,6 +21,7 @@ namespace AbstractPixel.SceneManagement.Editor
             Welcome,
             Folder,
             NewScenes,
+            LaunchScene,
             SceneGroups,
             Ready,
             Done
@@ -48,6 +49,7 @@ namespace AbstractPixel.SceneManagement.Editor
             pages.Add(Page.Welcome);
             pages.Add(Page.Folder);
             pages.Add(Page.NewScenes);
+            pages.Add(Page.LaunchScene);
             if (plan.HasWork)
             {
                 pages.Add(Page.SceneGroups);
@@ -134,6 +136,9 @@ namespace AbstractPixel.SceneManagement.Editor
                 case Page.NewScenes:
                     ShowNewScenes();
                     break;
+                case Page.LaunchScene:
+                    ShowLaunchScene();
+                    break;
                 case Page.SceneGroups:
                     ShowSceneGroups();
                     break;
@@ -165,6 +170,13 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 bool folderIsFine = string.IsNullOrEmpty(SceneSystemSetup.FolderProblemInProject(choices.Folder));
                 nextButton.SetEnabled(folderIsFine);
+            }
+            if (Current == Page.LaunchScene)
+            {
+                string launchProblem = SceneSystemSetup.LaunchSceneProblem(choices);
+                nextButton.text = choices.LaunchScene == LaunchSceneChoice.None ? "Skip" : "Next";
+                nextButton.tooltip = launchProblem;
+                nextButton.SetEnabled(string.IsNullOrEmpty(launchProblem));
             }
             if (Current == Page.Ready)
             {
@@ -252,6 +264,64 @@ namespace AbstractPixel.SceneManagement.Editor
             Show();
         }
 
+        // Optional: a scene, such as a splash, that the game opens first. It is put at build index 0.
+        private void ShowLaunchScene()
+        {
+            content.Add(SceneSystemUI.PageHeader("Launch Scene", "Optional: a splash or intro the game opens first."));
+            content.Add(SceneSystemUI.ChoiceCard("No launch scene", "The game opens its start scene group straight away.", choices.LaunchScene == LaunchSceneChoice.None, true,
+                "You can add one later in Project Settings > Abstract Pixel > Scene System > Start-up.", () => PickLaunchScene(LaunchSceneChoice.None)));
+            content.Add(SceneSystemUI.ChoiceCard("Use a scene I have", "Pick the splash or intro scene.", choices.LaunchScene == LaunchSceneChoice.Existing, true,
+                "It becomes the launch scene and moves to build index 0, the scene a build opens first.", () => PickLaunchScene(LaunchSceneChoice.Existing)));
+            content.Add(SceneSystemUI.ChoiceCard("Create one", "A new scene with a camera and a light.", choices.LaunchScene == LaunchSceneChoice.CreateNew, true,
+                "Setup saves a new scene where you choose, makes it the launch scene and puts it at build index 0.", () => PickLaunchScene(LaunchSceneChoice.CreateNew)));
+
+            if (choices.LaunchScene == LaunchSceneChoice.Existing)
+            {
+                UnityEditor.UIElements.ObjectField scenePicker = new UnityEditor.UIElements.ObjectField("Scene");
+                scenePicker.objectType = typeof(SceneAsset);
+                scenePicker.allowSceneObjects = false;
+                scenePicker.SetValueWithoutNotify(choices.ExistingLaunchScene);
+                scenePicker.tooltip = "The scene the game opens first.";
+                scenePicker.style.marginTop = 6;
+                scenePicker.RegisterValueChangedCallback(_change =>
+                {
+                    choices.ExistingLaunchScene = _change.newValue as SceneAsset;
+                    RefreshFooter();
+                });
+                content.Add(scenePicker);
+            }
+            if (choices.LaunchScene == LaunchSceneChoice.CreateNew)
+            {
+                VisualElement row = SceneSystemUI.Row();
+                row.style.marginTop = 6;
+                TextField path = new TextField("Save as");
+                path.value = choices.NewLaunchScenePath;
+                path.tooltip = "Where to save the new launch scene, inside Assets/.";
+                path.style.flexGrow = 1;
+                path.RegisterValueChangedCallback(_change =>
+                {
+                    choices.NewLaunchScenePath = _change.newValue;
+                    RefreshFooter();
+                });
+                row.Add(path);
+                row.Add(SceneSystemUI.Button("Choose…", "Pick where to save the launch scene.", () =>
+                {
+                    string picked = LaunchSceneCreation.AskForPath(System.IO.Path.GetDirectoryName(choices.NewLaunchScenePath));
+                    if (!string.IsNullOrEmpty(picked))
+                    {
+                        path.value = picked;
+                    }
+                }));
+                content.Add(row);
+            }
+        }
+
+        private void PickLaunchScene(LaunchSceneChoice _choice)
+        {
+            choices.LaunchScene = _choice;
+            Show();
+        }
+
         private void ShowSceneGroups()
         {
             content.Add(SceneSystemUI.PageHeader("Scene Groups", "Found <b>" + plan.GroupsToMigrateCount + "</b> scene groups in this project."));
@@ -284,6 +354,11 @@ namespace AbstractPixel.SceneManagement.Editor
                 list.Add(Check("A starter scene set" + fade));
             }
             list.Add(Check("New scenes go to " + place));
+            string launchLine = SceneSystemSetup.LaunchSceneLine(choices);
+            if (!string.IsNullOrEmpty(launchLine))
+            {
+                list.Add(Check(launchLine));
+            }
             list.tooltip = string.Join("\n", SceneSystemSetup.WillCreate(choices, plan, SceneSystemSetup.LibraryFadeExists(), AddressableScenes.IsInstalled));
             content.Add(list);
 
