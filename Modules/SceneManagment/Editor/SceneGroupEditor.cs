@@ -165,10 +165,9 @@ namespace AbstractPixel.SceneManagement.Editor
             foreach (Object item in targets)
             {
                 SceneGroup group = (SceneGroup)item;
-                bool changed = SceneSetSync.UpdateOverrideAfterEdit(group, _part);
+                bool changed = SceneSetSync.SaveInspectorEdit(group, _part);
                 if (changed)
                 {
-                    EditorUtility.SetDirty(group);
                     anyChanged = true;
                 }
             }

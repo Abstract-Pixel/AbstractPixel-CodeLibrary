@@ -91,7 +91,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 SceneStatusReader.MoveTo(report, ScenePlace.BuildSettings);
             }
-            EditorBuildSettings.scenes = WithLaunchSceneFirst(EditorBuildSettings.scenes, path);
+            SceneBuildSettingsWriter.Write(WithLaunchSceneFirst(EditorBuildSettings.scenes, path));
             Debug.Log(LogPrefix + "Put the launch scene '" + _settings.LaunchScene.SceneName + "' at build index 0, so a build opens it first.", _settings);
             return true;
         }

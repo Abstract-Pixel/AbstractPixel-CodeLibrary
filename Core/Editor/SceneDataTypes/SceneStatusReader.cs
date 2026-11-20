@@ -114,7 +114,7 @@ namespace AbstractPixel.Core.Editor
             IAddressableSceneProvider provider = AddressableScenes.Provider;
             bool wasAddressable = provider != null && provider.IsAddressable(_report.SceneGuid);
 
-            EditorBuildSettings.scenes = SceneBuildSettingsList.WithSceneSwitchedOn(EditorBuildSettings.scenes, _report.ScenePath);
+            SceneBuildSettingsWriter.Write(SceneBuildSettingsList.WithSceneSwitchedOn(EditorBuildSettings.scenes, _report.ScenePath));
 
             string line = LogPrefix + " Added '" + _report.SceneName + "' to Build Settings.";
             if (wasAddressable)
@@ -149,7 +149,7 @@ namespace AbstractPixel.Core.Editor
             bool wasListed = SceneBuildSettingsList.IsListed(EditorBuildSettings.scenes, _report.ScenePath);
             if (wasListed)
             {
-                EditorBuildSettings.scenes = SceneBuildSettingsList.WithoutScene(EditorBuildSettings.scenes, _report.ScenePath);
+                SceneBuildSettingsWriter.Write(SceneBuildSettingsList.WithoutScene(EditorBuildSettings.scenes, _report.ScenePath));
                 line += " Removed it from Build Settings, so it loads from one place.";
             }
             Debug.Log(line);

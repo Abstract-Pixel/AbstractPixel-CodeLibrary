@@ -112,7 +112,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 return change;
             }
 
-            EditorBuildSettings.scenes = change.Scenes;
+            SceneBuildSettingsWriter.Write(change.Scenes);
             if (!_logChange)
             {
                 return change;

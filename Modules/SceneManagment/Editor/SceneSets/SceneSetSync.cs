@@ -241,6 +241,22 @@ namespace AbstractPixel.SceneManagement.Editor
             }
         }
 
+        /// <summary>
+        /// A part edited in the group inspector: turns it into an override (or ends one) and saves the group at once.
+        /// Returns true when the override state changed.
+        /// </summary>
+        public static bool SaveInspectorEdit(SceneGroup _group, SceneSetPart _part)
+        {
+            if (_group == null)
+            {
+                return false;
+            }
+            bool changed = UpdateOverrideAfterEdit(_group, _part);
+            // The edited value itself is unsaved too (the bound field only marks the group dirty), so always save.
+            Save(_group);
+            return changed;
+        }
+
         private static void Save(SceneGroup _group)
         {
             EditorUtility.SetDirty(_group);
