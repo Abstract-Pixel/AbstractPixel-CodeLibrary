@@ -56,8 +56,8 @@ messages from the fade system, not scene messages.
 **Start-up** (`SceneSystemStartUp`, `[RuntimeInitializeOnLoadMethod]`): scene changes are refused from before the first
 scene loads (BeforeSceneLoad) until start-up ends, with a logged reason.
 0. Before any scene's Awake (BeforeSceneLoad) it holds the **launch scene hold** when the settings name a launch scene and
-   Unity is opening it (`StartUpRule.ShouldHoldLaunchScene`), with one log line. Unity has the first scenes' objects in
-   memory by then, so the open scenes are known. With no settings found yet it decides again after the first scenes
+   Unity is opening it (`StartUpRule.ShouldHoldLaunchScene`), with one log line. Unity lists the first scenes by then (a
+   player's first scene is listed but not loaded yet, so it counts as opening: `StartUpRule.CountsAsOpening`). With no settings found yet it decides again after the first scenes
    load, before any `Start`. The hold lasts until the launch scene calls `SceneActions.ReleaseLaunchScene()` (after
    `OnGameStarted`, or after `HasStartUpFailed` to recover); that runs the waiting actions, raises
    `OnLaunchSceneReleased` once and logs one line. Released before `OnGameStarted`: one warning, and it still releases.

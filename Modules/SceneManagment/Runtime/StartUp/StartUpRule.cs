@@ -79,6 +79,25 @@ namespace AbstractPixel.SceneManagement
             return StartUpSceneMatch.ListHolds(_openScenes, _settings.LaunchScene);
         }
 
+        /// <summary>
+        /// Whether a scene Unity lists at BeforeSceneLoad is one it is opening. A player lists only the scenes it is
+        /// loading, and they are not loaded yet at BeforeSceneLoad. The Editor's scenes are loaded when Play starts;
+        /// a scene left unloaded in the Hierarchy is listed but never opens.
+        /// </summary>
+        public static bool CountsAsOpening(bool _isValid, bool _isLoaded, bool _isEditor)
+        {
+            if (_isValid == false)
+            {
+                return false;
+            }
+            if (_isLoaded)
+            {
+                return true;
+            }
+            bool isPlayerLoadingIt = _isEditor == false;
+            return isPlayerLoadingIt;
+        }
+
         private static StartUpChoice ChooseStartSceneGroup(SceneSystemSettings _settings, StartUpChoiceKind _kind, SceneReference _reasonScene)
         {
             StartUpChoice choice = new StartUpChoice();

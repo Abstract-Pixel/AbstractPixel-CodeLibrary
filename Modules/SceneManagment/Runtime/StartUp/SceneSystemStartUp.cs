@@ -66,8 +66,8 @@ namespace AbstractPixel.SceneManagement
             }
 
             decidedLaunchSceneHold = true;
-            List<SceneReference> openScenes = OpenScenesActiveFirst();
-            bool shouldHold = StartUpRule.ShouldHoldLaunchScene(settings, openScenes);
+            List<SceneReference> openingScenes = ScenesUnityIsOpening();
+            bool shouldHold = StartUpRule.ShouldHoldLaunchScene(settings, openingScenes);
             if (shouldHold == false)
             {
                 return;
@@ -150,6 +150,23 @@ namespace AbstractPixel.SceneManagement
                     continue;
                 }
                 scenes.Add(ToReference(scene));
+            }
+            return scenes;
+        }
+
+        // The scenes Unity is opening, for BeforeSceneLoad: a player's first scene is listed but not loaded yet then.
+        private static List<SceneReference> ScenesUnityIsOpening()
+        {
+            List<SceneReference> scenes = new List<SceneReference>();
+            bool isEditor = Application.isEditor;
+            for (int index = 0; index < SceneManager.sceneCount; index++)
+            {
+                Scene scene = SceneManager.GetSceneAt(index);
+                bool opening = StartUpRule.CountsAsOpening(scene.IsValid(), scene.isLoaded, isEditor);
+                if (opening)
+                {
+                    scenes.Add(ToReference(scene));
+                }
             }
             return scenes;
         }

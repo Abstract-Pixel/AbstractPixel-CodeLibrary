@@ -153,6 +153,20 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.AreEqual(_expectedHold, shouldHold);
         }
 
+        // Found in the 4B-2 build: a player's first scene is valid but not yet loaded at BeforeSceneLoad.
+        [TestCase(true, false, false, true)]
+        [TestCase(true, true, false, true)]
+        [TestCase(true, true, true, true)]
+        [TestCase(true, false, true, false)]
+        [TestCase(false, false, false, false)]
+        [TestCase(false, false, true, false)]
+        public void AScenePlayerIsLoadingCountsAsOpening(bool _isValid, bool _isLoaded, bool _isEditor, bool _expected)
+        {
+            bool opening = StartUpRule.CountsAsOpening(_isValid, _isLoaded, _isEditor);
+
+            Assert.AreEqual(_expected, opening);
+        }
+
         [Test]
         public void StartUpNeverHoldsWithoutALaunchScene()
         {
