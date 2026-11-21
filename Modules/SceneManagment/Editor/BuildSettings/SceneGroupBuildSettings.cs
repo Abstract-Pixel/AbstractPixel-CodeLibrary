@@ -83,6 +83,11 @@ namespace AbstractPixel.SceneManagement.Editor
         /// <summary>What adding this group's scenes that are not Addressable to the project's Build Settings would change.</summary>
         public static BuildSettingsChange PreviewForProject(SceneGroup _group)
         {
+            if (_group != null && _group.IsSample)
+            {
+                // A sample scene group's scenes never go into Build Settings (ADR 0014).
+                return AddScenes(new List<string>(), EditorBuildSettings.scenes, SceneFileExists);
+            }
             List<string> groupPaths = GroupScenePaths(_group);
             List<string> pathsForBuild = WithoutAddressableScenes(groupPaths, IsAddressableInProject);
             return AddScenes(pathsForBuild, EditorBuildSettings.scenes, SceneFileExists);

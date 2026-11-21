@@ -14,7 +14,6 @@ namespace AbstractPixel.SceneManagement.Editor
     [InitializeOnLoad]
     internal static class SpawnPointSceneView
     {
-        private const float GroundGap = 0.05f;
         private static readonly int PreviewHash = "SpawnPointPreview".GetHashCode();
         private static readonly int AddHash = "SpawnPointAdd".GetHashCode();
         private static readonly List<int> previewControls = new List<int>();
@@ -340,21 +339,8 @@ namespace AbstractPixel.SceneManagement.Editor
             // Upright and facing the spawn point's forward; tilted to the ground only when the label aligns to surface.
             private static Pose StandingPose(RaycastHit _hit, SpawnPoint _spawnPoint, PreviewShape _shape)
             {
-                Vector3 forward = Vector3.ProjectOnPlane(_spawnPoint.transform.forward, Vector3.up);
-                if (forward.sqrMagnitude < 0.0001f)
-                {
-                    forward = Vector3.forward;
-                }
-                Quaternion rotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
-                Vector3 up = Vector3.up;
                 bool alignToSurface = _spawnPoint.Label != null && _spawnPoint.Label.AlignToSurface;
-                if (alignToSurface)
-                {
-                    rotation = Quaternion.FromToRotation(Vector3.up, _hit.normal) * rotation;
-                    up = _hit.normal;
-                }
-                Vector3 position = _hit.point + up * (GroundGap - _shape.LowestPoint);
-                return new Pose(position, rotation);
+                return GroundPlacement.StandingPose(_hit, _spawnPoint.transform.forward, _shape, alignToSurface);
             }
 
             // The first relocatable with this label shows what will land; otherwise the label's prefab or the box.

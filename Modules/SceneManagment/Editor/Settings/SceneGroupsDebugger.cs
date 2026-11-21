@@ -57,6 +57,8 @@ namespace AbstractPixel.SceneManagement.Editor
                 _card.Add(BeforeBuildToggle(_settings));
             }
             List<SceneGroup> groups = SceneGroupAssets.FindAll();
+            // Sample scene groups have their own section on the page.
+            groups.RemoveAll(_group => _group.IsSample);
             SceneGroupMigrationPlan plan = SceneGroupMigration.Plan(groups);
             if (_settings != null && plan.HasWork)
             {

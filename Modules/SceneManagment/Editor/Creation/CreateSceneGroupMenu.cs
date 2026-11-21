@@ -49,8 +49,15 @@ namespace AbstractPixel.SceneManagement.Editor
             SceneReference mainScene = new SceneReference(_scene.name, sceneGuid, scenePath);
             mainScene.SceneFieldReference.SetSceneAsset(_scene);
             group.Initialize(new SceneReference[0], new SceneReference[0], mainScene);
-            UseDefaultSceneSet(group);
+            // A scene in a Samples folder gets a sample scene group: it stays out of builds and keeps its own scenes
+            // instead of the game's default scene set.
+            group.IsSample = SceneGroupCreation.IsInSamplesFolder(scenePath);
+            if (!group.IsSample)
+            {
+                UseDefaultSceneSet(group);
+            }
             AssetDatabase.CreateAsset(group, groupPath);
+            SampleSceneGroups.Forget();
 
             // Build Settings change before the save, so the save-time fix finds nothing left to do and logs nothing.
             BuildSettingsChange change = SceneGroupBuildSettings.ApplyToProject(group, false);

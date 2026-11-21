@@ -11,7 +11,6 @@ namespace AbstractPixel.SceneManagement.Editor
     /// </summary>
     internal static class SpawnPointCreation
     {
-        private const float GroundGap = 0.05f;
         private const float LookDown = 200f;
 
         public static SpawnPoint AddFor(Relocatable _relocatable)
@@ -25,6 +24,9 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             PreviewShape shape = PreviewShapes.For(_relocatable, _relocatable.Label);
             position = StandOnGroundBelow(position, shape);
+            // Read before the new spawn point exists, so it never counts its own first position.
+            RelocationEditorModel.MarkDirty();
+            int firstInstance = RelocationEditorModel.Current.NextFreeInstance(_relocatable.Label);
 
             GameObject spawnObject = new GameObject(NameFor(_relocatable.Label));
             SceneManager.MoveGameObjectToScene(spawnObject, mainScene);
@@ -32,7 +34,7 @@ namespace AbstractPixel.SceneManagement.Editor
             Undo.RegisterCreatedObjectUndo(spawnObject, "Add spawn point to this scene group");
             SpawnPoint spawnPoint = spawnObject.AddComponent<SpawnPoint>();
             spawnPoint.Label = _relocatable.Label;
-            spawnPoint.SetInstance(0, RelocationEditorModel.Current.NextFreeInstance(_relocatable.Label));
+            spawnPoint.SetInstance(0, firstInstance);
             EditorSceneManager.MarkSceneDirty(mainScene);
             RelocationEditorModel.MarkDirty();
             Selection.activeGameObject = spawnObject;
@@ -46,7 +48,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 return _pivot;
             }
-            return hit.point + Vector3.up * (GroundGap - _shape.LowestPoint);
+            return GroundPlacement.StandingPose(hit, Vector3.forward, _shape, false).position;
         }
 
         private static string NameFor(RelocationLabel _label)
