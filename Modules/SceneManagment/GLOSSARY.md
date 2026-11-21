@@ -113,11 +113,11 @@ The one thing the scene system asks to hide and show the screen around a scene c
 _Avoid_: change cover, fade hook, transition callback
 
 **Hide screen**:
-The step that covers the screen before scenes close, such as a fade to black.
+The step that covers the screen before scenes close, such as a fade to black. Its messages are "start hide screen transition" and "end hide screen transition" (the screen counts as covered).
 _Avoid_: transition in, fade in, cover
 
 **Show screen**:
-The step that uncovers the screen after the new scenes are ready.
+The step that uncovers the screen after the new scenes are ready. Its messages are "start show screen transition" and "end show screen transition".
 _Avoid_: transition out, fade out, reveal
 
 **Screen state**:

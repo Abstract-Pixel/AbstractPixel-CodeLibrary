@@ -8,7 +8,8 @@ Opens, closes and switches groups of scenes for a single-player Unity game: a ma
 - **Why it is built this way:** [docs/adr/](docs/adr/). One short file per decision that is hard to reverse.
 - **How a scene change runs today:** the sections below (messages, order per entry point, loader choice, contract tests).
 - **How the game starts:** no start-up object is needed in any scene. Set the start scene group (and an optional launch scene, such as a splash) in Project Settings > Abstract Pixel > Scene System > Start-up. When the game launches or Play is pressed, start-up (`SceneSystemStartUp`) opens the right scene group, then raises `OnNewSceneGroupTransitionTo` once and `OnGameStarted` once. A launch scene waits for `SceneActions.HasGameStarted` instead of loading scenes itself (ADR 0009). While it plays, the **launch scene hold** keeps the start scene group back: its scenes load and wake behind the launch scene, and scripts that show something (camera, music, entrance) wait with `SceneActions.RunWhenLaunchSceneReleased` (or read `SceneActions.IsLaunchSceneHeld`). The launch scene calls `SceneActions.ReleaseLaunchScene()` at its hand-off. Start-up holds only when the launch scene is one of the scenes Unity opens, so Play from a level or the start scene group never waits.
-- **Work in progress:** the rework plan lives in the game that tests this module, Project Rally Shift, at `.scratch/scene-coordinator/plan.md` (with `map.md` and `issues/`). Parts of the glossary and the ADRs (scene sets, loading scene, scene transition executor, placement) describe decisions for sessions that are not built yet; the plan says which.
+- **Changing scene:** `SceneActions.ChangeTo(group)`, `Retry()`, `Preload(group)`, each returning a `SceneChangeResult`; the screen effect and the loading scene run inside the call. Read `SceneActions.LoadingProgress` and `TransitionActions.ScreenState`. Details below ("Scene messages", "Loading scene").
+- **Work in progress:** the rework plan lives in the game that tests this module, Project Rally Shift, at `.scratch/scene-coordinator/plan.md` (with `map.md` and `issues/`). Placement (ADR 0006) is not built yet; the plan says which decisions belong to later sessions.
 
 ## Editor tools (sessions 3C, 4A and 4B)
 
@@ -31,95 +32,108 @@ Opens, closes and switches groups of scenes for a single-player Unity game: a ma
 
 # Scene messages
 
-What `SceneEventBus` sends, in what order, and who listens in Project Rally Shift. Read from the code as of the
-`scene-system-rework` branch, after session 3B. Go to a level, Retry, Preload and Switch to preloaded share one start step
-and one finish step. A preload is settled before any other scene change starts. Nothing in Rally Shift calls preload yet.
+What `SceneEventBus` and `TransitionEventBus` send, in what order, and who listens in Project Rally Shift. Read from the
+code as of the `scene-system-rework` branch, after session 4C. A game changes scene with one call (ADR 0001):
+`SceneActions.ChangeTo(group)`, `SceneActions.Retry()` or `SceneActions.Preload(group)`. Each returns a
+`SceneChangeResult`: **Done**, **Refused** with a reason (`Busy`, `StartUpRunning`, `AlreadyOpen`, `NoGroupGiven`,
+`NothingOpenToRetry`) or **Failed** with the scene that failed. None of them throws. `MonoSceneActions` has the same three
+as void methods for UnityEvents, and `TransitionActions.TransitionToSceneWithEffects` / `ReloadActiveScenesWithEffects`
+stay as one-line forwards to `ChangeTo` and `Retry` for buttons that call them by name.
 
 ## The messages
 
 | Message | Argument | Sent by |
 |---|---|---|
-| `OnNewSceneGroupTransitionTo` | the new group | Start-up, go to a level, Retry, switch to preloaded. Not sent when a scene fails to load |
+| `OnNewSceneGroupTransitionTo` | the new group | Start-up, a change, Retry, a switch to a preloaded group, the fallback scene group. Not sent for a group whose scene failed |
 | `OnGameStarted` | the first group | Start-up only, once per session, right after its `OnNewSceneGroupTransitionTo` |
-| `OnLaunchSceneReleased` | none | `SceneActions.ReleaseLaunchScene()`, once, when the launch scene hands over. Never sent when nothing was held (Play from a level or the start scene group) |
-| `OnMainSceneLoaded` | the main scene | `DefaultSceneLoader`, after it activates a main scene and makes it the active scene. A held (preloaded) main scene fires it when the switch activates it |
-| `OnSceneGroupUnloaded` | the group that **closed** (the one that was active when the change started) | Go to a level, Retry, switch to preloaded. Not sent when there was no previous group. Not sent when a preload replaces an earlier preload |
+| `OnLaunchSceneReleased` | none | `SceneActions.ReleaseLaunchScene()`, once, when the launch scene hands over. Never sent when nothing was held |
+| `OnMainSceneLoaded` | the main scene | The loader, after it activates a main scene and makes it the active scene |
+| `OnSceneGroupUnloaded` | the group that **closed** | A change, Retry, a switch to a preloaded group. Not sent when there was no previous group |
 | `OnSceneGroupPreloaded` | the preloaded group | Preload, when it finished |
-| `OnPreloadedSceneGroupActivated` | the preloaded group | Switch to preloaded, after `OnNewSceneGroupTransitionTo` |
+| `OnPreloadedSceneGroupActivated` | the preloaded group | A change to the preloaded group, after `OnNewSceneGroupTransitionTo` |
+| `OnSceneChangeFailed` | the group asked for, the scene that failed | A change, Retry or the fallback, once per failed change (4C, ADR 0011). Not sent for a failed preload |
+| `TransitionEventBus.OnScreenStateChanged` | the new `ScreenState` | The transitions module: Visible → Hiding → Hidden → Showing → Visible |
+| `OnStartHideScreenTransition`, `OnEndHideScreenTransition` | none | Hide screen starts / the screen counts as covered (was In started / In completed) |
+| `OnStartShowScreenTransition`, `OnEndShowScreenTransition` | none | Show screen starts / ends (was Out started / Out completed) |
+
+`SceneEventBus`'s `Raise*` methods and `ResetStatics` are internal: only the scene system raises scene messages.
+`TransitionActions.ScreenState` is read-only and resets with domain reload off. Neither module reads or writes
+`Time.timeScale`: game management owns game time and reacts to the screen state (ADR 0010).
 
 ## Order, per entry point
 
-The fade wraps every entry point that goes through `TransitionActions`: `OnTransitionInStarted`, `OnTransitionInCompleted`,
-then the scene work below, then `OnTransitionOutStarted` and `OnTransitionOutCompleted`. These are `TransitionEventBus`
-messages from the fade system, not scene messages.
-
-**Start-up** (`SceneSystemStartUp`, `[RuntimeInitializeOnLoadMethod]`): scene changes are refused from before the first
-scene loads (BeforeSceneLoad) until start-up ends, with a logged reason.
+**Start-up** (`SceneSystemStartUp`, `[RuntimeInitializeOnLoadMethod]`): scene changes are refused (`StartUpRunning`) from
+before the first scene loads until start-up ends. It never uses the screen effect or a loading scene.
 0. Before any scene's Awake (BeforeSceneLoad) it holds the **launch scene hold** when the settings name a launch scene and
-   Unity is opening it (`StartUpRule.ShouldHoldLaunchScene`), with one log line. Unity lists the first scenes by then (a
-   player's first scene is listed but not loaded yet, so it counts as opening: `StartUpRule.CountsAsOpening`). With no settings found yet it decides again after the first scenes
-   load, before any `Start`. The hold lasts until the launch scene calls `SceneActions.ReleaseLaunchScene()` (after
-   `OnGameStarted`, or after `HasStartUpFailed` to recover); that runs the waiting actions, raises
-   `OnLaunchSceneReleased` once and logs one line. Released before `OnGameStarted`: one warning, and it still releases.
-1. After the first scenes load (AfterSceneLoad) it reads the scene system settings (Preloaded Assets in a build; found by
-   type in the Editor) and picks a group from the scenes Unity opened (`StartUpRule`): the launch scene open means the
-   start scene group behind it, one frame later; otherwise the first open scene, active first, that is a group's main
-   scene picks that real group (two open: an error, the first wins); a manager or shared scene active means the start
-   scene group, with one log line; a scene in no group becomes the main scene of a temporary group from the default scene
-   set, with one warning. Scenes match by GUID, then path, then name. No settings: one error and nothing else.
-2. It creates the coordinator if no scene holds one, and runs the start step.
-3. It asks for every scene of the group that is not open, at once and in order (main scene, manager scenes, shared
-   scenes), so Unity opens the main scene first and makes it active before the others wake, and every request is made
-   before the first frame's `Start`. It waits for all of them. Nothing is closed; a launch scene closes itself.
-4. Finish step: records the group, `OnNewSceneGroupTransitionTo` once, then `OnGameStarted` once
-   (`SceneActions.HasGameStarted` turns true). A failed load raises neither; `SceneActions.HasStartUpFailed` turns true.
+   Unity is opening it (`StartUpRule.ShouldHoldLaunchScene`, `StartUpRule.CountsAsOpening`). The launch scene releases
+   it with `SceneActions.ReleaseLaunchScene()`: waiting actions run, `OnLaunchSceneReleased` once, one log line.
+1. After the first scenes load it reads the settings and picks a group from the scenes Unity opened (`StartUpRule`).
+2. It creates the coordinator if no scene holds one.
+3. It asks for every missing scene of the group at once and in order (main scene, manager scenes, shared scenes).
+4. Records the group, `OnNewSceneGroupTransitionTo` once, then `OnGameStarted` once. A failed load raises neither;
+   `SceneActions.HasStartUpFailed` turns true (no fallback for start-up).
 
-**Go to a level** (`TransitionToSceneGroup`) and **Retry** (`ReloadActiveSceneGroup`) share the same steps. A
-`SceneChangePlan` works out first which scenes to close and open. Retry is "go to the group that is already open".
-1. Start step (`TryBeginSceneChange`): if a scene change is already running, log a warning and refuse. Otherwise set
-   "busy" (`IsLoadingSceneGroup` and `IsUnloadingSceneGroup`) before the first `await`, so a second request in the same
-   frame is refused.
-2. **Settle the preload** (`SettlePreloadBeforeChange`), before any scene closes. Unity holds every later scene
-   operation, unloads included, while a preloaded main scene waits, so a change that starts with a preload held would
-   never finish. With no preload this does nothing. When go to a level targets the preloaded group, the whole change
-   runs as **Switch to preloaded** below (one "new level", then `OnPreloadedSceneGroupActivated`) and the steps after
-   this one are skipped. For anything else (a different level, or Retry) the preload is discarded: the held main scene
-   closes first, then its other scenes. That discard does not release memory, because the change releases it once.
-3. Close the old main scene, then the shared scenes (all of them with `ForceReloadContextualScenes`, otherwise only the
-   ones the new group does not use). Manager scenes stay open.
-4. Release unused memory once.
-5. `OnSceneGroupUnloaded` with the group that closed.
-6. Open manager scenes, shared scenes, then the main scene. `OnMainSceneLoaded` fires as the main scene becomes active.
-   A scene that throws is logged by name and stops the change.
-7. Finish step (`EndSceneChange`): clear "busy", then record the open shared and manager scenes, make the group the active
-   one, then `OnNewSceneGroupTransitionTo` once. A listener that reads `SceneActions.ActiveSceneGroup` sees the new group.
-   After a failed load nothing is recorded and `OnNewSceneGroupTransitionTo` is not sent.
+**A change** (`ChangeTo`) and **Retry** (`Retry`) share one body. A `SceneChangePlan` works out which scenes to close and open.
+1. Refusals first, each before anything touches the screen: no group (`NoGroupGiven`), the group asked for is the open
+   asset (`AlreadyOpen`; groups are equal only to themselves), nothing open to Retry (`NothingOpenToRetry`), start-up
+   running, another change running (`Busy`). Busy is set before the first `await` and stays set until Show screen ends.
+2. **Hide screen** through the registered `ISceneTransitionExecutor` (none registered: nothing). A Hide screen asked for
+   while an effect still runs waits for it, so the screen is always covered.
+3. A preload this change does not use is closed (held main scene first). Unity holds every later scene operation while a
+   preloaded main scene waits. A change to the preloaded group itself runs as the preloaded switch in step 5.
+4. **Loading scene**, when the group shows one (next section): it opens under the cover and Show screen uncovers it.
+5. Close the old main scene and the shared scenes (all with Reset shared scenes), free memory once,
+   `OnSceneGroupUnloaded`, open manager scenes, shared scenes, then the main scene (`OnMainSceneLoaded`). Loading
+   progress fills. A switch to a preloaded group activates the held main scene first, then closes and opens the rest.
+6. Done: record the open scenes, `OnNewSceneGroupTransitionTo` once (then `OnPreloadedSceneGroupActivated` for a switch).
+   Failed: record what is really open (no group counts as open), `OnSceneChangeFailed` once, then the **fallback scene
+   group** (settings: "If a scene change fails, go to"; empty means the start scene group) runs steps 5 and 6 once,
+   with the screen still covered and the loading scene still up. If the fallback fails too, or the failed change was
+   the fallback, the screen is shown on whatever is open and an error is logged. A failed load is never tried again. A
+   scene that fails to close is logged and the change carries on.
+7. The loading scene leaves (minimum time, "full" animation, Hide screen, it closes).
+8. **Show screen**, then busy clears. The result says Done, or Failed with the scene.
 
-**Preload** (`PreloadSceneGroup`):
-1. Nothing happens when the group is the open level or is already preloaded.
-2. Start step, as above. A preload is refused while any scene change runs.
-3. An earlier preload is closed first: its held main scene first, then its other scenes, then unused memory is released
-   once. Replacing a preload counts as a scene change for the memory release.
-4. Open the manager and shared scenes that are not open yet, then the main scene, held at 90% without activating it (no
-   `OnMainSceneLoaded`). Only the main scene is held, because Unity holds every later scene operation while a scene
-   waits. A shared scene that is already open is never opened a second time, even with `ForceReloadContextualScenes`.
-5. `OnSceneGroupPreloaded`. A preload that fails closes what it opened and raises nothing.
-
-**Switch to preloaded** (`TransitionToPreloadedSceneGroup`):
-1. Start step, as above. Refused while any scene change runs. Go to a level to the preloaded group joins here, after its
-   own start step. If the preloaded group is already the open level, the held scene is closed, a warning is logged and
-   nothing else changes.
-2. Activate the held main scene. The loader makes it the active scene and raises `OnMainSceneLoaded`. This comes first
-   because Unity holds the close and open steps below while the main scene waits.
-3. Close the old main scene and the shared scenes that must reload (all open ones with `ForceReloadContextualScenes`,
-   otherwise the ones the new group does not use), release unused memory once, `OnSceneGroupUnloaded` with the group
-   that closed.
-4. Open the shared scenes that are still missing. The ones the preload opened stay as they are.
-5. Finish step (`EndSceneChange`): as for go to a level, and the preload record is cleared before the event. Then
-   `OnNewSceneGroupTransitionTo` once, then `OnPreloadedSceneGroupActivated`.
+**Preload** (`Preload`): refused for no group, the open group, start-up or a running change; Done at once when the group is
+already preloaded. It never touches the screen and never shows a loading scene. An earlier preload closes first (memory
+freed once), then the missing manager and shared scenes open and the main scene is held at 90%. `OnSceneGroupPreloaded`.
+A failed preload closes what it opened, returns Failed and goes nowhere. The scene system never preloads by itself: a
+change uses a preload only when the game preloaded that same group.
 
 The coordinator makes no scene load or unload call of its own: every open and close goes through `ISceneLoader`, whose
-four-rule held-scene contract is written on the interface and tested with the recording loader in `Tests/Editor`.
+held-scene contract is written on the interface and tested with the recording loader in `Tests/Editor`. A loader fails a
+load it cannot do (a scene missing from the build, an Addressable scene without a GUID) by throwing; it never logs and
+returns. `ISceneLoader.GetLoadProgress` reports a scene's own progress for the loading progress.
+
+# Loading scene
+
+One scene shown while the old place closes and the new one opens (ADR 0003, amended in 4C). Project Settings > Abstract
+Pixel > Scene System > **Loading scenes** lists them, names the default and sets the **minimum time on screen** (unscaled
+seconds, counted from Show screen starting). Each scene group says **Show the loading scene**: Never, When arriving from
+another scene group (a Retry goes straight back in), or Every time, Retry included, with a loading scene picker (the
+default preselected). Start-up and a switch to a preloaded group never show it.
+
+- **With a screen effect:** Hide screen, the loading scene opens, Show screen, the old scenes close, memory is freed, the
+  new scenes open while progress fills, the loading progress view plays its "full" animation, Hide screen, the loading
+  scene closes, Show screen on the new level.
+- **Without one:** the same steps make an instant cut; the loading scene opens before the old level closes, so no frame
+  has no camera.
+- **Loading progress:** `SceneActions.LoadingProgress`, 0 to 1. Every scene the change opens has an equal share, the value
+  never goes back and is 1 only once every scene is open. Safe to read every frame. Not smoothed.
+- **SceneScreens** (`Modules/SceneManagment/SceneScreens`, its own assembly; the scene module never references it):
+  `LoadingProgressView` reads the progress, smooths it (feel: speed, optional curve, hold at full) and raises On Shown,
+  On Progress (float), On Full and On Hidden. It also drives an `ILoadingProgressDisplay` (Show, SetProgress, PlayFull,
+  Hide) found on its object or assigned. It registers itself with `SceneActions.RegisterLoadingProgressView`; the
+  scene system calls it when Show screen starts and waits for its full beat and hold before Hide screen.
+- **Feel with no code:** drag `MMProgressBar.UpdateBar01` into On Progress and an `MMF_Player.PlayFeedbacks` into On Full.
+  **Code animations:** implement `ILoadingProgressDisplay` (Rally's `RallyLoadingFullBeat` plays `IAnimationCommand`s).
+- **Ready-made:** `SceneScreens/ReadyMade/Loading Scene.unity` (opaque background in the ready-made fade's colour, a plain
+  bar, no art). The setup clones it, lists the copy as the default, and clones the ready-made fade with its controller
+  prefab, so nothing the project uses points into the library (ADR 0004). Visual rules: the effect's canvas draws above
+  everything (Screen Space Overlay, highest sort order); the loading scene's canvas is opaque and full screen.
+- **Launch scene helpers** also live in SceneScreens: `LaunchSceneReleaseMarker` + `LaunchSceneReleaseReceiver` (a
+  Timeline marker that releases the launch scene hold once start-up has finished), `LaunchSceneRenderSettingsGuard`,
+  `LaunchSceneTimelineClock` and `LaunchSceneStartUpLog`.
 
 ## Which loader opens a scene
 
@@ -177,19 +191,19 @@ active in a switch, not before, and discarding a held preload lets its level wak
 | `OnGameStarted` | `Splash Screen/Scripts/SplashSequenceDirector.cs` | Hands off to the menu one frame after the game started |
 | | `ProjectServices/LevelManager/LevelManagerScripts/Logic/RallyLevelManager.cs` | Syncs the current level from the real scene group asset (its `Awake` runs before start-up records the group) |
 | `OnMainSceneLoaded` | `Assets/SceneUtility/SceneToObjectChanger.cs` | Turns objects on or off for the scene that just became active. Also hears a preloaded switch now |
-| `OnSceneGroupUnloaded`, `OnSceneGroupPreloaded`, `OnPreloadedSceneGroupActivated` | none | |
+| `OnSceneGroupUnloaded`, `OnSceneGroupPreloaded`, `OnPreloadedSceneGroupActivated`, `OnSceneChangeFailed` | none | |
 
 Rally paths are under `Assets/[1]Project/` unless shown otherwise. Many other systems read
 `SceneActions.ActiveSceneGroup` directly (win screen, leaderboards, ghosts, level finish, `RallyLevelManager`) instead of
 listening.
 
-## Fade messages used for placement
+## Screen messages used for placement
 
 | Message | Listener | Purpose |
 |---|---|---|
-| `TransitionEventBus.OnTransitionOutStarted` | `GameplaySystems/Car/CarCore/CarScripts/CarBootPhysicsToggle.cs` | Unlocks the car (it was frozen while the screen was covered), turns on its safety recorder, and sets `CarCanMove` |
+| `TransitionEventBus.OnStartShowScreenTransition` | `GameplaySystems/Car/CarCore/CarScripts/CarBootPhysicsToggle.cs` | Unlocks the car (it was frozen while the screen was covered), turns on its safety recorder, and sets `CarCanMove` |
 | | `SceneTransitionSystem/.../FallbackAudioListener.cs`, `TransitionAudio.cs` (library) | Hands audio back to the scene's listener, plays the reveal sound |
-| `TransitionEventBus.OnTransitionOutCompleted` | `CarBootPhysicsToggle.cs` | Same handler, as a safety net. It runs once |
+| `TransitionEventBus.OnEndShowScreenTransition` | `CarBootPhysicsToggle.cs` | Same handler, as a safety net. It runs once |
 
-With Play pressed inside a level there is no fade. `CarBootPhysicsToggle.Start` unlocks the car instead, in the Editor
+With a loading scene, the new car loads while the loading scene covers the level and is released by the last Show screen. Rally's pause is refused while a scene change runs (`RallyPauseCondition`). With Play pressed inside a level there is no fade. `CarBootPhysicsToggle.Start` unlocks the car instead, in the Editor
 only.
