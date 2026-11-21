@@ -145,7 +145,7 @@ namespace AbstractPixel.SceneManagement
             {
                 isStartUpRunning = false;
                 IsLoadingSceneGroup = false;
-                relocation.ReleaseAfterLaunchSceneHold();
+                relocation.ReleaseOnce();
             }
 
             if (!succeeded)

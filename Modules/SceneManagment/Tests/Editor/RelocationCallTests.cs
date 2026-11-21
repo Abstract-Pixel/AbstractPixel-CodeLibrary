@@ -276,6 +276,19 @@ namespace AbstractPixel.SceneManagement.Tests
         }
 
         [Test]
+        public async Task AChangeWhileTheLaunchSceneHoldsReleasesAtTheHandOff()
+        {
+            SceneActions.RegisterTransitionExecutor(executor);
+            LaunchSceneHold.Hold();
+
+            await rig.Coordinator.ChangeTo(rig.CreateLevelGroup("Level2"));
+
+            Assert.AreEqual(0, broadcaster.Count(FakeRelocationBroadcaster.ReleaseCall), "the launch scene still covers the screen");
+            LaunchSceneHold.Release();
+            Assert.AreEqual(1, broadcaster.Count(FakeRelocationBroadcaster.ReleaseCall), "released at the hand-off");
+        }
+
+        [Test]
         public async Task AFailedStartUpStillRelocatesAndReleasesOnce()
         {
             SceneCoordinatorTestRig fresh = SceneCoordinatorTestRig.BeforeStartUp();
