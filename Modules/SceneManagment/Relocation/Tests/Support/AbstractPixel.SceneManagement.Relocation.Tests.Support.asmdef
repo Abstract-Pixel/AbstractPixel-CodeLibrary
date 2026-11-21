@@ -1,0 +1,18 @@
+{
+    "name": "AbstractPixel.SceneManagement.Relocation.Tests.Support",
+    "rootNamespace": "AbstractPixel.SceneManagement.Relocation.Tests",
+    "references": [
+        "AbstractPixel.SceneManagement.Relocation"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

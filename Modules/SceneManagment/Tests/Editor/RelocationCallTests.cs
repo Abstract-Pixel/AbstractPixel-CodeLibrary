@@ -184,6 +184,23 @@ namespace AbstractPixel.SceneManagement.Tests
         }
 
         [Test]
+        public async Task AChangeAskedForDuringRelocateIsRefused()
+        {
+            TaskCompletionSource<bool> gate = new TaskCompletionSource<bool>();
+            broadcaster.RelocateGate = gate.Task;
+            Task<SceneChangeResult> change = rig.Coordinator.ChangeTo(rig.CreateLevelGroup("Level2"));
+            await Task.Yield();
+
+            LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("already in progress"));
+            SceneChangeResult refused = await rig.Coordinator.ChangeTo(rig.CreateLevelGroup("Level3"));
+            gate.SetResult(true);
+            await change;
+
+            Assert.AreEqual(SceneChangeRefusal.Busy, refused.Refusal);
+            AssertEachStepOnce();
+        }
+
+        [Test]
         public async Task AFailedChangeRelocatesOnceForTheFallback()
         {
             SceneGroup menu = rig.CreateGroup("Menu", new string[0], false);

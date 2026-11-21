@@ -27,6 +27,10 @@ namespace AbstractPixel.SceneManagement
         [SerializeField] private SceneReference defaultLoadingScene = new SceneReference(string.Empty);
         [Tooltip("Minimum time on screen, in unscaled seconds, so a fast load does not flash the loading scene. Counts from Show screen starting.")]
         [Min(0f)] [SerializeField] private float loadingSceneMinimumSeconds = 1f;
+        [Tooltip("Ground layers: the physics layers that count as ground, for Wait for ground below and for adding spawn point positions in the Editor. Triggers never count.")]
+        [SerializeField] private LayerMask groundLayers = ~(1 << 2);
+        [Tooltip("Steepest ground for relocatables with no label, in degrees. A steeper spawn point position is allowed but shown as a warning.")]
+        [Range(0f, 90f)] [SerializeField] private float noLabelSteepestGround = 35f;
 
         /// <summary>The scene group the game opens at launch. Start-up needs it, except when Play starts in a main scene.</summary>
         public SceneGroup StartSceneGroup
@@ -113,6 +117,20 @@ namespace AbstractPixel.SceneManagement
         {
             get { return loadingSceneMinimumSeconds; }
             set { loadingSceneMinimumSeconds = Mathf.Max(0f, value); }
+        }
+
+        /// <summary>The physics layers that count as ground for relocation (default: everything except Ignore Raycast).</summary>
+        public LayerMask GroundLayers
+        {
+            get { return groundLayers; }
+            set { groundLayers = value; }
+        }
+
+        /// <summary>Steepest ground, in degrees, for relocatables and spawn points with no relocation label.</summary>
+        public float NoLabelSteepestGround
+        {
+            get { return noLabelSteepestGround; }
+            set { noLabelSteepestGround = Mathf.Clamp(value, 0f, 90f); }
         }
 
         /// <summary>Every scene group in the project, kept current by an editor script.</summary>
