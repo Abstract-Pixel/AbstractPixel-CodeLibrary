@@ -22,6 +22,8 @@ namespace AbstractPixel.SceneManagement
         [SerializeField] private ShowLoadingScene showLoadingScene = ShowLoadingScene.Never;
         [Tooltip("The loading scene this group shows. Empty uses the default loading scene from the scene system settings.")]
         [SerializeField] private SceneReference loadingScene = new SceneReference(string.Empty);
+        [Tooltip("Sample scene group: its scenes open in the Editor but never go into a build (ADR 0014).")]
+        [SerializeField] private bool isSample = false;
 
         // The scene set that fills the three parts below, and which of them are overrides (ADR 0008). The loader does
         // not read these: it reads the lists above, which the Editor keeps in step with the set.
@@ -34,6 +36,13 @@ namespace AbstractPixel.SceneManagement
         {
             get { return sceneSet; }
             set { sceneSet = value; }
+        }
+
+        /// <summary>True for a sample scene group: its scenes open in the Editor but never go into a build.</summary>
+        public bool IsSample
+        {
+            get { return isSample; }
+            set { isSample = value; }
         }
 
         /// <summary>When this group shows its loading scene.</summary>

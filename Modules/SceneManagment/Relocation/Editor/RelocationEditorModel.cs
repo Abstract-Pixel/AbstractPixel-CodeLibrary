@@ -26,6 +26,7 @@ namespace AbstractPixel.SceneManagement.Editor
             public PreviewShape Shape;
             public bool HasGround;
             public float DepthUnderTerrain;
+            public float SinkDepth;
             public float Slope;
             public bool IsTooSteep;
             public bool Overlaps;
@@ -207,6 +208,7 @@ namespace AbstractPixel.SceneManagement.Editor
                     continue;
                 }
                 position.Slope = EditorGround.SlopeOf(hit.normal);
+                position.SinkDepth = GroundPlacement.SinkDepth(position.Shape, position.Pose);
                 float steepest = RelocationLabels.SteepestGroundOf(position.Address.Label);
                 position.IsTooSteep = position.Slope > steepest + 0.05f;
             }
@@ -337,6 +339,10 @@ namespace AbstractPixel.SceneManagement.Editor
             if (_position.DepthUnderTerrain > 0f)
             {
                 AddProblem(where + ": " + _position.DepthUnderTerrain.ToString("0.00") + " m under the terrain. Raise it.", spawnPoint, true);
+            }
+            if (_position.SinkDepth > GroundCheck.DeepestAllowedOverlap)
+            {
+                AddProblem(where + ": one side sinks " + _position.SinkDepth.ToString("0.00") + " m into the ground, so it would stay held. Raise it, or use Align to surface.", spawnPoint, true);
             }
             if (_position.Overlaps)
             {

@@ -36,6 +36,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private static VisualElement debuggerCard;
         private static VisualElement debuggerSummary;
         private static VisualElement relocationCard;
+        private static VisualElement samplesCard;
         private static bool refreshQueued;
         private static string pendingSection;
         private static int scrollAttempts;
@@ -125,6 +126,7 @@ namespace AbstractPixel.SceneManagement.Editor
             debuggerSummary = new VisualElement();
             debuggerHeader.Add(debuggerSummary);
             debuggerHeader.Add(SceneSystemUI.Button("Check again", "Checks every scene group in the project again.", Refresh));
+            samplesCard = AddSection(page, SceneSystemSampleGroupsSection.Title, SceneSystemSampleGroupsSection.Tooltip);
             relocationCard = AddSection(page, SceneSystemRelocationSection.Title, SceneSystemRelocationSection.Tooltip);
 
             // Never subscribed twice, even if Unity activates the page again without deactivating it first.
@@ -191,6 +193,7 @@ namespace AbstractPixel.SceneManagement.Editor
             SceneSystemLoadingScenesSection.Fill(loadingScenesCard, settings);
             FillNewScenes(settings);
             SceneGroupsDebugger.Fill(debuggerCard, debuggerSummary, settings, RequestRefresh);
+            SceneSystemSampleGroupsSection.Fill(samplesCard);
             SceneSystemRelocationSection.Fill(relocationCard, settings);
         }
 

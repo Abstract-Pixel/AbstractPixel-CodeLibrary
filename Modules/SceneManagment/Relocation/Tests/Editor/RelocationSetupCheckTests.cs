@@ -82,6 +82,37 @@ namespace AbstractPixel.SceneManagement.Relocation.Tests
         }
 
         [Test]
+        public void AnUprightPositionAddedOnASlopeClearsTheGround()
+        {
+            GameObject ramp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ramp.transform.position = new Vector3(50f, 5f, 0f);
+            ramp.transform.rotation = Quaternion.Euler(0f, 0f, 25f);
+            ramp.transform.localScale = new Vector3(20f, 1f, 20f);
+            Physics.SyncTransforms();
+            Ray down = new Ray(new Vector3(50f, 30f, 0f), Vector3.down);
+            Assert.IsTrue(EditorGround.TryHit(down, out RaycastHit hit));
+
+            Pose pose = GroundPlacement.StandingPose(hit, Vector3.forward, PreviewShapes.Box(), false);
+
+            Assert.LessOrEqual(GroundPlacement.SinkDepth(PreviewShapes.Box(), pose), 0.001f, "no corner starts inside the slope");
+            Assert.Less(Vector3.Angle(Vector3.up, pose.rotation * Vector3.up), 0.1f, "upright");
+        }
+
+        [Test]
+        public void APositionSinkingIntoASlopeIsFlagged()
+        {
+            GameObject ramp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ramp.transform.position = new Vector3(50f, 5f, 0f);
+            ramp.transform.rotation = Quaternion.Euler(0f, 0f, 34f);
+            ramp.transform.localScale = new Vector3(20f, 1f, 20f);
+            Physics.SyncTransforms();
+            Vector3 onSurface = new Vector3(50f, 5f, 0f) + ramp.transform.up * 0.5f;
+            world.SpawnPoint("Half buried", crateLabel, onSurface + Vector3.up * 0.05f);
+
+            StringAssert.Contains("'Half buried', Instance 1: one side sinks", AllProblems());
+        }
+
+        [Test]
         public void OverlappingPositionsAreFlagged()
         {
             SpawnPoint spawnPoint = world.SpawnPoint("Crates", crateLabel, Vector3.zero);
@@ -116,6 +147,17 @@ namespace AbstractPixel.SceneManagement.Relocation.Tests
             RelocationEditorModel.MarkDirty();
 
             Assert.AreEqual(8, RelocationEditorModel.Current.NextFreeInstance(crateLabel));
+        }
+
+        [Test]
+        public void AddSpawnPointGivesTheNextFreeInstanceWithoutCountingItself()
+        {
+            Relocatable crate = world.Crate("Crate", crateLabel);
+            SpawnPoint first = SpawnPointCreation.AddFor(crate);
+            SpawnPoint second = SpawnPointCreation.AddFor(crate);
+
+            Assert.AreEqual(1, first.GetInstance(0), "the first spawn point starts at Instance 1");
+            Assert.AreEqual(2, second.GetInstance(0), "the next one continues");
         }
 
         [Test]

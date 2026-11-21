@@ -43,6 +43,7 @@ namespace AbstractPixel.SceneManagement.Editor
             root.Add(SceneSystemUI.SceneField(serializedObject.FindProperty("MainScene"), "Main scene", SceneSystemUI.MainSceneTooltip));
             root.Add(MakeSceneSetField(group));
             root.Add(MakeLoadingSceneFields(group));
+            root.Add(MakeSampleToggle());
             root.Add(MakeAdvanced());
             root.Add(MakeButtons(group));
 
@@ -182,6 +183,25 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             serializedObject.Update();
             RefreshGroupState();
+        }
+
+        // Sample scene group (ADR 0014): its scenes open in the Editor but never go into a build.
+        private VisualElement MakeSampleToggle()
+        {
+            PropertyField sample = new PropertyField(serializedObject.FindProperty("isSample"), "Sample scene group");
+            sample.tooltip = "Sample scene group: its scenes open in the Editor but never go into a build. A build that still contains one stops.";
+            sample.style.marginTop = 4;
+            sample.RegisterValueChangeCallback(_change =>
+            {
+                SampleSceneGroups.Forget();
+                SceneGroup group = (SceneGroup)target;
+                if (group != null && group.IsSample)
+                {
+                    // Ticked: its scenes leave Build Settings at once (the writer leaves sample scenes out).
+                    AbstractPixel.Core.Editor.SceneBuildSettingsWriter.Write(EditorBuildSettings.scenes);
+                }
+            });
+            return sample;
         }
 
         private VisualElement MakeAdvanced()

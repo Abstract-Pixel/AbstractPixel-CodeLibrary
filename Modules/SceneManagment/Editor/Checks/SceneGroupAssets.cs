@@ -34,6 +34,11 @@ namespace AbstractPixel.SceneManagement.Editor
             Dictionary<string, List<SceneGroupProblem>> problemsByPath = new Dictionary<string, List<SceneGroupProblem>>();
             foreach (SceneGroup group in FindAll())
             {
+                // Sample scene groups never reach a build, so their problems never stop one.
+                if (group.IsSample)
+                {
+                    continue;
+                }
                 List<SceneGroupProblem> problems = SceneGroupCheck.Find(group);
                 if (problems.Count == 0)
                 {

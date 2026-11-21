@@ -7,6 +7,17 @@ namespace AbstractPixel.SceneManagement.Editor
     /// <summary>The rules behind "Create Scene Group": where the new group goes, and which group already uses a scene as its main scene.</summary>
     public static class SceneGroupCreation
     {
+        /// <summary>True for a scene inside a folder named Samples, whose scene group is made a sample scene group.</summary>
+        public static bool IsInSamplesFolder(string _scenePath)
+        {
+            if (string.IsNullOrEmpty(_scenePath))
+            {
+                return false;
+            }
+            string path = _scenePath.Replace('\\', '/');
+            return path.Contains("/Samples/") || path.StartsWith("Samples/");
+        }
+
         /// <summary>The new group's path: next to the scene, named after it, "Level 7.unity" becomes "Level 7Group.asset".</summary>
         public static string GroupPathFor(string _scenePath)
         {

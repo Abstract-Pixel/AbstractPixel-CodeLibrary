@@ -185,6 +185,14 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             _seenScenes.Add(_scene);
 
+            SceneGroup otherKind = SampleSceneGroups.OtherKindUsing(_group, _scene.ScenePath);
+            if (otherKind != null)
+            {
+                string kinds = _group.IsSample ? "game scene group" : "sample scene group";
+                string message = "Scene group '" + groupName + "': scene '" + sceneName + "' is also used by " + kinds + " '" + otherKind.name + "'. A sample's scenes never go into a build, so a scene belongs to samples or to the game, not both.";
+                _problems.Add(new SceneGroupProblem(SceneGroupProblemKind.SharedWithOtherKind, SceneGroupProblemFix.None, _list, _index, _scene, message));
+            }
+
             SceneStatus status = _statusOf(_scene);
             if (status == SceneStatus.Missing)
             {
@@ -197,7 +205,8 @@ namespace AbstractPixel.SceneManagement.Editor
                 _problems.Add(new SceneGroupProblem(SceneGroupProblemKind.MissingScene, fix, _list, _index, _scene, message));
                 return;
             }
-            if (status == SceneStatus.NotInBuild)
+            // A sample scene group's scenes are never in build on purpose; the Editor opens them from their path.
+            if (status == SceneStatus.NotInBuild && !_group.IsSample)
             {
                 SceneFix sceneFix = SceneStatusRules.FixFor(status, SceneStatusReader.ProjectDefaultPlace, AddressableScenes.IsInstalled);
                 SceneGroupProblemFix fix = SceneGroupProblemFix.AddToBuild;

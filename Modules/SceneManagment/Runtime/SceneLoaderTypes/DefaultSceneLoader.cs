@@ -9,6 +9,12 @@ namespace AbstractPixel.SceneManagement
 {
     public class DefaultSceneLoader : ISceneLoader
     {
+        /// <summary>
+        /// True for a scene of a sample scene group, which is never in Build Settings. Set by the scene system's editor
+        /// code; null in a build. Such a scene is opened in Play mode with EditorSceneManager.LoadSceneAsyncInPlayMode.
+        /// </summary>
+        internal static System.Func<string, bool> IsEditorOnlySampleScene;
+
         private Dictionary<string, AsyncOperation> sceneLoadHandles = new Dictionary<string, AsyncOperation>();
 
         // For the loading progress: loads under way, and scenes that have loaded and not closed yet.
@@ -54,15 +60,8 @@ namespace AbstractPixel.SceneManagement
                 return;
             }
 
-            // A scene missing from the build fails the load, so the scene change fails instead of looking finished.
-            // Checked first, so Unity does not log an error of its own for the same scene.
-            if (!Application.CanStreamedLevelBeLoaded(sceneReference.SceneName))
-            {
-                throw new System.InvalidOperationException($"Scene '{sceneReference.SceneName}' is not in the build (Build Settings or Addressables).");
-            }
-
             LoadSceneMode loadMode = isAdditive ? LoadSceneMode.Additive : LoadSceneMode.Single;
-            AsyncOperation sceneLoadHandle = SceneManager.LoadSceneAsync(sceneReference.SceneName, loadMode);
+            AsyncOperation sceneLoadHandle = StartLoad(sceneReference, loadMode);
             if (sceneLoadHandle == null)
             {
                 throw new System.InvalidOperationException($"Scene '{sceneReference.SceneName}' could not be loaded.");
@@ -88,6 +87,28 @@ namespace AbstractPixel.SceneManagement
             }
             loadsUnderWay.Remove(sceneReference.SceneName);
             loadedScenes.Add(sceneReference.SceneName);
+        }
+
+        // A scene missing from the build fails the load, so the scene change fails instead of looking finished. Checked
+        // first, so Unity does not log an error of its own for the same scene. A sample scene opens from its path, in
+        // the Editor only.
+        private static AsyncOperation StartLoad(SceneReference _sceneReference, LoadSceneMode _loadMode)
+        {
+            string sceneName = _sceneReference.SceneName;
+            if (Application.CanStreamedLevelBeLoaded(sceneName))
+            {
+                return SceneManager.LoadSceneAsync(sceneName, _loadMode);
+            }
+#if UNITY_EDITOR
+            string scenePath = _sceneReference.ScenePath;
+            bool isSampleScene = IsEditorOnlySampleScene != null && !string.IsNullOrEmpty(scenePath) && IsEditorOnlySampleScene(scenePath);
+            if (isSampleScene)
+            {
+                LoadSceneParameters parameters = new LoadSceneParameters(_loadMode);
+                return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(scenePath, parameters);
+            }
+#endif
+            throw new System.InvalidOperationException($"Scene '{sceneName}' is not in the build (Build Settings or Addressables).");
         }
 
         public async Task UnloadScene(SceneReference sceneReference)
