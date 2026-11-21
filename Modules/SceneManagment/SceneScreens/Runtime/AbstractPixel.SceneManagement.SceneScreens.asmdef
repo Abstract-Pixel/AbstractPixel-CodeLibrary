@@ -1,0 +1,19 @@
+{
+    "name": "AbstractPixel.SceneManagement.SceneScreens",
+    "rootNamespace": "AbstractPixel.SceneManagement.SceneScreens",
+    "references": [
+        "AbstractPixel.Core",
+        "AbstractPixel.SceneManagment",
+        "Unity.Timeline",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

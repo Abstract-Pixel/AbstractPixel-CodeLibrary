@@ -22,6 +22,11 @@ namespace AbstractPixel.SceneManagement.Editor
         private const string StarterSetFileName = "Default Scene Set.asset";
         private const string ManagerSceneFileName = "Managers.unity";
         private const string FadeFileName = "Fade.asset";
+        private const string FadeControllerFileName = "Fade Controller.prefab";
+        private const string LoadingSceneFileName = "Loading Scene.unity";
+
+        // The ready-made loading scene in SceneScreens (ADR 0004): cloned, never referenced.
+        private const string LibraryLoadingSceneGuid = "ca40e8005259bd345b8ba56e2de6f32e";
 
         // The library's basic fade profile and the component that plays it, found by GUID and name: the scene module
         // never references the transitions module (ADR 0001), and works without it.
@@ -150,12 +155,16 @@ namespace AbstractPixel.SceneManagement.Editor
                 lines.Add("A starter scene set '" + Path.GetFileNameWithoutExtension(StarterSetFileName) + "', the default, with one empty manager scene '" + Path.GetFileNameWithoutExtension(ManagerSceneFileName) + "' in " + place + ".");
                 if (_hasFade)
                 {
-                    lines.Add("A copy of the basic fade (" + FadeFileName + ") in that folder, played by the manager scene. Restyle the copy; the library's original stays untouched.");
+                    lines.Add("A copy of the basic fade (" + FadeFileName + ") and its controller prefab (" + FadeControllerFileName + ") in that folder, played by the manager scene. Restyle the copies; the library's originals stay untouched.");
                 }
                 else
                 {
                     lines.Add("No fade: the transitions module is not in this project, so scenes change without an effect.");
                 }
+            }
+            if (LibraryLoadingSceneExists())
+            {
+                lines.Add("A copy of the ready-made loading scene (" + LoadingSceneFileName + ") in that folder, in " + place + ", listed as the default loading scene. Scene groups show it only when their Show the loading scene says so.");
             }
             lines.Add("New scenes go to " + place + ". Check scene groups before a build: on.");
             string launchLine = LaunchSceneLine(_choices);
@@ -164,6 +173,12 @@ namespace AbstractPixel.SceneManagement.Editor
                 lines.Add(launchLine + ".");
             }
             return lines;
+        }
+
+        public static bool LibraryLoadingSceneExists()
+        {
+            string path = AssetDatabase.GUIDToAssetPath(LibraryLoadingSceneGuid);
+            return !string.IsNullOrEmpty(path) && AssetDatabase.LoadMainAssetAtPath(path) != null;
         }
 
         public static bool LibraryFadeExists()
@@ -209,6 +224,7 @@ namespace AbstractPixel.SceneManagement.Editor
                     CreateStarterSet(folder, settings, createdPaths);
                 }
 
+                CopyLibraryLoadingScene(folder, settings, createdPaths);
                 ApplyLaunchScene(_choices, settings, createdPaths);
                 SceneSystemSettingsAssets.RefreshLists(settings);
                 SceneSystemSettingsAssets.EnsurePreloaded(settings);
@@ -332,7 +348,59 @@ namespace AbstractPixel.SceneManagement.Editor
                 throw new InvalidOperationException("Unity could not copy the basic fade to '" + copyPath + "'.");
             }
             _createdPaths.Add(copyPath);
-            return AssetDatabase.LoadAssetAtPath<ScriptableObject>(copyPath);
+            ScriptableObject fadeCopy = AssetDatabase.LoadAssetAtPath<ScriptableObject>(copyPath);
+            CopyFadeController(_folder, fadeCopy, _createdPaths);
+            return fadeCopy;
+        }
+
+        // The copied profile still names the library's controller prefab; it gets its own copy, so nothing the project
+        // uses points into the library (ADR 0004). The field is found by name: the scene module never references transitions.
+        private static void CopyFadeController(string _folder, ScriptableObject _fadeCopy, List<string> _createdPaths)
+        {
+            SerializedObject profile = new SerializedObject(_fadeCopy);
+            SerializedProperty controllerProperty = profile.FindProperty("TransitionControllerPrefab");
+            if (controllerProperty == null || controllerProperty.objectReferenceValue == null)
+            {
+                return;
+            }
+            string originalPath = AssetDatabase.GetAssetPath(controllerProperty.objectReferenceValue);
+            string copyPath = AssetDatabase.GenerateUniqueAssetPath(_folder + "/" + FadeControllerFileName);
+            if (!AssetDatabase.CopyAsset(originalPath, copyPath))
+            {
+                throw new InvalidOperationException("Unity could not copy the fade's controller prefab to '" + copyPath + "'.");
+            }
+            _createdPaths.Add(copyPath);
+            controllerProperty.objectReferenceValue = AssetDatabase.LoadAssetAtPath<GameObject>(copyPath);
+            profile.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // A copy of the ready-made loading scene, listed in the settings as the default loading scene and put where new
+        // scenes go. Scene groups show it only when they ask to.
+        private static void CopyLibraryLoadingScene(string _folder, SceneSystemSettings _settings, List<string> _createdPaths)
+        {
+            string originalPath = AssetDatabase.GUIDToAssetPath(LibraryLoadingSceneGuid);
+            if (string.IsNullOrEmpty(originalPath) || AssetDatabase.LoadMainAssetAtPath(originalPath) == null)
+            {
+                Debug.LogWarning(LogPrefix + " The ready-made loading scene is not in this project, so no loading scene was added.");
+                return;
+            }
+            string copyPath = AssetDatabase.GenerateUniqueAssetPath(_folder + "/" + LoadingSceneFileName);
+            if (!AssetDatabase.CopyAsset(originalPath, copyPath))
+            {
+                throw new InvalidOperationException("Unity could not copy the ready-made loading scene to '" + copyPath + "'.");
+            }
+            _createdPaths.Add(copyPath);
+
+            SceneAsset sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(copyPath);
+            SceneReference loadingScene = new SceneReference(sceneAsset.name, AssetDatabase.AssetPathToGUID(copyPath), copyPath);
+            loadingScene.SceneFieldReference.SetSceneAsset(sceneAsset);
+            _settings.LoadingScenes.Add(loadingScene);
+            _settings.DefaultLoadingScene = new SceneReference(sceneAsset.name, loadingScene.SceneGuid, copyPath);
+            _settings.DefaultLoadingScene.SceneFieldReference.SetSceneAsset(sceneAsset);
+            EditorUtility.SetDirty(_settings);
+
+            SceneStatusReport report = SceneStatusReader.Read(loadingScene.SceneFieldReference);
+            SceneStatusReader.MoveTo(report, SceneStatusReader.ProjectDefaultPlace);
         }
 
         // An empty scene opened next to the current ones, so the designer's open scenes stay as they are.
