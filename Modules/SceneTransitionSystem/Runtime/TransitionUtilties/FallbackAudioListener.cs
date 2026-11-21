@@ -37,15 +37,15 @@ namespace AbstractPixel.SceneTransitions
 
         private void OnEnable()
         {
-            TransitionEventBus.OnTransitionInCompleted += TakeOverWhileScreenCovered;
-            TransitionEventBus.OnTransitionOutStarted += GiveBackToSurvivingListener;
+            TransitionEventBus.OnEndHideScreenTransition += TakeOverWhileScreenCovered;
+            TransitionEventBus.OnStartShowScreenTransition += GiveBackToSurvivingListener;
             SceneManager.sceneLoaded += HandleSceneLoaded;
         }
 
         private void OnDisable()
         {
-            TransitionEventBus.OnTransitionInCompleted -= TakeOverWhileScreenCovered;
-            TransitionEventBus.OnTransitionOutStarted -= GiveBackToSurvivingListener;
+            TransitionEventBus.OnEndHideScreenTransition -= TakeOverWhileScreenCovered;
+            TransitionEventBus.OnStartShowScreenTransition -= GiveBackToSurvivingListener;
             SceneManager.sceneLoaded -= HandleSceneLoaded;
         }
 

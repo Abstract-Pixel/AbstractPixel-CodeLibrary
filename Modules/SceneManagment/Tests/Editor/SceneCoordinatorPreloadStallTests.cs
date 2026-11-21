@@ -39,11 +39,11 @@ namespace AbstractPixel.SceneManagement.Tests
         [Test]
         public async Task GoToADifferentLevelWhilePreloadedCompletesAndClosesThePreload()
         {
-            await rig.Coordinator.PreloadSceneGroup(rig.CreateLevelGroup("Level2"));
+            await rig.Coordinator.Preload(rig.CreateLevelGroup("Level2"));
             rig.Loader.Calls.Clear();
             SceneGroup levelThree = rig.CreateLevelGroup("Level3");
 
-            Task change = rig.Coordinator.TransitionToSceneGroup(levelThree);
+            Task change = rig.Coordinator.ChangeTo(levelThree);
 
             Assert.IsTrue(change.IsCompleted, "the change stalled behind the held main scene: " + Calls());
             await change;
@@ -60,10 +60,10 @@ namespace AbstractPixel.SceneManagement.Tests
         [Test]
         public async Task RetryWhilePreloadedCompletesAndClosesThePreload()
         {
-            await rig.Coordinator.PreloadSceneGroup(rig.CreateLevelGroup("Level2"));
+            await rig.Coordinator.Preload(rig.CreateLevelGroup("Level2"));
             rig.Loader.Calls.Clear();
 
-            Task retry = rig.Coordinator.ReloadActiveSceneGroup();
+            Task retry = rig.Coordinator.Retry();
 
             Assert.IsTrue(retry.IsCompleted, "the Retry stalled behind the held main scene: " + Calls());
             await retry;
@@ -80,10 +80,10 @@ namespace AbstractPixel.SceneManagement.Tests
         {
             string[] sharedScenes = { SceneCoordinatorTestRig.CarScene, "Rain" };
             SceneGroup levelTwo = rig.CreateGroup("Level2", sharedScenes, true);
-            await rig.Coordinator.PreloadSceneGroup(levelTwo);
+            await rig.Coordinator.Preload(levelTwo);
             rig.Loader.Calls.Clear();
 
-            Task change = rig.Coordinator.TransitionToSceneGroup(levelTwo);
+            Task change = rig.Coordinator.ChangeTo(levelTwo);
 
             Assert.IsTrue(change.IsCompleted, "the change stalled behind the held main scene: " + Calls());
             await change;
@@ -98,31 +98,11 @@ namespace AbstractPixel.SceneManagement.Tests
         }
 
         [Test]
-        public async Task SwitchToPreloadedWhenThatGroupIsAlreadyOpenClosesTheHeldScene()
-        {
-            SceneGroup levelTwo = rig.CreateLevelGroup("Level2");
-            await rig.Coordinator.PreloadSceneGroup(levelTwo);
-            // Makes the preloaded level the open one without going through the coordinator, the case the code guards.
-            rig.Coordinator.Open.Group = levelTwo;
-            rig.Loader.Calls.Clear();
-
-            LogAssert.Expect(LogType.Warning, new Regex("already active"));
-            Task change = rig.Coordinator.TransitionToPreloadedSceneGroup();
-
-            Assert.IsTrue(change.IsCompleted, "the held scene was left waiting: " + Calls());
-            await change;
-            Assert.IsNull(rig.Loader.HeldScene, "nothing waits any more: " + Calls());
-            Assert.AreEqual(1, rig.Loader.CountCalls("unload Level2"), "the held scene is closed: " + Calls());
-            Assert.AreEqual(0, newLevelGroups.Count, "no change happened");
-            await AssertSettledAndNextPreloadWorks();
-        }
-
-        [Test]
         public async Task GoToALevelWithNothingPreloadedStillWorks()
         {
             SceneGroup levelTwo = rig.CreateLevelGroup("Level2");
 
-            Task change = rig.Coordinator.TransitionToSceneGroup(levelTwo);
+            Task change = rig.Coordinator.ChangeTo(levelTwo);
 
             Assert.IsTrue(change.IsCompleted, Calls());
             await change;
@@ -135,16 +115,16 @@ namespace AbstractPixel.SceneManagement.Tests
         private async Task AssertSettledAndNextPreloadWorks()
         {
             Assert.IsFalse(rig.Coordinator.IsLoadingSceneGroup, "still busy");
-            Assert.IsNull(rig.Coordinator.Preload.Group, "the preload record is not empty");
-            Assert.AreEqual(0, rig.Coordinator.Preload.Scenes.Count, "the preload record is not empty");
+            Assert.IsNull(rig.Coordinator.Preloaded.Group, "the preload record is not empty");
+            Assert.AreEqual(0, rig.Coordinator.Preloaded.Scenes.Count, "the preload record is not empty");
             Assert.IsNull(rig.Loader.HeldScene, "a scene still waits for activation: " + Calls());
             Assert.AreEqual(0, rig.Loader.StalledCalls.Count, "calls stalled: " + string.Join(", ", rig.Loader.StalledCalls));
 
             SceneGroup nextGroup = rig.CreateLevelGroup("LevelNext");
-            Task preload = rig.Coordinator.PreloadSceneGroup(nextGroup);
+            Task preload = rig.Coordinator.Preload(nextGroup);
             Assert.IsTrue(preload.IsCompleted, "the next preload stalled: " + Calls());
             await preload;
-            Assert.AreSame(nextGroup, rig.Coordinator.Preload.Group, "the next preload did not take");
+            Assert.AreSame(nextGroup, rig.Coordinator.Preloaded.Group, "the next preload did not take");
         }
 
         private void RecordNewLevel(SceneGroup _group)

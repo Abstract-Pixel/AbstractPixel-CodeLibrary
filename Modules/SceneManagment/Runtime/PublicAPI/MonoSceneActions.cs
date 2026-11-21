@@ -3,27 +3,23 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
+    /// <summary>The scene calls for UnityEvents, which list only void methods. The results are not returned.</summary>
     [DisallowMultipleComponent]
     public class MonoSceneActions : MonoBehaviour
     {
-        public void TransitionToSceneGroup(SceneGroup _sceneGroup)
+        public void ChangeTo(SceneGroup _sceneGroup)
         {
-            SceneActions.TransitionToSceneGroup(_sceneGroup).ForgetTask();
+            SceneActions.ChangeTo(_sceneGroup).ForgetTask();
         }
 
-        public void PreloadSceneGroup(SceneGroup _sceneGroup)
+        public void Retry()
         {
-            SceneActions.PreloadSceneGroup(_sceneGroup).ForgetTask();
+            SceneActions.Retry().ForgetTask();
         }
 
-        public void TransitionToPreloadedSceneGroup()
+        public void Preload(SceneGroup _sceneGroup)
         {
-            SceneActions.TransitionToPreloadedSceneGroup().ForgetTask();
-        }
-
-        public void ReloadActiveSceneGroup()
-        {
-            SceneActions.ReloadActiveSceneGroup().ForgetTask();
+            SceneActions.Preload(_sceneGroup).ForgetTask();
         }
     }
 }

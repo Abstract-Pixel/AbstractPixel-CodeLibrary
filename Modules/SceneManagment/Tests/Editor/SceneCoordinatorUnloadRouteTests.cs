@@ -29,7 +29,7 @@ namespace AbstractPixel.SceneManagement.Tests
             rig.Coordinator.Open.MainScene = null;
             string activeSceneName = SceneManager.GetActiveScene().name;
 
-            await rig.Coordinator.ReloadActiveSceneGroup();
+            await rig.Coordinator.Retry();
 
             string expectedCall = RecordingSceneLoader.UnloadPrefix + activeSceneName;
             Assert.AreEqual(1, rig.Loader.CountCalls(expectedCall), "the loader must receive the close: " + string.Join(", ", rig.Loader.Calls));

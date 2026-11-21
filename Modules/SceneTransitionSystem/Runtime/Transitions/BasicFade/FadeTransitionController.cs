@@ -4,6 +4,11 @@ using UnityEngine.UI;
 
 namespace AbstractPixel.SceneTransitions
 {
+    /// <summary>
+    /// The ready-made fade: one full-screen image fades to the profile's colour (Hide screen) and back (Show screen),
+    /// on unscaled time. Hide screen finishes at the profile's "Screen counts as covered at" share; the fade keeps
+    /// finishing on top, and Show screen waits for it first.
+    /// </summary>
     [RequireComponent(typeof(Image))]
     [DisallowMultipleComponent]
     public class FadeTransitionController : MonoBehaviour, ITransitionController
@@ -13,18 +18,17 @@ namespace AbstractPixel.SceneTransitions
         [SerializeField] private Image fadeImage;
 
         private ImageFadeProfile cachedProfile;
+        private Task runningFade = Task.CompletedTask;
 
         private void Awake()
         {
-            if (fadeImage == null)
-            {
-                fadeImage = GetComponent<Image>();
-            }
+            FindImage();
             fadeImage.gameObject.SetActive(false);
         }
 
         public void Initialize(TransitionProfile _profile)
         {
+            FindImage();
             if (_profile is ImageFadeProfile imageFadeProfile)
             {
                 cachedProfile = imageFadeProfile;
@@ -35,65 +39,80 @@ namespace AbstractPixel.SceneTransitions
             }
         }
 
-        public async Task PlayTransitionOut()
+        public Task PlayHideScreen()
         {
             if (cachedProfile == null)
             {
-                Debug.LogError("[FadeTransitionController] Cannot play transition. Profile was not initialized.");
-                return;
+                Debug.LogError("[FadeTransitionController] Cannot play Hide screen. Profile was not initialized.");
+                return Task.CompletedTask;
             }
 
-            fadeImage.color = new Color(cachedProfile.FadeColor.r, cachedProfile.FadeColor.g, cachedProfile.FadeColor.b, 1f);
-            fadeImage.gameObject.SetActive(true);
-            await Task.Delay((int)(cachedProfile.StartDelay) * 1000);
-            float timer = 0f;
-            while (timer < cachedProfile.Duration)
-            {
-                timer += Time.unscaledDeltaTime;
-                float percent = Mathf.Clamp01(timer / cachedProfile.Duration);
-                float alpha = cachedProfile.FadeCurve.Evaluate(1-percent);
-
-                Color currentColor = fadeImage.color;
-                currentColor.a = alpha;
-                fadeImage.color = currentColor;
-                await Task.Yield();
-            }
-
-            Color finalColor = fadeImage.color;
-            finalColor.a = cachedProfile.FadeCurve.Evaluate(0f);
-            fadeImage.color = finalColor;
-            fadeImage.gameObject.SetActive(false);
+            runningFade = Fade(true);
+            float effectSeconds = cachedProfile.StartDelay + cachedProfile.Duration;
+            return TransitionTiming.WhenShareHasPlayed(runningFade, effectSeconds, cachedProfile.ScreenCountsAsCoveredAt);
         }
 
-        public async Task PlayTransitionIn()
+        public async Task PlayShowScreen()
         {
             if (cachedProfile == null)
             {
-                Debug.LogError("[FadeTransitionController] Cannot play transition. Profile was not initialized.");
+                Debug.LogError("[FadeTransitionController] Cannot play Show screen. Profile was not initialized.");
                 return;
             }
 
-            fadeImage.color = new Color(cachedProfile.FadeColor.r, cachedProfile.FadeColor.g, cachedProfile.FadeColor.b, 0f);
+            // A Hide screen that counted as covered early may still be finishing on top.
+            await runningFade;
+            runningFade = Fade(false);
+            await runningFade;
+        }
+
+        private async Task Fade(bool _toCovered)
+        {
+            float startAlpha = _toCovered ? 0f : 1f;
+            SetAlpha(cachedProfile.FadeCurve.Evaluate(startAlpha));
             fadeImage.gameObject.SetActive(true);
-            await Task.Delay((int)(cachedProfile.StartDelay) * 1000);
-            float timer = 0f;
-            while (timer < cachedProfile.Duration)
+
+            await TransitionTiming.WaitSeconds(cachedProfile.StartDelay);
+            float startTime = TransitionTiming.Now;
+            float share = 0f;
+            while (share < 1f)
             {
-                timer += Time.unscaledDeltaTime;
-                float percent = Mathf.Clamp01(timer / cachedProfile.Duration);
-
-                float alpha = cachedProfile.FadeCurve.Evaluate(percent);
-
-                Color currentColor = fadeImage.color;
-                currentColor.a = alpha;
-                fadeImage.color = currentColor;
-
-                await Task.Yield();
+                if (fadeImage == null)
+                {
+                    return;
+                }
+                share = TransitionTiming.ShareSince(startTime, cachedProfile.Duration);
+                float curveTime = _toCovered ? share : 1f - share;
+                SetAlpha(cachedProfile.FadeCurve.Evaluate(curveTime));
+                if (share < 1f)
+                {
+                    await Task.Yield();
+                }
             }
 
-            Color finalColor = fadeImage.color;
-            finalColor.a = cachedProfile.FadeCurve.Evaluate(1f);
-            fadeImage.color = finalColor;
+            if (!_toCovered && fadeImage != null)
+            {
+                fadeImage.gameObject.SetActive(false);
+            }
+        }
+
+        private void SetAlpha(float _alpha)
+        {
+            if (fadeImage == null)
+            {
+                return;
+            }
+            Color color = cachedProfile.FadeColor;
+            color.a = _alpha;
+            fadeImage.color = color;
+        }
+
+        private void FindImage()
+        {
+            if (fadeImage == null)
+            {
+                fadeImage = GetComponent<Image>();
+            }
         }
     }
 }

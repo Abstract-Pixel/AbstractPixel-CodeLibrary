@@ -16,6 +16,14 @@ namespace AbstractPixel.SceneManagement
     {
         private ISceneLoader loader;
 
+        /// <summary>The scene that failed to load in the last scene change, or null. Cleared by <see cref="ForgetFailure"/>.</summary>
+        public SceneReference FailedScene { get; private set; }
+
+        public void ForgetFailure()
+        {
+            FailedScene = null;
+        }
+
         /// <summary>The loader, created the first time it is needed, so a scene change in the first frame has one.</summary>
         public ISceneLoader Loader
         {
@@ -144,6 +152,10 @@ namespace AbstractPixel.SceneManagement
             {
                 Debug.LogException(ex);
                 Debug.LogError($"[SceneCoordinator] Failed to load scene '{_scene.SceneName}'.");
+                if (FailedScene == null)
+                {
+                    FailedScene = _scene;
+                }
                 return false;
             }
         }

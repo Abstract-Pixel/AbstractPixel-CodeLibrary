@@ -81,7 +81,7 @@ namespace AbstractPixel.SceneManagement.Tests
             await rig.Coordinator.RunStartUp(level, Open("SplashScreen"), false);
             rig.Loader.Calls.Clear();
 
-            await rig.Coordinator.TransitionToSceneGroup(rig.CreateLevelGroup("Level3"));
+            await rig.Coordinator.ChangeTo(rig.CreateLevelGroup("Level3"));
 
             StringAssert.Contains("unload Level2", Calls());
             StringAssert.Contains("unload GameBootScene", Calls());
@@ -98,7 +98,7 @@ namespace AbstractPixel.SceneManagement.Tests
 
             Task<bool> startUp = rig.Coordinator.RunStartUp(menu, Open("SplashScreen"), false);
             LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("Start-up"));
-            Task refused = rig.Coordinator.TransitionToSceneGroup(level);
+            Task refused = rig.Coordinator.ChangeTo(level);
 
             Assert.IsTrue(refused.IsCompleted, "refused at once");
             rig.Loader.LoadGate = null;

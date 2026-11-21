@@ -8,14 +8,14 @@ public class TransitionAudio : MonoBehaviour
     [SerializeField] private SoundID FadeOutSound;
     private void OnEnable()
     {
-        TransitionEventBus.OnTransitionInStarted += PlayFadeInSound;
-        TransitionEventBus.OnTransitionOutStarted += PlayFadeOutSound;
+        TransitionEventBus.OnStartHideScreenTransition += PlayFadeInSound;
+        TransitionEventBus.OnStartShowScreenTransition += PlayFadeOutSound;
     }
 
     private void OnDisable()
     {
-        TransitionEventBus.OnTransitionInStarted -= PlayFadeInSound;
-        TransitionEventBus.OnTransitionOutStarted -= PlayFadeOutSound;
+        TransitionEventBus.OnStartHideScreenTransition -= PlayFadeInSound;
+        TransitionEventBus.OnStartShowScreenTransition -= PlayFadeOutSound;
     }
 
     private void PlayFadeInSound()

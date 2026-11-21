@@ -26,7 +26,7 @@ namespace AbstractPixel.SceneManagement.Tests
         [Test]
         public async Task SceneChangeReleasesMemoryOnceAfterClosingScenes()
         {
-            await rig.Coordinator.TransitionToSceneGroup(rig.CreateLevelGroup("Level2"));
+            await rig.Coordinator.ChangeTo(rig.CreateLevelGroup("Level2"));
 
             AssertReleasedOnceAfterLastUnload();
         }
@@ -34,7 +34,7 @@ namespace AbstractPixel.SceneManagement.Tests
         [Test]
         public async Task RetryReleasesMemoryOnceAfterClosingScenes()
         {
-            await rig.Coordinator.ReloadActiveSceneGroup();
+            await rig.Coordinator.Retry();
 
             AssertReleasedOnceAfterLastUnload();
         }

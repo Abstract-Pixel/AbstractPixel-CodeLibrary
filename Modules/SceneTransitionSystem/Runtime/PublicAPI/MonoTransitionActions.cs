@@ -4,6 +4,7 @@ using AbstractPixel.SceneManagement;
 
 namespace AbstractPixel.SceneTransitions
 {
+    /// <summary>The transition calls for UnityEvents, which list only void methods.</summary>
     [DisallowMultipleComponent]
     public class MonoTransitionActions : MonoBehaviour
     {
@@ -11,34 +12,32 @@ namespace AbstractPixel.SceneTransitions
         {
             TransitionActions.Initialize(_transitionProfile);
         }
+
         public void SetTransitionProfile(TransitionProfile _transitionProfile)
         {
             TransitionActions.SetTransitionProfile(_transitionProfile);
         }
-      
-        public void PlayTransitionIn()
+
+        public void HideScreen()
         {
-            TransitionActions.PlayTransitionIn().ForgetTask();
+            TransitionActions.HideScreen().ForgetTask();
         }
 
-        public void PlayTransitionOut()
+        public void ShowScreen()
         {
-            TransitionActions.PlayTransitionOut().ForgetTask();
+            TransitionActions.ShowScreen().ForgetTask();
         }
 
-        public void ReloadActiveScenesWithEffects()
-        {
-            TransitionActions.ReloadActiveScenesWithEffects().ForgetTask();
-        }
-
+        /// <summary>Kept by name: pause, win and game over buttons call it through UnityEvents. Forwards to SceneActions.ChangeTo.</summary>
         public void TransitionToSceneWithEffects(SceneGroup group)
         {
             TransitionActions.TransitionToSceneWithEffects(group).ForgetTask();
         }
 
-        public void TransitionToPreloadedSceneWithEffects()
+        /// <summary>Kept by name: pause, win and game over buttons call it through UnityEvents. Forwards to SceneActions.Retry.</summary>
+        public void ReloadActiveScenesWithEffects()
         {
-            TransitionActions.TransitionToPreloadedSceneWithEffects().ForgetTask();
+            TransitionActions.ReloadActiveScenesWithEffects().ForgetTask();
         }
     }
 }

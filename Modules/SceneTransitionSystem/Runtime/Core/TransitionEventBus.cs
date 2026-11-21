@@ -3,25 +3,46 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneTransitions
 {
+    /// <summary>
+    /// The screen effect's messages, in glossary words: Hide screen covers the screen, Show screen uncovers it. The
+    /// state change event carries the new <see cref="ScreenState"/>.
+    /// </summary>
     public static class TransitionEventBus
     {
-        public static event Action OnTransitionInStarted = delegate { };
-        public static event Action OnTransitionInCompleted = delegate { };
-        public static event Action OnTransitionOutStarted = delegate { };
-        public static event Action OnTransitionOutCompleted = delegate { };
+        public static event Action<ScreenState> OnScreenStateChanged = delegate { };
+        public static event Action OnStartHideScreenTransition = delegate { };
+        public static event Action OnEndHideScreenTransition = delegate { };
+        public static event Action OnStartShowScreenTransition = delegate { };
+        public static event Action OnEndShowScreenTransition = delegate { };
 
-        public static void RaiseTransitionInStarted() => OnTransitionInStarted?.Invoke();
-        public static void RaiseTransitionInCompleted() => OnTransitionInCompleted?.Invoke();
-        public static void RaiseTransitionOutStarted() => OnTransitionOutStarted?.Invoke();
-        public static void RaiseTransitionOutCompleted() => OnTransitionOutCompleted?.Invoke();
+        internal static void RaiseScreenStateChanged(ScreenState _state)
+        {
+            OnScreenStateChanged.Invoke(_state);
+            switch (_state)
+            {
+                case ScreenState.Hiding:
+                    OnStartHideScreenTransition.Invoke();
+                    break;
+                case ScreenState.Hidden:
+                    OnEndHideScreenTransition.Invoke();
+                    break;
+                case ScreenState.Showing:
+                    OnStartShowScreenTransition.Invoke();
+                    break;
+                default:
+                    OnEndShowScreenTransition.Invoke();
+                    break;
+            }
+        }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ClearAllSubscribers()
+        internal static void ResetStatics()
         {
-            OnTransitionInStarted = delegate { };
-            OnTransitionInCompleted = delegate { };
-            OnTransitionOutStarted = delegate { };
-            OnTransitionOutCompleted = delegate { };
+            OnScreenStateChanged = delegate { };
+            OnStartHideScreenTransition = delegate { };
+            OnEndHideScreenTransition = delegate { };
+            OnStartShowScreenTransition = delegate { };
+            OnEndShowScreenTransition = delegate { };
         }
     }
 }

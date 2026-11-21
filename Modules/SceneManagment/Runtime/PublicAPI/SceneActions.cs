@@ -9,7 +9,7 @@ namespace AbstractPixel.SceneManagement
     public static class SceneActions
     {
         public static SceneGroup ActiveSceneGroup => SceneCoordinator.FindOrCreate()?.ActiveSceneGroup;
-        public static SceneGroup PreloadedSceneGroup => SceneCoordinator.FindOrCreate()?.Preload.Group;
+        public static SceneGroup PreloadedSceneGroup => SceneCoordinator.FindOrCreate()?.Preloaded.Group;
 
         public static bool IsLoadingSceneGroup
         {
@@ -90,32 +90,59 @@ namespace AbstractPixel.SceneManagement
         }
 
 
-        /// <summary>Transitions asynchronously to the specified scene group.This will be active when loaded</summary>
-        /// <param name="_sceneGroup">The scene group to transition to. Cannot be null.</param>
-        /// <returns>A task that represents the asynchronous transition operation.</returns>
-        public static Task TransitionToSceneGroup(SceneGroup _sceneGroup)
+        /// <summary>
+        /// A scene change to another scene group: Hide screen, close the old scenes, open the new ones, Show screen. When
+        /// the game called <see cref="Preload"/> for this same group earlier, the change uses that preload; any other
+        /// preload is closed. Never throws: a request that cannot start is Refused before the screen is covered.
+        /// </summary>
+        public static Task<SceneChangeResult> ChangeTo(SceneGroup _sceneGroup)
         {
-            return SceneCoordinator.FindOrCreate()?.TransitionToSceneGroup(_sceneGroup);
+            SceneCoordinator coordinator = SceneCoordinator.FindOrCreate();
+            if (coordinator == null)
+            {
+                return Task.FromResult(SceneChangeResult.Refused(SceneChangeRefusal.StartUpRunning));
+            }
+            return coordinator.ChangeTo(_sceneGroup);
         }
 
-        /// <summary>Preloads asynchronously the specified scene group in the background.This will not be active when preloaded.</summary>
-        /// <param name="_sceneGroup">The scene group to preload. Cannot be null.</param>
-        /// <returns>A task that represents the asynchronous preload operation.</returns>
-        public static Task PreloadSceneGroup(SceneGroup _sceneGroup)
-        { 
-           return SceneCoordinator.FindOrCreate()?.PreloadSceneGroup(_sceneGroup);
+        /// <summary>Retry: a scene change to the scene group that is open, so the place starts again.</summary>
+        public static Task<SceneChangeResult> Retry()
+        {
+            SceneCoordinator coordinator = SceneCoordinator.FindOrCreate();
+            if (coordinator == null)
+            {
+                return Task.FromResult(SceneChangeResult.Refused(SceneChangeRefusal.NothingOpenToRetry));
+            }
+            return coordinator.Retry();
         }
-        
-        /// <summary>Transitions asynchronously to the preloaded scene group that was specified through an earlier call.</summary>
-        /// <returns>A task that represents the asynchronous transition operation.</returns>
-        public static Task TransitionToPreloadedSceneGroup()
+
+        /// <summary>
+        /// Opens a scene group in the background and holds back its main scene, for a later <see cref="ChangeTo"/> of the
+        /// same group. The scene system never preloads by itself. A failed preload returns Failed and goes nowhere.
+        /// </summary>
+        public static Task<SceneChangeResult> Preload(SceneGroup _sceneGroup)
         {
-            return SceneCoordinator.FindOrCreate()?.TransitionToPreloadedSceneGroup();
-        }   
-        
-        public static Task ReloadActiveSceneGroup()
+            SceneCoordinator coordinator = SceneCoordinator.FindOrCreate();
+            if (coordinator == null)
+            {
+                return Task.FromResult(SceneChangeResult.Refused(SceneChangeRefusal.StartUpRunning));
+            }
+            return coordinator.Preload(_sceneGroup);
+        }
+
+        /// <summary>
+        /// Registers the scene transition executor that hides and shows the screen around every scene change. The
+        /// transitions module calls this when it initializes. A second executor replaces the first, with a warning.
+        /// </summary>
+        public static void RegisterTransitionExecutor(ISceneTransitionExecutor _executor)
         {
-            return SceneCoordinator.FindOrCreate()?.ReloadActiveSceneGroup();
+            SceneTransitionExecutorSlot.Register(_executor);
+        }
+
+        /// <summary>Removes the executor if it is the registered one; scenes then change with no effect.</summary>
+        public static void UnregisterTransitionExecutor(ISceneTransitionExecutor _executor)
+        {
+            SceneTransitionExecutorSlot.Unregister(_executor);
         }
     }
 }
