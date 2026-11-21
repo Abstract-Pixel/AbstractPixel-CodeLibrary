@@ -30,13 +30,20 @@ namespace AbstractPixel.SceneManagement
         /// <summary>Every spawn point position in a scene, in Hierarchy order of the spawn points, then position order.</summary>
         public static List<SpawnPointPositionAddress> PositionsIn(Scene _mainScene)
         {
+            // Only the main scene is searched, through its own root objects, so no other scene's spawn point can count.
             List<SpawnPoint> spawnPoints = new List<SpawnPoint>();
-            SpawnPoint[] found = Object.FindObjectsByType<SpawnPoint>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-            foreach (SpawnPoint spawnPoint in found)
+            if (!_mainScene.IsValid() || !_mainScene.isLoaded)
             {
-                if (spawnPoint.gameObject.scene == _mainScene && spawnPoint.isActiveAndEnabled)
+                return new List<SpawnPointPositionAddress>();
+            }
+            foreach (GameObject root in _mainScene.GetRootGameObjects())
+            {
+                foreach (SpawnPoint spawnPoint in root.GetComponentsInChildren<SpawnPoint>(false))
                 {
-                    spawnPoints.Add(spawnPoint);
+                    if (spawnPoint.isActiveAndEnabled)
+                    {
+                        spawnPoints.Add(spawnPoint);
+                    }
                 }
             }
             HierarchyOrder.Sort(spawnPoints, _spawnPoint => _spawnPoint.transform);
@@ -58,7 +65,7 @@ namespace AbstractPixel.SceneManagement
         public static RelocationMatchResult Match(List<Relocatable> _relocatables, List<SpawnPointPositionAddress> _positions, HashSet<SpawnPointPositionAddress> _taken)
         {
             RelocationMatchResult result = new RelocationMatchResult();
-            Dictionary<int, List<SpawnPointPositionAddress>> positionsByLabel = GroupByLabel(_positions);
+            Dictionary<string, List<SpawnPointPositionAddress>> positionsByLabel = GroupByLabel(_positions);
 
             foreach (Relocatable relocatable in _relocatables)
             {
@@ -104,12 +111,12 @@ namespace AbstractPixel.SceneManagement
             _result.Problems.Add(new KeyValuePair<Relocatable, RelocationMatchProblem>(_relocatable, problem));
         }
 
-        private static Dictionary<int, List<SpawnPointPositionAddress>> GroupByLabel(List<SpawnPointPositionAddress> _positions)
+        private static Dictionary<string, List<SpawnPointPositionAddress>> GroupByLabel(List<SpawnPointPositionAddress> _positions)
         {
-            Dictionary<int, List<SpawnPointPositionAddress>> byLabel = new Dictionary<int, List<SpawnPointPositionAddress>>();
+            Dictionary<string, List<SpawnPointPositionAddress>> byLabel = new Dictionary<string, List<SpawnPointPositionAddress>>();
             foreach (SpawnPointPositionAddress position in _positions)
             {
-                int key = LabelKey(position.Label);
+                string key = RelocationLabels.KeyOf(position.Label);
                 if (!byLabel.TryGetValue(key, out List<SpawnPointPositionAddress> list))
                 {
                     list = new List<SpawnPointPositionAddress>();
@@ -122,23 +129,14 @@ namespace AbstractPixel.SceneManagement
 
         private static readonly List<SpawnPointPositionAddress> NoPositions = new List<SpawnPointPositionAddress>();
 
-        private static List<SpawnPointPositionAddress> PositionsWithLabel(Dictionary<int, List<SpawnPointPositionAddress>> _byLabel, RelocationLabel _label)
+        private static List<SpawnPointPositionAddress> PositionsWithLabel(Dictionary<string, List<SpawnPointPositionAddress>> _byLabel, RelocationLabel _label)
         {
-            if (_byLabel.TryGetValue(LabelKey(_label), out List<SpawnPointPositionAddress> list))
+            if (_byLabel.TryGetValue(RelocationLabels.KeyOf(_label), out List<SpawnPointPositionAddress> list))
             {
                 return list;
             }
             return NoPositions;
         }
 
-        // Unity never gives an object the instance ID 0, so 0 stands for "No label".
-        private static int LabelKey(RelocationLabel _label)
-        {
-            if (_label == null)
-            {
-                return 0;
-            }
-            return _label.GetInstanceID();
-        }
     }
 }

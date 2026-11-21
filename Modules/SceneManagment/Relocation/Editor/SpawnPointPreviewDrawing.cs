@@ -62,6 +62,15 @@ namespace AbstractPixel.SceneManagement.Editor
         /// Draws a tag unless one is already drawn close by on screen, so a field of 100 positions stays readable.
         /// A forced tag (selected, hovered, the add ghost) is always drawn.
         /// </summary>
+        /// <summary>A thin line from the preview's centre out of its front, so the facing reads without changing the shape.</summary>
+        public static void DrawFacing(PreviewShape _shape, Pose _pose, Color _colour)
+        {
+            Vector3 centre = _pose.position + _pose.rotation * _shape.LocalBounds.center;
+            float length = Mathf.Max(0.5f, _shape.LocalBounds.extents.z + 0.5f);
+            Handles.color = _colour;
+            Handles.DrawLine(centre, centre + _pose.rotation * Vector3.forward * length, 2f);
+        }
+
         public static void DrawTag(Vector3 _position, string _text, Color _colour, bool _force)
         {
             Vector2 onScreen = HandleUtility.WorldToGUIPoint(_position);

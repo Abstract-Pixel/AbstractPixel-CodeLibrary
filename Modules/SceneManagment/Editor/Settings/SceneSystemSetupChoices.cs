@@ -15,5 +15,9 @@ namespace AbstractPixel.SceneManagement.Editor
         public LaunchSceneChoice LaunchScene = LaunchSceneChoice.None;
         public SceneAsset ExistingLaunchScene = null;
         public string NewLaunchScenePath = "Assets/Scenes/" + LaunchSceneCreation.DefaultFileName + ".unity";
+
+        /// <summary>Optional: the default loading scene. The ready-made one is copied by default, as before this step existed.</summary>
+        public LoadingSceneChoice LoadingScene = LoadingSceneChoice.ReadyMade;
+        public SceneAsset ExistingLoadingScene = null;
     }
 }

@@ -125,7 +125,40 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 return "Save the open scene first.";
             }
-            return LaunchSceneProblem(_choices);
+            string launchProblem = LaunchSceneProblem(_choices);
+            if (!string.IsNullOrEmpty(launchProblem))
+            {
+                return launchProblem;
+            }
+            return LoadingSceneProblem(_choices);
+        }
+
+        /// <summary>Why the loading scene step cannot go on, or empty.</summary>
+        public static string LoadingSceneProblem(SceneSystemSetupChoices _choices)
+        {
+            if (_choices.LoadingScene == LoadingSceneChoice.Existing && _choices.ExistingLoadingScene == null)
+            {
+                return "Pick the loading scene, or choose another option.";
+            }
+            if (_choices.LoadingScene == LoadingSceneChoice.ReadyMade && !LibraryLoadingSceneExists())
+            {
+                return "The ready-made loading scene is not in this project. Pick a scene, or skip.";
+            }
+            return string.Empty;
+        }
+
+        /// <summary>"A copy of the ready-made loading scene" or "Loading scene 'Loading'", or empty when skipped.</summary>
+        public static string LoadingSceneLine(SceneSystemSetupChoices _choices)
+        {
+            if (_choices.LoadingScene == LoadingSceneChoice.ReadyMade)
+            {
+                return "A copy of the ready-made loading scene, as the default loading scene";
+            }
+            if (_choices.LoadingScene == LoadingSceneChoice.Existing && _choices.ExistingLoadingScene != null)
+            {
+                return "Loading scene '" + _choices.ExistingLoadingScene.name + "', as the default loading scene";
+            }
+            return string.Empty;
         }
 
         public static bool WillMigrate(SceneSystemSetupChoices _choices, SceneGroupMigrationPlan _plan)
@@ -162,7 +195,11 @@ namespace AbstractPixel.SceneManagement.Editor
                     lines.Add("No fade: the transitions module is not in this project, so scenes change without an effect.");
                 }
             }
-            if (LibraryLoadingSceneExists())
+            if (_choices.LoadingScene == LoadingSceneChoice.Existing && _choices.ExistingLoadingScene != null)
+            {
+                lines.Add("Loading scene '" + _choices.ExistingLoadingScene.name + "' listed as the default loading scene, in " + place + ". Scene groups show it only when their Show the loading scene says so.");
+            }
+            if (_choices.LoadingScene == LoadingSceneChoice.ReadyMade && LibraryLoadingSceneExists())
             {
                 lines.Add("A copy of the ready-made loading scene (" + LoadingSceneFileName + ") in that folder, in " + place + ", listed as the default loading scene. Scene groups show it only when their Show the loading scene says so.");
             }
@@ -224,7 +261,7 @@ namespace AbstractPixel.SceneManagement.Editor
                     CreateStarterSet(folder, settings, createdPaths);
                 }
 
-                CopyLibraryLoadingScene(folder, settings, createdPaths);
+                ApplyLoadingScene(_choices, folder, settings, createdPaths);
                 ApplyLaunchScene(_choices, settings, createdPaths);
                 SceneSystemSettingsAssets.RefreshLists(settings);
                 SceneSystemSettingsAssets.EnsurePreloaded(settings);
@@ -376,6 +413,21 @@ namespace AbstractPixel.SceneManagement.Editor
 
         // A copy of the ready-made loading scene, listed in the settings as the default loading scene and put where new
         // scenes go. Scene groups show it only when they ask to.
+        // The loading scene step: a copy of the ready-made scene, the designer's own scene, or nothing.
+        private static void ApplyLoadingScene(SceneSystemSetupChoices _choices, string _folder, SceneSystemSettings _settings, List<string> _createdPaths)
+        {
+            if (_choices.LoadingScene == LoadingSceneChoice.ReadyMade)
+            {
+                CopyLibraryLoadingScene(_folder, _settings, _createdPaths);
+                return;
+            }
+            if (_choices.LoadingScene == LoadingSceneChoice.Existing && _choices.ExistingLoadingScene != null)
+            {
+                string path = AssetDatabase.GetAssetPath(_choices.ExistingLoadingScene);
+                ListAsDefaultLoadingScene(_choices.ExistingLoadingScene, path, _settings);
+            }
+        }
+
         private static void CopyLibraryLoadingScene(string _folder, SceneSystemSettings _settings, List<string> _createdPaths)
         {
             string originalPath = AssetDatabase.GUIDToAssetPath(LibraryLoadingSceneGuid);
@@ -392,11 +444,17 @@ namespace AbstractPixel.SceneManagement.Editor
             _createdPaths.Add(copyPath);
 
             SceneAsset sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(copyPath);
-            SceneReference loadingScene = new SceneReference(sceneAsset.name, AssetDatabase.AssetPathToGUID(copyPath), copyPath);
-            loadingScene.SceneFieldReference.SetSceneAsset(sceneAsset);
+            ListAsDefaultLoadingScene(sceneAsset, copyPath, _settings);
+        }
+
+        // Lists the scene as a loading scene and the default one, and puts it where new scenes go so it loads in a build.
+        private static void ListAsDefaultLoadingScene(SceneAsset _scene, string _path, SceneSystemSettings _settings)
+        {
+            SceneReference loadingScene = new SceneReference(_scene.name, AssetDatabase.AssetPathToGUID(_path), _path);
+            loadingScene.SceneFieldReference.SetSceneAsset(_scene);
             _settings.LoadingScenes.Add(loadingScene);
-            _settings.DefaultLoadingScene = new SceneReference(sceneAsset.name, loadingScene.SceneGuid, copyPath);
-            _settings.DefaultLoadingScene.SceneFieldReference.SetSceneAsset(sceneAsset);
+            _settings.DefaultLoadingScene = new SceneReference(_scene.name, loadingScene.SceneGuid, _path);
+            _settings.DefaultLoadingScene.SceneFieldReference.SetSceneAsset(_scene);
             EditorUtility.SetDirty(_settings);
 
             SceneStatusReport report = SceneStatusReader.Read(loadingScene.SceneFieldReference);

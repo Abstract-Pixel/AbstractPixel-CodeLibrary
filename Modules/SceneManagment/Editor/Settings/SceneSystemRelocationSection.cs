@@ -12,7 +12,7 @@ namespace AbstractPixel.SceneManagement.Editor
         public const string Title = "Relocation";
         public const string Tooltip = "How relocatables find ground. Relocatables move to spawn point positions on every scene change.";
         private const string GroundLayersTooltip = "Ground layers: the physics layers that count as ground, for Wait for ground below and for adding spawn point positions with Shift+click. Triggers never count.";
-        private const string SteepestGroundTooltip = "Steepest ground, in degrees, for relocatables and spawn points with No label. A relocation label sets its own. A steeper position is allowed but shown as a warning.";
+        private const string SteepestGroundTooltip = "The steepest slope, in degrees, a spawn point position may stand on when its relocatables have no relocation label (No label). Each label sets its own. A steeper position is allowed but shown as a warning.";
 
         public static void Fill(VisualElement _card, SceneSystemSettings _settings)
         {
@@ -32,7 +32,7 @@ namespace AbstractPixel.SceneManagement.Editor
             });
             _card.Add(groundLayers);
 
-            Slider steepestGround = new Slider("Steepest ground, No label (°)", 0f, 90f);
+            Slider steepestGround = new Slider("Steepest slope without a label (°)", 0f, 90f);
             steepestGround.showInputField = true;
             steepestGround.SetValueWithoutNotify(_settings.NoLabelSteepestGround);
             steepestGround.tooltip = SteepestGroundTooltip;

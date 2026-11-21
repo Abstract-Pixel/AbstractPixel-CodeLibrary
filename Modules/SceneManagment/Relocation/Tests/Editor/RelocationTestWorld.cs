@@ -28,6 +28,7 @@ namespace AbstractPixel.SceneManagement.Relocation.Tests
             Broadcaster = new RelocationBroadcaster();
             Broadcaster.GroundWaitSeconds = 0.3f;
             Broadcaster.DescribeSceneGroup = () => SceneGroupName;
+            Broadcaster.FindMainScene = () => MainScene;
             RelocationBroadcaster.MakeCurrent(Broadcaster);
         }
 

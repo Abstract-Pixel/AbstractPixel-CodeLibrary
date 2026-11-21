@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace AbstractPixel.SceneManagement.Relocation.Tests
@@ -48,6 +49,22 @@ namespace AbstractPixel.SceneManagement.Relocation.Tests
             AssertAt(new Vector3(0f, 0f, 0f), a);
             AssertAt(new Vector3(1f, 0f, 0f), b);
             AssertAt(new Vector3(50f, 0f, 0f), c);
+        }
+
+        [Test]
+        public async Task TwoCopiesOfOneLabelMatch()
+        {
+            // An Addressables bundle carries its own copy of a label its scene uses; the copy must still match.
+            RelocationLabel playerLabel = world.Label("Player");
+            RelocationLabel copyInBundle = world.Label("Player");
+            playerLabel.Id = "guid-of-player-label";
+            copyInBundle.Id = "guid-of-player-label";
+            world.SpawnPoint("Player start", copyInBundle, new Vector3(3f, 0f, 0f));
+            Relocatable car = world.AwakeCrate("Car", playerLabel);
+
+            await world.RunSceneChange();
+
+            AssertAt(new Vector3(3f, 0f, 0f), car);
         }
 
         [Test]
@@ -116,6 +133,22 @@ namespace AbstractPixel.SceneManagement.Relocation.Tests
             await world.RunSceneChange();
 
             Assert.IsTrue(player.IsHeld);
+        }
+
+        [Test]
+        public async Task TheGroupsMainSceneCountsEvenWhenAnotherSceneIsActive()
+        {
+            // A launch scene still on screen keeps itself active; the scene system's main scene is the one that counts.
+            Scene mainScene = world.CreateOtherScene();
+            SpawnPoint inMainScene = world.SpawnPoint("In the main scene", null, new Vector3(7f, 0f, 7f));
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(inMainScene.gameObject, mainScene);
+            world.SpawnPoint("In the active scene", null, new Vector3(-7f, 0f, -7f));
+            world.Broadcaster.FindMainScene = () => mainScene;
+            Relocatable player = world.AwakeCrate("Player", null);
+
+            await world.RunSceneChange();
+
+            AssertAt(new Vector3(7f, 0f, 7f), player);
         }
 
         [Test]

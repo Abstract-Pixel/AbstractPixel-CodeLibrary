@@ -51,11 +51,13 @@ namespace AbstractPixel.SceneManagement
         private List<Relocatable> MatchAndMove(List<Relocatable> _relocatables, HashSet<SpawnPointPositionAddress> _taken)
         {
             HierarchyOrder.Sort(_relocatables, _relocatable => _relocatable.transform);
-            List<SpawnPointPositionAddress> positions = RelocationMatching.PositionsIn(SceneManager.GetActiveScene());
+            Scene mainScene = broadcaster.FindMainScene();
+            List<SpawnPointPositionAddress> positions = RelocationMatching.PositionsIn(mainScene);
             RelocationMatchResult match = RelocationMatching.Match(_relocatables, positions, _taken);
             foreach (KeyValuePair<Relocatable, RelocationMatchProblem> problem in match.Problems)
             {
-                broadcaster.ReportHeld(problem.Key, DescribeProblem(problem.Key, problem.Value));
+                string where = " (main scene '" + mainScene.name + "' has " + positions.Count + " spawn point positions)";
+                broadcaster.ReportHeld(problem.Key, DescribeProblem(problem.Key, problem.Value) + where);
             }
 
             // Bodies that appeared since Hold, and bodies joined from outside, are held before anything moves.
