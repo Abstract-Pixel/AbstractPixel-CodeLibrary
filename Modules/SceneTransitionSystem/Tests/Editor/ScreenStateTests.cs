@@ -85,6 +85,19 @@ namespace AbstractPixel.SceneTransitions.Tests
             Assert.AreEqual("start hide,end hide,start show,end show", string.Join(",", steps));
         }
 
+        // Stage 7: a scene change asked for while the start-up Show screen still runs must still cover the screen.
+        [Test]
+        public async Task HideScreenAskedForWhileShowScreenRunsWaitsAndThenHides()
+        {
+            Task show = manager.ShowScreen();
+            Task hide = manager.HideScreen();
+            await show;
+            await hide;
+
+            Assert.AreEqual(ScreenState.Hidden, TransitionActions.ScreenState, string.Join(",", seenStates));
+            Assert.AreEqual("Showing,Visible,Hiding,Hidden", string.Join(",", seenStates));
+        }
+
         [Test]
         public async Task HidingTheScreenLeavesTimeScaleAlone()
         {

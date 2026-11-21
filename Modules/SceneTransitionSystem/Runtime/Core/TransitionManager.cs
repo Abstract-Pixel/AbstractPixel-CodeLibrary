@@ -15,6 +15,7 @@ namespace AbstractPixel.SceneTransitions
     {
         [SerializeField,ReadOnly] private TransitionProfile transitionProfile;
         private ITransitionController transitionController;
+        private Task runningEffect = Task.CompletedTask;
 
         internal bool IsInitialized { get; private set; } = false;
 
@@ -36,41 +37,56 @@ namespace AbstractPixel.SceneTransitions
             SceneActions.UnregisterTransitionExecutor(this);
         }
 
-        /// <summary>Hide screen. Does nothing while an effect is already running or no profile is set.</summary>
+        /// <summary>Hide screen. An effect that is still running finishes first, so the screen is always covered at the end.</summary>
         internal async Task HideScreen()
         {
-            if (!CanStartEffect())
+            if (!IsInitialized || transitionController == null)
             {
                 return;
             }
+            await WaitForRunningEffect();
+            runningEffect = PlayStep(ScreenState.Hiding, ScreenState.Hidden, true);
+            await runningEffect;
+        }
 
-            TransitionActions.ChangeScreenState(ScreenState.Hiding);
-            try
+        /// <summary>Show screen. An effect that is still running finishes first.</summary>
+        internal async Task ShowScreen()
+        {
+            if (!IsInitialized || transitionController == null)
             {
-                await transitionController.PlayHideScreen();
+                return;
             }
-            finally
+            await WaitForRunningEffect();
+            runningEffect = PlayStep(ScreenState.Showing, ScreenState.Visible, false);
+            await runningEffect;
+        }
+
+        // Checked again after every wait: another step may have started while this one waited.
+        private async Task WaitForRunningEffect()
+        {
+            while (!runningEffect.IsCompleted)
             {
-                TransitionActions.ChangeScreenState(ScreenState.Hidden);
+                await runningEffect;
             }
         }
 
-        /// <summary>Show screen. Does nothing while an effect is already running or no profile is set.</summary>
-        internal async Task ShowScreen()
+        private async Task PlayStep(ScreenState _starting, ScreenState _finished, bool _hides)
         {
-            if (!CanStartEffect())
-            {
-                return;
-            }
-
-            TransitionActions.ChangeScreenState(ScreenState.Showing);
+            TransitionActions.ChangeScreenState(_starting);
             try
             {
-                await transitionController.PlayShowScreen();
+                if (_hides)
+                {
+                    await transitionController.PlayHideScreen();
+                }
+                else
+                {
+                    await transitionController.PlayShowScreen();
+                }
             }
             finally
             {
-                TransitionActions.ChangeScreenState(ScreenState.Visible);
+                TransitionActions.ChangeScreenState(_finished);
             }
         }
 
@@ -121,17 +137,6 @@ namespace AbstractPixel.SceneTransitions
                 return;
             }
             DestroyImmediate(_controllerObject);
-        }
-
-        private bool CanStartEffect()
-        {
-            if (!IsInitialized || transitionController == null)
-            {
-                return false;
-            }
-            ScreenState state = TransitionActions.ScreenState;
-            bool effectIsRunning = state == ScreenState.Hiding || state == ScreenState.Showing;
-            return !effectIsRunning;
         }
     }
 }

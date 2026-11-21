@@ -11,6 +11,9 @@ namespace AbstractPixel.SceneManagement.Tests
 
         private readonly List<string> calls;
 
+        /// <summary>While set, Hide screen waits for this task, so a test can ask for things while the screen covers.</summary>
+        public Task HideGate;
+
         public FakeTransitionExecutor(List<string> _calls)
         {
             calls = _calls;
@@ -29,6 +32,10 @@ namespace AbstractPixel.SceneManagement.Tests
         public Task TransitionToHideScreen()
         {
             calls.Add(HideCall);
+            if (HideGate != null)
+            {
+                return HideGate;
+            }
             return Task.CompletedTask;
         }
 
