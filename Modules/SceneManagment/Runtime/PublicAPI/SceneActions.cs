@@ -176,5 +176,21 @@ namespace AbstractPixel.SceneManagement
         {
             SceneTransitionExecutorSlot.Unregister(_executor);
         }
+
+        /// <summary>
+        /// Registers the relocation broadcaster that holds, relocates and releases relocatables in every scene change.
+        /// The relocation sub-module calls this before the first scene loads. A second one replaces the first, with a
+        /// warning.
+        /// </summary>
+        public static void RegisterRelocationBroadcaster(IRelocationBroadcaster _broadcaster)
+        {
+            RelocationBroadcasterSlot.Register(_broadcaster);
+        }
+
+        /// <summary>Removes the broadcaster if it is the registered one; scenes then change without relocation.</summary>
+        public static void UnregisterRelocationBroadcaster(IRelocationBroadcaster _broadcaster)
+        {
+            RelocationBroadcasterSlot.Unregister(_broadcaster);
+        }
     }
 }

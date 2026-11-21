@@ -88,6 +88,10 @@ namespace AbstractPixel.SceneManagement
             {
                 IsPending = false;
                 HasFailed = true;
+                // Relocatables that woke in the first scenes wait for start-up. With no start-up they are relocated
+                // on what is open now, and the ones with no position stay held with an error.
+                await RelocationBroadcasterSlot.Relocate();
+                RelocationBroadcasterSlot.Release();
                 return;
             }
 

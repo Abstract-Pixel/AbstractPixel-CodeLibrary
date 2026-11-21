@@ -29,6 +29,9 @@ namespace AbstractPixel.SceneManagement
         /// <summary>The loading scene of a change, when its group shows one.</summary>
         internal readonly LoadingSceneRoute LoadingScenes = new LoadingSceneRoute();
 
+        /// <summary>Hold, Relocate and Release of the current scene change, through the relocation broadcaster.</summary>
+        private readonly SceneChangeRelocation relocation = new SceneChangeRelocation();
+
         /// <summary>How far the current or last scene change has got, from 0 to 1.</summary>
         internal readonly SceneLoadingProgress Progress;
 
@@ -97,8 +100,9 @@ namespace AbstractPixel.SceneManagement
         /// <summary>
         /// Start-up: the first scene change of a session. It opens only the group's scenes that are not open yet, the
         /// main scene first (it becomes the active scene as soon as it loads), then manager and shared scenes, all asked
-        /// for at once. When all have loaded it raises "new level" once, then "game started". Other scene changes are
-        /// refused while it runs. It never uses the screen effect: a launch scene or the first frame covers it.
+        /// for at once. When all have loaded it relocates, raises "new level" once, then "game started". Relocatables are
+        /// released straight after, or when the launch scene hold ends. Other scene changes are refused while it runs.
+        /// It never uses the screen effect: a launch scene or the first frame covers it.
         /// </summary>
         /// <param name="_scenesAlreadyOpen">The scenes Unity has open, which are not loaded again.</param>
         /// <param name="_waitOneFrame">True behind a launch scene, so it shows its first frame before loading starts.</param>
@@ -116,6 +120,7 @@ namespace AbstractPixel.SceneManagement
             }
 
             isStartUpRunning = true;
+            relocation.Hold();
             SceneChangePlan plan = SceneChangePlan.ForStartUp(_group, _scenesAlreadyOpen);
             bool succeeded = false;
             try
@@ -127,13 +132,20 @@ namespace AbstractPixel.SceneManagement
                 succeeded = await opening.OpenScenes(plan, true, true);
                 if (succeeded)
                 {
-                    RecordEndOfChange(plan);
+                    RecordOpenScenes(plan);
+                }
+                // A failed start-up relocates too, so objects with no position stay held with an error (ADR 0006).
+                await relocation.RelocateOnce();
+                if (succeeded)
+                {
+                    SceneEventBus.RaiseOnNewSceneTransitionedTo(plan.TargetGroup);
                 }
             }
             finally
             {
                 isStartUpRunning = false;
                 IsLoadingSceneGroup = false;
+                relocation.ReleaseAfterLaunchSceneHold();
             }
 
             if (!succeeded)
@@ -249,13 +261,14 @@ namespace AbstractPixel.SceneManagement
         }
 
         /// <summary>
-        /// The one body of a change and a Retry, after the change was accepted: Hide screen, the scene work, the
-        /// fallback scene group if a load failed, Show screen. Busy stays set until the screen is shown again, and is
-        /// cleared in every case.
+        /// The one body of a change and a Retry, after the change was accepted: Hold, Hide screen, the scene work with
+        /// Relocate, the fallback scene group if a load failed, Show screen, Release. Busy stays set until the screen is
+        /// shown again, and is cleared in every case.
         /// </summary>
         private async Task<SceneChangeResult> RunSceneChange(SceneGroup _group, bool _usesPreload, bool _isRetry)
         {
             SceneReference failedScene = null;
+            relocation.Hold();
             try
             {
                 await SceneTransitionExecutorSlot.HideScreen();
@@ -277,8 +290,12 @@ namespace AbstractPixel.SceneManagement
                 {
                     await SceneChangeFallback.GoToFallback(_group, FindFallbackSceneGroup(), _fallback => ChangeScenes(_fallback, false));
                 }
+                // Everything failed: relocate on what is open, so objects with no position stay held with an error.
+                await relocation.RelocateOnce();
                 await LoadingScenes.Leave(opening.Loader);
-                await SceneTransitionExecutorSlot.ShowScreen();
+                // The last Show screen releases when the screen counts as visible, or at its end if it never reports.
+                await SceneTransitionExecutorSlot.ShowScreen(relocation.ReleaseOnce);
+                relocation.ReleaseOnce();
             }
             finally
             {
@@ -305,7 +322,9 @@ namespace AbstractPixel.SceneManagement
                 return RecordFailure(plan, _usesPreload);
             }
 
-            RecordEndOfChange(plan);
+            RecordOpenScenes(plan);
+            await relocation.RelocateOnce();
+            SceneEventBus.RaiseOnNewSceneTransitionedTo(plan.TargetGroup);
             Progress.Complete();
             if (_usesPreload)
             {
@@ -365,8 +384,11 @@ namespace AbstractPixel.SceneManagement
             return SceneChangeRefusal.None;
         }
 
-        /// <summary>Records the open scenes, making the group the active one, and only then raises "new level" once.</summary>
-        private void RecordEndOfChange(SceneChangePlan _plan)
+        /// <summary>
+        /// Records the open scenes, making the group the active one. The caller relocates and only then raises "new
+        /// level" once, so relocation reads the right scene group and listeners find objects at their positions.
+        /// </summary>
+        private void RecordOpenScenes(SceneChangePlan _plan)
         {
             open = _plan.OpenAfterChange();
             if (_plan.UsesPreloadedScenes)
@@ -374,7 +396,6 @@ namespace AbstractPixel.SceneManagement
                 // The preload is used up. It is cleared before the event, so a listener may preload the next level.
                 Preloaded.Clear();
             }
-            SceneEventBus.RaiseOnNewSceneTransitionedTo(_plan.TargetGroup);
         }
 
 

@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +8,7 @@ namespace AbstractPixel.SceneTransitions
     /// <summary>
     /// The ready-made fade: one full-screen image fades to the profile's colour (Hide screen) and back (Show screen),
     /// on unscaled time. Hide screen finishes at the profile's "Screen counts as covered at" share; the fade keeps
-    /// finishing on top, and Show screen waits for it first.
+    /// finishing on top, and Show screen waits for it first. Show screen reports "Screen counts as visible at".
     /// </summary>
     [RequireComponent(typeof(Image))]
     [DisallowMultipleComponent]
@@ -52,7 +53,7 @@ namespace AbstractPixel.SceneTransitions
             return TransitionTiming.WhenShareHasPlayed(runningFade, effectSeconds, cachedProfile.ScreenCountsAsCoveredAt);
         }
 
-        public async Task PlayShowScreen()
+        public async Task PlayShowScreen(Action _screenCountsAsVisible)
         {
             if (cachedProfile == null)
             {
@@ -63,7 +64,8 @@ namespace AbstractPixel.SceneTransitions
             // A Hide screen that counted as covered early may still be finishing on top.
             await runningFade;
             runningFade = Fade(false);
-            await runningFade;
+            float effectSeconds = cachedProfile.StartDelay + cachedProfile.Duration;
+            await TransitionTiming.PlayAndReportAtShare(runningFade, effectSeconds, cachedProfile.ScreenCountsAsVisibleAt, _screenCountsAsVisible);
         }
 
         private async Task Fade(bool _toCovered)

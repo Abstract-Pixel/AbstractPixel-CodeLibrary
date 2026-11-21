@@ -7,11 +7,11 @@ Start with the module `README.md`. Decisions and their reasons are in `docs/adr/
 ## Scenes and groups
 
 **Scene group**:
-An asset that describes one place the player can be, such as a level, the main menu or a minigame. It names one main scene and picks a scene set. The game changes scene by going to a scene group.
+An asset that describes one location the player can be in, such as a level, the main menu or a minigame. It names one main scene and picks a scene set. The game changes scene by going to a scene group.
 _Avoid_: level, scene list, scene collection
 
 **Main scene**:
-The one scene in a scene group that makes it that place, such as "Level 7". It becomes Unity's active scene. A scene is the main scene of at most one scene group.
+The one scene in a scene group that makes it that location, such as "Level 7". It becomes Unity's active scene. A scene is the main scene of at most one scene group.
 _Avoid_: level scene, primary scene, active scene (when meaning the asset)
 
 **Scene set**:
@@ -47,7 +47,7 @@ A scene group option that closes the manager scenes that were open before, when 
 _Avoid_: discard managers, reset managers
 
 **Loading scene**:
-A scene shown while the old place closes and the new one opens. It is one scene, never a scene group. Project Settings lists the loading scenes and names the default; a scene group says when it shows one and which.
+A scene shown while the old location closes and the new one opens. It is one scene, never a scene group. Project Settings lists the loading scenes and names the default; a scene group says when it shows one and which.
 _Avoid_: loading screen (when meaning the scene asset), loading scene group, interstitial
 
 **Show the loading scene**:
@@ -87,7 +87,7 @@ Leaving the current scene group and arriving in another one, or the same one aga
 _Avoid_: transition (that word belongs to the screen effect), scene load, level load
 
 **Retry**:
-A scene change to the scene group that is already open, so the place starts again. It is never a second attempt at a scene that failed to load: a failed load is not tried again.
+A scene change to the scene group that is already open, so the location starts again. It is never a second attempt at a scene that failed to load: a failed load is not tried again.
 _Avoid_: reload, restart (in code names), retry (for trying a failed load again)
 
 **Preload**:
@@ -120,32 +120,66 @@ _Avoid_: transition in, fade in, cover
 The step that uncovers the screen after the new scenes are ready. Its messages are "start show screen transition" and "end show screen transition".
 _Avoid_: transition out, fade out, reveal
 
+**Screen counts as visible at**:
+The share of Show screen, set on a transition profile, at which the screen counts as visible enough for relocatables to be released.
+_Avoid_: release gate, reveal threshold
+
 **Screen state**:
 What the scene transition executor is doing to the screen: Visible, Hiding, Hidden or Showing. Game management reacts to it; the screen effect never changes game time itself.
 _Avoid_: transition in, transition out, transitioning, IsTransitioning (as a word in docs)
 
-## Placing objects
+## Relocating objects
 
-**Placeable**:
-An object that lives in a manager scene or shared scene and is moved to a spawn point on every scene change, such as the player or the car.
-_Avoid_: relocatable, boot object
+**Relocatable**:
+An object in a manager scene or shared scene that the scene system moves to a spawn point position on every scene change, such as the player's car or a pooled enemy.
+_Avoid_: placeable, relocatable boot object, boot object
+
+**Relocation label**:
+An asset that names a kind of relocatable, such as "Player" or "Enemy". Relocatables and spawn point positions match by label. An empty label field is a valid label of its own, shown as "No label", for games that relocate one kind of object.
+_Avoid_: placement label, tag (Unity already has tags), spawn type, entity type, string id
+
+**Instance**:
+The number, counted from 1, that picks one relocatable among those with the same relocation label, and the one spawn point position it goes to. It is shown as "Instance 5". A relocatable with no instance set takes the next free one.
+_Avoid_: slot, index, instance number, spawn number, number
 
 **Spawn point**:
-A marker in a main scene that says where a placeable with the same placement label goes in that place.
-_Avoid_: relocator, spawn marker, placement point
+A component in a main scene that holds the positions where relocatables with its relocation label go in that scene group. Its own transform is its first position.
+_Avoid_: relocator, spawn marker, placement point, spawn area
 
-**Placement label**:
-An asset that names a kind of placeable, such as "Player" or "Enemy". Placeables and spawn points match by label, and by number when many share one label.
-_Avoid_: tag (Unity already has tags), spawn type, entity type, string id
+**Spawn point position**:
+One position and rotation stored in a spawn point, with its instance. Positions are data on the spawn point, never GameObjects.
+_Avoid_: slot, spawn slot, child point, marker
+
+**Relocation broadcaster**:
+The one thing the scene system asks to hold, relocate and release every relocatable during a scene change. The relocation sub-module provides it; a game without it changes scenes without relocation.
+_Avoid_: placement step, placement hook, relocation service
 
 **Hold**:
-The state of a placeable whose movement and physics are paused during a scene change, or because it has no spawn point.
+The state of a relocatable whose movement and physics are paused during a scene change, or because it has no spawn point position.
 _Avoid_: freeze, lock, disable
 
-**Place**:
-Moving every held placeable to its spawn point once the new scene group is open.
-_Avoid_: relocate, teleport, spawn
+**Relocate**:
+The step that moves every held relocatable to its spawn point position once the new scene group is open.
+_Avoid_: place, placement (as the step), teleport, spawn, move to spawn point
 
 **Release**:
-Ending the hold, once enough of the screen is visible again.
+Ending the hold, once the screen counts as visible again.
 _Avoid_: unlock, unfreeze, enable physics
+
+**Wait for ground below**:
+A relocatable setting that keeps it held, and the screen covered, until a collider is found under its spawn point position. It never moves the relocatable onto the ground.
+_Avoid_: ground snap, snap to ground, drop to ground
+
+**Ground layers**:
+The physics layers that count as ground, both for Wait for ground below and for adding spawn point positions in the Editor.
+_Avoid_: walkable layers, floor mask
+
+**Steepest ground**:
+The steepest slope, in degrees, that a relocation label accepts for a spawn point position. A steeper position is allowed but shown as a warning.
+_Avoid_: max slope, slope limit
+
+## Samples
+
+**Sample scene group**:
+A scene group marked as a sample. Its scenes open in the Editor but never go into a build.
+_Avoid_: demo group, test group, example scene group

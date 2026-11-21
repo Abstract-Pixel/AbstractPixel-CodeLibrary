@@ -70,7 +70,8 @@ namespace AbstractPixel.SceneManagement
             {
                 view.OnShowStarted();
             }
-            await SceneTransitionExecutorSlot.ShowScreen();
+            // The Show screen that uncovers a loading scene never releases relocatables.
+            await SceneTransitionExecutorSlot.ShowScreen(null);
         }
 
         /// <summary>

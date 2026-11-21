@@ -50,5 +50,19 @@ namespace AbstractPixel.SceneTransitions
                 await Task.Yield();
             }
         }
+
+        /// <summary>
+        /// Plays an effect to its end, and calls the report once the given share of its seconds has played (or at its
+        /// end, whichever comes first). Show screen uses it for "Screen counts as visible at". A null report is skipped.
+        /// </summary>
+        public static async Task PlayAndReportAtShare(Task _effect, float _effectSeconds, float _share, System.Action _report)
+        {
+            await WhenShareHasPlayed(_effect, _effectSeconds, _share);
+            if (_report != null)
+            {
+                _report.Invoke();
+            }
+            await _effect;
+        }
     }
 }

@@ -58,8 +58,32 @@ namespace AbstractPixel.SceneTransitions.Tests
             double seconds = watch.Elapsed.TotalSeconds;
 
             Assert.That(seconds, Is.InRange(0.35, 0.8), "Hide screen finished after " + seconds + " s");
-            await fade.PlayShowScreen();
+            await fade.PlayShowScreen(null);
             Assert.Greater(watch.Elapsed.TotalSeconds, 1.9, "Show screen waits for the rest of the hide effect, then plays in full");
+        }
+
+        [Test]
+        public async Task ShowScreenReportsTheScreenCountsAsVisibleAtItsShare()
+        {
+            profile.StartDelay = 0f;
+            profile.Duration = 1f;
+            profile.ScreenCountsAsVisibleAt = 0.5f;
+            fade.Initialize(profile);
+            await fade.PlayHideScreen();
+
+            Stopwatch watch = Stopwatch.StartNew();
+            double reportedAt = -1;
+            int reportCount = 0;
+            await fade.PlayShowScreen(() =>
+            {
+                reportCount++;
+                reportedAt = watch.Elapsed.TotalSeconds;
+            });
+            double endedAt = watch.Elapsed.TotalSeconds;
+
+            Assert.AreEqual(1, reportCount, "reported once");
+            Assert.That(reportedAt, Is.InRange(0.35, 0.8), "reported after " + reportedAt + " s");
+            Assert.Greater(endedAt, 0.9, "Show screen still plays to its end");
         }
 
         [Test]

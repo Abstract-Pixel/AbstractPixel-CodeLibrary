@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace AbstractPixel.SceneManagement
@@ -13,7 +14,11 @@ namespace AbstractPixel.SceneManagement
         /// <summary>Hide screen: finishes once the screen counts as covered.</summary>
         Task TransitionToHideScreen();
 
-        /// <summary>Show screen: finishes once the screen is uncovered.</summary>
-        Task TransitionToShowScreen();
+        /// <summary>
+        /// Show screen: finishes once the screen is uncovered. It calls &lt;paramref name="_screenCountsAsVisible"/&gt; once,
+        /// at the transition profile's "Screen counts as visible at" share, so the scene system can release relocatables
+        /// then. The argument may be null. An executor that never calls it is released at the end of Show screen.
+        /// </summary>
+        Task TransitionToShowScreen(Action _screenCountsAsVisible);
     }
 }

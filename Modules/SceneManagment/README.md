@@ -197,7 +197,7 @@ Rally paths are under `Assets/[1]Project/` unless shown otherwise. Many other sy
 `SceneActions.ActiveSceneGroup` directly (win screen, leaderboards, ghosts, level finish, `RallyLevelManager`) instead of
 listening.
 
-## Screen messages used for placement
+## Screen messages used to relocate the car (until session 4D replaces them)
 
 | Message | Listener | Purpose |
 |---|---|---|

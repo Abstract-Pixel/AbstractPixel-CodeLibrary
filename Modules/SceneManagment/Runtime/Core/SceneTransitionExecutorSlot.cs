@@ -55,7 +55,8 @@ namespace AbstractPixel.SceneManagement
             }
         }
 
-        public static async Task ShowScreen()
+        /// <param name="_screenCountsAsVisible">Called when Show screen reports the screen counts as visible; may be null.</param>
+        public static async Task ShowScreen(Action _screenCountsAsVisible)
         {
             if (executor == null)
             {
@@ -63,7 +64,7 @@ namespace AbstractPixel.SceneManagement
             }
             try
             {
-                await executor.TransitionToShowScreen();
+                await executor.TransitionToShowScreen(_screenCountsAsVisible);
             }
             catch (Exception ex)
             {

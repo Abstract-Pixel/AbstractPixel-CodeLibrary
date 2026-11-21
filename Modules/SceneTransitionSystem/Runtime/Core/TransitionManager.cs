@@ -1,6 +1,7 @@
 using UnityEngine;
 using AbstractPixel.Core;
 using AbstractPixel.SceneManagement;
+using System;
 using System.Threading.Tasks;
 
 namespace AbstractPixel.SceneTransitions
@@ -45,19 +46,25 @@ namespace AbstractPixel.SceneTransitions
                 return;
             }
             await WaitForRunningEffect();
-            runningEffect = PlayStep(ScreenState.Hiding, ScreenState.Hidden, true);
+            runningEffect = PlayStep(ScreenState.Hiding, ScreenState.Hidden, null);
             await runningEffect;
         }
 
         /// <summary>Show screen. An effect that is still running finishes first.</summary>
-        internal async Task ShowScreen()
+        internal Task ShowScreen()
+        {
+            return ShowScreen(null);
+        }
+
+        /// <summary>Show screen, calling the report once the screen counts as visible (it may be null).</summary>
+        internal async Task ShowScreen(Action _screenCountsAsVisible)
         {
             if (!IsInitialized || transitionController == null)
             {
                 return;
             }
             await WaitForRunningEffect();
-            runningEffect = PlayStep(ScreenState.Showing, ScreenState.Visible, false);
+            runningEffect = PlayStep(ScreenState.Showing, ScreenState.Visible, _screenCountsAsVisible);
             await runningEffect;
         }
 
@@ -70,18 +77,20 @@ namespace AbstractPixel.SceneTransitions
             }
         }
 
-        private async Task PlayStep(ScreenState _starting, ScreenState _finished, bool _hides)
+        // Hiding plays Hide screen; Showing plays Show screen and passes its report on.
+        private async Task PlayStep(ScreenState _starting, ScreenState _finished, Action _screenCountsAsVisible)
         {
             TransitionActions.ChangeScreenState(_starting);
             try
             {
-                if (_hides)
+                bool hides = _starting == ScreenState.Hiding;
+                if (hides)
                 {
                     await transitionController.PlayHideScreen();
                 }
                 else
                 {
-                    await transitionController.PlayShowScreen();
+                    await transitionController.PlayShowScreen(_screenCountsAsVisible);
                 }
             }
             finally
@@ -95,9 +104,9 @@ namespace AbstractPixel.SceneTransitions
             return HideScreen();
         }
 
-        Task ISceneTransitionExecutor.TransitionToShowScreen()
+        Task ISceneTransitionExecutor.TransitionToShowScreen(Action _screenCountsAsVisible)
         {
-            return ShowScreen();
+            return ShowScreen(_screenCountsAsVisible);
         }
 
         internal void SetTransitionProfile(TransitionProfile _transitionProfile)
