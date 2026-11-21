@@ -50,7 +50,7 @@ namespace AbstractPixel.SceneManagement.Tests
             await second;
 
             Assert.AreEqual(0, rig.Loader.CountCalls("load Level3"), "the refused level must never open: " + Calls());
-            Assert.AreSame(levelTwo, rig.Coordinator.activeSceneGroup);
+            Assert.AreSame(levelTwo, rig.Coordinator.ActiveSceneGroup);
             Assert.AreEqual(1, groupsSeenByNewSceneListeners.Count, "one change, one 'new level'");
         }
 
@@ -106,7 +106,6 @@ namespace AbstractPixel.SceneManagement.Tests
 
             Assert.AreEqual(0, groupsSeenByNewSceneListeners.Count, "a failed change must not announce a new level");
             Assert.IsFalse(rig.Coordinator.IsLoadingSceneGroup);
-            Assert.IsFalse(rig.Coordinator.IsUnloadingSceneGroup);
         }
 
         [Test]
@@ -120,7 +119,6 @@ namespace AbstractPixel.SceneManagement.Tests
 
             Assert.AreEqual(0, groupsSeenByNewSceneListeners.Count, "a failed Retry must not announce a new level");
             Assert.IsFalse(rig.Coordinator.IsLoadingSceneGroup);
-            Assert.IsFalse(rig.Coordinator.IsUnloadingSceneGroup);
         }
 
         [Test]
@@ -132,9 +130,8 @@ namespace AbstractPixel.SceneManagement.Tests
             await rig.Coordinator.PreloadSceneGroup(levelTwo);
 
             Assert.AreEqual("Level2", string.Join(",", rig.Loader.HeldLoads), "only the main scene waits: " + Calls());
-            Assert.AreSame(levelTwo, rig.Coordinator.preloadedSceneGroup);
+            Assert.AreSame(levelTwo, rig.Coordinator.Preload.Group);
             Assert.IsFalse(rig.Coordinator.IsLoadingSceneGroup);
-            Assert.IsFalse(rig.Coordinator.IsUnloadingSceneGroup);
         }
 
         [Test]
@@ -156,11 +153,11 @@ namespace AbstractPixel.SceneManagement.Tests
             await rig.Coordinator.PreloadSceneGroup(levelTwo);
             await rig.Coordinator.PreloadSceneGroup(levelThree);
 
-            Assert.AreSame(levelThree, rig.Coordinator.preloadedSceneGroup);
+            Assert.AreSame(levelThree, rig.Coordinator.Preload.Group);
             Assert.AreEqual(1, rig.Loader.CountCalls("unload Level2"), "the first preload closes: " + Calls());
             Assert.AreEqual(0, rig.Loader.CountCalls("unload Level3"), Calls());
-            Assert.IsTrue(rig.Coordinator.preloadedContextualScenesSet.Contains(levelThree.MainScene));
-            Assert.IsFalse(rig.Coordinator.preloadedContextualScenesSet.Contains(levelTwo.MainScene));
+            Assert.IsTrue(rig.Coordinator.Preload.Scenes.Contains(levelThree.MainScene));
+            Assert.IsFalse(rig.Coordinator.Preload.Scenes.Contains(levelTwo.MainScene));
         }
 
         // Decision: replacing a preload closes scenes, so it releases memory once. Without it the old level's assets stay
@@ -210,7 +207,7 @@ namespace AbstractPixel.SceneManagement.Tests
             await change;
 
             Assert.AreEqual(0, rig.Loader.CountCalls("load Level3"), Calls());
-            Assert.IsNull(rig.Coordinator.preloadedSceneGroup);
+            Assert.IsNull(rig.Coordinator.Preload.Group);
         }
 
         [Test]
@@ -228,10 +225,9 @@ namespace AbstractPixel.SceneManagement.Tests
             SceneEventBus.OnSceneGroupPreloaded -= countPreloaded;
 
             Assert.AreEqual(0, preloadedEvents);
-            Assert.IsNull(rig.Coordinator.preloadedSceneGroup);
-            Assert.AreEqual(0, rig.Coordinator.preloadedContextualScenesSet.Count);
+            Assert.IsNull(rig.Coordinator.Preload.Group);
+            Assert.AreEqual(0, rig.Coordinator.Preload.Scenes.Count);
             Assert.IsFalse(rig.Coordinator.IsLoadingSceneGroup);
-            Assert.IsFalse(rig.Coordinator.IsUnloadingSceneGroup);
         }
 
         [Test]
@@ -246,8 +242,8 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.AreEqual(1, mostCarScenesOpen, "never a second car scene: " + Calls());
             Assert.AreEqual(1, groupsSeenByNewSceneListeners.Count, "one 'new level'");
             Assert.AreSame(levelTwo, activeGroupSeenByNewSceneListeners[0], "a listener sees the new active group");
-            Assert.AreSame(levelTwo, rig.Coordinator.activeSceneGroup);
-            Assert.AreEqual("Level2", rig.Coordinator.activeMainScene.SceneName);
+            Assert.AreSame(levelTwo, rig.Coordinator.ActiveSceneGroup);
+            Assert.AreEqual("Level2", rig.Coordinator.Open.MainScene.SceneName);
         }
 
         [Test]
@@ -281,9 +277,9 @@ namespace AbstractPixel.SceneManagement.Tests
             SceneEventBus.OnPreloadedSceneGroupActivated -= onActivated;
 
             Assert.AreEqual("new level,preloaded activated", string.Join(",", order));
-            Assert.IsNull(rig.Coordinator.preloadedSceneGroup);
-            Assert.IsNotNull(rig.Coordinator.preloadedContextualScenesSet, "cleared, never set to null (B1)");
-            Assert.AreEqual(0, rig.Coordinator.preloadedContextualScenesSet.Count);
+            Assert.IsNull(rig.Coordinator.Preload.Group);
+            Assert.IsNotNull(rig.Coordinator.Preload.Scenes, "cleared, never set to null (B1)");
+            Assert.AreEqual(0, rig.Coordinator.Preload.Scenes.Count);
         }
 
         [Test]
@@ -295,7 +291,7 @@ namespace AbstractPixel.SceneManagement.Tests
 
             await rig.Coordinator.PreloadSceneGroup(levelThree);
 
-            Assert.AreSame(levelThree, rig.Coordinator.preloadedSceneGroup);
+            Assert.AreSame(levelThree, rig.Coordinator.Preload.Group);
             Assert.AreEqual(0, rig.Loader.CountCalls("unload Level2"), "the level that is open is never closed by a preload");
         }
 
@@ -308,8 +304,8 @@ namespace AbstractPixel.SceneManagement.Tests
 
             await rig.Coordinator.TransitionToPreloadedSceneGroup();
 
-            Assert.IsTrue(rig.Coordinator.activeContextualScenesSet.Contains(new SceneReference("Rain")), "B2");
-            Assert.IsTrue(rig.Coordinator.activeContextualScenesSet.Contains(new SceneReference(SceneCoordinatorTestRig.CarScene)));
+            Assert.IsTrue(rig.Coordinator.Open.ContextualScenes.Contains(new SceneReference("Rain")), "B2");
+            Assert.IsTrue(rig.Coordinator.Open.ContextualScenes.Contains(new SceneReference(SceneCoordinatorTestRig.CarScene)));
             Assert.AreEqual(1, rig.Loader.CountCalls("load Rain"), "the shared scene opens once, in the preload: " + Calls());
         }
 
@@ -350,7 +346,6 @@ namespace AbstractPixel.SceneManagement.Tests
 
             Assert.AreEqual(0, groupsSeenByNewSceneListeners.Count);
             Assert.IsFalse(rig.Coordinator.IsLoadingSceneGroup);
-            Assert.IsFalse(rig.Coordinator.IsUnloadingSceneGroup);
         }
 
         [Test]
@@ -360,6 +355,19 @@ namespace AbstractPixel.SceneManagement.Tests
 
             await rig.Coordinator.TransitionToPreloadedSceneGroup();
 
+            Assert.AreEqual(0, groupsSeenByNewSceneListeners.Count);
+            Assert.IsFalse(rig.Coordinator.IsLoadingSceneGroup);
+        }
+
+        // Stage 4C-1: "already open" is decided by the group asset itself, not by names.
+        [Test]
+        public async Task GoingToTheOpenGroupIsSkippedAndClosesNothing()
+        {
+            LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("already active"));
+
+            await rig.Coordinator.TransitionToSceneGroup(rig.StartGroup);
+
+            Assert.AreEqual(0, rig.Loader.Calls.Count, Calls());
             Assert.AreEqual(0, groupsSeenByNewSceneListeners.Count);
             Assert.IsFalse(rig.Coordinator.IsLoadingSceneGroup);
         }

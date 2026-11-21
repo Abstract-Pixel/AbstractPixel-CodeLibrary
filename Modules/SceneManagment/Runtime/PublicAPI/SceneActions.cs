@@ -8,8 +8,8 @@ namespace AbstractPixel.SceneManagement
 {
     public static class SceneActions
     {
-        public static SceneGroup ActiveSceneGroup => SceneCoordinator.FindOrCreate()?.activeSceneGroup;
-        public static SceneGroup PreloadedSceneGroup => SceneCoordinator.FindOrCreate()?.preloadedSceneGroup;
+        public static SceneGroup ActiveSceneGroup => SceneCoordinator.FindOrCreate()?.ActiveSceneGroup;
+        public static SceneGroup PreloadedSceneGroup => SceneCoordinator.FindOrCreate()?.Preload.Group;
 
         public static bool IsLoadingSceneGroup
         {

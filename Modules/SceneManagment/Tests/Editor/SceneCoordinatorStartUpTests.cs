@@ -71,7 +71,7 @@ namespace AbstractPixel.SceneManagement.Tests
 
             Assert.AreEqual("new level Level2, game started Level2", string.Join(", ", raisedEvents));
             Assert.IsTrue(rig.Coordinator.HasGameStarted);
-            Assert.AreSame(level, rig.Coordinator.activeSceneGroup);
+            Assert.AreSame(level, rig.Coordinator.ActiveSceneGroup);
         }
 
         [Test]
@@ -107,7 +107,7 @@ namespace AbstractPixel.SceneManagement.Tests
             await refused;
 
             Assert.AreEqual(0, rig.Loader.CountCalls("load Level2"), Calls());
-            Assert.AreSame(menu, rig.Coordinator.activeSceneGroup);
+            Assert.AreSame(menu, rig.Coordinator.ActiveSceneGroup);
         }
 
         [Test]

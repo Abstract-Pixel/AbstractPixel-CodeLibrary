@@ -52,7 +52,7 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.AreEqual(1, rig.Loader.CountCalls("load Level3"), Calls());
             Assert.AreEqual(1, rig.Loader.CountCalls(RecordingSceneLoader.ReleaseCall), "the change releases memory once, the discard adds none: " + Calls());
             Assert.AreEqual(1, newLevelGroups.Count, "one 'new level'");
-            Assert.AreSame(levelThree, rig.Coordinator.activeSceneGroup);
+            Assert.AreSame(levelThree, rig.Coordinator.ActiveSceneGroup);
             Assert.AreEqual(0, preloadedActivatedGroups.Count, "a discarded preload is not 'activated'");
             await AssertSettledAndNextPreloadWorks();
         }
@@ -71,7 +71,7 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.AreEqual(1, rig.Loader.CountCalls("load Level1"), "the level opens again: " + Calls());
             Assert.AreEqual(1, rig.Loader.CountCalls(RecordingSceneLoader.ReleaseCall), "the Retry releases memory once, the discard adds none: " + Calls());
             Assert.AreEqual(1, newLevelGroups.Count, "one 'new level'");
-            Assert.AreSame(rig.StartGroup, rig.Coordinator.activeSceneGroup);
+            Assert.AreSame(rig.StartGroup, rig.Coordinator.ActiveSceneGroup);
             await AssertSettledAndNextPreloadWorks();
         }
 
@@ -93,7 +93,7 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.AreEqual(1, newLevelGroups.Count, "one 'new level'");
             Assert.AreEqual(1, preloadedActivatedGroups.Count, "OnPreloadedSceneGroupActivated");
             Assert.AreSame(levelTwo, preloadedActivatedGroups[0]);
-            Assert.AreSame(levelTwo, rig.Coordinator.activeSceneGroup);
+            Assert.AreSame(levelTwo, rig.Coordinator.ActiveSceneGroup);
             await AssertSettledAndNextPreloadWorks();
         }
 
@@ -103,7 +103,7 @@ namespace AbstractPixel.SceneManagement.Tests
             SceneGroup levelTwo = rig.CreateLevelGroup("Level2");
             await rig.Coordinator.PreloadSceneGroup(levelTwo);
             // Makes the preloaded level the open one without going through the coordinator, the case the code guards.
-            rig.Coordinator.activeMainScene = levelTwo.MainScene;
+            rig.Coordinator.Open.Group = levelTwo;
             rig.Loader.Calls.Clear();
 
             LogAssert.Expect(LogType.Warning, new Regex("already active"));
@@ -135,9 +135,8 @@ namespace AbstractPixel.SceneManagement.Tests
         private async Task AssertSettledAndNextPreloadWorks()
         {
             Assert.IsFalse(rig.Coordinator.IsLoadingSceneGroup, "still busy");
-            Assert.IsFalse(rig.Coordinator.IsUnloadingSceneGroup, "still busy");
-            Assert.IsNull(rig.Coordinator.preloadedSceneGroup, "the preload record is not empty");
-            Assert.AreEqual(0, rig.Coordinator.preloadedContextualScenesSet.Count, "the preload record is not empty");
+            Assert.IsNull(rig.Coordinator.Preload.Group, "the preload record is not empty");
+            Assert.AreEqual(0, rig.Coordinator.Preload.Scenes.Count, "the preload record is not empty");
             Assert.IsNull(rig.Loader.HeldScene, "a scene still waits for activation: " + Calls());
             Assert.AreEqual(0, rig.Loader.StalledCalls.Count, "calls stalled: " + string.Join(", ", rig.Loader.StalledCalls));
 
@@ -145,7 +144,7 @@ namespace AbstractPixel.SceneManagement.Tests
             Task preload = rig.Coordinator.PreloadSceneGroup(nextGroup);
             Assert.IsTrue(preload.IsCompleted, "the next preload stalled: " + Calls());
             await preload;
-            Assert.AreSame(nextGroup, rig.Coordinator.preloadedSceneGroup, "the next preload did not take");
+            Assert.AreSame(nextGroup, rig.Coordinator.Preload.Group, "the next preload did not take");
         }
 
         private void RecordNewLevel(SceneGroup _group)

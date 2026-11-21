@@ -10,3 +10,5 @@ Games change scene with one call on `SceneActions`, and the screen effect runs i
 ## Consequences
 
 `TransitionActions` keeps status (`IsTransitioning`, in or out) and stand-alone effects. Its two button method names, `TransitionToSceneWithEffects` and `ReloadActiveScenesWithEffects`, stay as forwards to `SceneActions`, because pause, win and game over buttons call them by name through UnityEvents. `SceneActions` returns a scene change result; `MonoSceneActions` returns nothing, because UnityEvents only list void methods.
+
+Amended by the 4C grill, 2026-11-21: the status `TransitionActions` keeps is the screen state (Visible, Hiding, Hidden, Showing) with one change event, replacing `IsTransitioning` and the in/out events (ADR 0010). The scene calls are `SceneActions.ChangeTo`, `Retry` and `Preload`; the two button names forward to them.

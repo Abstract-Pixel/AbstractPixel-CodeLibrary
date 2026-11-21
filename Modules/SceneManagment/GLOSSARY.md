@@ -47,8 +47,16 @@ A scene group option that closes the manager scenes that were open before, when 
 _Avoid_: discard managers, reset managers
 
 **Loading scene**:
-A scene shown while the old place closes and the new one opens. Project Settings lists the loading scenes and names the default; a scene group says whether it uses one and which.
-_Avoid_: loading screen (when meaning the scene asset), interstitial
+A scene shown while the old place closes and the new one opens. It is one scene, never a scene group. Project Settings lists the loading scenes and names the default; a scene group says when it shows one and which.
+_Avoid_: loading screen (when meaning the scene asset), loading scene group, interstitial
+
+**Show the loading scene**:
+The scene group setting that says when its loading scene appears: **Never**, **When arriving from another scene group** (a Retry goes straight back in), or **Every time, Retry included**.
+_Avoid_: Retry option, Off / When changing level / Always, use a loading scene
+
+**Loading progress view**:
+The part of a loading scene that shows loading progress to the player: it smooths the value and plays its own animations when it appears, when it is full and when it leaves.
+_Avoid_: loading bar (a bar is only one look), progress widget
 
 **Scene status**:
 Where a scene can be loaded from: In build, Addressable, Not in build, or Missing. A scene is In build or Addressable, never both.
@@ -79,11 +87,11 @@ Leaving the current scene group and arriving in another one, or the same one aga
 _Avoid_: transition (that word belongs to the screen effect), scene load, level load
 
 **Retry**:
-A scene change to the scene group that is already open, so the place starts again.
-_Avoid_: reload, restart (in code names)
+A scene change to the scene group that is already open, so the place starts again. It is never a second attempt at a scene that failed to load: a failed load is not tried again.
+_Avoid_: reload, restart (in code names), retry (for trying a failed load again)
 
 **Preload**:
-Opening a scene group's scenes in the background before the scene change to it, keeping its main scene waiting until the change. At most one scene group is preloaded.
+Opening a scene group's scenes in the background before the scene change to it, keeping its main scene waiting until the change. The game asks for it per scene change; the scene system never preloads by itself. At most one scene group is preloaded.
 _Avoid_: prefetch, background load
 
 **Scene change result**:
@@ -93,6 +101,10 @@ _Avoid_: status code, success flag
 **Loading progress**:
 How far a scene change has got, from 0 to 1, for a loading scene to show.
 _Avoid_: percent, load amount
+
+**Fallback scene group**:
+The scene group the scene system goes to when a scene change fails, named in the scene system settings. By default it is the start scene group.
+_Avoid_: error scene, safe scene, recovery group
 
 ## The screen during a scene change
 
@@ -107,6 +119,10 @@ _Avoid_: transition in, fade in, cover
 **Show screen**:
 The step that uncovers the screen after the new scenes are ready.
 _Avoid_: transition out, fade out, reveal
+
+**Screen state**:
+What the scene transition executor is doing to the screen: Visible, Hiding, Hidden or Showing. Game management reacts to it; the screen effect never changes game time itself.
+_Avoid_: transition in, transition out, transitioning, IsTransitioning (as a word in docs)
 
 ## Placing objects
 

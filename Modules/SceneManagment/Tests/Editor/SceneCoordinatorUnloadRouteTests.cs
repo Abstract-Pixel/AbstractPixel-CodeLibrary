@@ -26,7 +26,7 @@ namespace AbstractPixel.SceneManagement.Tests
         [Test]
         public async Task ClosingTheActiveSceneWithNoMainSceneOnRecordGoesThroughTheLoader()
         {
-            rig.Coordinator.activeMainScene = null;
+            rig.Coordinator.Open.MainScene = null;
             string activeSceneName = SceneManager.GetActiveScene().name;
 
             await rig.Coordinator.ReloadActiveSceneGroup();

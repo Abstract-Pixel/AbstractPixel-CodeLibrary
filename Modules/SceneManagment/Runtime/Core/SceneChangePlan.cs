@@ -19,9 +19,11 @@ namespace AbstractPixel.SceneManagement
             Preload,
         }
 
-        /// <summary>The scenes that exist before the change.</summary>
+        /// <summary>The scenes that are open: the record the coordinator keeps, and the input of a plan.</summary>
         internal class OpenScenes
         {
+            /// <summary>The scene group these scenes belong to. Null before start-up.</summary>
+            public SceneGroup Group;
             public SceneReference MainScene;
             public HashSet<SceneReference> ManagerialScenes = new HashSet<SceneReference>();
             public HashSet<SceneReference> ContextualScenes = new HashSet<SceneReference>();
@@ -31,9 +33,34 @@ namespace AbstractPixel.SceneManagement
             /// the change is a switch to a preloaded group.
             /// </summary>
             public HashSet<SceneReference> PreloadedScenes = new HashSet<SceneReference>();
+
+            /// <summary>A copy whose sets can change without touching this record.</summary>
+            public OpenScenes Copy()
+            {
+                OpenScenes copy = new OpenScenes();
+                copy.Group = Group;
+                copy.MainScene = MainScene;
+                copy.ManagerialScenes = new HashSet<SceneReference>(ManagerialScenes);
+                copy.ContextualScenes = new HashSet<SceneReference>(ContextualScenes);
+                return copy;
+            }
+
+            /// <summary>The record of a group that is open with all of its scenes.</summary>
+            public static OpenScenes OfGroup(SceneGroup _group)
+            {
+                OpenScenes record = new OpenScenes();
+                record.Group = _group;
+                record.MainScene = _group.MainScene;
+                record.ManagerialScenes = new HashSet<SceneReference>(_group.ManagerialBootScenesList);
+                record.ContextualScenes = new HashSet<SceneReference>(_group.ContextualBootScenesList);
+                return record;
+            }
         }
 
         public SceneGroup TargetGroup { get; }
+
+        /// <summary>The group whose scenes close, for the "group closed" message. Null for start-up and preload.</summary>
+        public SceneGroup GroupThatCloses { get; }
         public SceneReference MainSceneToClose { get; }
         public SceneReference MainSceneToOpen { get; }
         public HashSet<SceneReference> ContextualToClose { get; }
@@ -51,6 +78,17 @@ namespace AbstractPixel.SceneManagement
 
         public SceneChangePlan(SceneGroup _targetGroup, OpenScenes _open) : this(_targetGroup, _open, Kind.Change)
         {
+        }
+
+        /// <summary>What is open once this plan has run to its end: the coordinator's new record.</summary>
+        public OpenScenes OpenAfterChange()
+        {
+            OpenScenes record = new OpenScenes();
+            record.Group = TargetGroup;
+            record.MainScene = TargetGroup.MainScene;
+            record.ManagerialScenes = new HashSet<SceneReference>(ManagerialOpenAfter);
+            record.ContextualScenes = new HashSet<SceneReference>(ContextualOpenAfter);
+            return record;
         }
 
         /// <summary>
@@ -106,6 +144,7 @@ namespace AbstractPixel.SceneManagement
             if (!isPreload)
             {
                 MainSceneToClose = _open.MainScene;
+                GroupThatCloses = _open.Group;
             }
             MainSceneToOpen = _targetGroup.MainScene;
 
