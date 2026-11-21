@@ -135,7 +135,7 @@ An object in a manager scene or shared scene that the scene system moves to a sp
 _Avoid_: placeable, relocatable boot object, boot object
 
 **Relocation label**:
-An asset that names a kind of relocatable, such as "Player" or "Enemy". Relocatables and spawn point positions match by label. An empty label field is a valid label of its own, shown as "No label", for games that relocate one kind of object.
+An asset that names a kind of relocatable, such as "Player" or "Enemy". Relocatables and spawn point positions match by label. An empty label field is a valid label of its own, shown as "No label", for games that relocate one kind of object. A label is known by its ID, so two copies of one label (an Addressables bundle carries its own) match.
 _Avoid_: placement label, tag (Unity already has tags), spawn type, entity type, string id
 
 **Instance**:
@@ -163,11 +163,11 @@ The step that moves every held relocatable to its spawn point position once the 
 _Avoid_: place, placement (as the step), teleport, spawn, move to spawn point
 
 **Release**:
-Ending the hold, once the screen counts as visible again.
+Ending the hold, once the screen counts as visible again (after the launch scene hold, while that still holds).
 _Avoid_: unlock, unfreeze, enable physics
 
 **Wait for ground below**:
-A relocatable setting that keeps it held, and the screen covered, until a collider is found under its spawn point position. It never moves the relocatable onto the ground.
+A relocatable setting that keeps it held, and the screen covered, until a collider of the Ground layers is found under its spawn point position. It never moves the relocatable onto the ground.
 _Avoid_: ground snap, snap to ground, drop to ground
 
 **Ground layers**:
@@ -175,7 +175,7 @@ The physics layers that count as ground, both for Wait for ground below and for 
 _Avoid_: walkable layers, floor mask
 
 **Steepest ground**:
-The steepest slope, in degrees, that a relocation label accepts for a spawn point position. A steeper position is allowed but shown as a warning.
+The steepest slope, in degrees, that a relocation label accepts for a spawn point position. A steeper position is allowed but shown as a warning. For "No label" it is the Scene System page's "Steepest slope without a label".
 _Avoid_: max slope, slope limit
 
 ## Samples

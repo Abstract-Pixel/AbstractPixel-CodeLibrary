@@ -9,3 +9,5 @@ Relocatables and spawn point positions match by a relocation label asset, never 
 - Match one specific object to one position by a stable object id. Replaced by the instance, which needs no cross-scene reference.
 
 Amended 2026-11-21 (4D grill): renamed from placement labels to relocation labels; "No label" and the instance added.
+
+Amended 2026-11-22 (4D stress build): labels match by an ID, the label asset's GUID stamped into it on import, not by object identity. An Addressables bundle carries its own copy of every asset it uses, so in a build the car's label and the spawn point's label were two objects and Level 3 kept the car held. Considered: matching by asset name (rejected, a rename or two labels with one name would break it) and keeping labels out of bundles (rejected, it depends on how each game builds its groups). A label with no ID yet (made before this change, not reimported) falls back to object identity.

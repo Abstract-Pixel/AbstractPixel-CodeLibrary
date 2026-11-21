@@ -9,7 +9,8 @@ Opens, closes and switches groups of scenes for a single-player Unity game: a ma
 - **How a scene change runs today:** the sections below (messages, order per entry point, loader choice, contract tests).
 - **How the game starts:** no start-up object is needed in any scene. Set the start scene group (and an optional launch scene, such as a splash) in Project Settings > Abstract Pixel > Scene System > Start-up. When the game launches or Play is pressed, start-up (`SceneSystemStartUp`) opens the right scene group, then raises `OnNewSceneGroupTransitionTo` once and `OnGameStarted` once. A launch scene waits for `SceneActions.HasGameStarted` instead of loading scenes itself (ADR 0009). While it plays, the **launch scene hold** keeps the start scene group back: its scenes load and wake behind the launch scene, and scripts that show something (camera, music, entrance) wait with `SceneActions.RunWhenLaunchSceneReleased` (or read `SceneActions.IsLaunchSceneHeld`). The launch scene calls `SceneActions.ReleaseLaunchScene()` at its hand-off. Start-up holds only when the launch scene is one of the scenes Unity opens, so Play from a level or the start scene group never waits.
 - **Changing scene:** `SceneActions.ChangeTo(group)`, `Retry()`, `Preload(group)`, each returning a `SceneChangeResult`; the screen effect and the loading scene run inside the call. Read `SceneActions.LoadingProgress` and `TransitionActions.ScreenState`. Details below ("Scene messages", "Loading scene").
-- **Work in progress:** the rework plan lives in the game that tests this module, Project Rally Shift, at `.scratch/scene-coordinator/plan.md` (with `map.md` and `issues/`). Placement (ADR 0006) is not built yet; the plan says which decisions belong to later sessions.
+- **Moving the player and other persistent objects:** "Relocating objects" below (session 4D).
+- **Work in progress:** the rework plan lives in the game that tests this module, Project Rally Shift, at `.scratch/scene-coordinator/plan.md` (with `map.md` and `issues/`). The plan says which decisions belong to later sessions.
 
 ## Editor tools (sessions 3C, 4A and 4B)
 
@@ -69,15 +70,18 @@ before the first scene loads until start-up ends. It never uses the screen effec
    it with `SceneActions.ReleaseLaunchScene()`: waiting actions run, `OnLaunchSceneReleased` once, one log line.
 1. After the first scenes load it reads the settings and picks a group from the scenes Unity opened (`StartUpRule`).
 2. It creates the coordinator if no scene holds one.
-3. It asks for every missing scene of the group at once and in order (main scene, manager scenes, shared scenes).
-4. Records the group, `OnNewSceneGroupTransitionTo` once, then `OnGameStarted` once. A failed load raises neither;
+3. **Hold** every relocatable, then ask for every missing scene of the group at once and in order (main scene, manager
+   scenes, shared scenes).
+4. Records the group and **Relocates** (a failed load relocates too, so objects with no position stay held), then
+   `OnNewSceneGroupTransitionTo` once, `OnGameStarted` once, and **Release** when start-up ends, or when the launch
+   scene hold ends if it still holds. A failed load raises neither;
    `SceneActions.HasStartUpFailed` turns true (no fallback for start-up).
 
 **A change** (`ChangeTo`) and **Retry** (`Retry`) share one body. A `SceneChangePlan` works out which scenes to close and open.
 1. Refusals first, each before anything touches the screen: no group (`NoGroupGiven`), the group asked for is the open
    asset (`AlreadyOpen`; groups are equal only to themselves), nothing open to Retry (`NothingOpenToRetry`), start-up
    running, another change running (`Busy`). Busy is set before the first `await` and stays set until Show screen ends.
-2. **Hide screen** through the registered `ISceneTransitionExecutor` (none registered: nothing). A Hide screen asked for
+2. **Hold** every relocatable. **Hide screen** through the registered `ISceneTransitionExecutor` (none registered: nothing). A Hide screen asked for
    while an effect still runs waits for it, so the screen is always covered.
 3. A preload this change does not use is closed (held main scene first). Unity holds every later scene operation while a
    preloaded main scene waits. A change to the preloaded group itself runs as the preloaded switch in step 5.
@@ -85,14 +89,17 @@ before the first scene loads until start-up ends. It never uses the screen effec
 5. Close the old main scene and the shared scenes (all with Reset shared scenes), free memory once,
    `OnSceneGroupUnloaded`, open manager scenes, shared scenes, then the main scene (`OnMainSceneLoaded`). Loading
    progress fills. A switch to a preloaded group activates the held main scene first, then closes and opens the rest.
-6. Done: record the open scenes, `OnNewSceneGroupTransitionTo` once (then `OnPreloadedSceneGroupActivated` for a switch).
+6. Done: record the open scenes, **Relocate**, `OnNewSceneGroupTransitionTo` once (then `OnPreloadedSceneGroupActivated` for a switch).
    Failed: record what is really open (no group counts as open), `OnSceneChangeFailed` once, then the **fallback scene
    group** (settings: "If a scene change fails, go to"; empty means the start scene group) runs steps 5 and 6 once,
    with the screen still covered and the loading scene still up. If the fallback fails too, or the failed change was
    the fallback, the screen is shown on whatever is open and an error is logged. A failed load is never tried again. A
    scene that fails to close is logged and the change carries on.
 7. The loading scene leaves (minimum time, "full" animation, Hide screen, it closes).
-8. **Show screen**, then busy clears. The result says Done, or Failed with the scene.
+   Relocate runs once per change: a failed change relocates on whatever is open.
+8. **Show screen**, then busy clears. **Release** comes once, when the screen counts as visible (the transition profile's
+   `ScreenCountsAsVisibleAt`, 0.75 by default), or when Show screen ends if it never reports; while the launch scene hold
+   is on, it waits for the hold to end. The result says Done, or Failed with the scene.
 
 **Preload** (`Preload`): refused for no group, the open group, start-up or a running change; Done at once when the group is
 already preloaded. It never touches the screen and never shows a loading scene. An earlier preload closes first (memory
@@ -197,13 +204,40 @@ Rally paths are under `Assets/[1]Project/` unless shown otherwise. Many other sy
 `SceneActions.ActiveSceneGroup` directly (win screen, leaderboards, ghosts, level finish, `RallyLevelManager`) instead of
 listening.
 
-## Screen messages used to relocate the car (until session 4D replaces them)
+## Relocating objects
 
-| Message | Listener | Purpose |
-|---|---|---|
-| `TransitionEventBus.OnStartShowScreenTransition` | `GameplaySystems/Car/CarCore/CarScripts/CarBootPhysicsToggle.cs` | Unlocks the car (it was frozen while the screen was covered), turns on its safety recorder, and sets `CarCanMove` |
-| | `SceneTransitionSystem/.../FallbackAudioListener.cs`, `TransitionAudio.cs` (library) | Hands audio back to the scene's listener, plays the reveal sound |
-| `TransitionEventBus.OnEndShowScreenTransition` | `CarBootPhysicsToggle.cs` | Same handler, as a safety net. It runs once |
+The relocation sub-module (`Relocation/`, assembly `AbstractPixel.SceneManagement.Relocation`) moves objects that live in a
+manager scene or shared scene, such as the player, to the right place in each new scene group. Words:
+[GLOSSARY.md](GLOSSARY.md) "Relocating objects". Decisions: ADR 0006, 0012, 0013. Example: `Samples/05 Persistent Player
+And Spawn Points`.
 
-With a loading scene, the new car loads while the loading scene covers the level and is released by the last Show screen. Rally's pause is refused while a scene change runs (`RallyPauseCondition`). With Play pressed inside a level there is no fade. `CarBootPhysicsToggle.Start` unlocks the car instead, in the Editor
-only.
+**Set up.** Add a `Relocatable` to the object (its label: "No label" or a relocation label asset; "New label" asks where to
+save one). Add a `SpawnPoint` with the same label to each main scene; its transform is Instance 1, and "Add position" or
+Shift+D in the Scene view adds more. The inspector lists the Scene view controls, lights the one in use and names the
+mode. The Scene System page's Relocation section holds the Ground layers and the steepest slope for "No label".
+
+**What happens in a scene change** (the coordinator calls the relocation broadcaster, ADR 0012):
+1. **Hold**, when the change is accepted: rigid bodies turn kinematic with zero velocity, interpolation off, and
+   `IRelocationHold` components on the object hear `OnHold`.
+2. **Relocate**, once the new scenes are open and before `OnNewSceneGroupTransitionTo`: every relocatable is matched
+   to a spawn point position in the open group's main scene by label and instance (a set instance wins, the rest take
+   the next free one in Hierarchy order), written in one batch with one `Physics.SyncTransforms`, checked one frame
+   later, then, with Wait for ground below, kept held until a collider of the Ground layers is under it. Trails and
+   world-space particles are cleared so the jump leaves no streak. A body nested under another held body is left to
+   follow its parent.
+3. **Release**, when the screen counts as visible: bodies get back their own settings, `IRelocationHold.OnRelease` runs,
+   then `Released` fires.
+
+A relocatable that has no position, starts deeper than 0.25 m inside the ground, or sits under a terrain surface stays
+held, and one error names it, its label, the scene group and how many positions the main scene has. Every wait counts
+unscaled frames, so a paused game (time scale 0) still relocates. Labels match by their ID (the asset GUID, stamped on
+import), so the copy of a label that an Addressables bundle carries matches the original.
+
+**Events for game code** on `Relocatable`: `Relocated`, `Released`, and `IsHeld`; `IRelocationHold` for components that pause
+their own behaviour. Rally Shift's `CarRelease` turns the
+car's controls on at `Released`, and `BombInitializer` starts the bomb there. A game with no relocatable changes scenes
+as before: the broadcaster is never registered.
+
+**Sample scene groups** (ADR 0014): tick "Sample scene group" on a group whose scenes are only for the Editor. They open
+in Play mode from their path, the Build Settings writer leaves them out, and a build that would include one stops and
+names it. The page's "Sample scene groups" section lists them.
