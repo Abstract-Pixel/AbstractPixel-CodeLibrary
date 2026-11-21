@@ -33,10 +33,17 @@ namespace AbstractPixel.SceneManagement.Editor
             panel.style.paddingRight = 3;
             panel.style.paddingBottom = 3;
 
+            // The icons share the panel's width evenly; the panel itself stays as narrow as its title.
             VisualElement buttons = new VisualElement();
             buttons.style.flexDirection = FlexDirection.Row;
-            buttons.style.flexWrap = Wrap.Wrap;
+            buttons.style.justifyContent = Justify.SpaceBetween;
+            buttons.style.width = Length.Percent(100);
             AddActionButtons(buttons);
+            foreach (VisualElement button in buttons.Children())
+            {
+                button.style.flexGrow = 1;
+                button.style.flexBasis = 0;
+            }
             panel.Add(buttons);
 
             Label mode = new Label();

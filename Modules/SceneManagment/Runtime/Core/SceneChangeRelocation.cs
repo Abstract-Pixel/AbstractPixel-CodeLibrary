@@ -4,9 +4,10 @@ namespace AbstractPixel.SceneManagement
 {
     /// <summary>
     /// The relocation steps of one scene change (ADR 0012): Hold once when the change is accepted, Relocate once, and
-    /// Release once, whichever moment comes first (the screen counts as visible, Show screen ends, or the launch scene
-    /// hold ends). A release left waiting for the launch scene hold is dropped if a newer scene change has started,
-    /// so it can never release objects in the middle of that change.
+    /// Release once, at the first of these moments: the screen counts as visible, Show screen ends, or start-up ends.
+    /// While the launch scene hold is on, the release waits for it, because the launch scene still covers the screen
+    /// (found in the 4D stress run: a change asked for during the splash released the car under it). A release left
+    /// waiting is dropped if a newer scene change has started, so it can never release objects in the middle of it.
     /// </summary>
     internal sealed class SceneChangeRelocation
     {
@@ -34,7 +35,7 @@ namespace AbstractPixel.SceneManagement
             await RelocationBroadcasterSlot.Relocate();
         }
 
-        /// <summary>Releases once per scene change. Show screen's report and its end both call it.</summary>
+        /// <summary>Releases once per scene change, now or when the launch scene hold ends. Show screen's report and its end both call it.</summary>
         public void ReleaseOnce()
         {
             if (hasReleased)
@@ -42,21 +43,15 @@ namespace AbstractPixel.SceneManagement
                 return;
             }
             hasReleased = true;
-            RelocationBroadcasterSlot.Release();
-        }
-
-        /// <summary>Start-up: releases now, or when the launch scene hold ends if it is held.</summary>
-        public void ReleaseAfterLaunchSceneHold()
-        {
-            int startUpChange = changeNumber;
+            int thisChange = changeNumber;
             LaunchSceneHold.RunWhenReleased(() =>
             {
-                bool aNewerChangeStarted = startUpChange != changeNumber;
+                bool aNewerChangeStarted = thisChange != changeNumber;
                 if (aNewerChangeStarted)
                 {
                     return;
                 }
-                ReleaseOnce();
+                RelocationBroadcasterSlot.Release();
             });
         }
     }
