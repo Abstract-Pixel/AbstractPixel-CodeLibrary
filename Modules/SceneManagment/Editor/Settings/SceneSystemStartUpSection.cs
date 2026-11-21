@@ -17,6 +17,8 @@ namespace AbstractPixel.SceneManagement.Editor
         public const string LaunchSceneTooltip = "Optional scene, such as a splash, that Unity opens first. Choosing it puts it at build index 0. Start-up opens the start scene group behind it one frame later, then raises OnGameStarted; the launch scene closes itself. Opened on its own in the Editor, it opens nothing else.";
         public const string BuildIndexTooltip = "Unity opens build index 0 first in a build. The scene system keeps the launch scene there: choosing it here moves it, and a build puts it back if Build Settings were reordered.";
         public const string CreateLaunchSceneTooltip = "Makes a new scene with a camera and a light where you choose, sets it as the launch scene and puts it at build index 0.";
+        public const string FallbackLabel = "If a scene change fails, go to";
+        public const string FallbackTooltip = "The fallback scene group: where the scene system goes when a scene of the target group fails to load (missing from the build, broken address). Empty means the start scene group. A failed load is never tried again, and if the fallback fails too the screen is shown on whatever is open.";
         public const string MissingStartSceneGroup = "Start scene group missing: a build, and Play from a manager, shared or launch scene, open nothing. Pick the scene group the game opens at launch.";
 
         // What the fields held when the section was built or last saved. A save only happens when it changes: binding a
@@ -43,12 +45,32 @@ namespace AbstractPixel.SceneManagement.Editor
             VisualElement launchRow = LabelledRow("Launch scene (optional)", LaunchSceneTooltip, launchSceneField);
             launchRow.style.marginTop = 2;
             fields.Add(launchRow);
+            PropertyField fallbackField = new PropertyField(settingsObject.FindProperty("fallbackSceneGroup"), string.Empty);
+            fallbackField.tooltip = FallbackTooltip;
+            VisualElement fallbackRow = LabelledRow(FallbackLabel, FallbackTooltip, fallbackField);
+            fallbackRow.style.marginTop = 2;
+            fields.Add(fallbackRow);
+            fields.Add(FallbackHint(_settings));
             savedSignature = Signature(_settings);
+            fallbackField.RegisterValueChangeCallback(_change => SaveIfChanged(_settings));
             startGroupField.RegisterValueChangeCallback(_change => SaveIfChanged(_settings));
             launchSceneField.RegisterValueChangeCallback(_change => SaveIfChanged(_settings));
             fields.Bind(settingsObject);
             _card.Add(fields);
             _card.Add(LaunchSceneRow(_settings));
+        }
+
+        // Under the fallback field: which group a failed change opens when the field is empty.
+        private static VisualElement FallbackHint(SceneSystemSettings _settings)
+        {
+            string text = "Empty: a failed scene change goes to the start scene group.";
+            if (_settings.FallbackSceneGroupSetting == null && _settings.StartSceneGroup != null)
+            {
+                text = "Empty: a failed scene change goes to the start scene group, '" + _settings.StartSceneGroup.name + "'.";
+            }
+            Label hint = SceneSystemUI.Hint(text);
+            hint.style.marginLeft = 160;
+            return hint;
         }
 
         // "Label        [field]" with the same label width as the Setup section's rows, so the fields line up.
@@ -137,7 +159,12 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 launchScene = _settings.LaunchScene.SceneGuid + "|" + _settings.LaunchScene.SceneName;
             }
-            return startGroupId + "/" + launchScene;
+            string fallbackId = "none";
+            if (_settings.FallbackSceneGroupSetting != null)
+            {
+                fallbackId = _settings.FallbackSceneGroupSetting.GetInstanceID().ToString();
+            }
+            return startGroupId + "/" + launchScene + "/" + fallbackId;
         }
 
         private static VisualElement StatusRow(SceneSystemSettings _settings)

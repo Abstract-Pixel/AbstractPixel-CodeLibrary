@@ -35,8 +35,8 @@ namespace AbstractPixel.SceneManagement
         {
             if (sceneReference == null || !sceneReference.HasGuid)
             {
-                Debug.LogError("[AddressablesSceneLoader] A scene needs its asset GUID to load through Addressables.");
-                return;
+                string sceneName = sceneReference == null ? "(none)" : sceneReference.SceneName;
+                throw new System.InvalidOperationException($"[AddressablesSceneLoader] Scene '{sceneName}' needs its asset GUID to load through Addressables.");
             }
 
             string key = sceneReference.SceneGuid;

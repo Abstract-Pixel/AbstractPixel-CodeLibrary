@@ -14,6 +14,8 @@ namespace AbstractPixel.SceneManagement
     {
         [SerializeField] private SceneGroup startSceneGroup = null;
         [SerializeField] private SceneReference launchScene = new SceneReference(string.Empty);
+        [Tooltip("If a scene change fails, go to: the scene group the scene system opens when a scene of the target group fails to load. Empty means the start scene group.")]
+        [SerializeField] private SceneGroup fallbackSceneGroup = null;
         [SerializeField] private List<SceneSet> sceneSets = new List<SceneSet>();
         [SerializeField] private SceneSet defaultSceneSet = null;
         [SerializeField] private bool newScenesAreAddressable = false;
@@ -32,6 +34,29 @@ namespace AbstractPixel.SceneManagement
         {
             get { return launchScene; }
             set { launchScene = value; }
+        }
+
+        /// <summary>
+        /// The scene group a failed scene change goes to (ADR 0011). Empty means the start scene group, which is what
+        /// <see cref="FallbackSceneGroup"/> returns then.
+        /// </summary>
+        public SceneGroup FallbackSceneGroupSetting
+        {
+            get { return fallbackSceneGroup; }
+            set { fallbackSceneGroup = value; }
+        }
+
+        /// <summary>The scene group a failed scene change goes to: the one set, otherwise the start scene group.</summary>
+        public SceneGroup FallbackSceneGroup
+        {
+            get
+            {
+                if (fallbackSceneGroup != null)
+                {
+                    return fallbackSceneGroup;
+                }
+                return startSceneGroup;
+            }
         }
 
         /// <summary>True when a launch scene is set.</summary>

@@ -50,6 +50,9 @@ namespace AbstractPixel.SceneManagement.Tests
         /// <summary>Loading the scene with this name fails with an exception.</summary>
         public string FailLoadOfScene;
 
+        /// <summary>More scenes whose load fails, for a fallback that fails too.</summary>
+        public readonly HashSet<string> FailingScenes = new HashSet<string>();
+
         public Task LoadScene(SceneReference sceneReference, bool isAdditive, bool sceneActivatedByDefault = true, bool isMainScene = false)
         {
             string sceneName = sceneReference.SceneName;
@@ -66,9 +69,9 @@ namespace AbstractPixel.SceneManagement.Tests
                 return NeverCompletes();
             }
 
-            if (sceneName == FailLoadOfScene)
+            if (sceneName == FailLoadOfScene || FailingScenes.Contains(sceneName))
             {
-                return Task.FromException(new InvalidOperationException("test load failure for " + FailLoadOfScene));
+                return Task.FromException(new InvalidOperationException("test load failure for " + sceneName));
             }
 
             if (isAskingForTheHeldScene && sceneActivatedByDefault)

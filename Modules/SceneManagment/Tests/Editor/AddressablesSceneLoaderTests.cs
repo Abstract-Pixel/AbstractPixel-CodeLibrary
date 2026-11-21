@@ -64,12 +64,21 @@ namespace AbstractPixel.SceneManagement.Tests
         }
 
         [Test]
-        public async Task ASceneReferenceWithoutAGuidIsRefusedWithAnError()
+        public async Task ASceneReferenceWithoutAGuidFailsTheLoad()
         {
-            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("needs its asset GUID"));
+            // 4C: a load that cannot happen fails, so the scene change fails instead of looking finished (ADR 0011).
+            System.Exception failure = null;
+            try
+            {
+                await harness.Loader.LoadScene(new SceneReference("NameOnly"), true, true, true);
+            }
+            catch (System.InvalidOperationException exception)
+            {
+                failure = exception;
+            }
 
-            await harness.Loader.LoadScene(new SceneReference("NameOnly"), true, true, true);
-
+            Assert.IsNotNull(failure);
+            StringAssert.Contains("needs its asset GUID", failure.Message);
             Assert.AreEqual(0, harness.Api.LoadedKeys.Count, "nothing opens without a GUID");
         }
     }

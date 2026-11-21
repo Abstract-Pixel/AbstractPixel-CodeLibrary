@@ -28,6 +28,7 @@ namespace AbstractPixel.SceneManagement.Tests
             rig.Coordinator = coordinatorObject.AddComponent<SceneCoordinator>();
             rig.Loader = new RecordingSceneLoader();
             rig.Coordinator.SetSceneLoader(rig.Loader);
+            rig.Coordinator.FindFallbackSceneGroup = NoFallback;
             PinSingletonInstance(rig.Coordinator);
             return rig;
         }
@@ -40,10 +41,17 @@ namespace AbstractPixel.SceneManagement.Tests
             rig.Coordinator = coordinatorObject.AddComponent<SceneCoordinator>();
             rig.Loader = new RecordingSceneLoader();
             rig.Coordinator.SetSceneLoader(rig.Loader);
+            rig.Coordinator.FindFallbackSceneGroup = NoFallback;
             PinSingletonInstance(rig.Coordinator);
             rig.StartGroup = rig.CreateLevelGroup(_levelName);
             rig.Coordinator.InitializeStartSceneGroup(rig.StartGroup);
             return rig;
+        }
+
+        // Tests that need a fallback scene group set their own; the project's settings never leak into a test.
+        private static SceneGroup NoFallback()
+        {
+            return null;
         }
 
         // Shaped like a Rally Shift level group: a manager scene, a force-reloaded car scene and the level.

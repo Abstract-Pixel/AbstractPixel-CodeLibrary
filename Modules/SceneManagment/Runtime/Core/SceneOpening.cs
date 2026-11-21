@@ -16,12 +16,21 @@ namespace AbstractPixel.SceneManagement
     {
         private ISceneLoader loader;
 
-        /// <summary>The scene that failed to load in the last scene change, or null. Cleared by <see cref="ForgetFailure"/>.</summary>
+        /// <summary>The scene that failed to load in the current scene change, or null.</summary>
         public SceneReference FailedScene { get; private set; }
 
-        public void ForgetFailure()
+        /// <summary>Every scene the current scene change opened, so the record stays true when a later one fails.</summary>
+        public readonly List<SceneReference> OpenedScenes = new List<SceneReference>();
+
+        /// <summary>True once the current scene change has closed the old scenes.</summary>
+        public bool OldScenesClosed { get; private set; }
+
+        /// <summary>Starts the bookkeeping of one scene change.</summary>
+        public void BeginChange()
         {
             FailedScene = null;
+            OpenedScenes.Clear();
+            OldScenesClosed = false;
         }
 
         /// <summary>The loader, created the first time it is needed, so a scene change in the first frame has one.</summary>
@@ -48,12 +57,17 @@ namespace AbstractPixel.SceneManagement
             try
             {
                 SceneReference mainSceneToClose = _plan.MainSceneToClose;
-                if (mainSceneToClose == null || string.IsNullOrEmpty(mainSceneToClose.SceneName))
+                bool mainSceneUnknown = mainSceneToClose == null || string.IsNullOrEmpty(mainSceneToClose.SceneName);
+                if (mainSceneUnknown && _plan.ClosesActiveSceneWhenNoMainScene)
                 {
                     // No main scene on record: close the scene Unity says is active. Only the loader closes scenes.
                     mainSceneToClose = new SceneReference(SceneManager.GetActiveScene().name);
+                    mainSceneUnknown = false;
                 }
-                await Loader.UnloadScene(mainSceneToClose);
+                if (!mainSceneUnknown)
+                {
+                    await Loader.UnloadScene(mainSceneToClose);
+                }
 
                 foreach (SceneReference scene in _plan.ContextualToClose)
                 {
@@ -64,9 +78,11 @@ namespace AbstractPixel.SceneManagement
             }
             catch (Exception ex)
             {
+                // A scene that fails to close is logged and the change carries on (ADR 0011).
                 Debug.LogException(ex);
             }
 
+            OldScenesClosed = true;
             if (_plan.GroupThatCloses != null)
             {
                 SceneEventBus.RaiseOnSceneGroupUnloaded(_plan.GroupThatCloses);
@@ -146,12 +162,13 @@ namespace AbstractPixel.SceneManagement
             try
             {
                 await Loader.LoadScene(_scene, true, _activate, _isMainScene);
+                OpenedScenes.Add(_scene);
                 return true;
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
-                Debug.LogError($"[SceneCoordinator] Failed to load scene '{_scene.SceneName}'.");
+                // One error that names the scene. A failed load is never tried again (ADR 0011).
+                Debug.LogError($"[Scene system] Scene '{_scene.SceneName}' failed to load: {ex.Message}");
                 if (FailedScene == null)
                 {
                     FailedScene = _scene;

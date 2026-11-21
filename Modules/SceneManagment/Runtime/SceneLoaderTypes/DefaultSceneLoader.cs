@@ -14,8 +14,7 @@ namespace AbstractPixel.SceneManagement
         {
             if (sceneReference == null || string.IsNullOrEmpty(sceneReference.SceneName))
             {
-                Debug.LogError(" scene reference provided to load is null.");
-                return;
+                throw new System.ArgumentException("[DefaultSceneLoader] No scene was given to load.");
             }
 
             if (sceneLoadHandles.TryGetValue(sceneReference.SceneName, out AsyncOperation operationHandle))
@@ -32,12 +31,18 @@ namespace AbstractPixel.SceneManagement
                 return;
             }
 
+            // A scene missing from the build fails the load, so the scene change fails instead of looking finished.
+            // Checked first, so Unity does not log an error of its own for the same scene.
+            if (!Application.CanStreamedLevelBeLoaded(sceneReference.SceneName))
+            {
+                throw new System.InvalidOperationException($"Scene '{sceneReference.SceneName}' is not in the build (Build Settings or Addressables).");
+            }
+
             LoadSceneMode loadMode = isAdditive ? LoadSceneMode.Additive : LoadSceneMode.Single;
             AsyncOperation sceneLoadHandle = SceneManager.LoadSceneAsync(sceneReference.SceneName, loadMode);
             if (sceneLoadHandle == null)
             {
-                Debug.LogError($"Failed to load scene '{sceneReference.SceneName}'. Is it in the Build Settings?");
-                return;
+                throw new System.InvalidOperationException($"Scene '{sceneReference.SceneName}' could not be loaded.");
             }
             sceneLoadHandle.allowSceneActivation = sceneActivatedByDefault;
 
@@ -63,7 +68,7 @@ namespace AbstractPixel.SceneManagement
         {
             if (sceneReference == null || string.IsNullOrEmpty(sceneReference.SceneName))
             {
-                Debug.LogError(" scene reference provided to unload is null.");
+                Debug.LogWarning("[DefaultSceneLoader] No scene was given to close.");
                 return;
             }
             if (sceneLoadHandles.TryGetValue(sceneReference.SceneName, out AsyncOperation heldHandle))

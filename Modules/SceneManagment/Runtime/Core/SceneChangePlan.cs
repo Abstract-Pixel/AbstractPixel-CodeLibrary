@@ -22,9 +22,15 @@ namespace AbstractPixel.SceneManagement
         /// <summary>The scenes that are open: the record the coordinator keeps, and the input of a plan.</summary>
         internal class OpenScenes
         {
-            /// <summary>The scene group these scenes belong to. Null before start-up.</summary>
+            /// <summary>The scene group these scenes belong to. Null before start-up and after a failed change.</summary>
             public SceneGroup Group;
             public SceneReference MainScene;
+
+            /// <summary>
+            /// True when a failed change closed the main scene and opened none. A null main scene then means "none is
+            /// open", not "unknown", so the next change does not close Unity's active scene.
+            /// </summary>
+            public bool MainSceneClosed;
             public HashSet<SceneReference> ManagerialScenes = new HashSet<SceneReference>();
             public HashSet<SceneReference> ContextualScenes = new HashSet<SceneReference>();
 
@@ -40,6 +46,7 @@ namespace AbstractPixel.SceneManagement
                 OpenScenes copy = new OpenScenes();
                 copy.Group = Group;
                 copy.MainScene = MainScene;
+                copy.MainSceneClosed = MainSceneClosed;
                 copy.ManagerialScenes = new HashSet<SceneReference>(ManagerialScenes);
                 copy.ContextualScenes = new HashSet<SceneReference>(ContextualScenes);
                 return copy;
@@ -73,11 +80,47 @@ namespace AbstractPixel.SceneManagement
         /// <summary>The manager scenes that are open once the change has finished.</summary>
         public HashSet<SceneReference> ManagerialOpenAfter { get; }
 
+        /// <summary>False when the record knows no main scene is open, so nothing stands in for it.</summary>
+        public bool ClosesActiveSceneWhenNoMainScene { get; }
+
         /// <summary>True when a preload already opened some of the target's scenes (a switch to a preloaded group).</summary>
         public bool UsesPreloadedScenes { get; }
 
         public SceneChangePlan(SceneGroup _targetGroup, OpenScenes _open) : this(_targetGroup, _open, Kind.Change)
         {
+        }
+
+        /// <summary>
+        /// What is really open after this plan failed part way: the scenes it opened are added, the old scenes are taken
+        /// out when they were closed, and no group counts as open.
+        /// </summary>
+        public OpenScenes OpenAfterFailure(OpenScenes _before, ICollection<SceneReference> _opened, bool _oldScenesClosed)
+        {
+            OpenScenes record = _before.Copy();
+            record.Group = null;
+            if (_oldScenesClosed)
+            {
+                record.ContextualScenes.ExceptWith(ContextualToClose);
+                record.MainScene = null;
+                record.MainSceneClosed = MainSceneToClose != null;
+            }
+            foreach (SceneReference scene in _opened)
+            {
+                if (scene.Equals(MainSceneToOpen))
+                {
+                    record.MainScene = scene;
+                    record.MainSceneClosed = false;
+                }
+                else if (ManagerialToOpen.Contains(scene))
+                {
+                    record.ManagerialScenes.Add(scene);
+                }
+                else
+                {
+                    record.ContextualScenes.Add(scene);
+                }
+            }
+            return record;
         }
 
         /// <summary>What is open once this plan has run to its end: the coordinator's new record.</summary>
@@ -146,6 +189,7 @@ namespace AbstractPixel.SceneManagement
                 MainSceneToClose = _open.MainScene;
                 GroupThatCloses = _open.Group;
             }
+            ClosesActiveSceneWhenNoMainScene = !isPreload && !_open.MainSceneClosed;
             MainSceneToOpen = _targetGroup.MainScene;
 
             HashSet<SceneReference> targetContextual = new HashSet<SceneReference>(_targetGroup.ContextualBootScenesList);

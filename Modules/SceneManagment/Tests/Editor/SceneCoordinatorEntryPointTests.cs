@@ -100,8 +100,7 @@ namespace AbstractPixel.SceneManagement.Tests
             rig.Loader.FailLoadOfScene = "Level2";
             SceneGroup levelTwo = rig.CreateLevelGroup("Level2");
 
-            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("test load failure"));
-            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Level2"));
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Scene 'Level2' failed to load: test load failure"));
             await rig.Coordinator.ChangeTo(levelTwo);
 
             Assert.AreEqual(0, groupsSeenByNewSceneListeners.Count, "a failed change must not announce a new level");
@@ -113,8 +112,7 @@ namespace AbstractPixel.SceneManagement.Tests
         {
             rig.Loader.FailLoadOfScene = "Level1";
 
-            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("test load failure"));
-            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Level1"));
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Scene 'Level1' failed to load: test load failure"));
             await rig.Coordinator.Retry();
 
             Assert.AreEqual(0, groupsSeenByNewSceneListeners.Count, "a failed Retry must not announce a new level");
@@ -219,8 +217,7 @@ namespace AbstractPixel.SceneManagement.Tests
             System.Action<SceneGroup> countPreloaded = _group => preloadedEvents++;
             SceneEventBus.OnSceneGroupPreloaded += countPreloaded;
 
-            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("test load failure"));
-            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Level2"));
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Scene 'Level2' failed to load: test load failure"));
             await rig.Coordinator.Preload(levelTwo);
             SceneEventBus.OnSceneGroupPreloaded -= countPreloaded;
 
@@ -340,8 +337,7 @@ namespace AbstractPixel.SceneManagement.Tests
             await rig.Coordinator.Preload(rig.CreateLevelGroup("Level2"));
             rig.Loader.FailLoadOfScene = "Level2";
 
-            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("test load failure"));
-            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Level2"));
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Scene 'Level2' failed to load: test load failure"));
             await rig.Coordinator.ChangeTo(rig.Coordinator.Preloaded.Group);
 
             Assert.AreEqual(0, groupsSeenByNewSceneListeners.Count);
