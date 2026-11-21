@@ -19,6 +19,9 @@ namespace AbstractPixel.SceneManagement
         // Open scenes by GUID and by name, so a close that only knows the name (the active scene) finds its loader.
         private readonly Dictionary<string, ISceneLoader> loaderOfOpenScene = new Dictionary<string, ISceneLoader>();
 
+        // Keeps one scene open while a change closes every scene (a group with no manager scene).
+        private readonly LastSceneGuard lastSceneGuard = new LastSceneGuard();
+
         public SceneLoaderSelector() : this(new DefaultSceneLoader(), new AddressablesSceneLoader(), new AddressableSceneCheck())
         {
         }
@@ -35,6 +38,10 @@ namespace AbstractPixel.SceneManagement
             ISceneLoader loader = await ChooseLoader(sceneReference);
             await loader.LoadScene(sceneReference, isAdditive, sceneActivatedByDefault, isMainScene);
             RememberLoader(sceneReference, loader);
+            if (isMainScene && sceneActivatedByDefault)
+            {
+                await lastSceneGuard.AfterOpening();
+            }
         }
 
         public async Task UnloadScene(SceneReference sceneReference)
@@ -45,6 +52,10 @@ namespace AbstractPixel.SceneManagement
                 loader = buildSettingsLoader;
             }
 
+            if (sceneReference != null)
+            {
+                lastSceneGuard.BeforeClosing(sceneReference.SceneName);
+            }
             await loader.UnloadScene(sceneReference);
             ForgetLoader(sceneReference);
         }

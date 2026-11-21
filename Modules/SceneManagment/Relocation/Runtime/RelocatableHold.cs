@@ -151,7 +151,26 @@ namespace AbstractPixel.SceneManagement
                 held.Body.rotation = held.Body.transform.rotation;
             }
             MoveJoinedBodies(_target);
+            ClearTrailsAcrossTheJump();
             return WarpAgents(out _problem);
+        }
+
+        // A teleport would leave world-space particles behind and draw trails as a streak from the old place to the
+        // new one, so both start fresh at the spawn point position.
+        private void ClearTrailsAcrossTheJump()
+        {
+            foreach (TrailRenderer trail in owner.GetComponentsInChildren<TrailRenderer>(false))
+            {
+                trail.Clear();
+            }
+            foreach (ParticleSystem particles in owner.GetComponentsInChildren<ParticleSystem>(false))
+            {
+                bool leavesParticlesBehind = particles.main.simulationSpace == ParticleSystemSimulationSpace.World;
+                if (leavesParticlesBehind)
+                {
+                    particles.Clear(false);
+                }
+            }
         }
 
         /// <summary>True when the relocatable is at the target and every held body agrees with its transform.</summary>
