@@ -160,6 +160,18 @@ namespace AbstractPixel.SceneManagement.Relocation.Tests
             Assert.AreEqual(2, second.GetInstance(0), "the next one continues");
         }
 
+        [TestCase("Crate (12)", "Crate")]
+        [TestCase("Crate 012", "Crate")]
+        [TestCase("Lava drone_3", "Lava drone")]
+        [TestCase("Spawn point (Crate)", "Crate")]
+        [TestCase("Player", "Player")]
+        public void NewLabelIsNamedAfterTheObject(string _objectName, string _labelName)
+        {
+            Relocatable relocatable = world.Crate(_objectName, null);
+
+            Assert.AreEqual(_labelName, RelocationLabelField.NameFromObject(relocatable));
+        }
+
         [Test]
         public void TheGroupCheckListsRelocationProblemsAsWarningsForTheOpenGroup()
         {

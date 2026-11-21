@@ -35,29 +35,46 @@ namespace AbstractPixel.SceneManagement.Editor
             ShortcutManager.RegisterContext(context);
         }
 
-        /// <summary>One line of the shortcut list: the keys, as bound now, and what they do.</summary>
+        /// <summary>One line of the control list: the keys, as bound now, what they do, and the mode that lights it up.</summary>
         public struct Row
         {
             public string Keys;
             public string Action;
+            public SpawnPointToolMode LitIn;
         }
 
         /// <summary>Every gesture and hotkey, in the order the inspector and the Overlay list them.</summary>
         public static List<Row> Rows()
         {
             List<Row> rows = new List<Row>();
-            rows.Add(new Row { Keys = "Shift+click", Action = "Add" });
-            rows.Add(new Row { Keys = "Ctrl+Shift+click", Action = "Add on allowed ground only" });
-            rows.Add(new Row { Keys = "Click", Action = "Select" });
-            rows.Add(new Row { Keys = "Shift+click a preview", Action = "Add to selection" });
-            rows.Add(new Row { Keys = BindingOf(DuplicateId), Action = "Duplicate" });
-            rows.Add(new Row { Keys = BindingOf(RemoveId) + " or " + BindingOf(RemoveWithDeleteId), Action = "Remove" });
-            rows.Add(new Row { Keys = BindingOf(FrameId), Action = "Frame" });
-            rows.Add(new Row { Keys = ClearKeys(), Action = "Clear selection" });
+            rows.Add(new Row { Keys = "Shift + click ground", Action = "Add a position where you click", LitIn = SpawnPointToolMode.Adding });
+            rows.Add(new Row { Keys = "Ctrl + Shift + click", Action = "Add, only on allowed ground", LitIn = SpawnPointToolMode.AddingStrict });
+            rows.Add(new Row { Keys = "Click a preview", Action = "Select it; move or turn it with W / E", LitIn = SpawnPointToolMode.Ready });
+            rows.Add(new Row { Keys = "Shift + click a preview", Action = "Add it to the selection, or take it out", LitIn = SpawnPointToolMode.AddingToSelection });
+            rows.Add(new Row { Keys = BindingOf(DuplicateId), Action = "Duplicate the selected positions", LitIn = SpawnPointToolMode.Editing });
+            rows.Add(new Row { Keys = BindingOf(RemoveId) + " / " + BindingOf(RemoveWithDeleteId), Action = "Remove the selected positions", LitIn = SpawnPointToolMode.Editing });
+            rows.Add(new Row { Keys = BindingOf(FrameId), Action = "Frame the selected positions", LitIn = SpawnPointToolMode.Editing });
+            rows.Add(new Row { Keys = ClearKeys(), Action = "Clear the position selection", LitIn = SpawnPointToolMode.Editing });
             return rows;
         }
 
-        public const string CtrlLine = "Ctrl is always stricter: it snaps while dragging and adds only on allowed ground.";
+        /// <summary>The line under the list that names the current mode.</summary>
+        public static string ModeLine(SpawnPointToolMode _mode)
+        {
+            switch (_mode)
+            {
+                case SpawnPointToolMode.Adding:
+                    return "Adding: click ground to add a position";
+                case SpawnPointToolMode.AddingStrict:
+                    return "Adding on allowed ground only: red ground adds nothing";
+                case SpawnPointToolMode.AddingToSelection:
+                    return "Selecting more: click a preview to add it";
+                case SpawnPointToolMode.Editing:
+                    return "Editing the selected positions";
+                default:
+                    return "Ready: hold Shift to add, click a preview to select";
+            }
+        }
 
         private static string ClearKeys()
         {

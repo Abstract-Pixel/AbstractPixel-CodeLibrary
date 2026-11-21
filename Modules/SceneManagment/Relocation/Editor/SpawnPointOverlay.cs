@@ -24,8 +24,8 @@ namespace AbstractPixel.SceneManagement.Editor
             panel.style.paddingLeft = 6;
             panel.style.paddingRight = 6;
             panel.style.paddingBottom = 4;
-            panel.style.width = 290;
-            panel.Add(RelocationShortcutList.Create(118f));
+            panel.style.width = 360;
+            panel.Add(new RelocationShortcutList(140f));
             return panel;
         }
     }
