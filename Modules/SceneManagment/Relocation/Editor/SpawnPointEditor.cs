@@ -32,10 +32,10 @@ namespace AbstractPixel.SceneManagement.Editor
             card.Add(selectedPosition);
             root.Add(card);
 
-            Label keysTitle = SceneSystemUI.Hint("Keys in the Scene view");
-            keysTitle.style.marginTop = 8;
-            root.Add(keysTitle);
-            root.Add(RelocationShortcutList.Create(150f));
+            VisualElement controls = SceneSystemUI.Card();
+            controls.style.marginTop = 8;
+            controls.Add(new RelocationShortcutList(150f));
+            root.Add(controls);
 
             root.Bind(serializedObject);
             root.TrackSerializedObjectValue(serializedObject, _changed => RelocationEditorModel.MarkDirty());

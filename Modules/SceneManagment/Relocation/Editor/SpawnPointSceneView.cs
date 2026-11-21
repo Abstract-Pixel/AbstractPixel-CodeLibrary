@@ -75,6 +75,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 }
             }
 
+            PublishMode(selected, shiftHeld, current.control || current.command, hovered);
             HandleClick(current, model, hovered, selected, ghost);
             ClearSelectionOnEscape(current);
             DrawPositionHandles(selected);
@@ -218,6 +219,29 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             int number = SpawnPointEditing.Add(_selected, _ghost.Pose);
             SpawnPointPositionSelection.Set(_selected, new List<int> { number });
+        }
+
+        // The control list in the inspector and the Overlay lights up the row for what a click would do now.
+        private static void PublishMode(SpawnPoint _selected, bool _shiftHeld, bool _ctrlHeld, int _hovered)
+        {
+            SpawnPointToolMode mode = SpawnPointToolMode.Ready;
+            if (_selected != null && SpawnPointPositionSelection.SpawnPoint == _selected && SpawnPointPositionSelection.HasAny)
+            {
+                mode = SpawnPointToolMode.Editing;
+            }
+            if (_selected != null && _shiftHeld)
+            {
+                mode = SpawnPointToolMode.Adding;
+                if (_ctrlHeld)
+                {
+                    mode = SpawnPointToolMode.AddingStrict;
+                }
+                if (_hovered >= 0)
+                {
+                    mode = SpawnPointToolMode.AddingToSelection;
+                }
+            }
+            SpawnPointToolState.Mode = mode;
         }
 
         // Esc clears the position selection. Unity's Shortcut Manager cannot bind Esc, so it is read here.
