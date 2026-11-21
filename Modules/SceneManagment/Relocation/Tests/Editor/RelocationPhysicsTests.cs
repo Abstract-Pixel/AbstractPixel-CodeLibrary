@@ -142,6 +142,28 @@ namespace AbstractPixel.SceneManagement.Relocation.Tests
         }
 
         [Test]
+        public async Task TrailsAndWorldSpaceParticlesStartFreshAtTheSpawnPoint()
+        {
+            Relocatable car = world.AwakeCrate("Car", null);
+            GameObject exhaust = new GameObject("Exhaust");
+            exhaust.transform.SetParent(car.transform, false);
+            ParticleSystem smoke = exhaust.AddComponent<ParticleSystem>();
+            ParticleSystem.MainModule main = smoke.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            smoke.Emit(20);
+            GameObject tyre = new GameObject("Tyre mark");
+            tyre.transform.SetParent(car.transform, false);
+            TrailRenderer trail = tyre.AddComponent<TrailRenderer>();
+            trail.AddPosition(new Vector3(-5f, 0f, 0f));
+            trail.AddPosition(new Vector3(-4f, 0f, 0f));
+
+            await world.RunSceneChange();
+
+            Assert.AreEqual(0, smoke.particleCount, "no smoke left at the old place");
+            Assert.AreEqual(0, trail.positionCount, "no streak across the jump");
+        }
+
+        [Test]
         public async Task ReleaseRestoresEachComponentsOwnState()
         {
             Relocatable car = world.Crate("Car", null);
