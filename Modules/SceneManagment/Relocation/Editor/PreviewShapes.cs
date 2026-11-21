@@ -59,8 +59,6 @@ namespace AbstractPixel.SceneManagement.Editor
             box.IsFallbackBox = true;
             Mesh cube = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
             box.Add(cube, Matrix4x4.TRS(new Vector3(0f, 0.5f, 0f), Quaternion.identity, Vector3.one));
-            // The arrow: a thin bar sticking out of the front, so the facing reads at a glance.
-            box.Add(cube, Matrix4x4.TRS(new Vector3(0f, 0.5f, 0.75f), Quaternion.identity, new Vector3(0.15f, 0.15f, 0.5f)));
             return box;
         }
 
@@ -87,8 +85,35 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 shape.Add(skinned.sharedMesh, rootInverse * skinned.transform.localToWorldMatrix);
             }
+            if (shape.Meshes.Count == 0)
+            {
+                AddColliderShapes(_root, rootInverse, shape);
+            }
             cache[key] = shape;
             return shape;
+        }
+
+        // An object with no meshes, such as a trigger zone, is drawn from its own colliders: boxes and spheres as they are.
+        private static void AddColliderShapes(GameObject _root, Matrix4x4 _rootInverse, PreviewShape _shape)
+        {
+            Mesh cube = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
+            Mesh sphere = Resources.GetBuiltinResource<Mesh>("New-Sphere.fbx");
+            foreach (Collider collider in _root.GetComponentsInChildren<Collider>(false))
+            {
+                Matrix4x4 local = _rootInverse * collider.transform.localToWorldMatrix;
+                BoxCollider boxCollider = collider as BoxCollider;
+                if (boxCollider != null)
+                {
+                    _shape.Add(cube, local * Matrix4x4.TRS(boxCollider.center, Quaternion.identity, boxCollider.size));
+                    continue;
+                }
+                SphereCollider sphereCollider = collider as SphereCollider;
+                if (sphereCollider != null && sphere != null)
+                {
+                    float diameter = sphereCollider.radius * 2f;
+                    _shape.Add(sphere, local * Matrix4x4.TRS(sphereCollider.center, Quaternion.identity, Vector3.one * diameter));
+                }
+            }
         }
     }
 }

@@ -104,7 +104,7 @@ namespace AbstractPixel.SceneManagement.Editor
             int highest = 0;
             foreach (Position position in Positions)
             {
-                if (position.IsInMainScene && position.Address.Label == _label)
+                if (position.IsInMainScene && RelocationLabels.Same(position.Address.Label, _label))
                 {
                     highest = Mathf.Max(highest, position.Address.Instance);
                 }
@@ -368,11 +368,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static string LabelId(RelocationLabel _label)
         {
-            if (_label == null)
-            {
-                return "none";
-            }
-            return _label.GetInstanceID().ToString();
+            return RelocationLabels.KeyOf(_label);
         }
 
         private static string LabelText(RelocationLabel _label)

@@ -121,7 +121,7 @@ namespace AbstractPixel.SceneManagement.Editor
             setsCard = AddSection(page, SceneSetsSection, "Scenes that come with every scene group using the set. Click a scene set to select it; the + and − under the list add and delete scene sets.");
             loadingScenesCard = AddSection(page, SceneSystemLoadingScenesSection.Title, SceneSystemLoadingScenesSection.Tooltip);
             newScenesCard = AddSection(page, NewScenesSection, "Where scenes go so they load in a build.");
-            debuggerCard = SceneSystemUI.Section(page, DebuggerSection, SceneGroupsDebugger.Tooltip, out VisualElement debuggerHeader);
+            debuggerCard = SceneSystemUI.Section(page, NumberedTitle(DebuggerSection), SceneGroupsDebugger.Tooltip, out VisualElement debuggerHeader);
             sections[DebuggerSection] = debuggerCard.parent;
             debuggerSummary = new VisualElement();
             debuggerHeader.Add(debuggerSummary);
@@ -143,9 +143,17 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static VisualElement AddSection(VisualElement _page, string _title, string _tooltip)
         {
-            VisualElement card = SceneSystemUI.Section(_page, _title, _tooltip);
+            VisualElement card = SceneSystemUI.Section(_page, NumberedTitle(_title), _tooltip);
             sections[_title] = card.parent;
             return card;
+        }
+
+        // Sections are numbered in page order ("1. Setup"), so a page this long reads like a checklist. The plain title
+        // stays the section's key for OpenAt.
+        private static string NumberedTitle(string _title)
+        {
+            int number = sections.Count + 1;
+            return number + ". " + _title;
         }
 
         private static void Deactivate()

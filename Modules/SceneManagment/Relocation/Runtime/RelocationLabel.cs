@@ -18,6 +18,15 @@ namespace AbstractPixel.SceneManagement
         [Range(0f, 90f)] [SerializeField] private float steepestGround = 35f;
         [Tooltip("Align to surface: positions added with Shift+click tilt to the ground's slope. Off keeps them upright.")]
         [SerializeField] private bool alignToSurface = false;
+        [Tooltip("The label's stable ID: its asset GUID, stamped in the Editor. Labels match by it, so a copy of this asset inside an Addressables bundle still counts as the same label.")]
+        [SerializeField, HideInInspector] private string id = string.Empty;
+
+        /// <summary>The stable ID labels match by; empty only for a label made in code that was never saved.</summary>
+        public string Id
+        {
+            get { return id; }
+            internal set { id = value; }
+        }
 
         public GameObject PreviewPrefab
         {
@@ -42,5 +51,23 @@ namespace AbstractPixel.SceneManagement
             get { return alignToSurface; }
             set { alignToSurface = value; }
         }
+
+#if UNITY_EDITOR
+        // A new, moved or duplicated label takes its own asset GUID as its ID.
+        private void OnValidate()
+        {
+            string path = UnityEditor.AssetDatabase.GetAssetPath(this);
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+            string guid = UnityEditor.AssetDatabase.AssetPathToGUID(path);
+            if (id != guid)
+            {
+                id = guid;
+                UnityEditor.EditorUtility.SetDirty(this);
+            }
+        }
+#endif
     }
 }

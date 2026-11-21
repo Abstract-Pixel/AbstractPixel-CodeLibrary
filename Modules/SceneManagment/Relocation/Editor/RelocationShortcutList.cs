@@ -13,7 +13,7 @@ namespace AbstractPixel.SceneManagement.Editor
     internal sealed class RelocationShortcutList : VisualElement
     {
         private readonly List<VisualElement> rowElements = new List<VisualElement>();
-        private readonly List<SpawnPointToolMode> rowModes = new List<SpawnPointToolMode>();
+        private readonly List<SpawnPointShortcuts.Row> rows = new List<SpawnPointShortcuts.Row>();
         private readonly Label modeLine;
         private SpawnPointToolMode shownMode = (SpawnPointToolMode)(-1);
 
@@ -41,7 +41,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 VisualElement line = Line(number, row, _keysWidth);
                 rowElements.Add(line);
-                rowModes.Add(row.LitIn);
+                rows.Add(row);
                 Add(line);
                 number++;
             }
@@ -76,7 +76,7 @@ namespace AbstractPixel.SceneManagement.Editor
             shownMode = mode;
             for (int index = 0; index < rowElements.Count; index++)
             {
-                bool lit = rowModes[index] == mode;
+                bool lit = !rows[index].NeverLit && rows[index].LitIn == mode;
                 rowElements[index].style.backgroundColor = lit ? LitBackground : new Color(0f, 0f, 0f, 0f);
                 rowElements[index].style.borderLeftColor = lit ? SceneSystemUI.DefaultAccent : new Color(0f, 0f, 0f, 0f);
                 foreach (Label label in rowElements[index].Query<Label>().ToList())

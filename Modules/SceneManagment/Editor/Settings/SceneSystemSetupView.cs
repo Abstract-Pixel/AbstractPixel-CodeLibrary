@@ -11,7 +11,7 @@ namespace AbstractPixel.SceneManagement.Editor
     /// <summary>
     /// The setup wizard, shared by the setup window and the page's Setup section. The Abstract Pixel logo sits on top;
     /// under it, one question per page, few words:
-    /// Welcome, Settings folder, New scenes, Launch scene (optional), Scene groups (only when the project has some), Ready, Done. Details are in
+    /// Welcome, Settings folder, New scenes, Launch scene (optional), Loading scene (optional), Scene groups (only when the project has some), Ready, Done. Details are in
     /// tooltips. Next stays disabled while the page's answer can't work.
     /// </summary>
     public class SceneSystemSetupView : VisualElement
@@ -22,6 +22,7 @@ namespace AbstractPixel.SceneManagement.Editor
             Folder,
             NewScenes,
             LaunchScene,
+            LoadingScene,
             SceneGroups,
             Ready,
             Done
@@ -50,6 +51,7 @@ namespace AbstractPixel.SceneManagement.Editor
             pages.Add(Page.Folder);
             pages.Add(Page.NewScenes);
             pages.Add(Page.LaunchScene);
+            pages.Add(Page.LoadingScene);
             if (plan.HasWork)
             {
                 pages.Add(Page.SceneGroups);
@@ -139,6 +141,9 @@ namespace AbstractPixel.SceneManagement.Editor
                 case Page.LaunchScene:
                     ShowLaunchScene();
                     break;
+                case Page.LoadingScene:
+                    ShowLoadingScene();
+                    break;
                 case Page.SceneGroups:
                     ShowSceneGroups();
                     break;
@@ -177,6 +182,13 @@ namespace AbstractPixel.SceneManagement.Editor
                 nextButton.text = choices.LaunchScene == LaunchSceneChoice.None ? "Skip" : "Next";
                 nextButton.tooltip = launchProblem;
                 nextButton.SetEnabled(string.IsNullOrEmpty(launchProblem));
+            }
+            if (Current == Page.LoadingScene)
+            {
+                string loadingProblem = SceneSystemSetup.LoadingSceneProblem(choices);
+                nextButton.text = choices.LoadingScene == LoadingSceneChoice.None ? "Skip" : "Next";
+                nextButton.tooltip = loadingProblem;
+                nextButton.SetEnabled(string.IsNullOrEmpty(loadingProblem));
             }
             if (Current == Page.Ready)
             {
@@ -322,6 +334,42 @@ namespace AbstractPixel.SceneManagement.Editor
             Show();
         }
 
+        // Optional: the scene shown while one location closes and the next opens. Scene groups still choose when to show it.
+        private void ShowLoadingScene()
+        {
+            content.Add(SceneSystemUI.PageHeader("Loading Scene", "Optional: a scene shown while the next location loads."));
+            bool readyMadeExists = SceneSystemSetup.LibraryLoadingSceneExists();
+            string readyMadeLine = readyMadeExists ? "A copy with a progress bar you can restyle." : "Not in this project.";
+            content.Add(SceneSystemUI.ChoiceCard("Ready-made loading scene", readyMadeLine, choices.LoadingScene == LoadingSceneChoice.ReadyMade, readyMadeExists,
+                "Setup copies the library's loading scene next to the settings and makes it the default loading scene. The library's original stays untouched.", () => PickLoadingScene(LoadingSceneChoice.ReadyMade)));
+            content.Add(SceneSystemUI.ChoiceCard("Use a scene I have", "Pick your loading scene.", choices.LoadingScene == LoadingSceneChoice.Existing, true,
+                "It becomes the default loading scene and goes where new scenes go, so it loads in a build.", () => PickLoadingScene(LoadingSceneChoice.Existing)));
+            content.Add(SceneSystemUI.ChoiceCard("No loading scene", "Scenes change behind the screen effect only.", choices.LoadingScene == LoadingSceneChoice.None, true,
+                "You can add one later in Project Settings > Abstract Pixel > Scene System > Loading scenes.", () => PickLoadingScene(LoadingSceneChoice.None)));
+
+            if (choices.LoadingScene == LoadingSceneChoice.Existing)
+            {
+                UnityEditor.UIElements.ObjectField scenePicker = new UnityEditor.UIElements.ObjectField("Scene");
+                scenePicker.objectType = typeof(SceneAsset);
+                scenePicker.allowSceneObjects = false;
+                scenePicker.SetValueWithoutNotify(choices.ExistingLoadingScene);
+                scenePicker.tooltip = "The scene shown while the next location loads.";
+                scenePicker.style.marginTop = 6;
+                scenePicker.RegisterValueChangedCallback(_change =>
+                {
+                    choices.ExistingLoadingScene = _change.newValue as SceneAsset;
+                    RefreshFooter();
+                });
+                content.Add(scenePicker);
+            }
+        }
+
+        private void PickLoadingScene(LoadingSceneChoice _choice)
+        {
+            choices.LoadingScene = _choice;
+            Show();
+        }
+
         private void ShowSceneGroups()
         {
             content.Add(SceneSystemUI.PageHeader("Scene Groups", "Found <b>" + plan.GroupsToMigrateCount + "</b> scene groups in this project."));
@@ -358,6 +406,11 @@ namespace AbstractPixel.SceneManagement.Editor
             if (!string.IsNullOrEmpty(launchLine))
             {
                 list.Add(Check(launchLine));
+            }
+            string loadingLine = SceneSystemSetup.LoadingSceneLine(choices);
+            if (!string.IsNullOrEmpty(loadingLine))
+            {
+                list.Add(Check(loadingLine));
             }
             list.tooltip = string.Join("\n", SceneSystemSetup.WillCreate(choices, plan, SceneSystemSetup.LibraryFadeExists(), AddressableScenes.IsInstalled));
             content.Add(list);

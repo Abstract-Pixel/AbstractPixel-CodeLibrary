@@ -2,6 +2,7 @@
     "name": "AbstractPixel.SceneManagement.Relocation",
     "rootNamespace": "AbstractPixel.SceneManagement",
     "references": [
+        "AbstractPixel.Core",
         "AbstractPixel.SceneManagment"
     ],
     "includePlatforms": [],

@@ -68,7 +68,7 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             SpawnPoint spawnPoint = SpawnPointPositionSelection.SpawnPoint;
             SceneView sceneView = SceneView.lastActiveSceneView;
-            if (spawnPoint == null || sceneView == null)
+            if (spawnPoint == null || sceneView == null || !SpawnPointPositionSelection.HasAny)
             {
                 return;
             }
@@ -84,7 +84,7 @@ namespace AbstractPixel.SceneManagement.Editor
         public static void MoveSelected(Vector3 _offset, Quaternion _turn)
         {
             SpawnPoint spawnPoint = SpawnPointPositionSelection.SpawnPoint;
-            if (spawnPoint == null)
+            if (spawnPoint == null || !SpawnPointPositionSelection.HasAny)
             {
                 return;
             }

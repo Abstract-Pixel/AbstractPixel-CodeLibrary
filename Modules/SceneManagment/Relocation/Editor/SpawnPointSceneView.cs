@@ -25,6 +25,8 @@ namespace AbstractPixel.SceneManagement.Editor
         static SpawnPointSceneView()
         {
             SceneView.duringSceneGui += OnSceneGui;
+            // A modifier pressed or let go outside a Scene view event would leave the lit row stale; a repaint re-reads it.
+            EditorApplication.modifierKeysChanged += SceneView.RepaintAll;
         }
 
         private static void OnSceneGui(SceneView _view)
@@ -140,6 +142,7 @@ namespace AbstractPixel.SceneManagement.Editor
                     Color outline = colour;
                     outline.a = 1f;
                     SpawnPointPreviewDrawing.DrawOutline(position.Shape, position.Pose, outline);
+                    SpawnPointPreviewDrawing.DrawFacing(position.Shape, position.Pose, outline);
                 }
 
                 bool belongsToSelection = selected != null && position.SpawnPoint == selected;
@@ -372,7 +375,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 foreach (Relocatable relocatable in _model.Relocatables)
                 {
-                    if (relocatable.Label == _label)
+                    if (RelocationLabels.Same(relocatable.Label, _label))
                     {
                         return PreviewShapes.For(relocatable, _label);
                     }

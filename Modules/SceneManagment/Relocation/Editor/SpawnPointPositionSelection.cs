@@ -17,16 +17,38 @@ namespace AbstractPixel.SceneManagement.Editor
         static SpawnPointPositionSelection()
         {
             Selection.selectionChanged += ClearIfSpawnPointUnselected;
+            Undo.undoRedoPerformed += DropPositionsThatAreGone;
         }
 
+        /// <summary>The selected position numbers that still exist; numbers an undo took away are dropped first.</summary>
         public static IReadOnlyList<int> Positions
         {
-            get { return positions; }
+            get
+            {
+                DropPositionsThatAreGone();
+                return positions;
+            }
         }
 
         public static bool HasAny
         {
-            get { return SpawnPoint != null && positions.Count > 0; }
+            get
+            {
+                DropPositionsThatAreGone();
+                return SpawnPoint != null && positions.Count > 0;
+            }
+        }
+
+        // An undo, a redo or an edit elsewhere can remove positions; a selected number past the end would throw.
+        internal static void DropPositionsThatAreGone()
+        {
+            if (SpawnPoint == null)
+            {
+                positions.Clear();
+                return;
+            }
+            int count = SpawnPoint.PositionCount;
+            positions.RemoveAll(_position => _position < 0 || _position >= count);
         }
 
         public static bool Contains(SpawnPoint _spawnPoint, int _position)

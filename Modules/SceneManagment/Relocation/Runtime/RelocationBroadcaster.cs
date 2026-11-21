@@ -30,6 +30,9 @@ namespace AbstractPixel.SceneManagement
         /// <summary>Names the open scene group in errors. Tests replace it.</summary>
         internal Func<string> DescribeSceneGroup = DescribeActiveSceneGroup;
 
+        /// <summary>The open scene group's main scene, whose spawn points count. Tests replace it.</summary>
+        internal Func<Scene> FindMainScene = MainSceneOfOpenGroup;
+
         private readonly List<Relocatable> awake = new List<Relocatable>();
         private readonly List<Relocatable> readyToRelease = new List<Relocatable>();
         private readonly HashSet<SpawnPointPositionAddress> takenPositions = new HashSet<SpawnPointPositionAddress>();
@@ -260,6 +263,27 @@ namespace AbstractPixel.SceneManagement
                 }
             }
             return held;
+        }
+
+        // The main scene the scene system has on record, not Unity's active scene: a launch scene still on screen (or game
+        // code) may keep another scene active, and its spawn points must never count (found in the 4D Deck stress run).
+        private static Scene MainSceneOfOpenGroup()
+        {
+            SceneGroup group = SceneActions.ActiveSceneGroup;
+            if (group != null && group.MainScene != null)
+            {
+                Scene byPath = SceneManager.GetSceneByPath(group.MainScene.ScenePath ?? string.Empty);
+                if (byPath.IsValid() && byPath.isLoaded)
+                {
+                    return byPath;
+                }
+                Scene byName = SceneManager.GetSceneByName(group.MainScene.SceneName ?? string.Empty);
+                if (byName.IsValid() && byName.isLoaded)
+                {
+                    return byName;
+                }
+            }
+            return SceneManager.GetActiveScene();
         }
 
         private static string DescribeActiveSceneGroup()
