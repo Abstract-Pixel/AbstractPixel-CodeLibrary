@@ -142,6 +142,38 @@ namespace AbstractPixel.SceneManagement.Relocation.Tests
         }
 
         [Test]
+        public async Task AKinematicBodyNestedUnderAMovingBodyStillFollowsItAfterRelease()
+        {
+            // Rally's car: a root with no body, the dynamic car body under it, and the camera target (a kinematic body)
+            // under the car body. The camera target must keep following the car once it drives off.
+            GameObject root = new GameObject("Car root");
+            Relocatable relocatable = root.AddComponent<Relocatable>();
+            relocatable.WaitForGroundBelow = false;
+            GameObject carObject = new GameObject("Car body");
+            carObject.transform.SetParent(root.transform, false);
+            carObject.AddComponent<BoxCollider>();
+            Rigidbody carBody = carObject.AddComponent<Rigidbody>();
+            carBody.useGravity = false;
+            GameObject cameraTarget = new GameObject("Camera target");
+            cameraTarget.transform.SetParent(carObject.transform, false);
+            cameraTarget.transform.localPosition = new Vector3(0f, 0.34f, 1.1f);
+            cameraTarget.AddComponent<Rigidbody>().isKinematic = true;
+            world.Wake(relocatable);
+            await world.RunSceneChange();
+
+            Physics.simulationMode = SimulationMode.Script;
+            carBody.linearVelocity = new Vector3(0f, 0f, 20f);
+            for (int step = 0; step < 25; step++)
+            {
+                Physics.Simulate(0.02f);
+            }
+
+            Vector3 local = carObject.transform.InverseTransformPoint(cameraTarget.transform.position);
+            Assert.Greater(carBody.position.z - SpawnPosition.z, 5f, "the car drove off");
+            Assert.Less(Vector3.Distance(new Vector3(0f, 0.34f, 1.1f), local), 0.01f, "the camera target stayed on the car, local " + local.ToString("F2"));
+        }
+
+        [Test]
         public async Task TrailsAndWorldSpaceParticlesStartFreshAtTheSpawnPoint()
         {
             Relocatable car = world.AwakeCrate("Car", null);

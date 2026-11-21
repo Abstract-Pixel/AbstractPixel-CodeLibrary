@@ -143,7 +143,7 @@ namespace AbstractPixel.SceneManagement
             root.SetPositionAndRotation(_target.position, _target.rotation);
             foreach (HeldBody held in bodies)
             {
-                if (held.Body == null)
+                if (held.Body == null || HasHeldBodyAbove(held.Body))
                 {
                     continue;
                 }
@@ -240,6 +240,24 @@ namespace AbstractPixel.SceneManagement
                 {
                     return true;
                 }
+            }
+            return false;
+        }
+
+        // A body under another held body is moved by its parent's transform and synced by Physics.SyncTransforms. Writing its
+        // pose by hand would pin it: Unity then writes that pose back over the transform after every physics step, so a
+        // kinematic camera target under a moving car body would stay behind at the spawn point (found with Rally's car).
+        private bool HasHeldBodyAbove(Rigidbody _body)
+        {
+            Transform parent = _body.transform.parent;
+            while (parent != null && parent != owner.transform.parent)
+            {
+                Rigidbody parentBody = parent.GetComponent<Rigidbody>();
+                if (parentBody != null && IsHeld(parentBody))
+                {
+                    return true;
+                }
+                parent = parent.parent;
             }
             return false;
         }
