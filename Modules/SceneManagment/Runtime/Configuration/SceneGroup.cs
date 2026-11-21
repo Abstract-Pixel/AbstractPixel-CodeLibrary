@@ -18,6 +18,11 @@ namespace AbstractPixel.SceneManagement
         public SceneReference MainScene;
         public bool ForceReloadContextualScenes = false;
 
+        [Tooltip("Show the loading scene: Never; When arriving from another scene group (a Retry goes straight back in without it); or Every time, Retry included.")]
+        [SerializeField] private ShowLoadingScene showLoadingScene = ShowLoadingScene.Never;
+        [Tooltip("The loading scene this group shows. Empty uses the default loading scene from the scene system settings.")]
+        [SerializeField] private SceneReference loadingScene = new SceneReference(string.Empty);
+
         // The scene set that fills the three parts below, and which of them are overrides (ADR 0008). The loader does
         // not read these: it reads the lists above, which the Editor keeps in step with the set.
         [SerializeField] private SceneSet sceneSet = null;
@@ -29,6 +34,20 @@ namespace AbstractPixel.SceneManagement
         {
             get { return sceneSet; }
             set { sceneSet = value; }
+        }
+
+        /// <summary>When this group shows its loading scene.</summary>
+        public ShowLoadingScene ShowLoadingScene
+        {
+            get { return showLoadingScene; }
+            set { showLoadingScene = value; }
+        }
+
+        /// <summary>The loading scene this group picked. Empty means the settings' default loading scene.</summary>
+        public SceneReference LoadingScene
+        {
+            get { return loadingScene; }
+            set { loadingScene = value; }
         }
 
         /// <summary>True when this part keeps the group's own value instead of following its scene set.</summary>

@@ -31,6 +31,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private static VisualElement setupCard;
         private static VisualElement startUpCard;
         private static VisualElement setsCard;
+        private static VisualElement loadingScenesCard;
         private static VisualElement newScenesCard;
         private static VisualElement debuggerCard;
         private static VisualElement debuggerSummary;
@@ -57,7 +58,7 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             SettingsProvider provider = new SettingsProvider(PagePath, SettingsScope.Project);
             provider.label = PageTitle;
-            provider.keywords = new HashSet<string> { "scene", "scene system", "scene set", "scene group", "manager scene", "shared scene", "Addressables", "Build Settings", "Preloaded Assets", "start-up", "start scene group", "launch scene", "migration", "debugger", "check" };
+            provider.keywords = new HashSet<string> { "scene", "scene system", "scene set", "scene group", "manager scene", "shared scene", "Addressables", "Build Settings", "Preloaded Assets", "start-up", "start scene group", "launch scene", "loading scene", "fallback scene group", "migration", "debugger", "check" };
             provider.activateHandler = (_search, _root) => Activate(_root);
             provider.deactivateHandler = Deactivate;
             return provider;
@@ -116,6 +117,7 @@ namespace AbstractPixel.SceneManagement.Editor
             setupCard = AddSection(page, SetupSection, "Where this page's settings are saved.");
             startUpCard = AddSection(page, StartUpSection, SceneSystemStartUpSection.Tooltip);
             setsCard = AddSection(page, SceneSetsSection, "Scenes that come with every scene group using the set. Click a scene set to select it; the + and − under the list add and delete scene sets.");
+            loadingScenesCard = AddSection(page, SceneSystemLoadingScenesSection.Title, SceneSystemLoadingScenesSection.Tooltip);
             newScenesCard = AddSection(page, NewScenesSection, "Where scenes go so they load in a build.");
             debuggerCard = SceneSystemUI.Section(page, DebuggerSection, SceneGroupsDebugger.Tooltip, out VisualElement debuggerHeader);
             sections[DebuggerSection] = debuggerCard.parent;
@@ -184,6 +186,7 @@ namespace AbstractPixel.SceneManagement.Editor
             FillSetup(settings);
             SceneSystemStartUpSection.Fill(startUpCard, settings);
             FillSceneSets(settings);
+            SceneSystemLoadingScenesSection.Fill(loadingScenesCard, settings);
             FillNewScenes(settings);
             SceneGroupsDebugger.Fill(debuggerCard, debuggerSummary, settings, RequestRefresh);
         }

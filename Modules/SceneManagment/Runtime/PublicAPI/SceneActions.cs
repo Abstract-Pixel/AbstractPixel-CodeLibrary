@@ -24,6 +24,38 @@ namespace AbstractPixel.SceneManagement
             }
         }
 
+        /// <summary>
+        /// How far the current scene change has got, from 0 to 1: every scene it opens has an equal share, the value
+        /// never goes back, and it is 1 only once every scene is open. Not smoothed. Safe to read every frame.
+        /// </summary>
+        public static float LoadingProgress
+        {
+            get
+            {
+                SceneCoordinator coordinator = SceneCoordinator.TryGetInstance();
+                if (coordinator == null || coordinator.Progress == null)
+                {
+                    return 0f;
+                }
+                return coordinator.Progress.Value;
+            }
+        }
+
+        /// <summary>
+        /// Registers the loading scene's loading progress view, so the scene system tells it when Show screen starts and
+        /// waits for its "full" animation before Hide screen. Call it from the view's OnEnable.
+        /// </summary>
+        public static void RegisterLoadingProgressView(ILoadingProgressView _view)
+        {
+            LoadingSceneRoute.Register(_view);
+        }
+
+        /// <summary>Removes the view if it is the registered one. Call it from the view's OnDisable.</summary>
+        public static void UnregisterLoadingProgressView(ILoadingProgressView _view)
+        {
+            LoadingSceneRoute.Unregister(_view);
+        }
+
         /// <summary>True once start-up has opened every scene of the first scene group (after SceneEventBus.OnGameStarted).</summary>
         public static bool HasGameStarted
         {

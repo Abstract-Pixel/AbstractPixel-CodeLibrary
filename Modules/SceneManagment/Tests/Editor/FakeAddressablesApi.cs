@@ -103,5 +103,11 @@ namespace AbstractPixel.SceneManagement.Tests
             TaskCompletionSource<T> never = new TaskCompletionSource<T>();
             return never.Task;
         }
+
+        public float LoadProgress(SceneReference _scene)
+        {
+            // The fake finishes every load at once, so no load is ever under way.
+            return 0f;
+        }
     }
 }

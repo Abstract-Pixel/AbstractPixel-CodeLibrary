@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AbstractPixel.Core;
 using AbstractPixel.Core.Editor;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -9,7 +10,7 @@ namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
     /// The short scene group inspector: problems at the top (only when the group check finds some), the main scene, the
-    /// scene set, then an Advanced foldout with manager scenes, shared scenes and Reset shared scenes. Each of those says
+    /// scene set, Show the loading scene with its loading scene picker, then an Advanced foldout with manager scenes, shared scenes and Reset shared scenes. Each of those says
     /// whether it follows the set or is an override, with Revert to set. Editing a part makes it an override; editing it
     /// back to the set's value ends the override. Every scene is drawn by the scene field drawer, which shows its status.
     /// </summary>
@@ -41,6 +42,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
             root.Add(SceneSystemUI.SceneField(serializedObject.FindProperty("MainScene"), "Main scene", SceneSystemUI.MainSceneTooltip));
             root.Add(MakeSceneSetField(group));
+            root.Add(MakeLoadingSceneFields(group));
             root.Add(MakeAdvanced());
             root.Add(MakeButtons(group));
 
@@ -69,6 +71,107 @@ namespace AbstractPixel.SceneManagement.Editor
             field.AddToClassList(PopupField<SceneSet>.alignedFieldUssClassName);
             container.Add(field);
             return container;
+        }
+
+        private static readonly List<string> ShowLoadingSceneChoices = new List<string> { "Never", "When arriving from another scene group", "Every time, Retry included" };
+        private const string ShowLoadingSceneTooltip = "Show the loading scene: Never; When arriving from another scene group (a Retry goes straight back in without it); or Every time, Retry included.";
+        private const string LoadingScenePickTooltip = "Which loading scene this group shows. The default comes from Project Settings > Abstract Pixel > Scene System > Loading scenes.";
+        private const string DefaultLoadingSceneChoice = "Default";
+        private VisualElement loadingScenePickRow;
+
+        // "Show the loading scene" and, when it is not Never, the loading scene picker with the default preselected.
+        private VisualElement MakeLoadingSceneFields(SceneGroup _group)
+        {
+            VisualElement container = new VisualElement();
+            container.style.marginTop = 4;
+            int currentChoice = (int)_group.ShowLoadingScene;
+            PopupField<string> showField = new PopupField<string>("Show the loading scene", ShowLoadingSceneChoices, currentChoice);
+            showField.tooltip = ShowLoadingSceneTooltip;
+            showField.AddToClassList(PopupField<string>.alignedFieldUssClassName);
+            showField.RegisterValueChangedCallback(_change => OnShowLoadingScenePicked(ShowLoadingSceneChoices.IndexOf(_change.newValue)));
+            container.Add(showField);
+
+            loadingScenePickRow = new VisualElement();
+            SceneSystemSettings settings = SceneSystemSettingsAssets.Find();
+            if (settings != null)
+            {
+                PopupField<string> pick = MakeLoadingScenePicker(_group, settings);
+                pick.AddToClassList(PopupField<string>.alignedFieldUssClassName);
+                loadingScenePickRow.Add(pick);
+            }
+            loadingScenePickRow.style.display = _group.ShowLoadingScene == ShowLoadingScene.Never ? DisplayStyle.None : DisplayStyle.Flex;
+            container.Add(loadingScenePickRow);
+            return container;
+        }
+
+        private PopupField<string> MakeLoadingScenePicker(SceneGroup _group, SceneSystemSettings _settings)
+        {
+            string defaultName = _settings.DefaultLoadingScene == null ? string.Empty : _settings.DefaultLoadingScene.SceneName;
+            string defaultLabel = string.IsNullOrEmpty(defaultName) ? DefaultLoadingSceneChoice + " (none set)" : DefaultLoadingSceneChoice + " (" + defaultName + ")";
+            List<string> choices = new List<string> { defaultLabel };
+            foreach (SceneReference scene in _settings.LoadingScenes)
+            {
+                if (scene != null && !string.IsNullOrEmpty(scene.SceneName) && !choices.Contains(scene.SceneName))
+                {
+                    choices.Add(scene.SceneName);
+                }
+            }
+
+            string current = defaultLabel;
+            bool hasOwnPick = _group.LoadingScene != null && !string.IsNullOrEmpty(_group.LoadingScene.SceneName);
+            if (hasOwnPick && choices.Contains(_group.LoadingScene.SceneName))
+            {
+                current = _group.LoadingScene.SceneName;
+            }
+
+            PopupField<string> pick = new PopupField<string>("Loading scene", choices, current);
+            pick.tooltip = LoadingScenePickTooltip;
+            pick.RegisterValueChangedCallback(_change => OnLoadingScenePicked(_settings, _change.newValue));
+            return pick;
+        }
+
+        private void OnShowLoadingScenePicked(int _choiceIndex)
+        {
+            ShowLoadingScene choice = (ShowLoadingScene)Mathf.Max(0, _choiceIndex);
+            foreach (Object item in targets)
+            {
+                SceneGroup group = (SceneGroup)item;
+                Undo.RecordObject(group, "Show the loading scene");
+                group.ShowLoadingScene = choice;
+                SaveGroupNow(group);
+            }
+            serializedObject.Update();
+            if (loadingScenePickRow != null)
+            {
+                loadingScenePickRow.style.display = choice == ShowLoadingScene.Never ? DisplayStyle.None : DisplayStyle.Flex;
+            }
+        }
+
+        private void OnLoadingScenePicked(SceneSystemSettings _settings, string _choice)
+        {
+            SceneReference picked = new SceneReference(string.Empty);
+            foreach (SceneReference scene in _settings.LoadingScenes)
+            {
+                if (scene != null && scene.SceneName == _choice)
+                {
+                    picked = new SceneReference(scene.SceneName, scene.SceneGuid, scene.ScenePath);
+                }
+            }
+            foreach (Object item in targets)
+            {
+                SceneGroup group = (SceneGroup)item;
+                Undo.RecordObject(group, "Loading scene");
+                group.LoadingScene = picked;
+                SaveGroupNow(group);
+            }
+            serializedObject.Update();
+        }
+
+        // Saved at once, like every group inspector edit, so a crash cannot lose it.
+        private static void SaveGroupNow(SceneGroup _group)
+        {
+            EditorUtility.SetDirty(_group);
+            AssetDatabase.SaveAssetIfDirty(_group);
         }
 
         private void OnSetPicked(SceneSet _set)

@@ -71,6 +71,19 @@ namespace AbstractPixel.SceneManagement
             }
         }
 
+        public float GetLoadProgress(SceneReference sceneReference)
+        {
+            if (sceneReference == null || !sceneReference.HasGuid)
+            {
+                return 0f;
+            }
+            if (openScenes.ContainsKey(sceneReference.SceneGuid))
+            {
+                return 1f;
+            }
+            return Mathf.Clamp01(api.LoadProgress(sceneReference));
+        }
+
         public async Task UnloadScene(SceneReference sceneReference)
         {
             if (sceneReference == null || !sceneReference.HasGuid)

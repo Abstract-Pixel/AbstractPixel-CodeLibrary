@@ -30,6 +30,12 @@ namespace AbstractPixel.SceneManagement
         /// <summary>Closes a scene. A held scene is activated first and then closed (rule 4).</summary>
         Task UnloadScene(SceneReference sceneReference);
 
+        /// <summary>
+        /// How far this scene's load has got, from 0 to 1: its own progress while the load is under way, 1 once it has
+        /// loaded (and until it closes), 0 for a scene this loader was never asked for. The loading progress reads it.
+        /// </summary>
+        float GetLoadProgress(SceneReference sceneReference);
+
         /// <summary>Frees assets nothing uses any more. Slow, so the coordinator calls it once per scene change.</summary>
         Task ReleaseUnusedMemory();
     }

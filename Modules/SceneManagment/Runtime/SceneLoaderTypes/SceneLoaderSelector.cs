@@ -49,6 +49,14 @@ namespace AbstractPixel.SceneManagement
             ForgetLoader(sceneReference);
         }
 
+        /// <summary>The progress from whichever loader knows the scene: an In-build scene is 0 to the Addressables loader and the other way round.</summary>
+        public float GetLoadProgress(SceneReference sceneReference)
+        {
+            float fromBuildSettings = buildSettingsLoader.GetLoadProgress(sceneReference);
+            float fromAddressables = addressablesLoader.GetLoadProgress(sceneReference);
+            return Mathf.Max(fromBuildSettings, fromAddressables);
+        }
+
         public Task ReleaseUnusedMemory()
         {
             return buildSettingsLoader.ReleaseUnusedMemory();

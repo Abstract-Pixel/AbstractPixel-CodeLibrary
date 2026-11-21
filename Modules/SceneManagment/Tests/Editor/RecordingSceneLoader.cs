@@ -50,6 +50,12 @@ namespace AbstractPixel.SceneManagement.Tests
         /// <summary>Loading the scene with this name fails with an exception.</summary>
         public string FailLoadOfScene;
 
+        /// <summary>A test sets a scene's progress here to stand for a load under way.</summary>
+        public readonly Dictionary<string, float> ProgressOf = new Dictionary<string, float>();
+
+        /// <summary>Scenes whose load has finished and that have not closed.</summary>
+        public readonly HashSet<string> LoadedScenes = new HashSet<string>();
+
         /// <summary>More scenes whose load fails, for a fallback that fails too.</summary>
         public readonly HashSet<string> FailingScenes = new HashSet<string>();
 
@@ -94,10 +100,31 @@ namespace AbstractPixel.SceneManagement.Tests
 
             if (LoadGate != null)
             {
-                return LoadGate;
+                return FinishAfter(LoadGate, sceneName);
             }
 
+            LoadedScenes.Add(sceneName);
             return Task.CompletedTask;
+        }
+
+        private async Task FinishAfter(Task _gate, string _sceneName)
+        {
+            await _gate;
+            LoadedScenes.Add(_sceneName);
+        }
+
+        public float GetLoadProgress(SceneReference sceneReference)
+        {
+            string sceneName = sceneReference.SceneName;
+            if (LoadedScenes.Contains(sceneName))
+            {
+                return 1f;
+            }
+            if (ProgressOf.TryGetValue(sceneName, out float progress))
+            {
+                return progress;
+            }
+            return 0f;
         }
 
         public Task UnloadScene(SceneReference sceneReference)
@@ -118,6 +145,7 @@ namespace AbstractPixel.SceneManagement.Tests
             }
 
             ClosedScenes.Add(sceneName);
+            LoadedScenes.Remove(sceneName);
             if (sceneName == ActiveSceneName)
             {
                 ActiveSceneName = null;

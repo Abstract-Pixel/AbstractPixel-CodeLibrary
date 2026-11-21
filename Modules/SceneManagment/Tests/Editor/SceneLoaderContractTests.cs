@@ -156,5 +156,18 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.IsNull(harness.ActiveSceneName);
             Assert.AreEqual(0, mainSceneLoadedEvents);
         }
+
+        // 4C: the loading progress reads each scene's progress from the loader.
+        [Test]
+        public async Task ASceneReportsNoProgressUntilAskedForThenFullOnceLoadedThenNoneOnceClosed()
+        {
+            Assert.AreEqual(0f, harness.Loader.GetLoadProgress(harness.ReferenceTo(Level)), "never asked for");
+
+            await Load(Level, true, true);
+            Assert.AreEqual(1f, harness.Loader.GetLoadProgress(harness.ReferenceTo(Level)), "loaded");
+
+            await Unload(Level);
+            Assert.AreEqual(0f, harness.Loader.GetLoadProgress(harness.ReferenceTo(Level)), "closed");
+        }
     }
 }

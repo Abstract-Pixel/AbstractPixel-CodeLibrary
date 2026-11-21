@@ -10,6 +10,29 @@ namespace AbstractPixel.SceneManagement
     public class DefaultSceneLoader : ISceneLoader
     {
         private Dictionary<string, AsyncOperation> sceneLoadHandles = new Dictionary<string, AsyncOperation>();
+
+        // For the loading progress: loads under way, and scenes that have loaded and not closed yet.
+        private readonly Dictionary<string, AsyncOperation> loadsUnderWay = new Dictionary<string, AsyncOperation>();
+        private readonly HashSet<string> loadedScenes = new HashSet<string>();
+
+        public float GetLoadProgress(SceneReference sceneReference)
+        {
+            if (sceneReference == null)
+            {
+                return 0f;
+            }
+            string sceneName = sceneReference.SceneName;
+            if (loadedScenes.Contains(sceneName))
+            {
+                return 1f;
+            }
+            if (loadsUnderWay.TryGetValue(sceneName, out AsyncOperation operation))
+            {
+                // Unity stops at 0.9 until the scene activates.
+                return Mathf.Clamp01(operation.progress / 0.9f);
+            }
+            return 0f;
+        }
         public async Task LoadScene(SceneReference sceneReference, bool isAdditive, bool sceneActivatedByDefault = true, bool isMainScene = false)
         {
             if (sceneReference == null || string.IsNullOrEmpty(sceneReference.SceneName))
@@ -45,6 +68,7 @@ namespace AbstractPixel.SceneManagement
                 throw new System.InvalidOperationException($"Scene '{sceneReference.SceneName}' could not be loaded.");
             }
             sceneLoadHandle.allowSceneActivation = sceneActivatedByDefault;
+            loadsUnderWay[sceneReference.SceneName] = sceneLoadHandle;
 
             if (sceneLoadHandle.allowSceneActivation)
             {
@@ -62,6 +86,8 @@ namespace AbstractPixel.SceneManagement
                     await Task.Yield();
                 }
             }
+            loadsUnderWay.Remove(sceneReference.SceneName);
+            loadedScenes.Add(sceneReference.SceneName);
         }
 
         public async Task UnloadScene(SceneReference sceneReference)
@@ -78,6 +104,7 @@ namespace AbstractPixel.SceneManagement
                 await ActivateHeldScene(sceneReference, heldHandle);
             }
 
+            loadedScenes.Remove(sceneReference.SceneName);
             AsyncOperation sceneUnLoadHandle = SceneManager.UnloadSceneAsync(sceneReference.SceneName, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
             if (sceneUnLoadHandle == null)
             {

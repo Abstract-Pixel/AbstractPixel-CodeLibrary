@@ -26,6 +26,12 @@ namespace AbstractPixel.SceneManagement
         /// <summary>The preloaded group and the scenes its preload opened.</summary>
         internal readonly ScenePreload Preloaded = new ScenePreload();
 
+        /// <summary>The loading scene of a change, when its group shows one.</summary>
+        internal readonly LoadingSceneRoute LoadingScenes = new LoadingSceneRoute();
+
+        /// <summary>How far the current or last scene change has got, from 0 to 1.</summary>
+        internal readonly SceneLoadingProgress Progress;
+
         /// <summary>Where a failed scene change goes. Reads the scene system settings; tests replace it.</summary>
         internal Func<SceneGroup> FindFallbackSceneGroup = SceneChangeFallback.FromSettings;
 
@@ -38,6 +44,11 @@ namespace AbstractPixel.SceneManagement
         internal SceneGroup ActiveSceneGroup
         {
             get { return open.Group; }
+        }
+
+        public SceneCoordinator()
+        {
+            Progress = new SceneLoadingProgress(opening);
         }
 
         private void OnDisable()
@@ -114,12 +125,15 @@ namespace AbstractPixel.SceneManagement
                     await Awaitable.NextFrameAsync();
                 }
                 succeeded = await opening.OpenScenes(plan, true, true);
-                RecordEndOfChange(plan, succeeded);
+                if (succeeded)
+                {
+                    RecordEndOfChange(plan);
+                }
             }
             finally
             {
                 isStartUpRunning = false;
-                MarkSceneChangeFinished();
+                IsLoadingSceneGroup = false;
             }
 
             if (!succeeded)
@@ -156,7 +170,7 @@ namespace AbstractPixel.SceneManagement
             }
 
             bool usesPreload = _sceneGroup == Preloaded.Group;
-            return await RunSceneChange(_sceneGroup, usesPreload);
+            return await RunSceneChange(_sceneGroup, usesPreload, false);
         }
 
         /// <summary>Retry: a scene change to the open scene group. A preload is closed first.</summary>
@@ -174,7 +188,7 @@ namespace AbstractPixel.SceneManagement
                 return SceneChangeResult.Refused(refusal);
             }
 
-            return await RunSceneChange(open.Group, false);
+            return await RunSceneChange(open.Group, false, true);
         }
 
         /// <summary>
@@ -221,7 +235,7 @@ namespace AbstractPixel.SceneManagement
             finally
             {
                 Application.backgroundLoadingPriority = defaultPriority;
-                MarkSceneChangeFinished();
+                IsLoadingSceneGroup = false;
             }
 
             if (!succeeded)
@@ -239,22 +253,36 @@ namespace AbstractPixel.SceneManagement
         /// fallback scene group if a load failed, Show screen. Busy stays set until the screen is shown again, and is
         /// cleared in every case.
         /// </summary>
-        private async Task<SceneChangeResult> RunSceneChange(SceneGroup _group, bool _usesPreload)
+        private async Task<SceneChangeResult> RunSceneChange(SceneGroup _group, bool _usesPreload, bool _isRetry)
         {
             SceneReference failedScene = null;
             try
             {
                 await SceneTransitionExecutorSlot.HideScreen();
+                Progress.Reset();
+                if (!_usesPreload && Preloaded.HasAny)
+                {
+                    // Closed before anything opens: Unity holds every later scene operation while a preloaded main
+                    // scene waits. The change releases memory once, so the close does not release it a second time.
+                    await Preloaded.Discard(opening.Loader, false);
+                }
+
+                SceneReference loadingScene = LoadingScenes.ChooseFor(_group, _isRetry, _usesPreload);
+                if (loadingScene != null)
+                {
+                    await LoadingScenes.Show(loadingScene, opening.Loader);
+                }
                 failedScene = await ChangeScenes(_group, _usesPreload);
                 if (failedScene != null)
                 {
                     await SceneChangeFallback.GoToFallback(_group, FindFallbackSceneGroup(), _fallback => ChangeScenes(_fallback, false));
                 }
+                await LoadingScenes.Leave(opening.Loader);
                 await SceneTransitionExecutorSlot.ShowScreen();
             }
             finally
             {
-                MarkSceneChangeFinished();
+                IsLoadingSceneGroup = false;
             }
 
             if (failedScene != null)
@@ -264,28 +292,21 @@ namespace AbstractPixel.SceneManagement
             return SceneChangeResult.Done();
         }
 
-        /// <summary>
-        /// Closes and opens the scenes of one change and records the result. A preload that this change does not use
-        /// is closed first: Unity holds every later scene operation, unloads included, while a preloaded main scene waits.
-        /// </summary>
+        /// <summary>Closes and opens the scenes of one change and records the result.</summary>
         /// <returns>The scene that failed to load, or null when the change finished.</returns>
         private async Task<SceneReference> ChangeScenes(SceneGroup _group, bool _usesPreload)
         {
             opening.BeginChange();
-            if (!_usesPreload && Preloaded.HasAny)
-            {
-                // The change releases memory once, so the close does not release it a second time.
-                await Preloaded.Discard(opening.Loader, false);
-            }
-
             SceneChangePlan plan = CreatePlan(_group, false);
+            Progress.Track(plan);
             bool succeeded = await CloseAndOpen(plan, _usesPreload);
             if (!succeeded)
             {
                 return RecordFailure(plan, _usesPreload);
             }
 
-            RecordEndOfChange(plan, true);
+            RecordEndOfChange(plan);
+            Progress.Complete();
             if (_usesPreload)
             {
                 SceneEventBus.RaiseOnPreloadedSceneGroupActivated(_group);
@@ -344,18 +365,9 @@ namespace AbstractPixel.SceneManagement
             return SceneChangeRefusal.None;
         }
 
-        /// <summary>
-        /// On success it records the open scenes, making the group the active one, and only then raises "new level"
-        /// once. On failure it raises nothing.
-        /// </summary>
-        private void RecordEndOfChange(SceneChangePlan _plan, bool _succeeded)
+        /// <summary>Records the open scenes, making the group the active one, and only then raises "new level" once.</summary>
+        private void RecordEndOfChange(SceneChangePlan _plan)
         {
-            if (!_succeeded)
-            {
-                Debug.LogWarning($"[SceneCoordinator] The change to '{_plan.TargetGroup.MainScene.SceneName}' did not finish. No 'new level' was raised.");
-                return;
-            }
-
             open = _plan.OpenAfterChange();
             if (_plan.UsesPreloadedScenes)
             {
@@ -365,10 +377,6 @@ namespace AbstractPixel.SceneManagement
             SceneEventBus.RaiseOnNewSceneTransitionedTo(_plan.TargetGroup);
         }
 
-        private void MarkSceneChangeFinished()
-        {
-            IsLoadingSceneGroup = false;
-        }
 
         /// <summary>The plan for a change or a preload, made from a copy of what is open.</summary>
         private SceneChangePlan CreatePlan(SceneGroup _targetGroup, bool _isPreload)

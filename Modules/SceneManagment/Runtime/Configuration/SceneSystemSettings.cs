@@ -21,6 +21,12 @@ namespace AbstractPixel.SceneManagement
         [SerializeField] private bool newScenesAreAddressable = false;
         [SerializeField] private bool checkSceneGroupsBeforeBuild = true;
         [SerializeField] private List<SceneGroup> sceneGroups = new List<SceneGroup>();
+        [Tooltip("The loading scenes of this project. A scene group that shows a loading scene picks one of them, or the default.")]
+        [SerializeField] private List<SceneReference> loadingScenes = new List<SceneReference>();
+        [Tooltip("The loading scene a scene group shows when it picked none.")]
+        [SerializeField] private SceneReference defaultLoadingScene = new SceneReference(string.Empty);
+        [Tooltip("Minimum time on screen, in unscaled seconds, so a fast load does not flash the loading scene. Counts from Show screen starting.")]
+        [Min(0f)] [SerializeField] private float loadingSceneMinimumSeconds = 1f;
 
         /// <summary>The scene group the game opens at launch. Start-up needs it, except when Play starts in a main scene.</summary>
         public SceneGroup StartSceneGroup
@@ -87,6 +93,26 @@ namespace AbstractPixel.SceneManagement
         {
             get { return checkSceneGroupsBeforeBuild; }
             set { checkSceneGroupsBeforeBuild = value; }
+        }
+
+        /// <summary>The project's loading scenes.</summary>
+        public List<SceneReference> LoadingScenes
+        {
+            get { return loadingScenes; }
+        }
+
+        /// <summary>The loading scene a group shows when it picked none.</summary>
+        public SceneReference DefaultLoadingScene
+        {
+            get { return defaultLoadingScene; }
+            set { defaultLoadingScene = value; }
+        }
+
+        /// <summary>Minimum time a loading scene stays on screen, in unscaled seconds.</summary>
+        public float LoadingSceneMinimumSeconds
+        {
+            get { return loadingSceneMinimumSeconds; }
+            set { loadingSceneMinimumSeconds = Mathf.Max(0f, value); }
         }
 
         /// <summary>Every scene group in the project, kept current by an editor script.</summary>

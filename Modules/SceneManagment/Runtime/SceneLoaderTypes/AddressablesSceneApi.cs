@@ -12,13 +12,33 @@ namespace AbstractPixel.SceneManagement
     /// <summary>The real Addressables calls behind <see cref="IAddressablesSceneApi"/>.</summary>
     internal sealed class AddressablesSceneApi : IAddressablesSceneApi
     {
+        // Loads under way by GUID, for the loading progress.
+        private readonly System.Collections.Generic.Dictionary<string, AsyncOperationHandle<SceneInstance>> loadsUnderWay = new System.Collections.Generic.Dictionary<string, AsyncOperationHandle<SceneInstance>>();
+
         public async Task<ISceneHandle> LoadScene(SceneReference _scene, LoadSceneMode _mode, bool _activateOnLoad)
         {
             // The handle is only released by hand: Addressables' own release on scene unload matches the scene it reported,
             // which is wrong for a held scene (see AddressablesSceneHandle).
             AsyncOperationHandle<SceneInstance> operation = Addressables.LoadSceneAsync(_scene.SceneGuid, _mode, SceneReleaseMode.OnlyReleaseSceneOnHandleRelease, _activateOnLoad);
-            await WaitFor(operation);
+            loadsUnderWay[_scene.SceneGuid] = operation;
+            try
+            {
+                await WaitFor(operation);
+            }
+            finally
+            {
+                loadsUnderWay.Remove(_scene.SceneGuid);
+            }
             return new AddressablesSceneHandle(_scene, operation);
+        }
+
+        public float LoadProgress(SceneReference _scene)
+        {
+            if (loadsUnderWay.TryGetValue(_scene.SceneGuid, out AsyncOperationHandle<SceneInstance> operation) && operation.IsValid())
+            {
+                return operation.PercentComplete;
+            }
+            return 0f;
         }
 
         public async Task Activate(ISceneHandle _handle)
