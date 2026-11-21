@@ -1,0 +1,22 @@
+{
+    "name": "AbstractPixel.SceneManagement.Relocation.Editor",
+    "rootNamespace": "AbstractPixel.SceneManagement.Editor",
+    "references": [
+        "AbstractPixel.SceneManagement.Relocation",
+        "AbstractPixel.SceneManagment",
+        "AbstractPixel.SceneManagment.Editor",
+        "AbstractPixel.Core",
+        "AbstractPixel.Core.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

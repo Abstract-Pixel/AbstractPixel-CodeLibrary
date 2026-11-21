@@ -6,6 +6,8 @@ namespace AbstractPixel.SceneManagement.Editor
         None,
         AddToBuild,
         MakeAddressable,
-        RemoveFromGroup
+        RemoveFromGroup,
+        /// <summary>Selects the object the problem is about, such as a spawn point, and frames it in the Scene view.</summary>
+        Select
     }
 }

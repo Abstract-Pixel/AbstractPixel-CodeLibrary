@@ -181,7 +181,14 @@ namespace AbstractPixel.SceneManagement
                     continue;
                 }
                 RelocatableHold hold = relocatable.CurrentHold;
-                if (!groundCheck.TryFindGround(hold, targets[relocatable].position, _groundLayers, out Collider ground))
+                Vector3 position = targets[relocatable].position;
+                if (groundCheck.TryFindTerrainAbove(position, out Terrain terrain, out float depthUnderTerrain))
+                {
+                    _waiting.RemoveAt(index);
+                    broadcaster.ReportHeld(relocatable, "it starts " + depthUnderTerrain.ToString("0.00") + " m under the terrain '" + terrain.name + "' and would fall through or be pushed out on release (raise its spawn point position)");
+                    continue;
+                }
+                if (!groundCheck.TryFindGround(hold, position, _groundLayers, out Collider ground))
                 {
                     continue;
                 }

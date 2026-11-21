@@ -6,6 +6,8 @@ namespace AbstractPixel.SceneManagement.Editor
         NoMainScene,
         MissingScene,
         NotInBuild,
-        ListedTwice
+        ListedTwice,
+        /// <summary>A relocation setup mistake in the group's open scenes, from the relocation sub-module's check.</summary>
+        RelocationSetup
     }
 }

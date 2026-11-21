@@ -21,6 +21,8 @@ namespace AbstractPixel.SceneManagement.Editor
                     return SceneStatusRules.FixLabel(SceneFix.MakeAddressable);
                 case SceneGroupProblemFix.RemoveFromGroup:
                     return "Remove from group";
+                case SceneGroupProblemFix.Select:
+                    return "Select";
                 default:
                     return string.Empty;
             }
@@ -36,6 +38,8 @@ namespace AbstractPixel.SceneManagement.Editor
                     return "Gives this scene an Addressables entry and removes it from Build Settings, so it loads from one place.";
                 case SceneGroupProblemFix.RemoveFromGroup:
                     return "Removes this entry from the scene group. Undo brings it back.";
+                case SceneGroupProblemFix.Select:
+                    return "Selects it and frames it in the Scene view.";
                 default:
                     return string.Empty;
             }
@@ -57,6 +61,24 @@ namespace AbstractPixel.SceneManagement.Editor
                 case SceneGroupProblemFix.RemoveFromGroup:
                     RemoveFromGroup(_group, _problem);
                     break;
+                case SceneGroupProblemFix.Select:
+                    SelectAndFrame(_problem.Target);
+                    break;
+            }
+        }
+
+        private static void SelectAndFrame(Object _target)
+        {
+            if (_target == null)
+            {
+                return;
+            }
+            Selection.activeObject = _target;
+            EditorGUIUtility.PingObject(_target);
+            SceneView sceneView = SceneView.lastActiveSceneView;
+            if (sceneView != null && _target is Component)
+            {
+                sceneView.FrameSelected();
             }
         }
 

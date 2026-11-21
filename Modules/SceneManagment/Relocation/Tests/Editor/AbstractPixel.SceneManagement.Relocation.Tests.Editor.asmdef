@@ -6,7 +6,10 @@
         "AbstractPixel.SceneManagment",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "AbstractPixel.SceneManagement.Relocation.Tests.Support"
+        "AbstractPixel.SceneManagement.Relocation.Tests.Support",
+        "AbstractPixel.SceneManagement.Relocation.Editor",
+        "AbstractPixel.SceneManagment.Editor",
+        "AbstractPixel.Core"
     ],
     "includePlatforms": [
         "Editor"

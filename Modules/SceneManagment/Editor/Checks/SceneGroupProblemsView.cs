@@ -46,8 +46,14 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static VisualElement MakeRow(SceneGroup _group, SceneGroupProblem _problem, Action _afterFix)
         {
-            // Every problem stops a build with the pre-build check on, a scene listed twice included (decision Q5).
-            HelpBox box = new HelpBox(_problem.Message, HelpBoxMessageType.Error);
+            // Every scene problem stops a build with the pre-build check on, a scene listed twice included (decision Q5).
+            // Relocation setup problems are warnings: they show here but never stop a build.
+            HelpBoxMessageType type = HelpBoxMessageType.Error;
+            if (!_problem.BlocksBuild)
+            {
+                type = HelpBoxMessageType.Warning;
+            }
+            HelpBox box = new HelpBox(_problem.Message, type);
             box.style.alignItems = Align.Center;
             if (!_problem.HasFix)
             {

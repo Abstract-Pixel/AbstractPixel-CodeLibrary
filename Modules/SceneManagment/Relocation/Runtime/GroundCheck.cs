@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
@@ -16,6 +17,7 @@ namespace AbstractPixel.SceneManagement
         public const float DeepestAllowedOverlap = 0.25f;
 
         private readonly RaycastHit[] hits = new RaycastHit[32];
+        private readonly List<Terrain> terrains = new List<Terrain>();
 
         public bool TryFindGround(RelocatableHold _hold, Vector3 _position, int _groundLayers, out Collider _ground)
         {
@@ -37,6 +39,41 @@ namespace AbstractPixel.SceneManagement
                 }
             }
             return _ground != null;
+        }
+
+        /// <summary>
+        /// True when a position lies under the surface of an active terrain. A TerrainCollider only has a top side, so
+        /// the ray down never finds a terrain it starts under; this reads the terrain's height instead.
+        /// </summary>
+        public bool TryFindTerrainAbove(Vector3 _position, out Terrain _terrain, out float _depth)
+        {
+            _terrain = null;
+            _depth = 0f;
+            Terrain.GetActiveTerrains(terrains);
+            foreach (Terrain terrain in terrains)
+            {
+                if (terrain == null || terrain.terrainData == null)
+                {
+                    continue;
+                }
+                Vector3 corner = terrain.transform.position;
+                Vector3 size = terrain.terrainData.size;
+                bool insideX = _position.x >= corner.x && _position.x <= corner.x + size.x;
+                bool insideZ = _position.z >= corner.z && _position.z <= corner.z + size.z;
+                if (!insideX || !insideZ)
+                {
+                    continue;
+                }
+                float surface = corner.y + terrain.SampleHeight(_position);
+                float depth = surface - _position.y;
+                if (depth > RayLift)
+                {
+                    _terrain = terrain;
+                    _depth = depth;
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>How deep, in metres, the relocatable's colliders start inside the ground collider.</summary>

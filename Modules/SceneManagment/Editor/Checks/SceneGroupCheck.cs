@@ -15,6 +15,21 @@ namespace AbstractPixel.SceneManagement.Editor
     {
         private const string LogPrefix = "[Scene system]";
 
+        private static readonly List<Func<SceneGroup, List<SceneGroupProblem>>> moreChecks = new List<Func<SceneGroup, List<SceneGroupProblem>>>();
+
+        /// <summary>
+        /// Adds a check another editor module runs on every scene group, such as the relocation setup check. Its
+        /// problems are listed after the scene problems. Adding the same check twice keeps one.
+        /// </summary>
+        public static void AddCheck(Func<SceneGroup, List<SceneGroupProblem>> _check)
+        {
+            if (_check == null || moreChecks.Contains(_check))
+            {
+                return;
+            }
+            moreChecks.Add(_check);
+        }
+
         /// <summary>The group's problems, reading each scene's status from the project.</summary>
         public static List<SceneGroupProblem> Find(SceneGroup _group)
         {
@@ -51,7 +66,27 @@ namespace AbstractPixel.SceneManagement.Editor
 
             CheckList(_group, _group.ManagerialBootScenesList, SceneGroupListKind.ManagerScenes, seenScenes, _statusOf, problems);
             CheckList(_group, _group.ContextualBootScenesList, SceneGroupListKind.SharedScenes, seenScenes, _statusOf, problems);
+            AddMoreChecks(_group, problems);
             return problems;
+        }
+
+        private static void AddMoreChecks(SceneGroup _group, List<SceneGroupProblem> _problems)
+        {
+            foreach (Func<SceneGroup, List<SceneGroupProblem>> check in moreChecks)
+            {
+                try
+                {
+                    List<SceneGroupProblem> found = check(_group);
+                    if (found != null)
+                    {
+                        _problems.AddRange(found);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    UnityEngine.Debug.LogException(ex);
+                }
+            }
         }
 
         /// <summary>
@@ -85,6 +120,10 @@ namespace AbstractPixel.SceneManagement.Editor
                 }
                 foreach (SceneGroupProblem problem in group.Value)
                 {
+                    if (!problem.BlocksBuild)
+                    {
+                        continue;
+                    }
                     lines.Append("\n- ").Append(group.Key).Append(": ").Append(problem.Message);
                     problemCount++;
                 }
