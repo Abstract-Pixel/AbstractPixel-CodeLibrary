@@ -40,7 +40,12 @@ namespace AbstractPixel.SceneTransitions.Tests
         public void DestroyCreatedObjects()
         {
             manager.SetTransitionProfile(null);
-            foreach (FadeTransitionController clone in Object.FindObjectsByType<FadeTransitionController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+#if UNITY_7000_0_OR_NEWER
+            FadeTransitionController[] clones = Object.FindObjectsByType<FadeTransitionController>(FindObjectsInactive.Include);
+#else
+            FadeTransitionController[] clones = Object.FindObjectsByType<FadeTransitionController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+#endif
+            foreach (FadeTransitionController clone in clones)
             {
                 Object.DestroyImmediate(clone.gameObject);
             }

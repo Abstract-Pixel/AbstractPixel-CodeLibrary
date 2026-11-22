@@ -61,7 +61,11 @@ namespace AbstractPixel.SceneManagement
             }
 
             // Bodies that appeared since Hold, and bodies joined from outside, are held before anything moves.
+#if UNITY_7000_0_OR_NEWER
+            Joint[] joints = Object.FindObjectsByType<Joint>();
+#else
             Joint[] joints = Object.FindObjectsByType<Joint>(FindObjectsSortMode.None);
+#endif
             List<Relocatable> moved = new List<Relocatable>();
             foreach (Relocatable relocatable in _relocatables)
             {
