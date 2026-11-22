@@ -62,6 +62,14 @@ _Avoid_: loading bar (a bar is only one look), progress widget
 Where a scene can be loaded from: In build, Addressable, Not in build, or Missing. A scene is In build or Addressable, never both.
 _Avoid_: build state, scene state
 
+**Scene picker**:
+The dropdown on the Editor's main toolbar that finds any scene or scene group by name, then opens it or selects it in the Project window.
+_Avoid_: scene switcher, scene selector, level picker
+
+**Scene in no group**:
+A scene that is no scene group's main scene. Played from the Editor, it opens in a temporary scene group built from the default scene set.
+_Avoid_: random scene, loose scene, orphan scene
+
 ## Starting the game
 
 **Start-up**:
