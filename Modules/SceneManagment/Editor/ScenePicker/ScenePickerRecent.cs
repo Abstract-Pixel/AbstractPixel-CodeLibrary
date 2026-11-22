@@ -66,7 +66,11 @@ namespace AbstractPixel.SceneManagement.Editor
             List<ScenePickerRow> result = new List<ScenePickerRow>();
             result.Add(ScenePickerRow.Heading(Heading));
             result.AddRange(recent);
-            result.Add(ScenePickerRow.Heading(AllHeading(_rows)));
+            bool startsWithHeading = _rows.Count > 0 && _rows[0].IsHeading;
+            if (!startsWithHeading)
+            {
+                result.Add(ScenePickerRow.Heading(AllHeading(_rows)));
+            }
             result.AddRange(_rows);
             return result;
         }
