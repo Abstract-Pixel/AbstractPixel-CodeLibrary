@@ -163,6 +163,19 @@ namespace AbstractPixel.SceneManagement.Tests
         }
 
         [Test]
+        public void ASharedSceneOfASampleSceneGroupOpensThatSampleGroupNotTheStartSceneGroup()
+        {
+            SceneGroup sample = AddSampleGroup("SampleArea", "SampleShared");
+
+            StartUpChoice choice = StartUpRule.Choose(settings, Scenes("SampleShared"));
+
+            Assert.AreSame(sample, choice.Group, "the sample scene group that uses the scene, not " + (choice.Group == null ? "none" : choice.Group.name));
+            Assert.AreEqual("SampleArea", choice.MainScene.SceneName);
+            Assert.AreEqual(StartUpChoiceKind.SampleSceneGroupOfOpenScene, choice.Kind);
+            StringAssert.Contains("sample scene group", choice.InfoMessage);
+        }
+
+        [Test]
         public void NoOpenSceneDoesNothing()
         {
             StartUpChoice choice = StartUpRule.Choose(settings, new List<SceneReference>());
@@ -177,6 +190,19 @@ namespace AbstractPixel.SceneManagement.Tests
             createdObjects.Add(group);
             group.Initialize(levelSet.ManagerScenes, levelSet.SharedScenes, new SceneReference(_mainSceneName), true);
             group.SceneSet = levelSet;
+            settings.SceneGroups.Add(group);
+            return group;
+        }
+
+        // A sample scene group (ADR 0014): no scene set, one shared scene of its own.
+        private SceneGroup AddSampleGroup(string _mainSceneName, string _sharedSceneName)
+        {
+            SceneGroup group = ScriptableObject.CreateInstance<SceneGroup>();
+            group.name = _mainSceneName + "Group";
+            createdObjects.Add(group);
+            List<SceneReference> shared = new List<SceneReference> { new SceneReference(_sharedSceneName) };
+            group.Initialize(new List<SceneReference>(), shared, new SceneReference(_mainSceneName), false);
+            group.IsSample = true;
             settings.SceneGroups.Add(group);
             return group;
         }

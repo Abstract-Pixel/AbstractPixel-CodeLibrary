@@ -46,6 +46,54 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             return assets;
         }
 
+        /// <summary>Every text-serialized scene and asset of the scene system module outside its Samples folder.</summary>
+        public static IEnumerable<string> SceneSystemAssets()
+        {
+            List<string> assets = new List<string>();
+            string root = Path.GetFullPath(PackageRoot);
+            string moduleRoot = Path.Combine(root, "Modules", "SceneManagment");
+            if (!Directory.Exists(moduleRoot))
+            {
+                return assets;
+            }
+            foreach (string fullPath in Directory.GetFiles(moduleRoot, "*", SearchOption.AllDirectories))
+            {
+                string relative = fullPath.Substring(root.Length).Replace('\\', '/');
+                bool inSamples = relative.Contains("/Samples/") || relative.Contains("/Samples~/");
+                if (!inSamples && IsSerializedAsset(relative))
+                {
+                    assets.Add(PackageRoot + relative);
+                }
+            }
+            assets.Sort();
+            return assets;
+        }
+
+        /// <summary>
+        /// The scene system's own scenes and assets (the ready-made loading scene, fades) may use Unity's packages, but
+        /// never an asset of the game that hosts the library: such a reference breaks in every other project.
+        /// </summary>
+        [TestCaseSource(nameof(SceneSystemAssets))]
+        public void SceneSystemAssetReferencesNoGameAsset(string _assetPath)
+        {
+            string fullPath = Path.GetFullPath(_assetPath);
+            if (!File.Exists(fullPath))
+            {
+                Assert.Ignore(_assetPath + " was deleted after the test list was read.");
+            }
+            List<string> gameAssets = new List<string>();
+            foreach (Match match in GuidPattern.Matches(File.ReadAllText(fullPath)))
+            {
+                string owner = AssetDatabase.GUIDToAssetPath(match.Groups[1].Value.ToLowerInvariant());
+                if (owner.StartsWith("Assets/") && !gameAssets.Contains(owner))
+                {
+                    gameAssets.Add(owner);
+                }
+            }
+
+            Assert.IsEmpty(gameAssets, _assetPath + " references the game's assets: " + string.Join(", ", gameAssets));
+        }
+
         [TestCaseSource(nameof(SampleAssets))]
         public void ReferencesOnlyTheLibraryAndUnityBuiltIns(string _assetPath)
         {
@@ -82,6 +130,11 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             {
                 return false;
             }
+            return IsSerializedAsset(_relativePath);
+        }
+
+        private static bool IsSerializedAsset(string _relativePath)
+        {
             string extension = Path.GetExtension(_relativePath).ToLowerInvariant();
             return extension == ".unity" || extension == ".asset" || extension == ".prefab" || extension == ".mat" || extension == ".controller" || extension == ".playable";
         }

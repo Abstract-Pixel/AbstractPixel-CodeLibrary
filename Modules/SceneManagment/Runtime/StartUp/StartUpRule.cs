@@ -10,6 +10,7 @@ namespace AbstractPixel.SceneManagement
     /// <item>The launch scene is open: the start scene group, behind the launch scene.</item>
     /// <item>An open scene, the active one first, is the main scene of a scene group in the settings list: that group.
     /// Two such scenes open: an error, and the first one wins.</item>
+    /// <item>The active scene is a manager or shared scene of a sample scene group: that sample scene group.</item>
     /// <item>The active scene is a manager or shared scene: the start scene group, with one line saying why.</item>
     /// <item>The active scene is in no scene group: a temporary scene group built from the default scene set, with one
     /// warning.</item>
@@ -49,6 +50,11 @@ namespace AbstractPixel.SceneManagement
             }
 
             SceneReference activeScene = _openScenesActiveFirst[0];
+            SceneGroup sampleGroup = FindSampleGroupUsing(_settings, activeScene);
+            if (sampleGroup != null)
+            {
+                return ChooseSampleSceneGroup(sampleGroup, activeScene);
+            }
             if (IsInASceneSet(_settings, activeScene))
             {
                 StartUpChoice startGroupChoice = ChooseStartSceneGroup(_settings, StartUpChoiceKind.StartSceneGroup, activeScene);
@@ -171,6 +177,34 @@ namespace AbstractPixel.SceneManagement
                 }
             }
             return null;
+        }
+
+        // The first sample scene group that lists the scene as a manager or shared scene, or null.
+        private static SceneGroup FindSampleGroupUsing(SceneSystemSettings _settings, SceneReference _scene)
+        {
+            foreach (SceneGroup group in _settings.SceneGroups)
+            {
+                if (group == null || group.IsSample == false)
+                {
+                    continue;
+                }
+                bool listsTheScene = StartUpSceneMatch.ListHolds(group.ManagerialBootScenesList, _scene) || StartUpSceneMatch.ListHolds(group.ContextualBootScenesList, _scene);
+                if (listsTheScene)
+                {
+                    return group;
+                }
+            }
+            return null;
+        }
+
+        private static StartUpChoice ChooseSampleSceneGroup(SceneGroup _sampleGroup, SceneReference _activeScene)
+        {
+            StartUpChoice choice = new StartUpChoice();
+            choice.Kind = StartUpChoiceKind.SampleSceneGroupOfOpenScene;
+            choice.Group = _sampleGroup;
+            choice.MainScene = _sampleGroup.MainScene;
+            choice.InfoMessage = LogPrefix + "'" + _activeScene.SceneName + "' is a shared or manager scene of the sample scene group '" + _sampleGroup.name + "' and no main scene is open, so start-up opens that sample scene group.";
+            return choice;
         }
 
         // A manager or shared scene of any scene set, or listed as one by any scene group (a group from before scene sets).

@@ -9,6 +9,7 @@ namespace AbstractPixel.SceneManagement.Editor
     /// <list type="bullet">
     /// <item>A group's main scene: its manager and shared scenes.</item>
     /// <item>A manager or shared scene: the start scene group's main, manager and shared scenes.</item>
+    /// <item>A manager or shared scene of a sample scene group: that sample scene group's main, manager and shared scenes.</item>
     /// <item>A scene in no group: the default scene set's manager and shared scenes.</item>
     /// <item>The launch scene: nothing, because a build opens only the launch scene.</item>
     /// </list>
@@ -32,6 +33,7 @@ namespace AbstractPixel.SceneManagement.Editor
                     AddGroupScenes(scenes, choice.Group, false);
                     break;
                 case StartUpChoiceKind.StartSceneGroup:
+                case StartUpChoiceKind.SampleSceneGroupOfOpenScene:
                     AddGroupScenes(scenes, choice.Group, true);
                     break;
                 case StartUpChoiceKind.TemporaryGroup:

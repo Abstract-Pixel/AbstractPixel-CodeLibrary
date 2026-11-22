@@ -63,6 +63,21 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
         }
 
         [Test]
+        public void ASharedSceneOfASampleSceneGroupOpensThatSampleGroupsMainScene()
+        {
+            SceneGroup sample = ScriptableObject.CreateInstance<SceneGroup>();
+            createdObjects.Add(sample);
+            List<SceneReference> shared = new List<SceneReference> { new SceneReference("SampleShared") };
+            sample.Initialize(new List<SceneReference>(), shared, new SceneReference("SampleArea"), false);
+            sample.IsSample = true;
+            settings.SceneGroups.Add(sample);
+
+            List<SceneReference> scenes = GroupScenesToOpen.For(settings, new SceneReference("SampleShared"));
+
+            Assert.AreEqual("SampleArea", Names(scenes), "the sample's own main scene, never the game's start scene group");
+        }
+
+        [Test]
         public void NoSettingsOpensNothing()
         {
             List<SceneReference> scenes = GroupScenesToOpen.For(null, new SceneReference("Level2"));
