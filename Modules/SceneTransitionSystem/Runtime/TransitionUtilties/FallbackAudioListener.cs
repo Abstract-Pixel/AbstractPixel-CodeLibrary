@@ -122,7 +122,11 @@ namespace AbstractPixel.SceneTransitions
         /// <summary>Only searched while no real listener is known, which is the short gap of a scene load.</summary>
         private AudioListener FindOtherRunningListener()
         {
+#if UNITY_7000_0_OR_NEWER
+            AudioListener[] listeners = FindObjectsByType<AudioListener>();
+#else
             AudioListener[] listeners = FindObjectsByType<AudioListener>(FindObjectsSortMode.None);
+#endif
             foreach (AudioListener listener in listeners)
             {
                 bool isFallback = listener == fallbackListener;
