@@ -196,6 +196,16 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             Assert.AreEqual(Titles(rows), Titles(ScenePickerRecent.WithRecentFirst(rows, new List<string>())));
         }
 
+        [Test]
+        public void UnderRecentAListThatStartsWithItsOwnHeadingGetsNoEmptyAllHeading()
+        {
+            List<ScenePickerRow> rows = ScenePickerRows.ForScenes(new List<ScenePickerSceneInfo> { Scene("CarTest", "Assets/Tests/CarTest.unity") }, groups, sets);
+
+            List<ScenePickerRow> withRecent = ScenePickerRecent.WithRecentFirst(rows, new List<string> { GuidOf("CarTest") });
+
+            Assert.AreEqual("[Recent],CarTest,[Scenes in no group],CarTest", Titles(withRecent));
+        }
+
         [TestCase("Level 10", "lev 10", "<b>Lev</b>el <b>10</b>")]
         [TestCase("MainMenu", "MENU", "Main<b>Menu</b>")]
         [TestCase("Car<b>Test", "car", "Car<b>Test")]
