@@ -31,6 +31,39 @@ Opens, closes and switches groups of scenes for a single-player Unity game: a ma
 
 ---
 
+## Scene picker
+
+The scene picker is a dropdown on Unity's main toolbar, just left of Play. It opens or selects any scene or scene group without the Project window.
+
+**Show it once.** Unity hides a new toolbar element until you tick it. On Unity 6.3, right-click an empty part of the toolbar (or open its More menu at the right end) and tick Scene picker. On Unity 7, click Show the scene picker in the toolbar on the Scene System page or on the setup window's last page; it opens Unity's toolbar picker at the scene picker, and one tick shows it.
+
+**The button** names the open scene group. With no group's main scene open it shows the active scene's name followed by "(no group)". In Play it is greyed out and still names the open group.
+
+**The popup** has two tabs and one search bar under them.
+
+- Scenes lists the game's scenes first, each with its group, or with its scene set for a manager or shared scene. Scenes in no group follow under their own heading, and sample scenes sit under Samples at the bottom. Unity's test runner scenes and other packages' scenes are left out.
+- Scene Groups lists game groups with their main scene and scene set, then sample scene groups. A group with no main scene can be selected but not opened.
+- Before you type, a Recent section shows what you opened last from the picker, and the open group or scene is highlighted.
+- Each row ends with its scene status (the scene field's colour) and a Select button.
+
+**Search** filters as you type. Words are separated by spaces, case is ignored, and every word must appear in the name, the folder or, in the Scenes tab, the group name. Rows whose name holds every word come first, with the matched letters in bold.
+
+**Keys and clicks.**
+
+| Action | What it does |
+|---|---|
+| Click a row, or Enter | Opens it. A scene opens as a double-click in the Project window does; a group runs Open group. |
+| Select button, or Shift+Enter | Selects the asset in the Project window and pings it. Nothing opens. |
+| Up and Down | Move the highlight. |
+| Tab | Switches between the Scenes and Scene Groups tabs. |
+| Esc | Closes the picker. |
+
+Opening asks Unity's usual save prompt first; Cancel changes nothing. The footer checkbox is the same preference as Preferences > Abstract Pixel > Scenes, "Open the group with its main scene": with it on, opening a scene also opens the scenes Play loads with it.
+
+**What it never does.** It never changes Build Settings and never marks a scene dirty. It finds each asset again by GUID when you click, so a scene or group renamed while the picker is open still opens, and a deleted one opens nothing and logs one warning. A pick made while Unity compiles or imports waits until Unity is idle, and survives the script reload that follows. It works with no scene system settings and with no scene groups.
+
+**Code.** `Editor/ScenePicker/`: `ScenePickerRows`, `ScenePickerSearch`, `ScenePickerLabel`, `ScenePickerRecent` and `ScenePickerTarget` are plain code with tests in `ScenePickerRowsTests`; `ScenePickerToolbar` is the toolbar element, `ScenePickerPopup` the popup, `ScenePickerActions` the open and select calls, `ScenePickerProject` reads the project. Unity 7-only code sits behind `#if UNITY_7000_0_OR_NEWER`; the 6.3 picker is complete without it.
+
 # Scene messages
 
 What `SceneEventBus` and `TransitionEventBus` send, in what order, and who listens in Project Rally Shift. Read from the
