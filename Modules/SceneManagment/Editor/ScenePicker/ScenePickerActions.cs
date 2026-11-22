@@ -14,9 +14,27 @@ namespace AbstractPixel.SceneManagement.Editor
     /// marks a scene dirty and never changes Build Settings. One pick at a time: a pick made while another one waits
     /// is ignored.
     /// </summary>
+    [InitializeOnLoad]
     public static class ScenePickerActions
     {
         private const string LogPrefix = "[Scene system] Scene picker: ";
+        private const string PendingPickKey = "AbstractPixel.SceneSystem.ScenePickerPendingPick";
+
+        // A pick made while scripts compile outlives the domain reload that follows: it is kept in SessionState.
+        static ScenePickerActions()
+        {
+            string pending = SessionState.GetString(PendingPickKey, string.Empty);
+            if (string.IsNullOrEmpty(pending))
+            {
+                return;
+            }
+            SessionState.EraseString(PendingPickKey);
+            ScenePickerRow row = RowFromPending(pending);
+            if (row != null)
+            {
+                EditorApplication.delayCall += () => Open(row);
+            }
+        }
         private const double LongestWaitSeconds = 60;
 
         private static ScenePickerRow waitingRow;
@@ -52,6 +70,7 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             waitingRow = _row;
             waitStartedAt = EditorApplication.timeSinceStartup;
+            SessionState.SetString(PendingPickKey, PendingFromRow(_row));
             EditorApplication.update -= OpenWhenUnityIsReady;
             EditorApplication.update += OpenWhenUnityIsReady;
         }
@@ -79,6 +98,7 @@ namespace AbstractPixel.SceneManagement.Editor
             EditorApplication.update -= OpenWhenUnityIsReady;
             ScenePickerRow row = waitingRow;
             waitingRow = null;
+            SessionState.EraseString(PendingPickKey);
             if (unityIsBusy)
             {
                 Debug.LogWarning(LogPrefix + "nothing opened: Unity was still busy after " + LongestWaitSeconds + " seconds. Pick '" + row.Title + "' again.");
@@ -143,6 +163,26 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             ScenePickerRecent.Remember(_row.AssetGuid);
             SceneGroupOpener.Open(group);
+        }
+
+        // "SceneGroup|guid|title": enough to find the asset again by GUID after a domain reload.
+        private static string PendingFromRow(ScenePickerRow _row)
+        {
+            return _row.Kind + "|" + _row.AssetGuid + "|" + _row.Title;
+        }
+
+        private static ScenePickerRow RowFromPending(string _pending)
+        {
+            string[] parts = _pending.Split(new[] { '|' }, 3);
+            if (parts.Length < 3)
+            {
+                return null;
+            }
+            ScenePickerRow row = new ScenePickerRow();
+            row.Kind = parts[0] == ScenePickerRowKind.SceneGroup.ToString() ? ScenePickerRowKind.SceneGroup : ScenePickerRowKind.Scene;
+            row.AssetGuid = parts[1];
+            row.Title = parts[2];
+            return row;
         }
 
         private static UnityEngine.Object LoadAsset(ScenePickerRow _row)

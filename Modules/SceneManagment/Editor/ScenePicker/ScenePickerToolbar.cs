@@ -56,7 +56,15 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 return;
             }
-            PopupWindow.Show(_buttonRect, new ScenePickerPopup());
+            try
+            {
+                PopupWindow.Show(_buttonRect, new ScenePickerPopup());
+            }
+            catch (System.ArgumentException exception)
+            {
+                // Unity refuses a popup position it cannot place (seen once while a scene was opening); a click again works.
+                Debug.LogWarning("[Scene system] Scene picker: Unity could not place the picker (" + exception.Message + "). Click it again.");
+            }
         }
 
         private static void OnSceneOpened(Scene _scene, OpenSceneMode _mode)

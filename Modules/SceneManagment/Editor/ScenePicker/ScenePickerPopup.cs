@@ -38,6 +38,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private static string lastQuery = string.Empty;
         private static int lastTabIndex;
 
+        private VisualElement rootElement;
         private TabView tabView;
         private ToolbarSearchField searchField;
         private ListView listView;
@@ -87,6 +88,7 @@ namespace AbstractPixel.SceneManagement.Editor
         public override VisualElement CreateGUI()
         {
             VisualElement root = new VisualElement();
+            rootElement = root;
             root.AddToClassList("scene-picker");
             root.style.width = Width;
             AddStyleSheet(root);
@@ -101,7 +103,8 @@ namespace AbstractPixel.SceneManagement.Editor
 
             searchField = new ToolbarSearchField();
             searchField.AddToClassList("scene-picker__search");
-            searchField.SetValueWithoutNotify(lastQuery);
+            // Each open starts with an empty search, so the Recent section and the open group are what the eye meets first.
+            searchField.SetValueWithoutNotify(string.Empty);
             searchField.RegisterValueChangedCallback(_change => OnQueryChanged(_change.newValue));
             root.Add(searchField);
 
@@ -300,6 +303,15 @@ namespace AbstractPixel.SceneManagement.Editor
                 height += NextRowPeek;
             }
             listView.style.height = height;
+            emptyLabel.style.height = height;
+            // An explicit height: Unity sizes the popup from its root, and a root not laid out yet measured as NaN.
+            rootElement.style.height = ChromeHeight + height + MessageHeight();
+        }
+
+        private float MessageHeight()
+        {
+            bool hasMessage = !string.IsNullOrEmpty(messageLabel.text);
+            return hasMessage ? 32f : 0f;
         }
 
         private void UpdatePlaceholder()
@@ -342,6 +354,7 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             messageLabel.text = _text;
             messageLabel.style.display = DisplayStyle.Flex;
+            FitListHeight();
         }
 
         private void BindRow(VisualElement _element, int _index)

@@ -18,6 +18,10 @@
     flex-grow: 1;
 }
 
+/* Like Unity's Add Component list: the highlighted row is blue even while the search field has the keyboard. */
+.scene-picker__list .unity-collection-view__item--selected {
+    background-color: var(--unity-colors-highlight-background);
+}
 .scene-picker__empty {
     padding: 16px 12px;
     -unity-text-align: middle-center;

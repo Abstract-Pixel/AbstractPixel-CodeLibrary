@@ -14,6 +14,10 @@ namespace AbstractPixel.SceneManagement.Editor
     [InitializeOnLoad]
     public static class ScenePickerProject
     {
+        /// <summary>Probes and tests replace these to read an empty or fake project; null means the real project.</summary>
+        internal static System.Func<List<ScenePickerSceneInfo>> FakeScenes;
+        internal static System.Func<List<ScenePickerGroupInfo>> FakeGroups;
+
         private static List<ScenePickerSceneInfo> scenes;
         private static List<ScenePickerGroupInfo> groups;
         private static List<ScenePickerSetInfo> sets;
@@ -109,6 +113,11 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 return scenes;
             }
+            if (FakeScenes != null)
+            {
+                scenes = FakeScenes();
+                return scenes;
+            }
             scenes = new List<ScenePickerSceneInfo>();
             foreach (string guid in AssetDatabase.FindAssets("t:" + nameof(SceneAsset)))
             {
@@ -129,6 +138,11 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             if (groups != null)
             {
+                return groups;
+            }
+            if (FakeGroups != null)
+            {
+                groups = FakeGroups();
                 return groups;
             }
             groups = new List<ScenePickerGroupInfo>();
