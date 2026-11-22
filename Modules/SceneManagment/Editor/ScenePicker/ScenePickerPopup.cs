@@ -47,6 +47,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private List<ScenePickerRow> allRows = new List<ScenePickerRow>();
         private List<ScenePickerRow> shownRows = new List<ScenePickerRow>();
         private bool hasPicked;
+        private bool isForgotten;
         private string[] searchWords = new string[0];
 
         /// <summary>True while a scene picker popup is open, so the button never opens a second one.</summary>
@@ -75,14 +76,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         public override void OnClose()
         {
-            IsOpen = false;
-            if (Current == this)
-            {
-                Current = null;
-            }
-            ScenePickerProject.Changed -= OnProjectChanged;
-            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-            AssemblyReloadEvents.beforeAssemblyReload -= Close;
+            Forget();
         }
 
         public override VisualElement CreateGUI()
@@ -219,10 +213,38 @@ namespace AbstractPixel.SceneManagement.Editor
 
         public void Close()
         {
-            if (editorWindow != null)
+            if (editorWindow == null)
+            {
+                Forget();
+                return;
+            }
+            try
             {
                 editorWindow.Close();
             }
+            catch (System.Exception)
+            {
+                // Unity's window was only half made (a show that failed); forget it so the next click opens a new one.
+                Forget();
+            }
+        }
+
+        /// <summary>Clears the open-picker state and its event subscriptions, once, even when Unity never called OnClose.</summary>
+        internal void Forget()
+        {
+            if (isForgotten)
+            {
+                return;
+            }
+            isForgotten = true;
+            IsOpen = false;
+            if (Current == this)
+            {
+                Current = null;
+            }
+            ScenePickerProject.Changed -= OnProjectChanged;
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+            AssemblyReloadEvents.beforeAssemblyReload -= Close;
         }
 
         private VisualElement Footer()
