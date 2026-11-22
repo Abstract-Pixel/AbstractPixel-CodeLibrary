@@ -1,100 +1,69 @@
 using System;
-using System.Linq;
-using System.Reflection;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
 namespace AbstractPixel.SaveSystem.Editor
 {
-    [InitializeOnLoad]
+    /// <summary>
+    /// Checks the project's saved scripts after every compile: a script whose save file class has no row in the
+    /// save system config would save nothing, so it is reported with a link to the script. SetupPlayModeGuard
+    /// blocks play mode on the same problem instead of only reporting it there.
+    /// </summary>
     public static class SaveSystemBodyGuard
     {
-
-        static SaveSystemBodyGuard()
-        {
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-        }
-
-
         [DidReloadScripts]
         public static void OnScriptsReloaded()
         {
-            ValidateCodebase(out bool _errorFound);
-
+            ValidateCodebase();
         }
 
-        private static void OnPlayModeStateChanged(PlayModeStateChange _state)
+        private static void ValidateCodebase()
         {
-            if (_state != PlayModeStateChange.ExitingEditMode) return;
-
-            ValidateCodebase(out bool errorFound);
-
-            if (errorFound)
+            SaveSystemConfigSO config = SaveSystemConfigFinder.FindInProject();
+            if (config == null)
             {
-                EditorApplication.isPlaying = false;
-                EditorUtility.DisplayDialog("Save System Integrity Error",
-                        "Critical Save System errors found in your scripts.\n\n" +
-                        "Play Mode has been blocked to prevent data corruption.\n\n" +
-                        "Check the Console for specific script names.", "Ok,Will fix it");
+                return;
+            }
+
+            foreach (Type savedType in TypeCache.GetTypesDerivedFrom<MonoBehaviour>())
+            {
+                ReportSaveFileWithNoRow(savedType, config);
             }
         }
 
-        private static void ValidateCodebase(out bool errorFound)
+        private static void ReportSaveFileWithNoRow(Type savedType, SaveSystemConfigSO config)
         {
-            errorFound = false;
-
-            TypeCache.TypeCollection allScriptTypes = TypeCache.GetTypesDerivedFrom<MonoBehaviour>();
-
-            foreach (Type type in allScriptTypes)
+            // A test fixture's made-up save file class never belongs in the project's config.
+            bool isTestClass = savedType.Assembly.GetName().Name.EndsWith("Tests", StringComparison.Ordinal);
+            if (isTestClass || !SavedScript.IsSaved(savedType))
             {
-                if (type.Assembly.FullName.StartsWith("Unity"))
-                {
-                    continue;
-                }
-
-                SavableAttribute saveableAttribute = type.GetCustomAttribute<SavableAttribute>();
-                bool hasSaveInterface = ImplementsGenericInterface(type, typeof(ISavable<>));
-
-                if ((saveableAttribute != null))
-                {
-                    if ((!hasSaveInterface))
-                    {
-                        errorFound = true;
-                        UnityEngine.Object scriptAsset = GetScriptAssetFromType(type);
-                        string scriptLink = GetHyperlink(scriptAsset, type.Name);
-                        Debug.LogError($"<color=red>[SaveSystem Critical]</color> The script {scriptLink} has the <b>[Saveable]</b> attribute but DOES NOT implement <b>ISaveable<></b> Interface.\n" +
-                               $"You must implement the interface to ensure data Capture/Restore works.", scriptAsset);
-
-                    }
-                }
-                else
-                {
-                    if (hasSaveInterface)
-                    {
-                        errorFound = true;
-                        UnityEngine.Object scriptAsset = GetScriptAssetFromType(type);
-                        string link = GetHyperlink(scriptAsset, type.Name);
-                        Debug.LogError($"<color=red>[SaveSystem Critical]</color> The script {link} implements <b>ISaveable<></b> Interface but is missing the <b>[Saveable(Category)]</b> attribute.\n" +
-                           $"The Save System will ignore this script without the attribute.", scriptAsset);
-                    }
-                }
+                return;
             }
+
+            string problem = SaveFileRowCheck.ProblemWith(savedType, config);
+            if (problem == null)
+            {
+                return;
+            }
+
+            UnityEngine.Object scriptAsset = GetScriptAssetFromType(savedType);
+            string scriptLink = GetHyperlink(scriptAsset, savedType.Name);
+            SaveLog.Warning($"[SaveSystem] {scriptLink} {problem}", scriptAsset);
         }
+
         private static string GetHyperlink(UnityEngine.Object asset, string fallbackName)
         {
-            if (asset == null) return $"<b>'{fallbackName}'</b>";
+            if (asset == null)
+            {
+                return $"'{fallbackName}'";
+            }
 
             string path = AssetDatabase.GetAssetPath(asset);
             string guid = AssetDatabase.AssetPathToGUID(path);
 
-            // This syntax creates a clickable link in Unity Console
-            return $"<a href=\"asset:{guid}\"><b>'{fallbackName}'</b></a>";
-        }
-
-        private static bool ImplementsGenericInterface(Type _type, Type _genericInterface)
-        {
-            return _type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == _genericInterface);
+            // This syntax makes a clickable link in the Unity console.
+            return $"<a href=\"asset:{guid}\">'{fallbackName}'</a>";
         }
 
         private static UnityEngine.Object GetScriptAssetFromType(Type _type)
@@ -108,10 +77,8 @@ namespace AbstractPixel.SaveSystem.Editor
                 {
                     return script;
                 }
-
             }
             return null;
         }
-
     }
 }

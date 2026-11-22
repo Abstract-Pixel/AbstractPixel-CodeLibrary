@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 Spawned Copies - Save System Samples</title>
+<meta name="description" content="Goblins spawned from one prefab, each with its own save ID from SetSaveId; defeated ones stay defeated.">
+<link rel="stylesheet" href="../../Documentation/assets/docs.css">
+</head>
+<body data-root="../../Documentation/">
+<main class="solo">
+<p class="crumbs"><a href="../../Documentation/index.html">Save System</a> › <a href="../README.html">Samples</a> › 05</p>
+<h1>05 Spawned Copies <span class="lv lv2">2 choices</span></h1>
+<p class="lede">Goblins spawned from one prefab, each saving its own health. A defeated goblin stays defeated.</p>
+<dl>
+<dt>Scene</dt><dd>Spawned Copies</dd>
+<dt>Scripts</dt><dd>Goblin.cs, GoblinSpawner.cs, SpawnedCopiesScreen.cs</dd>
+<dt>Prefab</dt><dd>Goblin.prefab</dd>
+<dt>Save file</dt><dd>Built-in <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">GameProfile</a> (nothing to add to the config)</dd>
+<dt>Guide</dt><dd><a href="../../Documentation/Pages/save-objects.html">Save plain classes, ScriptableObjects and spawned copies</a></dd>
+</dl>
+
+<h2>Try it</h2>
+<ol>
+<li><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/05 Spawned Copies/Spawned Copies.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/05 Spawned Copies/Spawned Copies.unity">Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/05 Spawned Copies/Spawned Copies.unity</button> opens the scene in Unity, then press Play. Three goblins spawn.</li>
+<li><b>Hit</b> one goblin once and another twice. <b>Defeat</b> the third. Press <b>Save</b>.</li>
+<li>Press <b>Reload scene</b>, or stop and press Play again.</li>
+</ol>
+<div class="see"><strong>You should see</strong>Each goblin has the health it had, and the defeated one doesn't come back. <b>Bring every goblin back</b> spawns it again with full health.</div>
+
+<h2>The lines that matter</h2>
+<figure class="code">
+<figcaption>Goblin.cs, GoblinSpawner.cs</figcaption>
+<pre data-source="Scripts/Goblin.cs Scripts/GoblinSpawner.cs"><code>[Save] int health = MaxHealth;                      // Goblin, on the prefab with a Savable Bridge
+Goblin goblin = Instantiate(goblinPrefab, spawnPoint.position, spawnPoint.rotation);
+goblin.SetSaveId($"goblin-{spawnPoint.name}");      // right after Instantiate, before its Start
+SaveActions.Forget(goblin.gameObject);              // a defeated copy's data goes away
+Destroy(goblin.gameObject);
+[Save] List&lt;string&gt; defeatedSpawnPoints = new List&lt;string&gt;();  // GoblinSpawner, in the scene: who not to spawn</code></pre>
+</figure>
+<p>Every copy of a prefab has the same <a class="term" href="../../Documentation/api/SavableBridge.html#savable-bridge">Savable Bridge</a>, so each one needs its own <a class="term" href="../../Documentation/api/SavableBridge.html#save-id">save ID</a>. Pick one that is the same every time the game runs, such as the spawn point's name, never a random number. A copy spawned with no <code><a class="term" href="../../Documentation/api/SavedScriptExtensions.html">SetSaveId</a></code> isn't saved and logs one warning naming it. Two live copies with the same ID log one error, and only the first is saved.</p>
+<p><code>Forget</code> on a <a class="term" href="../../Documentation/api/SavedScriptExtensions.html#spawned-copy">spawned copy</a> removes its data. It doesn't stop the copy being spawned again, so the spawner remembers that itself.</p>
+
+<nav>
+<a href="../04%20Pick%20A%20Save%20File/README.html">← 04 Pick A Save File</a>
+<a href="../README.html">All samples</a>
+<a href="../../Documentation/index.html">Save system guide</a>
+<a href="../06%20Custom%20Data%20With%20ISavable/README.html">06 Custom Data With ISavable →</a>
+</nav>
+<p class="crumbs">The guide also opens from <b>Tools &gt; External Project Tools &gt; Save System &gt; Open Guide</b>.</p>
+</main>
+<script src="../../Documentation/assets/glossary-data.js" defer></script>
+<script src="../../Documentation/assets/docs.js"></script>
+</body>
+</html>

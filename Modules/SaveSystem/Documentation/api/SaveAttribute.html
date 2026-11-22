@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SaveAttribute</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="[Save] marks a field to save and restore automatically, keyed by its name.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SaveAttribute.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SaveAttribute <span class="lv lv1">1 daily code</span></h1>
+<p class="lede" id="saved-field">Marks a field to save and restore automatically, keyed by its name, with no other code. Works on a MonoBehaviour, a ScriptableObject, or a plain class registered with <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.Register</code>.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Attribute</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveAttribute.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveAttribute.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveAttribute.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveAttribute.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveAttribute.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-core">Core restore pipeline</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-data.html">Save, restore and react to data</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity">Modules/SaveSystem/Samples/01 Save A Field/Save A Field.unity</button></div>
+<a class="try-open" href="../../Samples/01 Save A Field/README.html" target="_blank" rel="noopener">Open sample 01: Save A Field &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 01 &middot; Save A Field</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<figure class="code">
+<figcaption>Health.cs: a saved field</figcaption>
+<pre><code class="cs">public class Health : MonoBehaviour
+{
+    [Save] int current = 100;
+}</code></pre>
+</figure>
+<p>Renaming the field? Keep its data with <code>Formerly</code>, set to the field's old name:</p>
+<figure class="code">
+<figcaption>Health.cs: renaming "current" to "health" without losing saved data</figcaption>
+<pre><code class="cs">public class Health : MonoBehaviour
+{
+    [Save(Formerly = "current")] int health = 100;
+}</code></pre>
+</figure>
+<p>Data isn't plain fields? Use <a class="type" href="ISavable.html">ISavable&lt;TData&gt;</a> instead.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Properties</h3>
+<div class="members">
+<details id="former-field-name">
+<summary><code class="cs">public string Formerly { get; set; }</code><span class="desc"><span class="kind k-prop">property</span> The field's old name. Read when the new name is missing from a save file.</span></summary>
+<div class="body">The <strong>former field name</strong> is the name a saved field had before it was renamed. Set <code>Formerly</code> to it once, right after the rename, and leave it: saved data under the old name still loads, so the rename never loses it.</div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<p id="blocking-mistake">A <strong>blocking mistake</strong> is one the editor can see at a glance, such as <code>[Save]</code> on a GameObject field, or on a class that also implements <code><a class="term" href="../api/ISavable.html">ISavable</a></code>. It logs one error naming the fix, stops play mode from starting, and fails the build.</p>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>"[Save] on a GameObject field" error, play mode won't start</dt>
+<dd>The save system can't serialize a GameObject or Component reference. Save an ID or index instead.</dd>
+<dt>A renamed field reset to its new-game value</dt>
+<dd>Add <code>Formerly</code> with the field's old name so older saves still load into it.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a class="type" href="SaveIdAttribute.html">SaveIdAttribute</a>, <a class="type" href="SavableBridge.html">SavableBridge</a>, <a href="../Pages/save-data.html">Save, restore and react to data</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SaveEventBus</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveEventBus raises load and save events. Load events are sticky: a late subscriber is called right away.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SaveEventBus.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SaveEventBus <span class="lv lv2">2 choices</span></h1>
+<p class="lede">Raises load events and save events. A <strong id="load-event">load event</strong> fires when saved data is ready: one save file restored, or everything restored. Load events and <code>OnGameProfileOpened</code> are sticky: a script that subscribes after the event already happened is called right away. A Scene save file raises its load event once per scene, one frame after that scene's scripts start.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>Static class</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/PublicAPI/SaveEventBus.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveEventBus.cs" title="Ping Modules/SaveSystem/Runtime/PublicAPI/SaveEventBus.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/PublicAPI/SaveEventBus.cs" title="Open Modules/SaveSystem/Runtime/PublicAPI/SaveEventBus.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-publicapi">Public API</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/events.html">React to loads and saves</a>.</p>
+<details class="try pink">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity">Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity</button></div>
+<a class="try-open" href="../../Samples/04 Pick A Save File/README.html" target="_blank" rel="noopener">Open sample 04: Pick A Save File &rarr;</a>
+</summary>
+<div class="try-body">
+<p>Sample 04 &middot; Pick A Save File</p>
+</div>
+</details>
+</section>
+
+<section id="code">
+<h2>In code<a class="anchor" href="#code">#</a></h2>
+<p>Add a typed load listener for one save file, or subscribe to an event directly for all of them.</p>
+<figure class="code">
+<figcaption>Listening for a save file's load event</figcaption>
+<pre><code class="cs">SaveEventBus.AddLoadListener&lt;GameSaveFiles.Ghosts&gt;(ShowGhosts);
+
+void ShowGhosts()
+{
+    // Runs once this file's data has restored, and right away if it already has.
+}</code></pre>
+</figure>
+<p>See <a href="../Pages/events.html">React to loads and saves</a> for <code>OnSaveFailed</code> and the whole-save events.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Events</h3>
+<div class="members">
+<details>
+<summary><code class="cs">public static event Action&lt;Type&gt; OnLoadCompleted</code><span class="desc"><span class="kind k-event">event</span> One save file was read and every registered object in it restored. Sticky.</span></summary>
+<div class="body">Gives the save file class. A Scene save file raises it once per scene.</div>
+</details>
+<details>
+<summary><code class="cs">public static event Action OnLoadAllCompleted</code><span class="desc"><span class="kind k-event">event</span> Global data and the open game profile are restored. Sticky.</span></summary>
+<div class="body">Raised each time a <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> opens.</div>
+</details>
+<details>
+<summary><code class="cs">public static event Action&lt;GameProfile&gt; OnGameProfileOpened</code><span class="desc"><span class="kind k-event">event</span> A game profile opened. Sticky.</span></summary>
+<div class="body">Subscribing while one is already open calls the handler right away.</div>
+</details>
+<details>
+<summary><code class="cs">public static event Action OnSaveAllCompleted</code><span class="desc"><span class="kind k-event">event</span> SaveAll finished writing every changed save file.</span></summary>
+<div class="body"></div>
+</details>
+<details>
+<summary><code class="cs">public static event Action&lt;Type&gt; OnSaveCompleted</code><span class="desc"><span class="kind k-event">event</span> One save file was written.</span></summary>
+<div class="body"><code>Save&lt;TFile&gt;()</code> raises it for that file. <code>SaveAll</code> raises it once per file it wrote.</div>
+</details>
+<details id="save-failed">
+<summary><code class="cs">public static event Action&lt;Type, string&gt; OnSaveFailed</code><span class="desc"><span class="kind k-event">event</span> A save file could not be written.</span></summary>
+<div class="body">Gives the save file class and a reason to show the player. The previous good save on disk is untouched.</div>
+</details>
+</div>
+<h3>Methods</h3>
+<div class="members">
+<details id="typed-load-listener">
+<summary><code class="cs">public static void AddLoadListener&lt;TFile&gt;(Action handler)</code><span class="desc"><span class="kind k-method">method</span> Calls <code>handler</code> every time <code>TFile</code>'s load event fires.</span></summary>
+<div class="body">A <strong>typed load listener</strong>: a load event handler for one save file class. Sticky like every load event — subscribing after the file already loaded calls <code>handler</code> right away.</div>
+</details>
+<details>
+<summary><code class="cs">public static void RemoveLoadListener&lt;TFile&gt;(Action handler)</code><span class="desc"><span class="kind k-method">method</span> Stops <code>handler</code> from hearing about <code>TFile</code>'s load event.</span></summary>
+<div class="body"></div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>A handler never runs</dt>
+<dd>Check it subscribed to the right save file class with <code>AddLoadListener&lt;TFile&gt;</code>, not a different one.</dd>
+<dt>An error names a handler and "threw"</dt>
+<dd>That handler threw an exception. The save system logs it and keeps calling the other handlers; fix the one named in the message.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a href="../Pages/events.html">React to loads and saves</a>, <a class="type" href="SaveActions.html">SaveActions</a>, <a class="type" href="ISaveFile.html">ISaveFile</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

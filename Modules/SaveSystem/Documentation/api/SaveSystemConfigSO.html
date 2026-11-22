@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SaveSystemConfigSO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveSystemConfigSO is the one settings asset for the save system, at Assets/Resources/SaveSystemConfig.asset.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="api/SaveSystemConfigSO.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>SaveSystemConfigSO <span class="lv lv0">0 no code</span></h1>
+<p class="lede" id="save-system-config">The one settings asset for the save system, at <code>Assets/Resources/SaveSystemConfig.asset</code>. It is the source of truth for folders, file type, the save file list and <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> names. <strong>Tools &gt; External Project Tools &gt; Save System &gt; Create Config</strong> makes it.</p>
+<p id="save-system-metadata">Facts about the save system as a whole, not any one game profile — such as which game profile was opened most recently, so the game can reopen it at startup — are <strong>save system metadata</strong>. It's kept in Global, separately from this config asset.</p>
+<dl class="meta">
+<dt>Kind</dt><dd>ScriptableObject</dd>
+<dt>Namespace</dt><dd><code>AbstractPixel.SaveSystem</code></dd>
+<dt>File</dt><dd><code>Abstract Pixel Library/Modules/SaveSystem/Runtime/Config/SaveSystemConfigSO.cs</code> <span class="file-actions"><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveSystemConfigSO.cs" title="Ping Modules/SaveSystem/Runtime/Config/SaveSystemConfigSO.cs in Unity's Project window">Ping in Unity</button><button type="button" class="scene-btn file-btn" data-file="Packages/com.abstractpixel.library/Modules/SaveSystem/Runtime/Config/SaveSystemConfigSO.cs" title="Open Modules/SaveSystem/Runtime/Config/SaveSystemConfigSO.cs in your default .cs editor">Open in Visual Studio</button></span></dd>
+<dt>Part of</dt><dd><a href="../Pages/code-map.html#runtime-config">Config</a></dd>
+</dl>
+
+<section id="try">
+<h2>Try it<a class="anchor" href="#try">#</a></h2>
+<p>For more detail, go to <a class="chip" href="../Pages/save-data.html#setup">Set up a project</a>.</p>
+</section>
+
+<section id="inspector">
+<h2>In the Inspector<a class="anchor" href="#inspector">#</a></h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Inspector label</th><th>API member</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>Use Debug Path</td><td><a href="#member-usedebugpath"><code>UseDebugPath</code></a></td><td>Saves into a folder inside the project instead of the player's save folder, so you can read the files while you work.</td></tr>
+<tr><td><a class="term" href="../api/GameProfile.html#game-profile">Game Profile</a> Guid Length</td><td><a href="#member-gameprofileguidlength"><code>GameProfileGuidLength</code></a></td><td>How many characters a game profile's folder name has.</td></tr>
+<tr><td>Default Game Profile Name</td><td><a href="#member-defaultgameprofilename"><code>DefaultGameProfileName</code></a></td><td>The name every new game profile gets, followed by its slot number.</td></tr>
+<tr><td>Startup Policy</td><td><a href="#member-startuppolicy"><code>StartupPolicy</code></a></td><td>Whether the save system opens a game profile on its own at startup.</td></tr>
+<tr><td>Primary File Extension</td><td><a href="#member-primaryfileextension"><code>PrimaryFileExtension</code></a></td><td>The file type save files are written as.</td></tr>
+<tr><td>Save On Quit</td><td><a href="#member-saveonquit"><code>SaveOnQuit</code></a></td><td>Saves every save file when the game quits.</td></tr>
+<tr><td>Save On Focus Loss</td><td><a href="#member-saveonfocusloss"><code>SaveOnFocusLoss</code></a></td><td>Saves every save file when the game loses focus.</td></tr>
+<tr><td>Save On Scene Unload</td><td><a href="#member-saveonsceneunload"><code>SaveOnSceneUnload</code></a></td><td>Saves every save file when a scene unloads.</td></tr>
+<tr><td>Autosave Interval Minutes</td><td><a href="#member-autosaveintervalminutes"><code>AutosaveIntervalMinutes</code></a></td><td>Saves every save file on this interval while the game runs. 0 turns it off.</td></tr>
+<tr><td>Game Save Files Script Path</td><td><a href="#member-gamesavefilesscriptpath"><code>GameSaveFilesScriptPath</code></a></td><td>Where the editor writes <code>GameSaveFiles.cs</code>.</td></tr>
+</tbody>
+</table>
+</div>
+<p id="autosave"><strong>Autosave</strong> is saving every save file without the game asking: on quit, on focus loss, when a scene unloads, or every few minutes — the four checkboxes above, all off by default.</p>
+<p id="save-file-list">The <strong>save file list</strong> itself is drawn below these fields: the built-in save files first, then the game save files and any a library module adds. Each row has a name, a <a class="term" href="../api/SaveLocation.html#save-location">save location</a>, and a <strong id="backup">Backup</strong> checkbox — tick it to keep the previous good copy of that save file in the <code>Backups</code> folder, loaded instead if the file on disk is corrupt. See <a href="../Pages/save-files.html">Choose where data goes</a>.</p>
+</section>
+
+<section id="members">
+<h2>Members<a class="anchor" href="#members">#</a></h2>
+<h3>Properties</h3>
+<div class="members">
+<details id="member-autosaveintervalminutes">
+<summary><code class="cs">public float AutosaveIntervalMinutes</code><span class="desc"><span class="kind k-prop">property</span> Minutes between autosaves. 0 turns it off.</span></summary>
+<div class="body"></div>
+</details>
+<details id="member-defaultgameprofilename">
+<summary><code class="cs">public string DefaultGameProfileName</code><span class="desc"><span class="kind k-prop">property</span> The default name for a new game profile.</span></summary>
+<div class="body"></div>
+</details>
+<details id="member-gameprofileguidlength">
+<summary><code class="cs">public int GameProfileGuidLength</code><span class="desc"><span class="kind k-prop">property</span> Characters in a game profile's folder name.</span></summary>
+<div class="body"></div>
+</details>
+<details id="member-gamesavefilesscriptpath">
+<summary><code class="cs">public string GameSaveFilesScriptPath</code><span class="desc"><span class="kind k-prop">property</span> Where the editor writes GameSaveFiles.cs.</span></summary>
+<div class="body"></div>
+</details>
+<details id="member-primaryfileextension">
+<summary><code class="cs">public FileExtension PrimaryFileExtension</code><span class="desc"><span class="kind k-prop">property</span> The file type save files are written as.</span></summary>
+<div class="body"></div>
+</details>
+<details id="member-saveonfocusloss">
+<summary><code class="cs">public bool SaveOnFocusLoss</code><span class="desc"><span class="kind k-prop">property</span> Autosave when the game loses focus.</span></summary>
+<div class="body"></div>
+</details>
+<details id="member-saveonquit">
+<summary><code class="cs">public bool SaveOnQuit</code><span class="desc"><span class="kind k-prop">property</span> Autosave when the game quits.</span></summary>
+<div class="body"></div>
+</details>
+<details id="member-saveonsceneunload">
+<summary><code class="cs">public bool SaveOnSceneUnload</code><span class="desc"><span class="kind k-prop">property</span> Autosave when a scene unloads.</span></summary>
+<div class="body"></div>
+</details>
+<details id="member-startuppolicy">
+<summary><code class="cs">public SaveStartupPolicy StartupPolicy</code><span class="desc"><span class="kind k-prop">property</span> Whether a game profile opens automatically at startup.</span></summary>
+<div class="body"></div>
+</details>
+<details id="member-usedebugpath">
+<summary><code class="cs">public bool UseDebugPath</code><span class="desc"><span class="kind k-prop">property</span> Saves inside the project instead of the player's save folder.</span></summary>
+<div class="body"></div>
+</details>
+</div>
+</section>
+
+<section id="wrong">
+<h2>If it goes wrong<a class="anchor" href="#wrong">#</a></h2>
+<details class="wrong"><summary>Show fixes</summary>
+<dl>
+<dt>"Can't find the save system config" in the Console</dt>
+<dd>Run Create Config. With no config, save calls do nothing and the game keeps running.</dd>
+<dt>Two configs after a merge</dt>
+<dd>Only the asset at <code>Assets/Resources/SaveSystemConfig.asset</code> is read. Delete the other one.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: <a href="../Pages/save-data.html#setup">Set up a project</a>, <a href="../Pages/save-files.html">Choose where data goes</a>, <a class="type" href="SaveStartupPolicy.html">SaveStartupPolicy</a>, <a class="type" href="FileExtension.html">FileExtension</a>.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

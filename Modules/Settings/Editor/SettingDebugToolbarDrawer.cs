@@ -137,126 +137,60 @@ namespace AbstractPixel.Settings.Editor
                 return;
             }
 
-            bool isSaveConfigFound = FindSaveSystemConfigInProject(out SaveSystemConfigSO saveConfig);
-            if (!isSaveConfigFound)
-            {
-                return;
-            }
-
-            SavePathGenerator.Initialize(saveConfig);
-            SaveCatgeoryDefinition settingsDefinition = saveConfig.GetCategoryDefinition(SaveCategory.Settings);
-
-            bool isSettingsSaveDataUpdated = ReadAndWriteFileWithUpdatedSettings(actionToExecute, setting, settingsDefinition);
-            if (!isSettingsSaveDataUpdated)
-            {
-                return;
-            }
+            ReadAndWriteFileWithUpdatedSettings(actionToExecute, setting);
         }
 
-        private static bool ReadAndWriteFileWithUpdatedSettings(Action<ISettingBackend, SettingsDTO> actionToExecute, ISettingBackend setting, SaveCatgeoryDefinition settingsDefinition)
+        // SaveStorage takes the folder, file type and Backup box from the save system config, so the toolbar reads
+        // and writes the same Settings file the game does.
+        private static bool ReadAndWriteFileWithUpdatedSettings(Action<ISettingBackend, SettingsDTO> actionToExecute, ISettingBackend setting)
         {
-            if (settingsDefinition == null)
+            if (SaveStorage.ReadText<SaveFiles.Settings>(out string settingsJson) == false)
             {
-                Debug.LogError("Could not find a 'Settings' category definition in SaveSystemConfigSO.");
+                Debug.LogWarning("[Settings System] The toolbar could not read the saved Settings file. If no error above says why, run the game and save once to create it.");
                 return false;
             }
 
-            // 1. Read the existing save file
-            string fullFilePath = SavePathGenerator.GetPath(settingsDefinition, string.Empty);
-            JsonSerializer serializer = new JsonSerializer();
-            FileDataStorageService storageService = new FileDataStorageService();
+            SaveJson serializer = new SaveJson();
+            serializer.TryDeserialize(settingsJson, out SaveFileData settingsFile);
 
-            string existingJson = storageService.LoadFile(fullFilePath);
-
-            if (serializer.TryDeserialize(existingJson, out SaveFileData loadedFileData) == false)
+            foreach (KeyValuePair<string, SaveFileEntry> savedEntry in settingsFile.Entries)
             {
-                Debug.LogError("Failed to deserialize the existing save file.");
-                return false;
-            }
-
-            // 2. Variables to hold BOTH layers of IDs so we don't lose them
-            string targetGameObjectId = null;
-            string targetComponentId = null;
-            SettingsDTO targetDto = null;
-            Dictionary<string, object> targetInnerDictionary = null;
-
-            // 3. Drill down Level 1 (The SavableBridge GameObject ID)
-            foreach (KeyValuePair<string, object> gameObjectKvp in loadedFileData.DataMap)
-            {
-                // Convert the raw JSON object into the inner dictionary
-                Dictionary<string, object> innerDictionary = SaveDataConverter.Convert<Dictionary<string, object>>(gameObjectKvp.Value);
-                if (innerDictionary == null) continue;
-
-                // 4. Drill down Level 2 (The Component ID)
-                foreach (KeyValuePair<string, object> componentKvp in innerDictionary)
+                bool isSettingsData = TryReadSettingsData(serializer, savedEntry.Value, out SettingsDTO settingsData);
+                if (isSettingsData == false)
                 {
-                    SettingsDTO dto = SaveDataConverter.Convert<SettingsDTO>(componentKvp.Value);
-
-                    // If it has our dictionaries, we found our target!
-                    if (dto != null && dto.FloatSettings != null && dto.IntegerSettings != null)
-                    {
-                        targetGameObjectId = gameObjectKvp.Key;
-                        targetComponentId = componentKvp.Key;
-                        targetDto = dto;
-                        targetInnerDictionary = innerDictionary;
-                        break;
-                    }
+                    continue;
                 }
 
-                if (targetDto != null) break; // Stop searching if we found it
+                actionToExecute.Invoke(setting, settingsData);
+                savedEntry.Value.Data = serializer.ToToken(settingsData);
+                serializer.TrySerialize(settingsFile, out string updatedSettingsJson);
+                return SaveStorage.WriteText<SaveFiles.Settings>(updatedSettingsJson);
             }
 
-            if (string.IsNullOrEmpty(targetGameObjectId) || string.IsNullOrEmpty(targetComponentId) || targetDto == null)
-            {
-                Debug.LogWarning("[Settings System] Could not find a valid SettingsDTO in the save file. Run the game and save once to initialize it.");
-                return false;
-            }
-
-            // 5. Execute the requested action (Modify the exact setting in the DTO)
-            actionToExecute.Invoke(setting, targetDto);
-
-            // 6. Carefully pack the data back together preserving BOTH IDs
-            targetInnerDictionary[targetComponentId] = targetDto;          // Put DTO back into Component Level
-            loadedFileData.DataMap[targetGameObjectId] = targetInnerDictionary; // Put Component Level back into GameObject Level
-
-            // 7. Re-serialize and save to disk
-            if (serializer.TrySerialize(loadedFileData, out string outputJson) == true)
-            {
-                storageService.SaveFile(outputJson, fullFilePath);
-                AssetDatabase.Refresh();
-            }
-
-            return true;
+            Debug.LogWarning($"[Settings System] The Settings file at '{SaveStorage.GetFilePath<SaveFiles.Settings>()}' holds no settings data yet. Run the game and save once to create it.");
+            return false;
         }
 
-        private bool FindSaveSystemConfigInProject(out SaveSystemConfigSO saveConfig)
+        // Another saved object could share the Settings file, so an entry that isn't settings data is skipped, not an error.
+        private static bool TryReadSettingsData(SaveJson serializer, SaveFileEntry savedEntry, out SettingsDTO settingsData)
         {
-            saveConfig = default;
-            // 1. First, try searching by the exact Type name (Make sure it matches your class name exactly)
-            string[] foundGuids = AssetDatabase.FindAssets("t:SaveSystemConfigSO");
-
-            // 2. FALLBACK: If Unity's package boundary blocks the type search, search by the default file name
-            if (foundGuids.Length == 0)
+            settingsData = null;
+            if (savedEntry == null || savedEntry.Data == null)
             {
-                // This searches for any ScriptableObject literally named "SaveSystemConfigSO"
-                foundGuids = AssetDatabase.FindAssets("SaveSystemConfigurationSO t:ScriptableObject");
-            }
-
-            if (foundGuids.Length == 0)
-            {
-                Debug.LogError("[Settings System] Could not find the SaveSystemConfigSO asset in the project! Did you create it via the Create menu?");
                 return false;
             }
 
-            string configAssetPath = AssetDatabase.GUIDToAssetPath(foundGuids[0]);
-            saveConfig = AssetDatabase.LoadAssetAtPath<SaveSystemConfigSO>(configAssetPath);
-            if (saveConfig == null)
+            try
             {
-                Debug.LogError($"[Settings System] Found an asset at {configAssetPath}, but it couldn't be loaded as SaveSystemConfigSO. Check your Assembly Definitions!");
+                settingsData = serializer.FromToken(savedEntry.Data, typeof(SettingsDTO)) as SettingsDTO;
+            }
+            catch (Exception)
+            {
                 return false;
             }
 
-            return true;
+            bool hasSettingsDictionaries = settingsData != null && settingsData.FloatSettings != null && settingsData.IntegerSettings != null;
+            return hasSettingsDictionaries;
         }
     }
 }

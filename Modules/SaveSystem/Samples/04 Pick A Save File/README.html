@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 Pick A Save File - Save System Samples</title>
+<meta name="description" content="ISaveIn&lt;TFile&gt; puts data in a Global, GameProfile or Scene file; Save&lt;TFile&gt;(), Reload&lt;TFile&gt;() and a typed load listener.">
+<link rel="stylesheet" href="../../Documentation/assets/docs.css">
+</head>
+<body data-root="../../Documentation/">
+<main class="solo">
+<p class="crumbs"><a href="../../Documentation/index.html">Save System</a> › <a href="../README.html">Samples</a> › 04</p>
+<h1>04 Pick A Save File <span class="lv lv2">2 choices</span></h1>
+<p class="lede">Each saved script picks its save file with <code><a class="term" href="../../Documentation/api/ISaveIn.html#save-file-choice">ISaveIn</a>&lt;TFile&gt;</code>. The volume goes in the Global <b>Settings</b> file every <a class="term" href="../../Documentation/api/GameProfile.html#game-profile">game profile</a> shares, the coins in the <b><a class="term" href="../../Documentation/api/GameProfile.html#game-profile">GameProfile</a></b> file, and the chests in the <b>Scene</b> file, across two scenes.</p>
+<dl>
+<dt>Scene</dt><dd>Pick A Save File Forest, Pick A Save File Cave</dd>
+<dt>Scripts</dt><dd>Chest.cs, PlayerCoins.cs, VolumeSetting.cs, PickASaveFileScreen.cs</dd>
+<dt>Save file</dt><dd>Built-in Settings (Global), GameProfile and Scene (nothing to add to the config)</dd>
+<dt>Guide</dt><dd><a href="../../Documentation/Pages/save-files.html">Choose where data goes</a></dd>
+</dl>
+
+<h2>Try it</h2>
+<ol>
+<li><button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity">Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity</button> opens the scene in Unity, then press Play.</li>
+<li>Press <b>Volume up</b>, <b>Add 5 coins</b> and <b>Open Chest 1</b>, then <b>Save everything</b>.</li>
+<li>Press <b>Go to Pick A Save File Cave</b>, then go back. Chest 1 is still open: each scene keeps its own chests.</li>
+<li>Press <b>Add 5 coins</b> and <b>Volume up</b>, then <b>Save only the settings</b>, then <b>Undo unsaved coins</b>. The coins go back; the volume stays.</li>
+<li>Press <b>New game profile</b>. The volume stays, the coins go back to 0, and the chests are closed.</li>
+<li>Press <b>Next game profile</b> to go back. The coins and the open chest return.</li>
+</ol>
+<div class="see"><strong>You should see</strong>Global data survives a new game profile. GameProfile and Scene data don't.</div>
+
+<h2>The lines that matter</h2>
+<figure class="code">
+<figcaption>Chest.cs, PlayerCoins.cs, VolumeSetting.cs, PickASaveFileScreen.cs</figcaption>
+<pre data-source="Scripts/Chest.cs Scripts/PlayerCoins.cs Scripts/VolumeSetting.cs Scripts/PickASaveFileScreen.cs"><code>public class Chest : MonoBehaviour, ISaveIn&lt;SaveFiles.Scene&gt;  // one file per scene, per game profile
+public class PlayerCoins : MonoBehaviour            // no ISaveIn: the GameProfile file
+public class VolumeSetting : MonoBehaviour, ISaveIn&lt;SaveFiles.Settings&gt;  // Global: shared by every game profile
+SaveActions.Save&lt;SaveFiles.Settings&gt;();             // write one file
+SaveActions.Reload&lt;SaveFiles.GameProfile&gt;();        // throw away unsaved changes to one file
+SaveEventBus.AddLoadListener&lt;SaveFiles.Scene&gt;(CountSceneFileLoad);  // sticky: hears files that loaded earlier</code></pre>
+</figure>
+<p>The config decides where each save file lives. A script only names the file's class. Use a built-in class (<code><a class="term" href="../../Documentation/api/SaveFiles.html">SaveFiles</a>.GameProfile</code>, <code>Scene</code>, <code>Settings</code>, <code>Input</code>, <code>Achievements</code>) or one of your own rows from <code>GameSaveFiles</code>.</p>
+<p>Reload the scene after opening another game profile. Objects from the old profile never write into the new one.</p>
+
+<h2>Next steps</h2>
+<ul>
+<li>A library module that needs a file no built-in one fits ships its own class with <code>[SaveFileDefaults("Ghost Runs", <a class="term" href="../../Documentation/api/SaveLocation.html#save-location">SaveLocation</a>.GameProfile)]</code>, and the editor adds its row to the config. See <a href="../../Documentation/Pages/save-files.html">Choose where data goes</a> in the guide.</li>
+</ul>
+
+<nav>
+<a href="../03%20Save%20Slots%20And%20Continue/README.html">← 03 Save Slots And Continue</a>
+<a href="../README.html">All samples</a>
+<a href="../../Documentation/index.html">Save system guide</a>
+<a href="../05%20Spawned%20Copies/README.html">05 Spawned Copies →</a>
+</nav>
+<p class="crumbs">The guide also opens from <b>Tools &gt; External Project Tools &gt; Save System &gt; Open Guide</b>.</p>
+</main>
+<script src="../../Documentation/assets/glossary-data.js" defer></script>
+<script src="../../Documentation/assets/docs.js"></script>
+</body>
+</html>

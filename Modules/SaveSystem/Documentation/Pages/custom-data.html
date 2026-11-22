@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Saving complex data with ISavable</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Full control over saved data with ISavable<TData>: CaptureData and RestoreData, and how repeated instances get their save IDs.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/custom-data.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Saving complex data with ISavable <span class="lv lv3">3 full control</span></h1>
+<p class="lede">When <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> fields aren't enough, move the data yourself with <code><a class="term" href="../api/ISavable.html">ISavable</a>&lt;TData&gt;</code>.</p>
+
+<section id="isavable">
+<h2>ISavable&lt;TData&gt;<a class="anchor" href="#isavable">#</a></h2>
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/06 Custom Data With ISavable/Custom Data With ISavable.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/06 Custom Data With ISavable/Custom Data With ISavable.unity">Modules/SaveSystem/Samples/06 Custom Data With ISavable/Custom Data With ISavable.unity</button></div>
+<a class="try-open" href="../../Samples/06 Custom Data With ISavable/README.html" target="_blank" rel="noopener">Open sample 06: Custom Data With ISavable →</a>
+</summary>
+<div class="try-body">
+<p>Sample 06 · Custom Data With <a class="term" href="../api/ISavable.html">ISavable</a></p>
+<ol>
+<li>Open the <b>Custom Data With ISavable</b> scene and press Play.</li>
+<li>Press <b>Find an item</b> a few times, then <b>Save</b> and <b>Reload scene</b>.</li>
+</ol>
+</div>
+</details>
+<p>Implement <a class="type" href="../api/ISavable.html">ISavable&lt;TData&gt;</a> when the saved shape differs from the live fields, the data needs a copy or a conversion on the way in and out, or the fields hold things JSON can't store. A class uses <code><a class="type" href="../api/SaveAttribute.html">[Save]</a></code> fields or <code>ISavable</code>, never both.</p>
+<figure class="code">
+<figcaption>Inventory.cs: capturing and restoring its own data</figcaption>
+<pre><code class="cs">public class Inventory : ISavable&lt;InventoryData&gt;
+{
+    public List&lt;string&gt; Items { get; private set; }
+
+    public Inventory()
+    {
+        Items = new List&lt;string&gt; { "Wooden Sword" };
+        SaveActions.Register(this, "player-inventory");
+    }
+
+    public InventoryData CaptureData()
+    {
+        return new InventoryData { Items = new List&lt;string&gt;(Items) };
+    }
+
+    public void RestoreData(InventoryData loadedData)
+    {
+        Items = new List&lt;string&gt;(loadedData.Items);
+    }
+}</code></pre>
+</figure>
+<figure class="code">
+<figcaption>InventoryData.cs: the plain shape that goes in the save file</figcaption>
+<pre><code class="cs">[Serializable]
+public class InventoryData
+{
+    public List&lt;string&gt; Items = new List&lt;string&gt;();
+}</code></pre>
+</figure>
+<p><code>CaptureData</code> hands the save system a copy, so later changes to <code>Items</code> never reach data that was already captured. <code>RestoreData</code> puts the saved items back. Register on the last line, since saved data may arrive inside that call.</p>
+<div class="see"><strong>Show the result</strong>The Saved Objects window lists "player-inventory" under the <a class="term" href="../api/GameProfile.html#game-profile">GameProfile</a> file, and the file on disk holds <code>InventoryData</code>'s shape, not <code>Inventory</code>'s:
+<pre class="out"><code>"player-inventory": { "Items": ["Wooden Sword", "Potion"] }</code></pre>
+</div>
+</section>
+
+<section id="numbering">
+<h2>Inventory, Inventory 2, Inventory 3<a class="anchor" href="#numbering">#</a></h2>
+<p>A plain class or <code><a class="term" href="../api/ISavable.html">ISavable</a></code> object with no custom <a class="term" href="../api/SavableBridge.html#save-id">save ID</a> uses its class name. A second live instance of the same class gets "Inventory 2", then "Inventory 3", in the order they register.</p>
+<figure class="code">
+<figcaption>Three inventories, three save IDs</figcaption>
+<pre><code class="cs">Inventory player = new Inventory();   // save ID "Inventory"
+Inventory ally = new Inventory();     // save ID "Inventory 2"
+Inventory vendor = new Inventory();   // save ID "Inventory 3"</code></pre>
+</figure>
+<p>The Saved Objects window shows all three as separate cards: Inventory, Inventory 2 and Inventory 3, each with its own Items. If the order these register in can change between runs, the numbers would swap data between them.</p>
+<div class="note warn"><strong>Give each one a custom save ID when registration order isn't fixed:</strong> <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.Register(this, $"inventory-{owner.name}")</code>.</div>
+<details class="wrong"><summary>If it goes wrong</summary>
+<dl>
+<dt>Two instances swap data after a code change</dt>
+<dd>Their registration order changed, so the numbering changed with it. Give each a custom save ID.</dd>
+<dt>"can't register... another object already uses save ID" in the Console</dt>
+<dd>Two live objects already share an explicit save ID. Make the custom ID unique per instance.</dd>
+</dl>
+</details>
+</section>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

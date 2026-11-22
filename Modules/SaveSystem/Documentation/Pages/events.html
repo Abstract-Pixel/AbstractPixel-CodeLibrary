@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>React to loads and saves</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SaveEventBus tells your code when a save file loaded or saved. Load events are sticky: a late subscriber still gets called.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/events.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>React to loads and saves <span class="lv lv2">2 choices</span></h1>
+<p class="lede"><a class="type" href="../api/SaveEventBus.html">SaveEventBus</a> tells scripts when data has loaded or saved. A <a class="term" href="../api/SaveEventBus.html#load-event">load event</a> is sticky: a script that subscribes after it already happened is called right away.</p>
+
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity">Modules/SaveSystem/Samples/04 Pick A Save File/Pick A Save File Forest.unity</button></div>
+<a class="try-open" href="../../Samples/04 Pick A Save File/README.html" target="_blank" rel="noopener">Open sample 04: Pick A Save File →</a>
+</summary>
+<div class="try-body">
+<p>Sample 04 · Pick A Save File</p>
+<ol>
+<li>Open <b>Pick A Save File Forest</b> and press Play.</li>
+<li>Press <b>Go to Pick A Save File Cave</b>, then go back.</li>
+</ol>
+<p>A <a class="term" href="../api/SaveEventBus.html#typed-load-listener">typed load listener</a> on the Scene file counts each scene's load, sticky across the trip.</p>
+</div>
+</details>
+
+<section id="load">
+<h2>Hear one save file load<a class="anchor" href="#load">#</a></h2>
+<figure class="code">
+<figcaption>A typed load listener</figcaption>
+<pre><code class="cs">SaveEventBus.AddLoadListener&lt;GameSaveFiles.Ghosts&gt;(ShowGhosts);
+SaveEventBus.RemoveLoadListener&lt;GameSaveFiles.Ghosts&gt;(ShowGhosts);</code></pre>
+</figure>
+<p><code>AddLoadListener&lt;TFile&gt;</code> calls <code>handler</code> every time that save file's load event fires: once per scene for a Scene file, otherwise once. A Scene file raises its load event one frame after that scene's scripts start.</p>
+</section>
+
+<section id="all">
+<h2>Hear everything load<a class="anchor" href="#all">#</a></h2>
+<figure class="code">
+<figcaption>Every file, and the whole game profile</figcaption>
+<pre><code class="cs">SaveEventBus.OnLoadCompleted += file =&gt; { };
+SaveEventBus.OnLoadAllCompleted += Refresh;
+SaveEventBus.OnGameProfileOpened += profile =&gt; { };</code></pre>
+</figure>
+<p><code>OnLoadCompleted</code> gives the save file's class for code that wants every file, typed or not. <code>OnLoadAllCompleted</code> runs each time a <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> opens, once global data and that game profile are fully restored.</p>
+</section>
+
+<section id="save">
+<h2>Hear saves and failures<a class="anchor" href="#save">#</a></h2>
+<figure class="code">
+<figcaption>SaveEventBus: the save side</figcaption>
+<pre><code class="cs">SaveEventBus.OnSaveCompleted += file =&gt; { };
+SaveEventBus.OnSaveAllCompleted += ShowSavedIcon;
+SaveEventBus.OnSaveFailed += (file, reason) =&gt; ShowError(reason);</code></pre>
+</figure>
+<p><code>OnSaveCompleted</code> means the file is on disk. A write that fails raises <code>OnSaveFailed</code> with a reason instead, so a "Saved" message never shows for a lost save. <code>OnSaveAllCompleted</code> always fires once, at the end of <code>SaveAll</code>.</p>
+<div class="note warn"><strong>If one handler throws, the others still run.</strong> The save system catches the exception, logs which handler and event, and keeps calling the rest.</div>
+</section>
+
+<details class="wrong"><summary>If it goes wrong</summary>
+<dl>
+<dt>"Saved" shows, but the file didn't change</dt>
+<dd>A failed write can't raise <code>OnSaveCompleted</code>; it raises <code>OnSaveFailed</code> instead. Listen for that too.</dd>
+<dt>A load listener never fires</dt>
+<dd>Check the save file class matches exactly, including a Scene file's scene. See <a href="save-files.html">Choose where data goes</a>.</dd>
+</dl>
+</details>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

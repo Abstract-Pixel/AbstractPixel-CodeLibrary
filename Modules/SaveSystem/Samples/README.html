@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Save System Samples</title>
+<meta name="description" content="Eight Editor-only scenes that teach the Abstract Pixel Library save system step by step, with how to import, run and remove them.">
+<link rel="stylesheet" href="../Documentation/assets/docs.css">
+</head>
+<body data-root="../Documentation/">
+<main class="solo">
+<p class="crumbs"><a href="../Documentation/index.html">Save System</a> › Samples</p>
+<h1>Save System Samples</h1>
+<p class="lede">Eight small scenes that teach the save system one step at a time. They ship with the <b>Abstract Pixel Library</b> package and are for learning in the Unity Editor only.</p>
+
+<h2>Where they are</h2>
+<p>The samples are part of the package, next to the save system's code. There is nothing to import. Install the package (see <a href="../Documentation/Pages/get-started.html">Get started</a>), then in the Project window open <code>Packages/Abstract Pixel Library/Modules/SaveSystem/Samples/</code>.</p>
+<pre><code>Modules/SaveSystem/
+  Runtime/   the save system       AbstractPixel.SaveSystem
+  Editor/    its editor tools      AbstractPixel.SaveSystem.Editor
+  Tests/     its tests
+  Samples/   these samples         AbstractPixel.SaveSystem.Samples (Editor only)
+    01 Save A Field/ ... 08 ScriptableObject/   a scene, Scripts/ and README.html each
+    Shared/  scene loading and the build guard
+    Tests/   one PlayMode test per sample      AbstractPixel.SaveSystem.Samples.Tests</code></pre>
+<p>Open a sample's scene and press Play. To change a sample, copy its folder into <code>Assets/</code> first. A package installed from git is read-only.</p>
+<div class="note">Each sample's first step is a scene button showing its Unity path. Click it with the Editor open to ping that scene in its Project window; no setup needed. With Unity closed, it copies the path for you to paste in, or opens File Explorer there if you've run <code>assets/tools/register-scene-button.ps1</code> once (optional, Windows only).</div>
+
+<h2>Before any sample</h2>
+<ul>
+<li>Make a save system config once: <b>Tools &gt; External Project Tools &gt; Save System &gt; Create Config</b>.</li>
+<li>Every sample uses the built-in save files, so you don't add anything to the config.</li>
+<li>You don't add the scenes to the build's scene list. The samples load their scenes in the Editor by themselves.</li>
+</ul>
+
+<h2>Editor only, never in a build</h2>
+<p>All sample scripts are in one assembly, <code>AbstractPixel.SaveSystem.Samples</code>, that compiles only in the Editor (its <code>UNITY_EDITOR</code> define constraint). Nothing in your game can reference it. If a sample scene, or any scene that uses a sample script, ends up in a player build, the build stops and names the scene.</p>
+
+<h2>The samples</h2>
+<p>Level 0 needs no code, level 1 is daily code, level 2 is choices, level 3 is full control. Most games only need levels 0 to 2.</p>
+<div class="table-wrap">
+<table>
+<tr><th>Sample</th><th>Level</th><th>Shows</th></tr>
+<tr><td><a href="01%20Save%20A%20Field/README.html">01 Save A Field</a></td><td class="level"><span class="lv lv1">1</span><span class="name">daily code</span></td><td>The daily way to save: <code><a class="type" href="../Documentation/api/SaveAttribute.html">[Save]</a></code> on a field of a MonoBehaviour, and on a plain C# class that calls <code><a class="term" href="../Documentation/api/SaveActions.html">SaveActions</a>.Register(this)</code>.</td></tr>
+<tr><td><a href="02%20Buttons%20With%20No%20Code/README.html">02 Buttons With No Code</a></td><td class="level"><span class="lv lv0">0</span><span class="name">no code</span></td><td>A level saved with no code: Save Transform, Save Active State and Save Destroyed components, and uGUI buttons wired to Mono Save Actions.</td></tr>
+<tr><td><a href="03%20Save%20Slots%20And%20Continue/README.html">03 Save Slots And Continue</a></td><td class="level"><span class="lv lv2">2</span><span class="name">choices</span></td><td>A save slot screen: create, open, list and delete <a class="term" href="../Documentation/api/GameProfile.html#game-profile">game profiles</a> by slot number, plus a Continue button.</td></tr>
+<tr><td><a href="04%20Pick%20A%20Save%20File/README.html">04 Pick A Save File</a></td><td class="level"><span class="lv lv2">2</span><span class="name">choices</span></td><td><code><a class="term" href="../Documentation/api/ISaveIn.html#save-file-choice">ISaveIn</a>&lt;TFile&gt;</code> puts data in a Global, <a class="term" href="../Documentation/api/GameProfile.html#game-profile">GameProfile</a> or Scene file; <code>Save&lt;TFile&gt;()</code>, <code>Reload&lt;TFile&gt;()</code> and a typed load listener.</td></tr>
+<tr><td><a href="05%20Spawned%20Copies/README.html">05 Spawned Copies</a></td><td class="level"><span class="lv lv2">2</span><span class="name">choices</span></td><td>Goblins spawned from one prefab, each with its own <a class="term" href="../Documentation/api/SavableBridge.html#save-id">save ID</a> from <code><a class="term" href="../Documentation/api/SavedScriptExtensions.html">SetSaveId</a></code>. Defeated ones stay defeated.</td></tr>
+<tr><td><a href="06%20Custom%20Data%20With%20ISavable/README.html">06 Custom Data With ISavable</a></td><td class="level"><span class="lv lv3">3</span><span class="name">full control</span></td><td>A plain C# Inventory that moves its own data with <code><a class="term" href="../Documentation/api/ISavable.html">ISavable</a>&lt;T&gt;</code>, for data that isn't plain fields.</td></tr>
+<tr><td><a href="07%20Whole%20Files%20With%20SaveStorage/README.html">07 Whole Files With SaveStorage</a></td><td class="level"><span class="lv lv3">3</span><span class="name">full control</span></td><td>A debug screen that reads, copies, pastes and deletes a whole save file as JSON text with <code><a class="term" href="../Documentation/api/SaveStorage.html">SaveStorage</a></code>.</td></tr>
+<tr><td><a href="08%20ScriptableObject/README.html">08 ScriptableObject</a></td><td class="level"><span class="lv lv1">1</span><span class="name">daily code</span></td><td>A GameProgress ScriptableObject asset with <code>[Save]</code> fields that registers itself with the save system.</td></tr>
+</table>
+</div>
+
+<h2>Tests</h2>
+<p>Each sample has a PlayMode test in <code>Tests/</code>, in the <code>AbstractPixel.SaveSystem.Samples.Tests</code> assembly. Run them from <b>Window &gt; General &gt; Test Runner &gt; PlayMode</b>. They write to the save folder, like playing the samples does.</p>
+
+<nav>
+<a href="../Documentation/index.html">Save system guide</a>
+<a href="../Documentation/Pages/get-started.html">Samples in the guide</a>
+</nav>
+<p class="crumbs">A link to the guide doesn't open? In Unity, use <b>Tools &gt; External Project Tools &gt; Save System &gt; Open Guide</b>.</p>
+</main>
+<script src="../Documentation/assets/glossary-data.js" defer></script>
+<script src="../Documentation/assets/docs.js"></script>
+</body>
+</html>

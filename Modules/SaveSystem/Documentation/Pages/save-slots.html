@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Game profiles and save slots</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="List, create, open, rename and delete game profiles, and open the last one with Continue.">
+<link rel="stylesheet" href="../assets/docs.css">
+<script src="../assets/glossary-data.js" defer></script>
+</head>
+<body data-root="../" data-page="Pages/save-slots.html">
+<div class="page">
+<nav class="tree" id="tree"></nav>
+<main>
+<div class="crumbs" id="crumbs"></div>
+<h1>Game profiles and save slots <span class="lv lv2">2 choices</span></h1>
+<p class="lede">A <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> is one playthrough. You hold a <a class="type" href="../api/GameProfile.html">GameProfile</a> and call its methods; you never type its ID.</p>
+
+<details class="try">
+<summary>
+<div class="try-head"><strong>Try it in the sample</strong> <button type="button" class="scene-btn" data-scene="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity" title="Packages/com.abstractpixel.library/Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity">Modules/SaveSystem/Samples/03 Save Slots And Continue/Save Slots And Continue.unity</button></div>
+<a class="try-open" href="../../Samples/03 Save Slots And Continue/README.html" target="_blank" rel="noopener">Open sample 03: Save Slots And Continue →</a>
+</summary>
+<div class="try-body">
+<p>Sample 03 · Save Slots And Continue</p>
+<ol>
+<li>Open the <b>Save Slots And Continue</b> scene and press Play.</li>
+<li>Press <b>Add 100 points</b>, then <b>Save</b>.</li>
+<li>Press <b>Create game profile</b>, then <b>Open</b> on the new one. The points go back to 0.</li>
+<li>Press <b>Back to the main menu</b>, then <b>Continue</b>.</li>
+</ol>
+</div>
+</details>
+
+<section id="list">
+<h2>List the game profiles<a class="anchor" href="#list">#</a></h2>
+<figure class="code">
+<figcaption>SaveSlotScreen.cs: listing every slot</figcaption>
+<pre><code class="cs">foreach (GameProfile profile in SaveActions.GameProfiles.All)
+{
+    Debug.Log($"{profile.SlotNumber} {profile.DisplayName} {profile.LastSaved}");
+}</code></pre>
+</figure>
+<p><a class="type" href="../api/GameProfileList.html">SaveActions.GameProfiles</a> is never null. With no save system config it's an empty list, and its methods log one clear error instead of throwing.</p>
+</section>
+
+<section id="create">
+<h2>Create a new one<a class="anchor" href="#create">#</a></h2>
+<figure class="code">
+<figcaption>Creating a game profile</figcaption>
+<pre><code class="cs">GameProfile created = SaveActions.GameProfiles.CreateNew();</code></pre>
+</figure>
+<p>The new <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> gets the lowest free <a class="term" href="../api/GameProfile.html#slot-number">slot number</a> and a name like "Game Profile 3". <code>CreateNew</code> doesn't open it; call <code>Open()</code> next if the player should start playing right away.</p>
+</section>
+
+<section id="open">
+<h2>Open one<a class="anchor" href="#open">#</a></h2>
+<figure class="code">
+<figcaption>Opening a slot by number</figcaption>
+<pre><code class="cs">GameProfile slot = SaveActions.GameProfiles.Get(2);
+slot.Open();
+SceneManager.LoadScene(SceneManager.GetActiveScene().name);</code></pre>
+</figure>
+<div class="note warn"><strong>Reload your scenes after opening another <a class="term" href="../api/GameProfile.html#game-profile">game profile</a>.</strong> An object that stays alive across the switch keeps showing the old game profile's values until its scene reloads.</div>
+</section>
+
+<section id="continue">
+<h2>Continue: open the most recent<a class="anchor" href="#continue">#</a></h2>
+<figure class="code">
+<figcaption>A Continue button</figcaption>
+<pre><code class="cs">GameProfile lastOpened = SaveActions.GameProfiles.LastOpened;
+if (lastOpened != null)
+{
+    lastOpened.Open();
+}</code></pre>
+</figure>
+<p><code>LastOpened</code> is null on a first launch, so a Continue button should hide or grey out when it is. <code><a class="term" href="../api/SaveActions.html">SaveActions</a>.GameProfiles.Count</code> does the same for a Load button when there are no saves at all.</p>
+</section>
+
+<section id="rename">
+<h2>Rename a slot<a class="anchor" href="#rename">#</a></h2>
+<figure class="code">
+<figcaption>Renaming</figcaption>
+<pre><code class="cs">slot.Rename("Hard mode");</code></pre>
+</figure>
+<p>Renaming changes <code>DisplayName</code> only. The slot number stays the same, so nothing else about the <a class="term" href="../api/GameProfile.html#game-profile">game profile</a> moves.</p>
+</section>
+
+<section id="delete">
+<h2>Delete a slot<a class="anchor" href="#delete">#</a></h2>
+<figure class="code">
+<figcaption>Deleting</figcaption>
+<pre><code class="cs">slot.Delete();</code></pre>
+</figure>
+<p>Delete removes the <a class="term" href="../api/GameProfile.html#game-profile">game profile</a>'s save files and backups. Deleting slot 2 leaves slot 3 as slot 3; the next new game profile still takes the lowest free number.</p>
+<div class="see"><strong>Show the result</strong>Each save updates the open profile's last saved time, last scene and playtime. Put your own fields, such as difficulty, in <code>profile.Custom</code>; they're written on the next save and survive a list refresh.</div>
+<details class="wrong"><summary>If it goes wrong</summary>
+<dl>
+<dt>Old values stay on screen after opening another game profile</dt>
+<dd>The scene wasn't reloaded. Reload your scenes after <code>Open()</code>.</dd>
+<dt>No game profile opens at startup</dt>
+<dd>The config's Startup Policy is <code>Manual</code>. Set it to <code>AutoSetUp</code>, or open one from your own main menu.</dd>
+</dl>
+</details>
+</section>
+
+<p>See also: designers can wire the same actions with no code through <a class="type" href="../api/MonoSaveActions.html">MonoSaveActions</a>'s Open Slot, New Game and On Game Profile Opened.</p>
+
+<div class="pager" id="pager"></div>
+<footer><a href="../Project/v1-to-v2.html">Upgrading from v1</a></footer>
+</main>
+<nav class="toc" id="toc"></nav>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>
