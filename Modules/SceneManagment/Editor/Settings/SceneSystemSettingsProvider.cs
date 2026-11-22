@@ -283,6 +283,7 @@ namespace AbstractPixel.SceneManagement.Editor
             if (SceneSystemSettingsAssets.IsPreloaded(_settings))
             {
                 setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Green, "Builds can read these settings", PreloadedTooltip));
+                setupCard.Add(ScenePickerToolbarHint.Row());
                 return;
             }
             setupCard.Add(SceneSystemUI.HelpBoxWithButton("Builds can't read these settings yet: the settings asset is missing from Player Settings > Preloaded Assets, the list a build loads before its first scene. The next build adds it back, or fix it now.", HelpBoxMessageType.Warning, "Fix now", "Adds the settings asset to Player Settings > Preloaded Assets and drops empty entries there.", () =>
@@ -290,6 +291,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 SceneSystemSettingsAssets.EnsurePreloaded(_settings);
                 Refresh();
             }));
+            setupCard.Add(ScenePickerToolbarHint.Row());
         }
 
         // "● Set up   [SceneSystemSettings (Scene System Settings)]"

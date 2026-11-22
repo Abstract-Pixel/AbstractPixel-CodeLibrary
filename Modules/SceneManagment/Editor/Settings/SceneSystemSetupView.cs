@@ -444,6 +444,9 @@ namespace AbstractPixel.SceneManagement.Editor
             dot.style.borderBottomLeftRadius = 18;
             dot.style.borderBottomRightRadius = 18;
             content.Add(dot);
+            VisualElement pickerRow = ScenePickerToolbarHint.Centered();
+            pickerRow.style.marginTop = 12;
+            content.Add(pickerRow);
         }
 
         private void RunSetup()
