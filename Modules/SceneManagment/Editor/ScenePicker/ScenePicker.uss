@@ -1,0 +1,144 @@
+/* The scene picker popup (session 5A). Sizes and colours follow Unity's own Editor popups: 12px text, 20px rows,
+   the Editor's border and hover variables, and no colours of its own except the scene status chip. */
+
+.scene-picker {
+    flex-grow: 1;
+}
+
+.scene-picker__tabs .unity-tab-view__content-container {
+    display: none;
+}
+
+.scene-picker__search {
+    margin: 4px 4px 2px 4px;
+    width: auto;
+}
+
+.scene-picker__list {
+    flex-grow: 1;
+}
+
+.scene-picker__empty {
+    padding: 16px 12px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    opacity: 0.6;
+}
+
+.scene-picker__footer {
+    flex-direction: row;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 4px 0 2px;
+    border-top-width: 1px;
+    border-color: var(--unity-colors-default-border);
+    background-color: var(--unity-colors-toolbar-background);
+}
+
+.scene-picker__footer-hint {
+    margin-left: auto;
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+.scene-picker__message {
+    padding: 2px 6px;
+    white-space: normal;
+    color: var(--unity-colors-warning-text);
+}
+
+.scene-picker-row {
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+    padding-left: 6px;
+    padding-right: 2px;
+}
+
+.scene-picker-row__icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-right: 4px;
+}
+
+.scene-picker-row__title {
+    flex-shrink: 0;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0;
+    margin-right: 6px;
+}
+
+.scene-picker-row__detail {
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0;
+    opacity: 0.6;
+}
+
+.scene-picker-row__status {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    margin: 0 6px;
+}
+
+.scene-picker-row__separator {
+    width: 1px;
+    align-self: stretch;
+    flex-shrink: 0;
+    margin: 3px 2px;
+    background-color: var(--unity-colors-default-border);
+}
+
+.scene-picker-row__select {
+    width: 22px;
+    height: 18px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-width: 0;
+    border-radius: 2px;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.scene-picker-row__select:hover {
+    background-color: var(--unity-colors-button-background-hover);
+}
+
+.scene-picker-row__select-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.scene-picker-row__heading {
+    display: none;
+}
+
+.scene-picker-row--heading > * {
+    display: none;
+}
+
+.scene-picker-row--heading > .scene-picker-row__heading {
+    display: flex;
+    flex-grow: 1;
+    padding: 0;
+    -unity-font-style: bold;
+    opacity: 0.7;
+}
+
+.scene-picker-row--heading {
+    border-top-width: 1px;
+    border-color: var(--unity-colors-default-border);
+}
+
+.scene-picker-row--cannot-open > .scene-picker-row__title,
+.scene-picker-row--cannot-open > .scene-picker-row__icon {
+    opacity: 0.5;
+}
