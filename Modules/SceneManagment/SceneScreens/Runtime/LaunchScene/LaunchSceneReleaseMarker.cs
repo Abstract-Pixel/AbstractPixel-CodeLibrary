@@ -1,3 +1,5 @@
+#if ABSTRACTPIXEL_TIMELINE
+// Needs the Timeline package (com.unity.timeline); the asmdef defines ABSTRACTPIXEL_TIMELINE when it is installed.
 using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -20,3 +22,4 @@ namespace AbstractPixel.SceneManagement.SceneScreens
         public NotificationFlags flags => NotificationFlags.Retroactive | NotificationFlags.TriggerOnce;
     }
 }
+#endif

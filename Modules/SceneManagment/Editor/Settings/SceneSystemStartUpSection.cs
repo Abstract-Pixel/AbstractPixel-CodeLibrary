@@ -152,7 +152,7 @@ namespace AbstractPixel.SceneManagement.Editor
             string startGroupId = "none";
             if (_settings.StartSceneGroup != null)
             {
-                startGroupId = _settings.StartSceneGroup.GetInstanceID().ToString();
+                startGroupId = AbstractPixel.Core.UnityObjectIds.Of(_settings.StartSceneGroup).ToString();
             }
             string launchScene = "none";
             if (_settings.LaunchScene != null)
@@ -162,7 +162,7 @@ namespace AbstractPixel.SceneManagement.Editor
             string fallbackId = "none";
             if (_settings.FallbackSceneGroupSetting != null)
             {
-                fallbackId = _settings.FallbackSceneGroupSetting.GetInstanceID().ToString();
+                fallbackId = AbstractPixel.Core.UnityObjectIds.Of(_settings.FallbackSceneGroupSetting).ToString();
             }
             return startGroupId + "/" + launchScene + "/" + fallbackId;
         }

@@ -64,7 +64,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static PreviewShape FromObject(GameObject _root)
         {
-            int key = _root.GetInstanceID();
+            int key = AbstractPixel.Core.UnityObjectIds.Of(_root);
             if (cache.TryGetValue(key, out PreviewShape cached))
             {
                 return cached;

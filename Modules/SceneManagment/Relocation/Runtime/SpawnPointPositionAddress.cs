@@ -45,7 +45,7 @@ namespace AbstractPixel.SceneManagement
             int spawnPointHash = 0;
             if (SpawnPoint != null)
             {
-                spawnPointHash = SpawnPoint.GetInstanceID();
+                spawnPointHash = AbstractPixel.Core.UnityObjectIds.Of(SpawnPoint);
             }
             return spawnPointHash * 397 ^ Position;
         }

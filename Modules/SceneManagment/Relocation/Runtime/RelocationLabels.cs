@@ -30,7 +30,7 @@ namespace AbstractPixel.SceneManagement
             {
                 return _label.Id;
             }
-            return "instance:" + _label.GetInstanceID();
+            return "instance:" + AbstractPixel.Core.UnityObjectIds.Of(_label);
         }
 
         public static string NameOf(RelocationLabel _label)
