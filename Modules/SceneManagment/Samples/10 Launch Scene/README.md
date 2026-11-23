@@ -50,6 +50,7 @@ clock = new LaunchSceneTimelineClock(timeline, MaximumStepSeconds);
 `Scripts/Sample10Splash.cs`: the LaunchSceneReleaseReceiver's On Released calls this after it released the hold.
 ```csharp
 released = true;
+HandOverCount++;
 renderSettingsGuard.RestoreMenuSettings();
 splashCamera.enabled = false;
 ```

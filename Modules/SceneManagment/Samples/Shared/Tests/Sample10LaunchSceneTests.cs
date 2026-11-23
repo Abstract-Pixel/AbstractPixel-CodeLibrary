@@ -20,8 +20,6 @@ namespace AbstractPixel.SceneManagement.Samples.Tests
         private const string SplashPath = Folder + "Scenes/Sample 10 Splash.unity";
         private const float TimeoutSeconds = 30f;
 
-        private int releasedCount;
-
         [Test]
         public void TheSplashOpensTheMenuGroupBehindIt()
         {
@@ -42,26 +40,50 @@ namespace AbstractPixel.SceneManagement.Samples.Tests
             EditorSceneManager.OpenScene(SplashPath, OpenSceneMode.Single);
             yield return new EnterPlayMode();
 
-            SceneEventBus.OnLaunchSceneReleased += CountRelease;
-            bool wasHeld = SceneActions.IsLaunchSceneHeld;
+            // Entering Play can take longer than the splash itself (a domain reload), so the splash records the hold
+            // and its hand-over; the test reads them once the hold has ended.
             float startTime = Time.realtimeSinceStartup;
             while (SceneActions.IsLaunchSceneHeld && Time.realtimeSinceStartup - startTime < TimeoutSeconds)
             {
                 yield return null;
             }
+            while (ReadSplashCount("HandOverCount") == 0 && Time.realtimeSinceStartup - startTime < TimeoutSeconds)
+            {
+                yield return null;
+            }
             yield return null;
-            SceneEventBus.OnLaunchSceneReleased -= CountRelease;
+            bool wasHeld = ReadSplashFlag("WasHeldAtAwake");
+            int handOvers = ReadSplashCount("HandOverCount");
             int introRuns = Sample10IntroRuns();
+            bool stillHeld = SceneActions.IsLaunchSceneHeld;
             yield return new ExitPlayMode();
 
             Assert.IsTrue(wasHeld, "Play from the splash starts held");
-            Assert.AreEqual(1, releasedCount, "OnLaunchSceneReleased fired once");
+            Assert.IsFalse(stillHeld, "the hold ended");
+            Assert.AreEqual(1, handOvers, "the splash handed over once");
             Assert.AreEqual(1, introRuns, "Sample10MenuIntro's action ran once");
         }
 
-        private void CountRelease()
+        private const string SplashTypeName = "AbstractPixel.SceneManagement.Samples.Sample10Splash, AbstractPixel.SceneManagement.Samples.10LaunchScene";
+
+        private static bool ReadSplashFlag(string _property)
         {
-            releasedCount++;
+            System.Type splash = System.Type.GetType(SplashTypeName);
+            if (splash == null)
+            {
+                return false;
+            }
+            return (bool)splash.GetProperty(_property).GetValue(null);
+        }
+
+        private static int ReadSplashCount(string _property)
+        {
+            System.Type splash = System.Type.GetType(SplashTypeName);
+            if (splash == null)
+            {
+                return -1;
+            }
+            return (int)splash.GetProperty(_property).GetValue(null);
         }
 
         // Read by name: Shared.Tests does not reference the sample's own assembly.
