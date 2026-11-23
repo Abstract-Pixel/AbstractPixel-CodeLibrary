@@ -19,13 +19,15 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 
 ## Try it
 1. Open `Sample 02 Hub`: in the toolbar's scene picker, type "Sample 02 Hub" and click the row.
-2. Press Play.
-3. Click "Change to Arena" (top right of the Game view).
-4. Click "Change twice fast".
+2. Press Play. <!-- done-when OnGameStarted -->
+3. Click "Change to Arena" (top right of the Game view). <!-- done-when OnNewSceneGroupTransitionTo -->
+4. Click "Change twice fast". <!-- done-when OnNewSceneGroupTransitionTo -->
 5. Click "Change to the open group".
 6. Stop Play. Open Project Settings > Abstract Pixel > Scene System and find "If a scene change fails, go to" (look only: do not change it).
 
 ## You should see
+<!-- timeline -->
+
 - After step 2 the Hub is blue and the label's log lists "OnNewSceneGroupTransitionTo (Sample 02 HubGroup)" and "OnGameStarted (Sample 02 HubGroup)".
 - After step 3 the screen fades out and in, the Arena is yellow, the label says "Last result: Change to Arena: Done" and the log adds "Screen Hiding", "Screen Hidden", "OnMainSceneLoaded (Sample 02 Arena)", "OnNewSceneGroupTransitionTo (Sample 02 ArenaGroup)", "Screen Showing", "Screen Visible", each with its frame number.
 - After step 4 you are back in the Hub and the label says "Twice fast: first Done, second Refused (Busy)".
@@ -69,6 +71,18 @@ private void OnEnable()
 - The level changer's fields (other group, its name, label): select `Sample 02` in the Hierarchy.
 - "If a scene change fails, go to": Project Settings > Abstract Pixel > Scene System (look only).
 - The full message list and their order: the module README, "The messages" and "Order, per entry point".
+
+## How it's set up
+1. Select the object with `Sample02LevelChanger`; its Other Group field names the Arena's group.
+   <!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/02 Change Level From Code/Scenes/Sample 02 Hub.unity" "Sample 02" "Select the changer" -->
+2. Select the script that calls `SceneActions.ChangeTo`.
+   <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/02 Change Level From Code/Scripts/Sample02LevelChanger.cs" "Select the script" -->
+3. Select the Arena's scene group.
+   <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/02 Change Level From Code/Scene Groups/Sample 02 ArenaGroup.asset" "Select the Arena group" -->
+
+## Why it works
+- `SceneActions.ChangeTo` returns a [scene change result](../../Editor/Documentation/Pages/guide/change-scene.md#read-the-result) and never throws.
+- Busy is set before the first await, so a second change in the same frame is refused.
 
 ## If it goes wrong
 - A button logs nothing → the `Sample 02` object lost its label: drag `Sample Label` into both of its Label fields.

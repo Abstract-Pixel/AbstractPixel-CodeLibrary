@@ -352,6 +352,10 @@ namespace AbstractPixel.SceneManagement.Editor
             defaultSetToggle = FooterToggle(DefaultSetToggleText, SceneOpeningPreferences.NoGroupSceneWithDefaultSetLabel, SceneOpeningPreferences.NoGroupSceneWithDefaultSet);
             defaultSetToggle.RegisterValueChangedCallback(_change => SceneOpeningPreferences.NoGroupSceneWithDefaultSet = _change.newValue);
             footer.Add(defaultSetToggle);
+            VisualElement push = new VisualElement();
+            push.style.flexGrow = 1;
+            footer.Add(push);
+            footer.Add(SceneSystemHelp.Button(SceneSystemDocTopics.ScenePicker, "Opens the scene documentation about the scene picker"));
             return footer;
         }
 

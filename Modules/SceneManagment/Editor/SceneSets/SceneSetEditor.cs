@@ -14,6 +14,7 @@ namespace AbstractPixel.SceneManagement.Editor
             VisualElement root = new VisualElement();
             SceneSet set = (SceneSet)target;
 
+            root.Add(SceneSystemHelp.HelpRow("The manager scenes, shared scenes and Reset shared scenes for every scene group using this set.", SceneSystemDocTopics.SceneSetInspector));
             VisualElement buttons = new VisualElement();
             buttons.style.marginBottom = 6;
             buttons.Add(SceneSystemUI.PrimaryButton("Open Scene System", OpenSceneSystemTooltip, () => SceneSystemSettingsProvider.OpenAt(SceneSystemSettingsProvider.SceneSetsSection)));

@@ -61,20 +61,39 @@ namespace AbstractPixel.SceneManagement.Documentation
             return done[_index];
         }
 
-        /// <summary>Ticks the first pending step that waits for this message. Returns true when one ticked.</summary>
+        /// <summary>
+        /// Steps tick in order: the message ticks the first pending step that waits for a message, when it is the one
+        /// that step waits for, and marks the steps before it (which wait for nothing) done too. Other messages are
+        /// ignored, so a later step never ticks early. Returns true when a step ticked.
+        /// </summary>
         public bool Report(string _message)
+        {
+            int next = NextWaitingStep();
+            if (next < 0 || doneWhen[next] != _message)
+            {
+                return false;
+            }
+            for (int index = 0; index <= next; index++)
+            {
+                if (!done[index])
+                {
+                    MarkDone(index);
+                }
+            }
+            return true;
+        }
+
+        private int NextWaitingStep()
         {
             for (int index = 0; index < rows.Count; index++)
             {
-                bool waitsForIt = !done[index] && doneWhen[index] == _message;
-                if (!waitsForIt)
+                bool waits = !done[index] && !string.IsNullOrEmpty(doneWhen[index]);
+                if (waits)
                 {
-                    continue;
+                    return index;
                 }
-                MarkDone(index);
-                return true;
             }
-            return false;
+            return -1;
         }
 
         public void MarkDone(int _index)

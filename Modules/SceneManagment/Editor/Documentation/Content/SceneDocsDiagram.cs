@@ -42,10 +42,10 @@ namespace AbstractPixel.SceneManagement.Documentation
             during.Link("screen", "loading");
             during.Link("screen", "relocation");
 
-            Group(graph, "setup", "Set up", "Groups, sets, build, tools", setUp, 0);
-            DocsGraphNode core = Group(graph, "change", "Change scene", "Start-up, preload, messages", change, 1);
+            Group(graph, "setup", "Set up", "Groups, sets, tools", setUp, 0);
+            DocsGraphNode core = Group(graph, "change", "Change scene", "Start-up, preload", change, 1);
             core.IsKey = true;
-            Group(graph, "during", "During the change", "Screen, loading, relocation", during, 2);
+            Group(graph, "during", "During the change", "Screen, loading, moves", during, 2);
             graph.Link("setup", "change");
             graph.Link("change", "during");
             return new DocsGraphView(graph);
@@ -86,10 +86,10 @@ namespace AbstractPixel.SceneManagement.Documentation
             editor.Link("Editor", "RelocationEditor");
 
             DocsGraph graph = new DocsGraph("Scene system code");
-            Group(graph, "entry", "What you call", "Public API, settings, start-up", entry, 0);
-            DocsGraphNode core = Folder(graph, "Core", "Runtime/Core", "SceneCoordinator, messages", 1);
+            Group(graph, "entry", "What you call", "API, settings, start-up", entry, 0);
+            DocsGraphNode core = Folder(graph, "Core", "Runtime/Core", "The coordinator", 1);
             core.IsKey = true;
-            Group(graph, "parts", "Plugged-in parts", "Loaders, screen, relocation", parts, 2);
+            Group(graph, "parts", "Plugged-in parts", "Loaders, screen, moves", parts, 2);
             Group(graph, "editor", "Editor", "Tools on top of it all", editor, 2);
             graph.Link("entry", "Core");
             graph.Link("Core", "parts");

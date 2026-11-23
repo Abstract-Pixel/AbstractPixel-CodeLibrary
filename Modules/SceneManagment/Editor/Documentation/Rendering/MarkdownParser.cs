@@ -452,7 +452,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                         break;
                     }
                     DocsListItem last = block.Items[block.Items.Count - 1];
-                    last.Text = last.Text + " " + line.Trim();
+                    AddContinuation(_context, last, line.Trim(), _index + 1);
                     _index++;
                     continue;
                 }
@@ -479,6 +479,28 @@ namespace AbstractPixel.SceneManagement.Documentation
 
         // After a blank line the list goes on only with an item of the same kind (a numbered list after a bullet list
         // is a new list), or a deeper item.
+        // An indented line under an item: more of its text, or a directive line that belongs to the item (an action
+        // chip or a done-when written on its own line).
+        private static void AddContinuation(ParseContext _context, DocsListItem _item, string _trimmed, int _lineNumber)
+        {
+            bool isDirectiveLine = _trimmed.StartsWith("<!--") && _trimmed.EndsWith("-->");
+            if (!isDirectiveLine)
+            {
+                _item.Text = _item.Text + " " + _trimmed;
+                return;
+            }
+            string text = _trimmed;
+            foreach (DocsDirective directive in TakeTrailingDirectives(_context, ref text, _lineNumber))
+            {
+                if (directive.Name == "done-when")
+                {
+                    _item.DoneWhen = directive.Argument(0);
+                    continue;
+                }
+                _item.Directives.Add(directive);
+            }
+        }
+
         private static bool NextIsListItem(ParseContext _context, int _index, int _indent, bool _ordered)
         {
             if (_index >= _context.Lines.Length)

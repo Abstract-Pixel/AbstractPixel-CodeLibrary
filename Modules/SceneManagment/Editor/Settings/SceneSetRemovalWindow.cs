@@ -25,6 +25,12 @@ namespace AbstractPixel.SceneManagement.Editor
         private VisualElement problemArea;
         private PopupField<SceneSet> defaultField;
 
+        // The "?" in the tab bar. Unity calls this by reflection.
+        private void ShowButton(Rect _position)
+        {
+            SceneSystemHelp.TabBarButton(_position, SceneSystemDocTopics.SceneSetRemoval);
+        }
+
         public static SceneSetRemovalWindow Open(SceneSystemSettings _settings, SceneSet _set, Action _onRemoved)
         {
             SceneSetRemovalWindow window = CreateInstance<SceneSetRemovalWindow>();

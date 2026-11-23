@@ -47,14 +47,13 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 return null;
             }
-            foreach (string word in _info.Split(' '))
+            // The path is everything after "source=", so it may hold spaces (sample folders do).
+            int start = _info.IndexOf("source=", System.StringComparison.Ordinal);
+            if (start < 0)
             {
-                if (word.StartsWith("source="))
-                {
-                    return word.Substring("source=".Length);
-                }
+                return null;
             }
-            return null;
+            return _info.Substring(start + "source=".Length).Trim();
         }
 
         private static VisualElement Header(DocsBlock _block, string _source, string _assetPath)

@@ -141,6 +141,17 @@ namespace AbstractPixel.SceneManagement.Editor
             return card;
         }
 
+        /// <summary>Same as Section, with a help button at the right end of the header that opens this topic.</summary>
+        public static VisualElement Section(VisualElement _parent, string _title, string _tooltip, string _topicId)
+        {
+            VisualElement card = Section(_parent, _title, _tooltip, out VisualElement headerRow);
+            if (!string.IsNullOrEmpty(_topicId))
+            {
+                headerRow.Add(SceneSystemHelp.Button(_topicId, "Opens the scene documentation about " + _title));
+            }
+            return card;
+        }
+
         /// <summary>A header's slight colour change while the pointer is over it, so its tooltip is easy to find.</summary>
         public static void AddHoverTint(VisualElement _header)
         {

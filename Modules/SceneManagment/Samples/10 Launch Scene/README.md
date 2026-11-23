@@ -21,11 +21,13 @@ Unity 6.3 or newer and the scene system set up. The Timeline part needs the Time
 ## Try it
 1. Open `Sample 10 Splash`: in the toolbar's scene picker, type "Sample 10 Splash" and click the row.
 2. Select `Scene Groups/Sample 10 MenuGroup` and find "Launch scene (sample only)" under "Sample scene group": it names `Sample 10 Splash`.
-3. Press Play, with `Sample 10 Splash` as the only open scene.
-4. Wait about two seconds.
+3. Press Play, with `Sample 10 Splash` as the only open scene. <!-- done-when OnGameStarted -->
+4. Wait about two seconds. <!-- done-when OnLaunchSceneReleased -->
 5. Stop Play. Open Project Settings > Abstract Pixel > Scene System and read the Start-up section (look only: a real game sets its launch scene and start scene group there; samples never change it).
 
 ## You should see
+<!-- timeline -->
+
 - After step 3 a black screen with the gold logo growing in, a short tone when it is fully shown, and the splash label. The Menu is already open behind it (Hierarchy), held.
 - After step 4 the splash closes and the blue Menu appears; its label says "IsLaunchSceneHeld: false (the intro ran 1 time)".
 - The Console shows "Start-up: the launch scene 'Sample 10 Splash' holds the start scene group …", "'Sample 10 Splash' is the sample launch scene of 'Sample 10 MenuGroup' …", the [Startup] milestones "Sample 10 splash awake" and "Sample 10 logo revealed", and "Launch scene released: the start scene group takes over."
@@ -60,6 +62,20 @@ splashCamera.enabled = false;
 - The Timeline window with the release marker: select the `Splash` object, Window > Sequencing > Timeline.
 - LaunchSceneReleaseReceiver and its On Released list: select the `Splash` object.
 - Start-up section: Project Settings > Abstract Pixel > Scene System (look only).
+
+## How it's set up
+1. Select the menu's scene group: its Launch scene (sample only) names the splash.
+   <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/10 Launch Scene/Scene Groups/Sample 10 MenuGroup.asset" "Select the Menu group" -->
+2. Select the splash object, which releases the launch scene hold.
+   <!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/10 Launch Scene/Scenes/Sample 10 Splash.unity" "Splash" "Select the splash" -->
+3. Select `Menu Intro`; it waits with `SceneActions.RunWhenLaunchSceneReleased`.
+   <!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/10 Launch Scene/Scenes/Sample 10 Menu.unity" "Menu Intro" "Select Menu Intro" -->
+4. Open the Start-up section.
+   <!-- action open-settings "Start-up" "Open Start-up" -->
+
+## Why it works
+- The [launch scene hold](../../Editor/Documentation/Pages/guide/start-up.md#launch-scene) keeps the start scene group back while the splash plays ([design decision 9](../../docs/adr/0009-start-up-opens-the-start-scene-group-behind-a-launch-scene.md)).
+- The menu waits with `SceneActions.RunWhenLaunchSceneReleased`, so it starts once, at the hand-off.
 
 ## If it goes wrong
 - The Menu opens with no splash → Play was started from another scene: open only `Sample 10 Splash`.

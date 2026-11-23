@@ -21,6 +21,7 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             goesToShown = null;
             VisualElement root = new VisualElement();
+            root.Add(SceneSystemHelp.HelpRow("Moves this object to a spawn point position with the same label on every scene change.", SceneSystemDocTopics.RelocatableInspector));
             VisualElement card = SceneSystemUI.Card();
             card.Add(RelocationLabelField.Create(serializedObject.FindProperty("label")));
 

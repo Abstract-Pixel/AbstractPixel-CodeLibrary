@@ -19,12 +19,14 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 
 ## Try it
 1. Open `Sample 07 Menu`: in the toolbar's scene picker, type "Sample 07 Menu" and click the row.
-2. Press Play.
-3. Click "Preload Next Level" (top right).
-4. Click "Go to Next Level".
-5. In the Next Level, click "Go to Menu" without preloading, and compare the time.
+2. Press Play. <!-- done-when OnGameStarted -->
+3. Click "Preload Next Level" (top right). <!-- done-when OnSceneGroupPreloaded -->
+4. Click "Go to Next Level". <!-- done-when OnPreloadedSceneGroupActivated -->
+5. In the Next Level, click "Go to Menu" without preloading, and compare the time. <!-- done-when OnNewSceneGroupTransitionTo -->
 
 ## You should see
+<!-- timeline -->
+
 - After step 3 the label says "PreloadedSceneGroup: Sample 07 Next LevelGroup" and "OnSceneGroupPreloaded (Sample 07 Next LevelGroup)". The Menu stays on screen.
 - After step 4 the screen fades to the green Next Level, the label adds "OnPreloadedSceneGroupActivated (Sample 07 Next LevelGroup)", "PreloadedSceneGroup: none" and "ChangeTo took … ms (Done)".
 - After step 5 the Menu appears with no new OnPreloadedSceneGroupActivated line. Here both times are about the same, because these scenes are tiny and the fade takes most of it; with a big level the preloaded change is the short one.
@@ -54,6 +56,18 @@ SceneEventBus.OnPreloadedSceneGroupActivated += OnActivated;
 ## Windows this sample shows
 - The preloader's fields (next group, its name, label): select `Sample 07 Preloader` in the Hierarchy.
 - While a group is preloaded, its main scene shows in the Hierarchy as loading: look at it after step 3.
+
+## How it's set up
+1. Select the object with `Sample07Preloader`.
+   <!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/07 Preload The Next Level/Scenes/Sample 07 Menu.unity" "Sample 07 Preloader" "Select the preloader" -->
+2. Select the script that calls `SceneActions.Preload`.
+   <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/07 Preload The Next Level/Scripts/Sample07Preloader.cs" "Select the script" -->
+3. Select the next level's scene group.
+   <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/07 Preload The Next Level/Scene Groups/Sample 07 Next LevelGroup.asset" "Select the Next Level group" -->
+
+## Why it works
+- [Preload](../../Editor/Documentation/Pages/guide/preload.md#preload-a-scene-group) opens the next group in the background and holds only its main scene.
+- A change to the preloaded group switches to it instead of loading again.
 
 ## If it goes wrong
 - "Refused (Busy)" on Preload → a change is running: preload after it ends.

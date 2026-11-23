@@ -56,6 +56,12 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private bool isOpeningScenesOnly;
 
+        // The "?" in the tab bar. Unity calls this by reflection.
+        private void ShowButton(Rect _position)
+        {
+            SceneSystemHelp.TabBarButton(_position, SceneSystemDocTopics.SetupWindow);
+        }
+
         private static void OpenIfNeeded()
         {
             if (SessionState.GetBool(ShownThisSessionKey, false) || IsTurnedOff)

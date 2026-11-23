@@ -67,6 +67,7 @@ namespace AbstractPixel.SceneManagement.Editor
             provider.keywords = new HashSet<string> { "scene", "scene system", "scene set", "scene group", "manager scene", "shared scene", "Addressables", "Build Settings", "Preloaded Assets", "start-up", "start scene group", "launch scene", "loading scene", "fallback scene group", "migration", "debugger", "check" };
             provider.activateHandler = (_search, _root) => Activate(_root);
             provider.deactivateHandler = Deactivate;
+            provider.titleBarGuiHandler = () => SceneSystemHelp.TitleBarButton(SceneSystemDocTopics.SceneSystemPage);
             return provider;
         }
 
@@ -135,18 +136,19 @@ namespace AbstractPixel.SceneManagement.Editor
             refreshQueued = false;
 
             page.Add(SceneSystemUI.PageTitle(PageTitle, "How this project opens and switches scenes."));
-            setupCard = AddSection(page, SetupSection, "Where this page's settings are saved.");
-            startUpCard = AddSection(page, StartUpSection, SceneSystemStartUpSection.Tooltip);
-            setsCard = AddSection(page, SceneSetsSection, "Scenes that come with every scene group using the set. Click a scene set to select it; the + and − under the list add and delete scene sets.");
-            loadingScenesCard = AddSection(page, SceneSystemLoadingScenesSection.Title, SceneSystemLoadingScenesSection.Tooltip);
-            newScenesCard = AddSection(page, NewScenesSection, "Where scenes go so they load in a build.");
+            setupCard = AddSection(page, SetupSection, "Where this page's settings are saved.", SceneSystemDocTopics.SetupSection);
+            startUpCard = AddSection(page, StartUpSection, SceneSystemStartUpSection.Tooltip, SceneSystemDocTopics.StartUpSection);
+            setsCard = AddSection(page, SceneSetsSection, "Scenes that come with every scene group using the set. Click a scene set to select it; the + and − under the list add and delete scene sets.", SceneSystemDocTopics.SceneSetsSection);
+            loadingScenesCard = AddSection(page, SceneSystemLoadingScenesSection.Title, SceneSystemLoadingScenesSection.Tooltip, SceneSystemDocTopics.LoadingScenesSection);
+            newScenesCard = AddSection(page, NewScenesSection, "Where scenes go so they load in a build.", SceneSystemDocTopics.NewScenesSection);
             debuggerCard = SceneSystemUI.Section(page, NumberedTitle(DebuggerSection), SceneGroupsDebugger.Tooltip, out VisualElement debuggerHeader);
             sections[DebuggerSection] = debuggerCard.parent;
             debuggerSummary = new VisualElement();
             debuggerHeader.Add(debuggerSummary);
             debuggerHeader.Add(SceneSystemUI.Button("Check again", "Checks every scene group in the project again.", Refresh));
-            samplesCard = AddSection(page, SceneSystemSampleGroupsSection.Title, SceneSystemSampleGroupsSection.Tooltip);
-            relocationCard = AddSection(page, SceneSystemRelocationSection.Title, SceneSystemRelocationSection.Tooltip);
+            debuggerHeader.Add(SceneSystemHelp.Button(SceneSystemDocTopics.DebuggerSection, "Opens the scene documentation about " + DebuggerSection));
+            samplesCard = AddSection(page, SceneSystemSampleGroupsSection.Title, SceneSystemSampleGroupsSection.Tooltip, SceneSystemDocTopics.SampleGroupsSection);
+            relocationCard = AddSection(page, SceneSystemRelocationSection.Title, SceneSystemRelocationSection.Tooltip, SceneSystemDocTopics.RelocationSection);
 
             // Never subscribed twice, even if Unity activates the page again without deactivating it first.
             UnsubscribeFromProjectChanges();
@@ -160,9 +162,9 @@ namespace AbstractPixel.SceneManagement.Editor
             }
         }
 
-        private static VisualElement AddSection(VisualElement _page, string _title, string _tooltip)
+        private static VisualElement AddSection(VisualElement _page, string _title, string _tooltip, string _topicId)
         {
-            VisualElement card = SceneSystemUI.Section(_page, NumberedTitle(_title), _tooltip);
+            VisualElement card = SceneSystemUI.Section(_page, NumberedTitle(_title), _tooltip, _topicId);
             sections[_title] = card.parent;
             return card;
         }
