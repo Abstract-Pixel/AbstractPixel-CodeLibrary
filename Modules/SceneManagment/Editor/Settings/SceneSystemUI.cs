@@ -481,6 +481,39 @@ namespace AbstractPixel.SceneManagement.Editor
             return box;
         }
 
+        /// <summary>
+        /// A setup step's "Terminology" block (session 5A2): a small heading, then one grey line per word, the word in
+        /// bold italics followed by its plain definition from <see cref="SceneSystemTerms"/>. Empty when no words are given.
+        /// </summary>
+        public static VisualElement Terminology(params string[] _words)
+        {
+            VisualElement block = new VisualElement();
+            block.AddToClassList("scene-system-terminology");
+            if (_words == null || _words.Length == 0)
+            {
+                return block;
+            }
+            block.style.marginBottom = 12;
+            block.style.paddingLeft = 4;
+            Label heading = new Label("Terminology");
+            heading.style.fontSize = 11;
+            heading.style.unityFontStyleAndWeight = FontStyle.Bold;
+            heading.style.color = MutedText;
+            heading.style.marginBottom = 3;
+            block.Add(heading);
+            foreach (string word in _words)
+            {
+                Label line = new Label("<b><i>" + word + "</i></b>  " + SceneSystemTerms.Definition(word));
+                line.enableRichText = true;
+                line.style.whiteSpace = WhiteSpace.Normal;
+                line.style.color = MutedText;
+                line.style.fontSize = 11;
+                line.style.marginBottom = 2;
+                block.Add(line);
+            }
+            return block;
+        }
+
         /// <summary>A wizard page's big centred title and one short line under it.</summary>
         public static VisualElement PageHeader(string _title, string _line)
         {
