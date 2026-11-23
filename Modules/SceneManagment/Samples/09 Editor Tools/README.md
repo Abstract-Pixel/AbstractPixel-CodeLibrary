@@ -27,6 +27,8 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 8. In the scene picker: switch between its two tabs (Scenes and Scene Groups), type in its search field, look at Recent, and hover each row's label, status and folder buttons. Right-click a row for Open, Open additively, Select scene, Select scene group and Copy path. The footer reads "Open with: Group, Default set".
 
 ## You should see
+<!-- timeline -->
+
 - In step 2 the new group has "Sample scene group" ticked and no scene set, and it disappears again after Delete.
 - In step 3 the Main scene field shows "Not in build". That is right for a sample scene, which never goes into a build; the field has no sample state of its own yet (the scene picker shows it grey). Do not use its fix: the scene stays out of Build Settings anyway.
 - In step 4 the group check shows no problem.
@@ -42,6 +44,20 @@ This sample has no code. The settings to look at are on `Sample 09 WorkshopGroup
 - Scene field: the Main scene field in the group inspector.
 - Scene Groups Debugger, Sample scene groups, Preview migration: Project Settings > Abstract Pixel > Scene System.
 - Scene picker: main toolbar, "Abstract Pixel/Scene picker".
+
+## How it's set up
+1. Select the workshop's scene group and read its group check.
+   <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/09 Editor Tools/Scene Groups/Sample 09 WorkshopGroup.asset" "Select the group" -->
+2. Ping the loose scene: right-click it, Create > Scene Group.
+   <!-- action ping "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/09 Editor Tools/Scenes/Sample 09 Loose Scene.unity" "Ping the loose scene" -->
+3. Open the Scene Groups Debugger.
+   <!-- action open-settings "Scene Groups Debugger" "Open the Debugger" -->
+4. Open the scene picker.
+   <!-- action open-picker "Open the scene picker" -->
+
+## Why it works
+- The [Editor tools](../../Editor/Documentation/Pages/guide/editor-tools.md) never change your project on their own; each fix is a button you press.
+- [Sample scene groups](../../Editor/Documentation/Pages/guide/editor-tools.md#sample-scene-groups) never reach a build ([design decision 14](../../docs/adr/0014-sample-scene-groups-never-reach-a-build.md)).
 
 ## If it goes wrong
 - No scene picker in the toolbar → on 6.3, right-click the toolbar and tick "Abstract Pixel/Scene picker".

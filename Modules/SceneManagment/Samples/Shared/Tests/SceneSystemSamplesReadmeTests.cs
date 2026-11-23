@@ -21,6 +21,8 @@ namespace AbstractPixel.SceneManagement.Samples.Tests
             "## You should see",
             "## The lines that matter",
             "## Windows this sample shows",
+            "## How it's set up",
+            "## Why it works",
             "## If it goes wrong",
             "## Next steps"
         };

@@ -80,6 +80,16 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
         }
 
         [Test]
+        public void AnActionOnTheLineUnderAnItemBelongsToTheItem()
+        {
+            DocsPage page = Parse("# T\n\n1. Select the button.\n   <!-- action select \"Assets/A.asset\" \"Select it\" -->\n2. Next.\n");
+            DocsBlock list = page.Blocks.Find(_block => _block.Kind == DocsBlockKind.List);
+            Assert.AreEqual(2, list.Items.Count);
+            Assert.AreEqual("Select the button.", list.Items[0].Text);
+            Assert.AreEqual("action", list.Items[0].Directives[0].Name);
+        }
+
+        [Test]
         public void ATableKeepsItsRowsWithoutTheDivider()
         {
             DocsPage page = Parse("# T\n\n| A | B |\n|---|---|\n| 1 | 2 |\n");

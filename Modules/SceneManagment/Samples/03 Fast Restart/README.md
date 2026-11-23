@@ -19,12 +19,14 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 
 ## Try it
 1. Open `Sample 03 Arena`: in the toolbar's scene picker, type "Sample 03 Arena" and click the row.
-2. Press Play and wait until the score reaches 3 or more.
-3. Click "Retry" (top right).
-4. Click "Retry twice fast".
+2. Press Play and wait until the score reaches 3 or more. <!-- done-when OnGameStarted -->
+3. Click "Retry" (top right). <!-- done-when OnNewSceneGroupTransitionTo -->
+4. Click "Retry twice fast". <!-- done-when OnNewSceneGroupTransitionTo -->
 5. Stop Play. Select `Sample 03 ArenaGroup` in `Scene Groups/`, open Advanced in its Inspector and look at "Reset shared scenes" (ticked).
 
 ## You should see
+<!-- timeline -->
+
 - After step 2 the label counts "Score this run: 1, 2, 3 …" once a second.
 - After step 3 the screen fades, the label says "Last result: Retry: Done" and the score has started again from 0 (it keeps counting while the screen fades in) and the run number went up by one.
 - After step 4 the label says "Retry twice fast: first Done, second Refused (Busy)".
@@ -53,6 +55,18 @@ private void Update()
 
 ## Windows this sample shows
 - The scene group inspector, Advanced, "Reset shared scenes": select `Sample 03 ArenaGroup`.
+
+## How it's set up
+1. Select the Retry button object; it calls `SceneActions.Retry`.
+   <!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/03 Fast Restart/Scenes/Sample 03 Arena.unity" "Retry Button" "Select the Retry button" -->
+2. Select the Arena's scene group: open Advanced to see Reset shared scenes, ticked.
+   <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/03 Fast Restart/Scene Groups/Sample 03 ArenaGroup.asset" "Select the Arena group" -->
+3. Select `Run State` in the shared scene; Reset shared scenes reopens it on each Retry.
+   <!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/03 Fast Restart/Scenes/Sample 03 Run State.unity" "Run State" "Select Run State" -->
+
+## Why it works
+- [Retry](../../Editor/Documentation/Pages/guide/change-scene.md#retry-the-open-scene-group) closes and reopens the open group.
+- [Reset shared scenes](../../Editor/Documentation/Pages/guide/scene-groups-and-scene-sets.md#reset-shared-scenes) reopens the shared scene, so its state starts fresh.
 
 ## If it goes wrong
 - The score does not start over → "Reset shared scenes" is off on the group: tick it.

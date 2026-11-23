@@ -19,12 +19,14 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 ## Try it
 1. Open `Sample 01 Room A`: in the toolbar's scene picker, type "Sample 01 Room A" and click the row (or double-click it in the Project window under `Packages/Abstract Pixel Library/Modules/SceneManagment/Samples/01 Button Changes Level/Scenes/`).
 2. Select `Change Room Button` under `Canvas` in the Hierarchy and look at the Button's On Click list: one entry, `Scene Actions` > `MonoSceneActions.ChangeTo`, with `Sample 01 Room BGroup` as its argument.
-3. Press Play.
-4. Click "Go to Room B" at the bottom of the Game view.
-5. Click "Go to Room A" to go back.
+3. Press Play. <!-- done-when OnGameStarted -->
+4. Click "Go to Room B" at the bottom of the Game view. <!-- done-when OnNewSceneGroupTransitionTo -->
+5. Click "Go to Room A" to go back. <!-- done-when OnNewSceneGroupTransitionTo -->
 6. Stop Play. In the Project window, select `Packages/Abstract Pixel Library/Modules/SceneTransitionSystem/Runtime/Transitions/BasicFade/ImageFadeProfile` and look at its Inspector: the fade's colour and times, and "Screen counts as visible at".
 
 ## You should see
+<!-- timeline -->
+
 - After step 3 the Game view shows an orange doorway and the label "Sample 01 · Button Changes Level · Room A".
 - After step 4 the screen fades to black, then Room B appears with a teal doorway.
 - The label now reads "Sample 01 · Button Changes Level · Room B" and "You are in Room B.".
@@ -40,6 +42,20 @@ This sample has no code. The Inspector settings that do the work:
 - The Button's On Click list: select `Change Room Button` in the Hierarchy, Inspector.
 - The TransitionProfile and ImageFadeProfile Inspector: select `ImageFadeProfile` in the Project window (`SceneTransitionSystem/Runtime/Transitions/BasicFade/`).
 - The scene group inspector: select a group in `Scene Groups/`.
+
+## How it's set up
+1. Select the button. Its On Click calls `MonoSceneActions.ChangeTo` with the other room's group.
+   <!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/01 Button Changes Level/Scenes/Sample 01 Room A.unity" "Canvas/Change Room Button" "Select the button" -->
+2. Select `Scene Actions`, the object with the `MonoSceneActions` component the button calls.
+   <!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/01 Button Changes Level/Scenes/Sample 01 Room A.unity" "Scene Actions" "Select Scene Actions" -->
+3. Select Room B's scene group, the argument of the call.
+   <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/01 Button Changes Level/Scene Groups/Sample 01 Room BGroup.asset" "Select Room B's group" -->
+4. Select the fade's profile, which sets its colour, times and "Screen counts as visible at".
+   <!-- action select "Packages/com.abstractpixel.library/Modules/SceneTransitionSystem/Runtime/Transitions/BasicFade/ImageFadeProfile.asset" "Select the fade profile" -->
+
+## Why it works
+- A [scene group](../../Editor/Documentation/Pages/guide/scene-groups-and-scene-sets.md#scene-groups) is the place the button goes to; one call holds the whole change, fade included ([design decision 1](../../docs/adr/0001-scene-system-calls-transitions-through-one-interface.md)).
+- The fade lives in a [manager scene](../../Editor/Documentation/Pages/guide/screen-and-transitions.md#use-the-basic-fade), so every room gets it.
 
 ## If it goes wrong
 - The button does nothing → the scene has no EventSystem, or the On Click entry lost its target: pick `Scene Actions` and `MonoSceneActions.ChangeTo` again.
