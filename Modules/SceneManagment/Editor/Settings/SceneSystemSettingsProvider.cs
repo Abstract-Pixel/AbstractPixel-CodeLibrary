@@ -50,6 +50,9 @@ namespace AbstractPixel.SceneManagement.Editor
         // so editing a set's scenes keeps the focus in its field.
         private static string setsSignature;
         private static string selectedSetGuid;
+        // The scene set whose name opens as a text field when its card is next built (the one + just made).
+        private static string renameOnBuildGuid;
+        private static readonly Dictionary<string, SceneSetNameField> setNameFields = new Dictionary<string, SceneSetNameField>();
         private static readonly HashSet<string> openSetGuids = new HashSet<string>();
         private static readonly Dictionary<string, VisualElement> setCards = new Dictionary<string, VisualElement>();
         private static Button removeSetButton;
@@ -462,6 +465,7 @@ namespace AbstractPixel.SceneManagement.Editor
             setsSignature = signature;
             setsCard.Clear();
             setCards.Clear();
+            setNameFields.Clear();
             removeSetButton = null;
             if (_settings == null)
             {
@@ -565,12 +569,11 @@ namespace AbstractPixel.SceneManagement.Editor
 
             VisualElement header = SceneSystemUI.Row();
             Foldout foldout = new Foldout();
-            foldout.text = _number + ".  " + _set.name;
+            foldout.text = _number + ".";
             foldout.value = isOpen;
             foldout.tooltip = "Changes to a scene set reach every scene group using it, except the parts a group overrides. Click to show its scenes.";
-            foldout.style.width = 190;
-            foldout.style.flexShrink = 1;
-            foldout.style.minWidth = 100;
+            foldout.style.width = SetNumberWidth;
+            foldout.style.flexShrink = 0;
             foldout.contentContainer.style.display = DisplayStyle.None;
             Label foldoutText = foldout.Q<Label>(className: Toggle.textUssClassName);
             if (foldoutText != null)
@@ -594,6 +597,22 @@ namespace AbstractPixel.SceneManagement.Editor
                 OnSetCardToggled(_guid, _change.newValue, body, _set, users);
             });
             header.Add(foldout);
+
+            // The name: blue on hover, a click folds the card, a double-click or F2 renames the asset.
+            Color nameColour = isDefault ? SceneSystemUI.DefaultAccent : SceneSystemUI.TextColour;
+            SceneSetNameField nameField = new SceneSetNameField(_set, nameColour, () => foldout.value = !foldout.value);
+            nameField.style.width = SetNameWidth;
+            nameField.style.flexShrink = 1;
+            nameField.style.minWidth = 70;
+            setNameFields[_guid] = nameField;
+            header.Add(nameField);
+            card.focusable = true;
+            card.RegisterCallback<KeyDownEvent>(_event => OnSetCardKey(_event, nameField));
+            if (renameOnBuildGuid == _guid)
+            {
+                renameOnBuildGuid = null;
+                nameField.BeginRename();
+            }
 
             ObjectField reference = SceneSystemUI.ReadOnlyObjectField(_set, typeof(SceneSet), AssetDatabase.GetAssetPath(_set) + "\nClick to show it in the Project window.");
             reference.style.flexGrow = 1;
@@ -730,6 +749,46 @@ namespace AbstractPixel.SceneManagement.Editor
             _body.Add(usersFoldout);
         }
 
+        // Number column and name column of a scene set card: together as wide as the old "1.  Level" foldout.
+        private const float SetNumberWidth = 34;
+        private const float SetNameWidth = 156;
+
+        // F2 on a selected card renames its scene set, unless a text field inside the card has the keyboard.
+        private static void OnSetCardKey(KeyDownEvent _event, SceneSetNameField _nameField)
+        {
+            if (_event.keyCode != KeyCode.F2 || _nameField.IsEditing)
+            {
+                return;
+            }
+            bool typingInAField = _event.target is TextField || _event.target is TextElement && ((VisualElement)_event.target).GetFirstAncestorOfType<TextField>() != null;
+            if (typingInAField)
+            {
+                return;
+            }
+            _nameField.BeginRename();
+            _event.StopPropagation();
+        }
+
+        /// <summary>The name field of a scene set's card on the open page, for probes; null when there is none.</summary>
+        public static SceneSetNameField NameFieldOf(string _setGuid)
+        {
+            SceneSetNameField field;
+            setNameFields.TryGetValue(_setGuid ?? string.Empty, out field);
+            return field;
+        }
+
+        /// <summary>Presses + under the scene sets, as a probe would; returns the new set's GUID.</summary>
+        public static string CreateSceneSetForProbe()
+        {
+            SceneSystemSettings settings = SceneSystemSettingsAssets.Find();
+            if (settings == null)
+            {
+                return string.Empty;
+            }
+            CreateSceneSet(settings);
+            return selectedSetGuid;
+        }
+
         private static VisualElement SetsFooter(SceneSystemSettings _settings)
         {
             VisualElement footer = SceneSystemUI.Row();
@@ -841,6 +900,8 @@ namespace AbstractPixel.SceneManagement.Editor
             string guid = AssetDatabase.AssetPathToGUID(path);
             selectedSetGuid = guid;
             openSetGuids.Add(guid);
+            // Its name opens as a text field with the text selected, so the designer names it right away.
+            renameOnBuildGuid = guid;
             SceneSystemSettingsAssets.Save(_settings);
             Debug.Log("[Scene system] Created scene set '" + set.name + "' at " + path + ".", set);
         }

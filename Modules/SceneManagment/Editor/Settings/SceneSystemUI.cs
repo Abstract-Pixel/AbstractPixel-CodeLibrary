@@ -18,6 +18,18 @@ namespace AbstractPixel.SceneManagement.Editor
         public static readonly Color Green = new Color(0.30f, 0.75f, 0.36f);
         public static readonly Color Yellow = new Color(0.96f, 0.74f, 0.19f);
         public static readonly Color Red = new Color(0.89f, 0.29f, 0.24f);
+
+        /// <summary>Unity's default label text colour in the current skin.</summary>
+        public static Color TextColour
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.769f, 0.769f, 0.769f) : new Color(0.035f, 0.035f, 0.035f); }
+        }
+
+        /// <summary>Unity's link blue, for a name that reacts to the pointer (a scene set's name on hover).</summary>
+        public static Color LinkBlue
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.30f, 0.49f, 1f) : new Color(0.10f, 0.33f, 0.80f); }
+        }
         private static readonly Color OverrideBlue = new Color(0.17f, 0.52f, 0.92f);
 
         public const string SceneGroupTooltip = "An asset that describes one place the player can be, such as a level or the main menu. Click a name to select it.";
