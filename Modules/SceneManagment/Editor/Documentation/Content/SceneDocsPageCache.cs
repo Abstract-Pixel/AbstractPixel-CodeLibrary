@@ -5,6 +5,9 @@ using System.IO;
 namespace AbstractPixel.SceneManagement.Documentation
 {
     /// <summary>Parsed pages by topic, read again only when the file changes on disk.</summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class SceneDocsPageCache
     {
         private class Entry

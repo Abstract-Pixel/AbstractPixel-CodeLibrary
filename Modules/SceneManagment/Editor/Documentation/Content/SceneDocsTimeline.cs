@@ -13,6 +13,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// so a domain reload or a second window never adds duplicate rows.
     /// </summary>
     [InitializeOnLoad]
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class SceneDocsTimeline
     {
         private static readonly List<SceneDocsTimelineRow> rows = new List<SceneDocsTimelineRow>();

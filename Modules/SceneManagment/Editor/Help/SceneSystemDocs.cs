@@ -8,6 +8,9 @@ namespace AbstractPixel.SceneManagement.Editor
     /// which references this one, so it sets <see cref="Handler"/> when the Editor loads. Pass a topic id from
     /// <see cref="SceneSystemDocTopics"/>.
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class SceneSystemDocs
     {
         /// <summary>Opens the scene documentation at a topic id. Set by the docs assembly at load.</summary>

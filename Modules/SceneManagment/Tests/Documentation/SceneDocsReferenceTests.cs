@@ -14,6 +14,9 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
     /// terms that resolve, code blocks still in their scripts, images and icons that exist, and actions that point at
     /// real things.
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public class SceneDocsReferenceTests
     {
         private static readonly Regex LinkPattern = new Regex(@"(?<!!)\[[^\]]+\]\(([^)\s]+)\)");
@@ -48,14 +51,15 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
         public static List<string> TypesInScope()
         {
             List<string> names = new List<string>();
-            foreach (Assembly assembly in System.AppDomain.CurrentDomain.GetAssemblies())
+            foreach (UnityEditor.Compilation.Assembly compiled in UnityEditor.Compilation.CompilationPipeline.GetAssemblies())
             {
-                string name = assembly.GetName().Name;
+                string name = compiled.name;
                 bool isRuntimeScene = name.StartsWith("AbstractPixel.SceneManag") && !name.Contains("Test") && !name.Contains("Editor") && !name.Contains("Samples");
                 if (!isRuntimeScene)
                 {
                     continue;
                 }
+                Assembly assembly = Assembly.Load(name);
                 foreach (System.Type type in assembly.GetExportedTypes())
                 {
                     bool inScope = !type.IsNested && (type.Namespace == "AbstractPixel.SceneManagement" || type.Namespace == "AbstractPixel.SceneManagement.SceneScreens");

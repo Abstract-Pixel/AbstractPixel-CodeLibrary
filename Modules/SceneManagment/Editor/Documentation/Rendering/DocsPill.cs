@@ -3,6 +3,9 @@ using UnityEngine.UIElements;
 namespace AbstractPixel.SceneManagement.Documentation
 {
     /// <summary>Ladder pills ("1 daily code") and kind badges ("component"), with text so colour is never alone.</summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class DocsPill
     {
         private static readonly string[] Words = { "no code", "daily code", "choices", "full control" };

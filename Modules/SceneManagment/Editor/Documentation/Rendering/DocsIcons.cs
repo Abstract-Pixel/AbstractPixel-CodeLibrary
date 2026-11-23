@@ -8,6 +8,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// Every built-in Editor icon the docs window uses, by name. A test loads each one in both Editors, because icon
     /// names can change between Unity versions. The library ships no icon files.
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class DocsIcons
     {
         // Flat glyphs for buttons and chips (drawn in the text colour, so they follow the skin). Built-in icons are kept

@@ -7,6 +7,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// DocsDark.uss and DocsLight.uss. Picked by EditorGUIUtility.isProSkin; contrast is at least 4.5:1 on the
     /// code and window backgrounds of each skin.
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class DocsTheme
     {
         public static string Link { get { return EditorGUIUtility.isProSkin ? "#7BAAF7" : "#0B4FB8"; } }

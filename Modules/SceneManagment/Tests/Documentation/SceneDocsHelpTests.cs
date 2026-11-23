@@ -8,6 +8,9 @@ using NUnit.Framework;
 namespace AbstractPixel.SceneManagement.Documentation.Tests
 {
     /// <summary>Every help button opens a topic that exists, and every setup step, page section and problem has one.</summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public class SceneDocsHelpTests
     {
         private static readonly Regex OpenCall = new Regex(@"SceneSystemDocs\.Open\(([^)]*)\)");

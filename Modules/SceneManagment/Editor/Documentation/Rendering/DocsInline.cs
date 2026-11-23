@@ -8,6 +8,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// becomes a &lt;link&gt; tag whose id is the target, so <see cref="DocsLinkEvents"/> can route the click. A term
     /// link is written [scene group](term:scene-group).
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class DocsInline
     {
         private static readonly Regex CodePattern = new Regex(@"`([^`]+)`");

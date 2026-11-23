@@ -7,6 +7,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// A small C# tokenizer that wraps keywords, type names (words starting with a capital), strings, comments and
     /// numbers in &lt;color&gt; tags. One line at a time, so a block comment is coloured per line.
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class DocsCodeHighlighter
     {
         private static readonly HashSet<string> Keywords = new HashSet<string>

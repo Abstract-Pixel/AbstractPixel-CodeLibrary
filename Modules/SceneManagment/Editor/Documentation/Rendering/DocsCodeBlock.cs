@@ -9,6 +9,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// A code block: a header (file name, Copy, Open in IDE), a line-number gutter and selectable, highlighted code in
     /// the Editor's RobotoMono font, with its own horizontal scroll. Lines never wrap.
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class DocsCodeBlock
     {
         public const string MonoFontPath = "Fonts/RobotoMono/RobotoMono-Regular.ttf";
