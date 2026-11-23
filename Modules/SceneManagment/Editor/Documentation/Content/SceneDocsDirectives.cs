@@ -3,6 +3,9 @@ using System.Collections.Generic;
 namespace AbstractPixel.SceneManagement.Documentation
 {
     /// <summary>The directive names the scene documentation knows. Any other name is reported where it is written.</summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class SceneDocsDirectives
     {
         public static readonly HashSet<string> Known = new HashSet<string>

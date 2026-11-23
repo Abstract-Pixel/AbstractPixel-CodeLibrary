@@ -7,6 +7,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// The module's GLOSSARY.md, read directly: each bold term ("**Scene group**:") with its definition. Term links
     /// use the term's slug ("scene-group").
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class SceneGlossary
     {
         private static Dictionary<string, KeyValuePair<string, string>> terms;

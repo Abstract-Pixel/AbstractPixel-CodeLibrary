@@ -6,6 +6,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// The search index: page titles, headings, glossary terms and type names, each with the topic it opens and its
     /// category. Built once per domain load, on the first search.
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class SceneDocsSearch
     {
         public class Result

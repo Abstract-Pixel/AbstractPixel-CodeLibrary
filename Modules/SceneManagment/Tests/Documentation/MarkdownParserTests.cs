@@ -4,6 +4,9 @@ using NUnit.Framework;
 namespace AbstractPixel.SceneManagement.Documentation.Tests
 {
     /// <summary>The Markdown parser: every element and directive the scene documentation uses.</summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public class MarkdownParserTests
     {
         private static readonly HashSet<string> Known = new HashSet<string> { "level", "action", "done-when", "timeline", "marks", "members" };

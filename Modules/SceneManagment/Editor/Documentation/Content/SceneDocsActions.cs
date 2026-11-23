@@ -11,6 +11,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// Runs the docs' action chips. Every action is read-only: it opens, selects, pings, frames, enters or leaves Play,
     /// opens a Project Settings section or opens the scene picker. None changes settings, Build Settings or assets.
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class SceneDocsActions
     {
         /// <summary>The label a chip shows: the last argument.</summary>

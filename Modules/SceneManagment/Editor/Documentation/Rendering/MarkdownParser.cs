@@ -11,6 +11,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// &lt;details&gt;&lt;summary&gt; foldouts and directives (HTML comments). A directive whose name is not known is
     /// reported in <see cref="DocsPage.Problems"/> with the page and line.
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class MarkdownParser
     {
         private static readonly Regex DirectivePattern = new Regex(@"<!--\s*(.*?)\s*-->");

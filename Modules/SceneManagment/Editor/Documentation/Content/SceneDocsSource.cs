@@ -10,6 +10,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// Reads the library's C# files for the reference pages: which file declares a type, and the /// summary above a
     /// declaration. Files are listed once per domain load.
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class SceneDocsSource
     {
         private static List<string> files;

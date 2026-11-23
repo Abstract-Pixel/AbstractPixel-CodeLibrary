@@ -7,6 +7,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// Pages/Contents.md: the sidebar tree (a list of links under "## Guide", "## Reference" and so on) and, under
     /// "## Terms", the page each glossary term opens ("- scene-group: guide/scene-groups-and-scene-sets.md#scene-groups").
     /// </summary>
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class SceneDocsContents
     {
         public const string TermsSection = "Terms";
