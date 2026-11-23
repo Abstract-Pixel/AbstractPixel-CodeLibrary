@@ -2,7 +2,7 @@
 
 Keeps a launch scene dark while the start scene group opens behind it. Start-up makes the start scene group's main scene active, and the active scene's RenderSettings (ambient, fog, reflections) apply to every scene, so they would light the launch scene.
 
-**Kind:** component · **Namespace:** `AbstractPixel.SceneManagement.SceneScreens` · **File:** `LaunchSceneRenderSettingsGuard.cs`
+**Kind:** class · **Namespace:** `AbstractPixel.SceneManagement.SceneScreens` · **File:** `LaunchSceneRenderSettingsGuard.cs`
 
 <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/SceneScreens/Runtime/LaunchScene/LaunchSceneRenderSettingsGuard.cs" "Select the script" -->
 

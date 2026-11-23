@@ -20,6 +20,7 @@ namespace AbstractPixel.SceneManagement.Editor
             provider.label = "Scenes";
             provider.keywords = new HashSet<string> { "scene", "scene group", "main scene", "scene set", "scene in no group", "open", "hierarchy" };
             provider.activateHandler = (_search, _root) => Build(_root);
+            provider.titleBarGuiHandler = () => SceneSystemHelp.TitleBarButton(SceneSystemDocTopics.ScenesPreferences);
             return provider;
         }
 

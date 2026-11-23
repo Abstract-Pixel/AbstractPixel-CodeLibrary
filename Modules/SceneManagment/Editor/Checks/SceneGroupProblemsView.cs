@@ -55,6 +55,7 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             HelpBox box = new HelpBox(_problem.Message, type);
             box.style.alignItems = Align.Center;
+            box.Add(SceneSystemHelp.LearnMore(SceneSystemDocTopics.ForProblem(_problem.Kind)));
             if (!_problem.HasFix)
             {
                 return box;

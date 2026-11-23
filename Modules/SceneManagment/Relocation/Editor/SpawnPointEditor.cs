@@ -24,6 +24,7 @@ namespace AbstractPixel.SceneManagement.Editor
             statusShown = null;
             selectedPositionShown = null;
             VisualElement root = new VisualElement();
+            root.Add(SceneSystemHelp.HelpRow("Where relocatables with this label go in this scene group. Its own transform is Instance 1.", SceneSystemDocTopics.SpawnPointInspector));
             VisualElement card = SceneSystemUI.Card();
             card.Add(RelocationLabelField.Create(serializedObject.FindProperty("label")));
             status = new VisualElement();

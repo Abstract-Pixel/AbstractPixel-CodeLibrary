@@ -264,6 +264,30 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 content.Add(SceneSystemUI.Terminology(SceneSystemTerms.WordsPerStep[step]));
             }
+            string topic = TopicFor(Current);
+            if (topic != null)
+            {
+                Button learnMore = SceneSystemHelp.LearnMore(topic);
+                learnMore.style.alignSelf = Align.Center;
+                content.Add(learnMore);
+            }
+        }
+
+        // The guide section each step's "Learn more" opens (All set has its own button instead).
+        private static string TopicFor(Page _page)
+        {
+            switch (_page)
+            {
+                case Page.Welcome: return SceneSystemDocTopics.SetupWelcome;
+                case Page.Folder: return SceneSystemDocTopics.SetupFolder;
+                case Page.NewScenes: return SceneSystemDocTopics.SetupNewScenes;
+                case Page.LaunchScene: return SceneSystemDocTopics.SetupLaunchScene;
+                case Page.LoadingScene: return SceneSystemDocTopics.SetupLoadingScene;
+                case Page.SceneSets: return SceneSystemDocTopics.SetupSceneSets;
+                case Page.OpeningScenes: return SceneSystemDocTopics.SetupOpeningScenes;
+                case Page.Ready: return SceneSystemDocTopics.SetupReady;
+                default: return null;
+            }
         }
 
         private void ShowWelcome()
@@ -695,6 +719,12 @@ namespace AbstractPixel.SceneManagement.Editor
             VisualElement pickerRow = ScenePickerToolbarHint.Centered();
             pickerRow.style.marginTop = 12;
             content.Add(pickerRow);
+            Button docs = SceneSystemUI.Button("Open Scene Documentation", "Opens the scene documentation at its Home page", () => SceneSystemDocs.Open(SceneSystemDocTopics.Home));
+            docs.AddToClassList(SceneSystemHelp.ButtonClass);
+            docs.userData = SceneSystemDocTopics.Home;
+            docs.style.alignSelf = Align.Center;
+            docs.style.marginTop = 10;
+            content.Add(docs);
         }
 
         private void RunSetup()

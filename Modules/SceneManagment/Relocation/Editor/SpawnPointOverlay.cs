@@ -39,6 +39,7 @@ namespace AbstractPixel.SceneManagement.Editor
             buttons.style.justifyContent = Justify.SpaceBetween;
             buttons.style.width = Length.Percent(100);
             AddActionButtons(buttons);
+            buttons.Add(SceneSystemHelp.Button(SceneSystemDocTopics.SpawnPointInspector, "Opens the scene documentation about spawn points"));
             foreach (VisualElement button in buttons.Children())
             {
                 button.style.flexGrow = 1;

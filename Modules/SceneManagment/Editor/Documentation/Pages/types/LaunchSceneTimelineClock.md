@@ -2,7 +2,7 @@
 
 Caps how far a launch scene's Timeline may advance in one frame, so a load hitch (the start scene group opening behind it) delays the picture instead of skipping it. The director keeps its own playback, so markers fire and audio clips play normally; on a long frame the clock only slows the root playable for that frame (speed = cap / frame time).
 
-**Kind:** component · **Namespace:** `AbstractPixel.SceneManagement.SceneScreens` · **File:** `LaunchSceneTimelineClock.cs`
+**Kind:** class · **Namespace:** `AbstractPixel.SceneManagement.SceneScreens` · **File:** `LaunchSceneTimelineClock.cs`
 
 <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/SceneScreens/Runtime/LaunchScene/LaunchSceneTimelineClock.cs" "Select the script" -->
 

@@ -34,6 +34,7 @@ namespace AbstractPixel.SceneManagement.Editor
             VisualElement root = new VisualElement();
             SceneGroup group = (SceneGroup)target;
 
+            root.Add(SceneSystemHelp.HelpRow("One place the player can be: a main scene, its scene set and when it shows a loading scene.", SceneSystemDocTopics.SceneGroupInspector));
             problemsView = new SceneGroupProblemsView(true);
             problemsView.style.marginBottom = 6;
             root.Add(problemsView);
