@@ -62,6 +62,64 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             Assert.AreEqual(_expected, Names(scenes));
         }
 
+        // The opened scene, the preference that decides it, and what opens when that preference is on (session 5A2).
+        private static readonly object[][] OpeningCases =
+        {
+            new object[] { "Level2", SceneOpeningPreference.MainSceneWithGroup, "ManagerBootScene,GameBootScene" },
+            new object[] { "ManagerBootScene", SceneOpeningPreference.MainSceneWithGroup, "MainMenu,GameBootScene" },
+            new object[] { "GameBootScene", SceneOpeningPreference.MainSceneWithGroup, "MainMenu,ManagerBootScene" },
+            new object[] { "SampleArea", SceneOpeningPreference.MainSceneWithGroup, "SampleShared" },
+            new object[] { "SampleShared", SceneOpeningPreference.MainSceneWithGroup, "SampleArea" },
+            new object[] { "CarTest", SceneOpeningPreference.NoGroupSceneWithDefaultSet, "ManagerBootScene,GameBootScene" },
+            new object[] { "SplashScreen", SceneOpeningPreference.None, "" }
+        };
+
+        public static System.Collections.Generic.IEnumerable<TestCaseData> EachCaseWithEachPreference()
+        {
+            bool[] values = { true, false };
+            foreach (object[] openingCase in OpeningCases)
+            {
+                string scene = (string)openingCase[0];
+                SceneOpeningPreference preference = (SceneOpeningPreference)openingCase[1];
+                string whenOn = (string)openingCase[2];
+                foreach (bool groupOn in values)
+                {
+                    foreach (bool defaultSetOn in values)
+                    {
+                        bool allowed = new SceneOpeningChoices(groupOn, defaultSetOn).Allows(preference);
+                        string expected = allowed ? whenOn : "";
+                        string name = "Opens(" + scene + ", group " + OnOff(groupOn) + ", default set " + OnOff(defaultSetOn) + ")";
+                        yield return new TestCaseData(scene, groupOn, defaultSetOn, expected).SetName(name);
+                    }
+                }
+            }
+        }
+
+        [TestCaseSource(nameof(EachCaseWithEachPreference))]
+        public void OpensWhatTheCasesPreferenceAllows(string _openedScene, bool _mainSceneWithGroup, bool _noGroupSceneWithDefaultSet, string _expected)
+        {
+            AddSampleGroup();
+            SceneOpeningChoices choices = new SceneOpeningChoices(_mainSceneWithGroup, _noGroupSceneWithDefaultSet);
+
+            List<SceneReference> scenes = GroupScenesToOpen.For(settings, new SceneReference(_openedScene), choices);
+
+            Assert.AreEqual(_expected, Names(scenes));
+        }
+
+        [TestCase("Level2", SceneOpeningPreference.MainSceneWithGroup)]
+        [TestCase("ManagerBootScene", SceneOpeningPreference.MainSceneWithGroup)]
+        [TestCase("GameBootScene", SceneOpeningPreference.MainSceneWithGroup)]
+        [TestCase("SampleArea", SceneOpeningPreference.MainSceneWithGroup)]
+        [TestCase("SampleShared", SceneOpeningPreference.MainSceneWithGroup)]
+        [TestCase("CarTest", SceneOpeningPreference.NoGroupSceneWithDefaultSet)]
+        [TestCase("SplashScreen", SceneOpeningPreference.None)]
+        public void EachCaseHasItsPreference(string _openedScene, SceneOpeningPreference _expected)
+        {
+            AddSampleGroup();
+
+            Assert.AreEqual(_expected, GroupScenesToOpen.PreferenceFor(settings, new SceneReference(_openedScene)));
+        }
+
         [Test]
         public void ASharedSceneOfASampleSceneGroupOpensThatSampleGroupsMainScene()
         {
@@ -109,6 +167,23 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             Assert.AreEqual(_expectedOpen, Names(plan.ToOpen), "open");
             Assert.AreEqual(_expectedClose, Names(plan.ToClose), "close");
             Assert.AreEqual(_expectedRemembered, Names(plan.OpenedByToolAfter), "remembered");
+        }
+
+        private static string OnOff(bool _value)
+        {
+            return _value ? "on" : "off";
+        }
+
+        // A sample scene group: main scene SampleArea, shared scene SampleShared.
+        private void AddSampleGroup()
+        {
+            SceneGroup sample = ScriptableObject.CreateInstance<SceneGroup>();
+            sample.name = "SampleAreaGroup";
+            createdObjects.Add(sample);
+            List<SceneReference> shared = new List<SceneReference> { new SceneReference("SampleShared") };
+            sample.Initialize(new List<SceneReference>(), shared, new SceneReference("SampleArea"), false);
+            sample.IsSample = true;
+            settings.SceneGroups.Add(sample);
         }
 
         private SceneGroup AddGroup(string _mainScene, SceneSet _set)

@@ -253,8 +253,8 @@ namespace AbstractPixel.SceneManagement.Editor
             footer.AddToClassList("scene-picker__footer");
             Toggle openWithGroup = new Toggle(OpenWithGroupLabel);
             openWithGroup.tooltip = "Opening a scene also opens the scenes Play loads with it. The same choice as Preferences > Abstract Pixel > Scenes.";
-            openWithGroup.SetValueWithoutNotify(OpenGroupWithMainScenePreference.IsOn);
-            openWithGroup.RegisterValueChangedCallback(_change => OpenGroupWithMainScenePreference.IsOn = _change.newValue);
+            openWithGroup.SetValueWithoutNotify(SceneOpeningPreferences.MainSceneWithGroup);
+            openWithGroup.RegisterValueChangedCallback(_change => SceneOpeningPreferences.MainSceneWithGroup = _change.newValue);
             footer.Add(openWithGroup);
             Label hint = new Label(KeysHint);
             hint.AddToClassList("scene-picker__footer-hint");

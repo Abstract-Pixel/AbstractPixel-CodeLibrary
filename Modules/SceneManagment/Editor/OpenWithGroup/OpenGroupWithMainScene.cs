@@ -9,13 +9,14 @@ using UnityEngine.SceneManagement;
 namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
-    /// "Open the group with its main scene": when a scene is opened on its own (Single mode), the scenes Play would
-    /// load with it open next to it, so the Hierarchy shows what Play loads. The opened scene stays active. Switching to
+    /// The scene opening preferences at work: when a scene is opened on its own (Single mode), the scenes Play would
+    /// load with it open next to it, so the Hierarchy shows what Play loads. Which preference applies depends on the
+    /// scene (<see cref="GroupScenesToOpen"/>); when it is off, the tool does nothing for that scene. The opened scene stays active. Switching to
     /// another group closes the scenes this tool opened that the new group does not need (a scene with unsaved changes
     /// gets Unity's save prompt, and Cancel keeps it); a scene opened by hand is never closed.
     /// It does nothing in Play mode, during a build, in prefab mode, while tests run, while "Open group" runs, and while
     /// Unity restores scenes (Editor start, domain reload, leaving Play mode). It never marks a scene dirty and never
-    /// changes Build Settings. Preferences &gt; Abstract Pixel &gt; Scenes turns it off.
+    /// changes Build Settings. Preferences &gt; Abstract Pixel &gt; Scenes turns each case off.
     /// </summary>
     [InitializeOnLoad]
     public static class OpenGroupWithMainScene
@@ -88,7 +89,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static bool CanReact()
         {
-            if (!OpenGroupWithMainScenePreference.IsOn || isRestoringScenes || SceneGroupOpener.IsOpening)
+            if (isRestoringScenes || SceneGroupOpener.IsOpening)
             {
                 return false;
             }
@@ -122,7 +123,14 @@ namespace AbstractPixel.SceneManagement.Editor
             }
 
             SceneReference openedReference = ToReference(openedScene);
-            List<SceneReference> needed = GroupScenesToOpen.For(settings, openedReference);
+            SceneOpeningChoices choices = SceneOpeningPreferences.Choices;
+            SceneOpeningPreference preference = GroupScenesToOpen.PreferenceFor(settings, openedReference);
+            if (!choices.Allows(preference))
+            {
+                // The preference for this scene is off: open nothing and close nothing.
+                return;
+            }
+            List<SceneReference> needed = GroupScenesToOpen.For(settings, openedReference, choices);
             List<SceneReference> open = OpenScenes();
             OpenedGroupScenesPlan plan = OpenedGroupScenesPlan.Compute(needed, open, OpenedGroupScenesRecord.Read());
 
