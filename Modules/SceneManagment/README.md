@@ -264,8 +264,7 @@ listening.
 
 The relocation sub-module (`Relocation/`, assembly `AbstractPixel.SceneManagement.Relocation`) moves objects that live in a
 manager scene or shared scene, such as the player, to the right place in each new scene group. Words:
-[GLOSSARY.md](GLOSSARY.md) "Relocating objects". Decisions: ADR 0006, 0012, 0013. Example: `Samples/05 Persistent Player
-And Spawn Points`.
+[GLOSSARY.md](GLOSSARY.md) "Relocating objects". Decisions: ADR 0006, 0012, 0013. Example: sample 05 (see Samples below).
 
 **Set up.** Add a `Relocatable` to the object (its label: "No label" or a relocation label asset; "New label" asks where to
 save one). Add a `SpawnPoint` with the same label to each main scene; its transform is Instance 1, and "Add position" or
@@ -293,6 +292,9 @@ import), so the copy of a label that an Addressables bundle carries matches the 
 their own behaviour. Rally Shift's `CarRelease` turns the
 car's controls on at `Released`, and `BombInitializer` starts the bomb there. A game with no relocatable changes scenes
 as before: the broadcaster is never registered.
+
+**Samples.** Ten samples, from a no-code button to a launch scene, each with a README, a PlayMode test and a coverage
+table of every window and feature: [Samples/README.md](Samples/README.md).
 
 **Sample scene groups** (ADR 0014): tick "Sample scene group" on a group whose scenes are only for the Editor. They open
 in Play mode from their path, the Build Settings writer leaves them out, and a build that would include one stops and

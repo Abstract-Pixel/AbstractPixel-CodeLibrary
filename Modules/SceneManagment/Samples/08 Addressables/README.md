@@ -25,13 +25,13 @@ A package cannot ship an Addressables entry, so the sample ships the scene not A
 3. Open Window > Asset Management > Addressables > Groups: the scene is in the default group.
 4. Press Play and click "Go to the Addressable level" (top right).
 5. Click "Back". Stop Play.
-6. In the group's Inspector, right-click the Main scene reference again and remove it from Addressables (the scene goes back to being a sample scene that opens from its path).
+6. In the group's Inspector, right-click the Main scene reference again and pick "Move to Build Settings". The entry leaves Addressables; a sample scene never goes into Build Settings, so it goes back to opening from its path.
 7. Look only: open Project Settings > Abstract Pixel > Scene System and read the New scenes section (where new scenes go: Build Settings or Addressables).
 
 ## You should see
 - After step 2 the Main scene reference's status is blue: Addressable.
 - After step 4 the blue level appears, the label says "Sample 08 Addressable Level is Addressable: it opens through Addressables (now open)", and the Console logs "[SceneLoader] 'Sample 08 Addressable Level' is Addressable, opening it through Addressables."
-- After step 6 the status is no longer blue, and the Addressables Groups window no longer lists the scene.
+- After step 6 the status is no longer blue, the Addressables Groups window no longer lists the scene, and Build Settings is unchanged. The Console shows "Sample scenes were left out of Build Settings" (a warning that is expected here) and a line that still says "Added … to Build Settings"; that wording is wrong (a known scene system item for 5B): nothing was added.
 
 ## The lines that matter
 `Scripts/Sample08Buttons.cs`: the scene is a scene reference; Addressables knows it by the reference's GUID, as the scene system's loader does.
