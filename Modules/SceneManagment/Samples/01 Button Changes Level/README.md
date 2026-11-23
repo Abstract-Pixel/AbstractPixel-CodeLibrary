@@ -11,7 +11,7 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 | Folder | What is in it |
 |---|---|
 | `Scenes/` | `Sample 01 Room A` and `Sample 01 Room B`: a room each, with a button at the bottom of the screen |
-| `Scene Groups/` | `Sample 01 Room AGroup` and `Sample 01 Room BGroup`: sample scene groups with `Samples Managers` (the basic fade) as their manager scene |
+| `Scene Groups/` | `Sample 01 Room AGroup` and `Sample 01 Room BGroup`: sample scene groups with `Samples Managers` (the screen effect: the basic fade) as their manager scene |
 | `Prefabs/` | `Sample 01 Doorway`: a doorway made of three cubes |
 | `Materials/` | `Sample 01 Room A` (orange) and `Sample 01 Room B` (teal), made from the library's sample shader |
 | `Tests/` | The PlayMode test: the Room A button opens Room B, and the screen goes Hiding, Hidden, Showing, Visible |
@@ -33,7 +33,7 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 ## The lines that matter
 This sample has no code. The Inspector settings that do the work:
 - `Change Room Button` > Button > On Click: `Scene Actions` (a `MonoSceneActions` component) > `ChangeTo`, argument: the other room's scene group.
-- Each scene group: main scene the room, manager scene `Samples Managers` (it holds the `BasicFadeController` prefab), "Sample scene group" ticked, no scene set.
+- Each scene group: main scene the room, manager scene `Samples Managers` (its `Screen Effect` object has `InitializeTransitions` with `ImageFadeProfile`, which brings in the `BasicFadeController`), "Sample scene group" ticked, no scene set.
 - `ImageFadeProfile` (a `TransitionProfile`): the fade's look and times; "Screen counts as visible at" says how far into Show screen the screen counts as visible.
 
 ## Windows this sample shows

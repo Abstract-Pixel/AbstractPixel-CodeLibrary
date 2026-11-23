@@ -19,6 +19,20 @@ namespace AbstractPixel.SceneManagement
         private readonly Dictionary<string, bool> answers = new Dictionary<string, bool>();
         private Task initialization;
 
+        private readonly Func<bool> hasStarted;
+        private readonly Func<Task> start;
+
+        public AddressableSceneCheck() : this(AddressablesHaveStarted, InitializeAddressables)
+        {
+        }
+
+        // Stubs for tests: whether Addressables has started, and how to start it.
+        internal AddressableSceneCheck(Func<bool> _hasStarted, Func<Task> _start)
+        {
+            hasStarted = _hasStarted;
+            start = _start;
+        }
+
         public async Task<bool> IsAddressable(SceneReference _scene)
         {
             if (_scene == null || !_scene.HasGuid)
@@ -40,13 +54,33 @@ namespace AbstractPixel.SceneManagement
 
         private async Task<bool> EnsureInitialized()
         {
+            // Started already (an earlier Play with domain reload off, or another caller): nothing to wait for. In the
+            // Editor, InitializeAsync() can hand back a handle whose Completed never fires once Addressables has started.
+            if (hasStarted())
+            {
+                return true;
+            }
             if (initialization == null)
             {
-                initialization = InitializeAddressables();
+                initialization = start();
             }
 
             await initialization;
-            return Addressables.ResourceLocators != null;
+            return hasStarted();
+        }
+
+        // Addressables has started once it has a resource locator.
+        private static bool AddressablesHaveStarted()
+        {
+            if (Addressables.ResourceLocators == null)
+            {
+                return false;
+            }
+            foreach (var locator in Addressables.ResourceLocators)
+            {
+                return true;
+            }
+            return false;
         }
 
         private static async Task InitializeAddressables()
