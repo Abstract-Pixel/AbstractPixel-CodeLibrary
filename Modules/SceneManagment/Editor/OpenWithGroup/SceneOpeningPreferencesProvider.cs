@@ -29,7 +29,7 @@ namespace AbstractPixel.SceneManagement.Editor
             VisualElement page = new VisualElement();
             page.style.paddingLeft = 10;
             page.style.paddingTop = 6;
-            page.Add(SceneSystemUI.PageTitle("Scenes", "Scene tools for you, in this project."));
+            page.Add(SceneSystemUI.PageTitleWithHelp("Scenes", "Scene tools for you, in this project.", SceneSystemDocTopics.ScenesPreferences));
             page.Add(PreferenceToggle(SceneOpeningPreferences.MainSceneWithGroupLabel, SceneOpeningPreferences.MainSceneWithGroupTooltip, true));
             page.Add(PreferenceToggle(SceneOpeningPreferences.NoGroupSceneWithDefaultSetLabel, SceneOpeningPreferences.NoGroupSceneWithDefaultSetTooltip, false));
             page.Add(SceneSystemUI.Hint(PlayNote));

@@ -72,25 +72,70 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
         }
 
-        /// <summary>Opens the main scene of the sample's first scene group, with its group, after the usual save prompt.</summary>
+        /// <summary>
+        /// Opens the scene the sample's README starts with ("Open `Sample 02 Hub`" in its first Try it step), with its scene
+        /// group when it is a group's main scene, after Unity's usual save prompt. Falls back to the first scene group.
+        /// </summary>
         public static string OpenSample(string _number)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 return "cannot open a sample in Play mode";
             }
-            SceneGroup group = FirstSampleGroup(_number);
-            if (group == null)
-            {
-                return "sample " + _number + " has no scene group";
-            }
             bool mayContinue = EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
             if (!mayContinue)
             {
                 return "cancelled at the save prompt";
             }
+            string firstScene = FirstSceneOfReadme(_number);
+            SceneGroup group = GroupWithMainScene(_number, firstScene) ?? FirstSampleGroup(_number);
+            bool opensOwnScene = firstScene != null && (group == null || group.name != firstScene + "Group");
+            string scenePath = opensOwnScene ? SampleScenePath(_number, firstScene) : null;
+            if (scenePath != null)
+            {
+                EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+                return "opened " + firstScene;
+            }
+            if (group == null)
+            {
+                return "sample " + _number + " has no scene group";
+            }
             SceneGroupOpener.Open(group);
             return "opened " + group.name;
+        }
+
+        // The first `Sample NN ...` name in the README's Try it section.
+        private static string FirstSceneOfReadme(string _number)
+        {
+            string folder = SceneDocsTopics.SampleFolder(_number);
+            string text = folder == null ? null : SceneDocsPaths.Read(folder + "/README.md");
+            if (text == null)
+            {
+                return null;
+            }
+            int tryIt = text.IndexOf("## Try it", System.StringComparison.Ordinal);
+            if (tryIt < 0)
+            {
+                return null;
+            }
+            System.Text.RegularExpressions.Match match = System.Text.RegularExpressions.Regex.Match(text.Substring(tryIt), "`(Sample " + _number + " [^`]+)`");
+            return match.Success ? match.Groups[1].Value : null;
+        }
+
+        private static SceneGroup GroupWithMainScene(string _number, string _sceneName)
+        {
+            if (_sceneName == null)
+            {
+                return null;
+            }
+            string folder = SceneDocsTopics.SampleFolder(_number);
+            return AssetDatabase.LoadAssetAtPath<SceneGroup>(folder + "/Scene Groups/" + _sceneName + "Group.asset");
+        }
+
+        private static string SampleScenePath(string _number, string _sceneName)
+        {
+            string path = SceneDocsTopics.SampleFolder(_number) + "/Scenes/" + _sceneName + ".unity";
+            return AssetDatabase.LoadMainAssetAtPath(path) != null ? path : null;
         }
 
         public static SceneGroup FirstSampleGroup(string _number)

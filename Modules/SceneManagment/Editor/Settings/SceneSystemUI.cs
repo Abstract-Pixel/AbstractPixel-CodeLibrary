@@ -112,6 +112,19 @@ namespace AbstractPixel.SceneManagement.Editor
             return title;
         }
 
+        /// <summary>
+        /// A page title with a help button at its right end. Unity 6.3 does not draw SettingsProvider.titleBarGuiHandler
+        /// for a UI Toolkit page, so the page's "?" sits in its own title row.
+        /// </summary>
+        public static VisualElement PageTitleWithHelp(string _title, string _tooltip, string _topicId)
+        {
+            VisualElement row = Row();
+            row.Add(PageTitle(_title, _tooltip));
+            row.Add(Spacer());
+            row.Add(SceneSystemHelp.Button(_topicId, "Opens the scene documentation about this page"));
+            return row;
+        }
+
         /// <summary>Adds a section (header, card) to the parent and returns the card to fill. The explanation is the header's tooltip.</summary>
         public static VisualElement Section(VisualElement _parent, string _title, string _tooltip)
         {
