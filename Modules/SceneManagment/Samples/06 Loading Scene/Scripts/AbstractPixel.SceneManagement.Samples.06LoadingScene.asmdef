@@ -1,0 +1,21 @@
+{
+    "name": "AbstractPixel.SceneManagement.Samples.06LoadingScene",
+    "rootNamespace": "AbstractPixel.SceneManagement.Samples",
+    "references": [
+        "AbstractPixel.Core",
+        "AbstractPixel.SceneManagment",
+        "AbstractPixel.SceneManagement.SceneScreens",
+        "AbstractPixel.SceneManagement.Samples.Shared"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

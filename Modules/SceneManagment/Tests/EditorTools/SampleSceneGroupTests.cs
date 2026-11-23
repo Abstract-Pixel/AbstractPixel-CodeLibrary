@@ -40,6 +40,19 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             groups.Clear();
         }
 
+        // Scene system S: a sample group's own loading scene and its sample launch scene open in Play from their path too.
+        [Test]
+        public void ASampleGroupsLoadingSceneAndLaunchSceneAreSampleScenes()
+        {
+            SceneGroup sample = AddGroup("Sample A", SampleLevel, SharedScene, true);
+            sample.LoadingScene = new SceneReference("Sample Loading", string.Empty, "Assets/Samples/05/Sample Loading.unity");
+            sample.SampleLaunchScene = new SceneReference("Sample Splash", string.Empty, "Assets/Samples/05/Sample Splash.unity");
+            SampleSceneGroups.Forget();
+
+            Assert.IsTrue(SampleSceneGroups.IsSampleScene("Assets/Samples/05/Sample Loading.unity"), "loading scene");
+            Assert.IsTrue(SampleSceneGroups.IsSampleScene("Assets/Samples/05/Sample Splash.unity"), "sample launch scene");
+        }
+
         [Test]
         public void TheWriterLeavesSampleScenesOut()
         {
