@@ -15,6 +15,23 @@ namespace AbstractPixel.SceneManagement.Samples
         private int shownScore = -1;
         private SampleLabel label;
 
+        // Counts Run State objects this Play: a Retry makes a new one, so the number goes up.
+        private static int runsThisPlay;
+        private int runNumber;
+
+        // Domain reload may be off: count from zero every Play.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetRuns()
+        {
+            runsThisPlay = 0;
+        }
+
+        private void Awake()
+        {
+            runsThisPlay++;
+            runNumber = runsThisPlay;
+        }
+
         public int Score
         {
             get { return score; }
@@ -42,7 +59,7 @@ namespace AbstractPixel.SceneManagement.Samples
             {
                 return;
             }
-            label.SetLine(ScoreLine, "Score this run: " + score + " (Run State scene, object " + GetInstanceID() + ")");
+            label.SetLine(ScoreLine, "Score this run: " + score + " (Run State scene, run " + runNumber + ")");
             shownScore = score;
         }
     }

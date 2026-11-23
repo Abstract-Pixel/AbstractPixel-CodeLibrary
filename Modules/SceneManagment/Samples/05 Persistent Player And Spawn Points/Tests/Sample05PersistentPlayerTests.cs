@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -36,16 +37,32 @@ namespace AbstractPixel.SceneManagement.Samples.Tests
                 yield return null;
             }
 
-            Relocatable[] all = Object.FindObjectsByType<Relocatable>(FindObjectsSortMode.None);
-            int released = all.Length - CountHeld();
+            List<Relocatable> all = OpenRelocatables();
+            int released = all.Count - CountHeld();
             Assert.AreEqual(RelocatableCount, released, _groupFile + ": released relocatables");
             Assert.AreEqual(0, CountHeld(), _groupFile + ": held relocatables");
+        }
+
+        // Every relocatable in a loaded scene. Resources.FindObjectsOfTypeAll reads the same on 6.3 and 7.0, where
+        // FindObjectsByType's sort mode is obsolete.
+        private static List<Relocatable> OpenRelocatables()
+        {
+            List<Relocatable> open = new List<Relocatable>();
+            foreach (Relocatable relocatable in Resources.FindObjectsOfTypeAll<Relocatable>())
+            {
+                bool isInLoadedScene = relocatable.gameObject.scene.IsValid() && relocatable.gameObject.scene.isLoaded;
+                if (isInLoadedScene)
+                {
+                    open.Add(relocatable);
+                }
+            }
+            return open;
         }
 
         private static int CountHeld()
         {
             int held = 0;
-            foreach (Relocatable relocatable in Object.FindObjectsByType<Relocatable>(FindObjectsSortMode.None))
+            foreach (Relocatable relocatable in OpenRelocatables())
             {
                 if (relocatable.IsHeld)
                 {
