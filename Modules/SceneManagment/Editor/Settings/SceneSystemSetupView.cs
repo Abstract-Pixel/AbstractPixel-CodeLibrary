@@ -58,7 +58,7 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             onDone = _onDone;
             openingScenesOnly = _openingScenesOnly;
-            plan = SceneGroupMigration.Plan(SceneGroupAssets.FindAll());
+            plan = SceneSystemSetup.MigrationPlanFor(SceneGroupAssets.FindAll());
             AddPages();
 
             style.flexGrow = 1;

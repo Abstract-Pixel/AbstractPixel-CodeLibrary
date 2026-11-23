@@ -3,6 +3,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace AbstractPixel.SceneManagement.Editor
 {
@@ -105,6 +106,27 @@ namespace AbstractPixel.SceneManagement.Editor
             if (showProfile != null)
             {
                 showProfile.Invoke(_window, new object[] { new object[] { _profile } });
+            }
+            // The profile's page builds its sections a moment later; its Scene List section starts folded.
+            _window.rootVisualElement.schedule.Execute(() => UnfoldSceneList(_window)).ExecuteLater(SceneListUnfoldDelayMilliseconds);
+        }
+
+        private const long SceneListUnfoldDelayMilliseconds = 150;
+        private const string SceneListSectionTitle = "Scene List";
+
+        private static void UnfoldSceneList(EditorWindow _window)
+        {
+            if (_window == null)
+            {
+                return;
+            }
+            foreach (Foldout foldout in _window.rootVisualElement.Query<Foldout>().ToList())
+            {
+                if (foldout.text == SceneListSectionTitle)
+                {
+                    foldout.value = true;
+                    return;
+                }
             }
         }
     }

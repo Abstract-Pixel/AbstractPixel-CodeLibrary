@@ -55,6 +55,21 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             Group("LevelBootGroup", null, new[] { "ManagerBootScene" }, new[] { "GameBootScene" }, true);
         }
 
+        // Found in the Unity 7 Lab (session 5A2): setup's Ready said "2 scene groups can be sorted" for the two sample
+        // scene groups, which the Scene System page's migration box leaves out.
+        [Test]
+        public void SetupsMigrationLineLeavesSampleSceneGroupsOut()
+        {
+            Group("level2Group", "Level 2", new[] { "ManagerBootScene" }, new[] { "GameBootScene" }, true);
+            SceneGroup sample = Group("Sample 05 Area AGroup", "Sample 05 Area A", new string[0], new[] { "Sample 05 Shared" }, false);
+            sample.IsSample = true;
+
+            SceneGroupMigrationPlan plan = SceneSystemSetup.MigrationPlanFor(groups);
+
+            Assert.AreEqual(1, plan.GroupsToMigrateCount, "only the game's scene group");
+            StringAssert.StartsWith("1 scene groups", SceneSystemSetup.MigrationHint(plan));
+        }
+
         [Test]
         public void Plan_RallyLikeGroups_MakesOneSetPerCombination()
         {
