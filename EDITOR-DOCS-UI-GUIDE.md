@@ -243,4 +243,21 @@ Use a screenshot only where a picture explains a control faster than words: the 
 - [Custom Inspector findings]: the Custom Inspector asset, read from the Lab's git history before its removal (commit 898e105's parent). Ideas only, no code copied.
 - [Save System data-source test]: `SaveSystemDocsTests.TheLinesThatMatter_InEachSampleReadme_StillAppearInItsScripts` on library `origin/save-system`.
 
-Not yet checked in a running Editor (the first docs session checks them and updates this guide): the RobotoMono path in both Editors, `ShowButton` and `titleBarGuiHandler` drawing a "?", `Highlighter` on the Scene System page, and the theme variable values on Unity 7.
+## Checked in a running Editor (scene documentation, session D)
+
+- **RobotoMono:** `EditorGUIUtility.Load("Fonts/RobotoMono/RobotoMono-Regular.ttf")` returns the font in Unity 6.3 (True) and Unity 7.0a16 (True); code blocks and member names render in it.
+- **ShowButton** draws the "?" in an EditorWindow's tab bar in 6.3.
+- **titleBarGuiHandler is not drawn for a UI Toolkit page** (`activateHandler`) in 6.3: put the page's "?" in the page's own title row as well.
+- **Highlighter** is not used by any page yet; not checked.
+- **Theme values on Unity 7:** not checked visually. Grabbing window pixels (`GUIView.GrabPixels`) crashed Unity 7000.0.0a16 (D3D12 `GrabIntoRenderTexture`), so stills come from 6.3 only; the Lab is checked with probes.
+
+## Rules learned
+
+- **Icons:** load them with `EditorGUIUtility.FindTexture`, which logs nothing for a missing name (`IconContent` logs an error). Several names from older lists do not exist in 6.3. Buttons and chips use flat glyphs in the text colour; picture icons are kept for Note, Warning and the help "?" only (user, session D).
+- **Glyphs:** Inter has no ⧉ or ⌖; check each glyph renders before using it.
+- **Inline code:** a muted accent colour on a faint `<mark>` box. Do not force `<mspace>` on the body font: wide letters overlap.
+- **Leading spaces** in a Label are dropped: indent code with no-break spaces.
+- **Graphs:** layered (columns left to right, rows top down under 520 px), curved arrows behind the boxes, hover tracing, and a box with a map of its own opens it; show only the core boxes first, with "Show everything" for the rest (user, session D).
+- **Steps tick in order:** a message ticks only the next step that waits for one, so a later step never ticks early.
+- **Start-up messages fire before Play counts as entered:** listen from `RuntimeInitializeOnLoadMethod(AfterAssembliesLoaded)`, after the scene system resets its statics.
+- **Unity 7 analyzers:** a type with static members needs `[Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]` behind `#if UNITY_7000_0_OR_NEWER`; use `CompilationPipeline.GetAssemblies()` instead of `AppDomain.GetAssemblies()`.

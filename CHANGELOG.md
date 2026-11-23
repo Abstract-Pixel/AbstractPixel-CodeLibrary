@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] - scene system D (2026-11-24)
+**Scene documentation inside the Editor.**
+- **Feature:** Tools > External Project Tools > Scene System > Open Scene Documentation: a dockable UI Toolkit window with Home, twelve guide pages, Find a problem, Code map, Design decisions, a page per public type and the ten sample pages. Search, Back and Forward, deep links to headings, live "What just happened" timeline and self-ticking steps in Play.
+- **Feature:** help buttons open the documentation at the right section from the Scene System page (title and every section), Preferences > Scenes, the scene group, scene set, relocatable and spawn point inspectors, the spawn point overlay, the scene picker footer, the setup window and every group-check problem; eight components and assets without an inspector get a help row above their default inspector.
+- **Feature:** each sample README gains "How it's set up" (actions that select the objects that make it work) and "Why it works"; the sample label shows "Guide: Scene documentation window" and an Editor-only Open guide button.
+- **Docs:** the module README is now "Start here"; its content moved into the guide pages. `EDITOR-DOCS-UI-GUIDE.md` records what was checked in a running Editor.
+
 ## [Unreleased] - scene system 5A2 (2026-11-23)
 **Scene picker and setup polish.**
 - **Fix (samples):** Sample 05 and the InputRebinding sample no longer draw magenta in URP or HDRP: they use the library's sample shader `Abstract Pixel/Samples/Sample Lit` (no LightMode tag) and its materials. `PipelineDefaultMaterial` and its scene objects are removed.
