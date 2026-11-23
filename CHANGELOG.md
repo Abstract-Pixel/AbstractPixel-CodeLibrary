@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] - scene system 5A2 (2026-11-23)
+**Scene picker and setup polish.**
+- **Fix (samples):** Sample 05 and the InputRebinding sample no longer draw magenta in URP or HDRP: they use the library's sample shader `Abstract Pixel/Samples/Sample Lit` (no LightMode tag) and its materials. `PipelineDefaultMaterial` and its scene objects are removed.
+- **Feature:** two scene opening preferences replace "Open the group with its main scene": "Open a main scene with its scene group" and "Open a scene in no group with the default scene set" (per user, per project, both on; the old value carries over). Preferences, Tools menu (two toggles), setup and the scene picker footer.
+- **Feature (scene picker):** rows with a number, a label button (selects the group or scene set), a status button (opens Build Profiles at the scene list in use, the Addressables Groups window, the Scene System page at the group's Debugger row, or selects the group where the fix is) and a folder button; the Scene Groups tab shows the group check; sample scenes are grey; right-click menu (Open, Open additively, Select scene, Select scene group, Copy path); footer "Open with: Group, Default set".
+- **Feature (setup):** steps Scene Sets ("Set up your scene sets now?") and Opening Scenes; Terminology lines on each step; the migration step moves to the Scene System page; once set up, the setup menu opens Opening Scenes only.
+- **Feature (Scene System page):** rename a scene set from its card (double-click or F2; + opens the new set's name), with a red line for an empty, invalid or taken name.
+- **Fix:** the Scene Groups Debugger's main scene field showed "None" when a group's scene link was empty in memory; it finds the scene by GUID, then path.
+- **Fix:** setup's Ready line no longer counts sample scene groups as groups to sort into scene sets.
+
 ## [1.1.0] - 2026-10-31
 **GameManagment: delayed menus, eased time scale, skip, state fixes.** Every new option defaults to the old behaviour.
 - **Feature:** `StateSO.OverrideExecutionTimeScale` + `ExecutionTimeScale` (0 freeze, 0.2 slow motion, 1 no freeze), `TimeScaleEaseDuration` and `TimeScaleEaseCurve`. Easing runs on realtime in `GameStateComponent`; defaults (off / 0) keep the instant `IsTimeZeroOnExecution` behaviour.
