@@ -26,6 +26,14 @@ namespace AbstractPixel.SceneManagement
             StaticsResetter.OnResetStatics += ResetState;
         }
 
+        /// <summary>
+        /// Set by the scene system's editor code: whether a scene (by path) was loaded in edit mode when Play was pressed.
+        /// Unity 7 lists those scenes as still loading when start-up looks; null in a build.
+        /// </summary>
+        internal static System.Func<string, bool> WasLoadedInEditMode;
+
+        private const float EditModeScenesWaitSeconds = 10f;
+
         /// <summary>True when the launch scene hold was decided before the first scene's Awake (the settings were found then).</summary>
         private static bool decidedLaunchSceneHold;
 
@@ -97,6 +105,7 @@ namespace AbstractPixel.SceneManagement
 
         private static async Task RunAsync()
         {
+            await WaitForEditModeScenes();
             SceneSystemSettings settings = SceneSystemSettingsSource.Find();
             List<SceneReference> openScenes = OpenScenesActiveFirst();
             StartUpChoice choice = StartUpRule.Choose(settings, openScenes);
@@ -184,13 +193,47 @@ namespace AbstractPixel.SceneManagement
             for (int index = 0; index < SceneManager.sceneCount; index++)
             {
                 Scene scene = SceneManager.GetSceneAt(index);
-                bool opening = StartUpRule.CountsAsOpening(scene.IsValid(), scene.isLoaded, isEditor);
+                bool opening = StartUpRule.CountsAsOpening(scene.IsValid(), scene.isLoaded, isEditor, LoadedInEditMode(scene));
                 if (opening)
                 {
                     scenes.Add(ToReference(scene));
                 }
             }
             return scenes;
+        }
+
+        private static bool LoadedInEditMode(Scene _scene)
+        {
+            if (WasLoadedInEditMode == null || string.IsNullOrEmpty(_scene.path))
+            {
+                return false;
+            }
+            return WasLoadedInEditMode(_scene.path);
+        }
+
+        // Unity 7 is still loading the scenes that were open in edit mode when start-up begins. Wait for them, so they
+        // count as already open and are not loaded a second time. A scene left unloaded in the Hierarchy is not waited for.
+        private static async Task WaitForEditModeScenes()
+        {
+            double endTime = Time.realtimeSinceStartupAsDouble + EditModeScenesWaitSeconds;
+            while (AnyEditModeSceneStillLoading() && Time.realtimeSinceStartupAsDouble < endTime)
+            {
+                await Task.Yield();
+            }
+        }
+
+        private static bool AnyEditModeSceneStillLoading()
+        {
+            for (int index = 0; index < SceneManager.sceneCount; index++)
+            {
+                Scene scene = SceneManager.GetSceneAt(index);
+                bool stillLoading = scene.IsValid() && scene.isLoaded == false && LoadedInEditMode(scene);
+                if (stillLoading)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // True when a listed scene is not loaded yet in the Editor, so it may still be one that Play opens.

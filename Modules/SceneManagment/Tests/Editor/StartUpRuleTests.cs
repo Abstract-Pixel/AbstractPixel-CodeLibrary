@@ -235,6 +235,18 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.AreEqual(_expected, StartUpRule.MayStillBeOpening(_isValid, _isLoaded, _isEditor));
         }
 
+        // Scene system S, Lab: on Unity 7 the scenes open in edit mode are still loading when start-up looks, so a scene
+        // that was loaded in edit mode counts as opening even before it reports loaded; one left unloaded never does.
+        [TestCase(true, false, true, true, true)]
+        [TestCase(true, false, true, false, false)]
+        [TestCase(true, true, true, false, true)]
+        [TestCase(false, false, true, true, false)]
+        [TestCase(true, false, false, false, true)]
+        public void ASceneLoadedInEditModeCountsAsOpening(bool _isValid, bool _isLoaded, bool _isEditor, bool _wasLoadedInEditMode, bool _expected)
+        {
+            Assert.AreEqual(_expected, StartUpRule.CountsAsOpening(_isValid, _isLoaded, _isEditor, _wasLoadedInEditMode));
+        }
+
         [Test]
         public void NoOpenSceneDoesNothing()
         {

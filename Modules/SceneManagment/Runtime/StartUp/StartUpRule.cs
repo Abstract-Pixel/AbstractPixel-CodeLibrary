@@ -162,6 +162,21 @@ namespace AbstractPixel.SceneManagement
             return _isLoaded == false;
         }
 
+        /// <summary>Like CountsAsOpening, also counting a scene that was loaded in edit mode when Play was pressed.</summary>
+        public static bool CountsAsOpening(bool _isValid, bool _isLoaded, bool _isEditor, bool _wasLoadedInEditMode)
+        {
+            if (_isValid == false)
+            {
+                return false;
+            }
+            bool openingInTheEditor = _isEditor && _wasLoadedInEditMode;
+            if (openingInTheEditor)
+            {
+                return true;
+            }
+            return CountsAsOpening(_isValid, _isLoaded, _isEditor);
+        }
+
         private static StartUpChoice ChooseStartSceneGroup(SceneSystemSettings _settings, StartUpChoiceKind _kind, SceneReference _reasonScene)
         {
             StartUpChoice choice = new StartUpChoice();
