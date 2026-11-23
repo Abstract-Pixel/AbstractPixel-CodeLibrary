@@ -24,6 +24,8 @@ namespace AbstractPixel.SceneManagement
         [SerializeField] private SceneReference loadingScene = new SceneReference(string.Empty);
         [Tooltip("Sample scene group: its scenes open in the Editor but never go into a build (ADR 0014).")]
         [SerializeField] private bool isSample = false;
+        [Tooltip("Editor only. Play started from this scene runs the launch scene hold with this sample scene group as the start scene group.")]
+        [SerializeField] private SceneReference sampleLaunchScene = new SceneReference(string.Empty);
 
         // The scene set that fills the three parts below, and which of them are overrides (ADR 0008). The loader does
         // not read these: it reads the lists above, which the Editor keeps in step with the set.
@@ -43,6 +45,16 @@ namespace AbstractPixel.SceneManagement
         {
             get { return isSample; }
             set { isSample = value; }
+        }
+
+        /// <summary>
+        /// The launch scene of a sample scene group (scene system S): Play started with it open holds it, with this
+        /// sample scene group as the start scene group. Read only when <see cref="IsSample"/> is true.
+        /// </summary>
+        public SceneReference SampleLaunchScene
+        {
+            get { return sampleLaunchScene; }
+            set { sampleLaunchScene = value; }
         }
 
         /// <summary>When this group shows its loading scene.</summary>

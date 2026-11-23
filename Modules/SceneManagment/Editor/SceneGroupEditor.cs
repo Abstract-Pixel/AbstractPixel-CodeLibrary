@@ -201,7 +201,36 @@ namespace AbstractPixel.SceneManagement.Editor
                     AbstractPixel.Core.Editor.SceneBuildSettingsWriter.Write(EditorBuildSettings.scenes);
                 }
             });
-            return sample;
+
+            VisualElement container = new VisualElement();
+            container.Add(sample);
+            VisualElement launchScene = MakeSampleLaunchSceneField();
+            container.Add(launchScene);
+            ShowSampleLaunchSceneWhenSample(launchScene);
+            sample.RegisterValueChangeCallback(_change => ShowSampleLaunchSceneWhenSample(launchScene));
+            return container;
+        }
+
+        // The sample launch scene (scene system S): shown only while "Sample scene group" is ticked.
+        private VisualElement MakeSampleLaunchSceneField()
+        {
+            PropertyField launchScene = new PropertyField(serializedObject.FindProperty("sampleLaunchScene"), "Launch scene (sample only)");
+            launchScene.name = "sample-launch-scene";
+            launchScene.tooltip = "Editor only. Play started from this scene runs the launch scene hold with this sample scene group as the start scene group.";
+            launchScene.style.marginLeft = 15;
+            return launchScene;
+        }
+
+        private void ShowSampleLaunchSceneWhenSample(VisualElement _launchScene)
+        {
+            SceneGroup group = (SceneGroup)target;
+            bool isSample = group != null && group.IsSample;
+            DisplayStyle display = DisplayStyle.None;
+            if (isSample)
+            {
+                display = DisplayStyle.Flex;
+            }
+            _launchScene.style.display = display;
         }
 
         private VisualElement MakeAdvanced()

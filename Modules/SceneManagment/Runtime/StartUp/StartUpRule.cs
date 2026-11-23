@@ -8,6 +8,7 @@ namespace AbstractPixel.SceneManagement
     /// One rule for builds and Play: a build is the case where only build index 0 is open.
     /// <list type="number">
     /// <item>The launch scene is open: the start scene group, behind the launch scene.</item>
+    /// <item>A sample launch scene is open: its sample scene group, behind it (scene system S, Editor only).</item>
     /// <item>An open scene, the active one first, is the main scene of a scene group in the settings list: that group.
     /// Two such scenes open: an error, and the first one wins.</item>
     /// <item>The active scene is a manager or shared scene of a sample scene group: that sample scene group.</item>
@@ -37,10 +38,16 @@ namespace AbstractPixel.SceneManagement
                 return choice;
             }
 
-            bool launchSceneIsOpen = ShouldHoldLaunchScene(_settings, _openScenesActiveFirst);
-            if (launchSceneIsOpen)
+            bool projectLaunchSceneIsOpen = _settings.HasLaunchScene && StartUpSceneMatch.ListHolds(_openScenesActiveFirst, _settings.LaunchScene);
+            if (projectLaunchSceneIsOpen)
             {
                 return ChooseStartSceneGroup(_settings, StartUpChoiceKind.BehindLaunchScene, _settings.LaunchScene);
+            }
+
+            SceneGroup sampleWithLaunchScene = FindSampleGroupWithOpenLaunchScene(_settings, _openScenesActiveFirst);
+            if (sampleWithLaunchScene != null)
+            {
+                return ChooseBehindSampleLaunchScene(sampleWithLaunchScene);
             }
 
             bool foundMainScene = TryChooseGroupOfOpenMainScene(_settings, _openScenesActiveFirst, choice);
@@ -74,7 +81,7 @@ namespace AbstractPixel.SceneManagement
         /// </summary>
         public static bool ShouldHoldLaunchScene(SceneSystemSettings _settings, List<SceneReference> _openScenes)
         {
-            if (_settings == null || _settings.HasLaunchScene == false)
+            if (_settings == null)
             {
                 return false;
             }
@@ -82,7 +89,44 @@ namespace AbstractPixel.SceneManagement
             {
                 return false;
             }
-            return StartUpSceneMatch.ListHolds(_openScenes, _settings.LaunchScene);
+            bool projectLaunchSceneIsOpen = _settings.HasLaunchScene && StartUpSceneMatch.ListHolds(_openScenes, _settings.LaunchScene);
+            if (projectLaunchSceneIsOpen)
+            {
+                return true;
+            }
+            SceneGroup sampleWithLaunchScene = FindSampleGroupWithOpenLaunchScene(_settings, _openScenes);
+            return sampleWithLaunchScene != null;
+        }
+
+        /// <summary>
+        /// The first sample scene group whose sample launch scene is among the open scenes, or null. Game scene groups
+        /// never name a launch scene: their field is ignored. Sample scene groups never reach a build (ADR 0014), so in
+        /// practice this only matches in the Editor.
+        /// </summary>
+        public static SceneGroup FindSampleGroupWithOpenLaunchScene(SceneSystemSettings _settings, List<SceneReference> _openScenes)
+        {
+            if (_settings == null || _openScenes == null)
+            {
+                return null;
+            }
+            foreach (SceneGroup group in _settings.SceneGroups)
+            {
+                if (group == null || group.IsSample == false)
+                {
+                    continue;
+                }
+                SceneReference launchScene = group.SampleLaunchScene;
+                bool namesALaunchScene = launchScene != null && string.IsNullOrEmpty(launchScene.SceneName) == false;
+                if (namesALaunchScene == false)
+                {
+                    continue;
+                }
+                if (StartUpSceneMatch.ListHolds(_openScenes, launchScene))
+                {
+                    return group;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -195,6 +239,17 @@ namespace AbstractPixel.SceneManagement
                 }
             }
             return null;
+        }
+
+        // A sample launch scene is open: its sample scene group opens behind it, as the start scene group would.
+        private static StartUpChoice ChooseBehindSampleLaunchScene(SceneGroup _sampleGroup)
+        {
+            StartUpChoice choice = new StartUpChoice();
+            choice.Kind = StartUpChoiceKind.BehindLaunchScene;
+            choice.Group = _sampleGroup;
+            choice.MainScene = _sampleGroup.MainScene;
+            choice.InfoMessage = LogPrefix + "'" + _sampleGroup.SampleLaunchScene.SceneName + "' is the sample launch scene of '" + _sampleGroup.name + "', so that sample scene group opens behind it.";
+            return choice;
         }
 
         private static StartUpChoice ChooseSampleSceneGroup(SceneGroup _sampleGroup, SceneReference _activeScene)

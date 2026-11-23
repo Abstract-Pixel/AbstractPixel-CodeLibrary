@@ -13,7 +13,7 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
     /// </summary>
     public class SceneGroupsDebuggerMainSceneTests
     {
-        private const string SampleScenePath = "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/05 Persistent Player And Spawn Points/Sample 05 Area A.unity";
+        private const string SampleScenePath = "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/05 Persistent Player And Spawn Points/Scenes/Sample 05 Area A.unity";
 
         private SceneGroup group;
 

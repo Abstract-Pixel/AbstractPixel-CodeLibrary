@@ -74,7 +74,23 @@ namespace AbstractPixel.SceneManagement
             }
 
             LaunchSceneHold.Hold();
-            Debug.Log("[Scene system] Start-up: the launch scene '" + settings.LaunchScene.SceneName + "' holds the start scene group until it calls SceneActions.ReleaseLaunchScene().");
+            Debug.Log("[Scene system] Start-up: the launch scene '" + HeldLaunchSceneName(settings, openingScenes) + "' holds the start scene group until it calls SceneActions.ReleaseLaunchScene().");
+        }
+
+        // The project launch scene's name, or the sample launch scene's when only that one is opening.
+        private static string HeldLaunchSceneName(SceneSystemSettings _settings, List<SceneReference> _openingScenes)
+        {
+            bool projectLaunchSceneIsOpening = _settings.HasLaunchScene && StartUpSceneMatch.ListHolds(_openingScenes, _settings.LaunchScene);
+            if (projectLaunchSceneIsOpening)
+            {
+                return _settings.LaunchScene.SceneName;
+            }
+            SceneGroup sampleGroup = StartUpRule.FindSampleGroupWithOpenLaunchScene(_settings, _openingScenes);
+            if (sampleGroup == null)
+            {
+                return string.Empty;
+            }
+            return sampleGroup.SampleLaunchScene.SceneName;
         }
 
         private static async Task RunAsync()

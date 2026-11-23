@@ -100,8 +100,30 @@ namespace AbstractPixel.SceneManagement.Editor
                         owners.Add(path, group);
                     }
                 }
+                if (group.IsSample)
+                {
+                    AddOwnScreens(group, owners);
+                }
             }
             return sampleSceneOwners;
+        }
+
+        // A sample scene group's own loading scene and sample launch scene are sample scenes too (scene system S): they
+        // open in Play from their path and never go into a build.
+        private static void AddOwnScreens(SceneGroup _group, Dictionary<string, SceneGroup> _owners)
+        {
+            AbstractPixel.Core.SceneReference[] screens = { _group.LoadingScene, _group.SampleLaunchScene };
+            foreach (AbstractPixel.Core.SceneReference screen in screens)
+            {
+                if (screen == null || string.IsNullOrEmpty(screen.ScenePath))
+                {
+                    continue;
+                }
+                if (!_owners.ContainsKey(screen.ScenePath))
+                {
+                    _owners.Add(screen.ScenePath, _group);
+                }
+            }
         }
     }
 }
