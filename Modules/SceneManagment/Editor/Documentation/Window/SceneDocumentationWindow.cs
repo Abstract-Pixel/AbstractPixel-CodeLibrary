@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AbstractPixel.SceneManagement.Editor;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -8,8 +9,8 @@ namespace AbstractPixel.SceneManagement.Documentation
 {
     /// <summary>
     /// The scene documentation window: a toolbar (Back, Forward, Home, sidebar toggle, crumbs, "On this page", search),
-    /// a sidebar with the contents tree and the page column. Dockable. The current topic, the history and the scroll
-    /// position are serialized, so they survive a domain reload.
+    /// the contents tree (or search results) and the page column. Dockable. The current topic, the history and the
+    /// scroll position are serialized, so they survive a domain reload.
     /// </summary>
     public class SceneDocumentationWindow : EditorWindow
     {
@@ -18,6 +19,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         private const float MinHeight = 300f;
         private const float SidebarWidth = 220f;
         private const float NarrowWidth = 500f;
+        private const long FlashMilliseconds = 1000;
 
         [SerializeField] private DocsHistory history = new DocsHistory();
         [SerializeField] private float scrollY;
@@ -30,13 +32,37 @@ namespace AbstractPixel.SceneManagement.Documentation
         private ToolbarSearchField searchField;
         private TwoPaneSplitView split;
         private VisualElement sidebar;
+        private TreeView tree;
+        private ListView results;
         private ScrollView pageScroll;
         private VisualElement pageColumn;
+        private SceneDocsHost host;
+        private DocsRenderContext renderContext;
+        private string shownPage;
+        private System.DateTime contentsWriteTime;
+        private List<SceneDocsSearch.Result> shownResults = new List<SceneDocsSearch.Result>();
 
         /// <summary>The topic shown now (null on a new window).</summary>
         public string CurrentTopic
         {
             get { return history.Current; }
+        }
+
+        /// <summary>The page drawn now, for probes.</summary>
+        public DocsRenderContext RenderContext
+        {
+            get { return renderContext; }
+        }
+
+        public ScrollView PageScroll
+        {
+            get { return pageScroll; }
+        }
+
+        /// <summary>True while the search field has text (sample following waits then).</summary>
+        public bool IsSearching
+        {
+            get { return searchField != null && !string.IsNullOrEmpty(searchField.value); }
         }
 
         [MenuItem(SceneSystemDocs.MenuPath, false, 1001)]
@@ -59,6 +85,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         public void CreateGUI()
         {
             titleContent = new GUIContent(WindowTitle, DocsIcons.Load(DocsIcons.Help));
+            host = new SceneDocsHost(Navigate);
             VisualElement root = rootVisualElement;
             root.Clear();
             DocsStyles.Apply(root);
@@ -67,7 +94,19 @@ namespace AbstractPixel.SceneManagement.Documentation
             root.Add(BuildBody());
             root.RegisterCallback<GeometryChangedEvent>(OnWindowResized);
             root.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
+            SceneDocsTimeline.RowAdded -= OnTimelineRow;
+            SceneDocsTimeline.RowAdded += OnTimelineRow;
+            SceneDocsTimeline.Cleared -= OnTimelineCleared;
+            SceneDocsTimeline.Cleared += OnTimelineCleared;
+            float savedScroll = scrollY;
             ShowTopic(history.Current, false);
+            RestoreScroll(savedScroll);
+        }
+
+        private void OnDestroy()
+        {
+            SceneDocsTimeline.RowAdded -= OnTimelineRow;
+            SceneDocsTimeline.Cleared -= OnTimelineCleared;
         }
 
         // The "?" in the tab bar. Unity calls this by reflection, as for the Inspector's lock.
@@ -106,12 +145,12 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             Toolbar toolbar = new Toolbar();
             toolbar.AddToClassList("docs-toolbar");
-            backButton = IconButton(DocsIcons.Back, "Go back to the page you read before", GoBack);
-            forwardButton = IconButton(DocsIcons.Forward, "Go forward again", GoForward);
+            backButton = IconButton(DocsIcons.GlyphBack, "Go back to the page you read before", GoBack);
+            forwardButton = IconButton(DocsIcons.GlyphForward, "Go forward again", GoForward);
             ToolbarButton homeButton = new ToolbarButton(() => Navigate(SceneSystemDocTopics.Home));
             homeButton.text = "Home";
             homeButton.tooltip = "Open the Home page";
-            ToolbarButton sidebarButton = IconButton(DocsIcons.Sidebar, "Show or hide the contents", ToggleSidebar);
+            ToolbarButton sidebarButton = IconButton(DocsIcons.GlyphSidebar, "Show or hide the contents", ToggleSidebar);
             sidebarButton.AddToClassList("docs-sidebar-toggle");
             toolbar.Add(backButton);
             toolbar.Add(forwardButton);
@@ -131,19 +170,18 @@ namespace AbstractPixel.SceneManagement.Documentation
             searchField = new ToolbarSearchField();
             searchField.tooltip = "Search titles, headings, glossary terms and type names";
             searchField.AddToClassList("docs-search");
+            searchField.RegisterValueChangedCallback(_change => ShowSearch(_change.newValue));
+            searchField.RegisterCallback<KeyDownEvent>(OnSearchKey, TrickleDown.TrickleDown);
             toolbar.Add(searchField);
             return toolbar;
         }
 
-        private static ToolbarButton IconButton(string _icon, string _tooltip, System.Action _clicked)
+        private static ToolbarButton IconButton(string _glyph, string _tooltip, System.Action _clicked)
         {
             ToolbarButton button = new ToolbarButton(_clicked);
             button.tooltip = _tooltip;
+            button.text = _glyph;
             button.AddToClassList("docs-toolbar-icon");
-            Image icon = new Image();
-            icon.image = DocsIcons.Load(_icon);
-            icon.AddToClassList("docs-icon");
-            button.Add(icon);
             return button;
         }
 
@@ -153,8 +191,12 @@ namespace AbstractPixel.SceneManagement.Documentation
             split.viewDataKey = "scene-docs-split";
             split.AddToClassList("docs-split");
 
-            sidebar = new ScrollView();
+            sidebar = new VisualElement();
             sidebar.AddToClassList("docs-sidebar");
+            tree = BuildTree();
+            sidebar.Add(tree);
+            results = BuildResults();
+            sidebar.Add(results);
             split.Add(sidebar);
 
             pageScroll = new ScrollView(ScrollViewMode.Vertical);
@@ -168,24 +210,328 @@ namespace AbstractPixel.SceneManagement.Documentation
             return split;
         }
 
+        // The contents file is read again when it changes on disk, so a new page shows up without a reload.
+        private void RebuildTreeIfContentsChanged()
+        {
+            System.DateTime writeTime = System.IO.File.GetLastWriteTimeUtc(SceneDocsPaths.Physical(SceneDocsPaths.Contents));
+            if (writeTime == contentsWriteTime)
+            {
+                return;
+            }
+            contentsWriteTime = writeTime;
+            int index = sidebar.IndexOf(tree);
+            sidebar.Remove(tree);
+            tree = BuildTree();
+            sidebar.Insert(index, tree);
+        }
+
+        private TreeView BuildTree()
+        {
+            List<TreeViewItemData<SceneDocsContentsEntry>> items = new List<TreeViewItemData<SceneDocsContentsEntry>>();
+            int nextId = 1;
+            foreach (SceneDocsContentsEntry entry in SceneDocsContents.Tree())
+            {
+                items.Add(TreeItem(entry, ref nextId));
+            }
+            TreeView view = new TreeView();
+            view.AddToClassList("docs-tree");
+            view.viewDataKey = "scene-docs-tree";
+            view.fixedItemHeight = 20;
+            view.SetRootItems(items);
+            view.makeItem = () =>
+            {
+                Label label = new Label();
+                label.AddToClassList("docs-tree-label");
+                return label;
+            };
+            view.bindItem = (_element, _index) =>
+            {
+                SceneDocsContentsEntry entry = view.GetItemDataForIndex<SceneDocsContentsEntry>(_index);
+                Label label = (Label)_element;
+                label.text = entry.Title;
+                label.tooltip = string.IsNullOrEmpty(entry.Topic) ? "" : "Opens " + entry.Title;
+            };
+            view.selectionChanged += _selection => OnTreeSelection(_selection);
+            view.Rebuild();
+            return view;
+        }
+
+        private static TreeViewItemData<SceneDocsContentsEntry> TreeItem(SceneDocsContentsEntry _entry, ref int _nextId)
+        {
+            int id = _nextId++;
+            List<TreeViewItemData<SceneDocsContentsEntry>> children = new List<TreeViewItemData<SceneDocsContentsEntry>>();
+            foreach (SceneDocsContentsEntry child in _entry.Children)
+            {
+                children.Add(TreeItem(child, ref _nextId));
+            }
+            return new TreeViewItemData<SceneDocsContentsEntry>(id, _entry, children);
+        }
+
+        private void OnTreeSelection(IEnumerable<object> _selection)
+        {
+            foreach (object item in _selection)
+            {
+                SceneDocsContentsEntry entry = item as SceneDocsContentsEntry;
+                bool opensAPage = entry != null && !string.IsNullOrEmpty(entry.Topic) && entry.Topic != history.Current;
+                if (opensAPage)
+                {
+                    Navigate(entry.Topic);
+                }
+                return;
+            }
+        }
+
+        private ListView BuildResults()
+        {
+            ListView list = new ListView();
+            list.AddToClassList("docs-results");
+            list.AddToClassList("docs-hidden");
+            list.fixedItemHeight = 34;
+            list.itemsSource = shownResults;
+            list.makeItem = () =>
+            {
+                VisualElement row = new VisualElement();
+                row.AddToClassList("docs-result");
+                Label text = new Label();
+                text.AddToClassList("docs-result-text");
+                row.Add(text);
+                Label category = new Label();
+                category.AddToClassList("docs-result-category");
+                row.Add(category);
+                return row;
+            };
+            list.bindItem = (_element, _index) =>
+            {
+                SceneDocsSearch.Result result = shownResults[_index];
+                _element.Q<Label>(className: "docs-result-text").text = result.Text;
+                _element.Q<Label>(className: "docs-result-category").text = result.Category;
+                _element.tooltip = "Opens " + result.Text;
+            };
+            list.itemsChosen += _chosen => OpenFirst(_chosen);
+            list.selectionChanged += _chosen => OpenFirst(_chosen);
+            return list;
+        }
+
+        private void OpenFirst(IEnumerable<object> _items)
+        {
+            foreach (object item in _items)
+            {
+                SceneDocsSearch.Result result = item as SceneDocsSearch.Result;
+                if (result != null)
+                {
+                    Navigate(result.Topic);
+                }
+                return;
+            }
+        }
+
+        private void ShowSearch(string _query)
+        {
+            bool searching = !string.IsNullOrEmpty(_query);
+            tree.EnableInClassList("docs-hidden", searching);
+            results.EnableInClassList("docs-hidden", !searching);
+            shownResults.Clear();
+            if (searching)
+            {
+                shownResults.AddRange(SceneDocsSearch.Find(_query));
+                if (sidebarHidden)
+                {
+                    sidebarHidden = false;
+                    ApplySidebar();
+                }
+            }
+            results.RefreshItems();
+        }
+
+        private void OnSearchKey(KeyDownEvent _event)
+        {
+            bool isEnter = _event.keyCode == KeyCode.Return || _event.keyCode == KeyCode.KeypadEnter;
+            if (isEnter && shownResults.Count > 0)
+            {
+                Navigate(shownResults[0].Topic);
+                _event.StopPropagation();
+            }
+        }
+
         private void ShowTopic(string _topicId, bool _resetScroll)
         {
             if (pageColumn == null)
             {
                 return;
             }
-            pageColumn.Clear();
+            RebuildTreeIfContentsChanged();
             RefreshHistoryButtons();
-            pageColumn.Add(EmptyState());
-            crumbs.text = "";
+            if (string.IsNullOrEmpty(_topicId))
+            {
+                ShowEmpty();
+                return;
+            }
+            string page;
+            string anchor;
+            SceneDocsTopics.Split(_topicId, out page, out anchor);
+            bool samePage = page == shownPage && renderContext != null;
+            if (!samePage)
+            {
+                DocsPage parsed = SceneDocsPageCache.Get(page);
+                if (parsed == null)
+                {
+                    ShowEmpty();
+                    crumbs.text = "No page for " + _topicId;
+                    return;
+                }
+                RenderPage(page, parsed);
+            }
+            if (!string.IsNullOrEmpty(anchor))
+            {
+                ScrollToHeading(anchor);
+                return;
+            }
+            if (_resetScroll)
+            {
+                pageScroll.scrollOffset = Vector2.zero;
+            }
         }
 
-        // Shown until a page is picked, and for a topic that has no page yet.
-        private static VisualElement EmptyState()
+        private void RenderPage(string _page, DocsPage _parsed)
         {
+            pageColumn.Clear();
+            shownPage = _page;
+            renderContext = new DocsRenderContext(_parsed, host);
+            pageColumn.Add(DocsRenderer.Render(renderContext));
+            pageColumn.Add(Pager(_page));
+            crumbs.text = CrumbsFor(_page, _parsed.Title);
+            BuildOnThisPage(_parsed);
+            ReplayTimelineIntoSteps();
+        }
+
+        private void ShowEmpty()
+        {
+            pageColumn.Clear();
+            shownPage = null;
+            renderContext = null;
             Label empty = new Label("Pick a page on the left");
             empty.AddToClassList("docs-empty");
-            return empty;
+            pageColumn.Add(empty);
+            crumbs.text = "";
+            onThisPage.menu.ClearItems();
+        }
+
+        private static string CrumbsFor(string _page, string _title)
+        {
+            int slash = _page.IndexOf('/');
+            if (slash < 0)
+            {
+                return _title;
+            }
+            string section = _page.Substring(0, slash);
+            string sectionTitle = char.ToUpperInvariant(section[0]) + section.Substring(1);
+            return sectionTitle + " / " + _title;
+        }
+
+        private void BuildOnThisPage(DocsPage _parsed)
+        {
+            onThisPage.menu.ClearItems();
+            foreach (DocsHeading heading in _parsed.Headings)
+            {
+                if (heading.Level > 2)
+                {
+                    continue;
+                }
+                string id = heading.Id;
+                onThisPage.menu.AppendAction(heading.Text, _action => ScrollToHeading(id));
+            }
+            onThisPage.SetEnabled(_parsed.Headings.Count > 0);
+        }
+
+        // Previous and next page in the contents order.
+        private VisualElement Pager(string _page)
+        {
+            VisualElement pager = new VisualElement();
+            pager.AddToClassList("docs-pager");
+            List<SceneDocsContentsEntry> all = SceneDocsContents.Flatten();
+            int index = all.FindIndex(_entry => _entry.Topic == _page);
+            if (index < 0)
+            {
+                return pager;
+            }
+            if (index > 0)
+            {
+                SceneDocsContentsEntry previous = all[index - 1];
+                pager.Add(PagerButton("Previous: " + previous.Title, previous.Topic));
+            }
+            if (index < all.Count - 1)
+            {
+                SceneDocsContentsEntry next = all[index + 1];
+                Button nextButton = PagerButton("Next: " + next.Title, next.Topic);
+                nextButton.AddToClassList("docs-pager-next");
+                pager.Add(nextButton);
+            }
+            return pager;
+        }
+
+        private Button PagerButton(string _text, string _topic)
+        {
+            Button button = new Button(() => Navigate(_topic));
+            button.text = _text;
+            button.tooltip = "Opens " + _text.Substring(_text.IndexOf(':') + 2);
+            button.AddToClassList("docs-pager-button");
+            return button;
+        }
+
+        /// <summary>Scrolls a heading into view and flashes its row. Returns false when the page has no such heading.</summary>
+        public bool ScrollToHeading(string _anchor)
+        {
+            VisualElement row;
+            if (renderContext == null || !renderContext.HeadingRows.TryGetValue(_anchor, out row))
+            {
+                return false;
+            }
+            row.AddToClassList("docs-flash");
+            pageScroll.schedule.Execute(() => pageScroll.ScrollTo(row)).StartingIn(30);
+            row.schedule.Execute(() => row.RemoveFromClassList("docs-flash")).StartingIn(FlashMilliseconds);
+            return true;
+        }
+
+        private void RestoreScroll(float _value)
+        {
+            if (_value <= 0f)
+            {
+                return;
+            }
+            pageScroll.schedule.Execute(() => pageScroll.scrollOffset = new Vector2(0f, _value)).StartingIn(50);
+        }
+
+        private void OnTimelineRow(SceneDocsTimelineRow _row)
+        {
+            if (renderContext == null)
+            {
+                return;
+            }
+            foreach (DocsStepList steps in renderContext.StepLists)
+            {
+                steps.Report(_row.Message);
+            }
+        }
+
+        private void OnTimelineCleared()
+        {
+            if (renderContext == null)
+            {
+                return;
+            }
+            foreach (DocsStepList steps in renderContext.StepLists)
+            {
+                steps.Reset();
+            }
+        }
+
+        // A page opened during Play ticks the steps the rows so far already prove.
+        private void ReplayTimelineIntoSteps()
+        {
+            foreach (SceneDocsTimelineRow row in SceneDocsTimeline.Rows)
+            {
+                OnTimelineRow(row);
+            }
         }
 
         private void RefreshHistoryButtons()

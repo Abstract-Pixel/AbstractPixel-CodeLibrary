@@ -10,6 +10,21 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// </summary>
     public static class DocsIcons
     {
+        // Flat glyphs for buttons and chips (drawn in the text colour, so they follow the skin). Built-in icons are kept
+        // for the help "?", Note and Warning only.
+        public const string GlyphBack = "‹";
+        public const string GlyphForward = "›";
+        public const string GlyphSidebar = "☰";
+        public const string GlyphCopy = "";
+        public const string GlyphOpen = "↗";
+        public const string GlyphSelect = "→";
+        public const string GlyphPing = "→";
+        public const string GlyphSettings = "≡";
+        public const string GlyphPlay = "▶";
+        public const string GlyphStop = "■";
+        public const string GlyphTip = "✓";
+        public const string GlyphWhy = "i";
+
         public const string Help = "_Help";
         public const string Back = "back";
         public const string Forward = "forward";
