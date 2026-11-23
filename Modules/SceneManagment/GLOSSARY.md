@@ -195,3 +195,13 @@ _Avoid_: demo group, test group, example scene group
 **Sample launch scene**:
 A launch scene that a sample scene group names, used only when Play starts from it in the Editor.
 _Avoid_: test splash
+
+## Help
+
+**Scene documentation**:
+The scene system's documentation, read in a window inside the Unity Editor. It explains each part, shows each sample's setup and links to the windows and objects it talks about.
+_Avoid_: manual, wiki, readme, guide (for the whole documentation)
+
+**Help button**:
+The "?" next to a scene system window, page section, setup step or inspector. It opens the scene documentation at the part about that control.
+_Avoid_: info icon, docs link, help URL
