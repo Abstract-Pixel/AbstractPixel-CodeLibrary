@@ -24,16 +24,51 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.IsTrue(answer.IsCompleted, "the check waited for an Addressables start that had already happened");
         }
 
+        // Scene system S, Lab: in a project where Addressables was never built, InitializeAsync logs an error. In the Editor
+        // the Addressables settings already know the answer, so the check must not start Addressables for it.
+        [Test]
+        public void InTheEditorTheEditorAnswerIsUsedWithoutStartingAddressables()
+        {
+            bool started = false;
+            AddressableSceneCheck check = new AddressableSceneCheck(() => false, () =>
+            {
+                started = true;
+                return Task.CompletedTask;
+            });
+            System.Func<string, bool> realAnswer = AddressableSceneCheck.EditorAnswer;
+            AddressableSceneCheck.EditorAnswer = _guid => false;
+            try
+            {
+                Task<bool> answer = check.IsAddressable(SampleScene);
+
+                Assert.IsTrue(answer.IsCompleted);
+                Assert.IsFalse(answer.Result);
+                Assert.IsFalse(started, "Addressables was started although the Editor knew the answer");
+            }
+            finally
+            {
+                AddressableSceneCheck.EditorAnswer = realAnswer;
+            }
+        }
+
         [Test]
         public void WaitsForTheStartWhenAddressablesHasNotStarted()
         {
             TaskCompletionSource<bool> start = new TaskCompletionSource<bool>();
             AddressableSceneCheck check = new AddressableSceneCheck(() => false, () => start.Task);
+            System.Func<string, bool> realAnswer = AddressableSceneCheck.EditorAnswer;
+            AddressableSceneCheck.EditorAnswer = null;
+            try
+            {
+                Task<bool> answer = check.IsAddressable(SampleScene);
 
-            Task<bool> answer = check.IsAddressable(SampleScene);
-
-            Assert.IsFalse(answer.IsCompleted);
-            start.SetResult(true);
+                Assert.IsFalse(answer.IsCompleted);
+                start.SetResult(true);
+            }
+            finally
+            {
+                AddressableSceneCheck.EditorAnswer = realAnswer;
+            }
         }
     }
 }

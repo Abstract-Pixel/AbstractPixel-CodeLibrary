@@ -21,6 +21,8 @@ namespace AbstractPixel.SceneManagement.Editor
             AddressablesSceneProvider provider = new AddressablesSceneProvider();
             AddressableAssetSettings.OnModificationGlobal += provider.OnAddressablesModified;
             AddressableScenes.Register(provider);
+            // The loader asks the Editor settings instead of starting Addressables just to look a scene up.
+            AddressableSceneCheck.EditorAnswer = provider.IsAddressable;
         }
 
         public bool IsAddressable(string _sceneGuid)

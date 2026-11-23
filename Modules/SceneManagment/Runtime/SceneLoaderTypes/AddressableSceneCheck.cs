@@ -19,6 +19,12 @@ namespace AbstractPixel.SceneManagement
         private readonly Dictionary<string, bool> answers = new Dictionary<string, bool>();
         private Task initialization;
 
+        /// <summary>
+        /// Set by the scene system's editor code when Addressables is installed: whether a scene (by GUID) has an
+        /// Addressables entry, read from the editor settings. Null in a build, where the runtime locators answer.
+        /// </summary>
+        internal static Func<string, bool> EditorAnswer;
+
         private readonly Func<bool> hasStarted;
         private readonly Func<Task> start;
 
@@ -44,6 +50,15 @@ namespace AbstractPixel.SceneManagement
             if (answers.TryGetValue(key, out bool knownAnswer))
             {
                 return knownAnswer;
+            }
+
+            // In the Editor the settings know the answer; starting Addressables for it would fail in a project that has
+            // never built Addressables content.
+            if (EditorAnswer != null)
+            {
+                bool knownInEditor = EditorAnswer(key);
+                answers[key] = knownInEditor;
+                return knownInEditor;
             }
 
             bool ready = await EnsureInitialized();
