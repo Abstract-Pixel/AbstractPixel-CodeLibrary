@@ -504,7 +504,13 @@
 
 .docs-member-header {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
+}
+
+.docs-member-name {
+    flex-shrink: 1;
+    white-space: normal;
 }
 
 .docs-member-summary {

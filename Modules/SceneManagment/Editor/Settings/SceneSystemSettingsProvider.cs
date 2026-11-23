@@ -135,7 +135,7 @@ namespace AbstractPixel.SceneManagement.Editor
             setsSignature = null;
             refreshQueued = false;
 
-            page.Add(SceneSystemUI.PageTitle(PageTitle, "How this project opens and switches scenes."));
+            page.Add(SceneSystemUI.PageTitleWithHelp(PageTitle, "How this project opens and switches scenes.", SceneSystemDocTopics.SceneSystemPage));
             setupCard = AddSection(page, SetupSection, "Where this page's settings are saved.", SceneSystemDocTopics.SetupSection);
             startUpCard = AddSection(page, StartUpSection, SceneSystemStartUpSection.Tooltip, SceneSystemDocTopics.StartUpSection);
             setsCard = AddSection(page, SceneSetsSection, "Scenes that come with every scene group using the set. Click a scene set to select it; the + and − under the list add and delete scene sets.", SceneSystemDocTopics.SceneSetsSection);

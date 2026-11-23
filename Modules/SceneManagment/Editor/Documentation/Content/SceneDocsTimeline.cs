@@ -44,15 +44,28 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
         }
 
+        // The scene system resets its message statics at SubsystemRegistration and start-up sends its first messages
+        // before Play counts as entered, so the timeline starts listening right after that reset, before any scene loads.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        private static void StartListeningForThisPlay()
+        {
+            if (!Application.isEditor)
+            {
+                return;
+            }
+            rows.Clear();
+            if (Cleared != null)
+            {
+                Cleared();
+            }
+            Subscribe();
+        }
+
         private static void OnPlayModeChanged(PlayModeStateChange _change)
         {
             if (_change == PlayModeStateChange.EnteredPlayMode)
             {
-                rows.Clear();
-                if (Cleared != null)
-                {
-                    Cleared();
-                }
+                // Already listening since AfterAssembliesLoaded; subscribing again is harmless and covers a missed hook.
                 Subscribe();
                 return;
             }
