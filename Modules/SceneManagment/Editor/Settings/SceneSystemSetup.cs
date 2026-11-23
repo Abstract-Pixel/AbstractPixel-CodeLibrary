@@ -227,6 +227,20 @@ namespace AbstractPixel.SceneManagement.Editor
             return _names.Count == 0 ? "none" : string.Join(", ", _names);
         }
 
+        /// <summary>The migration plan for these scene groups, leaving sample scene groups out, as the Scene System page does.</summary>
+        public static SceneGroupMigrationPlan MigrationPlanFor(List<SceneGroup> _groups)
+        {
+            List<SceneGroup> gameGroups = new List<SceneGroup>();
+            foreach (SceneGroup group in _groups ?? new List<SceneGroup>())
+            {
+                if (group != null && !group.IsSample)
+                {
+                    gameGroups.Add(group);
+                }
+            }
+            return SceneGroupMigration.Plan(gameGroups);
+        }
+
         /// <summary>The one line Ready adds when the project has scene groups to sort into scene sets; empty otherwise.</summary>
         public static string MigrationHint(SceneGroupMigrationPlan _plan)
         {
