@@ -1,3 +1,15 @@
-/* Our own colour tokens, dark skin. Unity has no role for these. */
-.docs-window {
-}
+/* Our own colour tokens, dark skin. Unity has no role for these. Muted to sit with Unity's palette; text contrast 4.5:1 or more. */
+.docs-pill { border-width: 1px; }
+.docs-pill-0 { background-color: rgba(110, 170, 120, 0.18); border-color: rgba(110, 170, 120, 0.45); color: rgb(170, 210, 175); }
+.docs-pill-1 { background-color: rgba(110, 150, 210, 0.18); border-color: rgba(110, 150, 210, 0.45); color: rgb(175, 200, 235); }
+.docs-pill-2 { background-color: rgba(160, 130, 200, 0.18); border-color: rgba(160, 130, 200, 0.45); color: rgb(205, 190, 230); }
+.docs-pill-3 { background-color: rgba(210, 150, 90, 0.18); border-color: rgba(210, 150, 90, 0.45); color: rgb(230, 195, 160); }
+.docs-callout-note { border-left-color: rgb(130, 130, 130); }
+.docs-callout-warning { border-left-color: rgb(200, 165, 80); }
+.docs-callout-tip { border-left-color: rgb(110, 165, 115); }
+.docs-callout-why, .docs-foldout-why { border-left-color: rgb(110, 150, 210); }
+.docs-step-circle { border-color: rgb(140, 140, 140); }
+.docs-step-done .docs-step-circle { background-color: rgb(80, 135, 88); border-color: rgb(80, 135, 88); color: rgb(255, 255, 255); }
+.docs-mark, .docs-mark-number { background-color: rgb(58, 100, 180); }
+.docs-chip:hover, .docs-graph-box:hover { background-color: rgb(78, 78, 78); }
+.docs-step-current { background-color: rgba(255, 255, 255, 0.05); }
