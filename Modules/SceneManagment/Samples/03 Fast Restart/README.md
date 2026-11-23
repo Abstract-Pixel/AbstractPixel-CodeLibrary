@@ -26,7 +26,7 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 
 ## You should see
 - After step 2 the label counts "Score this run: 1, 2, 3 …" once a second.
-- After step 3 the screen fades, the label says "Last result: Retry: Done" and the score has started again from 0 (it keeps counting while the screen fades in) with a new object number.
+- After step 3 the screen fades, the label says "Last result: Retry: Done" and the score has started again from 0 (it keeps counting while the screen fades in) and the run number went up by one.
 - After step 4 the label says "Retry twice fast: first Done, second Refused (Busy)".
 - In step 5 "Reset shared scenes" is ticked, which is why the score scene reopens on every Retry.
 
