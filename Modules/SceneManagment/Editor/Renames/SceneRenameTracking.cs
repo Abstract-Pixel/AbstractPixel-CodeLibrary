@@ -49,18 +49,47 @@ namespace AbstractPixel.SceneManagement.Editor
             return found;
         }
 
-        /// <summary>Every .asset, .prefab and .unity file under Assets/, with forward slashes.</summary>
+        private static readonly string[] TrackedPatterns = { "*.asset", "*.prefab", "*.unity" };
+
+        /// <summary>
+        /// Every .asset, .prefab and .unity file under Assets/ and in the project's local and embedded packages (whose
+        /// files can be saved, such as a library's sample scene groups), with forward slashes. Package files are listed
+        /// by their Packages/ asset path.
+        /// </summary>
         public static List<string> ProjectFiles()
         {
             List<string> paths = new List<string>();
-            foreach (string pattern in new[] { "*.asset", "*.prefab", "*.unity" })
+            foreach (string pattern in TrackedPatterns)
             {
                 foreach (string file in Directory.GetFiles("Assets", pattern, SearchOption.AllDirectories))
                 {
                     paths.Add(file.Replace('\\', '/'));
                 }
             }
+            AddWritablePackageFiles(paths);
             return paths;
+        }
+
+        // Local and embedded packages live in folders the project owns; registry, Git and built-in packages are read-only.
+        private static void AddWritablePackageFiles(List<string> _paths)
+        {
+            foreach (UnityEditor.PackageManager.PackageInfo package in UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages())
+            {
+                bool isWritable = package.source == UnityEditor.PackageManager.PackageSource.Local || package.source == UnityEditor.PackageManager.PackageSource.Embedded;
+                if (isWritable == false || Directory.Exists(package.resolvedPath) == false)
+                {
+                    continue;
+                }
+                string root = Path.GetFullPath(package.resolvedPath);
+                foreach (string pattern in TrackedPatterns)
+                {
+                    foreach (string file in Directory.GetFiles(root, pattern, SearchOption.AllDirectories))
+                    {
+                        string relative = file.Substring(root.Length).Replace('\\', '/');
+                        _paths.Add(package.assetPath + relative);
+                    }
+                }
+            }
         }
 
         /// <summary>The file's bytes when it is a text-serialized file of at most &lt;see cref="LargestFileBytes"/&gt;, otherwise null.</summary>

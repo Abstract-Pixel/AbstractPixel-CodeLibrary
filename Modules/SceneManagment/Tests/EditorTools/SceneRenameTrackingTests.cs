@@ -32,5 +32,18 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
 
             Assert.IsEmpty(found[SceneGuid]);
         }
+
+        // Scene system S: a scene moved inside the library (a local package) left its sample scene groups with the old
+        // path, because only files under Assets/ were searched.
+        [Test]
+        public void ProjectFiles_IncludesTheFilesOfLocalPackages()
+        {
+            List<string> files = SceneRenameTracking.ProjectFiles();
+
+            bool hasLibraryAsset = files.Exists(_path => _path.StartsWith("Packages/com.abstractpixel.library/") && _path.EndsWith(".asset"));
+            Assert.IsTrue(hasLibraryAsset, "no .asset file of the library package (a local package) is searched");
+            string first = files.Find(_path => _path.StartsWith("Packages/com.abstractpixel.library/"));
+            Assert.IsNotNull(SceneRenameTracking.ReadIfSmallText(first), "a package file is read by its Packages/ path: " + first);
+        }
     }
 }

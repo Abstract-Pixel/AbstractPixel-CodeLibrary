@@ -37,6 +37,7 @@ namespace AbstractPixel.SceneManagement.Samples
             {
                 yield break;
             }
+            KeepTestRunnerAlive();
             if (SceneActions.ActiveSceneGroup == _group)
             {
                 _result.Result = SceneChangeResult.Done();
@@ -45,6 +46,22 @@ namespace AbstractPixel.SceneManagement.Samples
             Task<SceneChangeResult> change = SceneActions.ChangeTo(_group);
             yield return WaitFor(change, _result);
         }
+
+        /// <summary>
+        /// The test runner's object lives in the scene Play started with, which a scene change closes. Moved to
+        /// DontDestroyOnLoad, it keeps running the test across scene changes.
+        /// </summary>
+        public static void KeepTestRunnerAlive()
+        {
+            GameObject runner = GameObject.Find(TestRunnerObjectName);
+            if (runner == null || runner.transform.parent != null)
+            {
+                return;
+            }
+            Object.DontDestroyOnLoad(runner);
+        }
+
+        private const string TestRunnerObjectName = "Code-based tests runner";
 
         /// <summary>Waits for a scene change task, or until the timeout.</summary>
         public static IEnumerator WaitFor(Task<SceneChangeResult> _change, SampleStepResult _result)
