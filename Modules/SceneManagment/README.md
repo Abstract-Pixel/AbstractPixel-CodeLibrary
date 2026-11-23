@@ -296,4 +296,7 @@ as before: the broadcaster is never registered.
 
 **Sample scene groups** (ADR 0014): tick "Sample scene group" on a group whose scenes are only for the Editor. They open
 in Play mode from their path, the Build Settings writer leaves them out, and a build that would include one stops and
-names it. The page's "Sample scene groups" section lists them.
+names it. The page's "Sample scene groups" section lists them. A sample scene group can also name a **sample launch
+scene** ("Launch scene (sample only)", shown once the box is ticked): Play started from that scene in the Editor runs the
+launch scene hold with the sample scene group as the start scene group. The project's own launch scene wins when both
+are open.

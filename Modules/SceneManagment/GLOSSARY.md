@@ -191,3 +191,7 @@ _Avoid_: max slope, slope limit
 **Sample scene group**:
 A scene group marked as a sample. Its scenes open in the Editor but never go into a build.
 _Avoid_: demo group, test group, example scene group
+
+**Sample launch scene**:
+A launch scene that a sample scene group names, used only when Play starts from it in the Editor.
+_Avoid_: test splash

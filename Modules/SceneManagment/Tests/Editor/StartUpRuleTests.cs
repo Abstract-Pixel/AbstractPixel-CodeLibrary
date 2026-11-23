@@ -176,6 +176,55 @@ namespace AbstractPixel.SceneManagement.Tests
         }
 
         [Test]
+        public void ASampleLaunchSceneHoldsWithItsSampleGroupBehindIt()
+        {
+            SceneGroup sample = AddSampleGroup("SampleMenu", "SampleShared");
+            sample.SampleLaunchScene = new SceneReference("SampleSplash");
+
+            StartUpChoice choice = StartUpRule.Choose(settings, Scenes("SampleSplash"));
+
+            Assert.AreEqual(StartUpChoiceKind.BehindLaunchScene, choice.Kind);
+            Assert.AreSame(sample, choice.Group, "the sample scene group that names the launch scene");
+            Assert.IsEmpty(choice.ErrorMessage);
+        }
+
+        [Test]
+        public void TheProjectLaunchSceneWinsOverASampleLaunchScene()
+        {
+            SceneGroup sample = AddSampleGroup("SampleMenu", "SampleShared");
+            sample.SampleLaunchScene = new SceneReference("SampleSplash");
+
+            StartUpChoice choice = StartUpRule.Choose(settings, Scenes("SampleSplash,SplashScreen"));
+
+            Assert.AreEqual(StartUpChoiceKind.BehindLaunchScene, choice.Kind);
+            Assert.AreEqual("MainMenu", choice.Group.MainScene.SceneName);
+        }
+
+        [Test]
+        public void AGameSceneGroupNeverSetsALaunchScene()
+        {
+            SceneGroup game = AddGroup("Level4");
+            game.SampleLaunchScene = new SceneReference("GameSplash");
+
+            StartUpChoice choice = StartUpRule.Choose(settings, Scenes("GameSplash"));
+            bool holds = StartUpRule.ShouldHoldLaunchScene(settings, Scenes("GameSplash"));
+
+            Assert.AreNotEqual(StartUpChoiceKind.BehindLaunchScene, choice.Kind);
+            Assert.IsFalse(holds);
+        }
+
+        [Test]
+        public void ASampleLaunchSceneIsHeld()
+        {
+            SceneGroup sample = AddSampleGroup("SampleMenu", "SampleShared");
+            sample.SampleLaunchScene = new SceneReference("SampleSplash");
+
+            bool holds = StartUpRule.ShouldHoldLaunchScene(settings, Scenes("SampleSplash"));
+
+            Assert.IsTrue(holds);
+        }
+
+        [Test]
         public void NoOpenSceneDoesNothing()
         {
             StartUpChoice choice = StartUpRule.Choose(settings, new List<SceneReference>());
