@@ -1,0 +1,19 @@
+{
+    "name": "AbstractPixel.SceneManagement.Samples.Shared",
+    "rootNamespace": "AbstractPixel.SceneManagement.Samples",
+    "references": [
+        "AbstractPixel.Core",
+        "AbstractPixel.SceneManagment"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
