@@ -206,6 +206,16 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             return extension == ".unity" || extension == ".asset" || extension == ".prefab" || extension == ".mat" || extension == ".controller" || extension == ".playable";
         }
 
+        // Scene system S: Unity's own UI, Input System and Timeline packages bring the components a no-code sample needs
+        // (a uGUI button, its event system, a Timeline asset). Only their scripts and the Input System's default UI
+        // actions are allowed, never their materials, shaders or textures.
+        private static readonly string[] AllowedUnityPackages =
+        {
+            "Packages/com.unity.ugui/",
+            "Packages/com.unity.inputsystem/",
+            "Packages/com.unity.timeline/"
+        };
+
         private static bool IsAllowed(string _guid)
         {
             if (UnityBuiltInGuids.Contains(_guid))
@@ -213,7 +223,28 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
                 return true;
             }
             string path = AssetDatabase.GUIDToAssetPath(_guid);
-            return path.StartsWith(PackageRoot + "/");
+            if (path.StartsWith(PackageRoot + "/"))
+            {
+                return true;
+            }
+            return IsAllowedUnityPackageScript(path);
+        }
+
+        private static bool IsAllowedUnityPackageScript(string _path)
+        {
+            bool isScriptOrActions = _path.EndsWith(".cs") || _path.EndsWith(".inputactions");
+            if (isScriptOrActions == false)
+            {
+                return false;
+            }
+            foreach (string package in AllowedUnityPackages)
+            {
+                if (_path.StartsWith(package))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
