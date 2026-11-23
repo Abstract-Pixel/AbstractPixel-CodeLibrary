@@ -39,10 +39,17 @@
     background-color: var(--unity-colors-toolbar-background);
 }
 
-.scene-picker__footer-hint {
-    margin-left: auto;
-    font-size: 10px;
+.scene-picker__footer-label {
+    padding: 0 2px 0 2px;
     opacity: 0.6;
+}
+
+.scene-picker__footer-toggle {
+    margin: 0 6px 0 4px;
+}
+
+.scene-picker__footer-toggle .unity-toggle__text {
+    margin-left: 3px;
 }
 
 .scene-picker__message {

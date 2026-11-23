@@ -8,7 +8,7 @@ namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
     /// The scene picker's dropdown: Scenes and Scene Groups tabs, one search bar under them that both share, the rows,
-    /// and a footer with "Open the group with its main scene" and the keys. The search bar has focus when it opens;
+    /// and a footer with the two scene opening preferences ("Open with: Group, Default set"). The keys are in the search bar's tooltip. The search bar has focus when it opens;
     /// arrow keys move, Enter opens, Shift+Enter selects, Esc closes (decision 10). A click on a row opens it; its
     /// Select button selects it. Either closes the picker. It reads the project again whenever the project changes.
     /// </summary>
@@ -16,8 +16,10 @@ namespace AbstractPixel.SceneManagement.Editor
     {
         public const string ScenesTabName = "Scenes";
         public const string GroupsTabName = "Scene Groups";
-        public const string OpenWithGroupLabel = "Open the group with its main scene";
-        public const string KeysHint = "Enter open · Shift+Enter select";
+        public const string OpenWithText = "Open with:";
+        public const string GroupToggleText = "Group";
+        public const string DefaultSetToggleText = "Default set";
+        public const string SearchTooltip = "Type to filter; every word must match. Arrow keys move, Enter opens the highlighted row, Shift+Enter selects it, Tab switches tabs, Esc closes.";
         private const string StyleSheetGuid = "e090a93f571d828532ed313f826f10ed";
         private const float Width = 400f;
         private const float RowHeight = 20f;
@@ -51,6 +53,8 @@ namespace AbstractPixel.SceneManagement.Editor
         private string[] searchWords = new string[0];
         private ScenePickerProjectFacts facts = new ScenePickerProjectFacts();
         private bool showNumbers;
+        private Toggle groupToggle;
+        private Toggle defaultSetToggle;
 
         /// <summary>True while a scene picker popup is open, so the button never opens a second one.</summary>
         public static bool IsOpen { get; private set; }
@@ -74,6 +78,7 @@ namespace AbstractPixel.SceneManagement.Editor
             ScenePickerProject.BeginPicking();
             facts = ScenePickerProject.Facts();
             ScenePickerProject.Changed += OnProjectChanged;
+            SceneOpeningPreferences.Changed += OnPreferencesChanged;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
             AssemblyReloadEvents.beforeAssemblyReload += Close;
         }
@@ -101,6 +106,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
             searchField = new ToolbarSearchField();
             searchField.AddToClassList("scene-picker__search");
+            searchField.tooltip = SearchTooltip;
             // Each open starts with an empty search, so the Recent section and the open group are what the eye meets first.
             searchField.SetValueWithoutNotify(string.Empty);
             searchField.RegisterValueChangedCallback(_change => OnQueryChanged(_change.newValue));
@@ -326,23 +332,50 @@ namespace AbstractPixel.SceneManagement.Editor
                 Current = null;
             }
             ScenePickerProject.Changed -= OnProjectChanged;
+            SceneOpeningPreferences.Changed -= OnPreferencesChanged;
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             AssemblyReloadEvents.beforeAssemblyReload -= Close;
         }
 
+        // "Open with: [x] Group [x] Default set": the two scene opening preferences, the same ones as Preferences >
+        // Abstract Pixel > Scenes; the tooltips give their full names.
         private VisualElement Footer()
         {
             VisualElement footer = new VisualElement();
             footer.AddToClassList("scene-picker__footer");
-            Toggle openWithGroup = new Toggle(OpenWithGroupLabel);
-            openWithGroup.tooltip = "Opening a scene also opens the scenes Play loads with it. The same choice as Preferences > Abstract Pixel > Scenes.";
-            openWithGroup.SetValueWithoutNotify(SceneOpeningPreferences.MainSceneWithGroup);
-            openWithGroup.RegisterValueChangedCallback(_change => SceneOpeningPreferences.MainSceneWithGroup = _change.newValue);
-            footer.Add(openWithGroup);
-            Label hint = new Label(KeysHint);
-            hint.AddToClassList("scene-picker__footer-hint");
-            footer.Add(hint);
+            Label openWith = new Label(OpenWithText);
+            openWith.AddToClassList("scene-picker__footer-label");
+            footer.Add(openWith);
+            groupToggle = FooterToggle(GroupToggleText, SceneOpeningPreferences.MainSceneWithGroupLabel, SceneOpeningPreferences.MainSceneWithGroup);
+            groupToggle.RegisterValueChangedCallback(_change => SceneOpeningPreferences.MainSceneWithGroup = _change.newValue);
+            footer.Add(groupToggle);
+            defaultSetToggle = FooterToggle(DefaultSetToggleText, SceneOpeningPreferences.NoGroupSceneWithDefaultSetLabel, SceneOpeningPreferences.NoGroupSceneWithDefaultSet);
+            defaultSetToggle.RegisterValueChangedCallback(_change => SceneOpeningPreferences.NoGroupSceneWithDefaultSet = _change.newValue);
+            footer.Add(defaultSetToggle);
             return footer;
+        }
+
+        private static Toggle FooterToggle(string _text, string _fullName, bool _value)
+        {
+            Toggle toggle = new Toggle();
+            toggle.text = _text;
+            toggle.tooltip = _fullName + ". The same choice as Preferences > Abstract Pixel > Scenes.";
+            toggle.AddToClassList("scene-picker__footer-toggle");
+            toggle.SetValueWithoutNotify(_value);
+            return toggle;
+        }
+
+        // The Tools menu or Preferences may change a preference while the picker is open.
+        private void OnPreferencesChanged()
+        {
+            if (groupToggle != null)
+            {
+                groupToggle.SetValueWithoutNotify(SceneOpeningPreferences.MainSceneWithGroup);
+            }
+            if (defaultSetToggle != null)
+            {
+                defaultSetToggle.SetValueWithoutNotify(SceneOpeningPreferences.NoGroupSceneWithDefaultSet);
+            }
         }
 
         private static void AddStyleSheet(VisualElement _root)
