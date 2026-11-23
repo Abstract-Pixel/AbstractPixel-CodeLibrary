@@ -10,8 +10,38 @@ namespace AbstractPixel.SceneManagement.Editor
         /// <summary>The scene or scene group name, or the heading's text.</summary>
         public string Title = string.Empty;
 
-        /// <summary>The grey text after the title: the scene's group, or the group's main scene and scene set.</summary>
+        /// <summary>The label button's text: the scene's group, scene set, "Shared by X" or "No group"; the group's scene set.</summary>
         public string Detail = string.Empty;
+
+        /// <summary>What the label button selects; None for "No group", which is plain text.</summary>
+        public ScenePickerLabelKind LabelKind = ScenePickerLabelKind.None;
+
+        /// <summary>The GUID of the scene group or scene set the label button selects.</summary>
+        public string LabelGuid = string.Empty;
+
+        /// <summary>The name of what the label button selects, for its tooltip ("Select level2Group").</summary>
+        public string LabelTargetName = string.Empty;
+
+        /// <summary>
+        /// The number before the name: under Recent, 1 is the last used; on the Scene Groups tab, the group's number in
+        /// the Scene System page's list (the Scene Groups Debugger). 0 shows no number.
+        /// </summary>
+        public int Number;
+
+        /// <summary>A scene row's scene group: the group whose main scene it is, else the first that lists it.</summary>
+        public string GroupGuid = string.Empty;
+        public string GroupName = string.Empty;
+
+        /// <summary>A group row's main scene name, shown in the row's tooltip.</summary>
+        public string MainSceneName = string.Empty;
+
+        /// <summary>A group row's group check: how many problems, the first one, and whether one is fixed by Make Addressable.</summary>
+        public int ProblemCount;
+        public string FirstProblem = string.Empty;
+        public bool HasMakeAddressableProblem;
+
+        /// <summary>A group row of a boot group from before scene sets (no main scene, no scene set, its own scenes).</summary>
+        public bool IsBootGroup;
 
         /// <summary>The folder that holds the asset, such as "Assets/Levels/Level 3".</summary>
         public string Folder = string.Empty;
@@ -43,6 +73,14 @@ namespace AbstractPixel.SceneManagement.Editor
         public bool IsHeading
         {
             get { return Kind == ScenePickerRowKind.Heading; }
+        }
+
+        /// <summary>A copy with another number, for the Recent section, so the row in the full list keeps its own.</summary>
+        public ScenePickerRow WithNumber(int _number)
+        {
+            ScenePickerRow copy = (ScenePickerRow)MemberwiseClone();
+            copy.Number = _number;
+            return copy;
         }
     }
 }

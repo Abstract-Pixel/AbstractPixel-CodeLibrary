@@ -6,11 +6,18 @@ namespace AbstractPixel.SceneManagement.Editor
     public class ScenePickerSetInfo
     {
         public string Name;
+        public string Guid = string.Empty;
         public List<string> SceneGuids = new List<string>();
 
         public ScenePickerSetInfo(string _name)
         {
             Name = _name;
+        }
+
+        public ScenePickerSetInfo(string _name, string _guid)
+        {
+            Name = _name;
+            Guid = _guid ?? string.Empty;
         }
     }
 }

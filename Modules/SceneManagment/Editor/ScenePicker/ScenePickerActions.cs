@@ -1,4 +1,5 @@
 using System;
+using AbstractPixel.Core;
 using AbstractPixel.Core.Editor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -86,6 +87,146 @@ namespace AbstractPixel.SceneManagement.Editor
             EditorGUIUtility.PingObject(asset);
         }
 
+        /// <summary>Selects the scene group or scene set with this GUID, pings it and shows it in the Inspector.</summary>
+        public static void SelectByGuid(string _guid)
+        {
+            UnityEngine.Object asset = ScenePickerProject.LoadByGuid(_guid);
+            if (asset == null)
+            {
+                Debug.LogWarning(LogPrefix + "that asset no longer exists, so nothing was selected.");
+                ScenePickerProject.Forget();
+                return;
+            }
+            Selection.activeObject = asset;
+            EditorGUIUtility.PingObject(asset);
+        }
+
+        /// <summary>Does what a status click on a row does (<see cref="ScenePickerStatusRules"/>).</summary>
+        public static void RunStatusClick(ScenePickerClick _click)
+        {
+            if (_click == null)
+            {
+                return;
+            }
+            switch (_click.Kind)
+            {
+                case ScenePickerClickKind.OpenBuildProfilesSceneList:
+                    ScenePickerWindows.OpenBuildProfilesSceneList();
+                    break;
+                case ScenePickerClickKind.OpenAddressablesGroups:
+                    ScenePickerWindows.OpenAddressablesGroups();
+                    break;
+                case ScenePickerClickKind.SelectAsset:
+                    SelectByGuid(_click.TargetGuid);
+                    break;
+                case ScenePickerClickKind.OpenDebuggerAtGroup:
+                    SceneSystemSettingsProvider.OpenAtGroup(_click.TargetGuid);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// "Open additively": a scene opens next to the open scenes; a scene group adds its main, manager and shared scenes
+        /// that are not open yet. Nothing closes, so no save prompt is needed.
+        /// </summary>
+        public static void OpenAdditively(ScenePickerRow _row)
+        {
+            if (_row == null || _row.IsHeading || !string.IsNullOrEmpty(WhyNothingCanOpen()))
+            {
+                return;
+            }
+            if (_row.Kind == ScenePickerRowKind.Scene)
+            {
+                string path = CurrentPath(_row);
+                if (path != null)
+                {
+                    OpenAdditiveIfClosed(path);
+                    ScenePickerRecent.Remember(_row.AssetGuid);
+                }
+                return;
+            }
+            SceneGroup group = LoadAsset(_row) as SceneGroup;
+            if (group == null)
+            {
+                return;
+            }
+            OpenAdditiveIfClosed(group.MainScene);
+            foreach (SceneReference scene in group.ManagerialBootScenesList)
+            {
+                OpenAdditiveIfClosed(scene);
+            }
+            foreach (SceneReference scene in group.ContextualBootScenesList)
+            {
+                OpenAdditiveIfClosed(scene);
+            }
+            ScenePickerRecent.Remember(_row.AssetGuid);
+        }
+
+        /// <summary>Selects a scene group row's main scene, or a scene row's scene.</summary>
+        public static void SelectScene(ScenePickerRow _row)
+        {
+            if (_row == null || _row.IsHeading)
+            {
+                return;
+            }
+            if (_row.Kind == ScenePickerRowKind.Scene)
+            {
+                Select(_row);
+                return;
+            }
+            SceneGroup group = LoadAsset(_row) as SceneGroup;
+            if (group == null || group.MainScene == null)
+            {
+                return;
+            }
+            SceneStatusReport main = SceneStatusReader.Read(group.MainScene.SceneFieldReference);
+            SceneAsset scene = string.IsNullOrEmpty(main.ScenePath) ? null : AssetDatabase.LoadAssetAtPath<SceneAsset>(main.ScenePath);
+            if (scene == null)
+            {
+                return;
+            }
+            Selection.activeObject = scene;
+            EditorGUIUtility.PingObject(scene);
+        }
+
+        /// <summary>Copies the row's asset path (the scene or the scene group asset) to the clipboard.</summary>
+        public static void CopyPath(ScenePickerRow _row)
+        {
+            string path = CurrentPath(_row);
+            if (path != null)
+            {
+                EditorGUIUtility.systemCopyBuffer = path;
+            }
+        }
+
+        private static void OpenAdditiveIfClosed(SceneReference _scene)
+        {
+            if (_scene == null)
+            {
+                return;
+            }
+            SceneStatusReport report = SceneStatusReader.Read(_scene.SceneFieldReference);
+            if (string.IsNullOrEmpty(report.ScenePath))
+            {
+                return;
+            }
+            OpenAdditiveIfClosed(report.ScenePath);
+        }
+
+        private static void OpenAdditiveIfClosed(string _path)
+        {
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(_path) == null)
+            {
+                return;
+            }
+            UnityEngine.SceneManagement.Scene open = EditorSceneManager.GetSceneByPath(_path);
+            if (open.IsValid() && open.isLoaded)
+            {
+                return;
+            }
+            EditorSceneManager.OpenScene(_path, OpenSceneMode.Additive);
+        }
+
         // Runs once per Editor update until Unity is idle; the popup has closed by then, so the save prompt stands alone.
         private static void OpenWhenUnityIsReady()
         {
@@ -130,7 +271,7 @@ namespace AbstractPixel.SceneManagement.Editor
             OpenScene(_row);
         }
 
-        // What a double-click on the scene in the Project window does: "Open the group with its main scene" reacts to it.
+        // What a double-click on the scene in the Project window does: the scene opening preferences react to it.
         private static void OpenScene(ScenePickerRow _row)
         {
             string path = CurrentPath(_row);

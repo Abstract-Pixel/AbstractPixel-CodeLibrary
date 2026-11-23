@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using AbstractPixel.Core.Editor;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,9 +11,10 @@ namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
     /// The setup wizard, shared by the setup window and the page's Setup section. The Abstract Pixel logo sits on top;
-    /// under it, one question per page, few words:
-    /// Welcome, Settings folder, New scenes, Launch scene (optional), Loading scene (optional), Scene groups (only when the project has some), Ready, Done. Details are in
-    /// tooltips. Next stays disabled while the page's answer can't work.
+    /// under it, one question per page (session 5A2): 1 Scene System, 2 Settings Folder, 3 New Scenes, 4 Launch Scene,
+    /// 5 Loading Scene, 6 Scene Sets, 7 Opening Scenes, then Ready and All set. A step that brings in a new word explains
+    /// it in a small Terminology block; later steps carry the word's line as a tooltip. Next stays disabled while the
+    /// page's answer can't work. Once the project is set up, the setup menu opens only the Opening Scenes step.
     /// </summary>
     public class SceneSystemSetupView : VisualElement
     {
@@ -23,14 +25,18 @@ namespace AbstractPixel.SceneManagement.Editor
             NewScenes,
             LaunchScene,
             LoadingScene,
-            SceneGroups,
+            SceneSets,
+            OpeningScenes,
             Ready,
             Done
         }
 
         private const float LogoHeight = 88;
+        private const int NumberedSteps = 7;
+        public const string ChangeLaterText = "Change them later: run setup again (Tools > External Project Tools > Scene System > Set Up Scene System), Edit > Preferences > Abstract Pixel > Scenes, or the scene picker's footer.";
 
         private readonly Action<SceneSystemSettings> onDone;
+        private readonly bool openingScenesOnly;
         private readonly SceneSystemSetupChoices choices = new SceneSystemSetupChoices();
         private readonly SceneGroupMigrationPlan plan;
         private readonly List<Page> pages = new List<Page>();
@@ -43,21 +49,17 @@ namespace AbstractPixel.SceneManagement.Editor
         private VisualElement folderStatus;
         private SceneSystemSettings createdSettings;
 
-        public SceneSystemSetupView(Action<SceneSystemSettings> _onDone)
+        public SceneSystemSetupView(Action<SceneSystemSettings> _onDone) : this(_onDone, false)
+        {
+        }
+
+        /// <param name="_openingScenesOnly">True once the project is set up: only the Opening Scenes step, with Done.</param>
+        public SceneSystemSetupView(Action<SceneSystemSettings> _onDone, bool _openingScenesOnly)
         {
             onDone = _onDone;
+            openingScenesOnly = _openingScenesOnly;
             plan = SceneGroupMigration.Plan(SceneGroupAssets.FindAll());
-            pages.Add(Page.Welcome);
-            pages.Add(Page.Folder);
-            pages.Add(Page.NewScenes);
-            pages.Add(Page.LaunchScene);
-            pages.Add(Page.LoadingScene);
-            if (plan.HasWork)
-            {
-                pages.Add(Page.SceneGroups);
-            }
-            pages.Add(Page.Ready);
-            pages.Add(Page.Done);
+            AddPages();
 
             style.flexGrow = 1;
             style.minHeight = 340;
@@ -70,12 +72,14 @@ namespace AbstractPixel.SceneManagement.Editor
             Add(separator);
             content = new VisualElement();
             content.style.flexGrow = 1;
+            content.style.flexShrink = 1;
             content.style.justifyContent = Justify.FlexStart;
             content.style.paddingTop = 6;
             Add(content);
 
             VisualElement footer = new VisualElement();
             footer.style.marginTop = 14;
+            footer.style.flexShrink = 0;
             stepLabel = new Label();
             stepLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             stepLabel.style.fontSize = 10;
@@ -98,6 +102,24 @@ namespace AbstractPixel.SceneManagement.Editor
             Show();
         }
 
+        private void AddPages()
+        {
+            if (openingScenesOnly)
+            {
+                pages.Add(Page.OpeningScenes);
+                return;
+            }
+            pages.Add(Page.Welcome);
+            pages.Add(Page.Folder);
+            pages.Add(Page.NewScenes);
+            pages.Add(Page.LaunchScene);
+            pages.Add(Page.LoadingScene);
+            pages.Add(Page.SceneSets);
+            pages.Add(Page.OpeningScenes);
+            pages.Add(Page.Ready);
+            pages.Add(Page.Done);
+        }
+
         private Page Current
         {
             get { return pages[pageIndex]; }
@@ -111,14 +133,14 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private void OnNext()
         {
+            if (openingScenesOnly || Current == Page.Done)
+            {
+                Finish();
+                return;
+            }
             if (Current == Page.Ready)
             {
                 RunSetup();
-                return;
-            }
-            if (Current == Page.Done)
-            {
-                Finish();
                 return;
             }
             Go(1);
@@ -144,8 +166,11 @@ namespace AbstractPixel.SceneManagement.Editor
                 case Page.LoadingScene:
                     ShowLoadingScene();
                     break;
-                case Page.SceneGroups:
-                    ShowSceneGroups();
+                case Page.SceneSets:
+                    ShowSceneSets();
+                    break;
+                case Page.OpeningScenes:
+                    ShowOpeningScenes();
                     break;
                 case Page.Ready:
                     ShowReady();
@@ -157,16 +182,35 @@ namespace AbstractPixel.SceneManagement.Editor
             RefreshFooter();
         }
 
+        // "Step N of 7" on the seven questions; Ready and All set have no number.
+        private string StepText()
+        {
+            if (openingScenesOnly || Current == Page.Done)
+            {
+                return string.Empty;
+            }
+            if (Current == Page.Ready)
+            {
+                return "Review";
+            }
+            return "Step " + (pageIndex + 1) + " of " + NumberedSteps;
+        }
+
         private void RefreshFooter()
         {
             bool isDone = Current == Page.Done;
-            int questionCount = pages.Count - 1;
-            stepLabel.text = isDone ? string.Empty : "Step " + (pageIndex + 1) + " of " + questionCount;
-            backButton.style.visibility = pageIndex > 0 && !isDone ? Visibility.Visible : Visibility.Hidden;
+            stepLabel.text = StepText();
+            bool canGoBack = pageIndex > 0 && !isDone && !openingScenesOnly;
+            backButton.style.visibility = canGoBack ? Visibility.Visible : Visibility.Hidden;
 
             nextButton.text = "Next";
             nextButton.tooltip = string.Empty;
             nextButton.SetEnabled(true);
+            if (openingScenesOnly)
+            {
+                nextButton.text = "Done";
+                return;
+            }
             if (Current == Page.Welcome)
             {
                 nextButton.text = "Get started";
@@ -190,9 +234,15 @@ namespace AbstractPixel.SceneManagement.Editor
                 nextButton.tooltip = loadingProblem;
                 nextButton.SetEnabled(string.IsNullOrEmpty(loadingProblem));
             }
+            if (Current == Page.SceneSets)
+            {
+                string setsProblem = SceneSystemSetup.SceneSetsProblem(choices);
+                nextButton.tooltip = setsProblem;
+                nextButton.SetEnabled(string.IsNullOrEmpty(setsProblem));
+            }
             if (Current == Page.Ready)
             {
-                string blocking = SceneSystemSetup.BlockingProblem(choices, plan);
+                string blocking = SceneSystemSetup.BlockingProblem(choices);
                 nextButton.text = "Set up";
                 nextButton.tooltip = blocking;
                 nextButton.SetEnabled(string.IsNullOrEmpty(blocking));
@@ -204,9 +254,21 @@ namespace AbstractPixel.SceneManagement.Editor
             }
         }
 
+        // The page title, its line, then the Terminology lines for the step's new words.
+        private void AddHeader(string _title, string _line)
+        {
+            content.Add(SceneSystemUI.PageHeader(_title, _line));
+            int step = (int)Current;
+            bool hasWords = step < SceneSystemTerms.WordsPerStep.Length && SceneSystemTerms.WordsPerStep[step].Length > 0;
+            if (hasWords)
+            {
+                content.Add(SceneSystemUI.Terminology(SceneSystemTerms.WordsPerStep[step]));
+            }
+        }
+
         private void ShowWelcome()
         {
-            content.Add(SceneSystemUI.PageHeader("Scene System", "Let's set up scenes for this project.<br>It takes a minute."));
+            AddHeader("Scene System", "Let's set up scenes for this project.<br>It takes a minute.");
             Label steps = SceneSystemUI.Hint("You can change everything later in Project Settings.");
             steps.style.unityTextAlign = TextAnchor.MiddleCenter;
             content.Add(steps);
@@ -214,7 +276,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private void ShowFolder()
         {
-            content.Add(SceneSystemUI.PageHeader("Settings Folder", "Where to keep the scene system's settings."));
+            AddHeader("Settings Folder", "Where to keep the scene system's settings.");
             VisualElement row = SceneSystemUI.Row();
             TextField folder = new TextField();
             folder.value = choices.Folder;
@@ -261,13 +323,13 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private void ShowNewScenes()
         {
-            content.Add(SceneSystemUI.PageHeader("New Scenes", "Where scenes go so they load in a build."));
+            AddHeader("New Scenes", "Where scenes go so they load in a build.");
             bool addressablesInstalled = AddressableScenes.IsInstalled;
-            content.Add(SceneSystemUI.ChoiceCard("Build Settings", "Simple. Right for most games.", !choices.NewScenesAreAddressable, true,
-                "Scenes are added to File > Build Settings.", () => PickPlace(false)));
-            string addressablesLine = addressablesInstalled ? "Load scenes on demand." : "Needs the Addressables package.";
+            content.Add(SceneSystemUI.ChoiceCard("Build Settings", "New scenes are added to the build's scene list.", !choices.NewScenesAreAddressable, true,
+                "Scenes are added to File > Build Profiles > Scene List. Simple, and right for most games.", () => PickPlace(false)));
+            string addressablesLine = addressablesInstalled ? "New scenes get an Addressables entry and load on demand." : "Needs the Addressables package.";
             content.Add(SceneSystemUI.ChoiceCard("Addressables", addressablesLine, choices.NewScenesAreAddressable, addressablesInstalled,
-                addressablesInstalled ? "Scenes get an Addressables entry instead." : SceneMoves.NeedsAddressablesTooltip, () => PickPlace(true)));
+                addressablesInstalled ? "Scenes get an entry in Addressables' default group instead of a place in the scene list." : SceneMoves.NeedsAddressablesTooltip, () => PickPlace(true)));
         }
 
         private void PickPlace(bool _addressables)
@@ -279,17 +341,17 @@ namespace AbstractPixel.SceneManagement.Editor
         // Optional: a scene, such as a splash, that the game opens first. It is put at build index 0.
         private void ShowLaunchScene()
         {
-            content.Add(SceneSystemUI.PageHeader("Launch Scene", "Optional: a splash or intro the game opens first."));
-            content.Add(SceneSystemUI.ChoiceCard("No launch scene", "The game opens its start scene group straight away.", choices.LaunchScene == LaunchSceneChoice.None, true,
+            AddHeader("Launch Scene", "Optional: a splash or intro the game opens first.");
+            content.Add(SceneSystemUI.ChoiceCard("No launch scene", "The game opens the start scene group right away.", choices.LaunchScene == LaunchSceneChoice.None, true,
                 "You can add one later in Project Settings > Abstract Pixel > Scene System > Start-up.", () => PickLaunchScene(LaunchSceneChoice.None)));
-            content.Add(SceneSystemUI.ChoiceCard("Use a scene I have", "Pick the splash or intro scene.", choices.LaunchScene == LaunchSceneChoice.Existing, true,
+            content.Add(SceneSystemUI.ChoiceCard("Use a scene I have", "The scene you pick opens first, then the start scene group.", choices.LaunchScene == LaunchSceneChoice.Existing, true,
                 "It becomes the launch scene and moves to build index 0, the scene a build opens first.", () => PickLaunchScene(LaunchSceneChoice.Existing)));
-            content.Add(SceneSystemUI.ChoiceCard("Create one", "A new scene with a camera and a light.", choices.LaunchScene == LaunchSceneChoice.CreateNew, true,
+            content.Add(SceneSystemUI.ChoiceCard("Create one", "Setup makes a new scene with a camera and a light, and opens it first.", choices.LaunchScene == LaunchSceneChoice.CreateNew, true,
                 "Setup saves a new scene where you choose, makes it the launch scene and puts it at build index 0.", () => PickLaunchScene(LaunchSceneChoice.CreateNew)));
 
             if (choices.LaunchScene == LaunchSceneChoice.Existing)
             {
-                UnityEditor.UIElements.ObjectField scenePicker = new UnityEditor.UIElements.ObjectField("Scene");
+                ObjectField scenePicker = new ObjectField("Scene");
                 scenePicker.objectType = typeof(SceneAsset);
                 scenePicker.allowSceneObjects = false;
                 scenePicker.SetValueWithoutNotify(choices.ExistingLaunchScene);
@@ -318,7 +380,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 row.Add(path);
                 row.Add(SceneSystemUI.Button("Choose…", "Pick where to save the launch scene.", () =>
                 {
-                    string picked = LaunchSceneCreation.AskForPath(System.IO.Path.GetDirectoryName(choices.NewLaunchScenePath));
+                    string picked = LaunchSceneCreation.AskForPath(Path.GetDirectoryName(choices.NewLaunchScenePath));
                     if (!string.IsNullOrEmpty(picked))
                     {
                         path.value = picked;
@@ -334,26 +396,27 @@ namespace AbstractPixel.SceneManagement.Editor
             Show();
         }
 
-        // Optional: the scene shown while one location closes and the next opens. Scene groups still choose when to show it.
+        // Optional: the scene shown while one place closes and the next opens. Scene groups still choose when to show it.
         private void ShowLoadingScene()
         {
-            content.Add(SceneSystemUI.PageHeader("Loading Scene", "Optional: a scene shown while the next location loads."));
+            AddHeader("Loading Scene", "Optional: a scene shown while the next place loads.");
             bool readyMadeExists = SceneSystemSetup.LibraryLoadingSceneExists();
-            string readyMadeLine = readyMadeExists ? "A copy with a progress bar you can restyle." : "Not in this project.";
+            string readyMadeLine = readyMadeExists ? "Setup copies a loading scene with a progress bar for you to restyle." : "Not in this project.";
+            string groupTerm = SceneSystemTerms.Tooltip(SceneSystemTerms.SceneGroup);
             content.Add(SceneSystemUI.ChoiceCard("Ready-made loading scene", readyMadeLine, choices.LoadingScene == LoadingSceneChoice.ReadyMade, readyMadeExists,
-                "Setup copies the library's loading scene next to the settings and makes it the default loading scene. The library's original stays untouched.", () => PickLoadingScene(LoadingSceneChoice.ReadyMade)));
-            content.Add(SceneSystemUI.ChoiceCard("Use a scene I have", "Pick your loading scene.", choices.LoadingScene == LoadingSceneChoice.Existing, true,
+                SceneSystemTerms.WithTerms("Setup copies the library's loading scene next to the settings and makes it the default loading scene. The library's original stays untouched.", SceneSystemTerms.SceneGroup), () => PickLoadingScene(LoadingSceneChoice.ReadyMade)));
+            content.Add(SceneSystemUI.ChoiceCard("Use a scene I have", "The scene you pick shows while the next place loads.", choices.LoadingScene == LoadingSceneChoice.Existing, true,
                 "It becomes the default loading scene and goes where new scenes go, so it loads in a build.", () => PickLoadingScene(LoadingSceneChoice.Existing)));
-            content.Add(SceneSystemUI.ChoiceCard("No loading scene", "Scenes change behind the screen effect only.", choices.LoadingScene == LoadingSceneChoice.None, true,
+            content.Add(SceneSystemUI.ChoiceCard("No loading scene", "Scene changes show only the screen effect, such as a fade.", choices.LoadingScene == LoadingSceneChoice.None, true,
                 "You can add one later in Project Settings > Abstract Pixel > Scene System > Loading scenes.", () => PickLoadingScene(LoadingSceneChoice.None)));
 
             if (choices.LoadingScene == LoadingSceneChoice.Existing)
             {
-                UnityEditor.UIElements.ObjectField scenePicker = new UnityEditor.UIElements.ObjectField("Scene");
+                ObjectField scenePicker = new ObjectField("Scene");
                 scenePicker.objectType = typeof(SceneAsset);
                 scenePicker.allowSceneObjects = false;
                 scenePicker.SetValueWithoutNotify(choices.ExistingLoadingScene);
-                scenePicker.tooltip = "The scene shown while the next location loads.";
+                scenePicker.tooltip = "The scene shown while the next place loads.";
                 scenePicker.style.marginTop = 6;
                 scenePicker.RegisterValueChangedCallback(_change =>
                 {
@@ -370,36 +433,213 @@ namespace AbstractPixel.SceneManagement.Editor
             Show();
         }
 
-        private void ShowSceneGroups()
+        // "Set up your scene sets now?" Yes lists the sets to make; Not now makes the Default Scene Set as before.
+        private void ShowSceneSets()
         {
-            content.Add(SceneSystemUI.PageHeader("Scene Groups", "Found <b>" + plan.GroupsToMigrateCount + "</b> scene groups in this project."));
-            content.Add(SceneSystemUI.ChoiceCard("Organize them (recommended)", "Into " + plan.SetNames.Count + " scene sets: " + string.Join(", ", plan.SetNames) + ".", choices.MigrateGroups, true,
-                "Groups that share the same manager and shared scenes get one scene set. Every group keeps every scene; nothing is deleted. A report lists each group.", () => PickMigrate(true)));
-            content.Add(SceneSystemUI.ChoiceCard("Leave them as they are", "Start with an empty scene set instead.", !choices.MigrateGroups, true,
-                "You can organize them later from Project Settings > Abstract Pixel > Scene System.", () => PickMigrate(false)));
+            AddHeader("Scene Sets", "Set up your scene sets now?");
+            string fade = SceneSystemSetup.LibraryFadeExists() ? ", holding a copy of the fade" : string.Empty;
+            content.Add(SceneSystemUI.ChoiceCard("Yes", "Pick the manager and shared scenes for each scene set now.", choices.SetUpSceneSetsNow, true,
+                SceneSystemTerms.WithTerms("The first scene set is the default one. You can change every scene set later on the Scene System page.", SceneSystemTerms.SceneGroup), () => PickSetUpSets(true)));
+            content.Add(SceneSystemUI.ChoiceCard("Not now", "Setup makes the Default Scene Set with a new Managers scene" + fade + ".", !choices.SetUpSceneSetsNow, true,
+                "Add scenes to it later on the Scene System page, in Scene sets.", () => PickSetUpSets(false)));
+            if (!choices.SetUpSceneSetsNow)
+            {
+                return;
+            }
+
+            ScrollView scroll = new ScrollView(ScrollViewMode.Vertical);
+            scroll.style.flexGrow = 1;
+            scroll.style.flexShrink = 1;
+            scroll.style.marginTop = 4;
+            for (int index = 0; index < choices.SceneSets.Count; index++)
+            {
+                scroll.Add(DraftCard(index));
+            }
+            Button addSet = SceneSystemUI.Button("Add another scene set", "Adds an empty scene set. Scene groups pick their scene set on the Scene System page.", () =>
+            {
+                choices.SceneSets.Add(SceneSetDraft.Another(choices.SceneSets));
+                Show();
+            });
+            addSet.style.alignSelf = Align.FlexStart;
+            addSet.style.marginTop = 2;
+            scroll.Add(addSet);
+            content.Add(scroll);
         }
 
-        private void PickMigrate(bool _migrate)
+        private void PickSetUpSets(bool _now)
         {
-            choices.MigrateGroups = _migrate;
+            choices.SetUpSceneSetsNow = _now;
             Show();
+        }
+
+        // One scene set to make: its name, manager scenes, shared scenes and Reset shared scenes.
+        private VisualElement DraftCard(int _index)
+        {
+            SceneSetDraft draft = choices.SceneSets[_index];
+            VisualElement card = SceneSystemUI.Card();
+            card.style.marginBottom = 6;
+
+            VisualElement nameRow = SceneSystemUI.Row();
+            TextField name = new TextField("Name");
+            name.value = draft.Name;
+            name.tooltip = "The scene set's asset name.";
+            name.style.flexGrow = 1;
+            name.style.marginLeft = 0;
+            nameRow.Add(name);
+            if (_index == 0)
+            {
+                nameRow.Add(SceneSystemUI.Badge("Default", false, "The first scene set is the default: scene groups use it unless they pick another."));
+            }
+            else
+            {
+                nameRow.Add(SceneSystemUI.Button("Remove", "Removes this scene set from the list. Nothing is made for it.", () =>
+                {
+                    choices.SceneSets.RemoveAt(_index);
+                    Show();
+                }));
+            }
+            card.Add(nameRow);
+            Label nameProblem = new Label();
+            nameProblem.style.color = SceneSystemUI.Red;
+            nameProblem.style.fontSize = 11;
+            nameProblem.style.whiteSpace = WhiteSpace.Normal;
+            card.Add(nameProblem);
+            RefreshNameProblem(nameProblem, _index);
+            name.RegisterValueChangedCallback(_change =>
+            {
+                draft.Name = _change.newValue;
+                RefreshNameProblem(nameProblem, _index);
+                RefreshFooter();
+            });
+
+            card.Add(SceneList("Manager scenes", SceneSystemTerms.Tooltip(SceneSystemTerms.ManagerScene), draft.ManagerScenes, draft.IncludeStarterManagers, () =>
+            {
+                draft.IncludeStarterManagers = false;
+                Show();
+            }));
+            card.Add(SceneList("Shared scenes", SceneSystemTerms.Tooltip(SceneSystemTerms.SharedScene), draft.SharedScenes, false, null));
+
+            Toggle reset = new Toggle("Reset shared scenes");
+            reset.tooltip = "Closes and reopens every shared scene on each scene change, so state kept in them starts fresh.";
+            reset.SetValueWithoutNotify(draft.ResetSharedScenes);
+            reset.RegisterValueChangedCallback(_change => draft.ResetSharedScenes = _change.newValue);
+            card.Add(reset);
+            return card;
+        }
+
+        private void RefreshNameProblem(Label _label, int _index)
+        {
+            List<string> others = new List<string>();
+            for (int index = 0; index < choices.SceneSets.Count; index++)
+            {
+                if (index != _index)
+                {
+                    others.Add(choices.SceneSets[index].Name);
+                }
+            }
+            string problem = SceneSetNames.Problem(choices.SceneSets[_index].Name, others);
+            _label.text = problem;
+            _label.style.display = string.IsNullOrEmpty(problem) ? DisplayStyle.None : DisplayStyle.Flex;
+        }
+
+        // A titled list of scene fields with Remove buttons and "Add scene"; the starter Managers scene comes first.
+        private VisualElement SceneList(string _title, string _tooltip, List<SceneAsset> _scenes, bool _withStarter, Action _removeStarter)
+        {
+            VisualElement list = new VisualElement();
+            list.style.marginTop = 6;
+            Label title = new Label(_title);
+            title.tooltip = _tooltip;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.marginBottom = 2;
+            list.Add(title);
+            if (_withStarter)
+            {
+                VisualElement starterRow = SceneSystemUI.Row();
+                Label starter = new Label("Managers (new, made by setup)");
+                starter.tooltip = "An empty manager scene setup makes in the settings folder, holding a copy of the library's basic fade. Remove it if your own manager scenes are enough.";
+                starter.style.flexGrow = 1;
+                starter.style.paddingLeft = 3;
+                starterRow.Add(starter);
+                starterRow.Add(SceneSystemUI.Button("Remove", "Setup will not make the starter Managers scene for this scene set.", _removeStarter));
+                list.Add(starterRow);
+            }
+            for (int index = 0; index < _scenes.Count; index++)
+            {
+                list.Add(SceneRow(_scenes, index));
+            }
+            Button add = SceneSystemUI.Button("Add scene", "Adds a row to pick a scene from this project.", () =>
+            {
+                _scenes.Add(null);
+                Show();
+            });
+            add.style.alignSelf = Align.FlexStart;
+            list.Add(add);
+            return list;
+        }
+
+        private VisualElement SceneRow(List<SceneAsset> _scenes, int _index)
+        {
+            VisualElement row = SceneSystemUI.Row();
+            ObjectField field = new ObjectField();
+            field.objectType = typeof(SceneAsset);
+            field.allowSceneObjects = false;
+            field.SetValueWithoutNotify(_scenes[_index]);
+            field.style.flexGrow = 1;
+            field.style.marginLeft = 0;
+            field.RegisterValueChangedCallback(_change =>
+            {
+                _scenes[_index] = _change.newValue as SceneAsset;
+                RefreshFooter();
+            });
+            row.Add(field);
+            row.Add(SceneSystemUI.Button("Remove", "Removes this scene from the list.", () =>
+            {
+                _scenes.RemoveAt(_index);
+                Show();
+            }));
+            return row;
+        }
+
+        // The two scene opening preferences, written as soon as they change; they are per user, not project settings.
+        private void ShowOpeningScenes()
+        {
+            AddHeader("Opening Scenes", "What else opens when you open a scene in the Editor.");
+            content.Add(OpeningToggle(SceneOpeningPreferences.MainSceneWithGroupLabel,
+                SceneSystemTerms.WithTerms(SceneOpeningPreferences.MainSceneWithGroupTooltip, SceneSystemTerms.SceneGroup, SceneSystemTerms.StartSceneGroup),
+                SceneOpeningPreferences.MainSceneWithGroup, _value => SceneOpeningPreferences.MainSceneWithGroup = _value));
+            content.Add(OpeningToggle(SceneOpeningPreferences.NoGroupSceneWithDefaultSetLabel,
+                SceneSystemTerms.WithTerms(SceneOpeningPreferences.NoGroupSceneWithDefaultSetTooltip, SceneSystemTerms.SceneSet),
+                SceneOpeningPreferences.NoGroupSceneWithDefaultSet, _value => SceneOpeningPreferences.NoGroupSceneWithDefaultSet = _value));
+            Label play = SceneSystemUI.Hint(SceneOpeningPreferencesProvider.PlayNote);
+            play.style.marginTop = 8;
+            content.Add(play);
+            Label later = SceneSystemUI.Hint(ChangeLaterText);
+            later.style.marginTop = 6;
+            content.Add(later);
+        }
+
+        private static VisualElement OpeningToggle(string _label, string _tooltip, bool _value, Action<bool> _changed)
+        {
+            Toggle toggle = new Toggle();
+            toggle.text = _label;
+            toggle.tooltip = _tooltip;
+            toggle.style.marginBottom = 4;
+            toggle.SetValueWithoutNotify(_value);
+            toggle.RegisterValueChangedCallback(_change => _changed(_change.newValue));
+            return toggle;
         }
 
         private void ShowReady()
         {
-            content.Add(SceneSystemUI.PageHeader("Ready", "This is what setup will make."));
+            AddHeader("Ready", "This is what setup will make.");
             string folder = SceneSystemSetup.NormalizeFolder(choices.Folder);
             string place = choices.NewScenesAreAddressable && AddressableScenes.IsInstalled ? "Addressables" : "Build Settings";
+            bool hasFade = SceneSystemSetup.LibraryFadeExists();
             VisualElement list = SceneSystemUI.Card();
             list.Add(Check("Settings in " + folder));
-            if (SceneSystemSetup.WillMigrate(choices, plan))
+            foreach (string setLine in SceneSystemSetup.SceneSetLines(choices, hasFade))
             {
-                list.Add(Check(plan.SetNames.Count + " scene sets: " + string.Join(", ", plan.SetNames)));
-            }
-            else
-            {
-                string fade = SceneSystemSetup.LibraryFadeExists() ? " with a fade" : string.Empty;
-                list.Add(Check("A starter scene set" + fade));
+                list.Add(Check(setLine));
             }
             list.Add(Check("New scenes go to " + place));
             string launchLine = SceneSystemSetup.LaunchSceneLine(choices);
@@ -412,10 +652,18 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 list.Add(Check(loadingLine));
             }
-            list.tooltip = string.Join("\n", SceneSystemSetup.WillCreate(choices, plan, SceneSystemSetup.LibraryFadeExists(), AddressableScenes.IsInstalled));
+            list.tooltip = string.Join("\n", SceneSystemSetup.WillCreate(choices, hasFade, AddressableScenes.IsInstalled));
             content.Add(list);
 
-            string blocking = string.IsNullOrEmpty(setupError) ? SceneSystemSetup.BlockingProblem(choices, plan) : setupError;
+            string migrationHint = SceneSystemSetup.MigrationHint(plan);
+            if (!string.IsNullOrEmpty(migrationHint))
+            {
+                Label hint = SceneSystemUI.Hint(migrationHint);
+                hint.style.marginTop = 8;
+                content.Add(hint);
+            }
+
+            string blocking = string.IsNullOrEmpty(setupError) ? SceneSystemSetup.BlockingProblem(choices) : setupError;
             if (!string.IsNullOrEmpty(blocking))
             {
                 HelpBox problem = new HelpBox(blocking, HelpBoxMessageType.Warning);
@@ -434,7 +682,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private void ShowDone()
         {
-            content.Add(SceneSystemUI.PageHeader("All set", "The scene system is ready."));
+            AddHeader("All set", "The scene system is ready.");
             VisualElement dot = SceneSystemUI.Dot(SceneSystemUI.Green);
             dot.style.width = 36;
             dot.style.height = 36;

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace AbstractPixel.SceneManagement.Editor
 {
@@ -20,8 +19,8 @@ namespace AbstractPixel.SceneManagement.Editor
         public const string NoGroupHeading = "Scenes in no group";
         public const string NoGroupText = "No group";
         public const string NoMainSceneText = "No main scene";
+        public const string NoSceneSetText = "No scene set";
         private const string TestScenePrefix = "InitTestScene";
-        private const string DetailSeparator = "  ·  ";
 
         /// <summary>The library's package root; a scene in one of its Samples folders counts as a sample scene.</summary>
         public const string LibraryPackageRoot = "Packages/com.abstractpixel.library/";
@@ -149,59 +148,112 @@ namespace AbstractPixel.SceneManagement.Editor
             ScenePickerRow row = new ScenePickerRow();
             row.Kind = ScenePickerRowKind.Scene;
             row.Title = _scene.Name;
-            row.Detail = SceneDetail(_scene, _groups, _sets);
             row.Folder = FolderOf(_scene.Path);
             row.AssetGuid = _scene.Guid;
             row.AssetPath = _scene.Path;
             row.IsSample = _isSample;
             row.Status = _scene.Status;
+            DescribeScene(row, _scene, _groups, _sets);
             row.SearchText = SearchTextOf(row.Title, row.Folder, row.Detail);
             return row;
         }
 
-        // The group whose main scene this is; else the scene sets (or groups) that list it; else "No group".
-        private static string SceneDetail(ScenePickerSceneInfo _scene, List<ScenePickerGroupInfo> _groups, List<ScenePickerSetInfo> _sets)
+        // The label: the group whose main scene this is; else the scene sets that list it; else the groups that list
+        // it ("Shared by X"); else "No group". The row's group is the main scene's group, else the first that lists it.
+        private static void DescribeScene(ScenePickerRow _row, ScenePickerSceneInfo _scene, List<ScenePickerGroupInfo> _groups, List<ScenePickerSetInfo> _sets)
         {
+            _row.Detail = NoGroupText;
             if (string.IsNullOrEmpty(_scene.Guid))
             {
-                return NoGroupText;
+                return;
             }
-            foreach (ScenePickerGroupInfo group in _groups)
+            ScenePickerGroupInfo mainGroup = GroupWithMainScene(_groups, _scene.Guid);
+            List<ScenePickerGroupInfo> listingGroups = GroupsListing(_groups, _scene.Guid);
+            ScenePickerGroupInfo rowGroup = mainGroup;
+            if (rowGroup == null && listingGroups.Count > 0)
             {
-                if (group != null && group.MainSceneGuid == _scene.Guid)
-                {
-                    return group.Name;
-                }
+                rowGroup = listingGroups[0];
+            }
+            if (rowGroup != null)
+            {
+                _row.GroupGuid = rowGroup.Guid;
+                _row.GroupName = rowGroup.Name;
             }
 
-            List<string> setNames = new List<string>();
-            foreach (ScenePickerSetInfo set in _sets)
+            if (mainGroup != null)
             {
-                if (set != null && set.SceneGuids.Contains(_scene.Guid))
+                SetLabel(_row, mainGroup.Name, ScenePickerLabelKind.SceneGroup, mainGroup.Guid, mainGroup.Name);
+                return;
+            }
+            List<ScenePickerSetInfo> listingSets = SetsListing(_sets, _scene.Guid);
+            if (listingSets.Count > 0)
+            {
+                List<string> setNames = new List<string>();
+                foreach (ScenePickerSetInfo set in listingSets)
                 {
                     AddOnce(setNames, set.Name + " (scene set)");
                 }
-            }
-            if (setNames.Count > 0)
-            {
-                return string.Join(", ", setNames);
-            }
-
-            List<string> listingGroups = new List<string>();
-            foreach (ScenePickerGroupInfo group in _groups)
-            {
-                if (group != null && group.OtherSceneGuids.Contains(_scene.Guid))
-                {
-                    AddOnce(listingGroups, group.Name);
-                }
+                SetLabel(_row, string.Join(", ", setNames), ScenePickerLabelKind.SceneSet, listingSets[0].Guid, listingSets[0].Name);
+                return;
             }
             if (listingGroups.Count > 0)
             {
-                return "Shared by " + string.Join(", ", listingGroups);
+                List<string> groupNames = new List<string>();
+                foreach (ScenePickerGroupInfo group in listingGroups)
+                {
+                    AddOnce(groupNames, group.Name);
+                }
+                SetLabel(_row, "Shared by " + string.Join(", ", groupNames), ScenePickerLabelKind.SceneGroup, listingGroups[0].Guid, listingGroups[0].Name);
             }
-            return NoGroupText;
         }
 
+        private static void SetLabel(ScenePickerRow _row, string _text, ScenePickerLabelKind _kind, string _guid, string _targetName)
+        {
+            _row.Detail = _text;
+            _row.LabelKind = _kind;
+            _row.LabelGuid = _guid ?? string.Empty;
+            _row.LabelTargetName = _targetName ?? string.Empty;
+        }
+
+        private static ScenePickerGroupInfo GroupWithMainScene(List<ScenePickerGroupInfo> _groups, string _sceneGuid)
+        {
+            foreach (ScenePickerGroupInfo group in _groups)
+            {
+                if (group != null && group.MainSceneGuid == _sceneGuid)
+                {
+                    return group;
+                }
+            }
+            return null;
+        }
+
+        private static List<ScenePickerGroupInfo> GroupsListing(List<ScenePickerGroupInfo> _groups, string _sceneGuid)
+        {
+            List<ScenePickerGroupInfo> listing = new List<ScenePickerGroupInfo>();
+            foreach (ScenePickerGroupInfo group in _groups)
+            {
+                if (group != null && group.OtherSceneGuids.Contains(_sceneGuid))
+                {
+                    listing.Add(group);
+                }
+            }
+            return listing;
+        }
+
+        private static List<ScenePickerSetInfo> SetsListing(List<ScenePickerSetInfo> _sets, string _sceneGuid)
+        {
+            List<ScenePickerSetInfo> listing = new List<ScenePickerSetInfo>();
+            foreach (ScenePickerSetInfo set in _sets)
+            {
+                if (set != null && set.SceneGuids.Contains(_sceneGuid))
+                {
+                    listing.Add(set);
+                }
+            }
+            return listing;
+        }
+
+        // Name on the left; the label button names the group's scene set; the main scene moves to the row tooltip.
         private static ScenePickerRow GroupRow(ScenePickerGroupInfo _group)
         {
             ScenePickerRow row = new ScenePickerRow();
@@ -213,22 +265,23 @@ namespace AbstractPixel.SceneManagement.Editor
             row.IsSample = _group.IsSample;
             row.CanOpen = _group.HasMainScene;
             row.Status = _group.MainSceneStatus;
+            row.Number = _group.Number;
+            row.GroupGuid = _group.Guid;
+            row.GroupName = _group.Name;
+            row.MainSceneName = _group.HasMainScene ? _group.MainSceneName : string.Empty;
+            row.ProblemCount = _group.ProblemCount;
+            row.FirstProblem = _group.FirstProblem ?? string.Empty;
+            row.HasMakeAddressableProblem = _group.HasMakeAddressableProblem;
+            row.IsBootGroup = _group.IsBootGroup;
 
-            StringBuilder detail = new StringBuilder();
-            if (_group.HasMainScene)
+            if (string.IsNullOrEmpty(_group.SceneSetName))
             {
-                detail.Append(_group.MainSceneName);
+                row.Detail = NoSceneSetText;
             }
             else
             {
-                detail.Append(NoMainSceneText);
+                SetLabel(row, _group.SceneSetName, ScenePickerLabelKind.SceneSet, _group.SceneSetGuid, _group.SceneSetName);
             }
-            if (!string.IsNullOrEmpty(_group.SceneSetName))
-            {
-                detail.Append(DetailSeparator);
-                detail.Append(_group.SceneSetName);
-            }
-            row.Detail = detail.ToString();
             row.SearchText = SearchTextOf(row.Title, row.Folder, string.Empty);
             return row;
         }

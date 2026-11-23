@@ -42,7 +42,8 @@ namespace AbstractPixel.SceneManagement.Editor
 
         /// <summary>
         /// The rows with a "Recent" section on top holding copies of the rows opened last (at most MostRecent), newest
-        /// first. A recent asset that is not in these rows (the other tab's, or deleted) is skipped.
+        /// first and numbered by recency (1 is the last used). A recent asset that is not in these rows (the other tab's,
+        /// or deleted) is skipped. The rows in the full list keep their own numbers.
         /// </summary>
         public static List<ScenePickerRow> WithRecentFirst(List<ScenePickerRow> _rows, List<string> _recentGuids)
         {
@@ -56,7 +57,8 @@ namespace AbstractPixel.SceneManagement.Editor
                 ScenePickerRow row = FindByGuid(_rows, guid);
                 if (row != null && recent.Count < MostRecent)
                 {
-                    recent.Add(row);
+                    int recency = recent.Count + 1;
+                    recent.Add(row.WithNumber(recency));
                 }
             }
             if (recent.Count == 0)

@@ -25,6 +25,25 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
 
         private static readonly Regex GuidPattern = new Regex("guid: ([0-9a-fA-F]{32})");
 
+        // Unity's built-in extra resources, which hold Default-Material and the Built-in Standard shader.
+        private const string BuiltInExtraGuid = "0000000000000000f000000000000000";
+
+        // Default-Material (10303) and the Standard shader (46): only the Built-in render pipeline draws them, so URP
+        // and HDRP show every sample object that uses them magenta (scene system 5A2). Samples use the library's
+        // sample material ("Abstract Pixel/Samples/Sample Lit") instead.
+        private static readonly string[] BuiltInPipelineOnlyReferences =
+        {
+            "{fileID: 10303, guid: " + BuiltInExtraGuid,
+            "{fileID: 46, guid: " + BuiltInExtraGuid
+        };
+
+        // The InputRebinding sample lives outside a Samples folder; its game materials follow the same rule.
+        private const string RebindingSampleGameFolder = PackageRoot + "/Modules/InputRebinding/Rebinding UI/Game";
+
+        private const string UrpLitShaderGuid = "933532a4fcc9baf4fa0491de14d08ed7";
+        private const string SampleLitShaderGuid = "bba8fa45afa4fcf4f8308fa38d3cdfff";
+        private const string SampleDefaultMaterialGuid = "a68bea6173504a34b87eccdc0443691a";
+
         /// <summary>Every text-serialized scene and asset in a Samples folder of the library.</summary>
         public static IEnumerable<string> SampleAssets()
         {
@@ -120,6 +139,54 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             }
 
             Assert.IsEmpty(outsiders, _assetPath + " references assets outside the library: " + string.Join(", ", outsiders));
+        }
+
+        /// <summary>Every library sample scene and asset, plus the InputRebinding sample's game materials.</summary>
+        public static IEnumerable<string> SampleAssetsAndSampleMaterials()
+        {
+            List<string> assets = new List<string>(SampleAssets());
+            string folder = Path.GetFullPath(RebindingSampleGameFolder);
+            if (!Directory.Exists(folder))
+            {
+                return assets;
+            }
+            foreach (string fullPath in Directory.GetFiles(folder, "*.mat"))
+            {
+                assets.Add(RebindingSampleGameFolder + "/" + Path.GetFileName(fullPath));
+            }
+            return assets;
+        }
+
+        /// <summary>
+        /// A sample object must look the same in every render pipeline, in edit mode, in Play and in a player, so no
+        /// sample uses a material or shader that only the Built-in render pipeline draws.
+        /// </summary>
+        [TestCaseSource(nameof(SampleAssetsAndSampleMaterials))]
+        public void UsesNoMaterialOnlyTheBuiltInPipelineDraws(string _assetPath)
+        {
+            string fullPath = Path.GetFullPath(_assetPath);
+            if (!File.Exists(fullPath))
+            {
+                Assert.Ignore(_assetPath + " was deleted after the test list was read.");
+            }
+            string text = File.ReadAllText(fullPath);
+            int count = 0;
+            foreach (string reference in BuiltInPipelineOnlyReferences)
+            {
+                count += Regex.Matches(text, Regex.Escape(reference)).Count;
+            }
+
+            Assert.AreEqual(0, count, _assetPath + " uses Default-Material or the Standard shader " + count + " times; use the library's sample material.");
+        }
+
+        /// <summary>The guard's own rule: library and Unity built-in GUIDs pass, a package's (URP Lit) fails.</summary>
+        [TestCase(UrpLitShaderGuid, false, TestName = "AllowedGuid(URP Lit shader is outside the library)")]
+        [TestCase(SampleLitShaderGuid, true, TestName = "AllowedGuid(the library's Sample Lit shader)")]
+        [TestCase(SampleDefaultMaterialGuid, true, TestName = "AllowedGuid(the library's Sample Default material)")]
+        [TestCase(BuiltInExtraGuid, true, TestName = "AllowedGuid(Unity built-in extra resources)")]
+        public void AllowedGuid(string _guid, bool _expected)
+        {
+            Assert.AreEqual(_expected, IsAllowed(_guid));
         }
 
         // A scene or asset under a Samples (or Samples~) folder, serialized as text; .meta files and code are left out.

@@ -11,15 +11,15 @@ using UnityEngine.SceneManagement;
 namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
-    /// "Set up scene system": the settings asset, then either the migration of the project's scene groups or a starter
-    /// scene set with one empty manager scene holding a copy of the basic fade (ADR 0004). Validated before it runs, and
-    /// a failing step undoes everything made before it.
+    /// "Set up scene system": the settings asset, then the scene sets: the ones the designer listed on the Scene Sets
+    /// step, or a starter "Default Scene Set" with one empty manager scene holding a copy of the basic fade (ADR 0004).
+    /// Setup no longer sorts existing scene groups into scene sets (session 5A2): the Scene System page's "Preview
+    /// migration / Migrate" does. Validated before it runs, and a failing step undoes everything made before it.
     /// </summary>
     public static class SceneSystemSetup
     {
         public const string DefaultFolder = "Assets/SceneSystem";
         public const string SettingsFileName = "SceneSystemSettings.asset";
-        private const string StarterSetFileName = "Default Scene Set.asset";
         private const string ManagerSceneFileName = "Managers.unity";
         private const string FadeFileName = "Fade.asset";
         private const string FadeControllerFileName = "Fade Controller.prefab";
@@ -108,7 +108,7 @@ namespace AbstractPixel.SceneManagement.Editor
         }
 
         /// <summary>Why setup can't run with these choices right now; empty when it can.</summary>
-        public static string BlockingProblem(SceneSystemSetupChoices _choices, SceneGroupMigrationPlan _plan)
+        public static string BlockingProblem(SceneSystemSetupChoices _choices)
         {
             string folderProblem = FolderProblemInProject(_choices.Folder);
             if (!string.IsNullOrEmpty(folderProblem))
@@ -119,11 +119,16 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 return "This project is already set up.";
             }
-            bool makesStarterSet = !WillMigrate(_choices, _plan);
+            bool makesManagerScene = MakesStarterManagers(_choices);
             bool makesLaunchScene = _choices.LaunchScene == LaunchSceneChoice.CreateNew;
-            if ((makesStarterSet || makesLaunchScene) && HasUntitledOpenScene())
+            if ((makesManagerScene || makesLaunchScene) && HasUntitledOpenScene())
             {
                 return "Save the open scene first.";
+            }
+            string setsProblem = SceneSetsProblem(_choices);
+            if (!string.IsNullOrEmpty(setsProblem))
+            {
+                return setsProblem;
             }
             string launchProblem = LaunchSceneProblem(_choices);
             if (!string.IsNullOrEmpty(launchProblem))
@@ -131,6 +136,105 @@ namespace AbstractPixel.SceneManagement.Editor
                 return launchProblem;
             }
             return LoadingSceneProblem(_choices);
+        }
+
+        /// <summary>Why the scene sets listed on the Scene Sets step can't be made, naming the set; empty when they can.</summary>
+        public static string SceneSetsProblem(SceneSystemSetupChoices _choices)
+        {
+            if (!_choices.SetUpSceneSetsNow)
+            {
+                return string.Empty;
+            }
+            if (_choices.SceneSets == null || _choices.SceneSets.Count == 0)
+            {
+                return "Add a scene set, or choose Not now.";
+            }
+            List<string> earlierNames = new List<string>();
+            foreach (SceneSetDraft draft in _choices.SceneSets)
+            {
+                string problem = SceneSetNames.Problem(draft.Name, earlierNames);
+                if (!string.IsNullOrEmpty(problem))
+                {
+                    return problem;
+                }
+                earlierNames.Add(draft.Name);
+            }
+            return string.Empty;
+        }
+
+        /// <summary>True when setup makes the starter Managers scene (with the copied fade).</summary>
+        public static bool MakesStarterManagers(SceneSystemSetupChoices _choices)
+        {
+            if (!_choices.SetUpSceneSetsNow)
+            {
+                return true;
+            }
+            foreach (SceneSetDraft draft in _choices.SceneSets)
+            {
+                if (draft.IncludeStarterManagers)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>One line per scene set setup will make: "Default Scene Set (default): Managers (new, with a fade); shared: GameBoot".</summary>
+        public static List<string> SceneSetLines(SceneSystemSetupChoices _choices, bool _hasFade)
+        {
+            List<string> lines = new List<string>();
+            string starter = Path.GetFileNameWithoutExtension(ManagerSceneFileName) + (_hasFade ? " (new, with a fade)" : " (new)");
+            if (!_choices.SetUpSceneSetsNow)
+            {
+                lines.Add("Scene set '" + SceneSetDraft.DefaultName + "' (default), manager scene " + starter);
+                return lines;
+            }
+            for (int index = 0; index < _choices.SceneSets.Count; index++)
+            {
+                SceneSetDraft draft = _choices.SceneSets[index];
+                List<string> managers = new List<string>();
+                if (draft.IncludeStarterManagers)
+                {
+                    managers.Add(starter);
+                }
+                AddNames(managers, draft.ManagerScenes);
+                List<string> shared = new List<string>();
+                AddNames(shared, draft.SharedScenes);
+                string line = "Scene set '" + draft.Name.Trim() + "'" + (index == 0 ? " (default)" : string.Empty);
+                line += ", manager scenes: " + NamesOrNone(managers) + "; shared scenes: " + NamesOrNone(shared);
+                if (draft.ResetSharedScenes)
+                {
+                    line += "; Reset shared scenes";
+                }
+                lines.Add(line);
+            }
+            return lines;
+        }
+
+        private static void AddNames(List<string> _names, List<SceneAsset> _scenes)
+        {
+            foreach (SceneAsset scene in _scenes)
+            {
+                if (scene != null && !_names.Contains(scene.name))
+                {
+                    _names.Add(scene.name);
+                }
+            }
+        }
+
+        private static string NamesOrNone(List<string> _names)
+        {
+            return _names.Count == 0 ? "none" : string.Join(", ", _names);
+        }
+
+        /// <summary>The one line Ready adds when the project has scene groups to sort into scene sets; empty otherwise.</summary>
+        public static string MigrationHint(SceneGroupMigrationPlan _plan)
+        {
+            if (_plan == null || !_plan.HasWork)
+            {
+                return string.Empty;
+            }
+            return _plan.GroupsToMigrateCount + " scene groups can be sorted into scene sets later: Project Settings > Abstract Pixel > Scene System > Scene Groups Debugger, Preview migration.";
         }
 
         /// <summary>Why the loading scene step cannot go on, or empty.</summary>
@@ -161,31 +265,21 @@ namespace AbstractPixel.SceneManagement.Editor
             return string.Empty;
         }
 
-        public static bool WillMigrate(SceneSystemSetupChoices _choices, SceneGroupMigrationPlan _plan)
-        {
-            return _choices.MigrateGroups && _plan != null && _plan.HasWork;
-        }
-
         /// <summary>The lines of "Setup will create", in the words the page uses.</summary>
-        public static List<string> WillCreate(SceneSystemSetupChoices _choices, SceneGroupMigrationPlan _plan, bool _hasFade, bool _addressablesInstalled)
+        public static List<string> WillCreate(SceneSystemSetupChoices _choices, bool _hasFade, bool _addressablesInstalled)
         {
             string folder = NormalizeFolder(_choices.Folder);
             bool toAddressables = _choices.NewScenesAreAddressable && _addressablesInstalled;
             string place = toAddressables ? "Addressables" : "Build Settings";
             List<string> lines = new List<string>();
             lines.Add("The scene system settings asset: " + folder + "/" + SettingsFileName + ", added to Player Settings > Preloaded Assets.");
-            if (WillMigrate(_choices, _plan))
+            foreach (string setLine in SceneSetLines(_choices, _hasFade))
             {
-                lines.Add(_plan.SetNames.Count + " scene set(s) (" + string.Join(", ", _plan.SetNames) + ") in " + folder + "/Scene Sets, filled from " + _plan.GroupsToMigrateCount + " scene group(s); '" + _plan.SetNames[_plan.DefaultSetIndex] + "' is the default.");
-                lines.Add("Each of those scene groups uses its scene set with no overrides and keeps every scene. A report next to the settings asset lists every group before and after.");
-                if (_plan.GroupsWithoutMainScene.Count > 0)
-                {
-                    lines.Add(_plan.GroupsWithoutMainScene.Count + " scene group(s) without a main scene stay as they are and are listed in the report as unused.");
-                }
+                lines.Add(setLine + ", in " + folder + ".");
             }
-            else
+            if (MakesStarterManagers(_choices))
             {
-                lines.Add("A starter scene set '" + Path.GetFileNameWithoutExtension(StarterSetFileName) + "', the default, with one empty manager scene '" + Path.GetFileNameWithoutExtension(ManagerSceneFileName) + "' in " + place + ".");
+                lines.Add("The manager scene '" + Path.GetFileNameWithoutExtension(ManagerSceneFileName) + "' is new and empty, in " + place + ".");
                 if (_hasFade)
                 {
                     lines.Add("A copy of the basic fade (" + FadeFileName + ") and its controller prefab (" + FadeControllerFileName + ") in that folder, played by the manager scene. Restyle the copies; the library's originals stay untouched.");
@@ -227,8 +321,7 @@ namespace AbstractPixel.SceneManagement.Editor
         /// <summary>Runs the setup. Returns the new settings, or null with &lt;paramref name="_error"/&gt; and nothing left behind.</summary>
         public static SceneSystemSettings Run(SceneSystemSetupChoices _choices, out string _error)
         {
-            SceneGroupMigrationPlan plan = SceneGroupMigration.Plan(SceneGroupAssets.FindAll());
-            _error = BlockingProblem(_choices, plan);
+            _error = BlockingProblem(_choices);
             if (!string.IsNullOrEmpty(_error))
             {
                 return null;
@@ -251,10 +344,9 @@ namespace AbstractPixel.SceneManagement.Editor
                 SceneSystemSettingsAssets.Remember(settings);
                 SceneSystemSettingsAssets.PushToCore();
 
-                if (WillMigrate(_choices, plan))
+                if (_choices.SetUpSceneSetsNow)
                 {
-                    string reportPath = SceneGroupMigration.Run(settings, false, createdPaths, changedGroups);
-                    createdPaths.Add(reportPath);
+                    CreateSceneSets(folder, settings, _choices.SceneSets, createdPaths);
                 }
                 else
                 {
@@ -266,7 +358,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 SceneSystemSettingsAssets.RefreshLists(settings);
                 SceneSystemSettingsAssets.EnsurePreloaded(settings);
                 AssetDatabase.SaveAssets();
-                Debug.Log(LogPrefix + " Set up the scene system in '" + folder + "': " + string.Join(" ", WillCreate(_choices, plan, LibraryFadeExists(), AddressableScenes.IsInstalled)), settings);
+                Debug.Log(LogPrefix + " Set up the scene system in '" + folder + "': " + string.Join(" ", WillCreate(_choices, LibraryFadeExists(), AddressableScenes.IsInstalled)), settings);
                 SceneSystemSettingsAssets.NotifyChanged();
                 return settings;
             }
@@ -347,27 +439,90 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static void CreateStarterSet(string _folder, SceneSystemSettings _settings, List<string> _createdPaths)
         {
+            SceneSetDraft starter = SceneSetDraft.Default();
+            CreateSceneSets(_folder, _settings, new List<SceneSetDraft> { starter }, _createdPaths);
+        }
+
+        // One scene set per draft, the first being the default. The starter Managers scene is made once, for the sets
+        // that list it; picked scenes go where new scenes go when they are in neither Build Settings nor Addressables.
+        private static void CreateSceneSets(string _folder, SceneSystemSettings _settings, List<SceneSetDraft> _drafts, List<string> _createdPaths)
+        {
+            SceneAsset starterManagers = null;
+            for (int index = 0; index < _drafts.Count; index++)
+            {
+                SceneSetDraft draft = _drafts[index];
+                SceneSet set = ScriptableObject.CreateInstance<SceneSet>();
+                if (draft.IncludeStarterManagers)
+                {
+                    if (starterManagers == null)
+                    {
+                        starterManagers = CreateStarterManagers(_folder, _createdPaths);
+                    }
+                    set.ManagerScenes.Add(ReferenceTo(starterManagers));
+                }
+                AddScenes(set.ManagerScenes, draft.ManagerScenes);
+                AddScenes(set.SharedScenes, draft.SharedScenes);
+                set.ResetSharedScenes = draft.ResetSharedScenes;
+
+                string setPath = AssetDatabase.GenerateUniqueAssetPath(_folder + "/" + draft.Name.Trim() + ".asset");
+                AssetDatabase.CreateAsset(set, setPath);
+                _createdPaths.Add(setPath);
+                _settings.SceneSets.Add(set);
+                if (index == 0)
+                {
+                    _settings.DefaultSceneSet = set;
+                }
+                MoveToDefaultPlace(set.ManagerScenes);
+                MoveToDefaultPlace(set.SharedScenes);
+            }
+            EditorUtility.SetDirty(_settings);
+        }
+
+        // The starter manager scene: empty, holding a copy of the basic fade when the transitions module is here.
+        private static SceneAsset CreateStarterManagers(string _folder, List<string> _createdPaths)
+        {
             ScriptableObject fadeCopy = CopyLibraryFade(_folder, _createdPaths);
             string scenePath = AssetDatabase.GenerateUniqueAssetPath(_folder + "/" + ManagerSceneFileName);
             CreateManagerScene(scenePath, fadeCopy);
             _createdPaths.Add(scenePath);
+            return AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
+        }
 
-            SceneAsset sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
-            SceneReference managerScene = new SceneReference(sceneAsset.name, AssetDatabase.AssetPathToGUID(scenePath), scenePath);
-            managerScene.SceneFieldReference.SetSceneAsset(sceneAsset);
+        private static void AddScenes(List<SceneReference> _list, List<SceneAsset> _scenes)
+        {
+            foreach (SceneAsset scene in _scenes)
+            {
+                if (scene == null)
+                {
+                    continue;
+                }
+                SceneReference reference = ReferenceTo(scene);
+                bool alreadyListed = _list.Exists(_existing => _existing.SceneGuid == reference.SceneGuid);
+                if (!alreadyListed)
+                {
+                    _list.Add(reference);
+                }
+            }
+        }
 
-            SceneSet set = ScriptableObject.CreateInstance<SceneSet>();
-            set.ManagerScenes.Add(managerScene);
-            string setPath = AssetDatabase.GenerateUniqueAssetPath(_folder + "/" + StarterSetFileName);
-            AssetDatabase.CreateAsset(set, setPath);
-            _createdPaths.Add(setPath);
+        private static SceneReference ReferenceTo(SceneAsset _scene)
+        {
+            string path = AssetDatabase.GetAssetPath(_scene);
+            SceneReference reference = new SceneReference(_scene.name, AssetDatabase.AssetPathToGUID(path), path);
+            reference.SceneFieldReference.SetSceneAsset(_scene);
+            return reference;
+        }
 
-            _settings.SceneSets.Add(set);
-            _settings.DefaultSceneSet = set;
-            EditorUtility.SetDirty(_settings);
-
-            SceneStatusReport report = SceneStatusReader.Read(managerScene.SceneFieldReference);
-            SceneStatusReader.MoveTo(report, SceneStatusReader.ProjectDefaultPlace);
+        private static void MoveToDefaultPlace(List<SceneReference> _scenes)
+        {
+            foreach (SceneReference scene in _scenes)
+            {
+                SceneStatusReport report = SceneStatusReader.Read(scene.SceneFieldReference);
+                if (report.Status == SceneStatus.NotInBuild)
+                {
+                    SceneStatusReader.MoveTo(report, SceneStatusReader.ProjectDefaultPlace);
+                }
+            }
         }
 
         private static ScriptableObject CopyLibraryFade(string _folder, List<string> _createdPaths)

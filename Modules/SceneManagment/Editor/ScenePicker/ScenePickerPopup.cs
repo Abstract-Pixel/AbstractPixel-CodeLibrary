@@ -8,7 +8,7 @@ namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
     /// The scene picker's dropdown: Scenes and Scene Groups tabs, one search bar under them that both share, the rows,
-    /// and a footer with "Open the group with its main scene" and the keys. The search bar has focus when it opens;
+    /// and a footer with the two scene opening preferences ("Open with: Group, Default set"). The keys are in the search bar's tooltip. The search bar has focus when it opens;
     /// arrow keys move, Enter opens, Shift+Enter selects, Esc closes (decision 10). A click on a row opens it; its
     /// Select button selects it. Either closes the picker. It reads the project again whenever the project changes.
     /// </summary>
@@ -16,8 +16,10 @@ namespace AbstractPixel.SceneManagement.Editor
     {
         public const string ScenesTabName = "Scenes";
         public const string GroupsTabName = "Scene Groups";
-        public const string OpenWithGroupLabel = "Open the group with its main scene";
-        public const string KeysHint = "Enter open · Shift+Enter select";
+        public const string OpenWithText = "Open with:";
+        public const string GroupToggleText = "Group";
+        public const string DefaultSetToggleText = "Default set";
+        public const string SearchTooltip = "Type to filter; every word must match. Arrow keys move, Enter opens the highlighted row, Shift+Enter selects it, Tab switches tabs, Esc closes.";
         private const string StyleSheetGuid = "e090a93f571d828532ed313f826f10ed";
         private const float Width = 400f;
         private const float RowHeight = 20f;
@@ -49,6 +51,10 @@ namespace AbstractPixel.SceneManagement.Editor
         private bool hasPicked;
         private bool isForgotten;
         private string[] searchWords = new string[0];
+        private ScenePickerProjectFacts facts = new ScenePickerProjectFacts();
+        private bool showNumbers;
+        private Toggle groupToggle;
+        private Toggle defaultSetToggle;
 
         /// <summary>True while a scene picker popup is open, so the button never opens a second one.</summary>
         public static bool IsOpen { get; private set; }
@@ -69,7 +75,10 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             IsOpen = true;
             Current = this;
+            ScenePickerProject.BeginPicking();
+            facts = ScenePickerProject.Facts();
             ScenePickerProject.Changed += OnProjectChanged;
+            SceneOpeningPreferences.Changed += OnPreferencesChanged;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
             AssemblyReloadEvents.beforeAssemblyReload += Close;
         }
@@ -97,6 +106,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
             searchField = new ToolbarSearchField();
             searchField.AddToClassList("scene-picker__search");
+            searchField.tooltip = SearchTooltip;
             // Each open starts with an empty search, so the Recent section and the open group are what the eye meets first.
             searchField.SetValueWithoutNotify(string.Empty);
             searchField.RegisterValueChangedCallback(_change => OnQueryChanged(_change.newValue));
@@ -107,7 +117,7 @@ namespace AbstractPixel.SceneManagement.Editor
             listView.fixedItemHeight = RowHeight;
             listView.style.flexGrow = 0;
             listView.selectionType = SelectionType.Single;
-            listView.makeItem = () => new ScenePickerRowView(OpenRow, SelectRow);
+            listView.makeItem = () => new ScenePickerRowView(RowCallbacks());
             listView.bindItem = (_element, _index) => BindRow(_element, _index);
             listView.itemsSource = shownRows;
             root.Add(listView);
@@ -199,7 +209,86 @@ namespace AbstractPixel.SceneManagement.Editor
             ScenePickerActions.Open(_row);
         }
 
-        /// <summary>Selects the row's asset in the Project window and opens nothing, as its Select button does.</summary>
+        /// <summary>Does what a click on the row's label button does: selects the scene group or scene set it names.</summary>
+        public void ClickLabel(ScenePickerRow _row)
+        {
+            if (!ScenePickerLabelRules.IsClickable(_row) || hasPicked)
+            {
+                return;
+            }
+            hasPicked = true;
+            Close();
+            ScenePickerActions.SelectByGuid(_row.LabelGuid);
+        }
+
+        /// <summary>Does what a click on the row's status button does (<see cref="ScenePickerStatusRules"/>); never opens the row.</summary>
+        public void ClickStatus(ScenePickerRow _row)
+        {
+            if (_row == null || _row.IsHeading || hasPicked)
+            {
+                return;
+            }
+            ScenePickerClick click = ScenePickerStatusRules.Click(_row, facts);
+            if (click.Kind == ScenePickerClickKind.None)
+            {
+                return;
+            }
+            hasPicked = true;
+            Close();
+            // After the popup has closed, so the window it opens is not covered or closed with it.
+            AbstractPixel.Core.Editor.EditorIdleQueue.Run(() => ScenePickerActions.RunStatusClick(click));
+        }
+
+        /// <summary>The facts the status buttons were drawn with, for probes and tests.</summary>
+        public ScenePickerProjectFacts Facts
+        {
+            get { return facts; }
+        }
+
+        private ScenePickerRowCallbacks RowCallbacks()
+        {
+            ScenePickerRowCallbacks callbacks = new ScenePickerRowCallbacks();
+            callbacks.Opened = OpenRow;
+            callbacks.FolderClicked = SelectRow;
+            callbacks.LabelClicked = ClickLabel;
+            callbacks.StatusClicked = ClickStatus;
+            callbacks.MenuOpening = FillRowMenu;
+            return callbacks;
+        }
+
+        // Right-click on a row: Open, Open additively, Select scene, Select scene group, Copy path. Entries that do not
+        // apply (no group, no main scene, Play mode) are greyed out. Each entry closes the picker first.
+        private void FillRowMenu(ScenePickerRow _row, DropdownMenu _menu)
+        {
+            ScenePickerRowMenu entries = ScenePickerRowMenu.For(_row, EditorApplication.isPlayingOrWillChangePlaymode);
+            AddMenuEntry(_menu, ScenePickerRowMenu.OpenText, entries.CanOpen, () => OpenRow(_row));
+            AddMenuEntry(_menu, ScenePickerRowMenu.OpenAdditivelyText, entries.CanOpenAdditively, () => PickThen(() => ScenePickerActions.OpenAdditively(_row)));
+            _menu.AppendSeparator();
+            AddMenuEntry(_menu, ScenePickerRowMenu.SelectSceneText, entries.CanSelectScene, () => PickThen(() => ScenePickerActions.SelectScene(_row)));
+            AddMenuEntry(_menu, ScenePickerRowMenu.SelectGroupText, entries.CanSelectGroup, () => PickThen(() => ScenePickerActions.SelectByGuid(entries.GroupGuid)));
+            _menu.AppendSeparator();
+            AddMenuEntry(_menu, ScenePickerRowMenu.CopyPathText, entries.CanCopyPath, () => PickThen(() => ScenePickerActions.CopyPath(_row)));
+        }
+
+        private static void AddMenuEntry(DropdownMenu _menu, string _text, bool _enabled, System.Action _picked)
+        {
+            DropdownMenuAction.Status status = _enabled ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled;
+            _menu.AppendAction(_text, _action => _picked(), _action => status);
+        }
+
+        // Closes the picker (if it is still open) and runs the action once the popup is gone.
+        private void PickThen(System.Action _action)
+        {
+            if (hasPicked)
+            {
+                return;
+            }
+            hasPicked = true;
+            Close();
+            AbstractPixel.Core.Editor.EditorIdleQueue.Run(_action);
+        }
+
+        /// <summary>Selects the row's asset in the Project window and opens nothing, as its folder button does.</summary>
         public void SelectRow(ScenePickerRow _row)
         {
             if (_row == null || _row.IsHeading || hasPicked)
@@ -243,23 +332,50 @@ namespace AbstractPixel.SceneManagement.Editor
                 Current = null;
             }
             ScenePickerProject.Changed -= OnProjectChanged;
+            SceneOpeningPreferences.Changed -= OnPreferencesChanged;
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             AssemblyReloadEvents.beforeAssemblyReload -= Close;
         }
 
+        // "Open with: [x] Group [x] Default set": the two scene opening preferences, the same ones as Preferences >
+        // Abstract Pixel > Scenes; the tooltips give their full names.
         private VisualElement Footer()
         {
             VisualElement footer = new VisualElement();
             footer.AddToClassList("scene-picker__footer");
-            Toggle openWithGroup = new Toggle(OpenWithGroupLabel);
-            openWithGroup.tooltip = "Opening a scene also opens the scenes Play loads with it. The same choice as Preferences > Abstract Pixel > Scenes.";
-            openWithGroup.SetValueWithoutNotify(OpenGroupWithMainScenePreference.IsOn);
-            openWithGroup.RegisterValueChangedCallback(_change => OpenGroupWithMainScenePreference.IsOn = _change.newValue);
-            footer.Add(openWithGroup);
-            Label hint = new Label(KeysHint);
-            hint.AddToClassList("scene-picker__footer-hint");
-            footer.Add(hint);
+            Label openWith = new Label(OpenWithText);
+            openWith.AddToClassList("scene-picker__footer-label");
+            footer.Add(openWith);
+            groupToggle = FooterToggle(GroupToggleText, SceneOpeningPreferences.MainSceneWithGroupLabel, SceneOpeningPreferences.MainSceneWithGroup);
+            groupToggle.RegisterValueChangedCallback(_change => SceneOpeningPreferences.MainSceneWithGroup = _change.newValue);
+            footer.Add(groupToggle);
+            defaultSetToggle = FooterToggle(DefaultSetToggleText, SceneOpeningPreferences.NoGroupSceneWithDefaultSetLabel, SceneOpeningPreferences.NoGroupSceneWithDefaultSet);
+            defaultSetToggle.RegisterValueChangedCallback(_change => SceneOpeningPreferences.NoGroupSceneWithDefaultSet = _change.newValue);
+            footer.Add(defaultSetToggle);
             return footer;
+        }
+
+        private static Toggle FooterToggle(string _text, string _fullName, bool _value)
+        {
+            Toggle toggle = new Toggle();
+            toggle.text = _text;
+            toggle.tooltip = _fullName + ". The same choice as Preferences > Abstract Pixel > Scenes.";
+            toggle.AddToClassList("scene-picker__footer-toggle");
+            toggle.SetValueWithoutNotify(_value);
+            return toggle;
+        }
+
+        // The Tools menu or Preferences may change a preference while the picker is open.
+        private void OnPreferencesChanged()
+        {
+            if (groupToggle != null)
+            {
+                groupToggle.SetValueWithoutNotify(SceneOpeningPreferences.MainSceneWithGroup);
+            }
+            if (defaultSetToggle != null)
+            {
+                defaultSetToggle.SetValueWithoutNotify(SceneOpeningPreferences.NoGroupSceneWithDefaultSet);
+            }
         }
 
         private static void AddStyleSheet(VisualElement _root)
@@ -308,11 +424,24 @@ namespace AbstractPixel.SceneManagement.Editor
                 shownRows = ScenePickerSearch.Filter(allRows, query);
             }
             UpdatePlaceholder();
+            showNumbers = AnyRowHasANumber();
             listView.itemsSource = shownRows;
             listView.Rebuild();
             Highlight(IndexOfKey(previousKey));
             UpdateEmptyText();
             FitListHeight();
+        }
+
+        private bool AnyRowHasANumber()
+        {
+            foreach (ScenePickerRow row in shownRows)
+            {
+                if (row.Number > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // The list is as tall as its rows, between FewestVisibleRows and MostVisibleRows; the popup follows its content.
@@ -386,7 +515,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 return;
             }
-            view.Bind(shownRows[_index], searchWords);
+            view.Bind(shownRows[_index], searchWords, facts, showNumbers);
         }
 
         private void OnTabChanged()

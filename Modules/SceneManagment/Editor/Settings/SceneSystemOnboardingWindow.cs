@@ -40,14 +40,21 @@ namespace AbstractPixel.SceneManagement.Editor
             set { EditorUserSettings.SetConfigValue(TurnedOffKey, value ? "1" : null); }
         }
 
+        /// <summary>
+        /// Opens setup. Once the project is set up, it opens only the Opening Scenes step, with Done (session 5A2),
+        /// instead of stopping at "already set up".
+        /// </summary>
         [MenuItem(MenuPath)]
         public static void Open()
         {
             SceneSystemOnboardingWindow window = GetWindow<SceneSystemOnboardingWindow>(true, "Set up the scene system", true);
             window.minSize = new Vector2(460, 520);
             window.maxSize = new Vector2(690, 780);
+            window.Rebuild();
             window.Show();
         }
+
+        private bool isOpeningScenesOnly;
 
         private static void OpenIfNeeded()
         {
@@ -69,12 +76,24 @@ namespace AbstractPixel.SceneManagement.Editor
 
         public void CreateGUI()
         {
+            Rebuild();
+        }
+
+        // Built again on every Open, so a window left open from before setup shows the right steps.
+        private void Rebuild()
+        {
             VisualElement root = rootVisualElement;
+            root.Clear();
+            isOpeningScenesOnly = SceneSystemSettingsAssets.Find() != null;
             root.style.paddingLeft = 14;
             root.style.paddingRight = 14;
             root.style.paddingTop = 16;
             root.style.paddingBottom = 10;
-            root.Add(new SceneSystemSetupView(OnSetupDone));
+            root.Add(new SceneSystemSetupView(OnSetupDone, isOpeningScenesOnly));
+            if (isOpeningScenesOnly)
+            {
+                return;
+            }
 
             Toggle dontShow = new Toggle();
             dontShow.text = "Don't show again";
@@ -89,6 +108,10 @@ namespace AbstractPixel.SceneManagement.Editor
         private void OnSetupDone(SceneSystemSettings _settings)
         {
             Close();
+            if (isOpeningScenesOnly)
+            {
+                return;
+            }
             SceneSystemSettingsProvider.Open();
         }
     }

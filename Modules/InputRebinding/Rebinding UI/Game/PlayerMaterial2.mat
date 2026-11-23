@@ -8,11 +8,10 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PlayerMaterial2
-  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_Shader: {fileID: 4800000, guid: bba8fa45afa4fcf4f8308fa38d3cdfff, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _EMISSION
+  m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
@@ -79,6 +78,7 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.27999285, g: 0.49056602, b: 0.4855082, a: 1}
-    - _EmissionColor: {r: 0.27, g: 0.07830001, b: 0.19331999, a: 1}
+    - _Color: {r: 0.27999282, g: 0.49056596, b: 0.48550808, a: 1}
+    - _EmissionColor: {r: 0.26999995, g: 0.07829998, b: 0.19331995, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

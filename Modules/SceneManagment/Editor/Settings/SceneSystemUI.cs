@@ -18,6 +18,18 @@ namespace AbstractPixel.SceneManagement.Editor
         public static readonly Color Green = new Color(0.30f, 0.75f, 0.36f);
         public static readonly Color Yellow = new Color(0.96f, 0.74f, 0.19f);
         public static readonly Color Red = new Color(0.89f, 0.29f, 0.24f);
+
+        /// <summary>Unity's default label text colour in the current skin.</summary>
+        public static Color TextColour
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.769f, 0.769f, 0.769f) : new Color(0.035f, 0.035f, 0.035f); }
+        }
+
+        /// <summary>Unity's link blue, for a name that reacts to the pointer (a scene set's name on hover).</summary>
+        public static Color LinkBlue
+        {
+            get { return EditorGUIUtility.isProSkin ? new Color(0.30f, 0.49f, 1f) : new Color(0.10f, 0.33f, 0.80f); }
+        }
         private static readonly Color OverrideBlue = new Color(0.17f, 0.52f, 0.92f);
 
         public const string SceneGroupTooltip = "An asset that describes one place the player can be, such as a level or the main menu. Click a name to select it.";
@@ -479,6 +491,39 @@ namespace AbstractPixel.SceneManagement.Editor
             button.style.flexShrink = 0;
             box.Add(button);
             return box;
+        }
+
+        /// <summary>
+        /// A setup step's "Terminology" block (session 5A2): a small heading, then one grey line per word, the word in
+        /// bold italics followed by its plain definition from <see cref="SceneSystemTerms"/>. Empty when no words are given.
+        /// </summary>
+        public static VisualElement Terminology(params string[] _words)
+        {
+            VisualElement block = new VisualElement();
+            block.AddToClassList("scene-system-terminology");
+            if (_words == null || _words.Length == 0)
+            {
+                return block;
+            }
+            block.style.marginBottom = 12;
+            block.style.paddingLeft = 4;
+            Label heading = new Label("Terminology");
+            heading.style.fontSize = 11;
+            heading.style.unityFontStyleAndWeight = FontStyle.Bold;
+            heading.style.color = MutedText;
+            heading.style.marginBottom = 3;
+            block.Add(heading);
+            foreach (string word in _words)
+            {
+                Label line = new Label("<b><i>" + word + "</i></b>  " + SceneSystemTerms.Definition(word));
+                line.enableRichText = true;
+                line.style.whiteSpace = WhiteSpace.Normal;
+                line.style.color = MutedText;
+                line.style.fontSize = 11;
+                line.style.marginBottom = 2;
+                block.Add(line);
+            }
+            return block;
         }
 
         /// <summary>A wizard page's big centred title and one short line under it.</summary>

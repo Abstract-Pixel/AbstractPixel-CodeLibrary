@@ -16,7 +16,7 @@ _Avoid_: level scene, primary scene, active scene (when meaning the asset)
 
 **Scene set**:
 An asset that holds the default manager scenes, shared scenes and Reset shared scenes choice for the scene groups that use it. Many scene groups share one scene set, and Project Settings names the default one.
-_Avoid_: boot profile, boot group, boot scenes
+_Avoid_: boot profile, boot group, boot scenes, scene preset
 
 **Override**:
 A part of a scene group (its manager scenes, its shared scenes, or its Reset shared scenes choice) that keeps the group's own value instead of following its scene set. An override stays until the designer reverts it.
@@ -67,7 +67,7 @@ The dropdown on the Editor's main toolbar that finds any scene or scene group by
 _Avoid_: scene switcher, scene selector, level picker
 
 **Scene in no group**:
-A scene that is no scene group's main scene. Played from the Editor, it opens in a temporary scene group built from the default scene set.
+A scene that is no scene group's main scene and is in no scene set. Played from the Editor, it opens in a temporary scene group built from the default scene set. A manager or shared scene played on its own opens the start scene group instead.
 _Avoid_: random scene, loose scene, orphan scene
 
 ## Starting the game

@@ -4,8 +4,9 @@ using AbstractPixel.Core;
 namespace AbstractPixel.SceneManagement.Editor
 {
     /// <summary>
-    /// Which scenes "Open the group with its main scene" opens next to a scene opened on its own: what Play would
-    /// load from that scene, by the same rule start-up uses (<see cref="StartUpRule"/>).
+    /// Which scenes open next to a scene opened on its own in edit mode: what Play would load from that scene, by the
+    /// same rule start-up uses (<see cref="StartUpRule"/>), when the scene opening preference for that case is on
+    /// (<see cref="SceneOpeningPreferences"/>).
     /// <list type="bullet">
     /// <item>A group's main scene: its manager and shared scenes.</item>
     /// <item>A manager or shared scene: the start scene group's main, manager and shared scenes.</item>
@@ -13,11 +14,18 @@ namespace AbstractPixel.SceneManagement.Editor
     /// <item>A scene in no group: the default scene set's manager and shared scenes.</item>
     /// <item>The launch scene: nothing, because a build opens only the launch scene.</item>
     /// </list>
-    /// The opened scene itself is never in the list.
+    /// The opened scene itself is never in the list. "Open a main scene with its scene group" decides the first three
+    /// cases, "Open a scene in no group with the default scene set" the fourth; when it is off, nothing opens.
     /// </summary>
     public static class GroupScenesToOpen
     {
+        /// <summary>What opens with both preferences on.</summary>
         public static List<SceneReference> For(SceneSystemSettings _settings, SceneReference _openedScene)
+        {
+            return For(_settings, _openedScene, SceneOpeningChoices.BothOn);
+        }
+
+        public static List<SceneReference> For(SceneSystemSettings _settings, SceneReference _openedScene, SceneOpeningChoices _choices)
         {
             List<SceneReference> scenes = new List<SceneReference>();
             if (_settings == null || _openedScene == null)
@@ -25,8 +33,12 @@ namespace AbstractPixel.SceneManagement.Editor
                 return scenes;
             }
 
-            List<SceneReference> openScenes = new List<SceneReference> { _openedScene };
-            StartUpChoice choice = StartUpRule.Choose(_settings, openScenes);
+            StartUpChoice choice = ChooseFor(_settings, _openedScene);
+            SceneOpeningPreference preference = PreferenceFor(choice.Kind);
+            if (!_choices.Allows(preference))
+            {
+                return scenes;
+            }
             switch (choice.Kind)
             {
                 case StartUpChoiceKind.GroupOfOpenMainScene:
@@ -46,6 +58,39 @@ namespace AbstractPixel.SceneManagement.Editor
 
             RemoveScene(scenes, _openedScene);
             return scenes;
+        }
+
+        /// <summary>Which scene opening preference decides what opens next to this scene.</summary>
+        public static SceneOpeningPreference PreferenceFor(SceneSystemSettings _settings, SceneReference _openedScene)
+        {
+            if (_settings == null || _openedScene == null)
+            {
+                return SceneOpeningPreference.None;
+            }
+            StartUpChoice choice = ChooseFor(_settings, _openedScene);
+            return PreferenceFor(choice.Kind);
+        }
+
+        private static SceneOpeningPreference PreferenceFor(StartUpChoiceKind _kind)
+        {
+            switch (_kind)
+            {
+                case StartUpChoiceKind.GroupOfOpenMainScene:
+                case StartUpChoiceKind.StartSceneGroup:
+                case StartUpChoiceKind.SampleSceneGroupOfOpenScene:
+                    return SceneOpeningPreference.MainSceneWithGroup;
+                case StartUpChoiceKind.TemporaryGroup:
+                    return SceneOpeningPreference.NoGroupSceneWithDefaultSet;
+                default:
+                    return SceneOpeningPreference.None;
+            }
+        }
+
+        // The start-up rule for one scene opened on its own.
+        private static StartUpChoice ChooseFor(SceneSystemSettings _settings, SceneReference _openedScene)
+        {
+            List<SceneReference> openScenes = new List<SceneReference> { _openedScene };
+            return StartUpRule.Choose(_settings, openScenes);
         }
 
         private static void AddGroupScenes(List<SceneReference> _scenes, SceneGroup _group, bool _withMainScene)

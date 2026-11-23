@@ -35,7 +35,7 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
                 Scene("Sample 05 Shared", LibrarySamples + "Sample 05 Shared.unity")
             };
 
-            ScenePickerSetInfo levelSet = new ScenePickerSetInfo("Level");
+            ScenePickerSetInfo levelSet = new ScenePickerSetInfo("Level", "guid-Level");
             levelSet.SceneGuids.Add(GuidOf("ManagerBootScene"));
             levelSet.SceneGuids.Add(GuidOf("GameBootScene"));
             sets = new List<ScenePickerSetInfo> { levelSet };
@@ -66,6 +66,90 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             Assert.AreEqual(_expectedDetail, row.Detail);
         }
 
+        // scene -> label kind, label target GUID, label tooltip
+        [TestCase("Level 2", ScenePickerLabelKind.SceneGroup, "guid-Level 2Group", "Select Level 2Group")]
+        [TestCase("ManagerBootScene", ScenePickerLabelKind.SceneSet, "guid-Level", "Select Level")]
+        [TestCase("Sample 05 Shared", ScenePickerLabelKind.SceneGroup, "guid-Sample 05 Area AGroup", "Select Sample 05 Area AGroup")]
+        [TestCase("CarTest", ScenePickerLabelKind.None, "", "")]
+        public void ASceneLabelSelectsWhatItNames(string _scene, ScenePickerLabelKind _kind, string _guid, string _tooltip)
+        {
+            ScenePickerRow row = FindRow(ScenePickerRows.ForScenes(scenes, groups, sets), _scene);
+
+            Assert.AreEqual(_kind, row.LabelKind);
+            Assert.AreEqual(_guid, row.LabelGuid);
+            Assert.AreEqual(_tooltip, ScenePickerLabelRules.Tooltip(row));
+        }
+
+        [Test]
+        public void NoGroupIsPlainTextThatCannotBeClicked()
+        {
+            ScenePickerRow row = FindRow(ScenePickerRows.ForScenes(scenes, groups, sets), "CarTest");
+
+            Assert.AreEqual(ScenePickerRows.NoGroupText, row.Detail);
+            Assert.IsFalse(ScenePickerLabelRules.IsClickable(row));
+        }
+
+        [Test]
+        public void ASceneSharedBySeveralGroupsSelectsTheFirst()
+        {
+            groups[1].OtherSceneGuids.Add(GuidOf("CarTest"));
+            groups[0].OtherSceneGuids.Add(GuidOf("CarTest"));
+
+            ScenePickerRow row = FindRow(ScenePickerRows.ForScenes(scenes, groups, sets), "CarTest");
+
+            Assert.AreEqual("Shared by Level 10Group, Level 2Group", row.Detail);
+            Assert.AreEqual("guid-Level 10Group", row.LabelGuid);
+            Assert.AreEqual("guid-Level 10Group", row.GroupGuid, "its status and menu use the same group");
+            Assert.AreEqual("Shared by Level 10Group, Level 2Group\nSelect Level 10Group", ScenePickerLabelRules.Tooltip(row));
+        }
+
+        [Test]
+        public void AGroupLabelSelectsItsSceneSetAndAGroupWithNoSetHasPlainText()
+        {
+            groups[2].SceneSetName = string.Empty;
+            List<ScenePickerRow> rows = ScenePickerRows.ForGroups(groups);
+
+            ScenePickerRow level = FindRow(rows, "Level 2Group");
+            ScenePickerRow noSet = FindRow(rows, "MainMenuGroup");
+
+            Assert.AreEqual(ScenePickerLabelKind.SceneSet, level.LabelKind);
+            Assert.AreEqual("guid-Level", level.LabelGuid);
+            Assert.AreEqual(ScenePickerRows.NoSceneSetText, noSet.Detail);
+            Assert.IsFalse(ScenePickerLabelRules.IsClickable(noSet));
+        }
+
+        [Test]
+        public void GroupRowsShowTheDebuggerNumberAndSceneRowsShowNone()
+        {
+            groups[0].Number = 3;
+            groups[1].Number = 1;
+
+            List<ScenePickerRow> groupRows = ScenePickerRows.ForGroups(groups);
+            List<ScenePickerRow> sceneRows = ScenePickerRows.ForScenes(scenes, groups, sets);
+
+            Assert.AreEqual(3, FindRow(groupRows, "Level 10Group").Number);
+            Assert.AreEqual(1, FindRow(groupRows, "Level 2Group").Number);
+            Assert.AreEqual(0, FindRow(groupRows, "Sample 05 Area AGroup").Number, "a sample group is not in the Debugger");
+            Assert.IsTrue(sceneRows.TrueForAll(_row => _row.Number == 0));
+        }
+
+        [Test]
+        public void RecentRowsAreNumberedByRecencyAndTheFullListKeepsItsNumbers()
+        {
+            groups[0].Number = 3;
+            groups[1].Number = 1;
+            List<ScenePickerRow> rows = ScenePickerRows.ForGroups(groups);
+            List<string> recent = new List<string> { "guid-MainMenuGroup", "guid-Level 10Group" };
+
+            List<ScenePickerRow> withRecent = ScenePickerRecent.WithRecentFirst(rows, recent);
+
+            Assert.AreEqual("MainMenuGroup", withRecent[1].Title);
+            Assert.AreEqual(1, withRecent[1].Number, "1 is the last used");
+            Assert.AreEqual("Level 10Group", withRecent[2].Title);
+            Assert.AreEqual(2, withRecent[2].Number);
+            Assert.AreEqual(3, FindRow(rows, "Level 10Group").Number, "the full list still shows the Debugger number");
+        }
+
         [TestCase("InitTestScene637")]
         [TestCase("Package Scene")]
         [TestCase("Loading Scene")]
@@ -90,8 +174,8 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             List<ScenePickerRow> rows = ScenePickerRows.ForGroups(groups);
 
             Assert.AreEqual("BrokenGroup,Level 2Group,Level 10Group,MainMenuGroup,[Samples],Sample 05 Area AGroup", Titles(rows));
-            StringAssert.StartsWith("Level 2", FindRow(rows, "Level 2Group").Detail);
-            StringAssert.EndsWith("Level", FindRow(rows, "Level 2Group").Detail);
+            Assert.AreEqual("Level", FindRow(rows, "Level 2Group").Detail, "the label names the scene set");
+            Assert.AreEqual("Level 2", FindRow(rows, "Level 2Group").MainSceneName, "the main scene moves to the tooltip");
             Assert.IsTrue(FindRow(rows, "Level 2Group").CanOpen);
         }
 
@@ -101,7 +185,7 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             ScenePickerRow row = FindRow(ScenePickerRows.ForGroups(groups), "BrokenGroup");
 
             Assert.IsFalse(row.CanOpen);
-            StringAssert.StartsWith(ScenePickerRows.NoMainSceneText, row.Detail);
+            Assert.AreEqual(string.Empty, row.MainSceneName);
             Assert.IsFalse(string.IsNullOrEmpty(row.AssetGuid), "Select still finds the group asset");
         }
 
@@ -243,6 +327,7 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             ScenePickerGroupInfo group = new ScenePickerGroupInfo(_name, folder + _name + ".asset", "guid-" + _name);
             group.IsSample = _isSample;
             group.SceneSetName = _setName;
+            group.SceneSetGuid = _setName.Length > 0 ? "guid-" + _setName : string.Empty;
             if (_mainScene.Length > 0)
             {
                 group.MainSceneName = _mainScene;

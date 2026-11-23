@@ -19,6 +19,19 @@ namespace AbstractPixel.SceneManagement.Editor
 
         /// <summary>Empty when the group follows no scene set.</summary>
         public string SceneSetName = string.Empty;
+        public string SceneSetGuid = string.Empty;
+
+        /// <summary>The group's number in the Scene System page's list (the Scene Groups Debugger); 0 for a sample group.</summary>
+        public int Number;
+
+        /// <summary>The group check's result (game groups only): how many problems, the first one's message, and
+        /// whether one is fixed by Make Addressable.</summary>
+        public int ProblemCount;
+        public string FirstProblem = string.Empty;
+        public bool HasMakeAddressableProblem;
+
+        /// <summary>A boot group from before scene sets (SceneGroupCheck.IsBootGroup): no place, no problem.</summary>
+        public bool IsBootGroup;
 
         /// <summary>The GUIDs of the group's manager and shared scenes.</summary>
         public List<string> OtherSceneGuids = new List<string>();
