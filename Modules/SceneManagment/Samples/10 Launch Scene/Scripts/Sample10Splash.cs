@@ -25,8 +25,8 @@ namespace AbstractPixel.SceneManagement.Samples
         [SerializeField] private AudioListener splashListener;
         [SerializeField] private SampleLabel label;
 
-        /// <summary>Whether the launch scene hold was on when the splash woke (it is set before any Awake).</summary>
-        public static bool WasHeldAtAwake { get; private set; }
+        /// <summary>Whether the launch scene hold was on at the splash's first frame.</summary>
+        public static bool WasHeldAtStart { get; private set; }
 
         /// <summary>How many times the splash handed over this Play (1 expected).</summary>
         public static int HandOverCount { get; private set; }
@@ -35,7 +35,7 @@ namespace AbstractPixel.SceneManagement.Samples
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetRecord()
         {
-            WasHeldAtAwake = false;
+            WasHeldAtStart = false;
             HandOverCount = 0;
         }
 
@@ -49,9 +49,13 @@ namespace AbstractPixel.SceneManagement.Samples
         private LaunchSceneTimelineClock clock;
 #endif
 
+        private void Start()
+        {
+            WasHeldAtStart = SceneActions.IsLaunchSceneHeld;
+        }
+
         private void Awake()
         {
-            WasHeldAtAwake = SceneActions.IsLaunchSceneHeld;
             // The Menu's RenderSettings would light the splash once its scene is active: keep them dark until the hand-off.
             renderSettingsGuard.BeginGuarding();
             LaunchSceneStartUpLog.Milestone("Sample 10 splash awake");
