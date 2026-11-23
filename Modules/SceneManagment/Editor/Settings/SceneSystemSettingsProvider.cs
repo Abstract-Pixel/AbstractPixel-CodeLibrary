@@ -39,6 +39,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private static VisualElement samplesCard;
         private static bool refreshQueued;
         private static string pendingSection;
+        private static string pendingGroupGuid;
         private static int scrollAttempts;
         private static string moveError;
         private static string settingsError;
@@ -78,10 +79,25 @@ namespace AbstractPixel.SceneManagement.Editor
             OpenAt(DebuggerSection);
         }
 
+        /// <summary>
+        /// Opens the Scene System page at the Scene Groups Debugger, scrolled to this group's row, which is highlighted
+        /// for a moment. Works when the page is not open or not laid out yet: the scroll waits for the layout.
+        /// </summary>
+        public static void OpenAtGroup(string _groupGuid)
+        {
+            OpenAt(DebuggerSection, _groupGuid);
+        }
+
         /// <summary>Opens the Scene System page scrolled to the section with this title (the top when null).</summary>
         public static void OpenAt(string _section)
         {
+            OpenAt(_section, null);
+        }
+
+        private static void OpenAt(string _section, string _groupGuid)
+        {
             pendingSection = _section;
+            pendingGroupGuid = _groupGuid;
             scrollAttempts = 0;
             bool wasOpen = pageRoot != null;
             SettingsService.OpenProjectSettings(PagePath);
@@ -225,7 +241,13 @@ namespace AbstractPixel.SceneManagement.Editor
             if (!sections.TryGetValue(section, out VisualElement target))
             {
                 pendingSection = null;
+                pendingGroupGuid = null;
                 return;
+            }
+            VisualElement groupBlock = SceneGroupsDebugger.FindGroupBlock(debuggerCard, pendingGroupGuid);
+            if (groupBlock != null)
+            {
+                target = groupBlock;
             }
             // Not laid out yet: try again shortly, a few times at most.
             bool laidOut = target.layout.height > 0 && !float.IsNaN(target.worldBound.yMin);
@@ -236,8 +258,24 @@ namespace AbstractPixel.SceneManagement.Editor
                 return;
             }
             pendingSection = null;
+            pendingGroupGuid = null;
             float top = target.worldBound.yMin - pageScroll.contentContainer.worldBound.yMin;
             pageScroll.scrollOffset = new Vector2(0, Mathf.Max(0, top - 6));
+            if (groupBlock != null)
+            {
+                FlashRow(groupBlock);
+            }
+        }
+
+        private const long FlashMilliseconds = 1400;
+
+        // The row the scene picker asked for is highlighted for a moment, in the Editor's selection colour.
+        private static void FlashRow(VisualElement _block)
+        {
+            StyleColor before = _block.style.backgroundColor;
+            Color highlight = EditorGUIUtility.isProSkin ? new Color(0.17f, 0.36f, 0.53f, 0.55f) : new Color(0.23f, 0.45f, 0.69f, 0.35f);
+            _block.style.backgroundColor = highlight;
+            _block.schedule.Execute(() => _block.style.backgroundColor = before).ExecuteLater(FlashMilliseconds);
         }
 
         private static void FillSetup(SceneSystemSettings _settings)

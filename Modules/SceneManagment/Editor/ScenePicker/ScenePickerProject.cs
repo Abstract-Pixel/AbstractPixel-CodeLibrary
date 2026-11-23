@@ -21,6 +21,11 @@ namespace AbstractPixel.SceneManagement.Editor
         private static List<ScenePickerSceneInfo> scenes;
         private static List<ScenePickerGroupInfo> groups;
         private static List<ScenePickerSetInfo> sets;
+        private static readonly Dictionary<string, SceneGroup> groupAssets = new Dictionary<string, SceneGroup>();
+        private static bool groupChecksAreCurrent;
+
+        /// <summary>How long the last group check of every scene group took, in milliseconds (shown by probes).</summary>
+        public static double LastGroupCheckMilliseconds { get; private set; }
 
         /// <summary>Raised after the cached project data is dropped, so open views can read it again.</summary>
         public static event System.Action Changed;
@@ -38,6 +43,7 @@ namespace AbstractPixel.SceneManagement.Editor
             scenes = null;
             groups = null;
             sets = null;
+            groupChecksAreCurrent = false;
             Changed?.Invoke();
         }
 
@@ -48,7 +54,87 @@ namespace AbstractPixel.SceneManagement.Editor
 
         public static List<ScenePickerRow> GroupRows()
         {
-            return ScenePickerRows.ForGroups(Groups());
+            List<ScenePickerGroupInfo> current = Groups();
+            RunGroupChecksOnce(current);
+            return ScenePickerRows.ForGroups(current);
+        }
+
+        /// <summary>Called when the picker opens: the group check runs again once, the first time the Scene Groups tab needs it.</summary>
+        public static void BeginPicking()
+        {
+            groupChecksAreCurrent = false;
+        }
+
+        /// <summary>The project settings a status click depends on, read now.</summary>
+        public static ScenePickerProjectFacts Facts()
+        {
+            ScenePickerProjectFacts facts = new ScenePickerProjectFacts();
+            SceneSystemSettings settings = SceneSystemSettingsAssets.Find();
+            facts.NewScenesGoToAddressables = settings != null && settings.NewScenesAreAddressable && AddressableScenes.IsInstalled;
+            facts.AddressablesSetupProblem = AddressablesSetup.Problem();
+            UnityEditor.Build.Profile.BuildProfile profile = UnityEditor.Build.Profile.BuildProfile.GetActiveBuildProfile();
+            if (profile != null && profile.overrideGlobalScenes)
+            {
+                facts.SceneListProfileName = profile.name;
+            }
+            return facts;
+        }
+
+        /// <summary>The scene group or scene set asset with this GUID, for a label or status click; null when it is gone.</summary>
+        public static UnityEngine.Object LoadByGuid(string _guid)
+        {
+            if (string.IsNullOrEmpty(_guid))
+            {
+                return null;
+            }
+            string path = AssetDatabase.GUIDToAssetPath(_guid);
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+            return AssetDatabase.LoadMainAssetAtPath(path);
+        }
+
+        // The group check (SceneGroupCheck) of every game scene group, once per popup open and project change.
+        private static void RunGroupChecksOnce(List<ScenePickerGroupInfo> _groups)
+        {
+            if (groupChecksAreCurrent || FakeGroups != null)
+            {
+                return;
+            }
+            groupChecksAreCurrent = true;
+            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+            foreach (ScenePickerGroupInfo info in _groups)
+            {
+                ApplyGroupCheck(info);
+            }
+            watch.Stop();
+            LastGroupCheckMilliseconds = watch.Elapsed.TotalMilliseconds;
+        }
+
+        private static void ApplyGroupCheck(ScenePickerGroupInfo _info)
+        {
+            _info.ProblemCount = 0;
+            _info.FirstProblem = string.Empty;
+            _info.HasMakeAddressableProblem = false;
+            SceneGroup group;
+            if (_info.IsSample || !groupAssets.TryGetValue(_info.Guid, out group) || group == null)
+            {
+                return;
+            }
+            List<SceneGroupProblem> problems = SceneGroupCheck.Find(group);
+            _info.ProblemCount = problems.Count;
+            if (problems.Count > 0)
+            {
+                _info.FirstProblem = problems[0].Message;
+            }
+            foreach (SceneGroupProblem problem in problems)
+            {
+                if (problem.Fix == SceneGroupProblemFix.MakeAddressable)
+                {
+                    _info.HasMakeAddressableProblem = true;
+                }
+            }
         }
 
         /// <summary>The toolbar button's label: the open group's name, or the active scene's name with "(no group)".</summary>
@@ -146,9 +232,17 @@ namespace AbstractPixel.SceneManagement.Editor
                 return groups;
             }
             groups = new List<ScenePickerGroupInfo>();
+            groupAssets.Clear();
+            groupChecksAreCurrent = false;
+            List<SceneGroup> listed = SceneGroupsDebugger.ListedGroups();
             foreach (SceneGroup group in SceneGroupAssets.FindAll())
             {
-                groups.Add(GroupInfo(group));
+                ScenePickerGroupInfo info = GroupInfo(group);
+                // The same number the Scene Groups Debugger shows; sample scene groups are not in that list.
+                int place = listed.IndexOf(group);
+                info.Number = place >= 0 ? place + 1 : 0;
+                groups.Add(info);
+                groupAssets[info.Guid] = group;
             }
             return groups;
         }
@@ -158,9 +252,11 @@ namespace AbstractPixel.SceneManagement.Editor
             string path = AssetDatabase.GetAssetPath(_group);
             ScenePickerGroupInfo info = new ScenePickerGroupInfo(_group.name, path, AssetDatabase.AssetPathToGUID(path));
             info.IsSample = _group.IsSample;
+            info.IsBootGroup = SceneGroupCheck.IsBootGroup(_group);
             if (_group.SceneSet != null)
             {
                 info.SceneSetName = _group.SceneSet.name;
+                info.SceneSetGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(_group.SceneSet));
             }
 
             SceneStatusReport main = ReadScene(_group.MainScene);
@@ -190,7 +286,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 {
                     continue;
                 }
-                ScenePickerSetInfo info = new ScenePickerSetInfo(set.name);
+                ScenePickerSetInfo info = new ScenePickerSetInfo(set.name, guid);
                 AddSceneGuids(info.SceneGuids, set.ManagerScenes);
                 AddSceneGuids(info.SceneGuids, set.SharedScenes);
                 sets.Add(info);

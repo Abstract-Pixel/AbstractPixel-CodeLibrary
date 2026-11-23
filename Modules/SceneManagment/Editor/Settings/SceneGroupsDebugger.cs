@@ -44,6 +44,78 @@ namespace AbstractPixel.SceneManagement.Editor
         private const float ButtonWidth = 92;
         private const float ProblemsIndent = IndexWidth + ColumnGap;
 
+        /// <summary>
+        /// The scene groups this list shows, in its order: every game scene group (sample scene groups have their own
+        /// section on the page). A group's number is its place here plus one; the scene picker shows the same number.
+        /// </summary>
+        public static List<SceneGroup> ListedGroups()
+        {
+            List<SceneGroup> groups = SceneGroupAssets.FindAll();
+            groups.RemoveAll(_group => _group == null || _group.IsSample);
+            return groups;
+        }
+
+        /// <summary>
+        /// The group's main scene asset for the main scene field. A scene reference whose asset link did not load (found
+        /// in Rally Shift on 2026-11-23: the level groups' links were empty in memory although their files hold them)
+        /// is found again by its GUID, then its path, as the group check and start-up find it.
+        /// </summary>
+        public static SceneAsset MainSceneAssetOf(SceneGroup _group)
+        {
+            if (_group == null || _group.MainScene == null)
+            {
+                return null;
+            }
+            SceneAsset linked = _group.MainScene.SceneFieldReference.SceneAssetInEditor;
+            if (linked != null)
+            {
+                return linked;
+            }
+            SceneAsset byGuid = LoadSceneByGuid(_group.MainScene.SceneGuid);
+            if (byGuid != null)
+            {
+                return byGuid;
+            }
+            string path = _group.MainScene.ScenePath;
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+            return AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
+        }
+
+        private static SceneAsset LoadSceneByGuid(string _guid)
+        {
+            if (string.IsNullOrEmpty(_guid))
+            {
+                return null;
+            }
+            string path = AssetDatabase.GUIDToAssetPath(_guid);
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+            return AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
+        }
+
+        /// <summary>The block (row and its problems) of the group with this asset GUID in a filled card, or null.</summary>
+        public static VisualElement FindGroupBlock(VisualElement _card, string _groupGuid)
+        {
+            if (_card == null || string.IsNullOrEmpty(_groupGuid))
+            {
+                return null;
+            }
+            foreach (VisualElement child in _card.Children())
+            {
+                bool isThatGroup = child.name == BlockName && (child.userData as string) == _groupGuid;
+                if (isThatGroup)
+                {
+                    return child;
+                }
+            }
+            return null;
+        }
+
         /// <summary>Fills the section's card and the summary next to its title ("16 groups, 0 problems").</summary>
         public static void Fill(VisualElement _card, VisualElement _summary, SceneSystemSettings _settings, Action _requestRefresh)
         {
@@ -56,9 +128,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 _card.Add(BeforeBuildToggle(_settings));
             }
-            List<SceneGroup> groups = SceneGroupAssets.FindAll();
-            // Sample scene groups have their own section on the page.
-            groups.RemoveAll(_group => _group.IsSample);
+            List<SceneGroup> groups = ListedGroups();
             SceneGroupMigrationPlan plan = SceneGroupMigration.Plan(groups);
             if (_settings != null && plan.HasWork)
             {
@@ -210,6 +280,8 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             VisualElement block = new VisualElement();
             block.name = BlockName;
+            // The scene picker scrolls to a group's row by its GUID.
+            block.userData = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(_group));
             block.style.marginTop = 1;
             block.style.marginBottom = 1;
 
@@ -259,11 +331,10 @@ namespace AbstractPixel.SceneManagement.Editor
         // A small object field with the main scene (its path in the tooltip) that takes a new scene by drag or picker.
         private static VisualElement MainSceneField(SceneGroup _group, Action _requestRefresh)
         {
-            SceneAsset current = null;
+            SceneAsset current = MainSceneAssetOf(_group);
             string path = string.Empty;
             if (_group.MainScene != null)
             {
-                current = _group.MainScene.SceneFieldReference.SceneAssetInEditor;
                 path = _group.MainScene.ScenePath;
             }
 
