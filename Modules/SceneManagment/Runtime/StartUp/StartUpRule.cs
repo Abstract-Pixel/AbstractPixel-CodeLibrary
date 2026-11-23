@@ -148,6 +148,20 @@ namespace AbstractPixel.SceneManagement
             return isPlayerLoadingIt;
         }
 
+        /// <summary>
+        /// True in the Editor for a listed scene that is not loaded yet at BeforeSceneLoad. Unity 6.3 lists the scene Play
+        /// opens as loaded there; Unity 7 lists it as not loaded yet. Such a scene may still open, so the launch scene
+        /// hold is decided again after the first scenes load.
+        /// </summary>
+        public static bool MayStillBeOpening(bool _isValid, bool _isLoaded, bool _isEditor)
+        {
+            if (_isValid == false || _isEditor == false)
+            {
+                return false;
+            }
+            return _isLoaded == false;
+        }
+
         private static StartUpChoice ChooseStartSceneGroup(SceneSystemSettings _settings, StartUpChoiceKind _kind, SceneReference _reasonScene)
         {
             StartUpChoice choice = new StartUpChoice();

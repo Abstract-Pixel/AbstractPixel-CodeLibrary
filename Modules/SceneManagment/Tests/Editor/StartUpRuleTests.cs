@@ -224,6 +224,17 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.IsTrue(holds);
         }
 
+        // Scene system S, Lab: on Unity 7 the Editor lists the scene Play opens as not loaded yet at BeforeSceneLoad, so
+        // the hold must be decided again after the first scenes load instead of being given up.
+        [TestCase(true, false, true, true)]
+        [TestCase(true, true, true, false)]
+        [TestCase(true, false, false, false)]
+        [TestCase(false, false, true, false)]
+        public void AListedSceneNotLoadedYetInTheEditorDefersTheHoldDecision(bool _isValid, bool _isLoaded, bool _isEditor, bool _expected)
+        {
+            Assert.AreEqual(_expected, StartUpRule.MayStillBeOpening(_isValid, _isLoaded, _isEditor));
+        }
+
         [Test]
         public void NoOpenSceneDoesNothing()
         {

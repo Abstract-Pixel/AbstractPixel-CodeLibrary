@@ -65,13 +65,15 @@ namespace AbstractPixel.SceneManagement
                 return;
             }
 
-            decidedLaunchSceneHold = true;
             List<SceneReference> openingScenes = ScenesUnityIsOpening();
             bool shouldHold = StartUpRule.ShouldHoldLaunchScene(settings, openingScenes);
             if (shouldHold == false)
             {
+                // Unity 7 lists the scene Play opens as not loaded yet at BeforeSceneLoad: decide again after it loads.
+                decidedLaunchSceneHold = AnySceneMayStillBeOpening() == false;
                 return;
             }
+            decidedLaunchSceneHold = true;
 
             LaunchSceneHold.Hold();
             Debug.Log("[Scene system] Start-up: the launch scene '" + HeldLaunchSceneName(settings, openingScenes) + "' holds the start scene group until it calls SceneActions.ReleaseLaunchScene().");
@@ -189,6 +191,21 @@ namespace AbstractPixel.SceneManagement
                 }
             }
             return scenes;
+        }
+
+        // True when a listed scene is not loaded yet in the Editor, so it may still be one that Play opens.
+        private static bool AnySceneMayStillBeOpening()
+        {
+            bool isEditor = Application.isEditor;
+            for (int index = 0; index < SceneManager.sceneCount; index++)
+            {
+                Scene scene = SceneManager.GetSceneAt(index);
+                if (StartUpRule.MayStillBeOpening(scene.IsValid(), scene.isLoaded, isEditor))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static SceneReference ToReference(Scene _scene)

@@ -52,7 +52,7 @@ namespace AbstractPixel.SceneManagement.Samples.Tests
                 yield return null;
             }
             yield return null;
-            bool wasHeld = ReadSplashFlag("WasHeldAtAwake");
+            bool wasHeld = ReadSplashFlag("WasHeldAtStart");
             int handOvers = ReadSplashCount("HandOverCount");
             int introRuns = Sample10IntroRuns();
             bool stillHeld = SceneActions.IsLaunchSceneHeld;
