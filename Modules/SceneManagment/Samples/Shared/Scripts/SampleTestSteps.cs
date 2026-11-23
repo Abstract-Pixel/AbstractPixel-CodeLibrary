@@ -53,7 +53,7 @@ namespace AbstractPixel.SceneManagement.Samples
         /// </summary>
         public static void KeepTestRunnerAlive()
         {
-            GameObject runner = GameObject.Find(TestRunnerObjectName);
+            GameObject runner = FindTestRunner();
             if (runner == null || runner.transform.parent != null)
             {
                 return;
@@ -61,7 +61,25 @@ namespace AbstractPixel.SceneManagement.Samples
             Object.DontDestroyOnLoad(runner);
         }
 
-        private const string TestRunnerObjectName = "Code-based tests runner";
+        private const string TestRunnerTypeName = "PlaymodeTestsController";
+
+        // Found by its component, which Unity 6.3 and 7.0 share; GameObject.Find does not see it on 7.0.
+        private static GameObject FindTestRunner()
+        {
+            foreach (MonoBehaviour behaviour in Resources.FindObjectsOfTypeAll<MonoBehaviour>())
+            {
+                if (behaviour == null || behaviour.GetType().Name != TestRunnerTypeName)
+                {
+                    continue;
+                }
+                bool isInAScene = behaviour.gameObject.scene.IsValid();
+                if (isInAScene)
+                {
+                    return behaviour.gameObject;
+                }
+            }
+            return null;
+        }
 
         /// <summary>Waits for a scene change task, or until the timeout.</summary>
         public static IEnumerator WaitFor(Task<SceneChangeResult> _change, SampleStepResult _result)
