@@ -80,7 +80,12 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             SceneDocsMember member = new SceneDocsMember("property", _property.Name);
             member.TypeText = FriendlyName(_property.PropertyType);
+            // A property with a hidden getter and no setter still needs an accessor to read its modifiers from.
             MethodInfo widest = Visible(_property.GetMethod) ? _property.GetMethod : _property.SetMethod;
+            if (widest == null)
+            {
+                widest = _property.GetMethod;
+            }
             member.Modifiers.AddRange(MethodModifiers(widest));
             member.Accessors = Accessor("get", _property.GetMethod, widest) + Accessor("set", _property.SetMethod, widest);
             return member;
