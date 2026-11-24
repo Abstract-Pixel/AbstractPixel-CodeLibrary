@@ -196,7 +196,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             return AssetDatabase.LoadAssetAtPath<SceneGroup>(paths[0]);
         }
 
-        private static string SelectAsset(string _assetPath, bool _pingOnly)
+        public static string SelectAsset(string _assetPath, bool _pingOnly)
         {
             Object asset = AssetDatabase.LoadMainAssetAtPath(_assetPath);
             if (asset == null)
