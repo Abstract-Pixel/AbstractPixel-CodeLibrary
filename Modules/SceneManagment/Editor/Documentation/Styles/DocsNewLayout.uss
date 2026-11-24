@@ -1306,3 +1306,47 @@
 .docs-status-demo-meaning {
     margin-top: 2px;
 }
+
+/* ---- Code block header: its own darker band with a clear line under it, a C# badge, and flat actions that belong
+   to the block instead of Unity buttons. ---- */
+.docs-layout-new .docs-code-header {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(78, 78, 78);
+    background-color: rgba(0, 0, 0, 0.32);
+}
+
+.docs-code-language {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    background-color: rgb(104, 33, 122);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin: 0 8px 0 0;
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 3px;
+    margin: 0 0 0 4px;
+    padding: 2px 8px;
+    align-self: center;
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action .docs-chip-label,
+.docs-layout-new .docs-code-header > .docs-code-action .docs-glyph {
+    color: rgb(170, 170, 170);
+    font-size: 12px;
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action:hover {
+    background-color: rgba(255, 255, 255, 0.09);
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-chip-label,
+.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-glyph {
+    color: rgb(235, 235, 235);
+}
