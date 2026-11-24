@@ -46,8 +46,3 @@ public void OnContinuePressed()
 ```
 
 <!-- members AbstractPixel.SceneManagement.MonoSceneActions -->
-
-## See also
-
-- [Change scene](../guide/change-scene.md)
-- [Find a problem](../reference/find-a-problem.md)

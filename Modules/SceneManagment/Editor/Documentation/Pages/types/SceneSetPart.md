@@ -35,8 +35,3 @@ if (ownShared)
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneSetPart -->
-
-## See also
-
-- [Scene groups and scene sets](../guide/scene-groups-and-scene-sets.md)
-- [Find a problem](../reference/find-a-problem.md)

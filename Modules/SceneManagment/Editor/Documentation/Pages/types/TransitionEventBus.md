@@ -37,8 +37,3 @@ TransitionEventBus.OnScreenStateChanged += OnScreenStateChanged;
 ```
 
 <!-- members AbstractPixel.SceneTransitions.TransitionEventBus -->
-
-## See also
-
-- [Screen and transitions](../guide/screen-and-transitions.md)
-- [Find a problem](../reference/find-a-problem.md)

@@ -44,8 +44,3 @@ await loader.ReleaseUnusedMemory();
 ```
 
 <!-- members AbstractPixel.SceneManagement.ISceneLoader -->
-
-## See also
-
-- [Build settings and addressables](../guide/build-settings-and-addressables.md)
-- [Find a problem](../reference/find-a-problem.md)

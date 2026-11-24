@@ -30,8 +30,3 @@ Quaternion rotation = position.SafeLocalRotation;
 ```
 
 <!-- members AbstractPixel.SceneManagement.SpawnPointPosition -->
-
-## See also
-
-- [Relocation](../guide/relocation.md)
-- [Find a problem](../reference/find-a-problem.md)

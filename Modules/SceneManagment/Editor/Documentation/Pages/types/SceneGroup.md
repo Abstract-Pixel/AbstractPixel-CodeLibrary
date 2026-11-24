@@ -66,8 +66,3 @@ Each example is closed; open the one you need.
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneGroup -->
-
-## See also
-
-- [Scene groups and scene sets](../guide/scene-groups-and-scene-sets.md)
-- [Find a problem](../reference/find-a-problem.md)

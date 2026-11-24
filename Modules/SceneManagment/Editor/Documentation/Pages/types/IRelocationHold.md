@@ -36,8 +36,3 @@ public class EngineHold : MonoBehaviour, IRelocationHold
 ```
 
 <!-- members AbstractPixel.SceneManagement.IRelocationHold -->
-
-## See also
-
-- [Relocation](../guide/relocation.md)
-- [Find a problem](../reference/find-a-problem.md)

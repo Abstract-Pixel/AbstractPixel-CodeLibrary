@@ -33,8 +33,3 @@ LaunchSceneStartUpLog.Milestone("Sample 10 splash awake");
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneScreens.LaunchSceneStartUpLog -->
-
-## See also
-
-- [Start up](../guide/start-up.md)
-- [Find a problem](../reference/find-a-problem.md)

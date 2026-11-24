@@ -38,8 +38,3 @@ ShowResults("Change to " + otherGroupName + ": " + result);
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneChangeResult -->
-
-## See also
-
-- [Change scene](../guide/change-scene.md)
-- [Find a problem](../reference/find-a-problem.md)

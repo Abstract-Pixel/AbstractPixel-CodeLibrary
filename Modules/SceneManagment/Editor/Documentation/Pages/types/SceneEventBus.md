@@ -41,8 +41,3 @@ SceneEventBus.OnPreloadedSceneGroupActivated += OnActivated;
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneEventBus -->
-
-## See also
-
-- [Scene messages](../guide/scene-messages.md)
-- [Find a problem](../reference/find-a-problem.md)

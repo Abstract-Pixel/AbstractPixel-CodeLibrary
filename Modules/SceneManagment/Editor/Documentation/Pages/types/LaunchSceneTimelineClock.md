@@ -41,8 +41,3 @@ clock.Tick();
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneScreens.LaunchSceneTimelineClock -->
-
-## See also
-
-- [Start up](../guide/start-up.md)
-- [Find a problem](../reference/find-a-problem.md)

@@ -58,8 +58,3 @@ private void Awake()
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneScreens.LoadingProgressView -->
-
-## See also
-
-- [Loading scene](../guide/loading-scene.md)
-- [Find a problem](../reference/find-a-problem.md)

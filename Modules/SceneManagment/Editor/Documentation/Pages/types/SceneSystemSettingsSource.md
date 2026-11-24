@@ -34,8 +34,3 @@ SceneSystemSettings settings = SceneSystemSettingsSource.Find();
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneSystemSettingsSource -->
-
-## See also
-
-- [Start up](../guide/start-up.md)
-- [Find a problem](../reference/find-a-problem.md)

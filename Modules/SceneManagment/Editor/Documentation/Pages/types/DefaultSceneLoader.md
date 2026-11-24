@@ -41,8 +41,3 @@ float progress = loader.GetLoadProgress(levelScene);
 ```
 
 <!-- members AbstractPixel.SceneManagement.DefaultSceneLoader -->
-
-## See also
-
-- [Build settings and addressables](../guide/build-settings-and-addressables.md)
-- [Find a problem](../reference/find-a-problem.md)

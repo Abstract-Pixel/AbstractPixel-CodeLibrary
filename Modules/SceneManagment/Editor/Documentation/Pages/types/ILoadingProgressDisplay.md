@@ -32,8 +32,3 @@ public class Sample06BarDisplay : MonoBehaviour, ILoadingProgressDisplay
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneScreens.ILoadingProgressDisplay -->
-
-## See also
-
-- [Loading scene](../guide/loading-scene.md)
-- [Find a problem](../reference/find-a-problem.md)

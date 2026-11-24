@@ -47,8 +47,3 @@ private void AddOneMore()
 ```
 
 <!-- members AbstractPixel.SceneManagement.SpawnPoint -->
-
-## See also
-
-- [Relocation](../guide/relocation.md)
-- [Find a problem](../reference/find-a-problem.md)
