@@ -75,15 +75,13 @@ namespace AbstractPixel.SceneManagement.Documentation
             bool leavesCodeOut = code.Contains("// ...");
             if (!leavesCodeOut)
             {
-                Button copy = DocsChip.Create(DocsIcons.GlyphCopy, "Copy", "Copies this code to the clipboard", () => EditorGUIUtility.systemCopyBuffer = code);
-                copy.AddToClassList("docs-code-action");
+                Button copy = DocsCodeIcons.Action(DocsCodeIcons.Copy(), "Copy", "Copies this code to the clipboard", () => EditorGUIUtility.systemCopyBuffer = code);
                 header.Add(copy);
             }
             if (!string.IsNullOrEmpty(_assetPath))
             {
                 int line = FirstLineInFile(_assetPath, code);
-                Button open = DocsChip.Create(DocsIcons.GlyphOpen, "Open in IDE", "Opens " + title + " at line " + line + " in your code editor", () => OpenAt(_assetPath, line));
-                open.AddToClassList("docs-code-action");
+                Button open = DocsCodeIcons.Action(DocsCodeIcons.OpenInIde(), "Open in IDE", "Opens " + title + " at line " + line + " in your code editor", () => OpenAt(_assetPath, line));
                 header.Add(open);
             }
             return header;
