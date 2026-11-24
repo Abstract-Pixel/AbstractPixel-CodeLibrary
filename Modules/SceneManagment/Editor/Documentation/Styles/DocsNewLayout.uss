@@ -1196,7 +1196,7 @@
 .docs-type-separator {
     height: 3px;
     margin: 18px 0 6px 0;
-    background-color: var(--unity-colors-inspector_titlebar-border);
+    background-color: rgb(235, 235, 235);
     border-radius: 2px;
 }
 
