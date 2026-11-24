@@ -19,7 +19,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 label.AddToClassList(_className);
             }
-            DocsLinkEvents.Register(label, _target => host.OpenLink(_target, pagePath), host.TooltipFor);
+            DocsLinkEvents.Register(label, _target => host.OpenLink(_target, pagePath), _target => host.LinkTooltip(_target, pagePath));
             return label;
         }
     }

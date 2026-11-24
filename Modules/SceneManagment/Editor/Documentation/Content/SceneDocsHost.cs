@@ -100,6 +100,48 @@ namespace AbstractPixel.SceneManagement.Documentation
             return termTopics;
         }
 
+        public string LinkTooltip(string _target, string _fromPagePath)
+        {
+            string what = TooltipFor(_target);
+            string topic = TopicOfTarget(_target, _fromPagePath);
+            if (topic == null)
+            {
+                return what ?? "";
+            }
+            string where = topic.StartsWith("http") ? "Opens " + topic + " in your browser." : "Opens " + PageTitleOf(topic) + " in the docs.";
+            // A type link names the type page and the member by their real names.
+            if (_target.StartsWith(SceneDocsTypeIndex.Scheme))
+            {
+                string typeName;
+                string memberName;
+                SceneDocsTypeIndex.Split(_target, out typeName, out memberName);
+                where = memberName.Length > 0 ? "Opens the " + typeName + " page, at " + memberName + "." : "Opens the " + typeName + " page.";
+            }
+            return string.IsNullOrEmpty(what) ? where : what + "\n" + where;
+        }
+
+        // "guide/change-scene#read-the-result" becomes "Change scene"; a page not in the contents keeps its topic.
+        private static string PageTitleOf(string _topic)
+        {
+            string page = _topic;
+            int hash = page.IndexOf('#');
+            string section = hash >= 0 ? page.Substring(hash + 1) : "";
+            if (hash >= 0)
+            {
+                page = page.Substring(0, hash);
+            }
+            string title = page;
+            foreach (SceneDocsContentsEntry entry in SceneDocsContents.Flatten())
+            {
+                if (entry.Topic == page)
+                {
+                    title = entry.Title;
+                    break;
+                }
+            }
+            return section.Length > 0 ? title + ", at " + section.Replace('-', ' ') : title;
+        }
+
         public string TooltipFor(string _target)
         {
             if (_target != null && _target.StartsWith("term:"))
