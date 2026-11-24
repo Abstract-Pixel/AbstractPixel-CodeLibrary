@@ -20,7 +20,7 @@ Setup makes the [scene system settings](term:scene-system-settings) asset, a def
 > The All set page, then the [Scene System page](term:scene-system-page) with the settings asset in its Setup section.
 
 ![The setup window at its Scene Sets step](../../Images/scene-system-setup.png)
-<!-- marks 1@0.5,0.242 "The step and its question"; 2@0.13,0.32 "Terminology: the new words"; 3@0.5,0.53 "Your answer"; 4@0.5,0.932 "Step 6 of 7"; 5@0.87,0.968 "Next" -->
+<!-- marks 1@0.5,0.242 "Step: the question this step asks, here whether to set up scene sets now"; 2@0.13,0.32 "Terminology: the new words this step brings in, each with a one-line meaning"; 3@0.5,0.53 "Your answer: Yes picks the scenes for each set now, Not now makes the Default Scene Set with a new Managers scene"; 4@0.5,0.932 "Progress: which of the seven steps you are on"; 5@0.87,0.968 "Next: goes to the following step, on Ready it reads Set up" -->
 
 **Check the result**
 
