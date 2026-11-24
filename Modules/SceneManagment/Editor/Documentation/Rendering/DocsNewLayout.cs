@@ -51,6 +51,10 @@ namespace AbstractPixel.SceneManagement.Documentation
                 row.EnableInClassList("docs-facts-alt", rows.childCount % 2 == 1);
                 rows.Add(row);
             }
+            if (rows.childCount > 0)
+            {
+                rows[rows.childCount - 1].AddToClassList("docs-facts-last");
+            }
             return rows;
         }
 

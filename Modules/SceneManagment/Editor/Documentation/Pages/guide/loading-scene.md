@@ -40,8 +40,12 @@ Set [Show the loading scene](term:show-the-loading-scene) on the scene group you
 
 ## Minimum time <!-- level 0 -->
 
-Keeps a fast load from flashing the loading scene.
+Keeps a fast load from flashing the loading scene. One value for the whole project, set in Project Settings, not on a scene group.
 
+<!-- action open-settings "Loading scenes" "Open Loading scenes" -->
+
+- **Field:** Minimum time on screen (s), in Project Settings › Abstract Pixel › Scene System › Loading scenes.
+- **Applies to:** every loading scene in the project.
 - **Counts:** unscaled seconds.
 - **Starts:** when Show screen starts.
 
@@ -66,12 +70,16 @@ private void Update()
 }
 ```
 
-With the view, as the sample does:
+With the view, connect your bar in one of two ways:
 
 | Your bar | Do this |
 |---|---|
-| No code | Drag `MMProgressBar.UpdateBar01` into On Progress and `MMF_Player.PlayFeedbacks` into On Full. |
-| Code | Implement `ILoadingProgressDisplay`: |
+| Already has a function that sets its fill | No code. On the view's On Progress list, click +, drag in the object that has your bar, then pick that function in the dropdown. It works like a Button's On Click; the view calls the function every frame with the value from 0 to 1. |
+| Is your own script | Implement `ILoadingProgressDisplay` in a script on the same object as the view. Sample 06 does this: `Sample06BarDisplay` sits next to the view on Loading Bar, and its event lists are empty. |
+
+<!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/06 Loading Scene/Scenes/Sample 06 Loading.unity" "Loading Bar" "Select Loading Bar in sample 06" -->
+
+Sample 06's script:
 
 ```cs source=lib:Modules/SceneManagment/Samples/06 Loading Scene/Scripts/Sample06BarDisplay.cs
 public void SetProgress(float _progress)
@@ -79,16 +87,21 @@ public void SetProgress(float _progress)
     ShownProgress = _progress;
 ```
 
-**On the component, in the Inspector**
+**LoadingProgressView fields, in the Inspector**
+
+What you see when you select the object with the `LoadingProgressView` component in your loading scene.
 
 | Field | What it does for you | Change it when |
 |---|---|---|
-| Feel › Smoothing Speed | How fast the bar catches up with the real progress, per second. 1 fills an empty bar in one second. Default 1.5. | Raise it if the bar lags behind a fast load. Lower it for a calmer fill. |
-| Feel › Curve | Optional. Bends the fill, for example fast at first and slow near the end. Empty fills evenly. | You want the bar to feel like it speeds up or slows down. |
-| Feel › Hold At Full Seconds | How long the full bar stays on screen before the screen covers it. Default 0.3. | The player should see the bar reach 100%. |
 | Display | Optional. A script of yours that implements `ILoadingProgressDisplay`. Empty uses one on the same object. | Your bar's script sits on another object. |
+| **Feel: a foldout on this component that groups how the bar moves. Not the Feel package.** | | |
+| Smoothing Speed | How fast the bar catches up with the real progress, per second. 1 fills an empty bar in one second. Default 1.5. | Raise it if the bar lags behind a fast load. Lower it for a calmer fill. |
+| Curve | Optional. Bends the fill, for example fast at first and slow near the end. Empty fills evenly. | You want the bar to feel like it speeds up or slows down. |
+| Hold At Full Seconds | How long the full bar stays on screen before the screen covers it. Default 0.3. | The player should see the bar reach 100%. |
 
-**Events, in the Inspector**
+**LoadingProgressView events, in the Inspector**
+
+The four lists at the bottom of the same component. Each one calls the functions you drag into it.
 
 | Event | When it fires | You'll use it to |
 |---|---|---|
@@ -113,6 +126,7 @@ public void SetProgress(float _progress)
 - **Drives:** an `ILoadingProgressDisplay` found on its object or assigned: Show, SetProgress, PlayFull, Hide.
 - **Timing:** the scene system calls it when Show screen starts, and waits for its full beat and hold before Hide screen.
 - **Example:** Rally's `RallyLoadingFullBeat` plays `IAnimationCommand`s.
+- **Rally's bar, with no code:** `MMProgressBar.UpdateBar01` in On Progress and `MMF_Player.PlayFeedbacks` in On Full, both from the Feel package by More Mountains.
 
 </details>
 

@@ -194,13 +194,44 @@ namespace AbstractPixel.SceneManagement.Documentation
             return steps.Root;
         }
 
+        // A row with only a bold first cell is a group row in the new layout: "| **Feel** | | |".
+        private static bool IsGroupRow(List<string> _cells)
+        {
+            string first = (_cells.Count > 0 ? _cells[0] : "").Trim();
+            if (first.Length < 5 || !first.StartsWith("**") || !first.EndsWith("**"))
+            {
+                return false;
+            }
+            for (int index = 1; index < _cells.Count; index++)
+            {
+                if (_cells[index].Trim().Length > 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private static VisualElement Table(DocsBlock _block, DocsRenderContext _context)
         {
             VisualElement table = new VisualElement();
             table.AddToClassList("docs-table");
+            bool inGroup = false;
             for (int rowIndex = 0; rowIndex < _block.Rows.Count; rowIndex++)
             {
+                if (rowIndex > 0 && _context.Page.IsNewLayout && IsGroupRow(_block.Rows[rowIndex]))
+                {
+                    string title = _block.Rows[rowIndex][0].Trim();
+                    VisualElement groupRow = new VisualElement();
+                    groupRow.AddToClassList("docs-table-row");
+                    groupRow.AddToClassList("docs-table-group");
+                    groupRow.Add(DocsText.Create(title.Substring(2, title.Length - 4), "docs-table-cell", _context));
+                    table.Add(groupRow);
+                    inGroup = true;
+                    continue;
+                }
                 VisualElement row = new VisualElement();
+                row.EnableInClassList("docs-table-in-group", inGroup && rowIndex > 0);
                 row.AddToClassList("docs-table-row");
                 bool isHeader = rowIndex == 0;
                 row.EnableInClassList("docs-table-header", isHeader);

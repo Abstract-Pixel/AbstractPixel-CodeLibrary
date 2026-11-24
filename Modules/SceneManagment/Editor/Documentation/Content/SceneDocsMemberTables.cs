@@ -70,6 +70,10 @@ namespace AbstractPixel.SceneManagement.Documentation
                 row.EnableInClassList("docs-mrow-alt", table.childCount % 2 == 1);
                 table.Add(row);
             }
+            if (table.childCount > 0)
+            {
+                table[table.childCount - 1].AddToClassList("docs-mrow-last");
+            }
             section.Add(table);
             return section;
         }
@@ -107,10 +111,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                     line.Add(DocsText.Create(remark, "docs-list-content", _context));
                     more.Add(line);
                 }
-                row.Add(main);
-                // Full width under the type and the signature, not indented.
-                row.Add(more);
-                return row;
+                main.Add(more);
             }
             row.Add(main);
             return row;

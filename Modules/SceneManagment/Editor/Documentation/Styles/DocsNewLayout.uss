@@ -240,8 +240,7 @@
 }
 
 .docs-mrow-more {
-    width: 100%;
-    margin-top: 6px;
+    margin-top: 2px;
     margin-bottom: 0;
 }
 
@@ -375,7 +374,7 @@
 }
 
 .docs-section-body {
-    padding: 12px 14px 4px 14px;
+    padding: 12px 14px 0 14px;
 }
 
 /* Parts: a numbered strip across the box. A part runs to the next strip or the box's end. */
@@ -393,14 +392,14 @@
     white-space: normal;
 }
 
-.docs-section-body > .docs-part-strip:first-child,
-.docs-section-body > .docs-part-fold:first-child > .unity-foldout__toggle {
+.docs-section-body > .docs-part-strip.docs-first,
+.docs-section-body > .docs-part-fold.docs-first > .unity-foldout__toggle {
     margin-top: -12px;
     border-top-width: 0;
 }
 
 .docs-part-body {
-    padding-bottom: 4px;
+    padding-bottom: 0;
 }
 
 /* The sample part: a Unity foldout strip with Open sample and the folder on it. */
@@ -447,13 +446,21 @@
 
 /* A button and the rows that describe what it opens: one tinted box, darker than callouts. */
 .docs-action-group {
-    margin: 4px 0 12px 0;
-    padding: 8px 10px 4px 10px;
-    border-radius: 3px;
+    margin: 4px -14px 12px -14px;
+    padding: 0;
+    border-radius: 0;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+}
+
+.docs-action-group.docs-last {
+    border-bottom-width: 0;
 }
 
 .docs-action-group > .docs-action {
-    margin: 0 0 6px 0;
+    margin: 8px 14px 6px 14px;
     align-self: flex-start;
 }
 
@@ -462,7 +469,7 @@
     border-top-width: 0;
 }
 
-.docs-action-group-facts > .docs-facts-row:last-child {
+.docs-action-group-facts > .docs-facts-last {
     border-bottom-width: 0;
 }
 
@@ -473,7 +480,7 @@
     background-color: rgba(0, 0, 0, 0);
 }
 
-.docs-member-section .docs-mrow:last-child {
+.docs-member-section .docs-mrow-last {
     border-bottom-width: 0;
 }
 
@@ -498,4 +505,78 @@
 
 .docs-facts-label {
     width: 160px;
+}
+
+/* Tables and fact rows run to the box's edges; their text lines up with the paragraphs. */
+.docs-section-body > .docs-facts,
+.docs-part-body > .docs-facts,
+.docs-part-fold > .unity-foldout__content > .docs-facts,
+.docs-section-body > .docs-table,
+.docs-part-body > .docs-table,
+.docs-part-fold > .unity-foldout__content > .docs-table {
+    margin-left: -14px;
+    margin-right: -14px;
+    border-left-width: 0;
+    border-right-width: 0;
+}
+
+.docs-section-body > .docs-facts > .docs-facts-row,
+.docs-part-body > .docs-facts > .docs-facts-row {
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.docs-section-body > .docs-table .docs-table-first,
+.docs-part-body > .docs-table .docs-table-first {
+    padding-left: 14px;
+}
+
+.docs-facts.docs-last,
+.docs-table.docs-last {
+    margin-bottom: 0;
+}
+
+.docs-table.docs-last,
+.docs-facts.docs-last > .docs-facts-last {
+    border-bottom-width: 0;
+}
+
+.docs-action-group.docs-last {
+    margin-bottom: 0;
+}
+
+.docs-action-group-facts > .docs-facts-row {
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+/* Group rows in a table: a bold title row, the rows under it indented. */
+.docs-table-group .docs-table-cell {
+    -unity-font-style: bold;
+    padding-left: 14px;
+}
+
+.docs-part-body > .docs-table .docs-table-in-group .docs-table-first,
+.docs-section-body > .docs-table .docs-table-in-group .docs-table-first {
+    padding-left: 30px;
+}
+
+/* A member's More: the remarks right under the summary, no box. */
+.docs-mrow-more > .unity-foldout__content {
+    margin: 2px 0 0 0;
+    padding: 0 0 0 16px;
+}
+
+.docs-mrow-more .docs-list-row {
+    margin-bottom: 2px;
+}
+
+/* The Open sample button and folder on the sample strip sit on the title's line. */
+.docs-layout-new .docs-part-fold .docs-part-fold-action {
+    margin: 0 8px 0 0;
+    align-self: center;
+}
+
+.docs-layout-new .docs-part-fold .docs-sample-path {
+    align-self: center;
 }
