@@ -15,6 +15,8 @@ namespace AbstractPixel.SceneManagement.Documentation
         public int Layer { get; set; } = -1;
         public Action Clicked { get; set; }
         public DocsGraph Inner { get; set; }
+        /// <summary>"api", "interface", "enum", "editor" or "other"; empty for folder boxes. Picks the box's edge colour.</summary>
+        public string Category { get; set; } = "";
 
         public DocsGraphNode(string _id, string _title, string _line)
         {

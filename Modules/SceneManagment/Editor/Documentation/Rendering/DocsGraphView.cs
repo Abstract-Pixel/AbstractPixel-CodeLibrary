@@ -34,6 +34,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             Label hint = new Label("Hover a box to trace its links. A box marked › opens its own map.");
             hint.AddToClassList("docs-caption");
             Add(hint);
+            Add(Legend());
             // Layers deep: the map shows the core boxes first; this toggle lays every box's own map out underneath.
             showEverything = new Toggle("Show everything");
             showEverything.tooltip = "Shows the map inside each box under this one";
@@ -151,6 +152,10 @@ namespace AbstractPixel.SceneManagement.Documentation
             Button box = new Button(() => OnClicked(_node));
             box.AddToClassList("docs-graph-box");
             box.EnableInClassList("docs-graph-key", _node.IsKey);
+            if (!string.IsNullOrEmpty(_node.Category))
+            {
+                box.AddToClassList("docs-graph-cat-" + _node.Category);
+            }
             box.style.left = _rect.x;
             box.style.top = _rect.y;
             box.style.width = _rect.width;
@@ -167,6 +172,16 @@ namespace AbstractPixel.SceneManagement.Documentation
             string action = _node.Inner != null ? "Shows how the parts of " + _node.Title + " connect" : "Opens " + _node.Title;
             // The tooltip carries the whole line too, in case a long one still runs past two lines.
             box.tooltip = string.IsNullOrEmpty(_node.Line) ? action : _node.Line + "\n" + action;
+            // A box that opens a script says so: the Visual Studio icon shows on hover, and the tooltip names the editor.
+            bool opensScript = _node.Inner == null && _node.Clicked != null;
+            if (opensScript)
+            {
+                VisualElement opensOutside = DocsCodeIcons.OpenInIde();
+                opensOutside.AddToClassList("docs-graph-open-icon");
+                box.Add(opensOutside);
+                string line = string.IsNullOrEmpty(_node.Line) ? "" : _node.Line + "\n";
+                box.tooltip = line + "Opens " + _node.Title + ".cs in your code editor, outside the docs.";
+            }
             box.RegisterCallback<PointerEnterEvent>(_event => SetHovered(_node.Id));
             box.RegisterCallback<PointerLeaveEvent>(_event => SetHovered(null));
             box.RegisterCallback<FocusInEvent>(_event => SetHovered(_node.Id));
@@ -276,6 +291,33 @@ namespace AbstractPixel.SceneManagement.Documentation
             _painter.LineTo(back - side * 3.5f);
             _painter.ClosePath();
             _painter.Fill();
+        }
+
+        // What the edge colours of script boxes mean.
+        private static VisualElement Legend()
+        {
+            VisualElement legend = new VisualElement();
+            legend.AddToClassList("docs-graph-legend");
+            Label lead = new Label("Script boxes:");
+            lead.AddToClassList("docs-caption");
+            legend.Add(lead);
+            AddKey(legend, "api", "Public API");
+            AddKey(legend, "interface", "Interface");
+            AddKey(legend, "enum", "Enum");
+            AddKey(legend, "editor", "Editor");
+            AddKey(legend, "other", "Other");
+            return legend;
+        }
+
+        private static void AddKey(VisualElement _legend, string _category, string _text)
+        {
+            VisualElement swatch = new VisualElement();
+            swatch.AddToClassList("docs-graph-swatch");
+            swatch.AddToClassList("docs-graph-cat-" + _category);
+            _legend.Add(swatch);
+            Label label = new Label(_text);
+            label.AddToClassList("docs-caption");
+            _legend.Add(label);
         }
     }
 }

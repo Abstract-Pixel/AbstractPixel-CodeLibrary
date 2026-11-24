@@ -1518,3 +1518,46 @@
     margin: 3px 6px;
     background-color: var(--unity-colors-inspector_titlebar-border);
 }
+
+/* Code map script boxes: a muted left edge per kind of script, and a legend for it. */
+.docs-graph-box.docs-graph-cat-api,
+.docs-graph-box.docs-graph-cat-interface,
+.docs-graph-box.docs-graph-cat-enum,
+.docs-graph-box.docs-graph-cat-editor,
+.docs-graph-box.docs-graph-cat-other {
+    border-left-width: 4px;
+}
+
+.docs-graph-cat-api { border-left-color: rgb(96, 140, 196); background-color: rgba(96, 140, 196, 0.08); }
+.docs-graph-cat-interface { border-left-color: rgb(196, 168, 110); background-color: rgba(196, 168, 110, 0.08); }
+.docs-graph-cat-enum { border-left-color: rgb(150, 180, 130); background-color: rgba(150, 180, 130, 0.08); }
+.docs-graph-cat-editor { border-left-color: rgb(160, 136, 192); background-color: rgba(160, 136, 192, 0.08); }
+.docs-graph-cat-other { border-left-color: rgb(128, 128, 128); }
+
+.docs-graph-legend {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.docs-graph-swatch {
+    width: 10px;
+    height: 10px;
+    border-left-width: 4px;
+    border-radius: 2px;
+    margin: 0 4px 0 10px;
+}
+
+/* The Visual Studio icon in a script box's corner, shown on hover: the box opens the script outside the docs. */
+.docs-graph-open-icon {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    opacity: 0;
+    color: rgb(200, 200, 200);
+}
+
+.docs-graph-box:hover > .docs-graph-open-icon {
+    opacity: 1;
+}

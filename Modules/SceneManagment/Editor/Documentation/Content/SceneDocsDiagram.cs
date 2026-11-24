@@ -127,6 +127,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                 string scriptPath = path;
                 node.Clicked = () => OpenScript(scriptPath);
                 textOf[name] = SceneDocsPaths.Read(path) ?? "";
+                node.Category = CategoryOf(path, name, textOf[name]);
             }
             foreach (KeyValuePair<string, string> from in textOf)
             {
@@ -140,6 +141,28 @@ namespace AbstractPixel.SceneManagement.Documentation
                 }
             }
             return graph;
+        }
+
+        // What kind of script a box is, so the map can tint it: an interface, an enum, the public API, Editor code, or other.
+        private static string CategoryOf(string _path, string _name, string _text)
+        {
+            if (Regex.IsMatch(_text, @"\binterface\s+" + Regex.Escape(_name) + @"\b"))
+            {
+                return "interface";
+            }
+            if (Regex.IsMatch(_text, @"\benum\s+" + Regex.Escape(_name) + @"\b"))
+            {
+                return "enum";
+            }
+            if (_path.Contains("/PublicAPI/"))
+            {
+                return "api";
+            }
+            if (_path.Contains("/Editor/"))
+            {
+                return "editor";
+            }
+            return "other";
         }
 
         private static string Shorten(string _text)
