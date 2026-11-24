@@ -48,8 +48,3 @@ public void OnReleased()
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneScreens.LaunchSceneReleaseReceiver -->
-
-## See also
-
-- [Start up](../guide/start-up.md)
-- [Find a problem](../reference/find-a-problem.md)

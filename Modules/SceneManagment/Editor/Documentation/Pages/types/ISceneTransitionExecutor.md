@@ -49,8 +49,3 @@ SceneActions.RegisterTransitionExecutor(new MyEffect());
 ```
 
 <!-- members AbstractPixel.SceneManagement.ISceneTransitionExecutor -->
-
-## See also
-
-- [Screen and transitions](../guide/screen-and-transitions.md)
-- [Find a problem](../reference/find-a-problem.md)

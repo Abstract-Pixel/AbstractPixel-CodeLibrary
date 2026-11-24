@@ -52,8 +52,3 @@ private void UseWhiteFade()
 ```
 
 <!-- members AbstractPixel.SceneTransitions.ImageFadeProfile -->
-
-## See also
-
-- [Screen and transitions](../guide/screen-and-transitions.md)
-- [Find a problem](../reference/find-a-problem.md)

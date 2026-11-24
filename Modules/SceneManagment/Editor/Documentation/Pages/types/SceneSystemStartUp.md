@@ -41,8 +41,3 @@ SceneEventBus.OnGameStarted += OnGameStarted;
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneSystemStartUp -->
-
-## See also
-
-- [Start up](../guide/start-up.md)
-- [Find a problem](../reference/find-a-problem.md)

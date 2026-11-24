@@ -34,8 +34,3 @@ bool listed = StartUpSceneMatch.ListHolds(sceneGroup.ContextualBootScenesList, o
 ```
 
 <!-- members AbstractPixel.SceneManagement.StartUpSceneMatch -->
-
-## See also
-
-- [Start up](../guide/start-up.md)
-- [Find a problem](../reference/find-a-problem.md)

@@ -34,8 +34,3 @@ if (sceneGroup.ShowLoadingScene == ShowLoadingScene.Never)
 ```
 
 <!-- members AbstractPixel.SceneManagement.ShowLoadingScene -->
-
-## See also
-
-- [Loading scene](../guide/loading-scene.md)
-- [Find a problem](../reference/find-a-problem.md)

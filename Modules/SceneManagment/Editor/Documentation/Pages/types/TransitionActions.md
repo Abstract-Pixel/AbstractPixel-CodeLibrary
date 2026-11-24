@@ -43,8 +43,3 @@ await TransitionActions.ShowScreen();
 ```
 
 <!-- members AbstractPixel.SceneTransitions.TransitionActions -->
-
-## See also
-
-- [Screen and transitions](../guide/screen-and-transitions.md)
-- [Find a problem](../reference/find-a-problem.md)

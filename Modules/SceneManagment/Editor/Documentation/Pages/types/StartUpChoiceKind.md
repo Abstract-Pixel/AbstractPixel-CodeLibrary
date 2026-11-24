@@ -34,8 +34,3 @@ if (choice.Kind == StartUpChoiceKind.TemporaryGroup)
 ```
 
 <!-- members AbstractPixel.SceneManagement.StartUpChoiceKind -->
-
-## See also
-
-- [Start up](../guide/start-up.md)
-- [Find a problem](../reference/find-a-problem.md)

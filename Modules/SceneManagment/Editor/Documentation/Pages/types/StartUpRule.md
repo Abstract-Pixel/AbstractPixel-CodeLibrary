@@ -41,8 +41,3 @@ StartUpChoice choice = StartUpRule.Choose(settings, new List<SceneReference> { s
 ```
 
 <!-- members AbstractPixel.SceneManagement.StartUpRule -->
-
-## See also
-
-- [Start up](../guide/start-up.md)
-- [Find a problem](../reference/find-a-problem.md)

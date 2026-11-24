@@ -44,8 +44,3 @@ private void UseSlowFade()
 ```
 
 <!-- members AbstractPixel.SceneTransitions.TransitionProfile -->
-
-## See also
-
-- [Screen and transitions](../guide/screen-and-transitions.md)
-- [Find a problem](../reference/find-a-problem.md)

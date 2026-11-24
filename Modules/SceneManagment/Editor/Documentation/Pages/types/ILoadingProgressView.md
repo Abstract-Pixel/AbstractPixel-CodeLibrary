@@ -39,8 +39,3 @@ public class MyProgressView : MonoBehaviour, ILoadingProgressView
 ```
 
 <!-- members AbstractPixel.SceneManagement.ILoadingProgressView -->
-
-## See also
-
-- [Loading scene](../guide/loading-scene.md)
-- [Find a problem](../reference/find-a-problem.md)

@@ -41,8 +41,3 @@ SceneActions.RegisterRelocationBroadcaster(new MyBroadcaster());
 ```
 
 <!-- members AbstractPixel.SceneManagement.IRelocationBroadcaster -->
-
-## See also
-
-- [Relocation](../guide/relocation.md)
-- [Find a problem](../reference/find-a-problem.md)

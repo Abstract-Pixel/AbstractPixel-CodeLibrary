@@ -48,8 +48,3 @@ private async Task Demo()
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneScreens.SimpleLoadingProgressBar -->
-
-## See also
-
-- [Loading scene](../guide/loading-scene.md)
-- [Find a problem](../reference/find-a-problem.md)

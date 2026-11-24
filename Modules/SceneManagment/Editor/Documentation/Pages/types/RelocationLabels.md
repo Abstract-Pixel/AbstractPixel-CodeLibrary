@@ -34,8 +34,3 @@ bool sameKind = RelocationLabels.Same(relocatable.Label, spawnPoint.Label);
 ```
 
 <!-- members AbstractPixel.SceneManagement.RelocationLabels -->
-
-## See also
-
-- [Relocation](../guide/relocation.md)
-- [Find a problem](../reference/find-a-problem.md)

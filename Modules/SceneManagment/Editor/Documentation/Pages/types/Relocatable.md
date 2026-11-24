@@ -63,8 +63,3 @@ private void OnDisable()
 ```
 
 <!-- members AbstractPixel.SceneManagement.Relocatable -->
-
-## See also
-
-- [Relocation](../guide/relocation.md)
-- [Find a problem](../reference/find-a-problem.md)

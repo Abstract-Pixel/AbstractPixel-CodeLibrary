@@ -43,8 +43,3 @@ private void OnEnable()
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneScreens.LaunchSceneReleaseMarker -->
-
-## See also
-
-- [Start up](../guide/start-up.md)
-- [Find a problem](../reference/find-a-problem.md)

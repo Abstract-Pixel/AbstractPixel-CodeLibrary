@@ -38,8 +38,3 @@ SceneChangeResult result = await SceneActions.ChangeTo(otherGroup);
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneActions -->
-
-## See also
-
-- [Change scene](../guide/change-scene.md)
-- [Find a problem](../reference/find-a-problem.md)

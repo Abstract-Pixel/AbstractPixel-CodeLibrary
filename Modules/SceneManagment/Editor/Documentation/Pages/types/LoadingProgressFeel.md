@@ -53,8 +53,3 @@ if (feel.IsFull)
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneScreens.LoadingProgressFeel -->
-
-## See also
-
-- [Loading scene](../guide/loading-scene.md)
-- [Find a problem](../reference/find-a-problem.md)

@@ -42,8 +42,3 @@ bool busy = SceneActions.IsLoadingSceneGroup;
 ```
 
 <!-- members AbstractPixel.SceneManagement.SceneCoordinator -->
-
-## See also
-
-- [Scene messages](../guide/scene-messages.md)
-- [Find a problem](../reference/find-a-problem.md)

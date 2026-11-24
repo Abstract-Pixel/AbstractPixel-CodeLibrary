@@ -38,8 +38,3 @@ SceneChangeResult result = await SceneActions.ChangeTo(temporary);
 ```
 
 <!-- members AbstractPixel.SceneManagement.TemporarySceneGroup -->
-
-## See also
-
-- [Start up](../guide/start-up.md)
-- [Find a problem](../reference/find-a-problem.md)
