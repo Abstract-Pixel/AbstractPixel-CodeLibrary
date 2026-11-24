@@ -203,7 +203,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             DocsCodeBlock.ApplyMonoFont(label);
             string pagePath = _context.Page.Path;
             IDocsHost host = _context.Host;
-            DocsLinkEvents.Register(label, _target => host.OpenLink(_target, pagePath), host.TooltipFor);
+            DocsLinkEvents.Register(label, _target => host.OpenLink(_target, pagePath), _target => host.LinkTooltip(_target, pagePath));
             return label;
         }
 

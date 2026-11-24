@@ -15,6 +15,9 @@ namespace AbstractPixel.SceneManagement.Documentation
         /// <summary>The tooltip for a link: a term's definition, or where a page link goes. Null for none.</summary>
         string TooltipFor(string _target);
 
+        /// <summary>The tooltip for a link on a page: what it is, then where a click goes.</summary>
+        string LinkTooltip(string _target, string _fromPagePath);
+
         /// <summary>The link target for a code span on a page ("type:SceneActions"), or null to leave it plain.</summary>
         string CodeLinkTarget(string _code, string _fromPagePath);
 
