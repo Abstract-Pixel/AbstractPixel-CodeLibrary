@@ -1236,3 +1236,14 @@
     overflow: hidden;
     max-height: 36px;
 }
+
+/* Enum values: the value on the left, one line of meaning beside it. */
+.docs-mrow-value {
+    align-items: center;
+}
+
+.docs-mrow-value-name {
+    width: 300px;
+    flex-shrink: 0;
+    padding-right: 12px;
+}

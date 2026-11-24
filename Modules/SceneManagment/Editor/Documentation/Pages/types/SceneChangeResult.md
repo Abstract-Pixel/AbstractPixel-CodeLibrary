@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-What a scene change request tells its caller when it ends: Done, Refused (with the reason) or Failed (with the scene that failed to load).
+A class: what a scene change request tells its caller when it ends. Its `Outcome` (a `SceneChangeOutcome` enum) is Done, Refused or Failed; `Refusal` and `FailedScene` carry the details.
 
 <!-- type-header AbstractPixel.SceneManagement.SceneChangeResult -->
 
@@ -24,7 +24,7 @@ Read more in [Change scene](../guide/change-scene.md#read-the-result).
 
 **Called for you, leave alone**
 
-- **Done / Refused / Failed:** the scene system makes the result; you only read it.
+- **`Done()`, `Refused()` and `Failed()`:** static methods the scene system uses to make a result. They are not the outcome values; to check how a change ended, read `Outcome` or `IsDone`.
 
 ## In code
 

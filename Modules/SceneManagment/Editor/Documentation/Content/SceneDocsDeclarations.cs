@@ -44,7 +44,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         public static int MemberLine(string[] _lines, string _name, IList<string> _parameterNames, bool _inInterface)
         {
             string access = _inInterface ? "" : @"\b(public|protected|internal|private)\b[^=(]*";
-            Regex declaration = new Regex(@"^\s*(\[[^\]]*\]\s*)*" + access + @"\b" + Regex.Escape(_name) + @"\s*(\(|<|\{|=|;|$)");
+            Regex declaration = new Regex(@"^\s*(\[[^\]]*\]\s*)*" + access + @"\b" + Regex.Escape(_name) + @"\s*(\(|<|\{|=|;|,|$)");
             for (int index = 0; index < _lines.Length; index++)
             {
                 string line = _lines[index];

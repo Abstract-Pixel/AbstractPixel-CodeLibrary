@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-Why the scene system refused a scene change request. A refusal happens before anything touches the screen.
+An enum: why the scene system refused a scene change request. You get it from `SceneChangeResult.Refusal`, which is `None` unless `SceneChangeResult.Outcome` is `Refused`.
 
 <!-- type-header AbstractPixel.SceneManagement.SceneChangeRefusal -->
 
@@ -12,19 +12,38 @@ Read more in [Change scene](../guide/change-scene.md#read-the-result).
 
 ## Start here
 
-Read it from `SceneChangeResult.Refusal`. It is None unless the outcome is Refused.
+A refusal happens before anything touches the screen, so the player sees nothing. Check `Outcome` first, then read `Refusal` for the reason.
 
-| You got | Do this | Why |
+| Value | Means | Do this |
 |---|---|---|
-| `Busy` | Ask again after the running change | Another scene change is running. Only one runs at a time. |
-| `StartUpRunning` | Wait for `SceneEventBus.OnGameStarted` | Start-up is still opening the first scene group. |
-| `AlreadyOpen` | Call `Retry` | The group asked for is already open. |
-| `NoGroupGiven` | Pass a scene group | No scene group was given. |
-| `NothingOpenToRetry` | Call `ChangeTo` | Retry was asked for while no scene group is open. |
+| `None` | The request was not refused. | Nothing: the outcome is Done or Failed. |
+| `Busy` | Another scene change is running. Only one runs at a time. | Ask again after the running change. |
+| `StartUpRunning` | Start-up is still opening the first scene group. | Wait for `SceneEventBus.OnGameStarted`. |
+| `AlreadyOpen` | The group asked for is already open. | Call `SceneActions.Retry` to start it again. |
+| `NoGroupGiven` | No scene group was given. | Pass a scene group. |
+| `NothingOpenToRetry` | Retry was asked for while no scene group is open. | Call `SceneActions.ChangeTo` instead. |
+
+## In code
+
+React to the reason when the outcome is Refused:
+
+```cs
+SceneChangeResult result = await SceneActions.ChangeTo(nextGroup);
+if (result.Outcome == SceneChangeOutcome.Refused)
+{
+    switch (result.Refusal)
+    {
+        case SceneChangeRefusal.Busy:
+            // A change is already running: let it finish.
+            break;
+        case SceneChangeRefusal.AlreadyOpen:
+            await SceneActions.Retry();
+            break;
+        default:
+            Debug.Log("Refused: " + result.Refusal);
+            break;
+    }
+}
+```
 
 <!-- members AbstractPixel.SceneManagement.SceneChangeRefusal -->
-
-## See also
-
-- [Change scene](../guide/change-scene.md)
-- [Find a problem](../reference/find-a-problem.md)
