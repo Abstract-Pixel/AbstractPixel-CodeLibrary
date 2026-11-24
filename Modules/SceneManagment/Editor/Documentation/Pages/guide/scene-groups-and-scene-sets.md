@@ -13,7 +13,7 @@ Select a [scene group](term:scene-group) to see its [main scene](term:main-scene
 <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/01 Button Changes Level/Scene Groups/Sample 01 Room AGroup.asset" "Select a scene group" -->
 
 ![The scene group inspector](../../Images/scene-system-scene-group.png)
-<!-- marks 1@0.03,0.212 "Main scene"; 2@0.03,0.307 "Its scene status, with a fix button"; 3@0.03,0.402 "Scene set"; 4@0.03,0.445 "Show the loading scene"; 5@0.03,0.568 "Advanced: manager scenes, shared scenes, Reset shared scenes"; 6@0.9,0.698 "Open group" -->
+<!-- marks 1@0.03,0.212 "Main scene: the one scene that makes this place. It becomes Unity's active scene"; 2@0.03,0.307 "Scene status: whether that scene can load in a build, with a button that fixes it when it can't"; 3@0.03,0.402 "Scene set: the set that fills this group's manager scenes, shared scenes and Reset shared scenes"; 4@0.03,0.445 "Show the loading scene: when a loading scene covers the change into this group"; 5@0.03,0.568 "Advanced: the manager scenes, shared scenes and Reset shared scenes, each following the set or overridden"; 6@0.9,0.698 "Open group: opens the main scene with its manager and shared scenes, as Play would" -->
 
 **Or do it yourself**
 
