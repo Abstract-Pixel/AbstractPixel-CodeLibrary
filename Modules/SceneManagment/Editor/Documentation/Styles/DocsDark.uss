@@ -29,23 +29,6 @@
 .docs-flow-number { border-color: rgb(110, 150, 210); color: rgb(175, 200, 235); background-color: rgba(110, 150, 210, 0.15); }
 .docs-flow-phase { border-left-color: rgb(110, 150, 210); }
 .docs-mrow:hover { background-color: rgba(255, 255, 255, 0.03); }
-/* New layout: section and part edges, the sample box, the sandbox. */
-.docs-section-body { border-left-color: rgba(255, 255, 255, 0.16); }
-.docs-part-title { border-left-color: rgb(110, 150, 210); }
-.docs-part-body { border-left-color: rgba(110, 150, 210, 0.22); }
-.docs-action-group-facts { border-left-color: rgba(255, 255, 255, 0.16); }
-.docs-sample-box { border-color: rgba(110, 170, 120, 0.45); background-color: rgba(110, 170, 120, 0.06); }
-.docs-sandbox { border-color: rgba(210, 150, 90, 0.5); background-color: rgba(0, 0, 0, 0.12); }
-.docs-sandbox-pill { background-color: rgba(210, 150, 90, 0.2); border-color: rgba(210, 150, 90, 0.5); color: rgb(230, 195, 160); }
-.docs-sandbox-panel, .docs-sandbox-run-panel { background-color: rgb(56, 56, 56); border-color: rgb(36, 36, 36); }
-.docs-sandbox-panel-title { background-color: rgb(62, 62, 62); border-color: rgb(36, 36, 36); }
-.docs-sandbox-console { background-color: rgb(30, 30, 30); border-color: rgb(20, 20, 20); }
-.docs-sandbox-line-time { color: rgb(130, 130, 130); }
-.docs-sandbox-line-why { color: rgb(150, 150, 150); }
-.docs-sandbox-line-warning .docs-sandbox-line-what { color: rgb(230, 190, 90); }
-.docs-sandbox-screen-old { background-color: rgb(60, 80, 120); }
-.docs-sandbox-screen-loading { background-color: rgb(40, 40, 46); }
-.docs-sandbox-screen-new { background-color: rgb(60, 110, 70); }
-.docs-sandbox-bar { background-color: rgb(70, 70, 76); }
-.docs-sandbox-bar-fill { background-color: rgb(110, 170, 230); }
-.docs-sandbox-verdict { color: rgb(230, 195, 160); }
+/* New layout: part strips and the tinted group box. */
+.docs-part-strip, .docs-part-fold > .unity-foldout__toggle { background-color: rgba(255, 255, 255, 0.04); }
+.docs-action-group, .docs-fold > .unity-foldout__content { background-color: rgba(0, 0, 0, 0.22); }

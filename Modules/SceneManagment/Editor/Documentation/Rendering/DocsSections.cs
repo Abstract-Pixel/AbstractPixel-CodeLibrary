@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine.UIElements;
@@ -5,11 +6,11 @@ using UnityEngine.UIElements;
 namespace AbstractPixel.SceneManagement.Documentation
 {
     /// <summary>
-    /// Groups a new-layout page into sections and parts so each one's start and end show. A "##" heading starts a
-    /// section: its heading bar, then everything up to the next "##" behind one line on the left. A "###" heading or a
-    /// paragraph that is only bold text ("**Or do it yourself**") starts a part inside the section, behind its own
-    /// line. A part titled "Try it in the sample" becomes one box, closed by default: its first action sits on the
-    /// title line, and the steps show when it opens. (New layout only.)
+    /// Groups a new-layout page two levels deep so each part's start and end show. A "##" heading starts a numbered
+    /// section: a box with a header bar, holding everything up to the next "##". A "###" heading or a paragraph that is
+    /// only bold text ("**Or do it yourself**") starts a numbered part: a strip across the box, up to the next strip or
+    /// the box's end. A part titled "Try it in the sample" is a foldout strip, closed by default, with its first action
+    /// on the strip. A button with fact rows under it becomes one tinted box. (New layout only.)
     /// </summary>
     #if UNITY_7000_0_OR_NEWER
     [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
@@ -19,19 +20,24 @@ namespace AbstractPixel.SceneManagement.Documentation
         public const string SampleTitle = "Try it in the sample";
         private static readonly Regex BoldLine = new Regex(@"^\*\*([^*]+)\*\*$");
 
-        public static void AddBlocks(VisualElement _page, System.Collections.Generic.List<DocsBlock> _blocks, DocsRenderContext _context)
+        public static void AddBlocks(VisualElement _page, List<DocsBlock> _blocks, DocsRenderContext _context)
         {
             VisualElement sectionBody = null;
             VisualElement partBody = null;
-            DocsSampleBox sample = null;
+            Foldout sample = null;
+            bool sampleHasAction = false;
             VisualElement lastAction = null;
+            int sectionNumber = 0;
+            int partNumber = 0;
             foreach (DocsBlock block in _blocks)
             {
                 if (block.Kind == DocsBlockKind.Heading && block.Level <= 2)
                 {
+                    sectionNumber++;
+                    partNumber = 0;
                     VisualElement section = new VisualElement();
                     section.AddToClassList("docs-section");
-                    section.Add(DocsRenderer.RenderBlock(block, _context));
+                    section.Add(DocsRenderer.HeadingRow(sectionNumber + ".  " + block.Text, block.Id, block.Level, block.Pill, _context));
                     sectionBody = new VisualElement();
                     sectionBody.AddToClassList("docs-section-body");
                     section.Add(sectionBody);
@@ -43,28 +49,30 @@ namespace AbstractPixel.SceneManagement.Documentation
                 string partTitle = PartTitle(block);
                 if (partTitle != null && sectionBody != null)
                 {
+                    partNumber++;
+                    string numbered = sectionNumber + "." + partNumber + "  " + partTitle;
                     sample = null;
                     if (partTitle == SampleTitle)
                     {
-                        sample = new DocsSampleBox(partTitle, _context.Page.Path);
-                        sectionBody.Add(sample.Root);
-                        partBody = sample.Body;
+                        sample = DocsSessionFoldout.Create(numbered, _context.Page.Path + "#sample");
+                        sample.RemoveFromClassList("docs-fold");
+                        sample.AddToClassList("docs-part-fold");
+                        sampleHasAction = false;
+                        sectionBody.Add(sample);
+                        partBody = sample.contentContainer;
                         continue;
                     }
-                    VisualElement part = new VisualElement();
-                    part.AddToClassList("docs-part");
-                    Label title = new Label(partTitle);
-                    title.AddToClassList("docs-part-title");
-                    title.selection.isSelectable = true;
-                    part.Add(title);
+                    Label strip = new Label(numbered);
+                    strip.AddToClassList("docs-part-strip");
+                    strip.selection.isSelectable = true;
                     if (block.Kind == DocsBlockKind.Heading)
                     {
-                        _context.HeadingRows[block.Id] = part;
+                        _context.HeadingRows[block.Id] = strip;
                     }
+                    sectionBody.Add(strip);
                     partBody = new VisualElement();
                     partBody.AddToClassList("docs-part-body");
-                    part.Add(partBody);
-                    sectionBody.Add(part);
+                    sectionBody.Add(partBody);
                     continue;
                 }
                 VisualElement element = DocsRenderer.RenderBlock(block, _context);
@@ -72,12 +80,14 @@ namespace AbstractPixel.SceneManagement.Documentation
                 {
                     continue;
                 }
-                if (sample != null && sample.TakesIntoTitle(block, element))
+                if (sample != null && !sampleHasAction && IsSampleAction(block))
                 {
+                    sampleHasAction = true;
+                    AddToStrip(sample, element, block.Directive.Argument(1));
                     continue;
                 }
                 VisualElement target = partBody ?? sectionBody ?? _page;
-                // A button with fact rows right under it: one group, so the rows read as what the button opens.
+                // A button with fact rows right under it: one tinted box, so the rows read as what the button opens.
                 if (lastAction != null && lastAction.parent == target && block.Kind == DocsBlockKind.List && DocsFactRows.Applies(block))
                 {
                     VisualElement group = new VisualElement();
@@ -109,72 +119,29 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
             return null;
         }
-    }
 
-    /// <summary>
-    /// The "Try it in the sample" box. Closed: one line with the title, the Open sample button and the sample's folder
-    /// (a click selects it in the Project window). Open: the steps. Stays open for the editor session once opened.
-    /// </summary>
-    public class DocsSampleBox
-    {
-        public readonly VisualElement Root = new VisualElement();
-        public readonly VisualElement Body = new VisualElement();
-        private readonly VisualElement titleLine = new VisualElement();
-        private readonly Label arrow = new Label();
-        private readonly string key;
-        private bool hasAction;
-
-        public DocsSampleBox(string _title, string _pagePath)
+        private static bool IsSampleAction(DocsBlock _block)
         {
-            key = "scene-docs-sample:" + _pagePath;
-            Root.AddToClassList("docs-sample-box");
-            titleLine.AddToClassList("docs-sample-line");
-            Button toggle = new Button(() => SetOpen(!IsOpen));
-            toggle.AddToClassList("docs-sample-toggle");
-            toggle.tooltip = "Shows or hides the steps";
-            arrow.AddToClassList("docs-sample-arrow");
-            toggle.Add(arrow);
-            Label title = new Label(_title);
-            title.AddToClassList("docs-sample-title");
-            toggle.Add(title);
-            titleLine.Add(toggle);
-            Root.Add(titleLine);
-            Body.AddToClassList("docs-sample-body");
-            Root.Add(Body);
-            SetOpen(SessionState.GetBool(key, false));
+            return _block.Kind == DocsBlockKind.Directive && _block.Directive.Name == "action" && _block.Directive.Argument(0) == "open-sample";
         }
 
-        public bool IsOpen { get; private set; }
-
-        public void SetOpen(bool _open)
+        // The Open sample button and the sample folder go on the foldout's strip, after its title.
+        private static void AddToStrip(Foldout _sample, VisualElement _button, string _number)
         {
-            IsOpen = _open;
-            SessionState.SetBool(key, _open);
-            arrow.text = _open ? "▾" : "▸";
-            Body.style.display = _open ? DisplayStyle.Flex : DisplayStyle.None;
-            Root.EnableInClassList("docs-sample-open", _open);
-        }
-
-        /// <summary>Puts the first "open-sample" action on the title line, with the sample folder next to it.</summary>
-        public bool TakesIntoTitle(DocsBlock _block, VisualElement _element)
-        {
-            if (hasAction || _block.Kind != DocsBlockKind.Directive || _block.Directive.Name != "action" || _block.Directive.Argument(0) != "open-sample")
+            VisualElement strip = _sample.Q<Toggle>().Q(className: Toggle.inputUssClassName);
+            _button.AddToClassList("docs-part-fold-action");
+            strip.Add(_button);
+            string folder = SceneDocsTopics.SampleFolder(_number);
+            if (folder == null)
             {
-                return false;
+                return;
             }
-            hasAction = true;
-            titleLine.Add(_element);
-            string folder = SceneDocsTopics.SampleFolder(_block.Directive.Argument(1));
-            if (folder != null)
-            {
-                string shortPath = folder.Contains("/Samples/") ? folder.Substring(folder.IndexOf("/Samples/") + 1) : folder;
-                Button path = new Button(() => SelectFolder(folder));
-                path.text = shortPath;
-                path.tooltip = "Selects this sample's folder in the Project window";
-                path.AddToClassList("docs-sample-path");
-                titleLine.Add(path);
-            }
-            return true;
+            string shortPath = folder.Contains("/Samples/") ? folder.Substring(folder.IndexOf("/Samples/") + 1) : folder;
+            Button path = new Button(() => SelectFolder(folder));
+            path.text = shortPath;
+            path.tooltip = "Selects this sample's folder in the Project window";
+            path.AddToClassList("docs-sample-path");
+            strip.Add(path);
         }
 
         private static void SelectFolder(string _folder)

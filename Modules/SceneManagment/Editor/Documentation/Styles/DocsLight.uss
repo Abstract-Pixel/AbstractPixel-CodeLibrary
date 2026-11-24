@@ -29,23 +29,6 @@
 .docs-flow-number { border-color: rgb(50, 100, 180); color: rgb(30, 66, 130); background-color: rgba(50, 100, 180, 0.12); }
 .docs-flow-phase { border-left-color: rgb(50, 100, 180); }
 .docs-mrow:hover { background-color: rgba(0, 0, 0, 0.03); }
-/* New layout: section and part edges, the sample box, the sandbox. */
-.docs-section-body { border-left-color: rgba(0, 0, 0, 0.18); }
-.docs-part-title { border-left-color: rgb(50, 100, 180); }
-.docs-part-body { border-left-color: rgba(50, 100, 180, 0.25); }
-.docs-action-group-facts { border-left-color: rgba(0, 0, 0, 0.18); }
-.docs-sample-box { border-color: rgba(60, 130, 70, 0.5); background-color: rgba(60, 130, 70, 0.06); }
-.docs-sandbox { border-color: rgba(170, 110, 50, 0.55); background-color: rgba(0, 0, 0, 0.04); }
-.docs-sandbox-pill { background-color: rgba(170, 110, 50, 0.15); border-color: rgba(170, 110, 50, 0.5); color: rgb(120, 70, 20); }
-.docs-sandbox-panel, .docs-sandbox-run-panel { background-color: rgb(200, 200, 200); border-color: rgb(153, 153, 153); }
-.docs-sandbox-panel-title { background-color: rgb(210, 210, 210); border-color: rgb(153, 153, 153); }
-.docs-sandbox-console { background-color: rgb(235, 235, 235); border-color: rgb(153, 153, 153); }
-.docs-sandbox-line-time { color: rgb(110, 110, 110); }
-.docs-sandbox-line-why { color: rgb(90, 90, 90); }
-.docs-sandbox-line-warning .docs-sandbox-line-what { color: rgb(150, 100, 0); }
-.docs-sandbox-screen-old { background-color: rgb(90, 115, 160); }
-.docs-sandbox-screen-loading { background-color: rgb(50, 50, 56); }
-.docs-sandbox-screen-new { background-color: rgb(80, 140, 90); }
-.docs-sandbox-bar { background-color: rgb(80, 80, 86); }
-.docs-sandbox-bar-fill { background-color: rgb(120, 180, 240); }
-.docs-sandbox-verdict { color: rgb(120, 70, 20); }
+/* New layout: part strips and the tinted group box. */
+.docs-part-strip, .docs-part-fold > .unity-foldout__toggle { background-color: rgba(255, 255, 255, 0.35); }
+.docs-action-group, .docs-fold > .unity-foldout__content { background-color: rgba(0, 0, 0, 0.07); }
