@@ -10,30 +10,18 @@ The scene picker sits on the main toolbar, just left of Play. Use it to open or 
 
 <!-- action open-picker "Open the scene picker" -->
 
-![The scene picker, Scenes tab](../../Images/scene-system-picker-scenes.png)
-<!-- marks 1@0.03,0.057 "Scenes tab: every scene of the game, each with its group or scene set"; 2@0.95,0.177 "Search: filters the rows as you type, every word must match"; 3@0.895,0.385 "Status button: the scene's status colour, a click opens the place that fixes it"; 4@0.965,0.385 "Folder button: selects the asset in the Project window without opening it"; 5@0.6,0.91 "Open with: the two scene opening preferences, as in Preferences > Abstract Pixel > Scenes" -->
-
 > [!NOTE]
 > Unity hides a new toolbar element until you tick it. On Unity 6.3, right-click an empty part of the toolbar and tick Scene picker.
 
-**The button and the popup**
+- **The toolbar button:** names the open scene group. With no group's main scene open, it shows the active scene's name followed by "(no group)". In Play it is greyed out and still names the open group.
 
-- **The button:** names the open scene group. With no group's main scene open, it shows the active scene's name followed by "(no group)". In Play it is greyed out and still names the open group.
-- **Scenes tab:** the game's scenes first, each with its group, or with its scene set for a manager or shared scene. Scenes in no group follow under their own heading; sample scenes sit under Samples at the bottom. Unity's test runner scenes and other packages' scenes are left out.
-- **Scene Groups tab:** game groups with their main scene and scene set, then sample scene groups. A group with no main scene can be selected but not opened.
-- **Recent:** before you type, a Recent section shows what you opened last from the picker, and the open group or scene is highlighted.
+![The scene picker, Scenes tab](../../Images/scene-system-picker-scenes.png)
+<!-- marks 1@0.01,0.0,0.22,0.115 "Scenes tab: the game's scenes first, each with its group, or its scene set for a manager or shared scene. Scenes in no group follow under their own heading, sample scenes under Samples at the bottom. Unity's test runner scenes and other packages' scenes are left out"; 2@0.23,0.0,0.27,0.115 "Scene Groups tab: game groups with their main scene and scene set, then sample scene groups. A group with no main scene can be selected but not opened. Tab switches tabs"; 3@0.95,0.177 "Search: filters the rows as you type, every word must match the name, the folder or, on the Scenes tab, the group name"; 4@0.01,0.24,0.2,0.09 "Section heading: here Samples. Before you type, a Recent section comes first with what you last opened from the picker, numbered from 1, the last used"; 5@0.45,0.385 "Label button: names the scene's group, its scene set, Shared by X, or No group. A click selects what it names"; 6@0.895,0.385 "Status button: the scene's status colour. Its tooltip says the status and what a click does, a click never opens the row"; 7@0.965,0.385 "Folder button: selects the asset in the Project window without opening it"; 8@0.6,0.91 "Open with: the two scene opening preferences, as in Preferences > Abstract Pixel > Scenes" -->
 
 ![The scene picker, Scene Groups tab](../../Images/scene-system-picker-groups.png)
-<!-- marks 1@0.6,0.035 "Scene Groups tab: game scene groups first, then sample scene groups"; 2@0.625,0.22 "Scene set: the label names the group's scene set, a click selects it"; 3@0.87,0.22 "Group check: green with no problems, red shows the first problem and the count" -->
+<!-- marks 1@0.23,0.0,0.27,0.07 "Scene Groups tab: the tab this image shows"; 2@0.01,0.185,0.6,0.07 "Scene group: its ScriptableObject icon and name. On this tab the number before it is the group's number in the Scene Groups Debugger"; 3@0.625,0.22 "Scene set label: names the group's scene set, and the main scene moves into the row's tooltip. A click selects it"; 4@0.87,0.22 "Group check: green with no problems, red with the first problem and the count, yellow for an unused boot group, grey for a sample: Sample: never goes into a build" -->
 
-**A row**
-
-- **Name:** on the left, with a number before it under Recent (1 is the last used) and on the Scene Groups tab (the group's number in the Scene Groups Debugger).
-- **Buttons:** right-aligned, the label button, the status button and the folder button, flat until hovered.
-- **Label:** names the scene's group, its scene set ("Level (scene set)"), "Shared by X", or "No group" (plain text, not a button). On the Scene Groups tab it names the group's scene set, and the main scene moves into the row's tooltip. A click selects what it names and shows it in the Inspector.
-- **Status button:** the scene status colour on the Scenes tab, and the group check on the Scene Groups tab (red with the first problem and the count; yellow for an unused boot group, as the Debugger shows it). Sample scenes and groups are grey, "Sample: never goes into a build". Its tooltip says the status, then what a click does. A click never opens the row.
-- **Folder button:** selects the asset in the Project window.
-- **Right-click:** Open, Open additively, Select scene, Select scene group and Copy path. Entries that do not apply are greyed out.
+- **Right-click a row:** Open, Open additively, Select scene, Select scene group and Copy path. Entries that do not apply are greyed out.
 
 **What a status button click does**
 
