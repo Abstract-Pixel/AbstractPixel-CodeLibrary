@@ -15,14 +15,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             VisualElement page = new VisualElement();
             page.AddToClassList("docs-page-content");
             page.Add(TitleRow(_context.Page));
-            if (_context.Page.IsNewLayout)
-            {
-                DocsSections.AddBlocks(page, _context.Page.Blocks, _context);
-            }
-            else
-            {
-                AddBlocks(page, _context.Page.Blocks, _context);
-            }
+            DocsSections.AddBlocks(page, _context.Page.Blocks, _context);
             return page;
         }
 
@@ -122,11 +115,11 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 return StepList(_block, _context);
             }
-            if (_context.Page.IsNewLayout && DocsFactRows.Applies(_block))
+            if (DocsFactRows.Applies(_block))
             {
                 return DocsFactRows.Create(_block, _context);
             }
-            if (_context.Page.IsNewLayout && DocsFlow.Applies(_block))
+            if (DocsFlow.Applies(_block))
             {
                 return DocsFlow.Create(_block, _context);
             }
@@ -219,7 +212,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             bool inGroup = false;
             for (int rowIndex = 0; rowIndex < _block.Rows.Count; rowIndex++)
             {
-                if (rowIndex > 0 && _context.Page.IsNewLayout && IsGroupRow(_block.Rows[rowIndex]))
+                if (rowIndex > 0 && IsGroupRow(_block.Rows[rowIndex]))
                 {
                     string title = _block.Rows[rowIndex][0].Trim();
                     VisualElement groupRow = new VisualElement();
@@ -266,9 +259,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         // A closed foldout. "Why it works" gets the callout look; the others ("If it goes wrong") stay plain.
         private static VisualElement Details(DocsBlock _block, DocsRenderContext _context)
         {
-            if (_context.Page.IsNewLayout)
-            {
-                Foldout fold = DocsSessionFoldout.Create(_block.Title, _context.Page.Path);
+            Foldout fold = DocsSessionFoldout.Create(_block.Title, _context.Page.Path);
                 fold.AddToClassList("docs-inner-box");
                 fold.EnableInClassList("docs-fold-why", _block.Title == "Why it works");
                 fold.EnableInClassList("docs-fold-wrong", _block.Title == "If it goes wrong");
@@ -279,19 +270,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                     inside[0].AddToClassList("docs-first");
                     inside[inside.childCount - 1].AddToClassList("docs-last");
                 }
-                return fold;
-            }
-            Foldout foldout = new Foldout();
-            foldout.text = _block.Title;
-            foldout.value = false;
-            foldout.AddToClassList("docs-foldout");
-            bool isWhy = _block.Title == "Why it works";
-            if (isWhy)
-            {
-                foldout.AddToClassList("docs-foldout-why");
-            }
-            AddBlocks(foldout.contentContainer, _block.Children, _context);
-            return foldout;
+            return fold;
         }
     }
 }

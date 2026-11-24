@@ -165,11 +165,11 @@ namespace AbstractPixel.SceneManagement.Documentation
                 case "action": return ActionChip(_directive);
                 case "timeline": return new SceneDocsTimelineView(navigate);
                 case "your-project": return SceneDocsYourProject.Render(_directive.Argument(0));
-                case "members": return _context.Page.IsNewLayout ? SceneDocsMemberTables.Render(_directive.Argument(0), _context) : SceneDocsMembers.Render(_directive.Argument(0));
+                case "members": return SceneDocsMemberTables.Render(_directive.Argument(0), _context);
                 case "type-header": return SceneDocsTypeHeader.Render(_directive.Argument(0), _context);
                 case "decision": return SceneDocsReference.DecisionHeader(_context.Page.Path);
                 case "code-map": return SceneDocsDiagram.CodeMap();
-                case "adr-list": return _context.Page.IsNewLayout ? SceneDocsReference.DecisionList(navigate) : SceneDocsReference.AdrList(navigate);
+                case "adr-list": return SceneDocsReference.DecisionList(navigate);
                 case "diagram": return SceneDocsDiagram.Parts(navigate);
                 case "locate": return SceneDocsLocate.Render(_directive.Argument(0), _directive.Argument(1), _directive.Argument(2));
                 default: return null;

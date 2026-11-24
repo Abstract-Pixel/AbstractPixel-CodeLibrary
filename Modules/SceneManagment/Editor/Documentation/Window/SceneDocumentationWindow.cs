@@ -445,11 +445,11 @@ namespace AbstractPixel.SceneManagement.Documentation
             pageColumn.Clear();
             shownPage = _page;
             renderContext = new DocsRenderContext(_parsed, host);
-            pageColumn.EnableInClassList("docs-layout-new", _parsed.IsNewLayout);
+            pageColumn.AddToClassList("docs-layout-new");
             pageColumn.Add(DocsRenderer.Render(renderContext));
-            pageColumn.Add(_parsed.IsNewLayout ? PagerCards(_page) : Pager(_page));
+            pageColumn.Add(PagerCards(_page));
             rail.Build(pageColumn);
-            rootVisualElement.EnableInClassList("docs-has-rail", _parsed.IsNewLayout);
+            rootVisualElement.AddToClassList("docs-has-rail");
             crumbs.text = CrumbsFor(_page, _parsed.Title);
             trail.Refresh(history.RecentPages(DocsTrail.MaxPages), crumbs.text);
             BuildOnThisPage(_parsed);
@@ -493,32 +493,6 @@ namespace AbstractPixel.SceneManagement.Documentation
                 onThisPage.menu.AppendAction(heading.Text, _action => ScrollToHeading(id));
             }
             onThisPage.SetEnabled(_parsed.Headings.Count > 0);
-        }
-
-        // Previous and next page in the contents order.
-        private VisualElement Pager(string _page)
-        {
-            VisualElement pager = new VisualElement();
-            pager.AddToClassList("docs-pager");
-            List<SceneDocsContentsEntry> all = SceneDocsContents.Flatten();
-            int index = all.FindIndex(_entry => _entry.Topic == _page);
-            if (index < 0)
-            {
-                return pager;
-            }
-            if (index > 0)
-            {
-                SceneDocsContentsEntry previous = all[index - 1];
-                pager.Add(PagerButton("Previous: " + previous.Title, previous.Topic));
-            }
-            if (index < all.Count - 1)
-            {
-                SceneDocsContentsEntry next = all[index + 1];
-                Button nextButton = PagerButton("Next: " + next.Title, next.Topic);
-                nextButton.AddToClassList("docs-pager-next");
-                pager.Add(nextButton);
-            }
-            return pager;
         }
 
         // The new layout's pager: two equal halves, a small "Previous" or "Next" over the page title, Next on the right.

@@ -17,7 +17,7 @@ Games change scene with one call on `SceneActions`, and the screen effect runs i
 
 | Option | Why not |
 |---|---|
-| Keep two public calls (`TransitionActions.*WithEffects` and `SceneActions.*`) | Two busy flags, and the screen went black even when the coordinator refused the change |
+| Keep two public calls: the `*WithEffects` calls on `TransitionActions` and the scene calls on `SceneActions` | Two busy flags, and the screen went black even when the coordinator refused the change |
 | Connect the two modules through events | A scene change spread over event handlers is hard to follow in a debugger |
 
 ## Consequences
