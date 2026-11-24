@@ -911,6 +911,8 @@
 .docs-layout-new .docs-code-scroll {
     padding-left: 10px;
     padding-right: 10px;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 /* Phases of a flow run to the box's edges; plain numbered steps keep the text margin. */
