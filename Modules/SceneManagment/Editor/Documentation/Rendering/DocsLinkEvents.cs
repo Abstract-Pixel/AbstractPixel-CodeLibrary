@@ -37,6 +37,11 @@ namespace AbstractPixel.SceneManagement.Documentation
             bool isHoverOnly = _linkId.StartsWith(HoverOnlyPrefix, StringComparison.Ordinal);
             _label.tooltip = isHoverOnly ? "" : TooltipOrEmpty(_tooltipFor, _linkId);
             string original = OriginalText(_label);
+            // Unity's text selection breaks if the text changes under it, so selection pauses while a link is lit.
+            if (_label is Label selectable)
+            {
+                selectable.selection.isSelectable = false;
+            }
             _label.text = Brightened(original, _linkId);
         }
 
@@ -46,6 +51,10 @@ namespace AbstractPixel.SceneManagement.Documentation
             if (_label.userData is HoverText saved)
             {
                 _label.text = saved.Original;
+            }
+            if (_label is Label selectable)
+            {
+                selectable.selection.isSelectable = true;
             }
         }
 
