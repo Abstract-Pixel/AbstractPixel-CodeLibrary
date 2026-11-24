@@ -37,7 +37,7 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 
 ## The lines that matter
 `Scripts/Sample06BarDisplay.cs`: the view calls SetProgress every frame with the smoothed progress; the bar grows from the left.
-```csharp
+```csharp source=Scripts/Sample06BarDisplay.cs
 public void SetProgress(float _progress)
 {
     ShownProgress = _progress;
@@ -48,7 +48,7 @@ public void SetProgress(float _progress)
 ```
 
 `Scripts/Sample06BarDisplay.cs`: the display is a plain interface, so any look written in code can be one.
-```csharp
+```csharp source=Scripts/Sample06BarDisplay.cs
 public class Sample06BarDisplay : MonoBehaviour, ILoadingProgressDisplay
 ```
 

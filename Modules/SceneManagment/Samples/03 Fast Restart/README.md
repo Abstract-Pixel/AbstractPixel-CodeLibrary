@@ -37,7 +37,7 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 
 ## The lines that matter
 `Scripts/Sample03RetryButton.cs`: Retry is one call; it returns the same result type as a change.
-```csharp
+```csharp source=Scripts/Sample03RetryButton.cs
 public async Task<SceneChangeResult> RetryOnce()
 {
     SceneChangeResult result = await SceneActions.Retry();
@@ -47,7 +47,7 @@ public async Task<SceneChangeResult> RetryOnce()
 ```
 
 `Scripts/Sample03RunState.cs`: the per-run state lives in the shared scene, so it needs no reset code of its own.
-```csharp
+```csharp source=Scripts/Sample03RunState.cs
 private void Update()
 {
     secondsThisRun += Time.unscaledDeltaTime;
