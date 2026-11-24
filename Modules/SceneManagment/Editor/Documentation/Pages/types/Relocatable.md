@@ -38,6 +38,30 @@ One component and its relocation label are all it needs: no physics lock, no unl
 | On relocated | Inspector listeners of `Relocated`. | You want a reaction without code. |
 | On released | Inspector listeners of `Released`. | You want a reaction without code. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Listen to its events to react when the object has moved or is free…**
+
+Listen to its events to react when the object has moved or is free again:
+
+```cs
+[SerializeField] private Relocatable relocatable;
+
+private void OnEnable()
+{
+    relocatable.Relocated += OnRelocated;
+    relocatable.Released += OnReleased;
+}
+
+private void OnDisable()
+{
+    relocatable.Relocated -= OnRelocated;
+    relocatable.Released -= OnReleased;
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.Relocatable -->
 
 ## See also

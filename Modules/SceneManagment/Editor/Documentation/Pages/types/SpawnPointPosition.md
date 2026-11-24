@@ -18,6 +18,17 @@ Positions are data on the spawn point, never GameObjects. You rarely touch this 
 |---|---|---|
 | Read a position's rotation | `SafeLocalRotation` | An all-zero rotation (a new list entry) reads as no turn. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: One position: where, which way, and its instance**
+
+```cs
+SpawnPointPosition position = new SpawnPointPosition(new Vector3(0f, 0f, 3f), Quaternion.identity, 2);
+Quaternion rotation = position.SafeLocalRotation;
+```
+
 <!-- members AbstractPixel.SceneManagement.SpawnPointPosition -->
 
 ## See also

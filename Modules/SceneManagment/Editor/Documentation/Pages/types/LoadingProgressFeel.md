@@ -35,6 +35,23 @@ You set it in the Feel foldout of a `LoadingProgressView`. It is plain data and 
 | Curve | Optional: x is the smoothed progress, y what is shown. Empty shows it as it is. | The bar should speed up or slow down. |
 | Hold At Full Seconds | How long the view holds at full before Hide screen starts, in unscaled seconds. Default 0.3. | The player should see the bar reach 100%. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: The view owns one; you read it through LoadingProgressView.Feel**
+
+The view owns one; you read it through `LoadingProgressView.Feel`:
+
+```cs
+LoadingProgressFeel feel = progressView.Feel;
+float shown = feel.Smoothed;
+if (feel.IsFull)
+{
+    // The bar has reached 1.
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.SceneScreens.LoadingProgressFeel -->
 
 ## See also

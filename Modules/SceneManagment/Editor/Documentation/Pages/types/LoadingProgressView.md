@@ -39,6 +39,24 @@ Add it to an object in your loading scene, then connect your bar through an even
 | On Full | Every scene is open and the shown value reached 1: play the full beat. | You want a finishing flash or sound. |
 | On Hidden | The loading scene is closing. | You stop sounds or reset effects. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Most setups need no code. A display written in code is handed to…**
+
+Most setups need no code. A display written in code is handed to the view like this:
+
+```cs
+[SerializeField] private LoadingProgressView progressView;
+[SerializeField] private SimpleLoadingProgressBar bar;
+
+private void Awake()
+{
+    progressView.SetDisplay(bar);
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.SceneScreens.LoadingProgressView -->
 
 ## See also

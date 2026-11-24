@@ -28,6 +28,19 @@ The scene system creates one for you. You choose only where a scene lives.
 - **Last scene:** keeps one scene open while a change closes every scene (a group with no manager scene).
 - **Freeing memory:** goes through the Build Settings loader.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: The coordinator uses one; you never need to. It picks the loader…**
+
+The coordinator uses one; you never need to. It picks the loader per scene:
+
+```cs
+ISceneLoader loader = new SceneLoaderSelector();
+await loader.LoadScene(levelScene, true);
+```
+
 <!-- members AbstractPixel.SceneManagement.SceneLoaderSelector -->
 
 ## See also

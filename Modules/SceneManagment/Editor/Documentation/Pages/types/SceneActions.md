@@ -29,7 +29,9 @@ Most games only call `ChangeTo`. The rest are for a few special cases, and some 
 
 ## In code
 
-From a sample:
+Each example is closed; open the one you need.
+
+**Example: From a sample**
 
 ```cs source=../../../../Samples/02 Change Level From Code/Scripts/Sample02LevelChanger.cs
 SceneChangeResult result = await SceneActions.ChangeTo(otherGroup);

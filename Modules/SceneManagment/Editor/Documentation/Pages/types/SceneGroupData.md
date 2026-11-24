@@ -26,6 +26,20 @@ Use it only to save a scene group and read it back. It converts to and from `Sce
 - **Loaded group:** a new object, so it is not equal to the saved asset (see `SceneGroup`).
 - **Empty main scene:** loading logs an error that the saved group's main scene is empty.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Turn a scene group into plain data to save it, and back**
+
+```cs
+SceneGroupData data = sceneGroup;
+string json = JsonUtility.ToJson(data);
+
+SceneGroupData loaded = JsonUtility.FromJson<SceneGroupData>(json);
+SceneGroup restored = loaded;
+```
+
 <!-- members AbstractPixel.SceneManagement.SceneGroupData -->
 
 ## See also

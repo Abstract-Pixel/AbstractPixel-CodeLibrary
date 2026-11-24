@@ -26,6 +26,17 @@ You do not call it. Start-up calls `Create` when you press Play in a scene that 
 - **Name:** Temporary scene group (scene name).
 - **Saved:** never; the group is not an asset and equals only itself.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Start-up makes one for a scene in no group; the same call from code**
+
+```cs
+SceneGroup temporary = TemporarySceneGroup.Create(openScene, settings.DefaultSceneSet);
+SceneChangeResult result = await SceneActions.ChangeTo(temporary);
+```
+
 <!-- members AbstractPixel.SceneManagement.TemporarySceneGroup -->
 
 ## See also

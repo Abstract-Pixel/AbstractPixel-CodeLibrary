@@ -20,6 +20,20 @@ Pass a value to `SceneGroup.IsOverride` to ask whether that part keeps the group
 | Ask about shared scenes | `SharedScenes` | The group's Shared scenes. |
 | Ask about the reset choice | `ResetSharedScenes` | The group's Reset shared scenes. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Ask whether one part of a group keeps its own value**
+
+```cs
+bool ownShared = sceneGroup.IsOverride(SceneSetPart.SharedScenes);
+if (ownShared)
+{
+    // This group does not follow its scene set's shared scenes.
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.SceneSetPart -->
 
 ## See also

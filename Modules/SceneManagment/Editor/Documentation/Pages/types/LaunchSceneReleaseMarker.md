@@ -27,6 +27,21 @@ Drop one marker on the launch scene's Timeline, at the frame where the hand-off 
 
 - **id / flags:** Timeline reads these to send the notification; you never set them.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: No code: add it to the launch scene's Timeline. A script that waits…**
+
+No code: add it to the launch scene's Timeline. A script that waits for the hand-off it causes looks like this:
+
+```cs
+private void OnEnable()
+{
+    SceneActions.RunWhenLaunchSceneReleased(StartIntro);
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.SceneScreens.LaunchSceneReleaseMarker -->
 
 ## See also

@@ -27,6 +27,24 @@ Add this component to any object, then point a UnityEvent at it. Each call start
 
 <!-- locate "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/01 Button Changes Level/Scenes/Sample 01 Room A.unity" "Scene Actions" "MonoSceneActions" -->
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Usually called from a Button's On Click with no code. From a script…**
+
+Usually called from a Button's On Click with no code. From a script on the same object:
+
+```cs
+[SerializeField] private MonoSceneActions sceneActions;
+[SerializeField] private SceneGroup nextGroup;
+
+public void OnContinuePressed()
+{
+    sceneActions.ChangeTo(nextGroup);
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.MonoSceneActions -->
 
 ## See also

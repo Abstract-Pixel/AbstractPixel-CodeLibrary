@@ -29,6 +29,23 @@ Its own transform is its first position; more positions are data, each with its 
 | First instance | The instance of the first position, which is this object's own transform. | A relocatable asks for a set instance. |
 | More positions | The stored positions, each a `SpawnPointPosition` with its instance. | Normally edit them in the Scene view instead. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Read or add positions from code (the Scene view tools do the same)**
+
+```cs
+[SerializeField] private SpawnPoint spawnPoint;
+
+private void AddOneMore()
+{
+    Pose first = spawnPoint.GetWorldPose(0);
+    Pose next = new Pose(first.position + Vector3.right * 2f, first.rotation);
+    spawnPoint.AddPosition(next, spawnPoint.PositionCount + 1);
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.SpawnPoint -->
 
 ## See also

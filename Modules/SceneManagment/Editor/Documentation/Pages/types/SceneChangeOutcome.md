@@ -28,7 +28,9 @@ Three values. Each one says how the request ended; the result next to it carries
 
 ## In code
 
-Switch on the outcome after the await:
+Each example is closed; open the one you need.
+
+**Example: Switch on the outcome after the await**
 
 ```cs
 SceneChangeResult result = await SceneActions.ChangeTo(nextGroup);
@@ -46,7 +48,7 @@ switch (result.Outcome)
 }
 ```
 
-Or, for a plain yes or no:
+**Example: Or, for a plain yes or no**
 
 ```cs
 SceneChangeResult result = await SceneActions.ChangeTo(nextGroup);

@@ -25,6 +25,29 @@ The transitions module provides it: `TransitionManager` registers itself with `S
 - **Refused changes:** the scene system calls Hide screen only after it accepted a change, so a refused change never covers the screen.
 - **Release:** an executor that never calls the argument of `TransitionToShowScreen` is released at the end of Show screen. The argument may be null.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: The transitions module registers its executor. Your own screen…**
+
+The transitions module registers its executor. Your own screen effect would implement it like this:
+
+```cs
+public class MyEffect : ISceneTransitionExecutor
+{
+    public Task TransitionToHideScreen() { return Task.CompletedTask; }
+
+    public Task TransitionToShowScreen(Action _screenCountsAsVisible)
+    {
+        _screenCountsAsVisible?.Invoke();
+        return Task.CompletedTask;
+    }
+}
+
+SceneActions.RegisterTransitionExecutor(new MyEffect());
+```
+
 <!-- members AbstractPixel.SceneManagement.ISceneTransitionExecutor -->
 
 ## See also

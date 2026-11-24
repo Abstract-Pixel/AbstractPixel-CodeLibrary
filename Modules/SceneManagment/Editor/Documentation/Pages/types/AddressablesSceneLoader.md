@@ -26,6 +26,20 @@ You do not create this loader. The `SceneLoaderSelector` sends it every Addressa
 - **One copy per scene:** asking again for an open scene only activates it when it is held.
 - **Only through the API:** it calls Addressables through `IAddressablesSceneApi`, so the contract tests can run it on a fake.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: You never create one; SceneLoaderSelector uses it for every…**
+
+You never create one; `SceneLoaderSelector` uses it for every Addressable scene. To make a scene go through it, mark the scene Addressable:
+
+```cs
+// No code: right-click the scene field and pick Move to Addressables.
+// SceneLoaderSelector then sends this scene to AddressablesSceneLoader:
+SceneChangeResult result = await SceneActions.ChangeTo(addressableLevel);
+```
+
 <!-- members AbstractPixel.SceneManagement.AddressablesSceneLoader -->
 
 ## See also

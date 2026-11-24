@@ -21,6 +21,25 @@ The relocation sub-module provides it and registers it with `SceneActions.Regist
 - **Relocate:** once every scene of the group is open; the change waits for it.
 - **Release:** once the screen counts as visible.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: The relocation sub-module registers the one broadcaster. Only a…**
+
+The relocation sub-module registers the one broadcaster. Only a replacement of your own would register itself:
+
+```cs
+public class MyBroadcaster : IRelocationBroadcaster
+{
+    public void Hold() { }
+    public Task Relocate() { return Task.CompletedTask; }
+    public void Release() { }
+}
+
+SceneActions.RegisterRelocationBroadcaster(new MyBroadcaster());
+```
+
 <!-- members AbstractPixel.SceneManagement.IRelocationBroadcaster -->
 
 ## See also

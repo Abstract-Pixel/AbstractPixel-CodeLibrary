@@ -21,6 +21,18 @@ Use these in editor tools or checks instead of reading a label field directly, b
 | Find its steepest ground | `SteepestGroundOf` | For "No label" it reads the project-wide value on the Scene System page. |
 | Raycast for ground | `GroundLayers` | The Ground layers from the Scene System page. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Use it when a label field may be empty ("No label")**
+
+```cs
+string name = RelocationLabels.NameOf(relocatable.Label);
+float steepest = RelocationLabels.SteepestGroundOf(relocatable.Label);
+bool sameKind = RelocationLabels.Same(relocatable.Label, spawnPoint.Label);
+```
+
 <!-- members AbstractPixel.SceneManagement.RelocationLabels -->
 
 ## See also

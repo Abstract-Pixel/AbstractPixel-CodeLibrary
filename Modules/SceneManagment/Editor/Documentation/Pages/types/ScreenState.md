@@ -21,6 +21,21 @@ Read it from `TransitionActions.ScreenState`, or get it from `TransitionEventBus
 | Do work nobody should see | `Hidden` | Covered; scenes close and open. |
 | Get ready to give control back | `Showing` | Show screen runs. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Read it, or listen for changes**
+
+```cs
+if (TransitionActions.ScreenState == ScreenState.Visible)
+{
+    // Nothing covers the screen.
+}
+
+TransitionEventBus.OnScreenStateChanged += OnScreenStateChanged;
+```
+
 <!-- members AbstractPixel.SceneTransitions.ScreenState -->
 
 ## See also
