@@ -11,6 +11,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// a scene a docs button opened, and never by opening a window that is closed.
     /// </summary>
     [InitializeOnLoad]
+    #if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+    #endif
     public static class SceneDocsSampleFollower
     {
         static SceneDocsSampleFollower()

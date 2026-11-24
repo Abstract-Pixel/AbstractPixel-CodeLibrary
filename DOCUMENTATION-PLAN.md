@@ -25,8 +25,8 @@ settings page. From code: `SceneDocumentationWindow.OpenAt("guide/loading-scene"
 
 ## 2. The page format
 
-A page opts into the new look with the line `<!-- layout new -->` under its title. Pages without it render the old way;
-59 of 62 pages still do. When every page has the line, delete the old paths (see section 7).
+Every page carries the line `<!-- layout new -->` under its title. The old render paths are gone (November 2026), so every
+page renders in this layout; keep the line on new pages for readers of the raw Markdown.
 
 How each Markdown construct is drawn on a new-layout page:
 

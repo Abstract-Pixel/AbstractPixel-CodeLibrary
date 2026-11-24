@@ -9,11 +9,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             string pagePath = _context.Page.Path;
             IDocsHost host = _context.Host;
-            System.Func<string, string> codeLink = null;
-            if (_context.Page.IsNewLayout)
-            {
-                codeLink = _code => host.CodeLinkTarget(_code, pagePath);
-            }
+            System.Func<string, string> codeLink = _code => host.CodeLinkTarget(_code, pagePath);
             Label label = new Label(DocsInline.ToRichText(_markdown, codeLink));
             label.enableRichText = true;
             label.selection.isSelectable = true;

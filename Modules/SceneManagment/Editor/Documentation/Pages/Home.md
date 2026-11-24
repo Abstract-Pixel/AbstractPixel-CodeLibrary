@@ -1,5 +1,7 @@
 # Scene documentation
 
+<!-- layout new -->
+
 The scene system opens, closes and switches groups of scenes: a main scene plus the manager scenes and shared scenes that come with it, with a screen effect, an optional loading scene, preload and relocation.
 
 ## Three ways in

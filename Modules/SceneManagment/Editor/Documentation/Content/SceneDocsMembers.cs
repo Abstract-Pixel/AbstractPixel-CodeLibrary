@@ -64,56 +64,5 @@ namespace AbstractPixel.SceneManagement.Documentation
             members.Sort((_a, _b) => string.CompareOrdinal(_a.Key + _a.Value, _b.Key + _b.Value));
             return members;
         }
-
-        public static VisualElement Render(string _fullName)
-        {
-            VisualElement box = new VisualElement();
-            box.AddToClassList("docs-members");
-            Type type = FindType(_fullName);
-            if (type == null)
-            {
-                box.Add(new Label("No loaded type named " + _fullName));
-                return box;
-            }
-            string file = SceneDocsSource.FileDeclaring(type.Name);
-            List<KeyValuePair<string, string>> members = MembersOf(type);
-            if (members.Count == 0)
-            {
-                Label none = new Label("No public members of its own.");
-                none.AddToClassList("docs-text");
-                box.Add(none);
-                return box;
-            }
-            foreach (KeyValuePair<string, string> member in members)
-            {
-                box.Add(MemberRow(member.Key, member.Value, file));
-            }
-            return box;
-        }
-
-        private static VisualElement MemberRow(string _kind, string _name, string _file)
-        {
-            VisualElement row = new VisualElement();
-            row.AddToClassList("docs-member");
-            VisualElement header = new VisualElement();
-            header.AddToClassList("docs-member-header");
-            header.Add(DocsPill.Kind(_kind));
-            Label name = new Label(_name);
-            name.AddToClassList("docs-member-name");
-            name.selection.isSelectable = true;
-            DocsCodeBlock.ApplyMonoFont(name);
-            header.Add(name);
-            row.Add(header);
-            string summary = _file == null ? "" : SceneDocsSource.SummaryAbove(_file, _name);
-            if (summary.Length > 0)
-            {
-                Label text = new Label(summary);
-                text.AddToClassList("docs-text");
-                text.AddToClassList("docs-member-summary");
-                text.selection.isSelectable = true;
-                row.Add(text);
-            }
-            return row;
-        }
     }
 }

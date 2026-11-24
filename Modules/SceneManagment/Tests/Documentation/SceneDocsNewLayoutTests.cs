@@ -24,9 +24,9 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
         public void TheLayoutLineOptsAPageIn()
         {
             DocsPage page = Parse("# T\n\n<!-- layout new -->\n\nLede.");
-            Assert.IsTrue(page.IsNewLayout);
+            Assert.AreEqual("new", page.Layout);
             Assert.IsFalse(page.Blocks.Exists(_block => _block.Kind == DocsBlockKind.Directive), "The layout line draws nothing");
-            Assert.IsFalse(Parse("# T\n\nLede.").IsNewLayout);
+            Assert.IsNull(Parse("# T\n\nLede.").Layout);
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
             foreach (string topic in SceneDocsReferenceTests.AllTopics())
             {
                 DocsPage page = SceneDocsPageCache.Get(topic);
-                if (page == null || !page.IsNewLayout)
+                if (page == null)
                 {
                     continue;
                 }

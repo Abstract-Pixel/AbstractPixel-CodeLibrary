@@ -14,6 +14,9 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
     public class SceneDocsMemberReaderTests
     {
         // A type with no source file in the module, so everything comes from reflection.
+        #if UNITY_7000_0_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+        #endif
         public class Sample
         {
             public readonly float Speed = 1f;

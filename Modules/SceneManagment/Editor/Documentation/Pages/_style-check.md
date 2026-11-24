@@ -1,5 +1,7 @@
 # Style check <!-- level 1 -->
 
+<!-- layout new -->
+
 A page that uses every element, to check the look at 275 and 900 px. It is not in the contents.
 
 ## Prose and links <!-- level 0 -->

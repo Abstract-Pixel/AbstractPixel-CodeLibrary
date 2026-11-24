@@ -11,12 +11,6 @@ namespace AbstractPixel.SceneManagement.Documentation
 
         /// <summary>The layout a page opts into with a "&lt;!-- layout new --&gt;" line, or null for the old one.</summary>
         public string Layout { get; set; }
-
-        /// <summary>True when the page uses the new layout: wider, sectioned, with fact rows, flows and member tables.</summary>
-        public bool IsNewLayout
-        {
-            get { return Layout == "new"; }
-        }
         public List<DocsBlock> Blocks { get; private set; } = new List<DocsBlock>();
         public List<DocsHeading> Headings { get; private set; } = new List<DocsHeading>();
         public List<string> Problems { get; private set; } = new List<string>();
