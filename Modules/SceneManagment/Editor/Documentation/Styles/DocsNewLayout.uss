@@ -1528,11 +1528,47 @@
     border-left-width: 4px;
 }
 
-.docs-graph-cat-api { border-left-color: rgb(96, 140, 196); background-color: rgba(96, 140, 196, 0.08); }
-.docs-graph-cat-interface { border-left-color: rgb(196, 168, 110); background-color: rgba(196, 168, 110, 0.08); }
-.docs-graph-cat-enum { border-left-color: rgb(150, 180, 130); background-color: rgba(150, 180, 130, 0.08); }
-.docs-graph-cat-editor { border-left-color: rgb(160, 136, 192); background-color: rgba(160, 136, 192, 0.08); }
-.docs-graph-cat-other { border-left-color: rgb(128, 128, 128); }
+/* Two classes, so these win over the skin sheet's grey box border; the outline takes a softer tint of the edge. */
+.docs-graph-box.docs-graph-cat-api,
+.docs-graph-swatch.docs-graph-cat-api {
+    border-left-color: rgb(96, 140, 196);
+    border-top-color: rgba(96, 140, 196, 0.45);
+    border-right-color: rgba(96, 140, 196, 0.45);
+    border-bottom-color: rgba(96, 140, 196, 0.45);
+    background-color: rgba(96, 140, 196, 0.08);
+}
+
+.docs-graph-box.docs-graph-cat-interface,
+.docs-graph-swatch.docs-graph-cat-interface {
+    border-left-color: rgb(196, 168, 110);
+    border-top-color: rgba(196, 168, 110, 0.45);
+    border-right-color: rgba(196, 168, 110, 0.45);
+    border-bottom-color: rgba(196, 168, 110, 0.45);
+    background-color: rgba(196, 168, 110, 0.08);
+}
+
+.docs-graph-box.docs-graph-cat-enum,
+.docs-graph-swatch.docs-graph-cat-enum {
+    border-left-color: rgb(150, 180, 130);
+    border-top-color: rgba(150, 180, 130, 0.45);
+    border-right-color: rgba(150, 180, 130, 0.45);
+    border-bottom-color: rgba(150, 180, 130, 0.45);
+    background-color: rgba(150, 180, 130, 0.08);
+}
+
+.docs-graph-box.docs-graph-cat-editor,
+.docs-graph-swatch.docs-graph-cat-editor {
+    border-left-color: rgb(160, 136, 192);
+    border-top-color: rgba(160, 136, 192, 0.45);
+    border-right-color: rgba(160, 136, 192, 0.45);
+    border-bottom-color: rgba(160, 136, 192, 0.45);
+    background-color: rgba(160, 136, 192, 0.08);
+}
+
+.docs-graph-box.docs-graph-cat-other,
+.docs-graph-swatch.docs-graph-cat-other {
+    border-left-color: rgb(128, 128, 128);
+}
 
 .docs-graph-legend {
     flex-direction: row;
@@ -1600,4 +1636,13 @@
     font-size: 11px;
     background-color: rgba(255, 255, 255, 0.08);
     color: var(--unity-colors-label-text);
+}
+
+/* Where a settings button opens: a quiet path beside it, in the muted label colour. */
+.docs-action-place {
+    margin-left: 4px;
+    font-size: 11px;
+    color: var(--unity-colors-label-text);
+    opacity: 0.6;
+    -unity-text-align: middle-left;
 }
