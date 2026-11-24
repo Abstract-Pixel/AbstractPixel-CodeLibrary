@@ -66,6 +66,17 @@ namespace AbstractPixel.SceneManagement.Documentation
 
         private static VisualElement Heading(DocsBlock _block, DocsRenderContext _context)
         {
+            return HeadingRow(_block.Text, _block.Id, _block.Level, _block.Pill, _context);
+        }
+
+        /// <summary>A heading row with its pill and "#" copy-link, registered so links and "On this page" can reach it.</summary>
+        public static VisualElement HeadingRow(string _text, string _id, int _level, int _pill, DocsRenderContext _context)
+        {
+            DocsBlock _block = new DocsBlock(DocsBlockKind.Heading, 0);
+            _block.Text = _text;
+            _block.Id = _id;
+            _block.Level = _level;
+            _block.Pill = _pill;
             VisualElement row = new VisualElement();
             row.AddToClassList("docs-heading-row");
             row.AddToClassList("docs-h" + _block.Level);
@@ -103,6 +114,14 @@ namespace AbstractPixel.SceneManagement.Documentation
             if (_block.Ordered && HasDoneWhen(_block))
             {
                 return StepList(_block, _context);
+            }
+            if (_context.Page.IsNewLayout && DocsFactRows.Applies(_block))
+            {
+                return DocsFactRows.Create(_block, _context);
+            }
+            if (_context.Page.IsNewLayout && DocsFlow.Applies(_block))
+            {
+                return DocsFlow.Create(_block, _context);
             }
             VisualElement list = new VisualElement();
             list.AddToClassList("docs-list");
@@ -182,6 +201,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                 foreach (string cell in _block.Rows[rowIndex])
                 {
                     Label cellLabel = DocsText.Create(cell, "docs-table-cell", _context);
+                    cellLabel.EnableInClassList("docs-table-first", row.childCount == 0);
                     row.Add(cellLabel);
                 }
                 table.Add(row);
@@ -208,6 +228,14 @@ namespace AbstractPixel.SceneManagement.Documentation
         // A closed foldout. "Why it works" gets the callout look; the others ("If it goes wrong") stay plain.
         private static VisualElement Details(DocsBlock _block, DocsRenderContext _context)
         {
+            if (_context.Page.IsNewLayout)
+            {
+                Foldout fold = DocsSessionFoldout.Create(_block.Title, _context.Page.Path);
+                fold.EnableInClassList("docs-fold-why", _block.Title == "Why it works");
+                fold.EnableInClassList("docs-fold-wrong", _block.Title == "If it goes wrong");
+                AddBlocks(fold.contentContainer, _block.Children, _context);
+                return fold;
+            }
             Foldout foldout = new Foldout();
             foldout.text = _block.Title;
             foldout.value = false;

@@ -7,7 +7,14 @@ namespace AbstractPixel.SceneManagement.Documentation
     {
         public static Label Create(string _markdown, string _className, DocsRenderContext _context)
         {
-            Label label = new Label(DocsInline.ToRichText(_markdown));
+            string pagePath = _context.Page.Path;
+            IDocsHost host = _context.Host;
+            System.Func<string, string> codeLink = null;
+            if (_context.Page.IsNewLayout)
+            {
+                codeLink = _code => host.CodeLinkTarget(_code, pagePath);
+            }
+            Label label = new Label(DocsInline.ToRichText(_markdown, codeLink));
             label.enableRichText = true;
             label.selection.isSelectable = true;
             label.focusable = true;
@@ -16,8 +23,6 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 label.AddToClassList(_className);
             }
-            string pagePath = _context.Page.Path;
-            IDocsHost host = _context.Host;
             DocsLinkEvents.Register(label, _target => host.OpenLink(_target, pagePath), host.TooltipFor);
             return label;
         }

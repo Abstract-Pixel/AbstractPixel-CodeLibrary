@@ -13,3 +13,19 @@
 .docs-mark, .docs-mark-number { background-color: rgb(58, 100, 180); }
 .docs-chip:hover, .docs-graph-box:hover { background-color: rgb(78, 78, 78); }
 .docs-step-current { background-color: rgba(255, 255, 255, 0.05); }
+/* New layout: member kinds, decision status, flows. */
+.docs-mrow.docs-kind-method { border-left-color: rgb(100, 150, 230); }
+.docs-mrow.docs-kind-property { border-left-color: rgb(110, 180, 125); }
+.docs-mrow.docs-kind-field { border-left-color: rgb(215, 170, 80); }
+.docs-mrow.docs-kind-event { border-left-color: rgb(215, 120, 170); }
+.docs-mrow.docs-kind-value { border-left-color: rgb(150, 150, 150); }
+.docs-heading-row.docs-kind-method { border-left-width: 4px; border-left-color: rgb(100, 150, 230); }
+.docs-heading-row.docs-kind-property { border-left-width: 4px; border-left-color: rgb(110, 180, 125); }
+.docs-heading-row.docs-kind-field { border-left-width: 4px; border-left-color: rgb(215, 170, 80); }
+.docs-heading-row.docs-kind-event { border-left-width: 4px; border-left-color: rgb(215, 120, 170); }
+.docs-heading-row.docs-kind-value { border-left-width: 4px; border-left-color: rgb(150, 150, 150); }
+.docs-status-accepted { background-color: rgba(110, 170, 120, 0.18); border-color: rgba(110, 170, 120, 0.45); color: rgb(170, 210, 175); }
+.docs-status-amended { background-color: rgba(210, 150, 90, 0.18); border-color: rgba(210, 150, 90, 0.45); color: rgb(230, 195, 160); }
+.docs-flow-number { border-color: rgb(110, 150, 210); color: rgb(175, 200, 235); background-color: rgba(110, 150, 210, 0.15); }
+.docs-flow-phase { border-left-color: rgb(110, 150, 210); }
+.docs-mrow:hover { background-color: rgba(255, 255, 255, 0.03); }

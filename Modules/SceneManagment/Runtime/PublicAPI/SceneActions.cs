@@ -8,9 +8,12 @@ namespace AbstractPixel.SceneManagement
 {
     public static class SceneActions
     {
+        /// <summary>The scene group that is open now.</summary>
         public static SceneGroup ActiveSceneGroup => SceneCoordinator.FindOrCreate()?.ActiveSceneGroup;
+        /// <summary>The scene group a <see cref="Preload"/> opened and holds back, or null.</summary>
         public static SceneGroup PreloadedSceneGroup => SceneCoordinator.FindOrCreate()?.Preloaded.Group;
 
+        /// <summary>True while a scene change is running.</summary>
         public static bool IsLoadingSceneGroup
         {
             get
@@ -24,10 +27,12 @@ namespace AbstractPixel.SceneManagement
             }
         }
 
-        /// <summary>
-        /// How far the current scene change has got, from 0 to 1: every scene it opens has an equal share, the value
-        /// never goes back, and it is 1 only once every scene is open. Not smoothed. Safe to read every frame.
-        /// </summary>
+        /// <summary>How far the current scene change has got, from 0 to 1.</summary>
+        /// <remarks>
+        /// - Every scene the change opens has an equal share.
+        /// - Never goes back, and is 1 only once every scene is open.
+        /// - Not smoothed. Safe to read every frame.
+        /// </remarks>
         public static float LoadingProgress
         {
             get
@@ -41,16 +46,17 @@ namespace AbstractPixel.SceneManagement
             }
         }
 
-        /// <summary>
-        /// Registers the loading scene's loading progress view, so the scene system tells it when Show screen starts and
-        /// waits for its "full" animation before Hide screen. Call it from the view's OnEnable.
-        /// </summary>
+        /// <summary>Registers the loading scene's loading progress view (call it from the view's OnEnable).</summary>
+        /// <remarks>
+        /// - The scene system then tells the view when Show screen starts.
+        /// - It waits for the view's "full" animation before Hide screen.
+        /// </remarks>
         public static void RegisterLoadingProgressView(ILoadingProgressView _view)
         {
             LoadingSceneRoute.Register(_view);
         }
 
-        /// <summary>Removes the view if it is the registered one. Call it from the view's OnDisable.</summary>
+        /// <summary>Removes the view if it is the registered one (call it from the view's OnDisable).</summary>
         public static void UnregisterLoadingProgressView(ILoadingProgressView _view)
         {
             LoadingSceneRoute.Unregister(_view);
@@ -70,26 +76,31 @@ namespace AbstractPixel.SceneManagement
             }
         }
 
-        /// <summary>True when start-up could not open its scene group. A launch scene uses it to recover.</summary>
+        /// <summary>True when start-up could not open its scene group.</summary>
+        /// <remarks>
+        /// - A launch scene uses it to recover.
+        /// </remarks>
         public static bool HasStartUpFailed
         {
             get { return SceneSystemStartUp.HasFailed; }
         }
 
-        /// <summary>
-        /// True while the launch scene holds the start scene group back (from before the first scene's Awake until
-        /// <see cref="ReleaseLaunchScene"/>). Never true when Play starts in a level or in the start scene group.
-        /// </summary>
+        /// <summary>True while the launch scene holds the start scene group back.</summary>
+        /// <remarks>
+        /// - From before the first scene's Awake until <see cref="ReleaseLaunchScene"/>.
+        /// - Never true when Play starts in a level or in the start scene group.
+        /// </remarks>
         public static bool IsLaunchSceneHeld
         {
             get { return LaunchSceneHold.IsHeld; }
         }
 
-        /// <summary>
-        /// The launch scene's hand-off: ends the launch scene hold, runs every action waiting in
-        /// <see cref="RunWhenLaunchSceneReleased"/> and raises <see cref="SceneEventBus.OnLaunchSceneReleased"/> once.
-        /// Safe to call more than once and when start-up failed.
-        /// </summary>
+        /// <summary>The launch scene's hand-off: ends the launch scene hold.</summary>
+        /// <remarks>
+        /// - Runs every action waiting in <see cref="RunWhenLaunchSceneReleased"/>.
+        /// - Raises <see cref="SceneEventBus.OnLaunchSceneReleased"/> once.
+        /// - Safe to call more than once, and when start-up failed.
+        /// </remarks>
         public static void ReleaseLaunchScene()
         {
             bool wasHeld = LaunchSceneHold.IsHeld;
@@ -122,11 +133,12 @@ namespace AbstractPixel.SceneManagement
         }
 
 
-        /// <summary>
-        /// A scene change to another scene group: Hide screen, close the old scenes, open the new ones, Show screen. When
-        /// the game called <see cref="Preload"/> for this same group earlier, the change uses that preload; any other
-        /// preload is closed. Never throws: a request that cannot start is Refused before the screen is covered.
-        /// </summary>
+        /// <summary>Changes scene to another scene group.</summary>
+        /// <remarks>
+        /// - Order: Hide screen, close the old scenes, open the new ones, Show screen.
+        /// - Uses an earlier <see cref="Preload"/> of this same group; any other preload is closed.
+        /// - Never throws: a request that cannot start is Refused before the screen is covered.
+        /// </remarks>
         public static Task<SceneChangeResult> ChangeTo(SceneGroup _sceneGroup)
         {
             SceneCoordinator coordinator = SceneCoordinator.FindOrCreate();
@@ -148,10 +160,12 @@ namespace AbstractPixel.SceneManagement
             return coordinator.Retry();
         }
 
-        /// <summary>
-        /// Opens a scene group in the background and holds back its main scene, for a later <see cref="ChangeTo"/> of the
-        /// same group. The scene system never preloads by itself. A failed preload returns Failed and goes nowhere.
-        /// </summary>
+        /// <summary>Opens a scene group in the background, for a later <see cref="ChangeTo"/> of the same group.</summary>
+        /// <remarks>
+        /// - Holds back the group's main scene until that ChangeTo.
+        /// - The scene system never preloads by itself.
+        /// - A failed preload returns Failed and goes nowhere.
+        /// </remarks>
         public static Task<SceneChangeResult> Preload(SceneGroup _sceneGroup)
         {
             SceneCoordinator coordinator = SceneCoordinator.FindOrCreate();
@@ -162,10 +176,11 @@ namespace AbstractPixel.SceneManagement
             return coordinator.Preload(_sceneGroup);
         }
 
-        /// <summary>
-        /// Registers the scene transition executor that hides and shows the screen around every scene change. The
-        /// transitions module calls this when it initializes. A second executor replaces the first, with a warning.
-        /// </summary>
+        /// <summary>Registers the scene transition executor that hides and shows the screen around every scene change.</summary>
+        /// <remarks>
+        /// - The transitions module calls this when it initializes.
+        /// - A second executor replaces the first, with a warning.
+        /// </remarks>
         public static void RegisterTransitionExecutor(ISceneTransitionExecutor _executor)
         {
             SceneTransitionExecutorSlot.Register(_executor);
@@ -177,11 +192,11 @@ namespace AbstractPixel.SceneManagement
             SceneTransitionExecutorSlot.Unregister(_executor);
         }
 
-        /// <summary>
-        /// Registers the relocation broadcaster that holds, relocates and releases relocatables in every scene change.
-        /// The relocation sub-module calls this before the first scene loads. A second one replaces the first, with a
-        /// warning.
-        /// </summary>
+        /// <summary>Registers the relocation broadcaster that holds, relocates and releases relocatables in every scene change.</summary>
+        /// <remarks>
+        /// - The relocation sub-module calls this before the first scene loads.
+        /// - A second one replaces the first, with a warning.
+        /// </remarks>
         public static void RegisterRelocationBroadcaster(IRelocationBroadcaster _broadcaster)
         {
             RelocationBroadcasterSlot.Register(_broadcaster);

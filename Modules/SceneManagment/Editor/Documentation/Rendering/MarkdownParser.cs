@@ -207,6 +207,12 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 return null;
             }
+            // "<!-- layout new -->" sets how the whole page is drawn and draws nothing itself.
+            if (directive.Name == "layout")
+            {
+                _context.Page.Layout = directive.Argument(0);
+                return null;
+            }
             DocsBlock block = new DocsBlock(DocsBlockKind.Directive, _lineNumber);
             block.Directive = directive;
             return block;
