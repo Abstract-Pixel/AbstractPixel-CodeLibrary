@@ -23,7 +23,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         private static readonly Regex ImagePattern = new Regex(@"^!\[(.*?)\]\((.*?)\)\s*$");
         private static readonly Regex CalloutPattern = new Regex(@"^\[!(NOTE|WARNING|TIP)\]\s*$");
         private static readonly Regex SummaryPattern = new Regex(@"^<details>\s*<summary>(.*?)</summary>\s*$");
-        private static readonly Regex MarkPattern = new Regex(@"^(\d+)@([-0-9.]+),([-0-9.]+)\s+""(.*)""$");
+        private static readonly Regex MarkPattern = new Regex(@"^(\d+)@([-0-9.]+),([-0-9.]+)(?:,([0-9.]+),([0-9.]+))?\s+""(.*)""$");
 
         public static DocsPage Parse(string _text, string _path, ICollection<string> _knownDirectives)
         {
@@ -324,7 +324,10 @@ namespace AbstractPixel.SceneManagement.Documentation
                     continue;
                 }
                 int number = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
-                _image.Marks.Add(new DocsMark(number, x, y, match.Groups[4].Value));
+                // "N@x,y,w,h" outlines a rectangle from x,y; "N@x,y" is a numbered dot.
+                float width = match.Groups[4].Success ? float.Parse(match.Groups[4].Value, CultureInfo.InvariantCulture) : 0f;
+                float height = match.Groups[5].Success ? float.Parse(match.Groups[5].Value, CultureInfo.InvariantCulture) : 0f;
+                _image.Marks.Add(new DocsMark(number, x, y, match.Groups[6].Value, width, height));
             }
         }
 

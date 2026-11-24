@@ -31,6 +31,10 @@ namespace AbstractPixel.SceneManagement.Documentation
             frame.Add(image);
             foreach (DocsMark mark in _block.Marks)
             {
+                if (mark.IsRectangle)
+                {
+                    frame.Add(MarkRectangle(mark));
+                }
                 frame.Add(MarkCircle(mark));
             }
             // Width and height follow the texture; positions are shares of the frame. USS cannot express either.
@@ -68,6 +72,19 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
         }
 
+        // An outlined area of the image, such as a tab or a name, that the numbered mark at its corner explains.
+        private static VisualElement MarkRectangle(DocsMark _mark)
+        {
+            VisualElement area = new VisualElement();
+            area.AddToClassList("docs-mark-area");
+            area.pickingMode = PickingMode.Ignore;
+            area.style.left = Length.Percent(_mark.X * 100f);
+            area.style.top = Length.Percent(_mark.Y * 100f);
+            area.style.width = Length.Percent(_mark.Width * 100f);
+            area.style.height = Length.Percent(_mark.Height * 100f);
+            return area;
+        }
+
         private static VisualElement MarkCircle(DocsMark _mark)
         {
             Label circle = new Label(_mark.Number.ToString());
@@ -85,11 +102,14 @@ namespace AbstractPixel.SceneManagement.Documentation
             VisualElement list = new VisualElement();
             list.AddToClassList("docs-mark-list");
             list.AddToClassList("docs-mark-table");
+            Label header = new Label("Tool Anatomy");
+            header.AddToClassList("docs-mark-table-header");
+            list.Add(header);
             foreach (DocsMark mark in _block.Marks)
             {
                 VisualElement row = new VisualElement();
                 row.AddToClassList("docs-mark-row");
-                row.EnableInClassList("docs-mark-row-alt", list.childCount % 2 == 1);
+                row.EnableInClassList("docs-mark-row-alt", list.childCount % 2 == 0);
                 Label number = new Label(mark.Number.ToString());
                 number.AddToClassList("docs-mark-number");
                 row.Add(number);
