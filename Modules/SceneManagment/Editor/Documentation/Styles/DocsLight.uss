@@ -10,9 +10,9 @@
 .docs-callout-why, .docs-foldout-why { border-left-color: rgb(50, 100, 180); }
 .docs-step-circle { border-color: rgb(120, 120, 120); }
 .docs-step-done .docs-step-circle { background-color: rgb(60, 125, 72); border-color: rgb(60, 125, 72); color: rgb(255, 255, 255); }
-.docs-mark, .docs-mark-number { background-color: rgb(176, 104, 24); }
-/* Outlined areas on images: amber, so they stand apart from Unity's blue selection in the screenshots. */
-.docs-mark-area { border-top-color: rgb(176, 104, 24); border-right-color: rgb(176, 104, 24); border-bottom-color: rgb(176, 104, 24); border-left-color: rgb(176, 104, 24); }
+.docs-mark, .docs-mark-number { background-color: rgb(150, 100, 52); }
+/* Outlined areas on images: muted orange, so they stand apart from Unity's blue selection in the screenshots. */
+.docs-mark-area { border-top-color: rgb(150, 100, 52); border-right-color: rgb(150, 100, 52); border-bottom-color: rgb(150, 100, 52); border-left-color: rgb(150, 100, 52); }
 .docs-chip:hover, .docs-graph-box:hover { background-color: rgb(208, 208, 208); }
 .docs-step-current { background-color: rgba(0, 0, 0, 0.05); }
 /* New layout: member kinds, decision status, flows. */
