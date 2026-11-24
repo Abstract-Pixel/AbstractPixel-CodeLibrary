@@ -121,7 +121,6 @@
 - manager-scene: guide/scene-groups-and-scene-sets.md#scene-sets
 - shared-scene: guide/scene-groups-and-scene-sets.md#scene-sets
 - reset-shared-scenes: guide/scene-groups-and-scene-sets.md#reset-shared-scenes
-- close-previous-manager-scenes: guide/scene-groups-and-scene-sets.md#close-previous-manager-scenes
 - loading-scene: guide/loading-scene.md#show-a-loading-scene
 - show-the-loading-scene: guide/loading-scene.md#show-a-loading-scene
 - loading-progress-view: guide/loading-scene.md#show-the-progress
