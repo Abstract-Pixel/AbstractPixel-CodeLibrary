@@ -47,7 +47,9 @@ namespace AbstractPixel.SceneManagement.Documentation
                 string label;
                 string value;
                 Split(item.Text, out label, out value);
-                rows.Add(Row(label, value, _context));
+                VisualElement row = Row(label, value, _context);
+                row.EnableInClassList("docs-facts-alt", rows.childCount % 2 == 1);
+                rows.Add(row);
             }
             return rows;
         }

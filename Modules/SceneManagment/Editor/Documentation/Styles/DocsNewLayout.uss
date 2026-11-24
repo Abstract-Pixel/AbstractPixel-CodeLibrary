@@ -218,11 +218,11 @@
 }
 
 .docs-mrow-type {
-    width: 190px;
+    width: 150px;
     flex-shrink: 0;
     padding: 0 12px 0 0;
     white-space: normal;
-    -unity-text-align: upper-right;
+    -unity-text-align: upper-left;
 }
 
 .docs-mrow-main {
@@ -240,7 +240,8 @@
 }
 
 .docs-mrow-more {
-    margin-top: 4px;
+    width: 100%;
+    margin-top: 6px;
     margin-bottom: 0;
 }
 
@@ -463,4 +464,38 @@
 
 .docs-action-group-facts > .docs-facts-row:last-child {
     border-bottom-width: 0;
+}
+
+/* Member tables are numbered section boxes; the rows run edge to edge. */
+.docs-member-section > .docs-member-table {
+    border-width: 0;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.docs-member-section .docs-mrow:last-child {
+    border-bottom-width: 0;
+}
+
+.docs-member-tables {
+    margin-top: 0;
+}
+
+/* Fact rows read as a table: a small gap between rows, every other row striped. */
+.docs-facts-row {
+    padding: 5px 8px;
+}
+
+.docs-action-group-facts > .docs-facts-row,
+.docs-fold .docs-facts-row {
+    margin-bottom: 2px;
+    border-bottom-width: 0;
+}
+
+.docs-fold > .unity-foldout__content > .docs-facts {
+    margin-bottom: 4px;
+}
+
+.docs-facts-label {
+    width: 160px;
 }

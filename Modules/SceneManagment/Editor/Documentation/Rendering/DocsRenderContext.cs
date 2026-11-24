@@ -11,6 +11,9 @@ namespace AbstractPixel.SceneManagement.Documentation
         public List<DocsStepList> StepLists { get; private set; } = new List<DocsStepList>();
         public Dictionary<string, VisualElement> HeadingRows { get; private set; } = new Dictionary<string, VisualElement>();
 
+        /// <summary>How many numbered sections the new layout has drawn so far, so sections from directives number on.</summary>
+        public int SectionCount { get; set; }
+
         public DocsRenderContext(DocsPage _page, IDocsHost _host)
         {
             Page = _page;

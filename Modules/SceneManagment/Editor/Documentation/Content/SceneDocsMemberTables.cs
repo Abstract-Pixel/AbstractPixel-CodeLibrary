@@ -46,8 +46,11 @@ namespace AbstractPixel.SceneManagement.Documentation
         private static VisualElement Section(string _title, string _kind, List<SceneDocsMember> _members, Type _type, DocsRenderContext _context)
         {
             VisualElement section = new VisualElement();
+            section.AddToClassList("docs-section");
+            section.AddToClassList("docs-member-section");
             string id = _title.ToLowerInvariant();
-            VisualElement heading = DocsRenderer.HeadingRow(_title, id, 2, -1, _context);
+            _context.SectionCount++;
+            VisualElement heading = DocsRenderer.HeadingRow(_context.SectionCount + ".  " + _title, id, 2, -1, _context);
             heading.AddToClassList("docs-kind-" + _kind);
             Label count = new Label(_members.Count.ToString());
             count.AddToClassList("docs-member-count");
@@ -63,7 +66,9 @@ namespace AbstractPixel.SceneManagement.Documentation
             table.AddToClassList("docs-member-table");
             foreach (SceneDocsMember member in _members)
             {
-                table.Add(Row(member, _type, _context));
+                VisualElement row = Row(member, _type, _context);
+                row.EnableInClassList("docs-mrow-alt", table.childCount % 2 == 1);
+                table.Add(row);
             }
             section.Add(table);
             return section;
@@ -102,7 +107,10 @@ namespace AbstractPixel.SceneManagement.Documentation
                     line.Add(DocsText.Create(remark, "docs-list-content", _context));
                     more.Add(line);
                 }
-                main.Add(more);
+                row.Add(main);
+                // Full width under the type and the signature, not indented.
+                row.Add(more);
+                return row;
             }
             row.Add(main);
             return row;

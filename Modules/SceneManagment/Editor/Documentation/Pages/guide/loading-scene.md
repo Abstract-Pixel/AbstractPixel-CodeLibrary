@@ -47,12 +47,31 @@ Keeps a fast load from flashing the loading scene.
 
 ## Show the progress <!-- level 1 -->
 
-Add a `LoadingProgressView` to the loading scene. It reads the [loading progress](term:loading-progress), smooths it and drives your bar.
+Add a `LoadingProgressView` to the loading scene when you want to change how your progress bar looks and feels. It smooths the [loading progress](term:loading-progress) and fills your bar with it.
+
+**Two ways to fill your bar**
+
+| | Without the view | With the view |
+|---|---|---|
+| What you do | Your own script reads `SceneActions.LoadingProgress` every frame | Add a `LoadingProgressView` and connect your bar to it |
+| What the player sees | The bar jumps as each scene opens: 0.33, 0.66, 1 | The bar glides at the speed you set and can hold at full |
+| Good for | A quick test, or a bar that should show the raw value | Anything a player sees |
+
+Without the view, in your own script:
+
+```cs
+private void Update()
+{
+    bar.fillAmount = SceneActions.LoadingProgress;
+}
+```
+
+With the view, as the sample does:
 
 | Your bar | Do this |
 |---|---|
 | No code | Drag `MMProgressBar.UpdateBar01` into On Progress and `MMF_Player.PlayFeedbacks` into On Full. |
-| Code | Implement `ILoadingProgressDisplay`, as the sample does: |
+| Code | Implement `ILoadingProgressDisplay`: |
 
 ```cs source=lib:Modules/SceneManagment/Samples/06 Loading Scene/Scripts/Sample06BarDisplay.cs
 public void SetProgress(float _progress)
@@ -60,23 +79,40 @@ public void SetProgress(float _progress)
     ShownProgress = _progress;
 ```
 
-<details><summary>More: what the view does</summary>
+**On the component, in the Inspector**
 
-- **Reads:** `SceneActions.LoadingProgress`.
-- **Smooths it:** speed, an optional curve, and a hold at full.
-- **Raises:** On Shown, On Progress (float), On Full and On Hidden.
-- **Drives:** an `ILoadingProgressDisplay` found on its object or assigned: Show, SetProgress, PlayFull, Hide.
-- **Registers itself:** with `SceneActions.RegisterLoadingProgressView`.
-- **Timing:** the scene system calls it when Show screen starts, and waits for its full beat and hold before Hide screen.
-- **Example:** Rally's `RallyLoadingFullBeat` plays `IAnimationCommand`s.
+| Field | What it does for you | Change it when |
+|---|---|---|
+| Feel › Smoothing Speed | How fast the bar catches up with the real progress, per second. 1 fills an empty bar in one second. Default 1.5. | Raise it if the bar lags behind a fast load. Lower it for a calmer fill. |
+| Feel › Curve | Optional. Bends the fill, for example fast at first and slow near the end. Empty fills evenly. | You want the bar to feel like it speeds up or slows down. |
+| Feel › Hold At Full Seconds | How long the full bar stays on screen before the screen covers it. Default 0.3. | The player should see the bar reach 100%. |
+| Display | Optional. A script of yours that implements `ILoadingProgressDisplay`. Empty uses one on the same object. | Your bar's script sits on another object. |
 
-</details>
+**Events, in the Inspector**
 
-<details><summary>More: the progress value</summary>
+| Event | When it fires | You'll use it to |
+|---|---|---|
+| On Progress (float) | Every frame while the loading scene shows, with the smoothed value from 0 to 1 | Fill the bar. Almost every setup uses this one. |
+| On Full | Every scene is open and the bar has reached 1 | Play a finishing beat: a flash, a sound, a "ready" label. The screen waits for it. |
+| On Shown | Show screen starts on the loading scene | Play the bar's appear animation. |
+| On Hidden | The loading scene is closing | Stop sounds or reset effects. |
+
+<details><summary>More: the progress value, in code</summary>
+
+`SceneActions.LoadingProgress` is the raw value the scene system keeps. It is not a field on any component and you never set it. The view reads it; your own script can read it too.
 
 - **Range:** 0 to 1. Every scene the change opens has an equal share.
 - **Direction:** never goes back, and reaches 1 only once every scene is open.
 - **Reading it:** safe every frame. Not smoothed; the view smooths it.
+
+</details>
+
+<details><summary>More: how the view fits in</summary>
+
+- **Registers itself:** with `SceneActions.RegisterLoadingProgressView` when it is enabled. You never call it.
+- **Drives:** an `ILoadingProgressDisplay` found on its object or assigned: Show, SetProgress, PlayFull, Hide.
+- **Timing:** the scene system calls it when Show screen starts, and waits for its full beat and hold before Hide screen.
+- **Example:** Rally's `RallyLoadingFullBeat` plays `IAnimationCommand`s.
 
 </details>
 
