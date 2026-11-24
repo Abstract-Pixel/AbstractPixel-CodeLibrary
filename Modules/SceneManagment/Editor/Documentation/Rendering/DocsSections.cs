@@ -27,13 +27,13 @@ namespace AbstractPixel.SceneManagement.Documentation
             Foldout sample = null;
             bool sampleHasAction = false;
             VisualElement lastAction = null;
-            int sectionNumber = 0;
             int partNumber = 0;
             foreach (DocsBlock block in _blocks)
             {
                 if (block.Kind == DocsBlockKind.Heading && block.Level <= 2)
                 {
-                    sectionNumber++;
+                    _context.SectionCount++;
+                    int sectionNumber = _context.SectionCount;
                     partNumber = 0;
                     VisualElement section = new VisualElement();
                     section.AddToClassList("docs-section");
@@ -50,7 +50,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                 if (partTitle != null && sectionBody != null)
                 {
                     partNumber++;
-                    string numbered = sectionNumber + "." + partNumber + "  " + partTitle;
+                    string numbered = _context.SectionCount + "." + partNumber + "  " + partTitle;
                     sample = null;
                     if (partTitle == SampleTitle)
                     {
@@ -74,6 +74,13 @@ namespace AbstractPixel.SceneManagement.Documentation
                     partBody.AddToClassList("docs-part-body");
                     sectionBody.Add(partBody);
                     continue;
+                }
+                // Member tables are numbered sections of their own, so the section before them ends here.
+                if (block.Kind == DocsBlockKind.Directive && block.Directive.Name == "members")
+                {
+                    sectionBody = null;
+                    partBody = null;
+                    sample = null;
                 }
                 VisualElement element = DocsRenderer.RenderBlock(block, _context);
                 if (element == null)
