@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-What the screen effect is doing to the screen. Game management reacts to it; the effect never changes game time.
+An enum: what the screen effect is doing to the screen. You read it from `TransitionActions.ScreenState`, or get it from `TransitionEventBus.OnScreenStateChanged`. Game management reacts to it; the effect never changes game time.
 
 <!-- type-header AbstractPixel.SceneTransitions.ScreenState -->
 

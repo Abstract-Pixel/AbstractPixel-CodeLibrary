@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-When a scene group shows its loading scene ([Show the loading scene](term:show-the-loading-scene)).
+An enum: when a scene group shows its loading scene. You read it from `SceneGroup.ShowLoadingScene`; in the Inspector it is the group's [Show the loading scene](term:show-the-loading-scene) field.
 
 <!-- type-header AbstractPixel.SceneManagement.ShowLoadingScene -->
 

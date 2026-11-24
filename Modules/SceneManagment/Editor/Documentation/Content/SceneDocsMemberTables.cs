@@ -88,6 +88,12 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 _context.HeadingRows[anchor] = row;
             }
+            // An enum value is a name and what it means: the name takes the type column, the meaning sits beside it.
+            bool isValue = _member.Kind == "value";
+            if (isValue)
+            {
+                return ValueRow(row, _member, _type, _context);
+            }
             Label typeLabel = RichLabel(TypeRich(_member.TypeText), "docs-mrow-type", _context);
             row.Add(typeLabel);
             VisualElement main = new VisualElement();
@@ -129,6 +135,20 @@ namespace AbstractPixel.SceneManagement.Documentation
             IDocsHost host = _context.Host;
             DocsLinkEvents.Register(label, _target => host.OpenLink(_target, pagePath), host.TooltipFor);
             return label;
+        }
+
+        // "Done | The scene change ran to its end.", written as Type.Value so it reads like code.
+        private static VisualElement ValueRow(VisualElement _row, SceneDocsMember _member, Type _type, DocsRenderContext _context)
+        {
+            _row.AddToClassList("docs-mrow-value");
+            string name = "<color=" + DocsTheme.TypeName + ">" + _type.Name + "</color>.<b>" + _member.Name + "</b>";
+            _row.Add(RichLabel(name, "docs-mrow-value-name", _context));
+            VisualElement main = new VisualElement();
+            main.AddToClassList("docs-mrow-main");
+            string meaning = _member.Summary.Length > 0 ? _member.Summary : "No description in the source.";
+            main.Add(DocsText.Create(meaning, "docs-mrow-summary", _context));
+            _row.Add(main);
+            return _row;
         }
 
         // public static ChangeTo(SceneGroup _sceneGroup)   or   public static LoadingProgress { get; }

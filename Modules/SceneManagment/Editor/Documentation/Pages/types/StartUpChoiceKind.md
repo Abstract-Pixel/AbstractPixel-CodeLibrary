@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-What start-up does with the scenes Unity opened (decision 2 of session 4B).
+An enum: what start-up does with the scenes Unity opened (decision 2 of session 4B). You read it from `StartUpChoice.Kind`, which `StartUpRule.Choose` returns.
 
 <!-- type-header AbstractPixel.SceneManagement.StartUpChoiceKind -->
 

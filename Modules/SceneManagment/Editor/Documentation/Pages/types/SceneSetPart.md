@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-The three parts of a scene group that its scene set fills, and that can each be an override.
+An enum: the three parts of a scene group that its scene set fills, and that can each be an override. You pass it to `SceneGroup.IsOverride` to ask whether one part keeps the group's own value.
 
 <!-- type-header AbstractPixel.SceneManagement.SceneSetPart -->
 
