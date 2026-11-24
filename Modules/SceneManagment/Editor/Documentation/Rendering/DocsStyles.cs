@@ -15,6 +15,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         public static void Apply(VisualElement _root)
         {
             AddSheet(_root, "Docs.uss");
+            AddSheet(_root, "DocsNewLayout.uss");
             string skinSheet = EditorGUIUtility.isProSkin ? "DocsDark.uss" : "DocsLight.uss";
             AddSheet(_root, skinSheet);
         }

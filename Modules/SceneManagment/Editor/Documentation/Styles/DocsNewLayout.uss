@@ -1,0 +1,356 @@
+/* The new page layout, for pages with a "layout new" line. Colours for kinds and states are in DocsDark.uss and DocsLight.uss. */
+.docs-page.docs-layout-new {
+    max-width: 930px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 16px;
+    padding-bottom: 32px;
+}
+
+.docs-layout-new .docs-title-row {
+    margin-bottom: 12px;
+}
+
+.docs-layout-new .docs-paragraph {
+    max-width: 720px;
+    margin-bottom: 12px;
+}
+
+/* A concept starts with a full-width heading bar and room above it. */
+.docs-layout-new .docs-h2 {
+    margin-top: 32px;
+    margin-bottom: 14px;
+    padding: 6px 8px;
+    background-color: var(--unity-colors-inspector_titlebar-background);
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-layout-new .docs-h3 {
+    margin-top: 20px;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+}
+
+.docs-layout-new .docs-list {
+    margin-bottom: 12px;
+    max-width: 720px;
+}
+
+.docs-layout-new .docs-list-row {
+    margin-bottom: 6px;
+}
+
+.docs-layout-new .docs-callout {
+    padding: 10px 12px;
+    margin-top: 4px;
+    margin-bottom: 14px;
+    max-width: 720px;
+}
+
+.docs-layout-new .docs-code {
+    margin-top: 4px;
+    margin-bottom: 14px;
+}
+
+.docs-layout-new .docs-steps {
+    margin-bottom: 12px;
+}
+
+.docs-layout-new .docs-step {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.docs-layout-new .docs-action {
+    margin-bottom: 12px;
+}
+
+/* Tables: roomy cells, a divider under every row. */
+.docs-layout-new .docs-table {
+    margin-bottom: 14px;
+}
+
+.docs-layout-new .docs-table-row {
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+}
+
+.docs-layout-new .docs-table-cell {
+    padding: 6px 10px;
+}
+
+/* Fact rows: label column, value column, a divider between rows. */
+.docs-facts {
+    margin-bottom: 14px;
+    border-top-width: 1px;
+    border-top-color: var(--unity-colors-default-border);
+}
+
+.docs-facts-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+}
+
+.docs-facts-label {
+    width: 170px;
+    flex-shrink: 0;
+    padding: 0 12px 0 0;
+    margin: 0;
+    color: var(--unity-colors-label-text);
+    white-space: normal;
+}
+
+.docs-facts-value {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 200px;
+}
+
+/* Flow: numbered circles, steps grouped in phases. */
+.docs-flow {
+    margin-bottom: 14px;
+}
+
+.docs-flow-phase {
+    margin-bottom: 10px;
+    padding: 8px 10px 4px 10px;
+    border-left-width: 3px;
+    background-color: var(--unity-colors-alternated_rows-background);
+}
+
+.docs-flow-phase-title {
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.docs-flow-step {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.docs-flow-number {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    border-width: 1px;
+    -unity-text-align: middle-center;
+    font-size: var(--unity-metrics-default-font_small_size);
+    margin: 0 10px 0 0;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.docs-flow-text {
+    flex-shrink: 1;
+    flex-grow: 1;
+}
+
+/* Foldouts: a quiet toggle, the inside indented behind a line. */
+.docs-fold {
+    margin-top: 4px;
+    margin-bottom: 12px;
+}
+
+.docs-fold .unity-foldout__text {
+    color: var(--unity-colors-label-text);
+}
+
+.docs-fold > .unity-foldout__content {
+    margin-left: 6px;
+    padding: 8px 0 2px 14px;
+    border-left-width: 2px;
+    border-left-color: var(--unity-colors-default-border);
+}
+
+/* Type header */
+.docs-type-header {
+    margin-bottom: 14px;
+}
+
+.docs-type-declaration {
+    font-size: 13px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background-color: var(--unity-colors-default-background);
+    border-width: 1px;
+    border-color: var(--unity-colors-default-border);
+    white-space: normal;
+}
+
+/* Member tables: one box per kind, a coloured edge per row. */
+.docs-member-count {
+    font-size: var(--unity-metrics-default-font_small_size);
+    color: var(--unity-colors-label-text);
+    margin-right: 6px;
+    padding: 0 5px;
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: var(--unity-colors-default-border);
+}
+
+.docs-member-table {
+    border-width: 1px;
+    border-color: var(--unity-colors-default-border);
+    background-color: var(--unity-colors-default-background);
+    margin-bottom: 8px;
+}
+
+.docs-mrow {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 8px 10px;
+    border-left-width: 3px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+    transition-property: background-color;
+    transition-duration: 1s;
+}
+
+.docs-mrow-type {
+    width: 190px;
+    flex-shrink: 0;
+    padding: 0 12px 0 0;
+    white-space: normal;
+    -unity-text-align: upper-right;
+}
+
+.docs-mrow-main {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 260px;
+}
+
+.docs-mrow-signature {
+    white-space: normal;
+}
+
+.docs-mrow-summary {
+    margin-top: 3px;
+}
+
+.docs-mrow-more {
+    margin-top: 4px;
+    margin-bottom: 0;
+}
+
+.docs-narrow .docs-mrow-type {
+    -unity-text-align: upper-left;
+    width: 100%;
+}
+
+/* Design decisions */
+.docs-decision-list {
+    border-top-width: 1px;
+    border-top-color: var(--unity-colors-default-border);
+    margin-bottom: 14px;
+}
+
+.docs-decision-row {
+    flex-direction: row;
+    align-items: center;
+    margin: 0;
+    padding: 8px;
+    border-radius: 0;
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+    background-color: rgba(0, 0, 0, 0);
+    transition-property: background-color;
+    transition-duration: 0.1s;
+}
+
+.docs-decision-row:hover {
+    background-color: var(--unity-colors-button-background-hover);
+}
+
+.docs-decision-number {
+    width: 34px;
+    flex-shrink: 0;
+    color: var(--unity-colors-label-text);
+    -unity-text-align: middle-left;
+}
+
+.docs-decision-title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: normal;
+    -unity-text-align: middle-left;
+    color: var(--unity-colors-link-text);
+}
+
+.docs-decision-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.docs-decision-caption {
+    color: var(--unity-colors-label-text);
+    margin-right: 8px;
+}
+
+/* Pager cards: two equal halves that never overflow. */
+.docs-pager-cards {
+    flex-direction: row;
+    margin-top: 40px;
+    padding-top: 12px;
+    border-top-width: 1px;
+    border-top-color: var(--unity-colors-default-border);
+}
+
+.docs-pager-card,
+.docs-pager-card-space {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    margin: 0 4px;
+}
+
+.docs-pager-card {
+    align-items: flex-start;
+    padding: 8px 12px;
+    border-radius: 3px;
+}
+
+.docs-pager-card-next {
+    align-items: flex-end;
+}
+
+.docs-pager-card-caption {
+    font-size: var(--unity-metrics-default-font_small_size);
+    color: var(--unity-colors-label-text);
+    padding: 0;
+    margin: 0 0 2px 0;
+}
+
+.docs-pager-card-title {
+    white-space: normal;
+    padding: 0;
+    margin: 0;
+}
+
+.docs-pager-card-next .docs-pager-card-title,
+.docs-pager-card-next .docs-pager-card-caption {
+    -unity-text-align: upper-right;
+}
+
+.docs-narrow .docs-pager-cards {
+    flex-direction: column;
+}
+
+.docs-narrow .docs-pager-card {
+    margin-bottom: 6px;
+}
+
+.docs-layout-new .docs-table-first {
+    flex-grow: 0.6;
+}

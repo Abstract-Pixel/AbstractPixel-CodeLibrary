@@ -21,6 +21,15 @@ namespace AbstractPixel.SceneManagement.Documentation
         /// <summary>The rich text for one line of inline Markdown.</summary>
         public static string ToRichText(string _markdown)
         {
+            return ToRichText(_markdown, null);
+        }
+
+        /// <summary>
+        /// The rich text for one line of inline Markdown. A code span links when <paramref name="_codeLink"/> returns a
+        /// target for its text (such as "type:SceneActions"); a null resolver, or a null target, leaves it plain.
+        /// </summary>
+        public static string ToRichText(string _markdown, System.Func<string, string> _codeLink)
+        {
             if (string.IsNullOrEmpty(_markdown))
             {
                 return "";
@@ -31,7 +40,8 @@ namespace AbstractPixel.SceneManagement.Documentation
             foreach (Match code in CodePattern.Matches(_markdown))
             {
                 result.Append(FormatText(_markdown.Substring(position, code.Index - position)));
-                result.Append(CodeSpan(code.Groups[1].Value));
+                string target = _codeLink == null ? null : _codeLink(code.Groups[1].Value);
+                result.Append(target == null ? CodeSpan(code.Groups[1].Value) : LinkedCodeSpan(code.Groups[1].Value, target));
                 position = code.Index + code.Length;
             }
             result.Append(FormatText(_markdown.Substring(position)));
@@ -57,6 +67,14 @@ namespace AbstractPixel.SceneManagement.Documentation
             string code = _code.Replace("</noparse>", "");
             string padded = NoBreakSpace + code + NoBreakSpace;
             return "<mark=" + DocsTheme.InlineCodeBackground + "><color=" + DocsTheme.InlineCode + "><noparse>" + padded + "</noparse></color></mark>";
+        }
+
+        // A code span that names a documented type: the link colour on the same faint box, so it reads as code you can click.
+        private static string LinkedCodeSpan(string _code, string _target)
+        {
+            string code = _code.Replace("</noparse>", "");
+            string padded = NoBreakSpace + code + NoBreakSpace;
+            return "<link=\"" + _target + "\"><mark=" + DocsTheme.InlineCodeBackground + "><color=" + DocsTheme.Link + "><noparse>" + padded + "</noparse></color></mark></link>";
         }
 
         private static readonly string NoBreakSpace = ((char)0xA0).ToString();

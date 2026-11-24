@@ -47,6 +47,10 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 return _target;
             }
+            if (_target.StartsWith(SceneDocsTypeIndex.Scheme))
+            {
+                return TypeTopic(_target);
+            }
             if (_target.StartsWith("term:"))
             {
                 string topic;
@@ -59,6 +63,32 @@ namespace AbstractPixel.SceneManagement.Documentation
                 return null;
             }
             return SceneDocsContents.TopicOfLink(_target, fromAsset);
+        }
+
+        // "type:SceneActions.LoadingProgress" opens the SceneActions page at the LoadingProgress row.
+        private static string TypeTopic(string _target)
+        {
+            string typeName;
+            string memberName;
+            SceneDocsTypeIndex.Split(_target, out typeName, out memberName);
+            string page = "types/" + typeName.ToLowerInvariant();
+            return memberName.Length == 0 ? page : page + "#" + SceneDocsMember.AnchorFor(memberName);
+        }
+
+        public string CodeLinkTarget(string _code, string _fromPagePath)
+        {
+            return SceneDocsTypeIndex.TargetFor(_code, TypeOfPage(_fromPagePath));
+        }
+
+        // "types/sceneactions.md" is the SceneActions page; any other page has no type of its own.
+        private static string TypeOfPage(string _pagePath)
+        {
+            if (_pagePath == null || !_pagePath.StartsWith("types/"))
+            {
+                return null;
+            }
+            string file = SceneDocsPageCache.AssetPathOf(_pagePath);
+            return file == null ? null : System.IO.Path.GetFileNameWithoutExtension(file);
         }
 
         private Dictionary<string, string> TermTopics()
@@ -76,7 +106,31 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 return SceneGlossary.TooltipFor(_target.Substring(5));
             }
+            if (_target != null && _target.StartsWith(SceneDocsTypeIndex.Scheme))
+            {
+                return TypeTooltip(_target);
+            }
             return null;
+        }
+
+        // The member's one-line summary, or the type's first sentence.
+        private static string TypeTooltip(string _target)
+        {
+            string typeName;
+            string memberName;
+            SceneDocsTypeIndex.Split(_target, out typeName, out memberName);
+            Type type = SceneDocsTypeIndex.TypeNamed(typeName);
+            if (type == null)
+            {
+                return null;
+            }
+            if (memberName.Length == 0)
+            {
+                string file = SceneDocsSource.FileDeclaring(type.Name);
+                return file == null ? null : SceneDocsSource.FirstSentence(SceneDocsSource.SummaryAbove(file, type.Name));
+            }
+            SceneDocsMember member = SceneDocsMemberReader.Read(type).Find(_member => _member.Name == memberName);
+            return member == null ? null : DocsInline.ToPlainText(member.Summary);
         }
 
         public Texture2D LoadImage(string _imagePath, string _fromPagePath)
@@ -111,9 +165,11 @@ namespace AbstractPixel.SceneManagement.Documentation
                 case "action": return ActionChip(_directive);
                 case "timeline": return new SceneDocsTimelineView(navigate);
                 case "your-project": return SceneDocsYourProject.Render(_directive.Argument(0));
-                case "members": return SceneDocsMembers.Render(_directive.Argument(0));
+                case "members": return _context.Page.IsNewLayout ? SceneDocsMemberTables.Render(_directive.Argument(0), _context) : SceneDocsMembers.Render(_directive.Argument(0));
+                case "type-header": return SceneDocsTypeHeader.Render(_directive.Argument(0), _context);
+                case "decision": return SceneDocsReference.DecisionHeader(_context.Page.Path);
                 case "code-map": return SceneDocsDiagram.CodeMap();
-                case "adr-list": return SceneDocsReference.AdrList(navigate);
+                case "adr-list": return _context.Page.IsNewLayout ? SceneDocsReference.DecisionList(navigate) : SceneDocsReference.AdrList(navigate);
                 case "diagram": return SceneDocsDiagram.Parts(navigate);
                 default: return null;
             }

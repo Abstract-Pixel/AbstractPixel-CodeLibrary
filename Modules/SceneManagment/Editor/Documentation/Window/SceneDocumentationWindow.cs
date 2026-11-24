@@ -397,8 +397,9 @@ namespace AbstractPixel.SceneManagement.Documentation
             pageColumn.Clear();
             shownPage = _page;
             renderContext = new DocsRenderContext(_parsed, host);
+            pageColumn.EnableInClassList("docs-layout-new", _parsed.IsNewLayout);
             pageColumn.Add(DocsRenderer.Render(renderContext));
-            pageColumn.Add(Pager(_page));
+            pageColumn.Add(_parsed.IsNewLayout ? PagerCards(_page) : Pager(_page));
             crumbs.text = CrumbsFor(_page, _parsed.Title);
             BuildOnThisPage(_parsed);
             ReplayTimelineIntoSteps();
@@ -467,6 +468,42 @@ namespace AbstractPixel.SceneManagement.Documentation
                 pager.Add(nextButton);
             }
             return pager;
+        }
+
+        // The new layout's pager: two equal halves, a small "Previous" or "Next" over the page title, Next on the right.
+        private VisualElement PagerCards(string _page)
+        {
+            VisualElement pager = new VisualElement();
+            pager.AddToClassList("docs-pager-cards");
+            List<SceneDocsContentsEntry> all = SceneDocsContents.Flatten();
+            int index = all.FindIndex(_entry => _entry.Topic == _page);
+            bool hasPrevious = index > 0;
+            bool hasNext = index >= 0 && index < all.Count - 1;
+            pager.Add(hasPrevious ? PagerCard("Previous", all[index - 1], false) : Spacer());
+            pager.Add(hasNext ? PagerCard("Next", all[index + 1], true) : Spacer());
+            return pager;
+        }
+
+        private static VisualElement Spacer()
+        {
+            VisualElement spacer = new VisualElement();
+            spacer.AddToClassList("docs-pager-card-space");
+            return spacer;
+        }
+
+        private Button PagerCard(string _caption, SceneDocsContentsEntry _entry, bool _isNext)
+        {
+            Button card = new Button(() => Navigate(_entry.Topic));
+            card.tooltip = "Opens " + _entry.Title;
+            card.AddToClassList("docs-pager-card");
+            card.EnableInClassList("docs-pager-card-next", _isNext);
+            Label caption = new Label(_isNext ? _caption + " →" : "← " + _caption);
+            caption.AddToClassList("docs-pager-card-caption");
+            card.Add(caption);
+            Label title = new Label(_entry.Title);
+            title.AddToClassList("docs-pager-card-title");
+            card.Add(title);
+            return card;
         }
 
         private Button PagerButton(string _text, string _topic)
