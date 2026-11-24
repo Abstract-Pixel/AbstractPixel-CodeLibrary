@@ -144,12 +144,19 @@ namespace AbstractPixel.SceneManagement.Documentation
 
         private static string Shorten(string _text)
         {
-            const int MaxLength = 48;
+            // Two lines of a code map box hold about 46 characters once the words wrap.
+            const int MaxLength = 46;
             if (_text.Length <= MaxLength)
             {
                 return _text;
             }
-            return _text.Substring(0, MaxLength - 1).TrimEnd() + "…";
+            string cut = _text.Substring(0, MaxLength - 1);
+            int lastSpace = cut.LastIndexOf(' ');
+            if (lastSpace > MaxLength / 2)
+            {
+                cut = cut.Substring(0, lastSpace);
+            }
+            return cut.TrimEnd(' ', ',', ';', ':') + "…";
         }
 
         private static void OpenScript(string _path)

@@ -1199,3 +1199,40 @@
     background-color: var(--unity-colors-inspector_titlebar-border);
     border-radius: 2px;
 }
+
+/* Screenshots: the image on the left, its numbered labels and caption beside it; they wrap underneath on a narrow page. */
+.docs-figure-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.docs-figure-row > .docs-image-frame {
+    flex-shrink: 1;
+    flex-grow: 0;
+}
+
+.docs-figure-side {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 260px;
+    min-width: 220px;
+    margin-left: 16px;
+    padding-top: 4px;
+}
+
+.docs-figure-side > .docs-mark-list {
+    margin-top: 0;
+}
+
+.docs-layout-new .docs-figure {
+    margin-bottom: 12px;
+}
+
+/* Code map boxes: the second line wraps to two lines instead of ending in "...". */
+.docs-graph-box > .docs-graph-line {
+    white-space: normal;
+    text-overflow: clip;
+    overflow: hidden;
+    max-height: 36px;
+}

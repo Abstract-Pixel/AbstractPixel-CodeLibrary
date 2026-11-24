@@ -56,6 +56,12 @@ namespace AbstractPixel.SceneManagement.Documentation
                     end++;
                 }
                 string word = _line.Substring(_index, end - _index);
+                bool isMethodCall = end < _line.Length && _line[end] == '(' && !Keywords.Contains(word);
+                if (isMethodCall)
+                {
+                    AppendColoured(_result, word, DocsTheme.Method);
+                    return end;
+                }
                 AppendWord(_result, word);
                 return end;
             }
