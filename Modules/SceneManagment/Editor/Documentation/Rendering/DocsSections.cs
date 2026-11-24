@@ -28,6 +28,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             bool sampleHasAction = false;
             VisualElement lastAction = null;
             int partNumber = 0;
+            List<VisualElement> bodies = new List<VisualElement>();
             foreach (DocsBlock block in _blocks)
             {
                 if (block.Kind == DocsBlockKind.Heading && block.Level <= 2)
@@ -40,6 +41,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                     section.Add(DocsRenderer.HeadingRow(sectionNumber + ".  " + block.Text, block.Id, block.Level, block.Pill, _context));
                     sectionBody = new VisualElement();
                     sectionBody.AddToClassList("docs-section-body");
+                    bodies.Add(sectionBody);
                     section.Add(sectionBody);
                     _page.Add(section);
                     partBody = null;
@@ -60,6 +62,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                         sampleHasAction = false;
                         sectionBody.Add(sample);
                         partBody = sample.contentContainer;
+                        bodies.Add(partBody);
                         continue;
                     }
                     Label strip = new Label(numbered);
@@ -72,6 +75,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                     sectionBody.Add(strip);
                     partBody = new VisualElement();
                     partBody.AddToClassList("docs-part-body");
+                    bodies.Add(partBody);
                     sectionBody.Add(partBody);
                     continue;
                 }
@@ -109,6 +113,15 @@ namespace AbstractPixel.SceneManagement.Documentation
                 target.Add(element);
                 bool isAction = block.Kind == DocsBlockKind.Directive && block.Directive.Name == "action";
                 lastAction = isAction ? element : null;
+            }
+            // USS has no :last-child, so the last block of each box is marked: a table there meets the box's edge.
+            foreach (VisualElement body in bodies)
+            {
+                if (body.childCount > 0)
+                {
+                    body[0].AddToClassList("docs-first");
+                    body[body.childCount - 1].AddToClassList("docs-last");
+                }
             }
         }
 
