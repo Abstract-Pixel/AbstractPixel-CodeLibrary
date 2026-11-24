@@ -13,7 +13,7 @@ Select a [scene group](term:scene-group) to see its [main scene](term:main-scene
 <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/01 Button Changes Level/Scene Groups/Sample 01 Room AGroup.asset" "Select a scene group" -->
 
 ![The scene group inspector](../../Images/scene-system-scene-group.png)
-<!-- marks 1@0.03,0.167 "Main scene"; 2@0.03,0.27 "Its scene status, with a fix button"; 3@0.03,0.325 "Scene set"; 4@0.03,0.362 "Show the loading scene"; 5@0.03,0.465 "Advanced: manager scenes, shared scenes, Reset shared scenes"; 6@0.5,0.575 "Open group" -->
+<!-- marks 1@0.03,0.212 "Main scene"; 2@0.03,0.307 "Its scene status, with a fix button"; 3@0.03,0.402 "Scene set"; 4@0.03,0.445 "Show the loading scene"; 5@0.03,0.568 "Advanced: manager scenes, shared scenes, Reset shared scenes"; 6@0.9,0.698 "Open group" -->
 
 **Or do it yourself**
 
