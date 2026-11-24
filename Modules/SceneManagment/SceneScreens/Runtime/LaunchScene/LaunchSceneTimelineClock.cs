@@ -5,12 +5,13 @@ using UnityEngine.Playables;
 
 namespace AbstractPixel.SceneManagement.SceneScreens
 {
-    /// <summary>
-    /// Caps how far a launch scene's Timeline may advance in one frame, so a load hitch (the start scene group opening
-    /// behind it) delays the picture instead of skipping it. The director keeps its own playback, so markers fire and
-    /// audio clips play normally; on a long frame the clock only slows the root playable for that frame
-    /// (speed = cap / frame time). Call Tick from Update, which runs before the director's own update in the same frame.
-    /// </summary>
+    /// <summary>Caps how far a launch scene's Timeline may advance in one frame.</summary>
+    /// <remarks>
+    /// - A load hitch (the start scene group opening behind it) then delays the picture instead of skipping it.
+    /// - The director keeps its own playback, so markers fire and audio clips play normally.
+    /// - On a long frame the clock only slows the root playable for that frame (speed = cap / frame time).
+    /// - Call Tick from Update, which runs before the director's own update in the same frame.
+    /// </remarks>
     public sealed class LaunchSceneTimelineClock
     {
         private readonly PlayableDirector timeline;

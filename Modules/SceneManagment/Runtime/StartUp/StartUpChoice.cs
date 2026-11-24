@@ -2,10 +2,7 @@ using AbstractPixel.Core;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// The result of <see cref="StartUpRule.Choose"/>: what start-up does, the scene group it opens (none for a
-    /// temporary group, which the caller builds), and at most one line of each kind for the console.
-    /// </summary>
+    /// <summary>The result of <see cref="StartUpRule.Choose"/>: what start-up does, the scene group it opens (none for a temporary group, which the caller builds), and at most one line of each kind for the console.</summary>
     public class StartUpChoice
     {
         public StartUpChoiceKind Kind { get; internal set; }

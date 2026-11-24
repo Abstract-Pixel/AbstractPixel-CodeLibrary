@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// A spawn point: a component in a main scene that holds the positions where relocatables with its relocation label
-    /// go in that scene group (ADR 0013). Its own transform is its first position; more positions are data, each with
-    /// its instance. Use one spawn point per label per area, never one GameObject per object. Shift+click in the Scene
-    /// view adds positions.
-    /// </summary>
+    /// <summary>A component in a main scene that holds the positions where relocatables with its relocation label go (ADR 0013).</summary>
+    /// <remarks>
+    /// - Its own transform is its first position; more positions are data, each with its instance.
+    /// - Use one spawn point per label per area, never one GameObject per object.
+    /// - Shift+click in the Scene view adds positions.
+    /// </remarks>
     [DisallowMultipleComponent]
     [AddComponentMenu("Abstract Pixel/Scene System/Spawn Point")]
     public class SpawnPoint : MonoBehaviour
@@ -54,10 +54,11 @@ namespace AbstractPixel.SceneManagement
             morePositions[_position - 1] = stored;
         }
 
-        /// <summary>
-        /// The world position and rotation of a position. Stored positions follow the spawn point's parents, scale
-        /// included; the rotation is always a pure turn, never mirrored or scaled.
-        /// </summary>
+        /// <summary>The world position and rotation of a position.</summary>
+        /// <remarks>
+        /// - Stored positions follow the spawn point's parents, scale included.
+        /// - The rotation is always a pure turn, never mirrored or scaled.
+        /// </remarks>
         public Pose GetWorldPose(int _position)
         {
             if (_position == 0)
@@ -93,10 +94,11 @@ namespace AbstractPixel.SceneManagement
             return morePositions.Count;
         }
 
-        /// <summary>
-        /// Removes a position. Removing position 0 moves the spawn point onto the first stored position, which then
-        /// becomes position 0. The last remaining position cannot be removed; delete the spawn point instead.
-        /// </summary>
+        /// <summary>Removes a position; returns false when it cannot.</summary>
+        /// <remarks>
+        /// - Removing position 0 moves the spawn point onto the first stored position, which then becomes position 0.
+        /// - The last remaining position cannot be removed; delete the spawn point instead.
+        /// </remarks>
         public bool RemovePosition(int _position)
         {
             if (PositionCount <= 1)

@@ -6,11 +6,12 @@ using UnityEngine.SceneManagement;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// Opens and closes scenes that are Addressable. It follows the held scene contract on <see cref="ISceneLoader"/>,
-    /// and keeps the Addressables handle of every open scene so a level's assets leave memory when it closes.
-    /// A scene is known to Addressables by its asset GUID, so a reference without one is refused.
-    /// </summary>
+    /// <summary>Opens and closes scenes that are Addressable.</summary>
+    /// <remarks>
+    /// - Follows the held scene contract on <see cref="ISceneLoader"/>.
+    /// - Keeps the Addressables handle of every open scene so a level's assets leave memory when it closes.
+    /// - A scene is known to Addressables by its asset GUID, so a reference without one is refused.
+    /// </remarks>
     public class AddressablesSceneLoader : ISceneLoader
     {
         private class OpenScene

@@ -1,14 +1,26 @@
 # StartUpSceneMatch
 
-Says whether an open scene is a scene named in the settings: by GUID when both sides know one, otherwise by path when both know one, otherwise by name. A player build knows no GUID for an open scene, only its path.
+<!-- layout new -->
 
-**Kind:** class · **Namespace:** `AbstractPixel.SceneManagement` · **File:** `StartUpSceneMatch.cs`
+Says whether an open scene is a scene named in the settings.
+
+<!-- type-header AbstractPixel.SceneManagement.StartUpSceneMatch -->
 
 <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Runtime/StartUp/StartUpSceneMatch.cs" "Select the script" -->
 
 Read more in [Start up](../guide/start-up.md#play-from-any-scene).
 
-## Members
+## Start here
+
+| You want to | Use | Why |
+|---|---|---|
+| Compare two scenes | `IsSameScene` | By GUID when both sides know one, otherwise by path when both know one, otherwise by name. |
+| Find a scene in a list | `ListHolds` | True when the list holds the scene. |
+
+**Called for you, leave alone**
+
+- **In a build:** a player build knows no GUID for an open scene, only its path.
+- **Case:** paths and names compare ignoring case; GUIDs compare exactly.
 
 <!-- members AbstractPixel.SceneManagement.StartUpSceneMatch -->
 

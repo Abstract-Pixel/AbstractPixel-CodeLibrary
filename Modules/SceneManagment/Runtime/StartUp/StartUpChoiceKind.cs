@@ -18,10 +18,10 @@ namespace AbstractPixel.SceneManagement
         /// <summary>The active scene is in no scene group: a temporary scene group built from the default scene set.</summary>
         TemporaryGroup,
 
-        /// <summary>
-        /// No main scene is open and the active scene is a manager or shared scene of a sample scene group: that sample
-        /// scene group, main scene included. A sample never opens the game's start scene group (session 5A, stage 0).
-        /// </summary>
+        /// <summary>No main scene is open and the active scene is a manager or shared scene of a sample scene group: that sample scene group, main scene included.</summary>
+        /// <remarks>
+        /// - A sample never opens the game's start scene group (session 5A, stage 0).
+        /// </remarks>
         SampleSceneGroupOfOpenScene
     }
 }

@@ -7,12 +7,13 @@ using UnityEngine.Playables;
 
 namespace AbstractPixel.SceneManagement.SceneScreens
 {
-    /// <summary>
-    /// Put it next to the launch scene's PlayableDirector. When the Timeline reaches a <see cref="LaunchSceneReleaseMarker"/>
-    /// it waits until start-up has finished (or failed) and one more frame, then releases the launch scene hold with
-    /// SceneActions.ReleaseLaunchScene and raises On Released, where the launch scene turns its own camera and listener
-    /// off and closes itself. It also releases when it is destroyed, so leaving Play never leaves the start scene group held.
-    /// </summary>
+    /// <summary>Releases the launch scene hold when the Timeline reaches a <see cref="LaunchSceneReleaseMarker"/>.</summary>
+    /// <remarks>
+    /// - Put it next to the launch scene's PlayableDirector.
+    /// - Waits until start-up has finished (or failed) and one more frame, then calls SceneActions.ReleaseLaunchScene.
+    /// - Then raises On Released, where the launch scene turns its own camera and listener off and closes itself.
+    /// - It also releases when it is destroyed, so leaving Play never leaves the start scene group held.
+    /// </remarks>
     [DisallowMultipleComponent]
     public class LaunchSceneReleaseReceiver : MonoBehaviour, INotificationReceiver
     {

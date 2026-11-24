@@ -10,10 +10,11 @@ namespace AbstractPixel.SceneManagement
 
         private static readonly Color NoLabelColour = new Color(0.85f, 0.85f, 0.85f, 1f);
 
-        /// <summary>
-        /// True when two label fields name the same label: both "No label", the same asset, or two copies of one asset
-        /// (an Addressables bundle carries its own copy of a label its scenes use), which share the label's ID.
-        /// </summary>
+        /// <summary>True when two label fields name the same label.</summary>
+        /// <remarks>
+        /// - Both "No label", the same asset, or two copies of one asset count as the same.
+        /// - An Addressables bundle carries its own copy of a label its scenes use; the copies share the label's ID.
+        /// </remarks>
         public static bool Same(RelocationLabel _first, RelocationLabel _second)
         {
             return KeyOf(_first) == KeyOf(_second);

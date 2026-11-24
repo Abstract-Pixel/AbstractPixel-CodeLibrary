@@ -4,20 +4,26 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneTransitions
 {
-    /// <summary>
-    /// Stand-alone screen effects and the screen state. Scene changes run their effect inside
-    /// <see cref="SceneActions.ChangeTo"/> and <see cref="SceneActions.Retry"/>; the two button names below forward to them.
-    /// </summary>
+    /// <summary>Stand-alone screen effects, the screen state and the transition profile.</summary>
+    /// <remarks>
+    /// - Scene changes run their effect inside <see cref="SceneActions.ChangeTo"/> and <see cref="SceneActions.Retry"/>.
+    /// - The two button names below forward to them.
+    /// </remarks>
     public static class TransitionActions
     {
         private static ScreenState screenState = ScreenState.Visible;
 
-        /// <summary>What the screen effect is doing to the screen. Read-only; game management reacts to it.</summary>
+        /// <summary>What the screen effect is doing to the screen.</summary>
+        /// <remarks>
+        /// - Read-only; game management reacts to it.
+        /// - Visible when Play starts.
+        /// </remarks>
         public static ScreenState ScreenState
         {
             get { return screenState; }
         }
 
+        /// <summary>True once a transition profile is set and its controller was found.</summary>
         public static bool IsInitialized
         {
             get
@@ -27,11 +33,16 @@ namespace AbstractPixel.SceneTransitions
             }
         }
 
+        /// <summary>Sets the first transition profile; the InitializeTransitions component calls it.</summary>
         public static void Initialize(TransitionProfile _transitionProfile)
         {
             TransitionManager.Instance?.Initialize(_transitionProfile);
         }
 
+        /// <summary>Swaps the transition profile and its effect.</summary>
+        /// <remarks>
+        /// - Null removes the effect: scenes then change with no effect.
+        /// </remarks>
         public static void SetTransitionProfile(TransitionProfile _transitionProfile)
         {
             TransitionManager.Instance?.SetTransitionProfile(_transitionProfile);
@@ -59,13 +70,19 @@ namespace AbstractPixel.SceneTransitions
             return manager.ShowScreen();
         }
 
-        /// <summary>Button name kept for menus that call it by name (ADR 0001). Same as <see cref="SceneActions.ChangeTo"/>.</summary>
+        /// <summary>Same as <see cref="SceneActions.ChangeTo"/>.</summary>
+        /// <remarks>
+        /// - Button name kept for menus that call it by name (ADR 0001).
+        /// </remarks>
         public static Task<SceneChangeResult> TransitionToSceneWithEffects(SceneGroup _group)
         {
             return SceneActions.ChangeTo(_group);
         }
 
-        /// <summary>Button name kept for menus that call it by name (ADR 0001). Same as <see cref="SceneActions.Retry"/>.</summary>
+        /// <summary>Same as <see cref="SceneActions.Retry"/>.</summary>
+        /// <remarks>
+        /// - Button name kept for menus that call it by name (ADR 0001).
+        /// </remarks>
         public static Task<SceneChangeResult> ReloadActiveScenesWithEffects()
         {
             return SceneActions.Retry();

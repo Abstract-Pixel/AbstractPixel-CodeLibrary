@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// Finds the scene system settings at runtime. A build loads them with Player Settings' Preloaded Assets before the
-    /// first scene. The Editor does not load Preloaded Assets for Play, so the scene system's editor code registers a
-    /// lookup that finds the asset by type.
-    /// </summary>
+    /// <summary>Finds the scene system settings at runtime.</summary>
+    /// <remarks>
+    /// - A build loads them with Player Settings' Preloaded Assets before the first scene.
+    /// - The Editor does not load Preloaded Assets for Play, so the scene system's editor code registers a lookup that finds the asset by type.
+    /// </remarks>
     public static class SceneSystemSettingsSource
     {
         /// <summary>Set by the scene system's editor code. Null in a build.</summary>

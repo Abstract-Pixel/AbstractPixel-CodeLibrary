@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement.SceneScreens
 {
-    /// <summary>
-    /// The ready-made loading scene's plain progress bar: the fill's right edge follows the smoothed progress. It uses
-    /// the RectTransform's anchors, so it needs no sprite and no art.
-    /// </summary>
+    /// <summary>The ready-made loading scene's plain progress bar: the fill's right edge follows the smoothed progress.</summary>
+    /// <remarks>
+    /// - It uses the RectTransform's anchors, so it needs no sprite and no art.
+    /// </remarks>
     [DisallowMultipleComponent]
     public class SimpleLoadingProgressBar : MonoBehaviour, ILoadingProgressDisplay
     {

@@ -1,16 +1,31 @@
 # SceneCoordinator
 
+<!-- layout new -->
+
 Runs every scene change: start-up, a change to a scene group, Retry and preload. One runs at a time.
 
-**Kind:** class · **Namespace:** `AbstractPixel.SceneManagement` · **File:** `SceneCoordinator.cs`
+<!-- type-header AbstractPixel.SceneManagement.SceneCoordinator -->
 
 <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Runtime/Core/SceneCoordinator.cs" "Select the script" -->
 
 Read more in [Scene messages](../guide/scene-messages.md#order-in-a-scene-change).
 
-What to open and close comes from SceneChangePlan; what is open is kept in one record. A change that is accepted hides the screen through the registered scene transition executor and shows it again at the end; a refused change never touches the screen.
+## Start here
 
-## Members
+You never call it. `SceneActions` hands your calls to it and returns its `SceneChangeResult`.
+
+| You want to | Use | Why |
+|---|---|---|
+| Change scene | `SceneActions.ChangeTo` | Its scene work is internal. |
+| Know a change is running | `SceneActions.IsLoadingSceneGroup` | True until the screen is shown again. |
+| Know start-up is done | `SceneActions.HasGameStarted` | True once the first scene group is open and `OnGameStarted` was raised. |
+
+**Called for you, leave alone**
+
+- **Plan:** what to open and close comes from `SceneChangePlan`.
+- **Record:** what is open is kept in one record.
+- **Screen:** an accepted change hides the screen through the registered scene transition executor and shows it again at the end.
+- **Refused:** a refused change never touches the screen.
 
 <!-- members AbstractPixel.SceneManagement.SceneCoordinator -->
 

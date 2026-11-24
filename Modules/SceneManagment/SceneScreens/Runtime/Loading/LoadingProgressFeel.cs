@@ -2,11 +2,12 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement.SceneScreens
 {
-    /// <summary>
-    /// The feel of a loading progress view, as plain data and maths: the shown value moves towards the raw loading
-    /// progress at a set speed (never past it, never back), an optional curve shapes what is shown, and "full" means
-    /// the shown value has reached 1.
-    /// </summary>
+    /// <summary>The feel of a loading progress view, as plain data and maths.</summary>
+    /// <remarks>
+    /// - The shown value moves towards the raw loading progress at a set speed, never past it and never back.
+    /// - An optional curve shapes what is shown.
+    /// - "Full" means the shown value has reached 1.
+    /// </remarks>
     [System.Serializable]
     public class LoadingProgressFeel
     {

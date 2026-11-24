@@ -6,13 +6,12 @@ using UnityEngine.SceneManagement;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// Start-up: the first scene change of a session, run by the scene system itself when the game launches or Play is
-    /// pressed. It reads the scene system settings, picks a scene group from the scenes Unity opened
-    /// (<see cref="StartUpRule"/>), creates the coordinator and has it open the group's missing scenes. Scene changes
-    /// asked for before that are refused. State resets through <see cref="StaticsResetter"/>, so it runs on every Play
-    /// with domain reload off.
-    /// </summary>
+    /// <summary>Start-up: the first scene change of a session, run by the scene system itself when the game launches or Play is pressed.</summary>
+    /// <remarks>
+    /// - It reads the scene system settings, picks a scene group from the scenes Unity opened (<see cref="StartUpRule"/>), creates the coordinator and has it open the group's missing scenes.
+    /// - Scene changes asked for before that are refused.
+    /// - State resets through <see cref="StaticsResetter"/>, so it runs on every Play with domain reload off.
+    /// </remarks>
     public static class SceneSystemStartUp
     {
         /// <summary>True from before the first scene loads until start-up has handed over to the coordinator.</summary>
@@ -26,10 +25,10 @@ namespace AbstractPixel.SceneManagement
             StaticsResetter.OnResetStatics += ResetState;
         }
 
-        /// <summary>
-        /// Set by the scene system's editor code: whether a scene (by path) was loaded in edit mode when Play was pressed.
-        /// Unity 7 lists those scenes as still loading when start-up looks; null in a build.
-        /// </summary>
+        /// <summary>Set by the scene system's editor code: whether a scene (by path) was loaded in edit mode when Play was pressed.</summary>
+        /// <remarks>
+        /// - Unity 7 lists those scenes as still loading when start-up looks; null in a build.
+        /// </remarks>
         internal static System.Func<string, bool> WasLoadedInEditMode;
 
         private const float EditModeScenesWaitSeconds = 10f;

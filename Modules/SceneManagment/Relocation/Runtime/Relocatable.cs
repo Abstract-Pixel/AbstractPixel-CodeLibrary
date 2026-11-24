@@ -4,13 +4,13 @@ using UnityEngine.Events;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// A relocatable: an object in a manager scene or shared scene that the scene system moves to a spawn point position
-    /// on every scene change, such as the player's car or a pooled enemy. It is held while the scene changes (its
-    /// Rigidbodies kinematic, CharacterControllers off, NavMeshAgents stopped), relocated once the new scene group is
-    /// open, and released once the screen counts as visible again. One component and its relocation label are all it
-    /// needs: no physics lock, no unlock script, no code.
-    /// </summary>
+    /// <summary>A component that moves an object in a manager scene or shared scene to a spawn point position on every scene change.</summary>
+    /// <remarks>
+    /// - Example: the player's car or a pooled enemy.
+    /// - Held while the scene changes: its Rigidbodies kinematic, CharacterControllers off, NavMeshAgents stopped.
+    /// - Relocated once the new scene group is open, and released once the screen counts as visible again.
+    /// - One component and its relocation label are all it needs: no physics lock, no unlock script, no code.
+    /// </remarks>
     [DisallowMultipleComponent]
     [AddComponentMenu("Abstract Pixel/Scene System/Relocatable")]
     public class Relocatable : MonoBehaviour

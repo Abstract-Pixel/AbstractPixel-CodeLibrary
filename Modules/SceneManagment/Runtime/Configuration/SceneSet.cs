@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// The default manager scenes, shared scenes and Reset shared scenes choice for the scene groups that use it.
-    /// A scene set fills its groups in the Editor (ADR 0008); the loader still reads each group's own lists.
-    /// </summary>
+    /// <summary>The default manager scenes, shared scenes and Reset shared scenes choice for the scene groups that use it.</summary>
+    /// <remarks>
+    /// - A scene set fills its groups in the Editor (ADR 0008); the loader still reads each group's own lists.
+    /// </remarks>
     [CreateAssetMenu(fileName = "SceneSet", menuName = "Utility/SceneRelated/Scene Set", order = 2)]
     public class SceneSet : ScriptableObject
     {

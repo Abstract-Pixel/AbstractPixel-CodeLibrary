@@ -4,13 +4,12 @@ using UnityEngine.Events;
 
 namespace AbstractPixel.SceneManagement.SceneScreens
 {
-    /// <summary>
-    /// The part of a loading scene that shows loading progress to the player (glossary: loading progress view). It reads
-    /// SceneActions.LoadingProgress, smooths it with its feel settings and passes it on through four UnityEvents (a
-    /// designer can drag a progress bar or a feedback player in with no code) and to an ILoadingProgressDisplay written
-    /// in code. The scene system tells it when Show screen starts and waits for its "full" beat and hold before Hide
-    /// screen, so the screen effect and the loading scene never animate over each other.
-    /// </summary>
+    /// <summary>The component in a loading scene that shows the loading progress to the player, smoothed.</summary>
+    /// <remarks>
+    /// - Reads SceneActions.LoadingProgress and smooths it with its feel settings.
+    /// - Passes it on through four UnityEvents (a designer can drag a progress bar or a feedback player in with no code) and to an ILoadingProgressDisplay written in code.
+    /// - The scene system tells it when Show screen starts and waits for its "full" beat and hold before Hide screen, so the screen effect and the loading scene never animate over each other.
+    /// </remarks>
     [DisallowMultipleComponent]
     public class LoadingProgressView : MonoBehaviour, ILoadingProgressView
     {

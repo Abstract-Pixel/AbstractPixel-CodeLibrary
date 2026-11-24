@@ -3,10 +3,10 @@ using AbstractPixel.Core;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// Says whether an open scene is a scene named in the settings: by GUID when both sides know one, otherwise by
-    /// path when both know one, otherwise by name. A player build knows no GUID for an open scene, only its path.
-    /// </summary>
+    /// <summary>Says whether an open scene is a scene named in the settings: by GUID when both sides know one, otherwise by path when both know one, otherwise by name.</summary>
+    /// <remarks>
+    /// - A player build knows no GUID for an open scene, only its path.
+    /// </remarks>
     public static class StartUpSceneMatch
     {
         public static bool IsSameScene(SceneReference _first, SceneReference _second)

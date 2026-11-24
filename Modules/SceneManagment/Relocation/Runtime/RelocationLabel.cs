@@ -2,11 +2,11 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// A relocation label: an asset that names a kind of relocatable, such as "Player" or "Enemy" (ADR 0006).
-    /// Relocatables and spawn point positions match by label. An empty label field is "No label", a valid label of its
-    /// own, so a game that relocates only its player needs no asset.
-    /// </summary>
+    /// <summary>An asset that names a kind of relocatable, such as "Player" or "Enemy" (ADR 0006).</summary>
+    /// <remarks>
+    /// - Relocatables and spawn point positions match by label.
+    /// - An empty label field is "No label", a valid label of its own, so a game that relocates only its player needs no asset.
+    /// </remarks>
     [CreateAssetMenu(fileName = "RelocationLabel", menuName = "Abstract Pixel/Scene System/Relocation Label", order = 40)]
     public class RelocationLabel : ScriptableObject
     {

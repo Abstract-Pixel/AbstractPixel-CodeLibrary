@@ -3,10 +3,11 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// One stored spawn point position (ADR 0013): a position and rotation local to its spawn point, and its instance.
-    /// Positions are data on the spawn point, never GameObjects.
-    /// </summary>
+    /// <summary>One stored spawn point position (ADR 0013): a local position and rotation, and its instance.</summary>
+    /// <remarks>
+    /// - Position and rotation are local to its spawn point.
+    /// - Positions are data on the spawn point, never GameObjects.
+    /// </remarks>
     [Serializable]
     public struct SpawnPointPosition
     {
