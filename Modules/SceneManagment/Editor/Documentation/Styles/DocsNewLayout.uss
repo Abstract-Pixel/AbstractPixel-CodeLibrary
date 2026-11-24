@@ -1400,3 +1400,35 @@
     -unity-text-align: middle-center;
     color: var(--unity-colors-label-text);
 }
+
+/* "More" on a member: one inset box, its toggle the box's header row, the remarks inside. Never full width. */
+.docs-layout-new .docs-mrow-more {
+    margin: 6px 10px 2px 0;
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+    align-self: flex-start;
+    min-width: 320px;
+    max-width: 900px;
+}
+
+.docs-layout-new .docs-mrow-more > .unity-foldout__toggle {
+    margin: 0;
+    padding: 3px 8px;
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.docs-layout-new .docs-mrow-more > .unity-foldout__toggle:checked {
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-layout-new .docs-mrow-more > .unity-foldout__content {
+    margin: 0;
+    padding: 6px 10px 6px 6px;
+    background-color: rgba(0, 0, 0, 0);
+}
