@@ -30,10 +30,17 @@ namespace AbstractPixel.SceneManagement.Documentation
             VisualElement lastAction = null;
             int partNumber = 0;
             List<VisualElement> bodies = new List<VisualElement>();
+            // A type page's brief part (declaration, script buttons, Read more) is set off from the detail below.
+            bool needsTypeSeparator = IsTypePage(_blocks);
             foreach (DocsBlock block in _blocks)
             {
                 if (block.Kind == DocsBlockKind.Heading && block.Level <= 2)
                 {
+                    if (needsTypeSeparator)
+                    {
+                        _page.Add(TypeSeparator());
+                        needsTypeSeparator = false;
+                    }
                     _context.SectionCount++;
                     partNumber = 0;
                     VisualElement section = new VisualElement();
@@ -130,6 +137,26 @@ namespace AbstractPixel.SceneManagement.Documentation
                 return match.Success ? match.Groups[1].Value : null;
             }
             return null;
+        }
+
+        private static bool IsTypePage(List<DocsBlock> _blocks)
+        {
+            foreach (DocsBlock block in _blocks)
+            {
+                bool isTypeHeader = block.Kind == DocsBlockKind.Directive && block.Directive.Name == "type-header";
+                if (isTypeHeader)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static VisualElement TypeSeparator()
+        {
+            VisualElement separator = new VisualElement();
+            separator.AddToClassList("docs-type-separator");
+            return separator;
         }
 
         private static bool IsSampleAction(DocsBlock _block)

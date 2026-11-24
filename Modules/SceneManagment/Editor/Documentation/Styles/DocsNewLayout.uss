@@ -1191,3 +1191,11 @@
     margin-bottom: 10px;
     border-bottom-width: 1px;
 }
+
+/* On type pages: a wide rule between the brief part (declaration, script buttons, Read more) and the detail. */
+.docs-type-separator {
+    height: 3px;
+    margin: 18px 0 6px 0;
+    background-color: var(--unity-colors-inspector_titlebar-border);
+    border-radius: 2px;
+}
