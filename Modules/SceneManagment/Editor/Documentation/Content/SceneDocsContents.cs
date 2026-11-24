@@ -22,6 +22,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             List<SceneDocsContentsEntry> roots = new List<SceneDocsContentsEntry>();
             string text = SceneDocsPaths.Read(SceneDocsPaths.Contents) ?? "";
             SceneDocsContentsEntry section = null;
+            SceneDocsContentsEntry category = null;
             foreach (string rawLine in text.Replace("\r\n", "\n").Split('\n'))
             {
                 string line = rawLine.TrimEnd();
@@ -29,10 +30,18 @@ namespace AbstractPixel.SceneManagement.Documentation
                 {
                     string title = line.Substring(3).Trim();
                     section = title == TermsSection ? null : new SceneDocsContentsEntry(title, "");
+                    category = null;
                     if (section != null)
                     {
                         roots.Add(section);
                     }
+                    continue;
+                }
+                // "### Scene loaders" groups the links under it inside its section, as a folder in the tree.
+                if (line.StartsWith("### ") && section != null)
+                {
+                    category = new SceneDocsContentsEntry(line.Substring(4).Trim(), "");
+                    section.Children.Add(category);
                     continue;
                 }
                 Match link = LinkItem.Match(line);
@@ -47,7 +56,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                     roots.Add(entry);
                     continue;
                 }
-                section.Children.Add(entry);
+                (category ?? section).Children.Add(entry);
             }
             return roots;
         }

@@ -28,6 +28,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         private ToolbarButton backButton;
         private ToolbarButton forwardButton;
         private Label crumbs;
+        private DocsTrail trail;
         private ToolbarMenu onThisPage;
         private ToolbarSearchField searchField;
         private TwoPaneSplitView split;
@@ -35,6 +36,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         private TreeView tree;
         private ListView results;
         private ScrollView pageScroll;
+        private DocsPageRail rail;
         private VisualElement pageColumn;
         private SceneDocsHost host;
         private DocsRenderContext renderContext;
@@ -157,9 +159,12 @@ namespace AbstractPixel.SceneManagement.Documentation
             toolbar.Add(homeButton);
             toolbar.Add(sidebarButton);
 
+            // Left: the page and where it sits in the contents. Right: the history trail.
             crumbs = new Label();
             crumbs.AddToClassList("docs-crumbs");
             toolbar.Add(crumbs);
+            trail = new DocsTrail(Navigate);
+            toolbar.Add(trail.Root);
 
             onThisPage = new ToolbarMenu();
             onThisPage.text = "On this page";
@@ -206,7 +211,13 @@ namespace AbstractPixel.SceneManagement.Documentation
             pageColumn = new VisualElement();
             pageColumn.AddToClassList("docs-page");
             pageScroll.Add(pageColumn);
-            split.Add(pageScroll);
+            // The page and, beside it, the "On this page" rail that stays put while the page scrolls.
+            VisualElement pageArea = new VisualElement();
+            pageArea.AddToClassList("docs-page-area");
+            pageArea.Add(pageScroll);
+            rail = new DocsPageRail(pageScroll);
+            pageArea.Add(rail.Root);
+            split.Add(pageArea);
             return split;
         }
 
@@ -225,13 +236,19 @@ namespace AbstractPixel.SceneManagement.Documentation
             sidebar.Insert(index, tree);
         }
 
+        // Each page's tree id and each id's parent, so the tree can follow the page you open.
+        private readonly Dictionary<string, int> treeIdOfTopic = new Dictionary<string, int>();
+        private readonly Dictionary<int, int> treeParentOf = new Dictionary<int, int>();
+
         private TreeView BuildTree()
         {
             List<TreeViewItemData<SceneDocsContentsEntry>> items = new List<TreeViewItemData<SceneDocsContentsEntry>>();
             int nextId = 1;
+            treeIdOfTopic.Clear();
+            treeParentOf.Clear();
             foreach (SceneDocsContentsEntry entry in SceneDocsContents.Tree())
             {
-                items.Add(TreeItem(entry, ref nextId));
+                items.Add(TreeItem(entry, 0, ref nextId));
             }
             TreeView view = new TreeView();
             view.AddToClassList("docs-tree");
@@ -256,15 +273,44 @@ namespace AbstractPixel.SceneManagement.Documentation
             return view;
         }
 
-        private static TreeViewItemData<SceneDocsContentsEntry> TreeItem(SceneDocsContentsEntry _entry, ref int _nextId)
+        private TreeViewItemData<SceneDocsContentsEntry> TreeItem(SceneDocsContentsEntry _entry, int _parentId, ref int _nextId)
         {
             int id = _nextId++;
+            treeParentOf[id] = _parentId;
+            string page = PageOfTopic(_entry.Topic);
+            if (page.Length > 0 && !treeIdOfTopic.ContainsKey(page))
+            {
+                treeIdOfTopic[page] = id;
+            }
             List<TreeViewItemData<SceneDocsContentsEntry>> children = new List<TreeViewItemData<SceneDocsContentsEntry>>();
             foreach (SceneDocsContentsEntry child in _entry.Children)
             {
-                children.Add(TreeItem(child, ref _nextId));
+                children.Add(TreeItem(child, id, ref _nextId));
             }
             return new TreeViewItemData<SceneDocsContentsEntry>(id, _entry, children);
+        }
+
+        private static string PageOfTopic(string _topic)
+        {
+            string topic = (_topic ?? "").ToLowerInvariant();
+            int hash = topic.IndexOf('#');
+            return hash < 0 ? topic : topic.Substring(0, hash);
+        }
+
+        // Selects the open page in the tree, opening the folders above it, without opening the page again.
+        private void FollowInTree(string _topicId)
+        {
+            int id;
+            if (tree == null || !treeIdOfTopic.TryGetValue(PageOfTopic(_topicId), out id))
+            {
+                return;
+            }
+            for (int parent = treeParentOf[id]; parent > 0; parent = treeParentOf[parent])
+            {
+                tree.ExpandItem(parent);
+            }
+            tree.SetSelectionByIdWithoutNotify(new[] { id });
+            tree.ScrollToItemById(id);
         }
 
         private void OnTreeSelection(IEnumerable<object> _selection)
@@ -381,6 +427,8 @@ namespace AbstractPixel.SceneManagement.Documentation
                 }
                 RenderPage(page, parsed);
             }
+            trail.Refresh(history.RecentPages(DocsTrail.MaxPages), crumbs.text);
+            FollowInTree(_topicId);
             if (!string.IsNullOrEmpty(anchor))
             {
                 ScrollToHeading(anchor);
@@ -400,7 +448,10 @@ namespace AbstractPixel.SceneManagement.Documentation
             pageColumn.EnableInClassList("docs-layout-new", _parsed.IsNewLayout);
             pageColumn.Add(DocsRenderer.Render(renderContext));
             pageColumn.Add(_parsed.IsNewLayout ? PagerCards(_page) : Pager(_page));
+            rail.Build(pageColumn);
+            rootVisualElement.EnableInClassList("docs-has-rail", _parsed.IsNewLayout);
             crumbs.text = CrumbsFor(_page, _parsed.Title);
+            trail.Refresh(history.RecentPages(DocsTrail.MaxPages), crumbs.text);
             BuildOnThisPage(_parsed);
             ReplayTimelineIntoSteps();
         }
@@ -523,6 +574,15 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 return false;
             }
+            // A heading inside closed parts opens them first, so the link lands on something you can see.
+            for (VisualElement parent = row; parent != null; parent = parent.parent)
+            {
+                Foldout fold = parent as Foldout;
+                if (fold != null)
+                {
+                    fold.value = true;
+                }
+            }
             row.AddToClassList("docs-flash");
             pageScroll.schedule.Execute(() => pageScroll.ScrollTo(row)).StartingIn(30);
             row.schedule.Execute(() => row.RemoveFromClassList("docs-flash")).StartingIn(FlashMilliseconds);
@@ -598,6 +658,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             bool isNarrow = _event.newRect.width < NarrowWidth;
             rootVisualElement.EnableInClassList("docs-narrow", isNarrow);
+            rootVisualElement.EnableInClassList("docs-wide", _event.newRect.width >= DocsPageRail.MinWindowWidth);
             bool wasNarrow = _event.oldRect.width < NarrowWidth && _event.oldRect.width > 0f;
             if (isNarrow == wasNarrow)
             {

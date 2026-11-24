@@ -6,13 +6,13 @@ A [loading scene](term:loading-scene) shows while the old place closes and the n
 
 ## Show a loading scene <!-- level 0 -->
 
-Set [Show the loading scene](term:show-the-loading-scene) on the scene group you go to.
+On the scene group you go to, set the **[Show the loading scene](term:show-the-loading-scene)** field:
 
-| Show the loading scene | When the loading scene shows |
+| Value | When the loading scene shows |
 |---|---|
 | Never | Never |
 | When arriving from another scene group | On a change from another scene group, not on a Retry |
-| Every time | On every change, Retry included |
+| Every time, Retry included | On every change, Retry included |
 
 > [!TIP]
 > Hide screen, the loading scene with its bar, then the new place.
@@ -77,7 +77,7 @@ With the view, connect your bar in one of two ways:
 | Already has a function that sets its fill | No code. On the view's On Progress list, click +, drag in the object that has your bar, then pick that function in the dropdown. It works like a Button's On Click; the view calls the function every frame with the value from 0 to 1. |
 | Is your own script | Implement `ILoadingProgressDisplay` in a script on the same object as the view. Sample 06 does this: `Sample06BarDisplay` sits next to the view on Loading Bar, and its event lists are empty. |
 
-<!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/06 Loading Scene/Scenes/Sample 06 Loading.unity" "Loading Bar" "Select Loading Bar in sample 06" -->
+<!-- locate "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/06 Loading Scene/Scenes/Sample 06 Loading.unity" "Loading Bar" "LoadingProgressView" -->
 
 Sample 06's script:
 
@@ -90,6 +90,8 @@ public void SetProgress(float _progress)
 **LoadingProgressView fields, in the Inspector**
 
 What you see when you select the object with the `LoadingProgressView` component in your loading scene.
+
+<!-- locate "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/06 Loading Scene/Scenes/Sample 06 Loading.unity" "Loading Bar" "LoadingProgressView" -->
 
 | Field | What it does for you | Change it when |
 |---|---|---|

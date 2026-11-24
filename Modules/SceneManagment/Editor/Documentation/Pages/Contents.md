@@ -25,53 +25,76 @@
 
 ## Types
 
-- [AddressablesSceneLoader](types/AddressablesSceneLoader.md)
+### Change scene
+
+- [SceneActions](types/SceneActions.md)
+- [MonoSceneActions](types/MonoSceneActions.md)
+- [SceneChangeResult](types/SceneChangeResult.md)
+- [SceneChangeOutcome](types/SceneChangeOutcome.md)
+- [SceneChangeRefusal](types/SceneChangeRefusal.md)
+- [SceneEventBus](types/SceneEventBus.md)
+- [SceneCoordinator](types/SceneCoordinator.md)
+
+### Scene groups and sets
+
+- [SceneGroup](types/SceneGroup.md)
+- [SceneGroupData](types/SceneGroupData.md)
+- [TemporarySceneGroup](types/TemporarySceneGroup.md)
+- [SceneSet](types/SceneSet.md)
+- [SceneSetPart](types/SceneSetPart.md)
+- [ShowLoadingScene](types/ShowLoadingScene.md)
+
+### Settings and start-up
+
+- [SceneSystemSettings](types/SceneSystemSettings.md)
+- [SceneSystemSettingsSource](types/SceneSystemSettingsSource.md)
+- [SceneSystemStartUp](types/SceneSystemStartUp.md)
+- [StartUpRule](types/StartUpRule.md)
+- [StartUpChoice](types/StartUpChoice.md)
+- [StartUpChoiceKind](types/StartUpChoiceKind.md)
+- [StartUpSceneMatch](types/StartUpSceneMatch.md)
+
+### Scene loaders
+
+- [ISceneLoader](types/ISceneLoader.md)
 - [DefaultSceneLoader](types/DefaultSceneLoader.md)
+- [AddressablesSceneLoader](types/AddressablesSceneLoader.md)
+- [SceneLoaderSelector](types/SceneLoaderSelector.md)
+
+### Loading scene and progress
+
+- [LoadingProgressView](types/LoadingProgressView.md)
+- [LoadingProgressFeel](types/LoadingProgressFeel.md)
 - [ILoadingProgressDisplay](types/ILoadingProgressDisplay.md)
 - [ILoadingProgressView](types/ILoadingProgressView.md)
-- [IRelocationBroadcaster](types/IRelocationBroadcaster.md)
-- [IRelocationHold](types/IRelocationHold.md)
-- [ISceneLoader](types/ISceneLoader.md)
-- [ISceneTransitionExecutor](types/ISceneTransitionExecutor.md)
-- [ImageFadeProfile](types/ImageFadeProfile.md)
+- [SimpleLoadingProgressBar](types/SimpleLoadingProgressBar.md)
+
+### Launch scene
+
 - [LaunchSceneReleaseMarker](types/LaunchSceneReleaseMarker.md)
 - [LaunchSceneReleaseReceiver](types/LaunchSceneReleaseReceiver.md)
 - [LaunchSceneRenderSettingsGuard](types/LaunchSceneRenderSettingsGuard.md)
 - [LaunchSceneStartUpLog](types/LaunchSceneStartUpLog.md)
 - [LaunchSceneTimelineClock](types/LaunchSceneTimelineClock.md)
-- [LoadingProgressFeel](types/LoadingProgressFeel.md)
-- [LoadingProgressView](types/LoadingProgressView.md)
-- [MonoSceneActions](types/MonoSceneActions.md)
+
+### Screen transitions
+
+- [TransitionActions](types/TransitionActions.md)
+- [TransitionProfile](types/TransitionProfile.md)
+- [ImageFadeProfile](types/ImageFadeProfile.md)
+- [TransitionEventBus](types/TransitionEventBus.md)
+- [ScreenState](types/ScreenState.md)
+- [ISceneTransitionExecutor](types/ISceneTransitionExecutor.md)
+
+### Relocation
+
 - [Relocatable](types/Relocatable.md)
 - [RelocationLabel](types/RelocationLabel.md)
 - [RelocationLabels](types/RelocationLabels.md)
-- [SceneActions](types/SceneActions.md)
-- [SceneChangeOutcome](types/SceneChangeOutcome.md)
-- [SceneChangeRefusal](types/SceneChangeRefusal.md)
-- [SceneChangeResult](types/SceneChangeResult.md)
-- [SceneCoordinator](types/SceneCoordinator.md)
-- [SceneEventBus](types/SceneEventBus.md)
-- [SceneGroup](types/SceneGroup.md)
-- [SceneGroupData](types/SceneGroupData.md)
-- [SceneLoaderSelector](types/SceneLoaderSelector.md)
-- [SceneSet](types/SceneSet.md)
-- [SceneSetPart](types/SceneSetPart.md)
-- [SceneSystemSettings](types/SceneSystemSettings.md)
-- [SceneSystemSettingsSource](types/SceneSystemSettingsSource.md)
-- [SceneSystemStartUp](types/SceneSystemStartUp.md)
-- [ScreenState](types/ScreenState.md)
-- [ShowLoadingScene](types/ShowLoadingScene.md)
-- [SimpleLoadingProgressBar](types/SimpleLoadingProgressBar.md)
 - [SpawnPoint](types/SpawnPoint.md)
 - [SpawnPointPosition](types/SpawnPointPosition.md)
-- [StartUpChoice](types/StartUpChoice.md)
-- [StartUpChoiceKind](types/StartUpChoiceKind.md)
-- [StartUpRule](types/StartUpRule.md)
-- [StartUpSceneMatch](types/StartUpSceneMatch.md)
-- [TemporarySceneGroup](types/TemporarySceneGroup.md)
-- [TransitionActions](types/TransitionActions.md)
-- [TransitionEventBus](types/TransitionEventBus.md)
-- [TransitionProfile](types/TransitionProfile.md)
+- [IRelocationBroadcaster](types/IRelocationBroadcaster.md)
+- [IRelocationHold](types/IRelocationHold.md)
 
 ## Samples
 

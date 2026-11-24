@@ -8,9 +8,10 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// <summary>
     /// Groups a new-layout page two levels deep so each part's start and end show. A "##" heading starts a numbered
     /// section: a box with a header bar, holding everything up to the next "##". A "###" heading or a paragraph that is
-    /// only bold text ("**Or do it yourself**") starts a numbered part: a strip across the box, up to the next strip or
-    /// the box's end. A part titled "Try it in the sample" is a foldout strip, closed by default, with its first action
-    /// on the strip. A button with fact rows under it becomes one tinted box. (New layout only.)
+    /// only bold text ("**Or do it yourself**") starts a numbered part: a foldout strip across the box, closed by
+    /// default, up to the next strip or the box's end. On a "Try it in the sample" strip the first action sits on the
+    /// strip. A button with fact rows under it becomes a foldout too: the button on its strip, the rows inside.
+    /// Boxes have no inner padding: tables and rows meet the box's edges, text keeps its own margin. (New layout only.)
     /// </summary>
     #if UNITY_7000_0_OR_NEWER
     [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
@@ -34,11 +35,10 @@ namespace AbstractPixel.SceneManagement.Documentation
                 if (block.Kind == DocsBlockKind.Heading && block.Level <= 2)
                 {
                     _context.SectionCount++;
-                    int sectionNumber = _context.SectionCount;
                     partNumber = 0;
                     VisualElement section = new VisualElement();
                     section.AddToClassList("docs-section");
-                    section.Add(DocsRenderer.HeadingRow(sectionNumber + ".  " + block.Text, block.Id, block.Level, block.Pill, _context));
+                    section.Add(DocsRenderer.HeadingRow(_context.SectionCount + ".  " + block.Text, block.Id, block.Level, block.Pill, _context));
                     sectionBody = new VisualElement();
                     sectionBody.AddToClassList("docs-section-body");
                     bodies.Add(sectionBody);
@@ -53,30 +53,18 @@ namespace AbstractPixel.SceneManagement.Documentation
                 {
                     partNumber++;
                     string numbered = _context.SectionCount + "." + partNumber + "  " + partTitle;
-                    sample = null;
-                    if (partTitle == SampleTitle)
-                    {
-                        sample = DocsSessionFoldout.Create(numbered, _context.Page.Path + "#sample");
-                        sample.RemoveFromClassList("docs-fold");
-                        sample.AddToClassList("docs-part-fold");
-                        sampleHasAction = false;
-                        sectionBody.Add(sample);
-                        partBody = sample.contentContainer;
-                        bodies.Add(partBody);
-                        continue;
-                    }
-                    Label strip = new Label(numbered);
-                    strip.AddToClassList("docs-part-strip");
-                    strip.selection.isSelectable = true;
+                    Foldout part = DocsSessionFoldout.Create(numbered, _context.Page.Path + "#part");
+                    part.RemoveFromClassList("docs-fold");
+                    part.AddToClassList("docs-part-fold");
                     if (block.Kind == DocsBlockKind.Heading)
                     {
-                        _context.HeadingRows[block.Id] = strip;
+                        _context.HeadingRows[block.Id] = part;
                     }
-                    sectionBody.Add(strip);
-                    partBody = new VisualElement();
-                    partBody.AddToClassList("docs-part-body");
+                    sectionBody.Add(part);
+                    partBody = part.contentContainer;
                     bodies.Add(partBody);
-                    sectionBody.Add(partBody);
+                    sample = partTitle == SampleTitle ? part : null;
+                    sampleHasAction = false;
                     continue;
                 }
                 // Member tables are numbered sections of their own, so the section before them ends here.
@@ -94,17 +82,21 @@ namespace AbstractPixel.SceneManagement.Documentation
                 if (sample != null && !sampleHasAction && IsSampleAction(block))
                 {
                     sampleHasAction = true;
-                    AddToStrip(sample, element, block.Directive.Argument(1));
+                    AddToStrip(sample, element);
+                    AddSampleFolder(sample, block.Directive.Argument(1));
                     continue;
                 }
                 VisualElement target = partBody ?? sectionBody ?? _page;
-                // A button with fact rows right under it: one tinted box, so the rows read as what the button opens.
+                // A button with fact rows right under it: one foldout, the button on its strip and the rows inside.
                 if (lastAction != null && lastAction.parent == target && block.Kind == DocsBlockKind.List && DocsFactRows.Applies(block))
                 {
-                    VisualElement group = new VisualElement();
-                    group.AddToClassList("docs-action-group");
+                    string label = SceneDocsActions.LabelOf((DocsDirective)lastAction.userData);
+                    Foldout group = DocsSessionFoldout.Create("", _context.Page.Path + "#button-" + label);
+                    group.RemoveFromClassList("docs-fold");
+                    group.AddToClassList("docs-action-fold");
+                    group.AddToClassList("docs-inner-box");
                     target.Insert(target.IndexOf(lastAction), group);
-                    group.Add(lastAction);
+                    AddToStrip(group, lastAction);
                     element.AddToClassList("docs-action-group-facts");
                     group.Add(element);
                     lastAction = null;
@@ -114,7 +106,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                 bool isAction = block.Kind == DocsBlockKind.Directive && block.Directive.Name == "action";
                 lastAction = isAction ? element : null;
             }
-            // USS has no :last-child, so the last block of each box is marked: a table there meets the box's edge.
+            // USS has no :first-child or :last-child, so each box's first and last blocks are marked here.
             foreach (VisualElement body in bodies)
             {
                 if (body.childCount > 0)
@@ -145,12 +137,17 @@ namespace AbstractPixel.SceneManagement.Documentation
             return _block.Kind == DocsBlockKind.Directive && _block.Directive.Name == "action" && _block.Directive.Argument(0) == "open-sample";
         }
 
-        // The Open sample button and the sample folder go on the foldout's strip, after its title.
-        private static void AddToStrip(Foldout _sample, VisualElement _button, string _number)
+        // Puts a button on a foldout's strip, after its title, where a click runs the button and not the foldout.
+        private static void AddToStrip(Foldout _fold, VisualElement _button)
         {
-            VisualElement strip = _sample.Q<Toggle>().Q(className: Toggle.inputUssClassName);
-            _button.AddToClassList("docs-part-fold-action");
+            VisualElement strip = _fold.Q<Toggle>().Q(className: Toggle.inputUssClassName);
+            _button.AddToClassList("docs-strip-action");
+            _button.RegisterCallback<ClickEvent>(_click => _click.StopPropagation());
             strip.Add(_button);
+        }
+
+        private static void AddSampleFolder(Foldout _sample, string _number)
+        {
             string folder = SceneDocsTopics.SampleFolder(_number);
             if (folder == null)
             {
@@ -161,7 +158,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             path.text = shortPath;
             path.tooltip = "Selects this sample's folder in the Project window";
             path.AddToClassList("docs-sample-path");
-            strip.Add(path);
+            AddToStrip(_sample, path);
         }
 
         private static void SelectFolder(string _folder)

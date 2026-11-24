@@ -58,6 +58,19 @@ namespace AbstractPixel.SceneManagement.Documentation
         /// <summary>Runs an action. Returns a short sentence saying what it did, for probes and the Console.</summary>
         public static string Run(DocsDirective _directive)
         {
+            SceneDocsSampleFollower.IsDocsOpeningScenes = true;
+            try
+            {
+                return RunAction(_directive);
+            }
+            finally
+            {
+                SceneDocsSampleFollower.IsDocsOpeningScenes = false;
+            }
+        }
+
+        private static string RunAction(DocsDirective _directive)
+        {
             string kind = _directive.Argument(0);
             switch (kind)
             {
@@ -178,7 +191,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         }
 
         // Opens the scene additively when it is not open yet (no save prompt needed), then selects and frames the object.
-        private static string SelectInScene(string _scenePath, string _hierarchyPath)
+        public static string SelectInScene(string _scenePath, string _hierarchyPath)
         {
             Scene scene = SceneManager.GetSceneByPath(_scenePath);
             bool isOpen = scene.IsValid() && scene.isLoaded;
