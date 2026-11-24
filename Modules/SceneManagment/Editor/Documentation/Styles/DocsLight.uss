@@ -38,3 +38,5 @@
 .docs-action-group-facts > .docs-facts-alt, .docs-fold .docs-facts-alt { background-color: rgba(255, 255, 255, 0.75); }
 .docs-mrow-more > .unity-foldout__content { background-color: rgba(0, 0, 0, 0); }
 .docs-table-group { background-color: rgba(0, 0, 0, 0.06); }
+/* Table header rows: light grey, so a table reads as its own box. */
+.docs-layout-new .docs-table-header { background-color: rgba(0, 0, 0, 0.08); }
