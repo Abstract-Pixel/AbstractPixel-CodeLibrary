@@ -17,6 +17,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         private readonly ScrollView list = new ScrollView(ScrollViewMode.Vertical);
         private readonly List<VisualElement> sections = new List<VisualElement>();
         private readonly List<VisualElement> sectionRows = new List<VisualElement>();
+        private readonly DocsRailResizer resizer;
 
         public DocsPageRail(ScrollView _pageScroll)
         {
@@ -28,6 +29,8 @@ namespace AbstractPixel.SceneManagement.Documentation
             list.AddToClassList("docs-rail-list");
             Root.Add(list);
             pageScroll.verticalScroller.valueChanged += _value => MarkCurrent();
+            // The left edge drags to resize the rail.
+            resizer = new DocsRailResizer(Root);
         }
 
         /// <summary>Rebuilds the tree from the drawn page: its section boxes and the part strips inside them.</summary>
