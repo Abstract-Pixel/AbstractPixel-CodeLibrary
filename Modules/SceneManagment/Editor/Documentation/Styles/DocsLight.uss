@@ -49,3 +49,5 @@
 .docs-layout-new .docs-code-header > .docs-code-action:hover { background-color: rgba(0, 0, 0, 0.08); }
 .docs-layout-new .docs-code-header > .docs-code-action:hover .docs-chip-label,
 .docs-layout-new .docs-code-header > .docs-code-action:hover .docs-glyph { color: rgb(20, 20, 20); }
+/* The C# language label: a muted purple that reads on a light page. */
+.docs-code-language { color: rgb(110, 70, 140); }

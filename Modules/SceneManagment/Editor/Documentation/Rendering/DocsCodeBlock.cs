@@ -63,7 +63,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             VisualElement header = new VisualElement();
             header.AddToClassList("docs-code-header");
-            string title = string.IsNullOrEmpty(_source) ? "C#" : Path.GetFileName(_source.Replace("lib:", ""));
+            string title = string.IsNullOrEmpty(_source) ? "Example" : Path.GetFileName(_source.Replace("lib:", ""));
             // A small C# badge in the language's purple, before the language or file name.
             Label language = new Label("C#");
             language.AddToClassList("docs-code-language");
