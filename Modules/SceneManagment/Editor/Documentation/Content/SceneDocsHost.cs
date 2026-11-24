@@ -1,4 +1,5 @@
 using System;
+using AbstractPixel.SceneManagement.Editor;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -227,11 +228,60 @@ namespace AbstractPixel.SceneManagement.Documentation
             chip.userData = _directive;
             chip.AddToClassList("docs-action");
             bool selectsAScript = kind == "select" && _directive.Argument(1).EndsWith(".cs", System.StringComparison.OrdinalIgnoreCase);
-            if (!selectsAScript)
+            if (selectsAScript)
             {
-                return chip;
+                return WithOpenScriptChip(chip, _directive);
             }
-            return WithOpenScriptChip(chip, _directive);
+            string place = PlaceOf(_directive);
+            if (place != null)
+            {
+                return WithPlace(chip, _directive, place);
+            }
+            return chip;
+        }
+
+        // Where a settings button opens, from the pages' own paths: "Project Settings › Abstract Pixel › Scene System ›
+        // Scene Groups Debugger", or "Preferences › Abstract Pixel › Scenes". Null for other buttons.
+        private static string PlaceOf(DocsDirective _directive)
+        {
+            string kind = _directive.Argument(0);
+            if (kind == "open-settings")
+            {
+                return Readable(SceneSystemSettingsProvider.PagePath) + " › " + _directive.Argument(1);
+            }
+            if (kind == "open-preferences")
+            {
+                return Readable(SceneOpeningPreferencesProvider.PagePath);
+            }
+            return null;
+        }
+
+        // "Project/Abstract Pixel/Scene System" reads "Project Settings › Abstract Pixel › Scene System".
+        private static string Readable(string _settingsPath)
+        {
+            string[] parts = _settingsPath.Split('/');
+            if (parts.Length > 0 && parts[0] == "Project")
+            {
+                parts[0] = "Project Settings";
+            }
+            return string.Join(" › ", parts);
+        }
+
+        // The button, and beside it a small muted path saying where it opens.
+        private static VisualElement WithPlace(Button _chip, DocsDirective _directive, string _place)
+        {
+            VisualElement row = new VisualElement();
+            row.userData = _directive;
+            row.AddToClassList("docs-action");
+            row.AddToClassList("docs-action-row");
+            _chip.RemoveFromClassList("docs-action");
+            _chip.tooltip = "Opens " + _place.Replace(" › ", " > ");
+            row.Add(_chip);
+            Label place = new Label(_place);
+            place.AddToClassList("docs-action-place");
+            place.tooltip = _chip.tooltip;
+            row.Add(place);
+            return row;
         }
 
         // "Select the script" on a type page gets "Open script in IDE" beside it, in the same chip style.
