@@ -11,7 +11,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         public static readonly HashSet<string> Known = new HashSet<string>
         {
             "level", "action", "done-when", "marks", "timeline", "your-project", "members", "code-map", "adr-list", "diagram",
-            "layout", "type-header", "decision"
+            "layout", "type-header", "decision", "locate"
         };
 
         /// <summary>The action kinds an action directive may name.</summary>

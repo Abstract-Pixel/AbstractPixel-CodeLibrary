@@ -71,8 +71,9 @@ namespace AbstractPixel.SceneManagement.Documentation
     }
 
     /// <summary>
-    /// A flow: a numbered list with no done-when, drawn as numbered circles joined by a line. An item with a nested
-    /// numbered list is a phase: its text is the phase title and its steps carry on the numbering. (New layout only.)
+    /// A flow: a numbered list with no done-when, drawn as numbered circles. An item with a nested numbered list is a
+    /// phase: a box that opens and closes, closed by default, titled "1  Cover the old level", its steps 1.1, 1.2...
+    /// (New layout only.)
     /// </summary>
     public static class DocsFlow
     {
@@ -97,33 +98,38 @@ namespace AbstractPixel.SceneManagement.Documentation
             VisualElement flow = new VisualElement();
             flow.AddToClassList("docs-flow");
             int number = 1;
+            int phaseNumber = 0;
             foreach (DocsListItem item in _block.Items)
             {
                 bool isPhase = item.NestedList != null && item.NestedList.Ordered;
                 if (!isPhase)
                 {
-                    flow.Add(Step(number, DocsText.Create(item.Text, null, _context)));
+                    flow.Add(Step(number.ToString(), DocsText.Create(item.Text, null, _context)));
                     number++;
                     continue;
                 }
-                VisualElement phase = new VisualElement();
+                phaseNumber++;
+                string title = DocsInline.ToPlainText(item.Text);
+                Foldout phase = DocsSessionFoldout.Create(phaseNumber + "   " + title, _context.Page.Path + "#phase");
+                phase.RemoveFromClassList("docs-fold");
                 phase.AddToClassList("docs-flow-phase");
-                phase.Add(DocsText.Create(item.Text, "docs-flow-phase-title", _context));
+                phase.AddToClassList("docs-inner-box");
+                int stepNumber = 1;
                 foreach (DocsListItem step in item.NestedList.Items)
                 {
-                    phase.Add(Step(number, DocsText.Create(step.Text, null, _context)));
-                    number++;
+                    phase.Add(Step(phaseNumber + "." + stepNumber, DocsText.Create(step.Text, null, _context)));
+                    stepNumber++;
                 }
                 flow.Add(phase);
             }
             return flow;
         }
 
-        private static VisualElement Step(int _number, VisualElement _content)
+        private static VisualElement Step(string _number, VisualElement _content)
         {
             VisualElement row = new VisualElement();
             row.AddToClassList("docs-flow-step");
-            Label circle = new Label(_number.ToString());
+            Label circle = new Label(_number);
             circle.AddToClassList("docs-flow-number");
             row.Add(circle);
             _content.AddToClassList("docs-flow-text");

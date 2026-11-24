@@ -171,6 +171,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                 case "code-map": return SceneDocsDiagram.CodeMap();
                 case "adr-list": return _context.Page.IsNewLayout ? SceneDocsReference.DecisionList(navigate) : SceneDocsReference.AdrList(navigate);
                 case "diagram": return SceneDocsDiagram.Parts(navigate);
+                case "locate": return SceneDocsLocate.Render(_directive.Argument(0), _directive.Argument(1), _directive.Argument(2));
                 default: return null;
             }
         }

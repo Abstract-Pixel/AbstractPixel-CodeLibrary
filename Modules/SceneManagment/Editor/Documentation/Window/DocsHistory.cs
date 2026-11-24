@@ -55,6 +55,25 @@ namespace AbstractPixel.SceneManagement.Documentation
             index = topics.Count - 1;
         }
 
+        /// <summary>The last pages visited up to the current one, one entry per page, oldest first.</summary>
+        public List<string> RecentPages(int _max)
+        {
+            List<string> pages = new List<string>();
+            List<string> recent = new List<string>();
+            for (int at = index; at >= 0 && recent.Count < _max; at--)
+            {
+                string topic = topics[at];
+                int hash = topic.IndexOf('#');
+                string page = hash < 0 ? topic : topic.Substring(0, hash);
+                if (!pages.Contains(page))
+                {
+                    pages.Add(page);
+                    recent.Insert(0, topic);
+                }
+            }
+            return recent;
+        }
+
         public string Back()
         {
             if (CanGoBack)

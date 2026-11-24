@@ -269,9 +269,16 @@ namespace AbstractPixel.SceneManagement.Documentation
             if (_context.Page.IsNewLayout)
             {
                 Foldout fold = DocsSessionFoldout.Create(_block.Title, _context.Page.Path);
+                fold.AddToClassList("docs-inner-box");
                 fold.EnableInClassList("docs-fold-why", _block.Title == "Why it works");
                 fold.EnableInClassList("docs-fold-wrong", _block.Title == "If it goes wrong");
                 AddBlocks(fold.contentContainer, _block.Children, _context);
+                VisualElement inside = fold.contentContainer;
+                if (inside.childCount > 0)
+                {
+                    inside[0].AddToClassList("docs-first");
+                    inside[inside.childCount - 1].AddToClassList("docs-last");
+                }
                 return fold;
             }
             Foldout foldout = new Foldout();

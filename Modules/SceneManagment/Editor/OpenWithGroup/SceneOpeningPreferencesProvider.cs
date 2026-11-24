@@ -18,7 +18,7 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             SettingsProvider provider = new SettingsProvider(PagePath, SettingsScope.User);
             provider.label = "Scenes";
-            provider.keywords = new HashSet<string> { "scene", "scene group", "main scene", "scene set", "scene in no group", "open", "hierarchy" };
+            provider.keywords = new HashSet<string> { "scene", "scene group", "main scene", "scene set", "scene in no group", "open", "hierarchy", "docs", "sample" };
             provider.activateHandler = (_search, _root) => Build(_root);
             provider.titleBarGuiHandler = () => SceneSystemHelp.TitleBarButton(SceneSystemDocTopics.ScenesPreferences);
             return provider;
@@ -33,6 +33,14 @@ namespace AbstractPixel.SceneManagement.Editor
             page.Add(PreferenceToggle(SceneOpeningPreferences.MainSceneWithGroupLabel, SceneOpeningPreferences.MainSceneWithGroupTooltip, true));
             page.Add(PreferenceToggle(SceneOpeningPreferences.NoGroupSceneWithDefaultSetLabel, SceneOpeningPreferences.NoGroupSceneWithDefaultSetTooltip, false));
             page.Add(SceneSystemUI.Hint(PlayNote));
+            Toggle follow = new Toggle(SceneDocsFollowPreference.Label);
+            follow.tooltip = SceneDocsFollowPreference.Tooltip;
+            follow.labelElement.style.minWidth = LabelWidth;
+            follow.labelElement.style.width = LabelWidth;
+            follow.style.marginTop = 8;
+            follow.SetValueWithoutNotify(SceneDocsFollowPreference.FollowSampleScenes);
+            follow.RegisterValueChangedCallback(_change => SceneDocsFollowPreference.FollowSampleScenes = _change.newValue);
+            page.Add(follow);
             _root.Add(page);
         }
 

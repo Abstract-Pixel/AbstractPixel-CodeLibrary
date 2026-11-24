@@ -27,11 +27,11 @@
 .docs-status-accepted { background-color: rgba(60, 130, 75, 0.14); border-color: rgba(60, 130, 75, 0.45); color: rgb(36, 90, 48); }
 .docs-status-amended { background-color: rgba(170, 100, 30, 0.14); border-color: rgba(170, 100, 30, 0.45); color: rgb(115, 62, 12); }
 .docs-flow-number { border-color: rgb(50, 100, 180); color: rgb(30, 66, 130); background-color: rgba(50, 100, 180, 0.12); }
-.docs-flow-phase { border-left-color: rgb(50, 100, 180); }
+.docs-flow-phase, .docs-flow .docs-flow-phase.docs-inner-box { border-left-color: rgb(50, 100, 180); }
 .docs-mrow:hover { background-color: rgba(0, 0, 0, 0.03); }
 /* New layout: part strips and the tinted group box. */
 .docs-part-strip, .docs-part-fold > .unity-foldout__toggle { background-color: rgba(255, 255, 255, 0.35); }
-.docs-action-group, .docs-fold > .unity-foldout__content { background-color: rgba(0, 0, 0, 0.07); }
+.docs-action-fold, .docs-fold > .unity-foldout__content { background-color: rgba(0, 0, 0, 0.07); }
 /* Zebra rows. */
 .docs-facts-alt, .docs-mrow-alt { background-color: rgba(0, 0, 0, 0.04); }
 .docs-action-group-facts > .docs-facts-row, .docs-fold .docs-facts-row { background-color: rgba(255, 255, 255, 0.45); }

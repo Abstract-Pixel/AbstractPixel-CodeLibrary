@@ -56,6 +56,55 @@
     display: none;
 }
 
+/* The trail of recent pages in the toolbar. */
+.docs-trail {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    flex-grow: 0;
+    flex-shrink: 1;
+    max-width: 55%;
+    overflow: hidden;
+    padding: 0 8px;
+    border-left-width: 1px;
+    border-left-color: var(--unity-colors-toolbar-border);
+}
+
+.docs-trail-lead {
+    color: var(--unity-colors-label-text);
+    opacity: 0.6;
+    margin: 0 6px 0 0;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.docs-trail-link {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    margin: 0;
+    padding: 0 2px;
+    color: var(--unity-colors-link-text);
+    flex-shrink: 1;
+}
+
+.docs-trail-link:hover {
+    -unity-font-style: bold;
+}
+
+.docs-trail-separator {
+    color: var(--unity-colors-label-text);
+    opacity: 0.6;
+    padding: 0 3px;
+    margin: 0;
+}
+
+.docs-trail-current {
+    -unity-font-style: bold;
+    padding: 0 2px;
+    margin: 0;
+    flex-shrink: 1;
+}
+
 .docs-split {
     flex-grow: 1;
 }
@@ -715,4 +764,125 @@
 
 .docs-help-button:hover {
     background-color: var(--unity-colors-button-background-hover);
+}
+
+/* The page and the "On this page" rail beside it. */
+.docs-page-area {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.docs-page-area > .docs-page-scroll {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.docs-rail {
+    display: none;
+    width: 230px;
+    flex-shrink: 0;
+    padding: 16px 10px 10px 12px;
+    border-left-width: 1px;
+    border-left-color: var(--unity-colors-default-border);
+}
+
+.docs-wide.docs-has-rail .docs-rail {
+    display: flex;
+}
+
+.docs-wide.docs-has-rail .docs-on-this-page {
+    display: none;
+}
+
+.docs-rail-title {
+    -unity-font-style: bold;
+    margin: 0 0 6px 0;
+    padding: 0 0 6px 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+}
+
+.docs-rail-list {
+    flex-grow: 1;
+}
+
+/* Rows like a Unity tree view: a fold arrow, a muted number, the title on one line. */
+.docs-rail-row {
+    flex-direction: row;
+    align-items: center;
+    height: 20px;
+    padding: 0 4px 0 0;
+    border-radius: 2px;
+}
+
+.docs-rail-row:hover {
+    background-color: var(--unity-colors-highlight-background-hover);
+}
+
+.docs-rail-arrow {
+    width: 14px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
+    color: var(--unity-colors-label-text);
+    font-size: 10px;
+}
+
+.docs-rail-number {
+    min-width: 22px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0 4px 0 0;
+    color: var(--unity-colors-label-text);
+    opacity: 0.55;
+    -unity-text-align: middle-left;
+}
+
+.docs-rail-text {
+    flex-shrink: 1;
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -unity-text-align: middle-left;
+}
+
+.docs-rail-section {
+    margin-top: 2px;
+}
+
+.docs-rail-section .docs-rail-text {
+    -unity-font-style: bold;
+}
+
+/* Parts sit under their section behind a thin guide line. */
+.docs-rail-children {
+    margin-left: 10px;
+    padding-left: 6px;
+    border-left-width: 1px;
+    border-left-color: var(--unity-colors-default-border);
+}
+
+.docs-rail-part .docs-rail-text,
+.docs-rail-part .docs-rail-number {
+    font-size: var(--unity-metrics-default-font_small_size);
+}
+
+.docs-rail-part .docs-rail-arrow {
+    width: 4px;
+}
+
+/* The section you are reading shows as the selected row. */
+.docs-rail-current {
+    background-color: var(--unity-colors-highlight-background);
+}
+
+.docs-rail-current .docs-rail-text,
+.docs-rail-current .docs-rail-number,
+.docs-rail-current .docs-rail-arrow {
+    color: var(--unity-colors-highlight-text);
+    opacity: 1;
 }
