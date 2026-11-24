@@ -14,6 +14,12 @@ Set [Show the loading scene](term:show-the-loading-scene) on the scene group you
 | When arriving from another scene group | On a change from another scene group, not on a Retry |
 | Every time | On every change, Retry included |
 
+> [!TIP]
+> Hide screen, the loading scene with its bar, then the new place.
+
+> [!NOTE]
+> Start-up and a switch to a preloaded group never show a loading scene.
+
 **Try it in the sample**
 
 <!-- action open-sample 06 "Open sample 06" -->
@@ -32,18 +38,18 @@ Set [Show the loading scene](term:show-the-loading-scene) on the scene group you
 - **Default loading scene:** named in the same section.
 - **Minimum time:** set in the same section, see [Minimum time](#minimum-time).
 
-> [!TIP]
-> Hide screen, the loading scene with its bar, then the new place.
-
-> [!NOTE]
-> Start-up and a switch to a preloaded group never show a loading scene.
-
 ## Minimum time <!-- level 0 -->
 
 Keeps a fast load from flashing the loading scene.
 
 - **Counts:** unscaled seconds.
 - **Starts:** when Show screen starts.
+
+## Try it here <!-- level 0 -->
+
+Set the loading scene up as you would in your project, run a scene change, and watch what happens and why.
+
+<!-- sandbox loading-scene -->
 
 ## Show the progress <!-- level 1 -->
 

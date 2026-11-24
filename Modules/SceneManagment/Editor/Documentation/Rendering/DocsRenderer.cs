@@ -15,7 +15,14 @@ namespace AbstractPixel.SceneManagement.Documentation
             VisualElement page = new VisualElement();
             page.AddToClassList("docs-page-content");
             page.Add(TitleRow(_context.Page));
-            AddBlocks(page, _context.Page.Blocks, _context);
+            if (_context.Page.IsNewLayout)
+            {
+                DocsSections.AddBlocks(page, _context.Page.Blocks, _context);
+            }
+            else
+            {
+                AddBlocks(page, _context.Page.Blocks, _context);
+            }
             return page;
         }
 
@@ -46,7 +53,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
         }
 
-        private static VisualElement RenderBlock(DocsBlock _block, DocsRenderContext _context)
+        public static VisualElement RenderBlock(DocsBlock _block, DocsRenderContext _context)
         {
             switch (_block.Kind)
             {
