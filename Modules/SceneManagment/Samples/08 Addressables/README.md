@@ -1,4 +1,7 @@
 # 08 Addressables
+
+<!-- layout new -->
+
 **Level 3 · full control**
 You will learn how a scene group opens an Addressable main scene, and how its scene reference shows and changes where the scene loads from.
 
@@ -55,9 +58,9 @@ public Task<SceneChangeResult> Go()
 ```
 
 ## Windows this sample shows
-- The scene reference in the group inspector: blue status, right-click "Move to Addressables" and back (select `Sample 08 Addressable LevelGroup`).
-- Addressables Groups: Window > Asset Management > Addressables > Groups.
-- New scenes section: Project Settings > Abstract Pixel > Scene System (look only).
+- **The scene reference in the group inspector:** blue status, right-click "Move to Addressables" and back (select `Sample 08 Addressable LevelGroup`).
+- **Addressables Groups:** Window > Asset Management > Addressables > Groups.
+- **New scenes section:** Project Settings > Abstract Pixel > Scene System (look only).
 
 ## How it's set up
 1. Select the Addressable level's scene group; its main scene field shows Addressable.
@@ -72,10 +75,10 @@ public Task<SceneChangeResult> Go()
 - Addressables is optional ([design decision 5](../../docs/adr/0005-addressables-and-broaudio-are-optional.md)).
 
 ## If it goes wrong
-- "Move to Addressables (needs the Addressables package)" → install com.unity.addressables.
-- "this project has no Addressables settings yet" → Addressables Groups window > Create Addressables Settings.
-- The label says "not Addressable" in Play → step 2 was skipped or undone.
+- **"Move to Addressables (needs the Addressables package)":** install com.unity.addressables.
+- **"this project has no Addressables settings yet":** Addressables Groups window > Create Addressables Settings.
+- **The label says "not Addressable" in Play:** step 2 was skipped or undone.
 
 ## Next steps
-- [06 Loading Scene](../06%20Loading%20Scene/README.md): a loading scene while it loads.
-- [09 Editor Tools](../09%20Editor%20Tools/README.md): the scene picker shows the same blue status.
+- **[06 Loading Scene](../06%20Loading%20Scene/README.md):** a loading scene while it loads.
+- **[09 Editor Tools](../09%20Editor%20Tools/README.md):** the scene picker shows the same blue status.

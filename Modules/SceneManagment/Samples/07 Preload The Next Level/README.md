@@ -1,4 +1,7 @@
 # 07 Preload The Next Level
+
+<!-- layout new -->
+
 **Level 2 · choices**
 You will learn how to load the next scene group in the background, so the change to it only activates what is already loaded.
 
@@ -54,8 +57,8 @@ SceneEventBus.OnPreloadedSceneGroupActivated += OnActivated;
 ```
 
 ## Windows this sample shows
-- The preloader's fields (next group, its name, label): select `Sample 07 Preloader` in the Hierarchy.
-- While a group is preloaded, its main scene shows in the Hierarchy as loading: look at it after step 3.
+- **The preloader's fields (next group, its name, label):** select `Sample 07 Preloader` in the Hierarchy.
+- **While a group is preloaded, its main scene shows in the Hierarchy as loading:** look at it after step 3.
 
 ## How it's set up
 1. Select the object with `Sample07Preloader`.
@@ -70,10 +73,10 @@ SceneEventBus.OnPreloadedSceneGroupActivated += OnActivated;
 - A change to the preloaded group switches to it instead of loading again.
 
 ## If it goes wrong
-- "Refused (Busy)" on Preload → a change is running: preload after it ends.
-- No OnPreloadedSceneGroupActivated → the change went to a different group than the preloaded one; that preload was closed first.
-- Two copies of a scene → report it: the preloaded switch opens the held main scene once.
+- **"Refused (Busy)" on Preload:** a change is running: preload after it ends.
+- **No OnPreloadedSceneGroupActivated:** the change went to a different group than the preloaded one; that preload was closed first.
+- **Two copies of a scene:** report it: the preloaded switch opens the held main scene once.
 
 ## Next steps
-- [06 Loading Scene](../06%20Loading%20Scene/README.md): show progress while a group loads.
-- [08 Addressables](../08%20Addressables/README.md): scenes that load through Addressables.
+- **[06 Loading Scene](../06%20Loading%20Scene/README.md):** show progress while a group loads.
+- **[08 Addressables](../08%20Addressables/README.md):** scenes that load through Addressables.

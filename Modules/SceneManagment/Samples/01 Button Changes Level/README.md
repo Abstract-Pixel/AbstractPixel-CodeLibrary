@@ -1,4 +1,7 @@
 # 01 Button Changes Level
+
+<!-- layout new -->
+
 **Level 0 · no code**
 You will learn how a UI button changes the scene group with a fade, set up entirely in the Inspector.
 
@@ -39,9 +42,9 @@ This sample has no code. The Inspector settings that do the work:
 - `ImageFadeProfile` (a `TransitionProfile`): the fade's look and times; "Screen counts as visible at" says how far into Show screen the screen counts as visible.
 
 ## Windows this sample shows
-- The Button's On Click list: select `Change Room Button` in the Hierarchy, Inspector.
-- The TransitionProfile and ImageFadeProfile Inspector: select `ImageFadeProfile` in the Project window (`SceneTransitionSystem/Runtime/Transitions/BasicFade/`).
-- The scene group inspector: select a group in `Scene Groups/`.
+- **The Button's On Click list:** select `Change Room Button` in the Hierarchy, Inspector.
+- **The TransitionProfile and ImageFadeProfile Inspector:** select `ImageFadeProfile` in the Project window (`SceneTransitionSystem/Runtime/Transitions/BasicFade/`).
+- **The scene group inspector:** select a group in `Scene Groups/`.
 
 ## How it's set up
 1. Select the button. Its On Click calls `MonoSceneActions.ChangeTo` with the other room's group.
@@ -58,10 +61,10 @@ This sample has no code. The Inspector settings that do the work:
 - The fade lives in a [manager scene](../../Editor/Documentation/Pages/guide/screen-and-transitions.md#use-the-basic-fade), so every room gets it.
 
 ## If it goes wrong
-- The button does nothing → the scene has no EventSystem, or the On Click entry lost its target: pick `Scene Actions` and `MonoSceneActions.ChangeTo` again.
-- The room changes with no fade → `Samples Managers` is missing from the group's manager scenes.
-- The Console says the change was refused (Busy) → a change was still running: wait for the fade to end and click again.
+- **The button does nothing:** the scene has no EventSystem, or the On Click entry lost its target: pick `Scene Actions` and `MonoSceneActions.ChangeTo` again.
+- **The room changes with no fade:** `Samples Managers` is missing from the group's manager scenes.
+- **The Console says the change was refused (Busy):** a change was still running: wait for the fade to end and click again.
 
 ## Next steps
-- [02 Change Level From Code](../02%20Change%20Level%20From%20Code/README.md): the same change from a script, with its result.
-- [06 Loading Scene](../06%20Loading%20Scene/README.md): show a loading scene between the two.
+- **[02 Change Level From Code](../02%20Change%20Level%20From%20Code/README.md):** the same change from a script, with its result.
+- **[06 Loading Scene](../06%20Loading%20Scene/README.md):** show a loading scene between the two.

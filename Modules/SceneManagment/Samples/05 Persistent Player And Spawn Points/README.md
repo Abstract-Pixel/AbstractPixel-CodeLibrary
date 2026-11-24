@@ -1,4 +1,7 @@
 # 05 Persistent Player And Spawn Points
+
+<!-- layout new -->
+
 **Level 1 · daily code**
 You will learn how objects in a shared scene, such as the player, move to the right place in every new scene group.
 
@@ -43,11 +46,11 @@ This sample has no code. The settings that do the work are in the Inspector:
 - Each scene group: `Sample 05 Shared` as its shared scene, "Sample scene group" ticked, no scene set.
 
 ## Windows this sample shows
-- Relocatable inspector: select a relocatable in `Sample 05 Shared`.
-- Spawn Point inspector and its Scene view tools: select a spawn point in an area scene.
-- Relocation section: Project Settings > Abstract Pixel > Scene System > Relocation.
-- Stamp relocation label IDs: Tools > Abstract Pixel > Scene System > Stamp relocation label IDs.
-- Relocation Label: Assets > Create > Abstract Pixel > Scene System > Relocation Label.
+- **Relocatable inspector:** select a relocatable in `Sample 05 Shared`.
+- **Spawn Point inspector and its Scene view tools:** select a spawn point in an area scene.
+- **Relocation section:** Project Settings > Abstract Pixel > Scene System > Relocation.
+- **Stamp relocation label IDs:** Tools > Abstract Pixel > Scene System > Stamp relocation label IDs.
+- **Relocation Label:** Assets > Create > Abstract Pixel > Scene System > Relocation Label.
 
 ## How it's set up
 1. Select the Player in the shared scene and look at its `Relocatable`.
@@ -64,10 +67,10 @@ This sample has no code. The settings that do the work are in the Inspector:
 - A relocatable with no free position stays held, with one error ([design decision 6](../../docs/adr/0006-relocation-labels-are-assets-and-missing-positions-hold.md)).
 
 ## If it goes wrong
-- An object stays held with an error → its label has no free position in the main scene: add one with Shift + click.
-- An object floats or sinks after the jump → check the Ground layers in the Relocation section.
-- Nothing moves at all → the scene opened alone without its group: open it with its scene group (scene picker) and press Play again.
+- **An object stays held with an error:** its label has no free position in the main scene: add one with Shift + click.
+- **An object floats or sinks after the jump:** check the Ground layers in the Relocation section.
+- **Nothing moves at all:** the scene opened alone without its group: open it with its scene group (scene picker) and press Play again.
 
 ## Next steps
-- [03 Fast Restart](../03%20Fast%20Restart/README.md): Retry resets the shared scene, so relocatables start fresh.
-- [07 Preload The Next Level](../07%20Preload%20The%20Next%20Level/README.md): preload an area before you go there.
+- **[03 Fast Restart](../03%20Fast%20Restart/README.md):** Retry resets the shared scene, so relocatables start fresh.
+- **[07 Preload The Next Level](../07%20Preload%20The%20Next%20Level/README.md):** preload an area before you go there.

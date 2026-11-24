@@ -1,4 +1,7 @@
 # 06 Loading Scene
+
+<!-- layout new -->
+
 **Level 2 · choices**
 You will learn how a scene group shows a loading scene, and how a loading bar made of primitives follows the loading progress.
 
@@ -50,9 +53,9 @@ public class Sample06BarDisplay : MonoBehaviour, ILoadingProgressDisplay
 ```
 
 ## Windows this sample shows
-- The scene group inspector: "Show the loading scene" and "Loading scene" (select `Sample 06 DestinationGroup`).
-- LoadingProgressView: select `Loading Bar` in `Sample 06 Loading` (its feel settings and four UnityEvents).
-- Loading scenes section and Minimum time on screen: Project Settings > Abstract Pixel > Scene System (look only).
+- **The scene group inspector:** "Show the loading scene" and "Loading scene" (select `Sample 06 DestinationGroup`).
+- **LoadingProgressView:** select `Loading Bar` in `Sample 06 Loading` (its feel settings and four UnityEvents).
+- **Loading scenes section and Minimum time on screen:** Project Settings > Abstract Pixel > Scene System (look only).
 
 ## How it's set up
 1. Select the destination's scene group: Show the loading scene and its loading scene.
@@ -67,10 +70,10 @@ public class Sample06BarDisplay : MonoBehaviour, ILoadingProgressDisplay
 - `LoadingProgressView` smooths the [loading progress](../../Editor/Documentation/Pages/guide/loading-scene.md#show-the-progress) and drives the bar.
 
 ## If it goes wrong
-- No loading scene appears → the group's "Show the loading scene" is Never: pick "When arriving from another scene group".
-- The bar does not move → `Loading Bar` lost its `LoadingProgressView`, or its Bar field is empty.
-- The game shows through the loading scene → its camera needs an opaque (Solid Color) background and must not see the other scenes (here: far away, short far plane).
+- **No loading scene appears:** the group's "Show the loading scene" is Never: pick "When arriving from another scene group".
+- **The bar does not move:** `Loading Bar` lost its `LoadingProgressView`, or its Bar field is empty.
+- **The game shows through the loading scene:** its camera needs an opaque (Solid Color) background and must not see the other scenes (here: far away, short far plane).
 
 ## Next steps
-- [07 Preload The Next Level](../07%20Preload%20The%20Next%20Level/README.md): load the next level before you go there.
-- [10 Launch Scene](../10%20Launch%20Scene/README.md): the screen Play starts with.
+- **[07 Preload The Next Level](../07%20Preload%20The%20Next%20Level/README.md):** load the next level before you go there.
+- **[10 Launch Scene](../10%20Launch%20Scene/README.md):** the screen Play starts with.

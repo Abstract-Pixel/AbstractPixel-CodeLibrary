@@ -1,4 +1,7 @@
 # 04 Play From Any Scene
+
+<!-- layout new -->
+
 **Level 0 · no code**
 You will learn that Play from any scene of a scene group opens the whole group, and how the Editor opens a group's scenes together.
 
@@ -41,10 +44,10 @@ This sample has no code that you need to copy; start-up does the work. The setti
 - Preferences > Abstract Pixel > Scenes: the two scene opening preferences act in edit mode only; Play always loads what the group needs.
 
 ## Windows this sample shows
-- Scene opening preferences: Edit > Preferences > Abstract Pixel > Scenes (also the scene picker's footer, "Open with: Group, Default set").
-- Setup window: Tools > External Project Tools > Scene System > Set Up Scene System.
-- Setup section and Scene sets section: Project Settings > Abstract Pixel > Scene System (look only).
-- Scene set inspector, Override and Revert to set: select a scene set, then a scene group that uses it (look only).
+- **Scene opening preferences:** Edit > Preferences > Abstract Pixel > Scenes (also the scene picker's footer, "Open with: Group, Default set").
+- **Setup window:** Tools > External Project Tools > Scene System > Set Up Scene System.
+- **Setup section and Scene sets section:** Project Settings > Abstract Pixel > Scene System (look only).
+- **Scene set inspector, Override and Revert to set:** select a scene set, then a scene group that uses it (look only).
 
 ## How it's set up
 1. Select the level's scene group; Play from its main scene opens it.
@@ -59,10 +62,10 @@ This sample has no code that you need to copy; start-up does the work. The setti
 - Opening a scene in the Editor also opens what Play loads with it ([editor tools](../../Editor/Documentation/Pages/guide/editor-tools.md#scene-opening-preferences)).
 
 ## If it goes wrong
-- Step 3 opens only the shared scene → the first preference is off: tick it in Preferences > Abstract Pixel > Scenes.
-- Play opens a different group → another main scene was still open: close it before Play.
-- The label is empty → `Sample 04 Shared` did not load: check the group's shared scenes list.
+- **Step 3 opens only the shared scene:** the first preference is off: tick it in Preferences > Abstract Pixel > Scenes.
+- **Play opens a different group:** another main scene was still open: close it before Play.
+- **The label is empty:** `Sample 04 Shared` did not load: check the group's shared scenes list.
 
 ## Next steps
-- [09 Editor Tools](../09%20Editor%20Tools/README.md): the scene picker, the group inspector and the Debugger.
-- [10 Launch Scene](../10%20Launch%20Scene/README.md): Play from a launch scene.
+- **[09 Editor Tools](../09%20Editor%20Tools/README.md):** the scene picker, the group inspector and the Debugger.
+- **[10 Launch Scene](../10%20Launch%20Scene/README.md):** Play from a launch scene.

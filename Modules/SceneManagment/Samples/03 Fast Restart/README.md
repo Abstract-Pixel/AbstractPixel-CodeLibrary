@@ -1,4 +1,7 @@
 # 03 Fast Restart
+
+<!-- layout new -->
+
 **Level 1 · daily code**
 You will learn how Retry restarts the open scene group, and how Reset shared scenes gives each run fresh state.
 
@@ -54,7 +57,7 @@ private void Update()
 ```
 
 ## Windows this sample shows
-- The scene group inspector, Advanced, "Reset shared scenes": select `Sample 03 ArenaGroup`.
+- **The scene group inspector, Advanced, "Reset shared scenes":** select `Sample 03 ArenaGroup`.
 
 ## How it's set up
 1. Select the Retry button object; it calls `SceneActions.Retry`.
@@ -69,10 +72,10 @@ private void Update()
 - [Reset shared scenes](../../Editor/Documentation/Pages/guide/scene-groups-and-scene-sets.md#reset-shared-scenes) reopens the shared scene, so its state starts fresh.
 
 ## If it goes wrong
-- The score does not start over → "Reset shared scenes" is off on the group: tick it.
-- "Refused (NothingOpenToRetry)" → no scene group is open yet: wait for start-up after Play.
-- "Refused (Busy)" on a single click → the last Retry was still fading.
+- **The score does not start over:** "Reset shared scenes" is off on the group: tick it.
+- **"Refused (NothingOpenToRetry)":** no scene group is open yet: wait for start-up after Play.
+- **"Refused (Busy)" on a single click:** the last Retry was still fading.
 
 ## Next steps
-- [02 Change Level From Code](../02%20Change%20Level%20From%20Code/README.md): the result types in detail.
-- [05 Persistent Player And Spawn Points](../05%20Persistent%20Player%20And%20Spawn%20Points/README.md): keep objects across changes instead.
+- **[02 Change Level From Code](../02%20Change%20Level%20From%20Code/README.md):** the result types in detail.
+- **[05 Persistent Player And Spawn Points](../05%20Persistent%20Player%20And%20Spawn%20Points/README.md):** keep objects across changes instead.
