@@ -4,13 +4,12 @@ using UnityEngine.SceneManagement;
 
 namespace AbstractPixel.SceneManagement.SceneScreens
 {
-    /// <summary>
-    /// Keeps a launch scene dark while the start scene group opens behind it. Start-up makes the start scene group's
-    /// main scene active, and the active scene's RenderSettings (ambient, fog, reflections) apply to every scene, so they
-    /// would light the launch scene. When the active scene changes it remembers the new scene's values, swaps in black
-    /// ones, and puts them back at the hand-off (RestoreMenuSettings), so the start scene group looks as it would without
-    /// the launch scene.
-    /// </summary>
+    /// <summary>Keeps a launch scene dark while the start scene group opens behind it.</summary>
+    /// <remarks>
+    /// - Start-up makes the start scene group's main scene active, and the active scene's RenderSettings (ambient, fog, reflections) apply to every scene, so they would light the launch scene.
+    /// - When the active scene changes it remembers the new scene's values and swaps in black ones.
+    /// - RestoreMenuSettings puts them back at the hand-off, so the start scene group looks as it would without the launch scene.
+    /// </remarks>
     public sealed class LaunchSceneRenderSettingsGuard
     {
         private struct Snapshot
@@ -38,7 +37,10 @@ namespace AbstractPixel.SceneManagement.SceneScreens
             SceneManager.activeSceneChanged += HandleActiveSceneChanged;
         }
 
-        /// <summary>Puts the active scene's own settings back. Safe to call more than once.</summary>
+        /// <summary>Puts the active scene's own settings back.</summary>
+        /// <remarks>
+        /// - Safe to call more than once.
+        /// </remarks>
         public void RestoreMenuSettings()
         {
             if (isGuarding == false)

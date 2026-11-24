@@ -1,16 +1,29 @@
 # SceneSystemStartUp
 
-Start-up: the first scene change of a session, run by the scene system itself when the game launches or Play is pressed. It reads the scene system settings, picks a scene group from the scenes Unity opened (StartUpRule), creates the coordinator and has it open the group's missing scenes.
+<!-- layout new -->
 
-**Kind:** class · **Namespace:** `AbstractPixel.SceneManagement` · **File:** `SceneSystemStartUp.cs`
+Start-up: the first scene change of a session, run by the scene system itself when the game launches or Play is pressed.
+
+<!-- type-header AbstractPixel.SceneManagement.SceneSystemStartUp -->
 
 <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Runtime/StartUp/SceneSystemStartUp.cs" "Select the script" -->
 
 Read more in [Start up](../guide/start-up.md#play-from-any-scene).
 
-Scene changes asked for before that are refused. State resets through StaticsResetter, so it runs on every Play with domain reload off.
+## Start here
 
-## Members
+You never call start-up. It reads the scene system settings, picks a scene group from the scenes Unity opened (`StartUpRule`), creates the coordinator and has it open the group's missing scenes.
+
+| You want to | Use | Why |
+|---|---|---|
+| Know that start-up failed | `HasFailed` | True when start-up could not open its scene group, or had nothing it could do. |
+| Change which group start-up picks | `StartUpRule` | The rule start-up follows. |
+
+**Called for you, leave alone**
+
+- **Before start-up:** scene changes asked for before start-up are refused.
+- **Domain reload off:** state resets through `StaticsResetter`, so it runs on every Play.
+- **Launch scene hold:** start-up holds the launch scene when it is among the scenes Unity is opening, until it calls `SceneActions.ReleaseLaunchScene`.
 
 <!-- members AbstractPixel.SceneManagement.SceneSystemStartUp -->
 

@@ -6,11 +6,11 @@ using UnityEngine;
 namespace AbstractPixel.SceneManagement
 {
     [CreateAssetMenu(fileName = "SceneGroup", menuName = "Utility/SceneRelated/SceneGroup", order = 1)]
-    /// <summary>
-    /// One place the player can be. Its identity is the asset itself: two groups are equal only when they are the same
-    /// object, even if they name the same main scene (session 4C). A runtime group such as a temporary group equals
-    /// only itself.
-    /// </summary>
+    /// <summary>One place the player can be: a main scene with its manager scenes, shared scenes and loading scene choice.</summary>
+    /// <remarks>
+    /// - Its identity is the asset itself: two groups are equal only when they are the same object, even if they name the same main scene (session 4C).
+    /// - A runtime group such as a temporary group equals only itself.
+    /// </remarks>
     public class SceneGroup : ScriptableObject
     {
         public List<SceneReference> ManagerialBootScenesList = new List<SceneReference>();
@@ -47,10 +47,11 @@ namespace AbstractPixel.SceneManagement
             set { isSample = value; }
         }
 
-        /// <summary>
-        /// The launch scene of a sample scene group (scene system S): Play started with it open holds it, with this
-        /// sample scene group as the start scene group. Read only when <see cref="IsSample"/> is true.
-        /// </summary>
+        /// <summary>The launch scene of a sample scene group.</summary>
+        /// <remarks>
+        /// - Play started with it open holds it, with this sample scene group as the start scene group (scene system S).
+        /// - Read only when <see cref="IsSample"/> is true.
+        /// </remarks>
         public SceneReference SampleLaunchScene
         {
             get { return sampleLaunchScene; }

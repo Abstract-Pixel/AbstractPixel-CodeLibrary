@@ -6,15 +6,16 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// Runs every scene change: start-up, a change to a scene group, Retry and preload. One runs at a time. What to open
-    /// and close comes from <see cref="SceneChangePlan"/>; what is open is kept in one record. A change that is accepted
-    /// hides the screen through the registered scene transition executor and shows it again at the end; a refused
-    /// change never touches the screen.
-    /// </summary>
+    /// <summary>Runs every scene change: start-up, a change to a scene group, Retry and preload.</summary>
+    /// <remarks>
+    /// - One runs at a time.
+    /// - What to open and close comes from <see cref="SceneChangePlan"/>; what is open is kept in one record.
+    /// - A change that is accepted hides the screen through the registered scene transition executor and shows it again at the end; a refused change never touches the screen.
+    /// </remarks>
     [DisallowMultipleComponent]
     public class SceneCoordinator : PersistentSingleton<SceneCoordinator>
     {
+        /// <summary>True from the start of a scene change until the screen is shown again (busy).</summary>
         [field: SerializeField, ReadOnly] public bool IsLoadingSceneGroup { get; private set; }
         /// <summary>True once start-up has opened every scene of the first scene group and raised OnGameStarted.</summary>
         [field: SerializeField, ReadOnly] public bool HasGameStarted { get; private set; } = false;
@@ -59,10 +60,10 @@ namespace AbstractPixel.SceneManagement
             HasGameStarted = false;
         }
 
-        /// <summary>
-        /// The coordinator start-up uses: the one that exists (a manager scene may hold it), otherwise a new one. Never
-        /// creates one outside Play mode.
-        /// </summary>
+        /// <summary>The coordinator start-up uses: the one that exists (a manager scene may hold it), otherwise a new one.</summary>
+        /// <remarks>
+        /// - Never creates one outside Play mode.
+        /// </remarks>
         internal static SceneCoordinator FindOrCreate()
         {
             SceneCoordinator existing = TryGetInstance();
@@ -97,13 +98,14 @@ namespace AbstractPixel.SceneManagement
 
         internal void SetSceneLoader(ISceneLoader _sceneLoader) => opening.Loader = _sceneLoader;
 
-        /// <summary>
-        /// Start-up: the first scene change of a session. It opens only the group's scenes that are not open yet, the
-        /// main scene first (it becomes the active scene as soon as it loads), then manager and shared scenes, all asked
-        /// for at once. When all have loaded it relocates, raises "new level" once, then "game started". Relocatables are
-        /// released straight after, or when the launch scene hold ends. Other scene changes are refused while it runs.
-        /// It never uses the screen effect: a launch scene or the first frame covers it.
-        /// </summary>
+        /// <summary>Start-up: the first scene change of a session.</summary>
+        /// <remarks>
+        /// - It opens only the group's scenes that are not open yet, the main scene first (it becomes the active scene as soon as it loads), then manager and shared scenes, all asked for at once.
+        /// - When all have loaded it relocates, raises "new level" once, then "game started".
+        /// - Relocatables are released straight after, or when the launch scene hold ends.
+        /// - Other scene changes are refused while it runs.
+        /// - It never uses the screen effect: a launch scene or the first frame covers it.
+        /// </remarks>
         /// <param name="_scenesAlreadyOpen">The scenes Unity has open, which are not loaded again.</param>
         /// <param name="_waitOneFrame">True behind a launch scene, so it shows its first frame before loading starts.</param>
         /// <returns>True when every scene loaded and the game started.</returns>
@@ -158,10 +160,10 @@ namespace AbstractPixel.SceneManagement
             return true;
         }
 
-        /// <summary>
-        /// A scene change to another scene group. When the game preloaded this very group earlier, the change uses the
-        /// preload; any other preload is closed first.
-        /// </summary>
+        /// <summary>A scene change to another scene group.</summary>
+        /// <remarks>
+        /// - When the game preloaded this very group earlier, the change uses the preload; any other preload is closed first.
+        /// </remarks>
         internal async Task<SceneChangeResult> ChangeTo(SceneGroup _sceneGroup)
         {
             if (_sceneGroup == null)
@@ -203,10 +205,12 @@ namespace AbstractPixel.SceneManagement
             return await RunSceneChange(open.Group, false, true);
         }
 
-        /// <summary>
-        /// Opens the group in the background and holds back only its main scene. A group that is already preloaded is
-        /// kept. A different earlier preload is closed first. Never touches the screen.
-        /// </summary>
+        /// <summary>Opens the group in the background and holds back only its main scene.</summary>
+        /// <remarks>
+        /// - A group that is already preloaded is kept.
+        /// - A different earlier preload is closed first.
+        /// - Never touches the screen.
+        /// </remarks>
         internal async Task<SceneChangeResult> Preload(SceneGroup _sceneGroup)
         {
             if (_sceneGroup == null)
@@ -260,11 +264,10 @@ namespace AbstractPixel.SceneManagement
             return SceneChangeResult.Done();
         }
 
-        /// <summary>
-        /// The one body of a change and a Retry, after the change was accepted: Hold, Hide screen, the scene work with
-        /// Relocate, the fallback scene group if a load failed, Show screen, Release. Busy stays set until the screen is
-        /// shown again, and is cleared in every case.
-        /// </summary>
+        /// <summary>The one body of a change and a Retry, after the change was accepted: Hold, Hide screen, the scene work with Relocate, the fallback scene group if a load failed, Show screen, Release.</summary>
+        /// <remarks>
+        /// - Busy stays set until the screen is shown again, and is cleared in every case.
+        /// </remarks>
         private async Task<SceneChangeResult> RunSceneChange(SceneGroup _group, bool _usesPreload, bool _isRetry)
         {
             SceneReference failedScene = null;
@@ -365,7 +368,9 @@ namespace AbstractPixel.SceneManagement
         }
 
         /// <summary>Start step of a scene change: refuses when one is running, otherwise marks the coordinator busy.</summary>
-        /// <remarks>Called before the first await, so a second request in the same frame is refused.</remarks>
+        /// <remarks>
+        /// - Called before the first await, so a second request in the same frame is refused.
+        /// </remarks>
         private SceneChangeRefusal TryBeginSceneChange()
         {
             bool startUpIsComing = SceneSystemStartUp.IsPending;
@@ -384,10 +389,10 @@ namespace AbstractPixel.SceneManagement
             return SceneChangeRefusal.None;
         }
 
-        /// <summary>
-        /// Records the open scenes, making the group the active one. The caller relocates and only then raises "new
-        /// level" once, so relocation reads the right scene group and listeners find objects at their positions.
-        /// </summary>
+        /// <summary>Records the open scenes, making the group the active one.</summary>
+        /// <remarks>
+        /// - The caller relocates and only then raises "new level" once, so relocation reads the right scene group and listeners find objects at their positions.
+        /// </remarks>
         private void RecordOpenScenes(SceneChangePlan _plan)
         {
             open = _plan.OpenAfterChange();

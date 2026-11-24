@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// A scene group made at start-up for a scene that is in no scene group: the scene is its main scene, and its
-    /// manager scenes, shared scenes and Reset shared scenes come from a scene set. It is not an asset.
-    /// </summary>
+    /// <summary>Makes a scene group at start-up for a scene that is in no scene group.</summary>
+    /// <remarks>
+    /// - The scene is its main scene; its manager scenes, shared scenes and Reset shared scenes come from a scene set.
+    /// - It is not an asset.
+    /// </remarks>
     public static class TemporarySceneGroup
     {
         public static SceneGroup Create(SceneReference _mainScene, SceneSet _sceneSet)

@@ -1,27 +1,43 @@
 # LoadingProgressView
 
-The part of a loading scene that shows loading progress to the player (glossary: loading progress view). It reads SceneActions.LoadingProgress, smooths it with its feel settings and passes it on through four UnityEvents (a designer can drag a progress bar or a feedback player in with no code) and to an ILoadingProgressDisplay written in code.
+<!-- layout new -->
 
-**Kind:** component · **Namespace:** `AbstractPixel.SceneManagement.SceneScreens` · **File:** `LoadingProgressView.cs`
+The component in a loading scene that shows the [loading progress](term:loading-progress) to the player, smoothed.
+
+<!-- type-header AbstractPixel.SceneManagement.SceneScreens.LoadingProgressView -->
 
 <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/SceneScreens/Runtime/Loading/LoadingProgressView.cs" "Select the script" -->
 
 Read more in [Loading scene](../guide/loading-scene.md#show-the-progress).
 
-The scene system tells it when Show screen starts and waits for its "full" beat and hold before Hide screen, so the screen effect and the loading scene never animate over each other.
+## Start here
+
+Add it to an object in your loading scene, then connect your bar through an event or an `ILoadingProgressDisplay`. It reads `SceneActions.LoadingProgress`, smooths it with its Feel settings and passes the result on.
+
+| You want to | Use | Why |
+|---|---|---|
+| Fill a bar with no code | On Progress | Drag in your bar and pick its fill function; a designer can also drag in a feedback player. |
+| Fill a bar from your own script | `ILoadingProgressDisplay` | Put it on this object, or assign it to Display. |
+| Change how the bar moves | Feel | Speed, curve and hold at full, in one foldout. |
+| Build the view at runtime | `SetDisplay` | For setups and tests that make the view in code. |
+
+**Called for you, leave alone**
+
+- **OnShowStarted:** the scene system calls it when Show screen starts.
+- **PlayFullAnimation:** the scene system waits for its "full" beat and hold before Hide screen, so the screen effect and the loading scene never animate over each other.
+- **Registering:** it registers itself with `SceneActions.RegisterLoadingProgressView` when enabled.
 
 ## In the Inspector
 
-| Label | Member | What it does |
+| Field | What it does for you | Change it when |
 |---|---|---|
-| Feel | `feel` | — |
-| Display | `display` | Optional: a component that implements ILoadingProgressDisplay. Empty uses one on this object, if any. |
-| On shown | `onShown` | Show screen started on the loading scene: start the appear animation. |
-| On progress | `onProgress` | Every frame while shown: the smoothed loading progress, from 0 to 1. |
-| On full | `onFull` | Every scene is open and the shown value reached 1: play the full beat. |
-| On hidden | `onHidden` | The loading scene is closing. |
-
-## Members
+| Display | Optional: a component that implements `ILoadingProgressDisplay`. Empty uses one on this object, if any. | Your bar's script sits on another object. |
+| Feel | A foldout with the `LoadingProgressFeel` settings. Not the Feel package. | The bar should move faster, slower or hold longer. |
+| **Events** | | |
+| On Shown | Show screen started on the loading scene: start the appear animation. | The bar has an appear animation. |
+| On Progress | Every frame while shown: the smoothed loading progress, from 0 to 1. | You fill your bar with no code. |
+| On Full | Every scene is open and the shown value reached 1: play the full beat. | You want a finishing flash or sound. |
+| On Hidden | The loading scene is closing. | You stop sounds or reset effects. |
 
 <!-- members AbstractPixel.SceneManagement.SceneScreens.LoadingProgressView -->
 

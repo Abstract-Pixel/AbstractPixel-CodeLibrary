@@ -7,12 +7,14 @@ using UnityEngine.SceneManagement;
 
 namespace AbstractPixel.SceneManagement
 {
+    /// <summary>Opens and closes scenes that are in Build Settings, or known only by name, with Unity's SceneManager.</summary>
     public class DefaultSceneLoader : ISceneLoader
     {
-        /// <summary>
-        /// True for a scene of a sample scene group, which is never in Build Settings. Set by the scene system's editor
-        /// code; null in a build. Such a scene is opened in Play mode with EditorSceneManager.LoadSceneAsyncInPlayMode.
-        /// </summary>
+        /// <summary>True for a scene of a sample scene group, which is never in Build Settings.</summary>
+        /// <remarks>
+        /// - Set by the scene system's editor code; null in a build.
+        /// - Such a scene is opened in Play mode with EditorSceneManager.LoadSceneAsyncInPlayMode.
+        /// </remarks>
         internal static System.Func<string, bool> IsEditorOnlySampleScene;
 
         private Dictionary<string, AsyncOperation> sceneLoadHandles = new Dictionary<string, AsyncOperation>();

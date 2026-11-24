@@ -3,21 +3,17 @@ using AbstractPixel.Core;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// Which scene group start-up opens, decided from the settings and the scenes Unity opened (session 4B, decision 2).
-    /// One rule for builds and Play: a build is the case where only build index 0 is open.
-    /// <list type="number">
-    /// <item>The launch scene is open: the start scene group, behind the launch scene.</item>
-    /// <item>A sample launch scene is open: its sample scene group, behind it (scene system S, Editor only).</item>
-    /// <item>An open scene, the active one first, is the main scene of a scene group in the settings list: that group.
-    /// Two such scenes open: an error, and the first one wins.</item>
-    /// <item>The active scene is a manager or shared scene of a sample scene group: that sample scene group.</item>
-    /// <item>The active scene is a manager or shared scene: the start scene group, with one line saying why.</item>
-    /// <item>The active scene is in no scene group: a temporary scene group built from the default scene set, with one
-    /// warning.</item>
-    /// </list>
-    /// Plain data in and out: it never calls Unity's scene API.
-    /// </summary>
+    /// <summary>Which scene group start-up opens, decided from the settings and the scenes Unity opened (session 4B, decision 2).</summary>
+    /// <remarks>
+    /// - Rule 1: The launch scene is open: the start scene group, behind the launch scene.
+    /// - Rule 2: A sample launch scene is open: its sample scene group, behind it (scene system S, Editor only).
+    /// - Rule 3: An open scene, the active one first, is the main scene of a scene group in the settings list: that group. Two such scenes open: an error, and the first one wins.
+    /// - Rule 4: The active scene is a manager or shared scene of a sample scene group: that sample scene group.
+    /// - Rule 5: The active scene is a manager or shared scene: the start scene group, with one line saying why.
+    /// - Rule 6: The active scene is in no scene group: a temporary scene group built from the default scene set, with one warning.
+    /// - One rule for builds and Play: a build is the case where only build index 0 is open.
+    /// - Plain data in and out: it never calls Unity's scene API.
+    /// </remarks>
     public static class StartUpRule
     {
         private const string LogPrefix = "[Scene system] Start-up: ";
@@ -75,10 +71,10 @@ namespace AbstractPixel.SceneManagement
             return ChooseTemporaryGroup(_settings, activeScene);
         }
 
-        /// <summary>
-        /// Whether start-up holds the launch scene hold: only when the settings name a launch scene and it is among the
-        /// scenes Unity is opening. Play from a level or the start scene group never holds.
-        /// </summary>
+        /// <summary>Whether start-up holds the launch scene hold: only when the settings name a launch scene and it is among the scenes Unity is opening.</summary>
+        /// <remarks>
+        /// - Play from a level or the start scene group never holds.
+        /// </remarks>
         public static bool ShouldHoldLaunchScene(SceneSystemSettings _settings, List<SceneReference> _openScenes)
         {
             if (_settings == null)
@@ -98,11 +94,11 @@ namespace AbstractPixel.SceneManagement
             return sampleWithLaunchScene != null;
         }
 
-        /// <summary>
-        /// The first sample scene group whose sample launch scene is among the open scenes, or null. Game scene groups
-        /// never name a launch scene: their field is ignored. Sample scene groups never reach a build (ADR 0014), so in
-        /// practice this only matches in the Editor.
-        /// </summary>
+        /// <summary>The first sample scene group whose sample launch scene is among the open scenes, or null.</summary>
+        /// <remarks>
+        /// - Game scene groups never name a launch scene: their field is ignored.
+        /// - Sample scene groups never reach a build (ADR 0014), so in practice this only matches in the Editor.
+        /// </remarks>
         public static SceneGroup FindSampleGroupWithOpenLaunchScene(SceneSystemSettings _settings, List<SceneReference> _openScenes)
         {
             if (_settings == null || _openScenes == null)
@@ -129,11 +125,11 @@ namespace AbstractPixel.SceneManagement
             return null;
         }
 
-        /// <summary>
-        /// Whether a scene Unity lists at BeforeSceneLoad is one it is opening. A player lists only the scenes it is
-        /// loading, and they are not loaded yet at BeforeSceneLoad. The Editor's scenes are loaded when Play starts;
-        /// a scene left unloaded in the Hierarchy is listed but never opens.
-        /// </summary>
+        /// <summary>Whether a scene Unity lists at BeforeSceneLoad is one it is opening.</summary>
+        /// <remarks>
+        /// - A player lists only the scenes it is loading, and they are not loaded yet at BeforeSceneLoad.
+        /// - The Editor's scenes are loaded when Play starts; a scene left unloaded in the Hierarchy is listed but never opens.
+        /// </remarks>
         public static bool CountsAsOpening(bool _isValid, bool _isLoaded, bool _isEditor)
         {
             if (_isValid == false)
@@ -148,11 +144,11 @@ namespace AbstractPixel.SceneManagement
             return isPlayerLoadingIt;
         }
 
-        /// <summary>
-        /// True in the Editor for a listed scene that is not loaded yet at BeforeSceneLoad. Unity 6.3 lists the scene Play
-        /// opens as loaded there; Unity 7 lists it as not loaded yet. Such a scene may still open, so the launch scene
-        /// hold is decided again after the first scenes load.
-        /// </summary>
+        /// <summary>True in the Editor for a listed scene that is not loaded yet at BeforeSceneLoad.</summary>
+        /// <remarks>
+        /// - Unity 6.3 lists the scene Play opens as loaded there; Unity 7 lists it as not loaded yet.
+        /// - Such a scene may still open, so the launch scene hold is decided again after the first scenes load.
+        /// </remarks>
         public static bool MayStillBeOpening(bool _isValid, bool _isLoaded, bool _isEditor)
         {
             if (_isValid == false || _isEditor == false)

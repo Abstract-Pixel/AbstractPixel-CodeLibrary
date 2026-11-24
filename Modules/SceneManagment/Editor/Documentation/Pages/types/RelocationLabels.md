@@ -1,14 +1,25 @@
 # RelocationLabels
 
-What a relocation label means when it may be "No label" (null): its name, colour and steepest ground.
+<!-- layout new -->
 
-**Kind:** class · **Namespace:** `AbstractPixel.SceneManagement` · **File:** `RelocationLabels.cs`
+Helpers that say what a relocation label means when it may be "No label" (null): its name, colour and steepest ground.
+
+<!-- type-header AbstractPixel.SceneManagement.RelocationLabels -->
 
 <!-- action select "Packages/com.abstractpixel.library/Modules/SceneManagment/Relocation/Runtime/RelocationLabels.cs" "Select the script" -->
 
 Read more in [Relocation](../guide/relocation.md#make-a-relocation-label).
 
-## Members
+## Start here
+
+Use these in editor tools or checks instead of reading a label field directly, because the field may be empty.
+
+| You want to | Use | Why |
+|---|---|---|
+| Compare two label fields | `Same` | Both "No label", the same asset, or two copies of one asset count as the same. |
+| Show a label's name | `NameOf` | Returns "No label" for an empty field. |
+| Find its steepest ground | `SteepestGroundOf` | For "No label" it reads the project-wide value on the Scene System page. |
+| Raycast for ground | `GroundLayers` | The Ground layers from the Scene System page. |
 
 <!-- members AbstractPixel.SceneManagement.RelocationLabels -->
 

@@ -5,11 +5,11 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// The loader the coordinator uses. Each scene picks its own loader from the asset's state: an Addressable scene
-    /// opens through the <see cref="AddressablesSceneLoader"/>, every other scene through Build Settings. A scene is
-    /// closed by the loader that opened it, so a held scene and its handle never change hands.
-    /// </summary>
+    /// <summary>The loader the coordinator uses; each scene picks its own loader from the asset's state.</summary>
+    /// <remarks>
+    /// - An Addressable scene opens through the <see cref="AddressablesSceneLoader"/>, every other scene through Build Settings.
+    /// - A scene is closed by the loader that opened it, so a held scene and its handle never change hands.
+    /// </remarks>
     public class SceneLoaderSelector : ISceneLoader
     {
         private readonly ISceneLoader buildSettingsLoader;
@@ -60,7 +60,10 @@ namespace AbstractPixel.SceneManagement
             ForgetLoader(sceneReference);
         }
 
-        /// <summary>The progress from whichever loader knows the scene: an In-build scene is 0 to the Addressables loader and the other way round.</summary>
+        /// <summary>The progress from whichever loader knows the scene.</summary>
+        /// <remarks>
+        /// - An In-build scene is 0 to the Addressables loader and the other way round.
+        /// </remarks>
         public float GetLoadProgress(SceneReference sceneReference)
         {
             float fromBuildSettings = buildSettingsLoader.GetLoadProgress(sceneReference);

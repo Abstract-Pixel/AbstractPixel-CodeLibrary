@@ -4,12 +4,11 @@ using UnityEngine;
 
 namespace AbstractPixel.SceneManagement
 {
-    /// <summary>
-    /// The one scene system settings asset per project: the start scene group and launch scene, the scene sets and
-    /// the default one, where new scenes go,
-    /// whether builds check scene groups, and the list of scene groups. It can live in any folder; the Editor finds it
-    /// by type and keeps it in Player Settings' Preloaded Assets. Edited in Project Settings &gt; Abstract Pixel &gt; Scene System.
-    /// </summary>
+    /// <summary>The one scene system settings asset per project: the start scene group and launch scene, the scene sets and the default one, where new scenes go, whether builds check scene groups, and the list of scene groups.</summary>
+    /// <remarks>
+    /// - It can live in any folder; the Editor finds it by type and keeps it in Player Settings' Preloaded Assets.
+    /// - Edited in Project Settings &gt; Abstract Pixel &gt; Scene System.
+    /// </remarks>
     public class SceneSystemSettings : ScriptableObject
     {
         [SerializeField] private SceneGroup startSceneGroup = null;
@@ -46,10 +45,10 @@ namespace AbstractPixel.SceneManagement
             set { launchScene = value; }
         }
 
-        /// <summary>
-        /// The scene group a failed scene change goes to (ADR 0011). Empty means the start scene group, which is what
-        /// <see cref="FallbackSceneGroup"/> returns then.
-        /// </summary>
+        /// <summary>The scene group a failed scene change goes to (ADR 0011).</summary>
+        /// <remarks>
+        /// - Empty means the start scene group, which is what <see cref="FallbackSceneGroup"/> returns then.
+        /// </remarks>
         public SceneGroup FallbackSceneGroupSetting
         {
             get { return fallbackSceneGroup; }
