@@ -11,7 +11,7 @@ The scene picker sits on the main toolbar, just left of Play. Use it to open or 
 <!-- action open-picker "Open the scene picker" -->
 
 ![The scene picker, Scenes tab](../../Images/scene-system-picker-scenes.png)
-<!-- marks 1@0.12,0.065 "Scenes tab: every scene of the game, each with its group or scene set"; 2@0.55,0.18 "Search: filters the rows as you type, every word must match"; 3@0.89,0.38 "Status button: the scene's status colour, a click opens the place that fixes it"; 4@0.96,0.38 "Folder button: selects the asset in the Project window without opening it"; 5@0.27,0.92 "Open with: the two scene opening preferences, as in Preferences > Abstract Pixel > Scenes" -->
+<!-- marks 1@0.03,0.057 "Scenes tab: every scene of the game, each with its group or scene set"; 2@0.95,0.177 "Search: filters the rows as you type, every word must match"; 3@0.895,0.385 "Status button: the scene's status colour, a click opens the place that fixes it"; 4@0.965,0.385 "Folder button: selects the asset in the Project window without opening it"; 5@0.6,0.91 "Open with: the two scene opening preferences, as in Preferences > Abstract Pixel > Scenes" -->
 
 > [!NOTE]
 > Unity hides a new toolbar element until you tick it. On Unity 6.3, right-click an empty part of the toolbar and tick Scene picker.
@@ -24,7 +24,7 @@ The scene picker sits on the main toolbar, just left of Play. Use it to open or 
 - **Recent:** before you type, a Recent section shows what you opened last from the picker, and the open group or scene is highlighted.
 
 ![The scene picker, Scene Groups tab](../../Images/scene-system-picker-groups.png)
-<!-- marks 1@0.37,0.04 "Scene Groups tab: game scene groups first, then sample scene groups"; 2@0.72,0.17 "Scene set: the label names the group's scene set, a click selects it"; 3@0.86,0.17 "Group check: green with no problems, red shows the first problem and the count" -->
+<!-- marks 1@0.6,0.035 "Scene Groups tab: game scene groups first, then sample scene groups"; 2@0.625,0.22 "Scene set: the label names the group's scene set, a click selects it"; 3@0.87,0.22 "Group check: green with no problems, red shows the first problem and the count" -->
 
 **A row**
 
