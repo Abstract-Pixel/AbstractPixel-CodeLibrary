@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-**Level 2 · choices**
+**Choices**
 You will learn how a launch scene (a splash) holds the first scene group while it opens behind it, and how to hand over with a Timeline.
 
 Covers: F03 Page: Start-up section (look only) · F32 Launch scene hold and its SceneActions calls · F33 Launch scene helpers (Marker, Receiver, TimelineClock, RenderSettingsGuard, StartUpLog)

@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-**Level 3 · full control**
+**Full Control**
 You will learn how a scene group opens an Addressable main scene, and how its scene reference shows and changes where the scene loads from.
 
 Covers: F05 Page: New scenes section (look only) · F31 Addressables loader and moves

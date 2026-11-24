@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-**Level 1 · daily code**
+**Basic Code**
 You will learn how to change the scene group from a script, read the result it returns, and follow the scene messages in order.
 
 Covers: F23 SceneActions.ChangeTo and SceneChangeResult · F24 Scene messages and ScreenState · F25 Failed change and the fallback scene group (look only)

@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-**Level 0 · no code**
+**No Code**
 You will learn the Editor tools of the scene system: Create Scene Group, the scene field, the group inspector and its check, the Scene Groups Debugger, the sample scene groups list, migration, the build guard and the scene picker.
 
 Covers: F08 Page: Scene Groups Debugger · F09 Page: Sample scene groups section · F10 Page: Preview migration and Migrate (look only) · F11 Scene group inspector · F12 Group check and fix buttons · F14 Scene field · F15 Create Scene Group · F16 Scene picker · F18 Sample scene group and the build guard

@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-**Level 1 · daily code**
+**Basic Code**
 You will learn how Retry restarts the open scene group, and how Reset shared scenes gives each run fresh state.
 
 Covers: F26 Retry and Reset shared scenes

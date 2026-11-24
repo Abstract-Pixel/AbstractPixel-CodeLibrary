@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-**Level 0 · no code**
+**No Code**
 You will learn that Play from any scene of a scene group opens the whole group, and how the Editor opens a group's scenes together.
 
 Covers: F01 Setup window · F02 Page: Setup section (look only) · F04 Page: Scene sets section (look only) · F13 Scene set inspector, overrides, Revert to set (look only) · F17 Scene opening preferences · F27 Start-up and Play from any scene

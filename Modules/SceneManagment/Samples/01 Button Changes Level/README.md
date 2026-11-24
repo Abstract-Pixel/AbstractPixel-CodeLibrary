@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-**Level 0 · no code**
+**No Code**
 You will learn how a UI button changes the scene group with a fade, set up entirely in the Inspector.
 
 Covers: F21 MonoSceneActions on a UnityEvent · F22 Basic fade, TransitionProfile, Screen counts as visible at
