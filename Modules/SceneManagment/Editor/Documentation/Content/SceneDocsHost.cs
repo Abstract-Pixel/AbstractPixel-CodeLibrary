@@ -183,7 +183,31 @@ namespace AbstractPixel.SceneManagement.Documentation
             Button chip = DocsChip.Create(SceneDocsActions.IconOf(kind), label, SceneDocsActions.TooltipOf(_directive), () => SceneDocsActions.Run(_directive));
             chip.userData = _directive;
             chip.AddToClassList("docs-action");
-            return chip;
+            bool selectsAScript = kind == "select" && _directive.Argument(1).EndsWith(".cs", System.StringComparison.OrdinalIgnoreCase);
+            if (!selectsAScript)
+            {
+                return chip;
+            }
+            return WithOpenScriptChip(chip, _directive);
+        }
+
+        // "Select the script" on a type page gets "Open script in IDE" beside it, in the same chip style.
+        private static VisualElement WithOpenScriptChip(Button _selectChip, DocsDirective _directive)
+        {
+            string scriptPath = _directive.Argument(1);
+            VisualElement row = new VisualElement();
+            row.userData = _directive;
+            row.AddToClassList("docs-action");
+            row.AddToClassList("docs-action-row");
+            _selectChip.RemoveFromClassList("docs-action");
+            row.Add(_selectChip);
+
+            Button openChip = DocsChip.Create(DocsIcons.GlyphOpen, "Open script in IDE", "Opens " + System.IO.Path.GetFileName(scriptPath) + " in your code editor", () => SceneDocsActions.OpenScript(scriptPath));
+            // A missing script leaves the button greyed out, so a click never fails.
+            bool scriptExists = SceneDocsActions.ScriptAt(scriptPath) != null;
+            openChip.SetEnabled(scriptExists);
+            row.Add(openChip);
+            return row;
         }
     }
 }

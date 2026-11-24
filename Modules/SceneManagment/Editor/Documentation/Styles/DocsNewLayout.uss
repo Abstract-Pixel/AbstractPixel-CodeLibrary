@@ -1097,3 +1097,14 @@
 .docs-action-fold > .unity-foldout__content > .docs-flow.docs-last {
     margin-bottom: 10px;
 }
+
+/* "Select the script" and "Open script in IDE" side by side, 6 px apart. */
+.docs-action-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.docs-action-row > Button {
+    margin: 0 6px 0 0;
+}
+

@@ -69,6 +69,27 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
         }
 
+        /// <summary>The script asset at a path, or null when there is none.</summary>
+        public static MonoScript ScriptAt(string _assetPath)
+        {
+            if (string.IsNullOrEmpty(_assetPath))
+            {
+                return null;
+            }
+            return AssetDatabase.LoadAssetAtPath<MonoScript>(_assetPath);
+        }
+
+        /// <summary>Opens a script in the external script editor set in Preferences; does nothing when it is missing.</summary>
+        public static void OpenScript(string _assetPath)
+        {
+            MonoScript script = ScriptAt(_assetPath);
+            if (script == null)
+            {
+                return;
+            }
+            AssetDatabase.OpenAsset(script);
+        }
+
         private static string RunAction(DocsDirective _directive)
         {
             string kind = _directive.Argument(0);
