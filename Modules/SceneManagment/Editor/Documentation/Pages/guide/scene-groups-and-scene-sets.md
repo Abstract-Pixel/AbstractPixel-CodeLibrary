@@ -35,6 +35,16 @@ Select a [scene group](term:scene-group) to see its [main scene](term:main-scene
 
 Edit a part in the group's Inspector and it becomes an [override](term:override): the group keeps its own value. Press Revert to set to follow the set again.
 
+**What a part looks like while it follows the set**
+
+![A scene group whose parts follow its scene set](../../Images/scene-system-override-from-set.png)
+<!-- marks 1@0.7,0.586 "From set: this part follows the scene set 'Level'. Editing it here makes it an override"; 2@0.7,0.866 "Shared scenes: also from the set, so the list stays empty until the set lists some" -->
+
+**What a part looks like once it is overridden**
+
+![A scene group whose shared scenes are an override](../../Images/scene-system-override-on.png)
+<!-- marks 1@0.58,0.81 "Override: this part keeps the group's own value, whatever the set says"; 2@0.96,0.81 "Revert to set: ends the override and takes the set's value again"; 3@0.7,0.547 "From set: the other parts still follow the set" -->
+
 <details><summary>Why it works</summary>
 
 - **Groups keep their own lists:** a group names its set and still stores its own lists, which the loader reads, so changing a set only rewrites groups ([design decision 8](../../../../docs/adr/0008-scene-sets-fill-groups-and-overrides-persist.md)).
