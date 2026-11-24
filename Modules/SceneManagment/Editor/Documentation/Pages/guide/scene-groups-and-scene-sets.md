@@ -31,16 +31,6 @@ Select a [scene group](term:scene-group) to see its [main scene](term:main-scene
 
 </details>
 
-## Scene sets <!-- level 0 -->
-
-A [scene set](term:scene-set) holds the manager scenes, shared scenes and Reset shared scenes for every group that uses it. Change a set and every group using it follows, except for its [overrides](term:override).
-
-<!-- action open-settings "Scene sets" "Open Scene sets" -->
-
-- **Add:** click + to make "New Scene Set"; its name opens for typing.
-- **Rename:** double-click a name, or select its card and press F2.
-- **Remove:** select a set and click −. A set no group uses asks once; a set in use, or the default, opens a window that asks what happens to its groups and which set becomes the default.
-
 ## Overrides <!-- level 1 -->
 
 Edit a part in the group's Inspector and it becomes an [override](term:override): the group keeps its own value. Press Revert to set to follow the set again.
@@ -59,3 +49,13 @@ Tick [Reset shared scenes](term:reset-shared-scenes) when a shared scene holds p
 ## Scene status <!-- level 0 -->
 
 Every scene field shows a [scene status](term:scene-status): In build, Addressable, Not in build or Missing. A scene is In build or Addressable, never both. See [Build Settings and Addressables](build-settings-and-addressables.md).
+
+## Scene sets <!-- level 0 -->
+
+A [scene set](term:scene-set) holds the manager scenes, shared scenes and Reset shared scenes for every group that uses it. Change a set and every group using it follows, except for its [overrides](term:override).
+
+<!-- action open-settings "Scene sets" "Open Scene sets" -->
+
+- **Add:** click + to make "New Scene Set"; its name opens for typing.
+- **Rename:** double-click a name, or select its card and press F2.
+- **Remove:** select a set and click −. A set no group uses asks once; a set in use, or the default, opens a window that asks what happens to its groups and which set becomes the default.
