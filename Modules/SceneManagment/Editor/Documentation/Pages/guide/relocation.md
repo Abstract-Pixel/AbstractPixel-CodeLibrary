@@ -15,7 +15,7 @@ Add a `Relocatable` component to the object and pick its [relocation label](term
 <!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/05 Persistent Player And Spawn Points/Scenes/Sample 05 Shared.unity" "Player" "Select the Player" -->
 
 ![The Relocatable inspector](../../Images/scene-system-relocatable.png)
-<!-- marks 1@0.05,0.524 "Label, and New label"; 2@0.05,0.55 "Instance"; 3@0.05,0.576 "Wait for ground below"; 4@0.05,0.614 "Status: where it goes, or why it stays held" -->
+<!-- marks 1@0.05,0.524 "Label: relocatables go to spawn point positions with the same label, empty means No label, and New label makes one"; 2@0.05,0.55 "Instance: picks one position with this label, 0 takes the next free one in Hierarchy order"; 3@0.05,0.576 "Wait for ground below: stays held, screen covered, until ground is found under the position (3 s at most), it never moves the object onto it"; 4@0.05,0.614 "Status: where the object goes in the open scene group, or why it stays held" -->
 
 ## Add spawn points <!-- level 0 -->
 
@@ -26,7 +26,7 @@ Add a `SpawnPoint` with the same label to each main scene. Its own transform is 
 <!-- action select-in-scene "Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/05 Persistent Player And Spawn Points/Scenes/Sample 05 Area A.unity" "Crates near the barn" "Select a spawn point" -->
 
 ![The spawn point inspector](../../Images/scene-system-spawn-point.png)
-<!-- marks 1@0.05,0.289 "Label"; 2@0.05,0.336 "Positions"; 3@0.05,0.42 "Scene view controls"; 4@0.05,0.789 "The mode in use now" -->
+<!-- marks 1@0.05,0.289 "Label: relocatables with this label go to this spawn point's positions, empty means No label"; 2@0.05,0.336 "Positions: how many positions this spawn point has, and how many relocatables reach them"; 3@0.05,0.42 "Scene view controls: the keys and clicks that add, select, move and remove positions"; 4@0.05,0.789 "Mode: what a click in the Scene view does right now" -->
 
 **Or do it yourself**
 
@@ -41,7 +41,7 @@ Add a `SpawnPoint` with the same label to each main scene. Its own transform is 
 Press New label on the Relocatable, or use Assets > Create > Abstract Pixel > Scene System > Relocation Label. Relocatables and spawn points match by label, then by [instance](term:instance).
 
 ![A relocation label asset](../../Images/scene-system-relocation-label.png)
-<!-- marks 1@0.03,0.376 "Colour of its previews"; 2@0.03,0.424 "Steepest ground"; 3@0.03,0.471 "Align to surface" -->
+<!-- marks 1@0.03,0.331 "Preview prefab: optional. Its visible meshes (or, without any, its colliders) are drawn at every position with this label while no relocatable with it is open"; 2@0.03,0.376 "Colour: the colour of this label's previews and tags in the Scene view"; 3@0.03,0.424 "Steepest ground: the steepest slope, in degrees, a position may stand on, a steeper one shows a warning"; 4@0.03,0.471 "Align to surface: when ticked, positions added with Shift+click tilt to match the ground's slope. Unticked, they stay upright" -->
 
 ## What happens in a scene change <!-- level 1 -->
 

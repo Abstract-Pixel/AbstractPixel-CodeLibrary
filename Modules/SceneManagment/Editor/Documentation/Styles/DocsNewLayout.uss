@@ -1247,3 +1247,43 @@
     flex-shrink: 0;
     padding-right: 12px;
 }
+
+/* Image marks: a box of rows, number | name | what it is, outlined on all four sides like the other inner boxes. */
+.docs-mark-table {
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.docs-mark-table > .docs-mark-row {
+    align-items: flex-start;
+    padding: 6px 10px;
+    margin-bottom: 0;
+}
+
+.docs-mark-table > .docs-mark-row-alt {
+    background-color: rgba(128, 128, 128, 0.08);
+}
+
+.docs-mark-table .docs-mark-number {
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.docs-mark-name {
+    width: 150px;
+    flex-shrink: 0;
+    -unity-font-style: bold;
+    padding-right: 10px;
+}
+
+.docs-mark-meaning {
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: normal;
+}

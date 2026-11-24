@@ -78,20 +78,43 @@ namespace AbstractPixel.SceneManagement.Documentation
             return circle;
         }
 
+        // A box with one row per mark: its number, the name of the thing, and one line on what it is or does.
+        // A mark label written "Name: what it does" splits at the first ": ".
         private static VisualElement MarkLabels(DocsBlock _block)
         {
             VisualElement list = new VisualElement();
             list.AddToClassList("docs-mark-list");
+            list.AddToClassList("docs-mark-table");
             foreach (DocsMark mark in _block.Marks)
             {
                 VisualElement row = new VisualElement();
                 row.AddToClassList("docs-mark-row");
+                row.EnableInClassList("docs-mark-row-alt", list.childCount % 2 == 1);
                 Label number = new Label(mark.Number.ToString());
                 number.AddToClassList("docs-mark-number");
                 row.Add(number);
-                Label text = new Label(mark.Label);
-                text.AddToClassList("docs-text");
-                row.Add(text);
+
+                string name = mark.Label;
+                string meaning = string.Empty;
+                int split = mark.Label.IndexOf(": ", System.StringComparison.Ordinal);
+                if (split > 0)
+                {
+                    name = mark.Label.Substring(0, split);
+                    meaning = mark.Label.Substring(split + 2);
+                    // Each meaning reads as a sentence.
+                    meaning = char.ToUpperInvariant(meaning[0]) + meaning.Substring(1);
+                }
+                Label nameLabel = new Label(name);
+                nameLabel.AddToClassList("docs-text");
+                nameLabel.AddToClassList("docs-mark-name");
+                row.Add(nameLabel);
+                if (meaning.Length > 0)
+                {
+                    Label meaningLabel = new Label(meaning);
+                    meaningLabel.AddToClassList("docs-text");
+                    meaningLabel.AddToClassList("docs-mark-meaning");
+                    row.Add(meaningLabel);
+                }
                 list.Add(row);
             }
             return list;
