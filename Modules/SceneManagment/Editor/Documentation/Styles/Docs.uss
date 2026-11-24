@@ -109,6 +109,16 @@
     flex-grow: 1;
 }
 
+/* Text on the page and in the rail is 25% larger than Unity's own sizes (12 -> 15 px normal). The contents
+   sidebar and the toolbar keep Unity's sizes. */
+.docs-page-area {
+    font-size: 15px;
+    --unity-metrics-default-font_small_size: 13px;
+    --unity-metrics-default-font_normal_size: 15px;
+    --unity-metrics-default-font_big_size: 18px;
+    --unity-metrics-default-font_very_big_size: 24px;
+}
+
 .docs-sidebar {
     background-color: var(--unity-colors-default-background);
     border-right-width: 1px;
@@ -147,7 +157,7 @@
 }
 
 .docs-page {
-    max-width: 716px;
+    max-width: 895px;
     padding-left: 18px;
     padding-right: 18px;
     padding-top: 8px;
@@ -779,7 +789,7 @@
 
 .docs-rail {
     display: none;
-    width: 230px;
+    width: 280px;
     flex-shrink: 0;
     padding: 16px 10px 10px 12px;
     border-left-width: 1px;
@@ -810,7 +820,7 @@
 .docs-rail-row {
     flex-direction: row;
     align-items: center;
-    height: 20px;
+    height: 25px;
     padding: 0 4px 0 0;
     border-radius: 2px;
 }
@@ -826,7 +836,7 @@
     padding: 0;
     -unity-text-align: middle-center;
     color: var(--unity-colors-label-text);
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .docs-rail-number {
