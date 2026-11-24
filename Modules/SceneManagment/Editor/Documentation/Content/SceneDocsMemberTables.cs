@@ -64,9 +64,11 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
             VisualElement table = new VisualElement();
             table.AddToClassList("docs-member-table");
+            int number = 0;
             foreach (SceneDocsMember member in _members)
             {
-                VisualElement row = Row(member, _type, _context);
+                number++;
+                VisualElement row = Row(member, _type, number, _context);
                 row.EnableInClassList("docs-mrow-alt", table.childCount % 2 == 1);
                 table.Add(row);
             }
@@ -108,7 +110,9 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
         }
 
-        private static VisualElement Row(SceneDocsMember _member, Type _type, DocsRenderContext _context)
+        // One line: fold arrow, "1.", return type and signature. The summary sits under it; the arrow opens a box
+        // with the remarks (More), so no column or row is spent on them while closed.
+        private static VisualElement Row(SceneDocsMember _member, Type _type, int _number, DocsRenderContext _context)
         {
             VisualElement row = new VisualElement();
             row.AddToClassList("docs-mrow");
@@ -124,33 +128,69 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 return ValueRow(row, _member, _type, _context);
             }
-            Label typeLabel = RichLabel(TypeRich(_member.TypeText), "docs-mrow-type", _context);
-            row.Add(typeLabel);
-            VisualElement main = new VisualElement();
-            main.AddToClassList("docs-mrow-main");
-            main.Add(RichLabel(Signature(_member), "docs-mrow-signature", _context));
+            row.AddToClassList("docs-mrow-line-layout");
+
+            VisualElement line = new VisualElement();
+            line.AddToClassList("docs-mrow-line");
+            Label arrow = new Label(_member.Remarks.Count > 0 ? "▸" : "");
+            arrow.AddToClassList("docs-mrow-arrow");
+            line.Add(arrow);
+            Label number = new Label(_number + ".");
+            number.AddToClassList("docs-mrow-number");
+            line.Add(number);
+            line.Add(RichLabel(Signature(_member, true), "docs-mrow-signature", _context));
+            row.Add(line);
+
             if (_member.Summary.Length > 0)
             {
-                main.Add(DocsText.Create(_member.Summary, "docs-mrow-summary", _context));
+                row.Add(DocsText.Create(_member.Summary, "docs-mrow-summary", _context));
             }
             if (_member.Remarks.Count > 0)
             {
-                Foldout more = DocsSessionFoldout.Create("More", _context.Page.Path + "/" + _member.Name);
-                more.AddToClassList("docs-mrow-more");
-                foreach (string remark in _member.Remarks)
+                VisualElement more = MoreBox(_member, _context);
+                row.Add(more);
+                string key = _context.Page.Path + "/" + _member.Name;
+                bool isOpen = UnityEditor.SessionState.GetBool(key, false);
+                ShowMore(arrow, more, isOpen);
+                line.RegisterCallback<ClickEvent>(_click =>
                 {
-                    VisualElement line = new VisualElement();
-                    line.AddToClassList("docs-list-row");
-                    Label marker = new Label("•");
-                    marker.AddToClassList("docs-list-marker");
-                    line.Add(marker);
-                    line.Add(DocsText.Create(remark, "docs-list-content", _context));
-                    more.Add(line);
-                }
-                main.Add(more);
+                    bool open = more.style.display == DisplayStyle.None;
+                    ShowMore(arrow, more, open);
+                    UnityEditor.SessionState.SetBool(key, open);
+                });
+                line.AddToClassList("docs-mrow-line-foldable");
             }
-            row.Add(main);
             return row;
+        }
+
+        // The remarks in one inset box with a "More" header row.
+        private static VisualElement MoreBox(SceneDocsMember _member, DocsRenderContext _context)
+        {
+            VisualElement box = new VisualElement();
+            box.AddToClassList("docs-mrow-morebox");
+            Label header = new Label("More");
+            header.AddToClassList("docs-mrow-morebox-header");
+            box.Add(header);
+            VisualElement body = new VisualElement();
+            body.AddToClassList("docs-mrow-morebox-body");
+            foreach (string remark in _member.Remarks)
+            {
+                VisualElement remarkLine = new VisualElement();
+                remarkLine.AddToClassList("docs-list-row");
+                Label marker = new Label("•");
+                marker.AddToClassList("docs-list-marker");
+                remarkLine.Add(marker);
+                remarkLine.Add(DocsText.Create(remark, "docs-list-content", _context));
+                body.Add(remarkLine);
+            }
+            box.Add(body);
+            return box;
+        }
+
+        private static void ShowMore(Label _arrow, VisualElement _more, bool _isOpen)
+        {
+            _more.style.display = _isOpen ? DisplayStyle.Flex : DisplayStyle.None;
+            _arrow.text = _isOpen ? "▾" : "▸";
         }
 
         private static Label RichLabel(string _rich, string _className, DocsRenderContext _context)
@@ -184,10 +224,20 @@ namespace AbstractPixel.SceneManagement.Documentation
         // public static ChangeTo(SceneGroup _sceneGroup)   or   public static LoadingProgress { get; }
         private static string Signature(SceneDocsMember _member)
         {
+            return Signature(_member, false);
+        }
+
+        // With the type: "public static Task<SceneChangeResult> ChangeTo(SceneGroup _sceneGroup)", in C# order.
+        private static string Signature(SceneDocsMember _member, bool _withType)
+        {
             StringBuilder text = new StringBuilder();
             if (_member.Modifiers.Count > 0)
             {
                 text.Append("<color=").Append(DocsTheme.Keyword).Append(">").Append(string.Join(" ", _member.Modifiers)).Append("</color> ");
+            }
+            if (_withType && !string.IsNullOrEmpty(_member.TypeText))
+            {
+                text.Append(TypeRich(_member.TypeText)).Append(" ");
             }
             // Methods get the IDE's method colour; properties, fields and events keep the plain text colour.
             bool isMethod = _member.Parameters != null;
