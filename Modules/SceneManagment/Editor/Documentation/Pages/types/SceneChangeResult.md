@@ -28,7 +28,9 @@ Read more in [Change scene](../guide/change-scene.md#read-the-result).
 
 ## In code
 
-From a sample:
+Each example is closed; open the one you need.
+
+**Example: From a sample**
 
 ```cs source=../../../../Samples/02 Change Level From Code/Scripts/Sample02LevelChanger.cs
 SceneChangeResult result = await SceneActions.ChangeTo(otherGroup);

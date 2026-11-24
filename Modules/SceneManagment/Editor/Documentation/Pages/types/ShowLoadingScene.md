@@ -20,6 +20,19 @@ Set it in the scene group's Show the loading scene field. In code, read or set `
 | Show it on arrival only | `WhenArrivingFromAnotherSceneGroup` | A Retry goes straight back in without it. |
 | Show it every time | `EveryTimeRetryIncluded` | Shows on a Retry too. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Read a group's choice from code**
+
+```cs
+if (sceneGroup.ShowLoadingScene == ShowLoadingScene.Never)
+{
+    // The change into this group goes straight in.
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.ShowLoadingScene -->
 
 ## See also

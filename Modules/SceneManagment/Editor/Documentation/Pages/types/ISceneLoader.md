@@ -29,6 +29,20 @@ You do not call a loader yourself. The coordinator does, through a `SceneLoaderS
 - **Rule 4, close:** unloading the held scene activates it first, because a held load cannot be cancelled, without making it the active scene, and then closes it.
 - **Who follows it:** the coordinator relies on these four rules, and the fake loader in the tests follows them.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Every loader has these four calls; the coordinator makes them for you**
+
+```cs
+ISceneLoader loader = new SceneLoaderSelector();
+await loader.LoadScene(levelScene, true);
+float progress = loader.GetLoadProgress(levelScene);
+await loader.UnloadScene(levelScene);
+await loader.ReleaseUnusedMemory();
+```
+
 <!-- members AbstractPixel.SceneManagement.ISceneLoader -->
 
 ## See also

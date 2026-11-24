@@ -26,11 +26,15 @@ Start-up makes the start scene group's main scene active, and the active scene's
 
 ## In code
 
-From sample 10:
+Each example is closed; open the one you need.
+
+**Example: From sample 10**
 
 ```cs source=../../../../Samples/10 Launch Scene/Scripts/Sample10Splash.cs
 renderSettingsGuard.BeginGuarding();
 ```
+
+**Example: From a sample**
 
 ```cs source=../../../../Samples/10 Launch Scene/Scripts/Sample10Splash.cs
 renderSettingsGuard.RestoreMenuSettings();

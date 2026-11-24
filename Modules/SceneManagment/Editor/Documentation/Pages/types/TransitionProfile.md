@@ -28,6 +28,21 @@ This class is abstract: you make an asset of a profile that derives from it, suc
 | Screen Counts As Covered At | The share of Hide screen after which the scene change goes on, 0.5 to 1. Default 1. | The wait for a full cover feels long. |
 | Screen Counts As Visible At | The share of Show screen at which relocatables are released, 0 to 1. Default 0.75. The effect keeps finishing on top. | The player should get control sooner or later. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Pick the effect at run time**
+
+```cs
+[SerializeField] private TransitionProfile slowFade;
+
+private void UseSlowFade()
+{
+    TransitionActions.SetTransitionProfile(slowFade);
+}
+```
+
 <!-- members AbstractPixel.SceneTransitions.TransitionProfile -->
 
 ## See also

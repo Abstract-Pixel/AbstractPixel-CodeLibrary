@@ -19,6 +19,25 @@ Read more in [Loading scene](../guide/loading-scene.md#show-the-progress).
 | Start the appear animation | `OnShowStarted` | Called when Show screen starts, or at the instant cut. |
 | Play a "full" animation | `PlayFullAnimation` | Hide screen waits for its task, so the effect and the loading scene never animate over each other. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: LoadingProgressView implements it and registers itself. A view of…**
+
+`LoadingProgressView` implements it and registers itself. A view of your own does the same:
+
+```cs
+public class MyProgressView : MonoBehaviour, ILoadingProgressView
+{
+    private void OnEnable() { SceneActions.RegisterLoadingProgressView(this); }
+    private void OnDisable() { SceneActions.UnregisterLoadingProgressView(this); }
+
+    public void OnShowStarted() { /* start the appear animation */ }
+    public Task PlayFullAnimation() { return Task.CompletedTask; }
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.ILoadingProgressView -->
 
 ## See also

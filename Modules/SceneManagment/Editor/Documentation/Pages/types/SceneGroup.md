@@ -57,7 +57,9 @@ What you see when you select a scene group asset.
 
 ## In code
 
-From a sample:
+Each example is closed; open the one you need.
+
+**Example: From a sample**
 
 ```cs source=../../../../Samples/07 Preload The Next Level/Scripts/Sample07Preloader.cs
 [SerializeField] private SceneGroup nextGroup;

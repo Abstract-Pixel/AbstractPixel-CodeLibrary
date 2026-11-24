@@ -29,6 +29,20 @@ The set's inspector also says how many scene groups use it and has an Open Scene
 | Shared scenes | The shared scenes its groups get. | Every group of this set needs another shared scene. |
 | Reset shared scenes | Whether its groups reset the shared scenes on each scene change. | A shared scene holds per-run state. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Read what a scene group's set fills in**
+
+```cs
+SceneSet set = sceneGroup.SceneSet;
+if (set != null)
+{
+    Debug.Log(set.name + ": " + set.ManagerScenes.Count + " manager scenes, " + set.SharedScenes.Count + " shared scenes");
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.SceneSet -->
 
 ## See also

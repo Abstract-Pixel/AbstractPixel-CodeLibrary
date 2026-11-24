@@ -26,6 +26,20 @@ You do not create this loader. The `SceneLoaderSelector` sends it every scene th
 - **Progress:** Unity stops a load at 0.9 until the scene activates, so the loader reports progress / 0.9.
 - **Freeing memory:** one `Resources.UnloadUnusedAssets`.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: You never call it yourself. It is the loader SceneLoaderSelector…**
+
+You never call it yourself. It is the loader `SceneLoaderSelector` uses for every scene in Build Settings:
+
+```cs
+ISceneLoader loader = new DefaultSceneLoader();
+await loader.LoadScene(levelScene, true);
+float progress = loader.GetLoadProgress(levelScene);
+```
+
 <!-- members AbstractPixel.SceneManagement.DefaultSceneLoader -->
 
 ## See also

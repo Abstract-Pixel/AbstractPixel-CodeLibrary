@@ -33,6 +33,21 @@ Make one per kind of relocatable with Assets > Create > Abstract Pixel > Scene S
 | Steepest ground | The steepest slope, in degrees, this label accepts for a spawn point position. A steeper position is allowed but shown as a warning. | The default 35 does not fit this kind of object. |
 | Align to surface | Positions added with Shift+click tilt to the ground's slope. Off keeps them upright. | The object should sit flat on slopes. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Read a label's settings from code**
+
+```cs
+[SerializeField] private RelocationLabel crateLabel;
+
+private void LogLabel()
+{
+    Debug.Log(crateLabel.name + ": steepest ground " + crateLabel.SteepestGround + "°, align " + crateLabel.AlignToSurface);
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.RelocationLabel -->
 
 ## See also

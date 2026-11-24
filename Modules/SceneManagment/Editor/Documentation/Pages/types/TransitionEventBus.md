@@ -28,7 +28,9 @@ Listen here instead of polling. Each message is a code event; subscribe in `OnEn
 
 ## In code
 
-From a sample:
+Each example is closed; open the one you need.
+
+**Example: From a sample**
 
 ```cs source=../../../../Samples/02 Change Level From Code/Scripts/Sample02MessageLog.cs
 TransitionEventBus.OnScreenStateChanged += OnScreenStateChanged;

@@ -31,7 +31,9 @@ Subscribe in `OnEnable` and unsubscribe in `OnDisable`. Most games need only the
 
 ## In code
 
-From a sample:
+Each example is closed; open the one you need.
+
+**Example: From a sample**
 
 ```cs source=../../../../Samples/07 Preload The Next Level/Scripts/Sample07Preloader.cs
 SceneEventBus.OnSceneGroupPreloaded += OnPreloaded;

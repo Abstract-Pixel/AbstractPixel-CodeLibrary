@@ -32,7 +32,9 @@ The first case that fits wins.
 
 ## In code
 
-From a sample test:
+Each example is closed; open the one you need.
+
+**Example: From a sample test**
 
 ```cs source=../../../../Samples/Shared/Tests/Sample04StartUpRuleTests.cs
 StartUpChoice choice = StartUpRule.Choose(settings, new List<SceneReference> { shared });

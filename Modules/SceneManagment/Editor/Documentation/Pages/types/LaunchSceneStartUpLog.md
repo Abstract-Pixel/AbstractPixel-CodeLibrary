@@ -24,7 +24,9 @@ Use it to measure how long start-up takes in a build.
 
 ## In code
 
-From sample 10:
+Each example is closed; open the one you need.
+
+**Example: From sample 10**
 
 ```cs source=../../../../Samples/10 Launch Scene/Scripts/Sample10Splash.cs
 LaunchSceneStartUpLog.Milestone("Sample 10 splash awake");

@@ -23,7 +23,9 @@ Implement it on the view's object, or assign it to the view's Display field. The
 
 ## In code
 
-From a sample:
+Each example is closed; open the one you need.
+
+**Example: From a sample**
 
 ```cs source=../../../../Samples/06 Loading Scene/Scripts/Sample06BarDisplay.cs
 public class Sample06BarDisplay : MonoBehaviour, ILoadingProgressDisplay

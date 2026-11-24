@@ -26,11 +26,15 @@ The load hitch is the start scene group opening behind the launch scene. The dir
 
 ## In code
 
-From sample 10:
+Each example is closed; open the one you need.
+
+**Example: From sample 10**
 
 ```cs source=../../../../Samples/10 Launch Scene/Scripts/Sample10Splash.cs
 clock = new LaunchSceneTimelineClock(timeline, MaximumStepSeconds);
 ```
+
+**Example: From a sample**
 
 ```cs source=../../../../Samples/10 Launch Scene/Scripts/Sample10Splash.cs
 clock.Tick();

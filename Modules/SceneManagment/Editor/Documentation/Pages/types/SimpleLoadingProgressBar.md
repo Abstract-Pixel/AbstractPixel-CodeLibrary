@@ -29,6 +29,24 @@ It is an `ILoadingProgressDisplay`, so a `LoadingProgressView` drives it. It use
 |---|---|---|
 | Fill | The fill, stretched inside the bar's background; its right anchor follows the progress. | You replace the fill object. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: The view drives it; the same calls from code look like this**
+
+```cs
+[SerializeField] private SimpleLoadingProgressBar bar;
+
+private async Task Demo()
+{
+    bar.Show();
+    bar.SetProgress(0.5f);
+    await bar.PlayFull();
+    bar.Hide();
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.SceneScreens.SimpleLoadingProgressBar -->
 
 ## See also

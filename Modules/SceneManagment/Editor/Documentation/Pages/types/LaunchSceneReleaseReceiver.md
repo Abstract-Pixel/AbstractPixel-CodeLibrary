@@ -37,6 +37,10 @@ Add the component to the object with the launch scene's PlayableDirector, then h
 
 ## In code
 
+Each example is closed; open the one you need.
+
+**Example: The method that sample 10 hooks to On Released**
+
 The method that sample 10 hooks to `On Released`:
 
 ```cs source=../../../../Samples/10 Launch Scene/Scripts/Sample10Splash.cs

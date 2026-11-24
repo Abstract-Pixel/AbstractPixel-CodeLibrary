@@ -32,6 +32,25 @@ Under the header Fade Settings:
 | Duration | How long each fade takes in seconds, unscaled time. Default 1. | The fade feels slow or abrupt. |
 | Fade Curve | The easing curve: X is time (0 to 1), Y is alpha (0 to 1). Default linear. | You want an ease in or out. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Set it up in the Inspector, or change it from code before a scene…**
+
+Set it up in the Inspector, or change it from code before a scene change:
+
+```cs
+[SerializeField] private ImageFadeProfile fadeProfile;
+
+private void UseWhiteFade()
+{
+    fadeProfile.FadeColor = Color.white;
+    fadeProfile.Duration = 0.5f;
+    TransitionActions.SetTransitionProfile(fadeProfile);
+}
+```
+
 <!-- members AbstractPixel.SceneTransitions.ImageFadeProfile -->
 
 ## See also

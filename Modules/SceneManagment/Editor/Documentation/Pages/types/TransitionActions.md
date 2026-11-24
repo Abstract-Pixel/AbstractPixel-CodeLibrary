@@ -28,6 +28,20 @@ Scene changes run their screen effect inside `SceneActions.ChangeTo` and `SceneA
 - **TransitionToSceneWithEffects:** a button name kept for menus that call it by name (ADR 0001); it forwards to `SceneActions.ChangeTo`.
 - **ReloadActiveScenesWithEffects:** a button name kept for menus that call it by name (ADR 0001); it forwards to `SceneActions.Retry`.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Cover and uncover the screen without changing scene, for example…**
+
+Cover and uncover the screen without changing scene, for example around a cutscene:
+
+```cs
+await TransitionActions.HideScreen();
+// Move the camera, swap the UI...
+await TransitionActions.ShowScreen();
+```
+
 <!-- members AbstractPixel.SceneTransitions.TransitionActions -->
 
 ## See also

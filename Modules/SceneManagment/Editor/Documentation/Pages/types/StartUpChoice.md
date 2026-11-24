@@ -22,7 +22,9 @@ You get one from `StartUpRule.Choose`; start-up reads it. Its setters are intern
 
 ## In code
 
-From a sample test:
+Each example is closed; open the one you need.
+
+**Example: From a sample test**
 
 ```cs source=../../../../Samples/Shared/Tests/Sample10LaunchSceneTests.cs
 StartUpChoice choice = StartUpRule.Choose(settings, new List<SceneReference> { splash });

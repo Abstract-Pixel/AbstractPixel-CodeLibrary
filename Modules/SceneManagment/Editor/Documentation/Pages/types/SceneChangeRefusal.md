@@ -25,7 +25,9 @@ A refusal happens before anything touches the screen, so the player sees nothing
 
 ## In code
 
-React to the reason when the outcome is Refused:
+Each example is closed; open the one you need.
+
+**Example: React to the reason when the outcome is Refused**
 
 ```cs
 SceneChangeResult result = await SceneActions.ChangeTo(nextGroup);

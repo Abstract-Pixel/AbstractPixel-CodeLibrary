@@ -25,6 +25,21 @@ You never call start-up. It reads the scene system settings, picks a scene group
 - **Domain reload off:** state resets through `StaticsResetter`, so it runs on every Play.
 - **Launch scene hold:** start-up holds the launch scene when it is among the scenes Unity is opening, until it calls `SceneActions.ReleaseLaunchScene`.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: It runs by itself. Check whether it failed, or wait for it to finish**
+
+```cs
+if (SceneSystemStartUp.HasFailed)
+{
+    Debug.LogError("Start-up could not open the start scene group.");
+}
+
+SceneEventBus.OnGameStarted += OnGameStarted;
+```
+
 <!-- members AbstractPixel.SceneManagement.SceneSystemStartUp -->
 
 ## See also

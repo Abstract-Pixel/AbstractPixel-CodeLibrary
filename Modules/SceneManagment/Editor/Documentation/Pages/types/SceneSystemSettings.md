@@ -47,7 +47,9 @@ You edit this asset on a Project Settings page, not by hand. Code reads it throu
 
 ## In code
 
-From the library's relocation labels:
+Each example is closed; open the one you need.
+
+**Example: From the library's relocation labels**
 
 ```cs source=../../../../Relocation/Runtime/RelocationLabels.cs
 SceneSystemSettings settings = SceneSystemSettingsSource.Find();

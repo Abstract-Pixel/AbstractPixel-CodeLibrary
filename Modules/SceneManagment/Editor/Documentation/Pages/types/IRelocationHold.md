@@ -19,6 +19,22 @@ Any component in a relocatable's hierarchy that implements it gets the calls, wi
 | Pause your own behaviour | `OnHold` | Called when the relocatable is held. |
 | Resume it | `OnRelease` | Called when the relocatable is released. |
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Put a component like this on a relocatable to pause your own…**
+
+Put a component like this on a relocatable to pause your own behaviour while it is held:
+
+```cs
+public class EngineHold : MonoBehaviour, IRelocationHold
+{
+    public void OnHold() { enabled = false; }
+    public void OnRelease() { enabled = true; }
+}
+```
+
 <!-- members AbstractPixel.SceneManagement.IRelocationHold -->
 
 ## See also

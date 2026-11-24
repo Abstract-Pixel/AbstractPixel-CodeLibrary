@@ -27,6 +27,20 @@ You never call it. `SceneActions` hands your calls to it and returns its `SceneC
 - **Screen:** an accepted change hides the screen through the registered scene transition executor and shows it again at the end.
 - **Refused:** a refused change never touches the screen.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: You never call it. Every call on SceneActions goes to it**
+
+You never call it. Every call on `SceneActions` goes to it:
+
+```cs
+// Not SceneCoordinator: use SceneActions.
+SceneChangeResult result = await SceneActions.ChangeTo(nextGroup);
+bool busy = SceneActions.IsLoadingSceneGroup;
+```
+
 <!-- members AbstractPixel.SceneManagement.SceneCoordinator -->
 
 ## See also

@@ -22,6 +22,17 @@ Read more in [Start up](../guide/start-up.md#play-from-any-scene).
 - **In a build:** a player build knows no GUID for an open scene, only its path.
 - **Case:** paths and names compare ignoring case; GUIDs compare exactly.
 
+## In code
+
+Each example is closed; open the one you need.
+
+**Example: Compare scenes by GUID, then path, then name**
+
+```cs
+bool same = StartUpSceneMatch.IsSameScene(sceneGroup.MainScene, openScene);
+bool listed = StartUpSceneMatch.ListHolds(sceneGroup.ContextualBootScenesList, openScene);
+```
+
 <!-- members AbstractPixel.SceneManagement.StartUpSceneMatch -->
 
 ## See also
