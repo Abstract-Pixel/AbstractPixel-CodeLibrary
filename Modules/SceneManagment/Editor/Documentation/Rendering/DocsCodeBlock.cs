@@ -64,6 +64,10 @@ namespace AbstractPixel.SceneManagement.Documentation
             VisualElement header = new VisualElement();
             header.AddToClassList("docs-code-header");
             string title = string.IsNullOrEmpty(_source) ? "C#" : Path.GetFileName(_source.Replace("lib:", ""));
+            // A small C# badge in the language's purple, before the language or file name.
+            Label language = new Label("C#");
+            language.AddToClassList("docs-code-language");
+            header.Add(language);
             Label titleLabel = new Label(title);
             titleLabel.AddToClassList("docs-code-title");
             header.Add(titleLabel);
@@ -71,12 +75,16 @@ namespace AbstractPixel.SceneManagement.Documentation
             bool leavesCodeOut = code.Contains("// ...");
             if (!leavesCodeOut)
             {
-                header.Add(DocsChip.Create(DocsIcons.GlyphCopy, "Copy", "Copies this code to the clipboard", () => EditorGUIUtility.systemCopyBuffer = code));
+                Button copy = DocsChip.Create(DocsIcons.GlyphCopy, "Copy", "Copies this code to the clipboard", () => EditorGUIUtility.systemCopyBuffer = code);
+                copy.AddToClassList("docs-code-action");
+                header.Add(copy);
             }
             if (!string.IsNullOrEmpty(_assetPath))
             {
                 int line = FirstLineInFile(_assetPath, code);
-                header.Add(DocsChip.Create(DocsIcons.GlyphOpen, "Open in IDE", "Opens " + title + " at line " + line + " in your code editor", () => OpenAt(_assetPath, line)));
+                Button open = DocsChip.Create(DocsIcons.GlyphOpen, "Open in IDE", "Opens " + title + " at line " + line + " in your code editor", () => OpenAt(_assetPath, line));
+                open.AddToClassList("docs-code-action");
+                header.Add(open);
             }
             return header;
         }
