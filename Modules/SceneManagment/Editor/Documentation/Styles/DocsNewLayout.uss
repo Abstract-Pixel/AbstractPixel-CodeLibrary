@@ -1287,3 +1287,22 @@
     flex-shrink: 1;
     white-space: normal;
 }
+
+/* The scene status demo: state buttons in a row, the real status box, one line on what the state means. */
+.docs-status-demo {
+    margin: 10px 14px 12px 14px;
+}
+
+.docs-status-demo-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.docs-status-demo-button {
+    margin: 0 6px 6px 0;
+}
+
+.docs-status-demo-meaning {
+    margin-top: 2px;
+}

@@ -10,7 +10,7 @@ namespace AbstractPixel.SceneManagement.Documentation
     {
         public static readonly HashSet<string> Known = new HashSet<string>
         {
-            "level", "action", "done-when", "marks", "timeline", "your-project", "members", "code-map", "adr-list", "diagram",
+            "level", "action", "done-when", "marks", "timeline", "your-project", "members", "code-map", "adr-list", "diagram", "scene-status-demo",
             "layout", "type-header", "decision", "locate"
         };
 

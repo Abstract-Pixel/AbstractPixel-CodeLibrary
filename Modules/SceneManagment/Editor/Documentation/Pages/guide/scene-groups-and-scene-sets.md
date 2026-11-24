@@ -60,6 +60,12 @@ Tick [Reset shared scenes](term:reset-shared-scenes) when a shared scene holds p
 
 Every scene field shows a [scene status](term:scene-status): In build, Addressable, Not in build or Missing. A scene is In build or Addressable, never both. See [Build Settings and Addressables](build-settings-and-addressables.md).
 
+**Try every state**
+
+The real status box every scene field shows. Pick a state to see it.
+
+<!-- scene-status-demo -->
+
 ## Scene sets <!-- level 0 -->
 
 A [scene set](term:scene-set) holds the manager scenes, shared scenes and Reset shared scenes for every group that uses it. Change a set and every group using it follows, except for its [overrides](term:override).
