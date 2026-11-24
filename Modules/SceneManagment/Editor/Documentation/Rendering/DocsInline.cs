@@ -66,7 +66,8 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             string code = _code.Replace("</noparse>", "");
             string padded = NoBreakSpace + code + NoBreakSpace;
-            return "<mark=" + DocsTheme.InlineCodeBackground + "><color=" + DocsTheme.InlineCode + "><noparse>" + padded + "</noparse></color></mark>";
+            // Wrapped in a link that goes nowhere, only so the span can change colour under the pointer.
+            return "<link=\"" + DocsLinkEvents.HoverOnlyPrefix + "\"><mark=" + DocsTheme.InlineCodeBackground + "><color=" + DocsTheme.InlineCode + "><noparse>" + padded + "</noparse></color></mark></link>";
         }
 
         // A code span that names a documented type: the link colour on the same faint box, so it reads as code you can click.

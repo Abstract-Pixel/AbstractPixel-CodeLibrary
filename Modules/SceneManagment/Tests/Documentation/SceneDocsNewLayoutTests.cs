@@ -34,8 +34,11 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
         {
             string linked = DocsInline.ToRichText("Call `SceneActions` now.", _code => _code == "SceneActions" ? "type:SceneActions" : null);
             StringAssert.Contains("<link=\"type:SceneActions\">", linked);
-            StringAssert.DoesNotContain("<link", DocsInline.ToRichText("Call `SceneActions` now."));
-            StringAssert.DoesNotContain("<link", DocsInline.ToRichText("Call `Other` now.", _code => null));
+            // Plain code carries only a hover link, which goes nowhere.
+            string plain = DocsInline.ToRichText("Call `SceneActions` now.");
+            StringAssert.DoesNotContain("<link=\"type:", plain);
+            StringAssert.Contains("<link=\"" + DocsLinkEvents.HoverOnlyPrefix + "\">", plain);
+            StringAssert.DoesNotContain("<link=\"type:", DocsInline.ToRichText("Call `Other` now.", _code => null));
         }
 
         [Test]
