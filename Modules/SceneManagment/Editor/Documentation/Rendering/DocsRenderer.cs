@@ -89,24 +89,8 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 row.Add(DocsPill.Ladder(_block.Pill));
             }
-            string topic = TopicOf(_context.Page.Path) + "#" + _block.Id;
-            Button anchor = new Button(() => EditorGUIUtility.systemCopyBuffer = topic);
-            anchor.text = "#";
-            anchor.tooltip = "Copies this section's topic id: " + topic;
-            anchor.AddToClassList("docs-anchor");
-            row.Add(anchor);
             _context.HeadingRows[_block.Id] = row;
             return row;
-        }
-
-        // "guide/preload.md" becomes "guide/preload".
-        private static string TopicOf(string _pagePath)
-        {
-            if (_pagePath.EndsWith(".md"))
-            {
-                return _pagePath.Substring(0, _pagePath.Length - 3).ToLowerInvariant();
-            }
-            return _pagePath;
         }
 
         private static VisualElement List(DocsBlock _block, DocsRenderContext _context, int _depth)
