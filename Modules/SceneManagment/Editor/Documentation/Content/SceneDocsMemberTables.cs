@@ -141,7 +141,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         private static VisualElement ValueRow(VisualElement _row, SceneDocsMember _member, Type _type, DocsRenderContext _context)
         {
             _row.AddToClassList("docs-mrow-value");
-            string name = "<color=" + DocsTheme.TypeName + ">" + _type.Name + "</color>.<b>" + _member.Name + "</b>";
+            string name = "<color=" + DocsTypeColours.ColourOf(_type) + ">" + _type.Name + "</color>.<b>" + _member.Name + "</b>";
             _row.Add(RichLabel(name, "docs-mrow-value-name", _context));
             VisualElement main = new VisualElement();
             main.AddToClassList("docs-mrow-main");
@@ -220,12 +220,14 @@ namespace AbstractPixel.SceneManagement.Documentation
                     text.Append("<color=").Append(DocsTheme.Keyword).Append(">").Append(value).Append("</color>");
                     continue;
                 }
+                // Each type takes its kind's colour (an enum never looks like a class); a documented one is also a link.
+                string kindColour = DocsTypeColours.For(value) ?? DocsTheme.Class;
                 if (SceneDocsTypeIndex.TypeNamed(value) != null)
                 {
-                    text.Append("<link=\"").Append(SceneDocsTypeIndex.Scheme).Append(value).Append("\"><color=").Append(DocsTheme.Link).Append(">").Append(value).Append("</color></link>");
+                    text.Append("<link=\"").Append(SceneDocsTypeIndex.Scheme).Append(value).Append("\"><color=").Append(kindColour).Append(">").Append(value).Append("</color></link>");
                     continue;
                 }
-                text.Append("<color=").Append(DocsTheme.TypeName).Append(">").Append(value).Append("</color>");
+                text.Append("<color=").Append(kindColour).Append(">").Append(value).Append("</color>");
             }
             return text.ToString();
         }

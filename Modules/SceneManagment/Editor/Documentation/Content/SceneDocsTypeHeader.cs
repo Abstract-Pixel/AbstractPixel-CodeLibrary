@@ -51,7 +51,9 @@ namespace AbstractPixel.SceneManagement.Documentation
                 }
                 if (word == _name)
                 {
-                    text.Append("<b>").Append(word).Append("</b>");
+                    // The declared name takes its kind's colour: light green for an enum, teal for a class, and so on.
+                    string kindColour = DocsTypeColours.For(word) ?? DocsTheme.Class;
+                    text.Append("<color=").Append(kindColour).Append("><b>").Append(word).Append("</b></color>");
                     continue;
                 }
                 text.Append("<color=").Append(DocsTheme.Keyword).Append(">").Append(word).Append("</color>");
