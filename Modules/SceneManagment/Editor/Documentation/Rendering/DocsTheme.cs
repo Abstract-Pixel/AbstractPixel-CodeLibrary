@@ -21,6 +21,11 @@ namespace AbstractPixel.SceneManagement.Documentation
         public static string TypeName { get { return EditorGUIUtility.isProSkin ? "#8CC4B4" : "#2C6E62"; } }
         public static string String { get { return EditorGUIUtility.isProSkin ? "#CFA488" : "#8A3B1E"; } }
         public static string Comment { get { return EditorGUIUtility.isProSkin ? "#8A9A80" : "#4F6B45"; } }
+        /// <summary>Hover colours: the same hues, brighter, so a link or code span under the pointer stands out.</summary>
+        public static string LinkHover { get { return EditorGUIUtility.isProSkin ? "#B5D0FF" : "#062F70"; } }
+        public static string InlineCodeHover { get { return EditorGUIUtility.isProSkin ? "#F5DDB8" : "#4E2E08"; } }
+        public static string TermHover { get { return EditorGUIUtility.isProSkin ? "#FFFFFF" : "#000000"; } }
+        public static string InlineCodeBackgroundHover { get { return EditorGUIUtility.isProSkin ? "#FFFFFF33" : "#00000033"; } }
         /// <summary>Method names, light yellow on the dark skin like an IDE's.</summary>
         public static string Method { get { return EditorGUIUtility.isProSkin ? "#DCDCAA" : "#74531F"; } }
         public static string Number { get { return EditorGUIUtility.isProSkin ? "#B8C8A8" : "#3D6B4F"; } }
