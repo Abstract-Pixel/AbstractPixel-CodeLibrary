@@ -62,7 +62,8 @@ namespace AbstractPixel.SceneManagement.Documentation
                     AppendColoured(_result, word, DocsTheme.Method);
                     return end;
                 }
-                AppendWord(_result, word);
+                bool afterDot = _index > 0 && _line[_index - 1] == '.';
+                AppendWord(_result, word, afterDot);
                 return end;
             }
             if (char.IsDigit(character))
@@ -79,19 +80,32 @@ namespace AbstractPixel.SceneManagement.Documentation
             return _index + 1;
         }
 
-        private static void AppendWord(StringBuilder _result, string _word)
+        // Keywords, then type names by kind (class, struct, enum, interface), then members after a dot (plain, as an IDE
+        // shows properties and fields), then locals and parameters.
+        private static void AppendWord(StringBuilder _result, string _word, bool _afterDot)
         {
             if (Keywords.Contains(_word))
             {
                 AppendColoured(_result, _word, DocsTheme.Keyword);
                 return;
             }
-            if (char.IsUpper(_word[0]))
+            string typeColour = char.IsUpper(_word[0]) ? DocsTypeColours.For(_word) : null;
+            if (typeColour != null)
             {
-                AppendColoured(_result, _word, DocsTheme.TypeName);
+                AppendColoured(_result, _word, typeColour);
                 return;
             }
-            AppendPlain(_result, _word);
+            if (_afterDot)
+            {
+                AppendColoured(_result, _word, DocsTheme.Member);
+                return;
+            }
+            if (char.IsUpper(_word[0]))
+            {
+                AppendColoured(_result, _word, DocsTheme.Class);
+                return;
+            }
+            AppendColoured(_result, _word, DocsTheme.Variable);
         }
 
         private static int StringEnd(string _line, int _start)
