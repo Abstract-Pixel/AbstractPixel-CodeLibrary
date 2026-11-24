@@ -1116,3 +1116,45 @@
 .docs-layout-new .docs-callout .docs-paragraph {
     margin-bottom: 0;
 }
+
+/* ---- Tables are boxes of their own, like the "More" boxes: inset 10 px from the outer box, a 1 px outline on all
+   four sides, rounded corners, and a light grey header row. ---- */
+.docs-section-body > .docs-table,
+.docs-part-body > .docs-table,
+.docs-part-fold > .unity-foldout__content > .docs-table,
+.docs-fold > .unity-foldout__content > .docs-table,
+.docs-action-fold > .unity-foldout__content > .docs-table {
+    margin: 0 10px 12px 10px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+}
+
+.docs-section-body > .docs-table.docs-first,
+.docs-part-body > .docs-table.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-table.docs-first,
+.docs-fold > .unity-foldout__content > .docs-table.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-table.docs-first {
+    margin-top: 10px;
+}
+
+.docs-section-body > .docs-table.docs-last,
+.docs-part-body > .docs-table.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-table.docs-last,
+.docs-fold > .unity-foldout__content > .docs-table.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-table.docs-last {
+    margin-bottom: 10px;
+    border-bottom-width: 1px;
+}
+
+.docs-layout-new .docs-table .docs-table-first {
+    padding-left: 10px;
+}
+
+.docs-layout-new .docs-table .docs-table-in-group .docs-table-first {
+    padding-left: 26px;
+}
