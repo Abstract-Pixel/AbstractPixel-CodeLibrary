@@ -1575,8 +1575,29 @@
     position: absolute;
     border-width: 2px;
     border-radius: 3px;
-    border-top-color: rgb(70, 130, 210);
-    border-right-color: rgb(70, 130, 210);
-    border-bottom-color: rgb(70, 130, 210);
-    border-left-color: rgb(70, 130, 210);
+}
+
+.docs-mark-table-header-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 10px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-mark-table-header-row > .docs-mark-table-header {
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-bottom-width: 0;
+}
+
+/* Which image this anatomy belongs to, as a small tag beside the header. */
+.docs-mark-table-tag {
+    margin-left: 8px;
+    padding: 0 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--unity-colors-label-text);
 }
