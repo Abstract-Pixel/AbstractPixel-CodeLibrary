@@ -1082,3 +1082,18 @@
 .docs-layout-new .docs-facts-value {
     font-size: 12px;
 }
+
+/* Numbered steps keep the same gap from the strip or header above and the box edge below as text does. */
+.docs-section-body > .docs-flow.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-flow.docs-first,
+.docs-fold > .unity-foldout__content > .docs-flow.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-flow.docs-first {
+    margin-top: 10px;
+}
+
+.docs-section-body > .docs-flow.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-flow.docs-last,
+.docs-fold > .unity-foldout__content > .docs-flow.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-flow.docs-last {
+    margin-bottom: 10px;
+}
