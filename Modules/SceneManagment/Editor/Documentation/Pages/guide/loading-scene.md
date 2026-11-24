@@ -45,12 +45,6 @@ Keeps a fast load from flashing the loading scene.
 - **Counts:** unscaled seconds.
 - **Starts:** when Show screen starts.
 
-## Try it here <!-- level 0 -->
-
-Set the loading scene up as you would in your project, run a scene change, and watch what happens and why.
-
-<!-- sandbox loading-scene -->
-
 ## Show the progress <!-- level 1 -->
 
 Add a `LoadingProgressView` to the loading scene. It reads the [loading progress](term:loading-progress), smooths it and drives your bar.
