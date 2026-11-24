@@ -1,4 +1,7 @@
 # 09 Editor Tools
+
+<!-- layout new -->
+
 **Level 0 · no code**
 You will learn the Editor tools of the scene system: Create Scene Group, the scene field, the group inspector and its check, the Scene Groups Debugger, the sample scene groups list, migration, the build guard and the scene picker.
 
@@ -39,11 +42,11 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 This sample has no code. The settings to look at are on `Sample 09 WorkshopGroup`: "Sample scene group" ticked, main scene `Sample 09 Workshop`, manager scene `Samples Managers`, no scene set.
 
 ## Windows this sample shows
-- Create Scene Group: Project window, right-click a scene > Create > Scene Group (Assets > Create > Scene Group).
-- Scene group inspector and group check: select a scene group.
-- Scene field: the Main scene field in the group inspector.
-- Scene Groups Debugger, Sample scene groups, Preview migration: Project Settings > Abstract Pixel > Scene System.
-- Scene picker: main toolbar, "Abstract Pixel/Scene picker".
+- **Create Scene Group:** Project window, right-click a scene > Create > Scene Group (Assets > Create > Scene Group).
+- **Scene group inspector and group check:** select a scene group.
+- **Scene field:** the Main scene field in the group inspector.
+- **Scene Groups Debugger, Sample scene groups, Preview migration:** Project Settings > Abstract Pixel > Scene System.
+- **Scene picker:** main toolbar, "Abstract Pixel/Scene picker".
 
 ## How it's set up
 1. Select the workshop's scene group and read its group check.
@@ -60,10 +63,10 @@ This sample has no code. The settings to look at are on `Sample 09 WorkshopGroup
 - [Sample scene groups](../../Editor/Documentation/Pages/guide/editor-tools.md#sample-scene-groups) never reach a build ([design decision 14](../../docs/adr/0014-sample-scene-groups-never-reach-a-build.md)).
 
 ## If it goes wrong
-- No scene picker in the toolbar → on 6.3, right-click the toolbar and tick "Abstract Pixel/Scene picker".
-- Create Scene Group selects an existing group → that scene is already a main scene: a scene is the main scene of one group at most.
-- A game scene's status is red → click its fix, or right-click the field for the move items. A sample scene's "Not in build" needs no fix.
+- **No scene picker in the toolbar:** on 6.3, right-click the toolbar and tick "Abstract Pixel/Scene picker".
+- **Create Scene Group selects an existing group:** that scene is already a main scene: a scene is the main scene of one group at most.
+- **A game scene's status is red:** click its fix, or right-click the field for the move items. A sample scene's "Not in build" needs no fix.
 
 ## Next steps
-- [04 Play From Any Scene](../04%20Play%20From%20Any%20Scene/README.md): what Play opens.
-- [08 Addressables](../08%20Addressables/README.md): the blue status and the moves.
+- **[04 Play From Any Scene](../04%20Play%20From%20Any%20Scene/README.md):** what Play opens.
+- **[08 Addressables](../08%20Addressables/README.md):** the blue status and the moves.

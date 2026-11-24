@@ -1,4 +1,7 @@
 # 10 Launch Scene
+
+<!-- layout new -->
+
 **Level 2 · choices**
 You will learn how a launch scene (a splash) holds the first scene group while it opens behind it, and how to hand over with a Timeline.
 
@@ -58,10 +61,10 @@ splashCamera.enabled = false;
 ```
 
 ## Windows this sample shows
-- The scene group inspector, "Launch scene (sample only)": select `Sample 10 MenuGroup`.
-- The Timeline window with the release marker: select the `Splash` object, Window > Sequencing > Timeline.
-- LaunchSceneReleaseReceiver and its On Released list: select the `Splash` object.
-- Start-up section: Project Settings > Abstract Pixel > Scene System (look only).
+- **The scene group inspector, "Launch scene (sample only)":** select `Sample 10 MenuGroup`.
+- **The Timeline window with the release marker:** select the `Splash` object, Window > Sequencing > Timeline.
+- **LaunchSceneReleaseReceiver and its On Released list:** select the `Splash` object.
+- **Start-up section:** Project Settings > Abstract Pixel > Scene System (look only).
 
 ## How it's set up
 1. Select the menu's scene group: its Launch scene (sample only) names the splash.
@@ -78,10 +81,10 @@ splashCamera.enabled = false;
 - The menu waits with `SceneActions.RunWhenLaunchSceneReleased`, so it starts once, at the hand-off.
 
 ## If it goes wrong
-- The Menu opens with no splash → Play was started from another scene: open only `Sample 10 Splash`.
-- The splash never closes → the Timeline lost its marker, or the director has no Timeline: check the `Splash` object's PlayableDirector.
-- Two audio listeners warning → the splash must not add a listener of its own; the Menu's camera has the one listener.
+- **The Menu opens with no splash:** Play was started from another scene: open only `Sample 10 Splash`.
+- **The splash never closes:** the Timeline lost its marker, or the director has no Timeline: check the `Splash` object's PlayableDirector.
+- **Two audio listeners warning:** the splash must not add a listener of its own; the Menu's camera has the one listener.
 
 ## Next steps
-- [04 Play From Any Scene](../04%20Play%20From%20Any%20Scene/README.md): what Play opens without a launch scene.
-- [06 Loading Scene](../06%20Loading%20Scene/README.md): the other screen the scene system can show.
+- **[04 Play From Any Scene](../04%20Play%20From%20Any%20Scene/README.md):** what Play opens without a launch scene.
+- **[06 Loading Scene](../06%20Loading%20Scene/README.md):** the other screen the scene system can show.

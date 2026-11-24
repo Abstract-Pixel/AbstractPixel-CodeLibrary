@@ -1,4 +1,7 @@
 # 02 Change Level From Code
+
+<!-- layout new -->
+
 **Level 1 · daily code**
 You will learn how to change the scene group from a script, read the result it returns, and follow the scene messages in order.
 
@@ -68,9 +71,9 @@ private void OnEnable()
 ```
 
 ## Windows this sample shows
-- The level changer's fields (other group, its name, label): select `Sample 02` in the Hierarchy.
-- "If a scene change fails, go to": Project Settings > Abstract Pixel > Scene System (look only).
-- The full message list and their order: the module README, "The messages" and "Order, per entry point".
+- **The level changer's fields (other group, its name, label):** select `Sample 02` in the Hierarchy.
+- **"If a scene change fails, go to":** Project Settings > Abstract Pixel > Scene System (look only).
+- **The full message list and their order:** the module README, "The messages" and "Order, per entry point".
 
 ## How it's set up
 1. Select the object with `Sample02LevelChanger`; its Other Group field names the Arena's group.
@@ -85,10 +88,10 @@ private void OnEnable()
 - Busy is set before the first await, so a second change in the same frame is refused.
 
 ## If it goes wrong
-- A button logs nothing → the `Sample 02` object lost its label: drag `Sample Label` into both of its Label fields.
-- "Refused (Busy)" on a single click → the last change was still fading: wait for it to end.
-- "Refused (StartUpRunning)" → start-up has not finished yet: wait a moment after Play.
+- **A button logs nothing:** the `Sample 02` object lost its label: drag `Sample Label` into both of its Label fields.
+- **"Refused (Busy)" on a single click:** the last change was still fading: wait for it to end.
+- **"Refused (StartUpRunning)":** start-up has not finished yet: wait a moment after Play.
 
 ## Next steps
-- [03 Fast Restart](../03%20Fast%20Restart/README.md): Retry the open scene group.
+- **[03 Fast Restart](../03%20Fast%20Restart/README.md):** Retry the open scene group.
 - For level order, see the LevelManager module.

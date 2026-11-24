@@ -1,5 +1,8 @@
 # Scene System Samples
 
+<!-- layout new -->
+
+
 ## Before you start
 - These samples are for the Editor only. Their scene groups are sample scene groups: their scenes never go into a build, and a build that would contain one stops and names it.
 - Set up the scene system first: Tools > External Project Tools > Scene System > Set Up Scene System.
