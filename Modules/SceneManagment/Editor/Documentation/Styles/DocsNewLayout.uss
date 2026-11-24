@@ -1,6 +1,6 @@
 /* The new page layout, for pages with a "layout new" line. Colours for kinds and states are in DocsDark.uss and DocsLight.uss. */
 .docs-page.docs-layout-new {
-    max-width: 930px;
+    max-width: 1163px;
     padding-left: 24px;
     padding-right: 24px;
     padding-top: 16px;
@@ -12,7 +12,7 @@
 }
 
 .docs-layout-new .docs-paragraph {
-    max-width: 720px;
+    max-width: 900px;
     margin-bottom: 12px;
 }
 
@@ -37,7 +37,7 @@
 
 .docs-layout-new .docs-list {
     margin-bottom: 12px;
-    max-width: 720px;
+    max-width: 900px;
 }
 
 .docs-layout-new .docs-list-row {
@@ -48,7 +48,7 @@
     padding: 10px 12px;
     margin-top: 4px;
     margin-bottom: 14px;
-    max-width: 720px;
+    max-width: 900px;
 }
 
 .docs-layout-new .docs-code {
@@ -137,9 +137,9 @@
 }
 
 .docs-flow-number {
-    width: 20px;
-    height: 20px;
-    border-radius: 10px;
+    width: 25px;
+    height: 25px;
+    border-radius: 12px;
     border-width: 1px;
     -unity-text-align: middle-center;
     font-size: var(--unity-metrics-default-font_small_size);
@@ -179,7 +179,7 @@
 }
 
 .docs-type-declaration {
-    font-size: 13px;
+    font-size: 16px;
     padding: 8px 12px;
     margin-bottom: 10px;
     background-color: var(--unity-colors-default-background);
@@ -1041,5 +1041,37 @@
 }
 
 .docs-flow-number {
-    min-width: 26px;
+    min-width: 32px;
+}
+
+/* Inner boxes take the outline colour on their left side too (callouts keep their coloured edge). */
+.docs-section-body > .docs-inner-box,
+.docs-part-fold > .unity-foldout__content > .docs-inner-box,
+.docs-fold > .unity-foldout__content > .docs-inner-box,
+.docs-action-fold > .unity-foldout__content > .docs-inner-box {
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-type-declaration {
+    border-left-width: 1px;
+    border-left-color: var(--unity-colors-default-border);
+}
+
+/* Buttons on the page grow with the text; Unity's button style would keep them at its own size. */
+.docs-page-area .unity-button,
+.docs-page-area .unity-button .unity-label,
+.docs-page-area .unity-toolbar-button {
+    font-size: var(--unity-metrics-default-font_normal_size);
+}
+
+.docs-facts-label {
+    width: 210px;
+}
+
+.docs-page-area .docs-locate Label {
+    font-size: var(--unity-metrics-default-font_normal_size);
+}
+
+.docs-page-area .docs-locate {
+    height: 28px;
 }
