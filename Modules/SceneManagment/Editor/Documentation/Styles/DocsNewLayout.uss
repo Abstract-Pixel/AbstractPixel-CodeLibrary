@@ -1158,3 +1158,36 @@
 .docs-layout-new .docs-table .docs-table-in-group .docs-table-first {
     padding-left: 26px;
 }
+
+/* ---- Code blocks are boxes too, inset and outlined like tables, never edge to edge. ---- */
+.docs-section-body > .docs-code,
+.docs-part-body > .docs-code,
+.docs-part-fold > .unity-foldout__content > .docs-code,
+.docs-fold > .unity-foldout__content > .docs-code,
+.docs-action-fold > .unity-foldout__content > .docs-code {
+    margin: 0 10px 12px 10px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+}
+
+.docs-section-body > .docs-code.docs-first,
+.docs-part-body > .docs-code.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-code.docs-first,
+.docs-fold > .unity-foldout__content > .docs-code.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-code.docs-first {
+    margin-top: 10px;
+}
+
+.docs-section-body > .docs-code.docs-last,
+.docs-part-body > .docs-code.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-code.docs-last,
+.docs-fold > .unity-foldout__content > .docs-code.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-code.docs-last {
+    margin-bottom: 10px;
+    border-bottom-width: 1px;
+}
