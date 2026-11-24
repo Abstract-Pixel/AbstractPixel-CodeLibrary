@@ -1350,3 +1350,19 @@
 .docs-layout-new .docs-code-header > .docs-code-action:hover .docs-glyph {
     color: rgb(235, 235, 235);
 }
+
+/* "On this page": the part being read is marked, and its section keeps a quieter mark. */
+.docs-rail-current-parent .docs-rail-text,
+.docs-rail-current-parent .docs-rail-number {
+    color: var(--unity-colors-highlight-background);
+    -unity-font-style: bold;
+}
+
+/* The heading or part strip a rail click jumped to lights up for a moment. */
+.docs-layout-new .docs-section .docs-heading-row.docs-rail-target,
+.docs-layout-new .docs-section-body .docs-part-fold > .unity-foldout__toggle.docs-rail-target,
+.docs-layout-new .docs-section-body .docs-part-fold > .unity-foldout__toggle.docs-rail-target:checked {
+    background-color: rgba(58, 121, 187, 0.45);
+    transition-property: background-color;
+    transition-duration: 0.4s;
+}
