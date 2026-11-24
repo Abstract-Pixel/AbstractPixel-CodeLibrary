@@ -1432,3 +1432,67 @@
     padding: 6px 10px 6px 6px;
     background-color: rgba(0, 0, 0, 0);
 }
+
+/* Member rows: one line of arrow, number, return type and signature; the summary under it, indented to the text. */
+.docs-layout-new .docs-mrow-line-layout {
+    flex-direction: column;
+    padding: 6px 10px 6px 8px;
+}
+
+.docs-mrow-line {
+    flex-direction: row;
+    align-items: center;
+}
+
+.docs-mrow-line-foldable {
+    cursor: link;
+}
+
+.docs-mrow-arrow {
+    width: 14px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+    color: var(--unity-colors-label-text);
+}
+
+.docs-mrow-number {
+    min-width: 26px;
+    -unity-text-align: middle-right;
+    padding-right: 4px;
+    flex-shrink: 0;
+    margin-right: 4px;
+    color: var(--unity-colors-label-text);
+    opacity: 0.7;
+}
+
+.docs-layout-new .docs-mrow-line-layout > .docs-mrow-summary {
+    margin-left: 48px;
+    margin-top: 2px;
+}
+
+/* The remarks box: inset, outlined, a More header row, never full width. */
+.docs-mrow-morebox {
+    margin: 6px 10px 2px 48px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+    align-self: flex-start;
+    min-width: 320px;
+    max-width: 900px;
+    overflow: hidden;
+}
+
+.docs-mrow-morebox-header {
+    padding: 3px 8px;
+    -unity-font-style: bold;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-mrow-morebox-body {
+    padding: 6px 10px 6px 6px;
+}
