@@ -1333,18 +1333,41 @@
     align-self: center;
 }
 
-.docs-layout-new .docs-code-header > .docs-code-action .docs-chip-label,
-.docs-layout-new .docs-code-header > .docs-code-action .docs-glyph {
+/* Icon first; the text slides out on hover. */
+.docs-layout-new .docs-code-header > .docs-code-action {
+    flex-direction: row;
+    align-items: center;
+    color: rgb(170, 170, 170);
+}
+
+.docs-code-icon {
+    flex-shrink: 0;
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action .docs-code-action-label {
     color: rgb(170, 170, 170);
     font-size: 12px;
+    max-width: 0;
+    margin-left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0;
+    transition-property: max-width, margin-left;
+    transition-duration: 0.18s;
+    transition-timing-function: ease-out;
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-code-action-label {
+    max-width: 90px;
+    margin-left: 5px;
 }
 
 .docs-layout-new .docs-code-header > .docs-code-action:hover {
     background-color: rgba(255, 255, 255, 0.09);
 }
 
-.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-chip-label,
-.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-glyph {
+.docs-layout-new .docs-code-header > .docs-code-action:hover,
+.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-code-action-label {
     color: rgb(235, 235, 235);
 }
 

@@ -44,10 +44,10 @@
 .docs-type-separator { background-color: rgb(90, 90, 90); }
 /* Code block header on the light skin: a darker band and line, and dark action text. */
 .docs-layout-new .docs-code-header { background-color: rgba(0, 0, 0, 0.08); border-bottom-color: rgb(165, 165, 165); }
-.docs-layout-new .docs-code-header > .docs-code-action .docs-chip-label,
-.docs-layout-new .docs-code-header > .docs-code-action .docs-glyph { color: rgb(70, 70, 70); }
+.docs-layout-new .docs-code-header > .docs-code-action,
+.docs-layout-new .docs-code-header > .docs-code-action .docs-code-action-label { color: rgb(70, 70, 70); }
 .docs-layout-new .docs-code-header > .docs-code-action:hover { background-color: rgba(0, 0, 0, 0.08); }
-.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-chip-label,
-.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-glyph { color: rgb(20, 20, 20); }
+.docs-layout-new .docs-code-header > .docs-code-action:hover,
+.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-code-action-label { color: rgb(20, 20, 20); }
 /* The C# language label: a muted purple that reads on a light page. */
 .docs-code-language { color: rgb(110, 70, 140); }
