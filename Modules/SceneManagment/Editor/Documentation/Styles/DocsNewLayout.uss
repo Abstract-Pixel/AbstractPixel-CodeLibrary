@@ -1108,3 +1108,11 @@
     margin: 0 6px 0 0;
 }
 
+/* Callouts hug their text: a small even padding and no paragraph gap after the last line. */
+.docs-layout-new .docs-callout {
+    padding: 8px 12px 8px 12px;
+}
+
+.docs-layout-new .docs-callout .docs-paragraph {
+    margin-bottom: 0;
+}
