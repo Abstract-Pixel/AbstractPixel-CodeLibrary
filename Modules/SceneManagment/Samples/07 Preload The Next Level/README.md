@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-**Level 2 · choices**
+**Choices**
 You will learn how to load the next scene group in the background, so the change to it only activates what is already loaded.
 
 Covers: F30 Preload and the preloaded switch

@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-**Level 2 · choices**
+**Choices**
 You will learn how a scene group shows a loading scene, and how a loading bar made of primitives follows the loading progress.
 
 Covers: F06 Page: Loading scenes section (look only) · F29 Loading scene, LoadingProgress, LoadingProgressView, ILoadingProgressDisplay

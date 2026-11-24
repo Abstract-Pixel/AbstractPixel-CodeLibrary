@@ -12,16 +12,16 @@
 ## Samples
 | Sample | Level | You learn |
 |---|---|---|
-| [01 Button Changes Level](01%20Button%20Changes%20Level/README.md) | 0 no code | A UI button changes the scene group with a fade |
-| [02 Change Level From Code](02%20Change%20Level%20From%20Code/README.md) | 1 daily code | SceneActions.ChangeTo, its result, and the scene messages in order |
-| [03 Fast Restart](03%20Fast%20Restart/README.md) | 1 daily code | Retry and Reset shared scenes |
-| [04 Play From Any Scene](04%20Play%20From%20Any%20Scene/README.md) | 0 no code | Play from any scene of a group; the scene opening preferences and setup |
-| [05 Persistent Player And Spawn Points](05%20Persistent%20Player%20And%20Spawn%20Points/README.md) | 1 daily code | Relocatables, labels and spawn points |
-| [06 Loading Scene](06%20Loading%20Scene/README.md) | 2 choices | A loading scene with a progress bar of primitives |
-| [07 Preload The Next Level](07%20Preload%20The%20Next%20Level/README.md) | 2 choices | Preload, then an instant change |
-| [08 Addressables](08%20Addressables/README.md) | 3 full control | An Addressable main scene and the moves |
-| [09 Editor Tools](09%20Editor%20Tools/README.md) | 0 no code | Create Scene Group, the inspector, the Debugger, the scene picker |
-| [10 Launch Scene](10%20Launch%20Scene/README.md) | 2 choices | A splash that holds the first group, with a Timeline |
+| [01 Button Changes Level](01%20Button%20Changes%20Level/README.md) | No Code | A UI button changes the scene group with a fade |
+| [02 Change Level From Code](02%20Change%20Level%20From%20Code/README.md) | Basic Code | SceneActions.ChangeTo, its result, and the scene messages in order |
+| [03 Fast Restart](03%20Fast%20Restart/README.md) | Basic Code | Retry and Reset shared scenes |
+| [04 Play From Any Scene](04%20Play%20From%20Any%20Scene/README.md) | No Code | Play from any scene of a group; the scene opening preferences and setup |
+| [05 Persistent Player And Spawn Points](05%20Persistent%20Player%20And%20Spawn%20Points/README.md) | Basic Code | Relocatables, labels and spawn points |
+| [06 Loading Scene](06%20Loading%20Scene/README.md) | Choices | A loading scene with a progress bar of primitives |
+| [07 Preload The Next Level](07%20Preload%20The%20Next%20Level/README.md) | Choices | Preload, then an instant change |
+| [08 Addressables](08%20Addressables/README.md) | Full Control | An Addressable main scene and the moves |
+| [09 Editor Tools](09%20Editor%20Tools/README.md) | No Code | Create Scene Group, the inspector, the Debugger, the scene picker |
+| [10 Launch Scene](10%20Launch%20Scene/README.md) | Choices | A splash that holds the first group, with a Timeline |
 
 ## Coverage
 | ID | Feature | Sample | Look only |

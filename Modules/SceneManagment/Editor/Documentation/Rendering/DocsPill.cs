@@ -2,24 +2,25 @@ using UnityEngine.UIElements;
 
 namespace AbstractPixel.SceneManagement.Documentation
 {
-    /// <summary>Ladder pills ("1 daily code") and kind badges ("component"), with text so colour is never alone.</summary>
+    /// <summary>Ladder pills ("Basic Code") and kind badges ("component"), with text so colour is never alone.</summary>
     #if UNITY_7000_0_OR_NEWER
     [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
     #endif
     public static class DocsPill
     {
-        private static readonly string[] Words = { "no code", "daily code", "choices", "full control" };
+        // Title Case, no numbers: the colour and the word give the level.
+        private static readonly string[] Words = { "No Code", "Basic Code", "Choices", "Full Control" };
         private static readonly string[] Tooltips =
         {
-            "Level 0: done in the Inspector, no code.",
-            "Level 1: the code you write every day.",
-            "Level 2: choices most projects make once.",
-            "Level 3: full control, for the rare case."
+            "Done in the Inspector, no code.",
+            "The few calls most games make.",
+            "Choices most projects make once.",
+            "Full control, for the rare case."
         };
 
         public static Label Ladder(int _level)
         {
-            Label pill = new Label(_level + " " + Words[_level]);
+            Label pill = new Label(Words[_level]);
             pill.AddToClassList("docs-pill");
             pill.AddToClassList("docs-pill-" + _level);
             pill.tooltip = Tooltips[_level];

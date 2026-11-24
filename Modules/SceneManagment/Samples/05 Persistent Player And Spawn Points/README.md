@@ -2,7 +2,7 @@
 
 <!-- layout new -->
 
-**Level 1 · daily code**
+**Basic Code**
 You will learn how objects in a shared scene, such as the player, move to the right place in every new scene group.
 
 Covers: F07 Page: Relocation section · F19 Relocatable, Relocation Label, Stamp relocation label IDs · F20 Spawn point inspector and Scene view tools · F28 Relocation: Hold, Relocate, Release, missing position
