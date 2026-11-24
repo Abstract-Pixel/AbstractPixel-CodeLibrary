@@ -45,7 +45,7 @@ on the Scene System page; empty means the start scene group) with the screen sti
 
 ## The lines that matter
 `Scripts/Sample02LevelChanger.cs`: one change, awaited, with its result.
-```csharp
+```csharp source=Scripts/Sample02LevelChanger.cs
 public async Task<SceneChangeResult> ChangeToOther()
 {
     SceneChangeResult result = await SceneActions.ChangeTo(otherGroup);
@@ -55,14 +55,14 @@ public async Task<SceneChangeResult> ChangeToOther()
 ```
 
 `Scripts/Sample02LevelChanger.cs`: two changes in one frame; only one runs at a time, so the second is refused.
-```csharp
+```csharp source=Scripts/Sample02LevelChanger.cs
 Task<SceneChangeResult> first = SceneActions.ChangeTo(otherGroup);
 Task<SceneChangeResult> second = SceneActions.ChangeTo(otherGroup);
 SceneChangeResult[] results = await Task.WhenAll(first, second);
 ```
 
 `Scripts/Sample02MessageLog.cs`: listen in OnEnable, and stop in OnDisable.
-```csharp
+```csharp source=Scripts/Sample02MessageLog.cs
 private void OnEnable()
 {
     SceneEventBus.OnNewSceneGroupTransitionTo += OnNewSceneGroupTransitionTo;

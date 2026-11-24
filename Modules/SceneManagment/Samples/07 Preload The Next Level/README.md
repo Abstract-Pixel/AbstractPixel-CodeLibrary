@@ -36,7 +36,7 @@ Unity 6.3 or newer and the scene system set up (Project Settings > Abstract Pixe
 
 ## The lines that matter
 `Scripts/Sample07Preloader.cs`: preload is one call; it never touches the screen.
-```csharp
+```csharp source=Scripts/Sample07Preloader.cs
 public Task<SceneChangeResult> PreloadNext()
 {
     return SceneActions.Preload(nextGroup);
@@ -44,14 +44,14 @@ public Task<SceneChangeResult> PreloadNext()
 ```
 
 `Scripts/Sample07Preloader.cs`: the change is the usual ChangeTo; the scene system sees the group is preloaded and switches to it.
-```csharp
+```csharp source=Scripts/Sample07Preloader.cs
 Stopwatch watch = Stopwatch.StartNew();
 SceneChangeResult result = await SceneActions.ChangeTo(nextGroup);
 watch.Stop();
 ```
 
 `Scripts/Sample07Preloader.cs`: the two preload messages.
-```csharp
+```csharp source=Scripts/Sample07Preloader.cs
 SceneEventBus.OnSceneGroupPreloaded += OnPreloaded;
 SceneEventBus.OnPreloadedSceneGroupActivated += OnActivated;
 ```

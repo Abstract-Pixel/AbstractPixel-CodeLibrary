@@ -37,7 +37,7 @@ Unity 6.3 or newer and the scene system set up. The Timeline part needs the Time
 
 ## The lines that matter
 `Scripts/Sample10MenuIntro.cs`: the Menu's intro waits for the release; with nothing held it runs at once.
-```csharp
+```csharp source=Scripts/Sample10MenuIntro.cs
 private void OnEnable()
 {
     SceneActions.RunWhenLaunchSceneReleased(StartIntro);
@@ -45,7 +45,7 @@ private void OnEnable()
 ```
 
 `Scripts/Sample10Splash.cs`: the guard keeps the Menu's RenderSettings off the splash, and the clock caps the Timeline's step on a load hitch.
-```csharp
+```csharp source=Scripts/Sample10Splash.cs
 renderSettingsGuard.BeginGuarding();
 LaunchSceneStartUpLog.Milestone("Sample 10 splash awake");
 #if ABSTRACTPIXEL_TIMELINE
@@ -53,7 +53,7 @@ clock = new LaunchSceneTimelineClock(timeline, MaximumStepSeconds);
 ```
 
 `Scripts/Sample10Splash.cs`: the LaunchSceneReleaseReceiver's On Released calls this after it released the hold.
-```csharp
+```csharp source=Scripts/Sample10Splash.cs
 released = true;
 HandOverCount++;
 renderSettingsGuard.RestoreMenuSettings();

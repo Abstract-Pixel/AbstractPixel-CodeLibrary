@@ -40,7 +40,7 @@ A package cannot ship an Addressables entry, so the sample ships the scene not A
 
 ## The lines that matter
 `Scripts/Sample08Buttons.cs`: the scene is a scene reference; Addressables knows it by the reference's GUID, as the scene system's loader does.
-```csharp
+```csharp source=Scripts/Sample08Buttons.cs
 private static bool HasAddressablesEntry(AbstractPixel.Core.SceneReference _scene)
 {
     if (_scene == null || _scene.HasGuid == false || Addressables.ResourceLocators == null)
@@ -50,7 +50,7 @@ private static bool HasAddressablesEntry(AbstractPixel.Core.SceneReference _scen
 ```
 
 `Scripts/Sample08Buttons.cs`: the change itself is the usual call; the loader picks Addressables on its own.
-```csharp
+```csharp source=Scripts/Sample08Buttons.cs
 public Task<SceneChangeResult> Go()
 {
     return SceneActions.ChangeTo(otherGroup);
