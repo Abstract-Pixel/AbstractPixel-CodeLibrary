@@ -95,6 +95,18 @@ namespace AbstractPixel.SceneManagement.Documentation
             return circle;
         }
 
+        // "The scene picker, Scenes tab" gives "Scenes tab"; alt text with no comma is used whole.
+        private static string TagOf(string _altText)
+        {
+            if (string.IsNullOrEmpty(_altText))
+            {
+                return string.Empty;
+            }
+            int comma = _altText.LastIndexOf(", ", System.StringComparison.Ordinal);
+            string tag = comma >= 0 ? _altText.Substring(comma + 2) : _altText;
+            return char.ToUpperInvariant(tag[0]) + tag.Substring(1);
+        }
+
         // A box with one row per mark: its number, the name of the thing, and one line on what it is or does.
         // A mark label written "Name: what it does" splits at the first ": ".
         private static VisualElement MarkLabels(DocsBlock _block)
@@ -102,9 +114,20 @@ namespace AbstractPixel.SceneManagement.Documentation
             VisualElement list = new VisualElement();
             list.AddToClassList("docs-mark-list");
             list.AddToClassList("docs-mark-table");
+            VisualElement headerRow = new VisualElement();
+            headerRow.AddToClassList("docs-mark-table-header-row");
             Label header = new Label("Tool Anatomy");
             header.AddToClassList("docs-mark-table-header");
-            list.Add(header);
+            headerRow.Add(header);
+            // A tag names which view the image shows ("Scenes tab"), so two anatomies on a page read apart.
+            string tag = TagOf(_block.Text);
+            if (tag.Length > 0)
+            {
+                Label tagLabel = new Label(tag);
+                tagLabel.AddToClassList("docs-mark-table-tag");
+                headerRow.Add(tagLabel);
+            }
+            list.Add(headerRow);
             foreach (DocsMark mark in _block.Marks)
             {
                 VisualElement row = new VisualElement();
