@@ -804,6 +804,14 @@
     bottom: 0;
     width: 6px;
     cursor: resize-horizontal;
+    border-left-width: 2px;
+    border-left-color: rgba(0, 0, 0, 0);
+    margin-left: 2px;
+}
+
+/* Like the contents splitter on the left: a white line shows where the rail can be dragged. */
+.docs-rail-handle:hover {
+    border-left-color: rgba(255, 255, 255, 0.85);
 }
 
 .docs-wide.docs-has-rail .docs-rail {
