@@ -558,9 +558,20 @@ namespace AbstractPixel.SceneManagement.Documentation
                 }
             }
             row.AddToClassList("docs-flash");
-            pageScroll.schedule.Execute(() => pageScroll.ScrollTo(row)).StartingIn(30);
+            pageScroll.schedule.Execute(() => ScrollToIfStillShown(row)).StartingIn(30);
             row.schedule.Execute(() => row.RemoveFromClassList("docs-flash")).StartingIn(FlashMilliseconds);
             return true;
+        }
+
+        // The page may have changed in the 30 ms before the scroll runs; a row from the old page is skipped.
+        private void ScrollToIfStillShown(VisualElement _row)
+        {
+            bool isOnThePage = pageScroll.contentContainer.Contains(_row);
+            if (!isOnThePage)
+            {
+                return;
+            }
+            pageScroll.ScrollTo(_row);
         }
 
         private void RestoreScroll(float _value)
