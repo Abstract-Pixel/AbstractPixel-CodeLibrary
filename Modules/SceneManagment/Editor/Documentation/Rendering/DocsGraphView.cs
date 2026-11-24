@@ -164,7 +164,9 @@ namespace AbstractPixel.SceneManagement.Documentation
                 line.AddToClassList("docs-graph-line");
                 box.Add(line);
             }
-            box.tooltip = _node.Inner != null ? "Shows how the parts of " + _node.Title + " connect" : "Opens " + _node.Title;
+            string action = _node.Inner != null ? "Shows how the parts of " + _node.Title + " connect" : "Opens " + _node.Title;
+            // The tooltip carries the whole line too, in case a long one still runs past two lines.
+            box.tooltip = string.IsNullOrEmpty(_node.Line) ? action : _node.Line + "\n" + action;
             box.RegisterCallback<PointerEnterEvent>(_event => SetHovered(_node.Id));
             box.RegisterCallback<PointerLeaveEvent>(_event => SetHovered(null));
             box.RegisterCallback<FocusInEvent>(_event => SetHovered(_node.Id));

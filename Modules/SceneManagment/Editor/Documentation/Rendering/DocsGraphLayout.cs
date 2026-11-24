@@ -10,8 +10,10 @@ namespace AbstractPixel.SceneManagement.Documentation
     /// </summary>
     public static class DocsGraphLayout
     {
-        public const float BoxWidth = 136f;
-        public const float BoxHeight = 50f;
+        // Wide enough for the longest box title and line (about 32 characters) at the page's text size.
+        public const float BoxWidth = 240f;
+        // Room for the title and a line that wraps once.
+        public const float BoxHeight = 66f;
         public const float ColumnGap = 32f;
         public const float RowGap = 14f;
         public const float NarrowRowGap = 30f;

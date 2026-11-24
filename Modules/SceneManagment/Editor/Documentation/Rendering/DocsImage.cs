@@ -4,8 +4,8 @@ using UnityEngine.UIElements;
 namespace AbstractPixel.SceneManagement.Documentation
 {
     /// <summary>
-    /// A screenshot with numbered marks drawn over it by the window (sharp at any size, themed), the labels listed under
-    /// it, and the alt text as a caption. The image keeps its aspect ratio and never grows past its own width.
+    /// A screenshot with numbered marks drawn over it by the window (sharp at any size, themed), and beside it the mark
+    /// labels and the alt text as a caption. The image keeps its aspect ratio and never grows past its own width.
     /// </summary>
     public static class DocsImage
     {
@@ -35,15 +35,22 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
             // Width and height follow the texture; positions are shares of the frame. USS cannot express either.
             frame.style.maxWidth = texture.width;
+            frame.style.flexBasis = texture.width;
             frame.RegisterCallback<GeometryChangedEvent>(_event => KeepAspect(frame, texture));
+            box.AddToClassList("docs-figure-row");
             box.Add(frame);
+
+            // The explanation sits beside the image, where the page has room; a narrow page wraps it underneath.
+            VisualElement side = new VisualElement();
+            side.AddToClassList("docs-figure-side");
             if (_block.Marks.Count > 0)
             {
-                box.Add(MarkLabels(_block));
+                side.Add(MarkLabels(_block));
             }
             Label caption = new Label(_block.Text);
             caption.AddToClassList("docs-caption");
-            box.Add(caption);
+            side.Add(caption);
+            box.Add(side);
             return box;
         }
 

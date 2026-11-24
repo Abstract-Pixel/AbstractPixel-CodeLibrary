@@ -139,7 +139,16 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 text.Append("<color=").Append(DocsTheme.Keyword).Append(">").Append(string.Join(" ", _member.Modifiers)).Append("</color> ");
             }
-            text.Append("<b>").Append(_member.Name).Append("</b>");
+            // Methods get the IDE's method colour; properties, fields and events keep the plain text colour.
+            bool isMethod = _member.Parameters != null;
+            if (isMethod)
+            {
+                text.Append("<color=").Append(DocsTheme.Method).Append("><b>").Append(_member.Name).Append("</b></color>");
+            }
+            else
+            {
+                text.Append("<b>").Append(_member.Name).Append("</b>");
+            }
             if (_member.Parameters != null)
             {
                 text.Append("(").Append(ParametersRich(_member.Parameters)).Append(")");

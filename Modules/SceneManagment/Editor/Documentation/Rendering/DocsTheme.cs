@@ -21,6 +21,8 @@ namespace AbstractPixel.SceneManagement.Documentation
         public static string TypeName { get { return EditorGUIUtility.isProSkin ? "#8CC4B4" : "#2C6E62"; } }
         public static string String { get { return EditorGUIUtility.isProSkin ? "#CFA488" : "#8A3B1E"; } }
         public static string Comment { get { return EditorGUIUtility.isProSkin ? "#8A9A80" : "#4F6B45"; } }
+        /// <summary>Method names, light yellow on the dark skin like an IDE's.</summary>
+        public static string Method { get { return EditorGUIUtility.isProSkin ? "#DCDCAA" : "#74531F"; } }
         public static string Number { get { return EditorGUIUtility.isProSkin ? "#B8C8A8" : "#3D6B4F"; } }
     }
 }
