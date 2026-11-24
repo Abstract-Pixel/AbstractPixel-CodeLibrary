@@ -796,6 +796,16 @@
     border-left-color: var(--unity-colors-default-border);
 }
 
+/* The rail's left edge: a thin strip that drags to resize it. */
+.docs-rail-handle {
+    position: absolute;
+    left: -3px;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: resize-horizontal;
+}
+
 .docs-wide.docs-has-rail .docs-rail {
     display: flex;
 }

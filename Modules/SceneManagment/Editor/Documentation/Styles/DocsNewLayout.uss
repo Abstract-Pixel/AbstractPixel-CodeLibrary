@@ -1,6 +1,6 @@
 /* The new page layout, for pages with a "layout new" line. Colours for kinds and states are in DocsDark.uss and DocsLight.uss. */
 .docs-page.docs-layout-new {
-    max-width: 1163px;
+    max-width: 1279px;
     padding-left: 24px;
     padding-right: 24px;
     padding-top: 16px;
@@ -12,7 +12,7 @@
 }
 
 .docs-layout-new .docs-paragraph {
-    max-width: 900px;
+    max-width: 990px;
     margin-bottom: 12px;
 }
 
@@ -37,7 +37,7 @@
 
 .docs-layout-new .docs-list {
     margin-bottom: 12px;
-    max-width: 900px;
+    max-width: 990px;
 }
 
 .docs-layout-new .docs-list-row {
@@ -48,7 +48,7 @@
     padding: 10px 12px;
     margin-top: 4px;
     margin-bottom: 14px;
-    max-width: 900px;
+    max-width: 990px;
 }
 
 .docs-layout-new .docs-code {
@@ -1074,4 +1074,11 @@
 
 .docs-page-area .docs-locate {
     height: 28px;
+}
+
+/* Body text is 20% smaller than the page's normal size (15 -> 12 px); headings, titles and buttons keep theirs. */
+.docs-layout-new .docs-text,
+.docs-layout-new .docs-facts-label,
+.docs-layout-new .docs-facts-value {
+    font-size: 12px;
 }
