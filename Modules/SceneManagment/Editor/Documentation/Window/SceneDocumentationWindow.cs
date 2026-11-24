@@ -556,6 +556,11 @@ namespace AbstractPixel.SceneManagement.Documentation
                 {
                     fold.value = true;
                 }
+                // A member row sits in a member list that starts closed.
+                if (parent.ClassListContains("docs-member-table"))
+                {
+                    SceneDocsMemberTables.SetOpen(parent, true);
+                }
             }
             row.AddToClassList("docs-flash");
             pageScroll.schedule.Execute(() => ScrollToIfStillShown(row)).StartingIn(30);

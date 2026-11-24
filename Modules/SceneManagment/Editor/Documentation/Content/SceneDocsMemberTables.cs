@@ -75,7 +75,37 @@ namespace AbstractPixel.SceneManagement.Documentation
                 table[table.childCount - 1].AddToClassList("docs-mrow-last");
             }
             section.Add(table);
+            MakeFoldable(heading, table, _context.Page.Path + "#members-" + id);
             return section;
+        }
+
+        // The heading opens and closes its list; closed by default, and remembered for the session like other foldouts.
+        private static void MakeFoldable(VisualElement _heading, VisualElement _table, string _key)
+        {
+            Label arrow = new Label();
+            arrow.AddToClassList("docs-member-arrow");
+            _heading.Insert(0, arrow);
+            _heading.AddToClassList("docs-member-heading");
+            _table.userData = arrow;
+            bool isOpen = UnityEditor.SessionState.GetBool(_key, false);
+            SetOpen(_table, isOpen);
+            _heading.RegisterCallback<ClickEvent>(_click =>
+            {
+                bool open = _table.style.display == DisplayStyle.None;
+                SetOpen(_table, open);
+                UnityEditor.SessionState.SetBool(_key, open);
+            });
+        }
+
+        /// <summary>Opens or closes a member list; a link to one of its members opens it first.</summary>
+        public static void SetOpen(VisualElement _table, bool _isOpen)
+        {
+            _table.style.display = _isOpen ? DisplayStyle.Flex : DisplayStyle.None;
+            Label arrow = _table.userData as Label;
+            if (arrow != null)
+            {
+                arrow.text = _isOpen ? "▾" : "▸";
+            }
         }
 
         private static VisualElement Row(SceneDocsMember _member, Type _type, DocsRenderContext _context)

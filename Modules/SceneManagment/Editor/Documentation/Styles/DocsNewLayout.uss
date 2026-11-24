@@ -1366,3 +1366,15 @@
     transition-property: background-color;
     transition-duration: 0.4s;
 }
+
+/* Member sections (Properties, Methods, Values...) fold from their header, closed by default. */
+.docs-member-heading {
+    cursor: link;
+}
+
+.docs-member-arrow {
+    width: 14px;
+    margin-right: 4px;
+    -unity-text-align: middle-center;
+    color: var(--unity-colors-label-text);
+}
