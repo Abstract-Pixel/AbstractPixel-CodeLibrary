@@ -20,14 +20,21 @@ namespace AbstractPixel.SceneManagement.Documentation
             Label lead = new Label("Find it in");
             lead.AddToClassList("docs-locate-lead");
             bar.Add(lead);
-            bar.Add(Item("SceneAsset Icon", Path.GetFileNameWithoutExtension(_scenePath)));
+            string sceneName = Path.GetFileNameWithoutExtension(_scenePath);
+            // Each step of the path is a button: the scene shows in the Project window, the object and its component
+            // in the Hierarchy and Inspector, with the same select and ping the Select in Hierarchy button uses.
+            bar.Add(Item("SceneAsset Icon", sceneName, "Shows the scene " + sceneName + " in the Project window", () => SceneDocsActions.SelectAsset(_scenePath, true)));
             bar.Add(Separator());
-            bar.Add(Item("GameObject Icon", _objectPath));
+            bar.Add(Item("GameObject Icon", _objectPath, "Opens " + sceneName + " if it is closed and selects " + _objectPath + " in the Hierarchy", () => Select(_scenePath, _objectPath)));
             bar.Add(Separator());
-            bar.Add(Item("cs Script Icon", _component));
+            bar.Add(Item("cs Script Icon", _component, "Selects " + _objectPath + ", so the Inspector shows its " + _component, () => Select(_scenePath, _objectPath)));
             VisualElement space = new VisualElement();
             space.style.flexGrow = 1;
             bar.Add(space);
+            // A divider, so the last item reads as a button of its own.
+            VisualElement divider = new VisualElement();
+            divider.AddToClassList("docs-locate-divider");
+            bar.Add(divider);
             ToolbarButton select = new ToolbarButton(() => Select(_scenePath, _objectPath));
             select.text = "Select in Hierarchy";
             select.tooltip = "Opens " + Path.GetFileNameWithoutExtension(_scenePath) + " if it is closed and selects " + _objectPath + ", so the Inspector shows its " + _component;
@@ -36,10 +43,11 @@ namespace AbstractPixel.SceneManagement.Documentation
             return bar;
         }
 
-        private static VisualElement Item(string _icon, string _text)
+        private static VisualElement Item(string _icon, string _text, string _tooltip, System.Action _clicked)
         {
-            VisualElement item = new VisualElement();
+            ToolbarButton item = new ToolbarButton(() => RunFromDocs(_clicked));
             item.AddToClassList("docs-locate-item");
+            item.tooltip = _tooltip;
             Image icon = new Image();
             icon.image = EditorGUIUtility.IconContent(_icon).image;
             icon.AddToClassList("docs-locate-icon");
@@ -55,6 +63,19 @@ namespace AbstractPixel.SceneManagement.Documentation
             Label separator = new Label("›");
             separator.AddToClassList("docs-locate-separator");
             return separator;
+        }
+
+        private static void RunFromDocs(System.Action _action)
+        {
+            SceneDocsSampleFollower.IsDocsOpeningScenes = true;
+            try
+            {
+                _action();
+            }
+            finally
+            {
+                SceneDocsSampleFollower.IsDocsOpeningScenes = false;
+            }
         }
 
         private static void Select(string _scenePath, string _objectPath)

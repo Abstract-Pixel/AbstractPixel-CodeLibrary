@@ -1496,3 +1496,25 @@
 .docs-mrow-morebox-body {
     padding: 6px 10px 6px 6px;
 }
+
+/* "Find it in": each step is a flat toolbar button; a divider sets Select in Hierarchy apart. */
+.docs-locate .docs-locate-item {
+    flex-direction: row;
+    align-items: center;
+    border-width: 0;
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0);
+    padding: 0 6px;
+    margin: 0;
+}
+
+.docs-locate .docs-locate-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.docs-locate-divider {
+    width: 1px;
+    align-self: stretch;
+    margin: 3px 6px;
+    background-color: var(--unity-colors-inspector_titlebar-border);
+}
