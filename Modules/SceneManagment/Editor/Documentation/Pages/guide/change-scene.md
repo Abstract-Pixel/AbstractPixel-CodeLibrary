@@ -1,10 +1,12 @@
 # Change scene <!-- level 1 -->
 
-Go to another [scene group](term:scene-group) from a button or from code. The screen effect and the loading scene run inside the call, and the call tells you how it ended.
+<!-- layout new -->
+
+Go to another [scene group](term:scene-group) from a button or from code. One call runs the screen effect and the loading scene, then tells you how the change ended.
 
 ## Change scene from a button <!-- level 0 -->
 
-Add a `MonoSceneActions` component and point a button's On Click at `MonoSceneActions.ChangeTo` with the scene group as the argument.
+Point a button's On Click at `MonoSceneActions.ChangeTo` and give it the scene group. No code.
 
 **Try it in the sample**
 
@@ -16,23 +18,23 @@ Add a `MonoSceneActions` component and point a button's On Click at `MonoSceneAc
 
 **Or do it yourself**
 
-1. Add `MonoSceneActions` to any object in the scene.
-2. On the button's On Click, add an entry, drag that object in and pick `MonoSceneActions` > `ChangeTo`.
-3. Drag the target scene group into the argument field.
+1. Add a `MonoSceneActions` component to any object in the scene.
+2. On the button's On Click, click +, drag that object in and pick MonoSceneActions > ChangeTo.
+3. Drag the scene group you want to go to into the argument field.
 
 > [!TIP]
 > The screen fades, the new group opens, and the fade shows it.
 
 <details><summary>If it goes wrong</summary>
 
-- The click does nothing → check the Console for a Refused [scene change result](term:scene-change-result), such as Busy.
-- No fade → the manager scene holds no screen effect; add one, or accept an instant cut.
+- **The click does nothing:** look in the Console for a Refused [scene change result](term:scene-change-result), such as Busy.
+- **No fade:** the manager scene holds no screen effect. Add one, or keep the instant cut.
 
 </details>
 
 ## Change scene from code <!-- level 1 -->
 
-Call `SceneActions.ChangeTo(group)` and await its `SceneChangeResult`. It never throws.
+Call `SceneActions.ChangeTo(group)` and await the `SceneChangeResult` it returns. It never throws.
 
 **Try it in the sample**
 
@@ -56,17 +58,25 @@ public async Task<SceneChangeResult> ChangeToOther()
 
 ## Read the result <!-- level 1 -->
 
-A [scene change result](term:scene-change-result) is Done, Refused with a reason, or Failed with the scene that failed.
+A [scene change result](term:scene-change-result) is Done, Refused with a reason, or Failed with the scene that failed. A refusal happens before anything touches the screen.
+
+**Why a change is refused**
 
 | Reason | When |
 |---|---|
-| `Busy` | Another [scene change](term:scene-change) is running |
-| `StartUpRunning` | [Start-up](term:start-up) has not finished |
-| `AlreadyOpen` | The group asked for is the one open |
+| `Busy` | Another [scene change](term:scene-change) is running. Only one runs at a time. |
+| `StartUpRunning` | [Start-up](term:start-up) is still opening the first scene group |
+| `AlreadyOpen` | The group asked for is the one already open |
 | `NoGroupGiven` | The group was null |
-| `NothingOpenToRetry` | Retry with no group open |
+| `NothingOpenToRetry` | Retry was asked for while no group is open |
 
-Each refusal happens before anything touches the screen.
+<details><summary>If it goes wrong</summary>
+
+- **Refused: AlreadyOpen:** use Retry to start the open group again.
+- **Refused: StartUpRunning:** wait for `OnGameStarted`, or check `SceneActions.HasGameStarted`.
+- **Failed:** see [When a scene change fails](when-a-scene-change-fails.md).
+
+</details>
 
 ## Retry the open scene group <!-- level 1 -->
 
@@ -92,14 +102,7 @@ public async Task<SceneChangeResult> RetryOnce()
 
 <details><summary>Why it works</summary>
 
-One call holds the whole change, effect included ([design decision 1](../../../../docs/adr/0001-scene-system-calls-transitions-through-one-interface.md)). "Busy" is set before the first await, so a second press in the same frame is refused, not run twice.
-
-</details>
-
-<details><summary>If it goes wrong</summary>
-
-- Refused: AlreadyOpen → use Retry to start the open group again.
-- Refused: StartUpRunning → wait for `OnGameStarted`, or check `SceneActions.HasGameStarted`.
-- Failed → see [When a scene change fails](when-a-scene-change-fails.md).
+- **One call:** holds the whole change, screen effect included ([design decision 1](../../../../docs/adr/0001-scene-system-calls-transitions-through-one-interface.md)).
+- **Busy:** set before the first await, so a second press in the same frame is refused, not run twice.
 
 </details>
