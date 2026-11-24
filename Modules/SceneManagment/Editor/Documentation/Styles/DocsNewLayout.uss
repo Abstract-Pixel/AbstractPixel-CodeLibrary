@@ -1638,11 +1638,23 @@
     color: var(--unity-colors-label-text);
 }
 
-/* Where a settings button opens: a quiet path beside it, in the muted label colour. */
+/* Where a settings button opens: a quiet path that slides out beside the button on hover, like Copy and Open in IDE. */
 .docs-action-place {
-    margin-left: 4px;
+    margin-left: 0;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
     font-size: 11px;
     color: var(--unity-colors-label-text);
-    opacity: 0.6;
+    opacity: 0;
     -unity-text-align: middle-left;
+    transition-property: max-width, margin-left, opacity;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+}
+
+.docs-action-row:hover > .docs-action-place {
+    max-width: 640px;
+    margin-left: 6px;
+    opacity: 0.75;
 }
