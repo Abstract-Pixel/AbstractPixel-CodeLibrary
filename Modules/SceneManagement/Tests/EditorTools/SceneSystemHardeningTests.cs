@@ -130,6 +130,24 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
             Assert.IsTrue(settings.CheckSceneGroupsBeforeBuild);
             Object.DestroyImmediate(settings);
         }
+
+        [Test]
+        public void MakeDefaultCanBeUndone()
+        {
+            SceneSystemSettings settings = ScriptableObject.CreateInstance<SceneSystemSettings>();
+            SceneSet first = ScriptableObject.CreateInstance<SceneSet>();
+            SceneSet second = ScriptableObject.CreateInstance<SceneSet>();
+            settings.DefaultSceneSet = first;
+            Undo.IncrementCurrentGroup();
+
+            SceneSystemSettingsProvider.MakeDefault(settings, second);
+            Undo.PerformUndo();
+
+            Assert.AreSame(first, settings.DefaultSceneSet);
+            Object.DestroyImmediate(settings);
+            Object.DestroyImmediate(first);
+            Object.DestroyImmediate(second);
+        }
     }
 
     public class SceneSystemNamingTests

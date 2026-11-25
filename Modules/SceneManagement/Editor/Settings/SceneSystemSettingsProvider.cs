@@ -721,11 +721,17 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             Button makeDefault = SceneSystemUI.Button("Make default", "New scene groups will start with this scene set.", () =>
             {
-                _settings.DefaultSceneSet = _set;
-                SceneSystemSettingsAssets.Save(_settings);
+                MakeDefault(_settings, _set);
             });
             cell.Add(makeDefault);
             return cell;
+        }
+
+        internal static void MakeDefault(SceneSystemSettings _settings, SceneSet _set)
+        {
+            Undo.RecordObject(_settings, "Make default scene set");
+            _settings.DefaultSceneSet = _set;
+            SceneSystemSettingsAssets.Save(_settings);
         }
 
         private static void OnSetCardToggled(string _guid, bool _isOpen, VisualElement _body, SceneSet _set, List<SceneGroup> _users)
