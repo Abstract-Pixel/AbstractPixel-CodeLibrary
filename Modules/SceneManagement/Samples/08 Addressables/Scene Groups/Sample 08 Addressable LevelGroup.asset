@@ -16,7 +16,7 @@ MonoBehaviour:
   - scene:
       sceneName: Samples Managers
       sceneGuid: ba2b83a56e6dd3544b5db98720e26e25
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/Shared/Scenes/Samples
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/Shared/Scenes/Samples
         Managers.unity
       sceneAsset: {fileID: 102900000, guid: ba2b83a56e6dd3544b5db98720e26e25, type: 3}
   ContextualBootScenesList: []
@@ -24,7 +24,7 @@ MonoBehaviour:
     scene:
       sceneName: Sample 08 Addressable Level
       sceneGuid: ee8eac631c2103e409f9e5963ced11e0
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/08
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/08
         Addressables/Scenes/Sample 08 Addressable Level.unity
       sceneAsset: {fileID: 102900000, guid: ee8eac631c2103e409f9e5963ced11e0, type: 3}
   ForceReloadContextualScenes: 0

@@ -16,7 +16,7 @@ MonoBehaviour:
   - scene:
       sceneName: Samples Managers
       sceneGuid: ba2b83a56e6dd3544b5db98720e26e25
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/Shared/Scenes/Samples
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/Shared/Scenes/Samples
         Managers.unity
       sceneAsset: {fileID: 102900000, guid: ba2b83a56e6dd3544b5db98720e26e25, type: 3}
   ContextualBootScenesList: []
@@ -24,7 +24,7 @@ MonoBehaviour:
     scene:
       sceneName: Sample 01 Room B
       sceneGuid: b98533e7ee8fff44f84b6931423d5f57
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/01
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/01
         Button Changes Level/Scenes/Sample 01 Room B.unity
       sceneAsset: {fileID: 102900000, guid: b98533e7ee8fff44f84b6931423d5f57, type: 3}
   ForceReloadContextualScenes: 0

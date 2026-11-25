@@ -16,7 +16,7 @@ MonoBehaviour:
   - scene:
       sceneName: Samples Managers
       sceneGuid: ba2b83a56e6dd3544b5db98720e26e25
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/Shared/Scenes/Samples
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/Shared/Scenes/Samples
         Managers.unity
       sceneAsset: {fileID: 102900000, guid: ba2b83a56e6dd3544b5db98720e26e25, type: 3}
   ContextualBootScenesList: []
@@ -24,7 +24,7 @@ MonoBehaviour:
     scene:
       sceneName: Sample 10 Menu
       sceneGuid: 1ea65e632ce9bd540967a9645dd77557
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/10
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/10
         Launch Scene/Scenes/Sample 10 Menu.unity
       sceneAsset: {fileID: 102900000, guid: 1ea65e632ce9bd540967a9645dd77557, type: 3}
   ForceReloadContextualScenes: 0
@@ -40,7 +40,7 @@ MonoBehaviour:
     scene:
       sceneName: Sample 10 Splash
       sceneGuid: 9b834426e709c3c4e90dbd24d4c25a11
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/10
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/10
         Launch Scene/Scenes/Sample 10 Splash.unity
       sceneAsset: {fileID: 102900000, guid: 9b834426e709c3c4e90dbd24d4c25a11, type: 3}
   sceneSet: {fileID: 0}

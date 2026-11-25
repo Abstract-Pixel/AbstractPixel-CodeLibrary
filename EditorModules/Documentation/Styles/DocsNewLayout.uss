@@ -414,6 +414,8 @@
 
 .docs-part-fold > .unity-foldout__toggle .unity-toggle__input {
     align-items: center;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .docs-part-fold > .unity-foldout__toggle .unity-toggle__text {
@@ -432,6 +434,10 @@
 }
 
 .docs-sample-path {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
     color: var(--unity-colors-link-text);

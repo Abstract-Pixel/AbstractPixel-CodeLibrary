@@ -17,14 +17,14 @@ MonoBehaviour:
   - scene:
       sceneName: Sample 05 Shared
       sceneGuid: 451c608dd85114c41b1b0522f3448be7
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/05
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/05
         Persistent Player And Spawn Points/Scenes/Sample 05 Shared.unity
       sceneAsset: {fileID: 102900000, guid: 451c608dd85114c41b1b0522f3448be7, type: 3}
   MainScene:
     scene:
       sceneName: Sample 05 Area B
       sceneGuid: 8ebdec898f0483f4ebef74a9da03f143
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/05
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/05
         Persistent Player And Spawn Points/Scenes/Sample 05 Area B.unity
       sceneAsset: {fileID: 102900000, guid: 8ebdec898f0483f4ebef74a9da03f143, type: 3}
   ForceReloadContextualScenes: 0

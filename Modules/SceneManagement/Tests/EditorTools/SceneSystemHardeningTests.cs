@@ -160,6 +160,22 @@ namespace AbstractPixel.SceneManagement.Editor.Tests
         }
 
         [Test]
+        public void NoSerializedFileStoresTheOldModuleName()
+        {
+            string root = FileUtil.GetPhysicalPath("Packages/com.abstractpixel.library");
+            System.Collections.Generic.List<string> offenders = new System.Collections.Generic.List<string>();
+            foreach (string file in Directory.GetFiles(Path.Combine(root, "Modules"), "*", SearchOption.AllDirectories))
+            {
+                bool isSerialized = file.EndsWith(".asset") || file.EndsWith(".unity") || file.EndsWith(".prefab");
+                if (isSerialized && File.ReadAllText(file).Contains("SceneManagment"))
+                {
+                    offenders.Add(file.Substring(root.Length).Replace('\\', '/'));
+                }
+            }
+            CollectionAssert.IsEmpty(offenders);
+        }
+
+        [Test]
         public void TheAbstractTransitionProfileHasNoCreateMenu()
         {
             object[] menus = typeof(AbstractPixel.SceneTransitions.TransitionProfile).GetCustomAttributes(typeof(CreateAssetMenuAttribute), false);

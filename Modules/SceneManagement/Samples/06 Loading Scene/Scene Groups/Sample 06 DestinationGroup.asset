@@ -16,7 +16,7 @@ MonoBehaviour:
   - scene:
       sceneName: Samples Managers
       sceneGuid: ba2b83a56e6dd3544b5db98720e26e25
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/Shared/Scenes/Samples
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/Shared/Scenes/Samples
         Managers.unity
       sceneAsset: {fileID: 102900000, guid: ba2b83a56e6dd3544b5db98720e26e25, type: 3}
   ContextualBootScenesList: []
@@ -24,7 +24,7 @@ MonoBehaviour:
     scene:
       sceneName: Sample 06 Destination
       sceneGuid: 57ad7419f3e2b9340beeb6faa33cfab3
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/06
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/06
         Loading Scene/Scenes/Sample 06 Destination.unity
       sceneAsset: {fileID: 102900000, guid: 57ad7419f3e2b9340beeb6faa33cfab3, type: 3}
   ForceReloadContextualScenes: 0
@@ -33,7 +33,7 @@ MonoBehaviour:
     scene:
       sceneName: Sample 06 Loading
       sceneGuid: 543311539e618bd4580c60acc2a0a96f
-      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagment/Samples/06
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/06
         Loading Scene/Scenes/Sample 06 Loading.unity
       sceneAsset: {fileID: 102900000, guid: 543311539e618bd4580c60acc2a0a96f, type: 3}
   isSample: 1
