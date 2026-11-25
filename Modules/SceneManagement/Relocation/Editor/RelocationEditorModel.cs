@@ -133,7 +133,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private void CollectRelocatables()
         {
-#if UNITY_7000_0_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
             Relocatable[] relocatables = Object.FindObjectsByType<Relocatable>(FindObjectsInactive.Exclude);
 #else
             Relocatable[] relocatables = Object.FindObjectsByType<Relocatable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
@@ -150,7 +150,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private void CollectPositions()
         {
-#if UNITY_7000_0_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
             List<SpawnPoint> spawnPoints = new List<SpawnPoint>(Object.FindObjectsByType<SpawnPoint>(FindObjectsInactive.Exclude));
 #else
             List<SpawnPoint> spawnPoints = new List<SpawnPoint>(Object.FindObjectsByType<SpawnPoint>(FindObjectsInactive.Exclude, FindObjectsSortMode.None));

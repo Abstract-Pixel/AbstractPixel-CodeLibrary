@@ -45,7 +45,6 @@ namespace AbstractPixel.SaveSystem
             fileStorageService = new FileDataStorageService();
             serializer = new JsonSerializer();
 
-            Dictionary<SaveCategory, Dictionary<string, ISavableBridge>> registeredBridgesBeforeInitialization = null;
 
 
             if (savableObjectsRegistry==null)

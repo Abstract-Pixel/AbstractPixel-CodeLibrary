@@ -1,3 +1,5 @@
+// The settings module needs URP, Cinemachine and BroAudio; without them these two settings are left out.
+#if ABSTRACTPIXEL_URP && ABSTRACTPIXEL_CINEMACHINE && ABSTRACTPIXEL_BROAUDIO
 using System;
 using AbstractPixel.Settings;
 
@@ -30,3 +32,4 @@ namespace AbstractPixel.Rumble
 #endif
     }
 }
+#endif

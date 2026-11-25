@@ -14,7 +14,27 @@
     "overrideReferences": true,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
+    "defineConstraints": [
+        "ABSTRACTPIXEL_URP",
+        "ABSTRACTPIXEL_CINEMACHINE",
+        "ABSTRACTPIXEL_BROAUDIO"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "",
+            "define": "ABSTRACTPIXEL_URP"
+        },
+        {
+            "name": "com.unity.cinemachine",
+            "expression": "3.0.0",
+            "define": "ABSTRACTPIXEL_CINEMACHINE"
+        },
+        {
+            "name": "com.ami.broaudio",
+            "expression": "",
+            "define": "ABSTRACTPIXEL_BROAUDIO"
+        }
+    ],
     "noEngineReferences": false
 }
