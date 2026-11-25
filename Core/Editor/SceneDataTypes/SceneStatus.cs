@@ -9,6 +9,8 @@ namespace AbstractPixel.Core.Editor
         InBuild,
         Addressable,
         NotInBuild,
-        Missing
+        Missing,
+        /// <summary>The scene may never go into a build, such as a sample scene. It has no fix.</summary>
+        NeverInBuild
     }
 }

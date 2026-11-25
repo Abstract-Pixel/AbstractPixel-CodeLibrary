@@ -124,6 +124,12 @@ namespace AbstractPixel.SceneTransitions
             }
 
             transitionProfile = _transitionProfile;
+            if (_transitionProfile.TransitionControllerPrefab == null)
+            {
+                Debug.LogError($"[TransitionManager] The transition profile '{_transitionProfile.name}' has no controller prefab, so scenes change with no effect.", _transitionProfile);
+                SceneActions.UnregisterTransitionExecutor(this);
+                return;
+            }
             transitionController = Instantiate(_transitionProfile.TransitionControllerPrefab, transform)
                                                                      .GetComponentInChildren<ITransitionController>(true);
             if (transitionController == null)

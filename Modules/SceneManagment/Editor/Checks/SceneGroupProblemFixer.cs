@@ -94,6 +94,9 @@ namespace AbstractPixel.SceneManagement.Editor
 
             Undo.RecordObject(_group, "Remove scene from scene group");
             list.RemoveAt(_problem.Index);
+            // A part that now differs from the scene set is an override, or the set would put the scene back.
+            SceneSetPart part = _problem.List == SceneGroupListKind.ManagerScenes ? SceneSetPart.ManagerScenes : SceneSetPart.SharedScenes;
+            SceneSetSync.UpdateOverrideAfterEdit(_group, part);
             EditorUtility.SetDirty(_group);
             AssetDatabase.SaveAssetIfDirty(_group);
             Debug.Log(LogPrefix + " Scene group '" + _group.name + "': removed '" + _problem.Scene.SceneName + "' from " + SceneGroupCheck.Where(_problem.List, _problem.Index) + ".", _group);

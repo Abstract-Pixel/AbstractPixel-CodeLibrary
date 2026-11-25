@@ -90,6 +90,8 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             List<string> groupPaths = GroupScenePaths(_group);
             List<string> pathsForBuild = WithoutAddressableScenes(groupPaths, IsAddressableInProject);
+            // A sample scene that a game group uses is not added either: the writer would drop it.
+            pathsForBuild.RemoveAll(IsNeverInBuild);
             return AddScenes(pathsForBuild, EditorBuildSettings.scenes, SceneFileExists);
         }
 
@@ -106,6 +108,10 @@ namespace AbstractPixel.SceneManagement.Editor
         public static BuildSettingsChange ApplyToProject(SceneGroup _group, bool _logChange)
         {
             BuildSettingsChange change = PreviewForProject(_group);
+            if (!_group.IsSample)
+            {
+                ReportScenesNeverInBuild(_group);
+            }
 
             foreach (string missingPath in change.MissingPaths)
             {
@@ -124,6 +130,21 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             Debug.Log($"{LogPrefix} Scene group '{_group.name}': {DescribeChange(change)}", _group);
             return change;
+        }
+
+        private static void ReportScenesNeverInBuild(SceneGroup _group)
+        {
+            List<string> dropped = GroupScenePaths(_group).FindAll(IsNeverInBuild);
+            if (dropped.Count == 0)
+            {
+                return;
+            }
+            Debug.LogWarning($"{LogPrefix} Scene group '{_group.name}': did not add {JoinSceneNames(dropped)} to Build Settings. A sample scene never goes into a build.", _group);
+        }
+
+        private static bool IsNeverInBuild(string _scenePath)
+        {
+            return SceneBuildSettingsWriter.ScenePathsNeverInBuild != null && SceneBuildSettingsWriter.ScenePathsNeverInBuild().Contains(_scenePath);
         }
 
         private static string DescribeChange(BuildSettingsChange _change)

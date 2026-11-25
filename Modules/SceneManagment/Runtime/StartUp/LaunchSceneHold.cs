@@ -46,10 +46,7 @@ namespace AbstractPixel.SceneManagement
 
             Action actionsToRun = actionsWaitingForRelease;
             actionsWaitingForRelease = null;
-            if (actionsToRun != null)
-            {
-                actionsToRun.Invoke();
-            }
+            SafeInvoke.Each(actionsToRun);
             return true;
         }
 

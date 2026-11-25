@@ -26,6 +26,10 @@ namespace AbstractPixel.Core.Editor
             {
                 return SceneStatus.Addressable;
             }
+            if (_facts.IsNeverInBuild)
+            {
+                return SceneStatus.NeverInBuild;
+            }
             return SceneStatus.NotInBuild;
         }
 
@@ -72,6 +76,8 @@ namespace AbstractPixel.Core.Editor
                     return NotInBuildMessage(scene, _addressablesInstalled);
                 case SceneStatus.Missing:
                     return MissingMessage(scene, _scenePath);
+                case SceneStatus.NeverInBuild:
+                    return scene + " never goes into a build: it is a sample scene. It opens in the Editor only.";
                 default:
                     return "No scene assigned.";
             }

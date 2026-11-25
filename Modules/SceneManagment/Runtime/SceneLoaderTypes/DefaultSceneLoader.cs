@@ -17,6 +17,29 @@ namespace AbstractPixel.SceneManagement
         /// </remarks>
         internal static System.Func<string, bool> IsEditorOnlySampleScene;
 
+        /// <summary>True when the Editor opens this scene from its file because Build Settings does not list it.</summary>
+        internal static bool OpensFromItsFile(SceneReference _scene)
+        {
+            return _scene != null && !string.IsNullOrEmpty(_scene.ScenePath) && scenesOpenedFromTheirFile.Contains(_scene.ScenePath);
+        }
+
+        /// <summary>Remembers the main scene of a temporary scene group, so a Retry can open it again in the Editor.</summary>
+        internal static void OpenFromItsFile(SceneReference _scene)
+        {
+            if (_scene != null && !string.IsNullOrEmpty(_scene.ScenePath))
+            {
+                scenesOpenedFromTheirFile.Add(_scene.ScenePath);
+            }
+        }
+
+        private static readonly HashSet<string> scenesOpenedFromTheirFile = new HashSet<string>();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ForgetScenesOpenedFromTheirFile()
+        {
+            scenesOpenedFromTheirFile.Clear();
+        }
+
         private Dictionary<string, AsyncOperation> sceneLoadHandles = new Dictionary<string, AsyncOperation>();
 
         // For the loading progress: loads under way, and scenes that have loaded and not closed yet.
@@ -104,7 +127,12 @@ namespace AbstractPixel.SceneManagement
 #if UNITY_EDITOR
             string scenePath = _sceneReference.ScenePath;
             bool isSampleScene = IsEditorOnlySampleScene != null && !string.IsNullOrEmpty(scenePath) && IsEditorOnlySampleScene(scenePath);
-            if (isSampleScene)
+            bool isSceneInNoGroup = OpensFromItsFile(_sceneReference);
+            if (isSceneInNoGroup)
+            {
+                Debug.LogWarning($"[Scene system] '{sceneName}' is not in Build Settings, so the Editor opens it from its file. A build needs the entry.");
+            }
+            if (isSampleScene || isSceneInNoGroup)
             {
                 LoadSceneParameters parameters = new LoadSceneParameters(_loadMode);
                 return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(scenePath, parameters);

@@ -52,10 +52,17 @@ namespace AbstractPixel.Core.Editor
             facts.IsInBuild = hasSceneAsset && SceneBuildSettingsList.IsSwitchedOn(EditorBuildSettings.scenes, scenePath);
             facts.IsAddressable = hasSceneAsset && addressablesInstalled && provider.IsAddressable(sceneGuid);
 
+            facts.IsNeverInBuild = hasSceneAsset && IsNeverInBuild(scenePath);
+
             SceneStatus status = SceneStatusRules.Decide(facts);
             SceneFix fix = SceneStatusRules.FixFor(status, ProjectDefaultPlace, addressablesInstalled);
             string message = SceneStatusRules.Message(status, sceneName, scenePath, addressablesInstalled);
             return new SceneStatusReport(status, fix, sceneName, scenePath, sceneGuid, message);
+        }
+
+        private static bool IsNeverInBuild(string _scenePath)
+        {
+            return SceneBuildSettingsWriter.ScenePathsNeverInBuild != null && SceneBuildSettingsWriter.ScenePathsNeverInBuild().Contains(_scenePath);
         }
 
         /// <summary>Applies the report's fix to the project, with one console line naming the scene.</summary>
@@ -77,7 +84,7 @@ namespace AbstractPixel.Core.Editor
                 return false;
             }
             bool hasAsset = _report.Status != SceneStatus.Missing && _report.Status != SceneStatus.NoScene;
-            if (!hasAsset)
+            if (!hasAsset || _report.Status == SceneStatus.NeverInBuild)
             {
                 return false;
             }

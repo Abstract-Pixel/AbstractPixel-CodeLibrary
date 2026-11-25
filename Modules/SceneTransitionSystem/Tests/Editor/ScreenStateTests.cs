@@ -90,6 +90,83 @@ namespace AbstractPixel.SceneTransitions.Tests
             Assert.AreEqual("start hide,end hide,start show,end show", string.Join(",", steps));
         }
 
+        // 5B-1: a listener that throws must not leave the fade broken or the screen stuck.
+        [Test]
+        public async Task AThrowingScreenListenerDoesNotBreakTheFade()
+        {
+            TransitionEventBus.OnStartHideScreenTransition += () => throw new System.InvalidOperationException("test screen listener");
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("test screen listener"));
+
+            await manager.HideScreen();
+            Assert.AreEqual(ScreenState.Hidden, TransitionActions.ScreenState);
+            await manager.ShowScreen();
+
+            Assert.AreEqual(ScreenState.Visible, TransitionActions.ScreenState);
+        }
+
+        // 5B-1: an effect that throws once must not make every later Hide and Show screen throw too.
+        [Test]
+        public async Task AnEffectThatThrewOnceDoesNotBreakTheNextStep()
+        {
+            ThrowingController controller = new ThrowingController(manager.gameObject);
+            System.Reflection.FieldInfo field = typeof(TransitionManager).GetField("transitionController", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            object realController = field.GetValue(manager);
+            field.SetValue(manager, controller);
+            System.Exception first = null;
+            try
+            {
+                await manager.HideScreen();
+            }
+            catch (System.Exception exception)
+            {
+                first = exception;
+            }
+            field.SetValue(manager, realController);
+
+            await manager.ShowScreen();
+
+            Assert.IsNotNull(first);
+            Assert.AreEqual(ScreenState.Visible, TransitionActions.ScreenState);
+        }
+
+        // 5B-1: a profile with no controller prefab is one clear error, not an exception.
+        [Test]
+        public void AProfileWithNoControllerPrefabLogsOneError()
+        {
+            ImageFadeProfile empty = ScriptableObject.CreateInstance<ImageFadeProfile>();
+            empty.name = "Empty profile";
+            createdObjects.Add(empty);
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Empty profile.*no controller prefab"));
+
+            manager.SetTransitionProfile(empty);
+
+            Assert.IsFalse(manager.IsInitialized);
+        }
+
+        private sealed class ThrowingController : ITransitionController
+        {
+            public ThrowingController(GameObject _owner)
+            {
+                gameObject = _owner;
+            }
+
+            public GameObject gameObject { get; private set; }
+
+            public void Initialize(TransitionProfile _transitionProfile)
+            {
+            }
+
+            public Task PlayHideScreen()
+            {
+                return Task.FromException(new System.InvalidOperationException("test effect"));
+            }
+
+            public Task PlayShowScreen(System.Action _screenCountsAsVisible)
+            {
+                return Task.CompletedTask;
+            }
+        }
+
         // Stage 7: a scene change asked for while the start-up Show screen still runs must still cover the screen.
         [Test]
         public async Task HideScreenAskedForWhileShowScreenRunsWaitsAndThenHides()

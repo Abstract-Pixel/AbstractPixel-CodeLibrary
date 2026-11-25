@@ -105,15 +105,17 @@ namespace AbstractPixel.SceneManagement
         public void Release()
         {
             phase = Phase.Idle;
+            // A copy: a Released listener may switch relocatables off, which takes them out of the list.
+            List<Relocatable> releasing = new List<Relocatable>(readyToRelease);
+            readyToRelease.Clear();
             int releasedCount = 0;
-            foreach (Relocatable relocatable in readyToRelease)
+            foreach (Relocatable relocatable in releasing)
             {
                 if (ReleaseOne(relocatable))
                 {
                     releasedCount++;
                 }
             }
-            readyToRelease.Clear();
             LogSummary(releasedCount);
             RelocateLateOnes();
         }

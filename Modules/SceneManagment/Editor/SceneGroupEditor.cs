@@ -27,6 +27,9 @@ namespace AbstractPixel.SceneManagement.Editor
         private Button addToBuildButton;
         private SceneGroupProblemsView problemsView;
         private HelpBox bootGroupBox;
+        private PopupField<SceneSet> sceneSetPopup;
+        private PopupField<string> showLoadingScenePopup;
+        private PopupField<string> loadingScenePopup;
         private readonly Dictionary<SceneSetPart, VisualElement> partHeaders = new Dictionary<SceneSetPart, VisualElement>();
 
         public override VisualElement CreateInspectorGUI()
@@ -71,6 +74,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
             PopupField<SceneSet> field = SceneSystemUI.SceneSetPopup("Scene set", settings, _group.SceneSet, OnSetPicked);
             field.AddToClassList(PopupField<SceneSet>.alignedFieldUssClassName);
+            sceneSetPopup = field;
             container.Add(field);
             return container;
         }
@@ -92,6 +96,7 @@ namespace AbstractPixel.SceneManagement.Editor
             showField.AddToClassList(PopupField<string>.alignedFieldUssClassName);
             showField.RegisterValueChangedCallback(_change => OnShowLoadingScenePicked(ShowLoadingSceneChoices.IndexOf(_change.newValue)));
             container.Add(showField);
+            showLoadingScenePopup = showField;
 
             loadingScenePickRow = new VisualElement();
             SceneSystemSettings settings = SceneSystemSettingsAssets.Find();
@@ -100,6 +105,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 PopupField<string> pick = MakeLoadingScenePicker(_group, settings);
                 pick.AddToClassList(PopupField<string>.alignedFieldUssClassName);
                 loadingScenePickRow.Add(pick);
+                loadingScenePopup = pick;
             }
             loadingScenePickRow.style.display = _group.ShowLoadingScene == ShowLoadingScene.Never ? DisplayStyle.None : DisplayStyle.Flex;
             container.Add(loadingScenePickRow);
@@ -119,17 +125,33 @@ namespace AbstractPixel.SceneManagement.Editor
                 }
             }
 
-            string current = defaultLabel;
-            bool hasOwnPick = _group.LoadingScene != null && !string.IsNullOrEmpty(_group.LoadingScene.SceneName);
-            if (hasOwnPick && choices.Contains(_group.LoadingScene.SceneName))
-            {
-                current = _group.LoadingScene.SceneName;
-            }
-
-            PopupField<string> pick = new PopupField<string>("Loading scene", choices, current);
+            PopupField<string> pick = new PopupField<string>("Loading scene", choices, LoadingSceneChoiceOf(_group, choices));
             pick.tooltip = LoadingScenePickTooltip;
             pick.RegisterValueChangedCallback(_change => OnLoadingScenePicked(_settings, _change.newValue));
             return pick;
+        }
+
+        // The group's own pick when it is one of the choices, otherwise the first choice, "Default".
+        private static string LoadingSceneChoiceOf(SceneGroup _group, List<string> _choices)
+        {
+            bool hasOwnPick = _group.LoadingScene != null && !string.IsNullOrEmpty(_group.LoadingScene.SceneName);
+            if (hasOwnPick && _choices.Contains(_group.LoadingScene.SceneName))
+            {
+                return _group.LoadingScene.SceneName;
+            }
+            return _choices[0];
+        }
+
+        // The popups are not bound to the asset, so Undo, Redo and edits made elsewhere are copied into them here.
+        private void ShowValuesInPopups(SceneGroup _group)
+        {
+            sceneSetPopup?.SetValueWithoutNotify(_group.SceneSet);
+            showLoadingScenePopup?.SetValueWithoutNotify(ShowLoadingSceneChoices[(int)_group.ShowLoadingScene]);
+            loadingScenePopup?.SetValueWithoutNotify(LoadingSceneChoiceOf(_group, loadingScenePopup.choices));
+            if (loadingScenePickRow != null)
+            {
+                loadingScenePickRow.style.display = _group.ShowLoadingScene == ShowLoadingScene.Never ? DisplayStyle.None : DisplayStyle.Flex;
+            }
         }
 
         private void OnShowLoadingScenePicked(int _choiceIndex)
@@ -373,9 +395,11 @@ namespace AbstractPixel.SceneManagement.Editor
             RefreshGroupState();
         }
 
-        private void SubscribeToProjectChanges()
+        internal void SubscribeToProjectChanges()
         {
             EditorBuildSettings.sceneListChanged += RefreshGroupState;
+            // A deleted or moved scene changes no scene list, only the project.
+            EditorApplication.projectChanged += RefreshGroupState;
             SceneSystemSettingsAssets.Changed += RefreshGroupState;
             IAddressableSceneProvider provider = AddressableScenes.Provider;
             if (provider != null)
@@ -384,9 +408,10 @@ namespace AbstractPixel.SceneManagement.Editor
             }
         }
 
-        private void UnsubscribeFromProjectChanges()
+        internal void UnsubscribeFromProjectChanges()
         {
             EditorBuildSettings.sceneListChanged -= RefreshGroupState;
+            EditorApplication.projectChanged -= RefreshGroupState;
             SceneSystemSettingsAssets.Changed -= RefreshGroupState;
             IAddressableSceneProvider provider = AddressableScenes.Provider;
             if (provider != null)
@@ -396,7 +421,7 @@ namespace AbstractPixel.SceneManagement.Editor
         }
 
         // The problems list, the boot group note, the part headers and the Add scenes button follow the group and the project.
-        private void RefreshGroupState()
+        internal void RefreshGroupState()
         {
             if (target == null)
             {
@@ -416,6 +441,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 bootGroupBox.style.display = SceneGroupCheck.IsBootGroup(group) ? DisplayStyle.Flex : DisplayStyle.None;
             }
+            ShowValuesInPopups(group);
             RefreshPartHeaders();
         }
 

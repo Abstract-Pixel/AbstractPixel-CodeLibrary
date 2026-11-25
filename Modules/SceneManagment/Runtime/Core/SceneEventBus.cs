@@ -51,42 +51,42 @@ namespace AbstractPixel.SceneManagement
 
         internal static void RaiseOnSceneGroupUnloaded(SceneGroup newSceneGroup)
         {
-            OnSceneGroupUnloaded.Invoke(newSceneGroup);
+            SafeInvoke.Each(OnSceneGroupUnloaded, newSceneGroup);
         }
 
         internal static void RaiseOnPreloadedSceneGroupActivated(SceneGroup newSceneGroup)
         {
-            OnPreloadedSceneGroupActivated.Invoke(newSceneGroup);
+            SafeInvoke.Each(OnPreloadedSceneGroupActivated, newSceneGroup);
         }
 
         internal static void RaiseOnSceneGroupPreloaded(SceneGroup newSceneGroup)
         {
-            OnSceneGroupPreloaded.Invoke(newSceneGroup);
+            SafeInvoke.Each(OnSceneGroupPreloaded, newSceneGroup);
         }
 
         internal static void RaiseOnNewSceneTransitionedTo(SceneGroup newSceneGroup)
         {
-            OnNewSceneGroupTransitionTo.Invoke(newSceneGroup);
+            SafeInvoke.Each(OnNewSceneGroupTransitionTo, newSceneGroup);
         }
 
         internal static void RaiseOnGameStarted(SceneGroup _startedGroup)
         {
-            OnGameStarted.Invoke(_startedGroup);
+            SafeInvoke.Each(OnGameStarted, _startedGroup);
         }
 
         internal static void RaiseOnLaunchSceneReleased()
         {
-            OnLaunchSceneReleased.Invoke();
+            SafeInvoke.Each(OnLaunchSceneReleased);
         }
 
         internal static void RaiseOnSceneChangeFailed(SceneGroup _group, SceneReference _failedScene)
         {
-            OnSceneChangeFailed.Invoke(_group, _failedScene);
+            SafeInvoke.Each(OnSceneChangeFailed, _group, _failedScene);
         }
 
         internal static void RaiseOnMainSceneLoaded(SceneReference mainScene)
         {
-            OnMainSceneLoaded.Invoke(mainScene);
+            SafeInvoke.Each(OnMainSceneLoaded, mainScene);
         }
 
     }

@@ -59,7 +59,7 @@ The part of a loading scene that shows loading progress to the player: it smooth
 _Avoid_: loading bar (a bar is only one look), progress widget
 
 **Scene status**:
-Where a scene can be loaded from: In build, Addressable, Not in build, or Missing. A scene is In build or Addressable, never both.
+Where a scene can be loaded from: In build, Addressable, Not in build, Missing, or Never goes into a build (a sample scene, which opens in the Editor only and has no fix). A scene is In build or Addressable, never both.
 _Avoid_: build state, scene state
 
 **Scene picker**:

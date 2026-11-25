@@ -63,7 +63,7 @@ namespace AbstractPixel.SceneManagement.Editor
             BuildSettingsChange change = SceneGroupBuildSettings.ApplyToProject(group, false);
             AssetDatabase.SaveAssets();
 
-            Debug.Log(LogPrefix + " Created scene group '" + group.name + "' with main scene '" + _scene.name + "'; " + DescribeBuild(_scene.name, change), group);
+            Debug.Log(DescribeCreated(group.name, _scene.name, group.IsSample, DescribeBuild(_scene.name, change)), group);
             SelectAndPing(group);
             return group;
         }
@@ -78,6 +78,15 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             _group.SceneSet = settings.DefaultSceneSet;
             SceneSetSync.ApplySet(_group);
+        }
+
+        internal static string DescribeCreated(string _groupName, string _sceneName, bool _isSample, string _buildLine)
+        {
+            if (_isSample)
+            {
+                return LogPrefix + " Created sample scene group '" + _groupName + "' with main scene '" + _sceneName + "', because the scene is in a Samples folder: its scenes never go into a build and open in the Editor only.";
+            }
+            return LogPrefix + " Created scene group '" + _groupName + "' with main scene '" + _sceneName + "'; " + _buildLine;
         }
 
         private static string DescribeBuild(string _sceneName, BuildSettingsChange _change)

@@ -152,9 +152,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
             // Never subscribed twice, even if Unity activates the page again without deactivating it first.
             UnsubscribeFromProjectChanges();
-            SceneSystemSettingsAssets.Changed += RequestRefresh;
-            EditorBuildSettings.sceneListChanged += RequestRefresh;
-            Undo.undoRedoPerformed += RequestRefresh;
+            SubscribeToProjectChanges();
             Refresh();
             if (!string.IsNullOrEmpty(pendingSection))
             {
@@ -177,21 +175,40 @@ namespace AbstractPixel.SceneManagement.Editor
             return number + ". " + _title;
         }
 
-        private static void Deactivate()
+        internal static void SubscribeToProjectChanges()
+        {
+            SceneSystemSettingsAssets.Changed += RequestRefresh;
+            EditorBuildSettings.sceneListChanged += RequestRefresh;
+            Undo.undoRedoPerformed += RequestRefresh;
+            IAddressableSceneProvider provider = AddressableScenes.Provider;
+            if (provider != null)
+            {
+                provider.Changed += RequestRefresh;
+            }
+        }
+
+        internal static void Deactivate()
         {
             UnsubscribeFromProjectChanges();
             pageRoot = null;
             pageScroll = null;
+            // A rebuild still waiting on the closed page never runs, so it must not block the next ones.
+            refreshQueued = false;
             sections.Clear();
             setCards.Clear();
             removeSetButton = null;
         }
 
-        private static void UnsubscribeFromProjectChanges()
+        internal static void UnsubscribeFromProjectChanges()
         {
             SceneSystemSettingsAssets.Changed -= RequestRefresh;
             EditorBuildSettings.sceneListChanged -= RequestRefresh;
             Undo.undoRedoPerformed -= RequestRefresh;
+            IAddressableSceneProvider provider = AddressableScenes.Provider;
+            if (provider != null)
+            {
+                provider.Changed -= RequestRefresh;
+            }
         }
 
         // Many changes arrive together (a save, an import, Undo); they rebuild the page once, after the current event.

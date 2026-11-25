@@ -16,6 +16,7 @@ namespace AbstractPixel.SceneManagement
             SceneGroup group = ScriptableObject.CreateInstance<SceneGroup>();
             group.name = "Temporary scene group (" + _mainScene.SceneName + ")";
             group.hideFlags = HideFlags.DontSave;
+            DefaultSceneLoader.OpenFromItsFile(_mainScene);
 
             if (_sceneSet == null)
             {

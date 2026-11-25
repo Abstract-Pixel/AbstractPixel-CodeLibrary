@@ -47,6 +47,22 @@ namespace AbstractPixel.SceneManagement.Relocation.Tests
             Assert.AreEqual(expected, string.Join(", ", seen));
         }
 
+        // 5B-1: a pooled object that switches itself off in Released must not strand the ones released after it.
+        [Test]
+        public async Task SwitchingARelocatableOffInReleasedStillReleasesTheOthers()
+        {
+            world.SpawnPoint("Second spawn", null, new Vector3(20f, 0f, 0f));
+            Relocatable first = world.AwakeCrate("First", null);
+            Relocatable second = world.AwakeCrate("Second", null);
+            first.Released += () => world.Broadcaster.OnRelocatableDisabled(first);
+            second.Released += () => world.Broadcaster.OnRelocatableDisabled(second);
+
+            await world.RunSceneChange();
+
+            Assert.IsFalse(first.IsHeld);
+            Assert.IsFalse(second.IsHeld);
+        }
+
         [Test]
         public async Task AThrowingListenerDoesNotStopTheOthers()
         {

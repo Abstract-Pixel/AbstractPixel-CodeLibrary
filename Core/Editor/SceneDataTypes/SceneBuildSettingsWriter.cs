@@ -30,10 +30,23 @@ namespace AbstractPixel.Core.Editor
             EditorBuildSettingsScene[] allowed = WithoutScenesNeverInBuild(_scenes, neverInBuild);
             if (allowed.Length < _scenes.Length)
             {
-                Debug.LogWarning("[Scene system] Sample scenes were left out of Build Settings: a sample scene never goes into a build.");
+                Debug.LogWarning("[Scene system] Left out of Build Settings: " + NamesLeftOut(_scenes, neverInBuild) + ". A sample scene never goes into a build.");
             }
             EditorBuildSettings.scenes = allowed;
             AssetDatabase.SaveAssets();
+        }
+
+        private static string NamesLeftOut(EditorBuildSettingsScene[] _scenes, HashSet<string> _neverInBuild)
+        {
+            List<string> names = new List<string>();
+            foreach (EditorBuildSettingsScene scene in _scenes)
+            {
+                if (_neverInBuild.Contains(scene.path))
+                {
+                    names.Add("'" + System.IO.Path.GetFileNameWithoutExtension(scene.path) + "'");
+                }
+            }
+            return string.Join(", ", names);
         }
 
         /// <summary>The list without the scenes that never go into a build. Does not touch the project.</summary>
