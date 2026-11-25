@@ -1,0 +1,21 @@
+{
+    "name": "AbstractPixel.SceneManagement.Samples.02ChangeLevelFromCode",
+    "rootNamespace": "AbstractPixel.SceneManagement.Samples",
+    "references": [
+        "AbstractPixel.Core",
+        "AbstractPixel.SceneManagement",
+        "AbstractPixel.SceneTransitions",
+        "AbstractPixel.SceneManagement.Samples.Shared"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

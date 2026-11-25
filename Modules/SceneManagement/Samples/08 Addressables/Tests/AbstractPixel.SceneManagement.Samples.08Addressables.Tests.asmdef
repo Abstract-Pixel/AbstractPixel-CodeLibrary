@@ -1,0 +1,33 @@
+{
+    "name": "AbstractPixel.SceneManagement.Samples.08Addressables.Tests",
+    "rootNamespace": "AbstractPixel.SceneManagement.Samples.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "AbstractPixel.SceneManagement.Samples.08Addressables",
+        "AbstractPixel.SceneManagement.Samples.Shared",
+        "AbstractPixel.Core",
+        "AbstractPixel.Core.Editor",
+        "AbstractPixel.SceneManagement"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS",
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.addressables",
+            "expression": "",
+            "define": "ABSTRACTPIXEL_SAMPLES_ADDRESSABLES"
+        }
+    ],
+    "noEngineReferences": false
+}

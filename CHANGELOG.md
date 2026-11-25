@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] - scene system 5B (2026-11-26)
+**Hardening.**
+- **Breaking:** `SceneManagment` is now `SceneManagement` (folder and assemblies), and the `Singltons`, `Utilties` and Addressables loader file typos are fixed. Replace `AbstractPixel.SceneManagment` in your scenes, prefabs and assets, or button events stop firing.
+- **Change:** the documentation engine moved to `EditorModules/Documentation` (editor only).
+- **Change:** Addressables is no longer a package dependency; the scene and transition modules work without Addressables or BroAudio.
+- **Feature:** `SceneActions.SetSceneLoader` for a custom loader.
+- **Fix:** failing listeners no longer stop a scene change or the fade; stale scene field, inspector and settings page views; sample scenes read "never in build"; Retry in a scene in no group.
+- **Fix:** saved scene groups keep each scene's GUID and path; reading `SceneActions` no longer creates a coordinator; relocation runs from an older change no longer move objects; scene status follows a build profile's own scene list; Undo for the before-build check.
+- **Fix:** two compile errors on Unity 6.7.
+
 ## [Unreleased] - scene system D (2026-11-24)
 **Scene documentation inside the Editor.**
 - **Feature:** Tools > External Project Tools > Scene System > Open Scene Documentation: a dockable UI Toolkit window with Home, twelve guide pages, Find a problem, Code map, Design decisions, a page per public type and the ten sample pages. Search, Back and Forward, deep links to headings, live "What just happened" timeline and self-ticking steps in Play.

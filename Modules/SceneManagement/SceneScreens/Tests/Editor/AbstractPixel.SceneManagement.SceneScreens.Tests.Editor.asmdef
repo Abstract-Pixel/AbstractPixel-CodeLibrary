@@ -1,0 +1,26 @@
+{
+    "name": "AbstractPixel.SceneManagement.SceneScreens.Tests.Editor",
+    "rootNamespace": "AbstractPixel.SceneManagement.SceneScreens.Tests",
+    "references": [
+        "AbstractPixel.Core",
+        "AbstractPixel.SceneManagement",
+        "AbstractPixel.SceneManagement.SceneScreens",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

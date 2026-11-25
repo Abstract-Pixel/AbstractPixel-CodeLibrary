@@ -13,11 +13,11 @@ Read this first, then `EditorModules/Documentation/EDITOR-DOCS-UI-GUIDE.md` (Uni
 | Branch with this work | `docs-restyle-sample` (commits `ef0fd56` … latest) |
 | Abstract Pixel Lab (Unity 7000.0.0a16) | `C:\Users\avig7\Desktop\AllUnity\ActiveProjects\Abstract_Pixel_Lab` — uses the library through `"com.abstractpixel.library": "file:C:/Users/avig7/Desktop/AllUnity/ExternalCodeAssets/AbstractPixel-CodeLibrary"` |
 | ProjectRallyShift (Unity 6000.3.15f1) | `C:\Users\avig7\Desktop\AllUnity\ActiveProjects\ProjectRallyShift` — uses its own clone of the same repo through `"file:../LocalPackages/AbstractPixelLibrary"`; that clone is on branch `scene-system-rework` at `8ea6b51`, behind this work |
-| Docs code | `Modules/SceneManagment/Editor/Documentation/` (`Content/`, `Rendering/`, `Window/`, `Styles/`, `HelpEditors/`) |
-| Pages | `Modules/SceneManagment/Editor/Documentation/Pages/` (`guide/`, `reference/`, `types/`, `Contents.md`) |
-| Design decisions (ADRs) | `Modules/SceneManagment/docs/adr/` |
-| Docs tests | `Modules/SceneManagment/Tests/Documentation/` |
-| Screenshot tool | `Modules/SceneManagment/Editor/Documentation/Tools~/capture-window.ps1` (Unity ignores `Tools~`) |
+| Docs code | `Modules/SceneManagement/Editor/Documentation/` (`Content/`, `Rendering/`, `Window/`, `Styles/`, `HelpEditors/`) |
+| Pages | `Modules/SceneManagement/Editor/Documentation/Pages/` (`guide/`, `reference/`, `types/`, `Contents.md`) |
+| Design decisions (ADRs) | `Modules/SceneManagement/docs/adr/` |
+| Docs tests | `Modules/SceneManagement/Tests/Documentation/` |
+| Screenshot tool | `Modules/SceneManagement/Editor/Documentation/Tools~/capture-window.ps1` (Unity ignores `Tools~`) |
 | Reference pages | **Guide › Loading scene** (`Pages/guide/loading-scene.md`) and **Types › SceneActions** (`Pages/types/SceneActions.md`) |
 
 Open the window: Tools > External Project Tools > Scene System docs, or the "?" on any scene system inspector or
@@ -125,7 +125,7 @@ Model every guide page on **Loading scene** and every type page on **SceneAction
 
 ## 5. Rolling it out
 
-Order: Guide pages (12), Reference (3), Types (47 by folder), design decisions in `Modules/SceneManagment/docs/adr/`
+Order: Guide pages (12), Reference (3), Types (47 by folder), design decisions in `Modules/SceneManagement/docs/adr/`
 (0003 is already done), Samples READMEs last. Per page:
 
 1. Add `<!-- layout new -->`; restructure into sections and parts per section 2; keep every fact (write the old → new
@@ -142,7 +142,7 @@ When all pages are done: remove `IsNewLayout` checks and the old render paths (`
 ## 6. Verifying (what to check, and only that)
 
 - Screenshot without stealing focus:
-  `powershell -NoProfile -File Modules/SceneManagment/Editor/Documentation/Tools~/capture-window.ps1 -Title "Scene documentation" -Out <png>`
+  `powershell -NoProfile -File Modules/SceneManagement/Editor/Documentation/Tools~/capture-window.ps1 -Title "Scene documentation" -Out <png>`
   (`-Title` = start of the window title: "Scene documentation" when floating, the project name when docked; crop with
   `-X -Y -W -H` in **screen** pixels, which on a second monitor start at that monitor's offset, e.g. 1912).
 - Drive the window from Pipeline `script eval`: `SceneDocumentationWindow.OpenAt("<topic>")`, then

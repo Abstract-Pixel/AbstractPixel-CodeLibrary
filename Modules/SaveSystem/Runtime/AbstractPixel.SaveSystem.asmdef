@@ -3,7 +3,7 @@
     "rootNamespace": "AbstractPixel.SaveSystem",
     "references": [
         "AbstractPixel.Core",
-        "AbstractPixel.SceneManagment"
+        "AbstractPixel.SceneManagement"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
