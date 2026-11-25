@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System.Collections.Generic;
 
 namespace AbstractPixel.SceneManagement.Documentation
@@ -27,7 +28,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                 return index;
             }
             index = new List<Result>();
-            foreach (SceneDocsContentsEntry entry in SceneDocsContents.Flatten())
+            foreach (DocsContentsEntry entry in SceneDocsContents.Flatten())
             {
                 AddPage(entry);
             }
@@ -40,11 +41,11 @@ namespace AbstractPixel.SceneManagement.Documentation
             return index;
         }
 
-        private static void AddPage(SceneDocsContentsEntry _entry)
+        private static void AddPage(DocsContentsEntry _entry)
         {
             string page;
             string anchor;
-            SceneDocsTopics.Split(_entry.Topic, out page, out anchor);
+            DocsTopicId.Split(_entry.Topic, out page, out anchor);
             string category = page.StartsWith("types/") ? "Types" : page.StartsWith("samples") ? "Samples" : "Pages";
             index.Add(new Result { Text = _entry.Title, Topic = _entry.Topic, Category = category });
             DocsPage parsed = SceneDocsPageCache.Get(page);

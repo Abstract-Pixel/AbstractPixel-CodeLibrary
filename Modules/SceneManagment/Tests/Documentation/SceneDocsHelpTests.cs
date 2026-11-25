@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -20,7 +21,7 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
         public void EveryOpenCallUsesATopicConstant()
         {
             List<string> loose = new List<string>();
-            string root = SceneDocsPaths.Physical(SceneDocsPaths.Module);
+            string root = DocsFiles.Physical(SceneDocsPaths.Module);
             foreach (string path in Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories))
             {
                 string normalised = path.Replace('\\', '/');
@@ -78,7 +79,7 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
         [Test]
         public void EverySettingsSectionHasAHelpButton()
         {
-            string provider = SceneDocsPaths.Read(SceneDocsPaths.Module + "Editor/Settings/SceneSystemSettingsProvider.cs");
+            string provider = DocsFiles.Read(SceneDocsPaths.Module + "Editor/Settings/SceneSystemSettingsProvider.cs");
             int sectionsWithHelp = Regex.Matches(provider, @"AddSection\(page,.*SceneSystemDocTopics\.").Count;
             bool debuggerHasHelp = provider.Contains("SceneSystemDocTopics.DebuggerSection");
             Assert.AreEqual(7, sectionsWithHelp, "seven sections made with AddSection carry a topic");

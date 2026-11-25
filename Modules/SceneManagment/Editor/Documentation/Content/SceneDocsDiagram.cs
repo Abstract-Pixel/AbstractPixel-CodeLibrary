@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -99,7 +100,7 @@ namespace AbstractPixel.SceneManagement.Documentation
 
         private static DocsGraphNode Folder(DocsGraph _graph, string _id, string _relative, string _line, int _layer)
         {
-            string assetFolder = SceneDocsPaths.Combine(SceneDocsPaths.Module.TrimEnd('/'), _relative);
+            string assetFolder = DocsFiles.Combine(SceneDocsPaths.Module.TrimEnd('/'), _relative);
             DocsGraphNode node = _graph.Add(_id, _id, _line);
             node.Layer = _layer;
             node.Inner = ScriptsGraph(_id, assetFolder);
@@ -113,7 +114,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             List<string> scripts = new List<string>();
             foreach (string path in SceneDocsSource.Files())
             {
-                if (SceneDocsPaths.FolderOf(path) == _assetFolder || SceneDocsPaths.FolderOf(path).StartsWith(_assetFolder + "/"))
+                if (DocsFiles.FolderOf(path) == _assetFolder || DocsFiles.FolderOf(path).StartsWith(_assetFolder + "/"))
                 {
                     scripts.Add(path);
                 }
@@ -126,7 +127,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                 DocsGraphNode node = graph.Add(name, name, Shorten(summary));
                 string scriptPath = path;
                 node.Clicked = () => OpenScript(scriptPath);
-                textOf[name] = SceneDocsPaths.Read(path) ?? "";
+                textOf[name] = DocsFiles.Read(path) ?? "";
                 node.Category = CategoryOf(path, name, textOf[name]);
             }
             foreach (KeyValuePair<string, string> from in textOf)

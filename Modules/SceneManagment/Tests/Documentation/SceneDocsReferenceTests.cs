@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -96,7 +97,7 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
         {
             foreach (string fullName in TransitionTypes)
             {
-                Assert.IsNotNull(SceneDocsMembers.FindType(fullName), fullName);
+                Assert.IsNotNull(DocsTypeFinder.FindType(fullName), fullName);
             }
         }
 
@@ -116,7 +117,7 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
         [Test]
         public void EveryContentsEntryOpensAPage()
         {
-            foreach (SceneDocsContentsEntry entry in SceneDocsContents.Flatten())
+            foreach (DocsContentsEntry entry in SceneDocsContents.Flatten())
             {
                 Assert.IsTrue(Resolves(entry.Topic), entry.Title + " -> " + entry.Topic);
             }
@@ -129,7 +130,7 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
             List<string> broken = new List<string>();
             foreach (string topic in AllTopics())
             {
-                string text = WithoutCode(SceneDocsPaths.Read(SceneDocsTopics.FileFor(topic)));
+                string text = WithoutCode(DocsFiles.Read(SceneDocsTopics.FileFor(topic)));
                 foreach (Match link in LinkPattern.Matches(text))
                 {
                     string target = link.Groups[1].Value;
@@ -191,7 +192,7 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
                         continue;
                     }
                     string path = host.ResolveSourcePath(source, topic + ".md");
-                    string file = SceneDocsPaths.Read(path);
+                    string file = DocsFiles.Read(path);
                     if (file == null)
                     {
                         drifted.Add(topic + ": missing " + source);
@@ -219,9 +220,9 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
             foreach (string topic in AllTopics())
             {
                 string fileAsset = SceneDocsTopics.FileFor(topic);
-                foreach (Match image in ImagePattern.Matches(WithoutCode(SceneDocsPaths.Read(fileAsset))))
+                foreach (Match image in ImagePattern.Matches(WithoutCode(DocsFiles.Read(fileAsset))))
                 {
-                    string path = SceneDocsPaths.Combine(SceneDocsPaths.FolderOf(fileAsset), image.Groups[1].Value);
+                    string path = DocsFiles.Combine(DocsFiles.FolderOf(fileAsset), image.Groups[1].Value);
                     if (AssetDatabase.LoadAssetAtPath<Texture2D>(path) == null)
                     {
                         missing.Add(topic + ": " + image.Groups[1].Value);
@@ -312,7 +313,7 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
         {
             string page;
             string anchor;
-            SceneDocsTopics.Split(_topic, out page, out anchor);
+            DocsTopicId.Split(_topic, out page, out anchor);
             DocsPage parsed = SceneDocsPageCache.Get(page);
             if (parsed == null)
             {

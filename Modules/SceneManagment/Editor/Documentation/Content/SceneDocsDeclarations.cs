@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -29,7 +30,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         /// <summary>The file's lines, or an empty array when it cannot be read.</summary>
         public static string[] LinesOf(string _assetPath)
         {
-            string text = _assetPath == null ? null : SceneDocsPaths.Read(_assetPath);
+            string text = _assetPath == null ? null : DocsFiles.Read(_assetPath);
             if (text == null)
             {
                 return new string[0];

@@ -2,6 +2,7 @@
     "name": "AbstractPixel.SceneManagement.Documentation.Tests.Editor",
     "rootNamespace": "AbstractPixel.SceneManagement.Documentation.Tests",
     "references": [
+        "AbstractPixel.EditorModules.Documentation",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "AbstractPixel.SceneManagement.Documentation.Editor",

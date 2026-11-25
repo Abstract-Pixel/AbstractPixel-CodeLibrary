@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -12,21 +13,6 @@ namespace AbstractPixel.SceneManagement.Documentation
     public static class SceneDocsMembers
     {
         private const BindingFlags Declared = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
-
-        /// <summary>The type with this full name in any loaded assembly, or null.</summary>
-        public static Type FindType(string _fullName)
-        {
-            // The project's own assemblies, as Unity lists them (AppDomain can list assemblies already unloaded).
-            foreach (UnityEditor.Compilation.Assembly assembly in UnityEditor.Compilation.CompilationPipeline.GetAssemblies())
-            {
-                Type type = Type.GetType(_fullName + ", " + assembly.name, false);
-                if (type != null)
-                {
-                    return type;
-                }
-            }
-            return null;
-        }
 
         /// <summary>Kind word for a member ("method", "property", "event", "field", "value").</summary>
         public static List<KeyValuePair<string, string>> MembersOf(Type _type)

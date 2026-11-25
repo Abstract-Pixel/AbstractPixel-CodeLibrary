@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +35,7 @@ namespace AbstractPixel.SceneManagement.Documentation
 
         private static void AddFolder(string _assetFolder)
         {
-            string root = SceneDocsPaths.Physical(_assetFolder);
+            string root = DocsFiles.Physical(_assetFolder);
             if (!Directory.Exists(root))
             {
                 return;
@@ -69,7 +70,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
             foreach (string path in Files())
             {
-                string text = SceneDocsPaths.Read(path) ?? "";
+                string text = DocsFiles.Read(path) ?? "";
                 if (declaration.IsMatch(text))
                 {
                     return path;
@@ -81,7 +82,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         /// <summary>The 1-based line of the first line in a file that matches, or 0.</summary>
         public static int LineOf(string _assetPath, Regex _pattern)
         {
-            string text = SceneDocsPaths.Read(_assetPath);
+            string text = DocsFiles.Read(_assetPath);
             if (text == null)
             {
                 return 0;
@@ -100,7 +101,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         /// <summary>The /// summary right above the first line that declares this name (a type or a public member).</summary>
         public static string SummaryAbove(string _assetPath, string _name)
         {
-            string text = SceneDocsPaths.Read(_assetPath);
+            string text = DocsFiles.Read(_assetPath);
             if (text == null)
             {
                 return "";
@@ -171,7 +172,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         public static List<string> TypesIn(string _assetPath)
         {
             List<string> names = new List<string>();
-            string text = SceneDocsPaths.Read(_assetPath) ?? "";
+            string text = DocsFiles.Read(_assetPath) ?? "";
             foreach (Match match in Regex.Matches(text, @"\b(?:class|struct|enum|interface)\s+([A-Z]\w*)"))
             {
                 if (!names.Contains(match.Groups[1].Value))

@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 namespace AbstractPixel.SceneManagement.Documentation
 {
     /// <summary>One row of "What just happened": seconds since Play, the message, why it fired and its guide topic.</summary>

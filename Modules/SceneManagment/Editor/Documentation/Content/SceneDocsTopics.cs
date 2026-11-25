@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,16 +15,6 @@ namespace AbstractPixel.SceneManagement.Documentation
         public const string SamplesTopic = "samples";
         public const string SamplePrefix = "samples/";
         public const string AdrPrefix = "adr/";
-
-        /// <summary>Splits "guide/preload#minimum-time" into its page and its anchor (empty when none).</summary>
-        public static void Split(string _topicId, out string _page, out string _anchor)
-        {
-            string id = (_topicId ?? "").Trim();
-            int hash = id.IndexOf('#');
-            _page = hash < 0 ? id : id.Substring(0, hash);
-            _anchor = hash < 0 ? "" : id.Substring(hash + 1);
-            _page = _page.ToLowerInvariant();
-        }
 
         /// <summary>The asset path of a page topic (no anchor), or null when no file has it.</summary>
         public static string FileFor(string _page)
@@ -84,7 +75,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         public static List<string> AllPagePaths()
         {
             List<string> paths = new List<string>();
-            string root = SceneDocsPaths.Physical(SceneDocsPaths.Pages);
+            string root = DocsFiles.Physical(SceneDocsPaths.Pages);
             if (!Directory.Exists(root))
             {
                 return paths;
@@ -125,7 +116,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         private static List<string> SampleFolders()
         {
             List<string> folders = new List<string>();
-            string root = SceneDocsPaths.Physical(SceneDocsPaths.Samples);
+            string root = DocsFiles.Physical(SceneDocsPaths.Samples);
             if (!Directory.Exists(root))
             {
                 return folders;
@@ -153,7 +144,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         public static List<string> AdrPaths()
         {
             List<string> paths = new List<string>();
-            string root = SceneDocsPaths.Physical(SceneDocsPaths.Adr);
+            string root = DocsFiles.Physical(SceneDocsPaths.Adr);
             if (!Directory.Exists(root))
             {
                 return paths;

@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System;
 using AbstractPixel.SceneManagement.Editor;
 using System.Collections.Generic;
@@ -132,7 +133,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                 page = page.Substring(0, hash);
             }
             string title = page;
-            foreach (SceneDocsContentsEntry entry in SceneDocsContents.Flatten())
+            foreach (DocsContentsEntry entry in SceneDocsContents.Flatten())
             {
                 if (entry.Topic == page)
                 {
@@ -183,7 +184,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 return null;
             }
-            string assetPath = SceneDocsPaths.Combine(SceneDocsPaths.FolderOf(fromAsset), _imagePath);
+            string assetPath = DocsFiles.Combine(DocsFiles.FolderOf(fromAsset), _imagePath);
             return AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
         }
 
@@ -198,7 +199,25 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 return null;
             }
-            return SceneDocsPaths.Combine(SceneDocsPaths.FolderOf(fromAsset), _source);
+            return DocsFiles.Combine(DocsFiles.FolderOf(fromAsset), _source);
+        }
+
+        public string ActionLabel(DocsDirective _directive)
+        {
+            return SceneDocsActions.LabelOf(_directive);
+        }
+
+        public string SampleFolder(string _number)
+        {
+            return SceneDocsTopics.SampleFolder(_number);
+        }
+
+        // The engine colours type names; this tells it where the types these pages name live.
+        [UnityEditor.InitializeOnLoadMethod]
+        private static void SearchSceneSystemNamespaces()
+        {
+            DocsTypeColours.SearchNamespaces("AbstractPixel.SceneManagement.", "AbstractPixel.SceneManagement.SceneScreens.",
+                "AbstractPixel.SceneManagement.Editor.", "AbstractPixel.SceneTransitions.");
         }
 
         public VisualElement RenderDirective(DocsDirective _directive, DocsRenderContext _context)

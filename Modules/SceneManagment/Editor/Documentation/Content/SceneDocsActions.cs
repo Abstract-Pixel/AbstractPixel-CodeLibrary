@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System.Collections.Generic;
 using AbstractPixel.SceneManagement.Editor;
 using UnityEditor;
@@ -145,7 +146,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         private static string FirstSceneOfReadme(string _number)
         {
             string folder = SceneDocsTopics.SampleFolder(_number);
-            string text = folder == null ? null : SceneDocsPaths.Read(folder + "/README.md");
+            string text = folder == null ? null : DocsFiles.Read(folder + "/README.md");
             if (text == null)
             {
                 return null;

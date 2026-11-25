@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine.UIElements;
@@ -27,7 +28,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             list.AddToClassList("docs-decision-list");
             foreach (string path in SceneDocsTopics.AdrPaths())
             {
-                string text = SceneDocsPaths.Read(path) ?? "";
+                string text = DocsFiles.Read(path) ?? "";
                 string title;
                 string firstParagraph;
                 ReadAdr(text, out title, out firstParagraph);
@@ -58,7 +59,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             caption.AddToClassList("docs-decision-caption");
             row.Add(caption);
             string file = SceneDocsTopics.FileFor(topic);
-            row.Add(StatusPill(StatusOf(file == null ? "" : SceneDocsPaths.Read(file))));
+            row.Add(StatusPill(StatusOf(file == null ? "" : DocsFiles.Read(file))));
             return row;
         }
 

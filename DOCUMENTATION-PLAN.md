@@ -3,7 +3,7 @@
 How the Scene documentation window is built, how every page gets brought to the same standard, and what was learned
 building the sample pages (November 2026), including what did not work.
 
-Read this first, then `EDITOR-DOCS-UI-GUIDE.md` (Unity look and wording rules) in the same folder.
+Read this first, then `EditorModules/Documentation/EDITOR-DOCS-UI-GUIDE.md` (Unity look and wording rules).
 
 ## 1. Where things are
 

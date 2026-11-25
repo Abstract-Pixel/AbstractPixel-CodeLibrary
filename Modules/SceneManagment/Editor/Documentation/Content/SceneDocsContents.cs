@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -17,19 +18,19 @@ namespace AbstractPixel.SceneManagement.Documentation
         private static readonly Regex TermItem = new Regex(@"^\s*-\s+([a-z0-9-]+):\s+(\S+)\s*$");
 
         /// <summary>The top-level tree: Home first, then one entry per section with its pages.</summary>
-        public static List<SceneDocsContentsEntry> Tree()
+        public static List<DocsContentsEntry> Tree()
         {
-            List<SceneDocsContentsEntry> roots = new List<SceneDocsContentsEntry>();
-            string text = SceneDocsPaths.Read(SceneDocsPaths.Contents) ?? "";
-            SceneDocsContentsEntry section = null;
-            SceneDocsContentsEntry category = null;
+            List<DocsContentsEntry> roots = new List<DocsContentsEntry>();
+            string text = DocsFiles.Read(SceneDocsPaths.Contents) ?? "";
+            DocsContentsEntry section = null;
+            DocsContentsEntry category = null;
             foreach (string rawLine in text.Replace("\r\n", "\n").Split('\n'))
             {
                 string line = rawLine.TrimEnd();
                 if (line.StartsWith("## "))
                 {
                     string title = line.Substring(3).Trim();
-                    section = title == TermsSection ? null : new SceneDocsContentsEntry(title, "");
+                    section = title == TermsSection ? null : new DocsContentsEntry(title, "");
                     category = null;
                     if (section != null)
                     {
@@ -40,7 +41,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                 // "### Scene loaders" groups the links under it inside its section, as a folder in the tree.
                 if (line.StartsWith("### ") && section != null)
                 {
-                    category = new SceneDocsContentsEntry(line.Substring(4).Trim(), "");
+                    category = new DocsContentsEntry(line.Substring(4).Trim(), "");
                     section.Children.Add(category);
                     continue;
                 }
@@ -50,7 +51,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                     continue;
                 }
                 string topic = TopicOfLink(link.Groups[2].Value, SceneDocsPaths.Contents);
-                SceneDocsContentsEntry entry = new SceneDocsContentsEntry(link.Groups[1].Value, topic ?? "");
+                DocsContentsEntry entry = new DocsContentsEntry(link.Groups[1].Value, topic ?? "");
                 if (section == null)
                 {
                     roots.Add(entry);
@@ -62,23 +63,23 @@ namespace AbstractPixel.SceneManagement.Documentation
         }
 
         /// <summary>Every link target in the tree, flattened (for tests and the pager).</summary>
-        public static List<SceneDocsContentsEntry> Flatten()
+        public static List<DocsContentsEntry> Flatten()
         {
-            List<SceneDocsContentsEntry> all = new List<SceneDocsContentsEntry>();
-            foreach (SceneDocsContentsEntry root in Tree())
+            List<DocsContentsEntry> all = new List<DocsContentsEntry>();
+            foreach (DocsContentsEntry root in Tree())
             {
                 AddAll(root, all);
             }
             return all;
         }
 
-        private static void AddAll(SceneDocsContentsEntry _entry, List<SceneDocsContentsEntry> _into)
+        private static void AddAll(DocsContentsEntry _entry, List<DocsContentsEntry> _into)
         {
             if (!string.IsNullOrEmpty(_entry.Topic))
             {
                 _into.Add(_entry);
             }
-            foreach (SceneDocsContentsEntry child in _entry.Children)
+            foreach (DocsContentsEntry child in _entry.Children)
             {
                 AddAll(child, _into);
             }
@@ -88,7 +89,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         public static Dictionary<string, string> TermTopics()
         {
             Dictionary<string, string> topics = new Dictionary<string, string>();
-            string text = SceneDocsPaths.Read(SceneDocsPaths.Contents) ?? "";
+            string text = DocsFiles.Read(SceneDocsPaths.Contents) ?? "";
             bool inTerms = false;
             foreach (string rawLine in text.Replace("\r\n", "\n").Split('\n'))
             {
@@ -119,7 +120,7 @@ namespace AbstractPixel.SceneManagement.Documentation
                 string own = SceneDocsTopics.TopicFor(_fromAssetPath);
                 return own == null ? null : own + anchor;
             }
-            string target = SceneDocsPaths.Combine(SceneDocsPaths.FolderOf(_fromAssetPath), path);
+            string target = DocsFiles.Combine(DocsFiles.FolderOf(_fromAssetPath), path);
             string topic = SceneDocsTopics.TopicFor(target);
             return topic == null ? null : topic + anchor;
         }

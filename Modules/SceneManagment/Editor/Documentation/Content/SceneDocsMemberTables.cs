@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,7 +26,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             VisualElement box = new VisualElement();
             box.AddToClassList("docs-member-tables");
-            Type type = SceneDocsMembers.FindType(_fullName);
+            Type type = DocsTypeFinder.FindType(_fullName);
             if (type == null)
             {
                 box.Add(new Label("No loaded type named " + _fullName));

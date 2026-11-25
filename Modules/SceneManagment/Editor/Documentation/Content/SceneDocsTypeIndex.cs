@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -95,8 +96,8 @@ namespace AbstractPixel.SceneManagement.Documentation
                 {
                     continue;
                 }
-                Match line = MembersLine.Match(SceneDocsPaths.Read(path) ?? "");
-                Type type = line.Success ? SceneDocsMembers.FindType(line.Groups[1].Value) : null;
+                Match line = MembersLine.Match(DocsFiles.Read(path) ?? "");
+                Type type = line.Success ? DocsTypeFinder.FindType(line.Groups[1].Value) : null;
                 if (type != null)
                 {
                     types[type.Name] = type;

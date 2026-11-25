@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
@@ -103,7 +104,7 @@ namespace AbstractPixel.SceneManagement.Documentation.Tests
                 {
                     continue;
                 }
-                string text = SceneDocsPaths.Read(SceneDocsTopics.FileFor(topic)) ?? "";
+                string text = DocsFiles.Read(SceneDocsTopics.FileFor(topic)) ?? "";
                 foreach (Match code in CodePattern.Matches(text))
                 {
                     string span = code.Groups[1].Value;

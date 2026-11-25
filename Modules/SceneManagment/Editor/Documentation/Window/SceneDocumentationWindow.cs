@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System.Collections.Generic;
 using AbstractPixel.SceneManagement.Editor;
 using UnityEditor;
@@ -163,7 +164,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             crumbs = new Label();
             crumbs.AddToClassList("docs-crumbs");
             toolbar.Add(crumbs);
-            trail = new DocsTrail(Navigate);
+            trail = new DocsTrail(Navigate, SceneDocsPageCache.TitleOf);
             toolbar.Add(trail.Root);
 
             onThisPage = new ToolbarMenu();
@@ -224,7 +225,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         // The contents file is read again when it changes on disk, so a new page shows up without a reload.
         private void RebuildTreeIfContentsChanged()
         {
-            System.DateTime writeTime = System.IO.File.GetLastWriteTimeUtc(SceneDocsPaths.Physical(SceneDocsPaths.Contents));
+            System.DateTime writeTime = System.IO.File.GetLastWriteTimeUtc(DocsFiles.Physical(SceneDocsPaths.Contents));
             if (writeTime == contentsWriteTime)
             {
                 return;
@@ -242,11 +243,11 @@ namespace AbstractPixel.SceneManagement.Documentation
 
         private TreeView BuildTree()
         {
-            List<TreeViewItemData<SceneDocsContentsEntry>> items = new List<TreeViewItemData<SceneDocsContentsEntry>>();
+            List<TreeViewItemData<DocsContentsEntry>> items = new List<TreeViewItemData<DocsContentsEntry>>();
             int nextId = 1;
             treeIdOfTopic.Clear();
             treeParentOf.Clear();
-            foreach (SceneDocsContentsEntry entry in SceneDocsContents.Tree())
+            foreach (DocsContentsEntry entry in SceneDocsContents.Tree())
             {
                 items.Add(TreeItem(entry, 0, ref nextId));
             }
@@ -263,7 +264,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             };
             view.bindItem = (_element, _index) =>
             {
-                SceneDocsContentsEntry entry = view.GetItemDataForIndex<SceneDocsContentsEntry>(_index);
+                DocsContentsEntry entry = view.GetItemDataForIndex<DocsContentsEntry>(_index);
                 Label label = (Label)_element;
                 label.text = entry.Title;
                 label.tooltip = string.IsNullOrEmpty(entry.Topic) ? "" : "Opens " + entry.Title;
@@ -273,7 +274,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             return view;
         }
 
-        private TreeViewItemData<SceneDocsContentsEntry> TreeItem(SceneDocsContentsEntry _entry, int _parentId, ref int _nextId)
+        private TreeViewItemData<DocsContentsEntry> TreeItem(DocsContentsEntry _entry, int _parentId, ref int _nextId)
         {
             int id = _nextId++;
             treeParentOf[id] = _parentId;
@@ -282,12 +283,12 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 treeIdOfTopic[page] = id;
             }
-            List<TreeViewItemData<SceneDocsContentsEntry>> children = new List<TreeViewItemData<SceneDocsContentsEntry>>();
-            foreach (SceneDocsContentsEntry child in _entry.Children)
+            List<TreeViewItemData<DocsContentsEntry>> children = new List<TreeViewItemData<DocsContentsEntry>>();
+            foreach (DocsContentsEntry child in _entry.Children)
             {
                 children.Add(TreeItem(child, id, ref _nextId));
             }
-            return new TreeViewItemData<SceneDocsContentsEntry>(id, _entry, children);
+            return new TreeViewItemData<DocsContentsEntry>(id, _entry, children);
         }
 
         private static string PageOfTopic(string _topic)
@@ -317,7 +318,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             foreach (object item in _selection)
             {
-                SceneDocsContentsEntry entry = item as SceneDocsContentsEntry;
+                DocsContentsEntry entry = item as DocsContentsEntry;
                 bool opensAPage = entry != null && !string.IsNullOrEmpty(entry.Topic) && entry.Topic != history.Current;
                 if (opensAPage)
                 {
@@ -414,7 +415,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             }
             string page;
             string anchor;
-            SceneDocsTopics.Split(_topicId, out page, out anchor);
+            DocsTopicId.Split(_topicId, out page, out anchor);
             bool samePage = page == shownPage && renderContext != null;
             if (!samePage)
             {
@@ -500,7 +501,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             VisualElement pager = new VisualElement();
             pager.AddToClassList("docs-pager-cards");
-            List<SceneDocsContentsEntry> all = SceneDocsContents.Flatten();
+            List<DocsContentsEntry> all = SceneDocsContents.Flatten();
             int index = all.FindIndex(_entry => _entry.Topic == _page);
             bool hasPrevious = index > 0;
             bool hasNext = index >= 0 && index < all.Count - 1;
@@ -516,7 +517,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             return spacer;
         }
 
-        private Button PagerCard(string _caption, SceneDocsContentsEntry _entry, bool _isNext)
+        private Button PagerCard(string _caption, DocsContentsEntry _entry, bool _isNext)
         {
             Button card = new Button(() => Navigate(_entry.Topic));
             card.tooltip = "Opens " + _entry.Title;

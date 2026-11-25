@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System.Collections.Generic;
 using System.Text;
 
@@ -20,7 +21,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             get
             {
-                string text = SceneDocsPaths.Read(SceneDocsPaths.Glossary) ?? "";
+                string text = DocsFiles.Read(SceneDocsPaths.Glossary) ?? "";
                 if (terms == null || text != loadedText)
                 {
                     terms = Parse(text);

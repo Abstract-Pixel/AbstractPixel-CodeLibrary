@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System;
 using System.Text;
 using UnityEngine.UIElements;
@@ -14,7 +15,7 @@ namespace AbstractPixel.SceneManagement.Documentation
         {
             VisualElement header = new VisualElement();
             header.AddToClassList("docs-type-header");
-            Type type = SceneDocsMembers.FindType(_fullName);
+            Type type = DocsTypeFinder.FindType(_fullName);
             if (type == null)
             {
                 header.Add(new Label("No loaded type named " + _fullName));

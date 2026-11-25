@@ -1,3 +1,4 @@
+using AbstractPixel.EditorModules.Documentation;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,7 +27,7 @@ namespace AbstractPixel.SceneManagement.Documentation
             {
                 return null;
             }
-            string physical = SceneDocsPaths.Physical(assetPath);
+            string physical = DocsFiles.Physical(assetPath);
             DateTime writeTime = File.GetLastWriteTimeUtc(physical);
             Entry cached;
             bool isFresh = pages.TryGetValue(_page, out cached) && cached.WriteTime == writeTime;
@@ -42,6 +43,16 @@ namespace AbstractPixel.SceneManagement.Documentation
                 UnityEngine.Debug.LogWarning("[Scene documentation] " + problem);
             }
             return page;
+        }
+
+        /// <summary>The title of a topic's page, or null when it has no page or no title.</summary>
+        public static string TitleOf(string _topicId)
+        {
+            string page;
+            string anchor;
+            DocsTopicId.Split(_topicId, out page, out anchor);
+            DocsPage parsed = Get(page);
+            return parsed == null || string.IsNullOrEmpty(parsed.Title) ? null : parsed.Title;
         }
 
         /// <summary>The asset path behind a parsed page's path ("guide/preload.md").</summary>
