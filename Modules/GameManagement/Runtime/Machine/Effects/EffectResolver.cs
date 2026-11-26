@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace AbstractPixel.GameManagement
 {
@@ -42,9 +43,24 @@ namespace AbstractPixel.GameManagement
             StateEffectSettings inputOwner = FindOwner(_stack, _effects => _effects.InputSource);
             if (inputOwner != null)
             {
-                wanted.InputMapIds = inputOwner.InputMapIds.ToArray();
+                wanted.InputMaps = MapsOf(inputOwner.InputMaps);
             }
             return wanted;
+        }
+
+        // Each listed action stands for its map; a map listed twice is turned on once.
+        private static InputActionMap[] MapsOf(List<InputActionReference> _actions)
+        {
+            List<InputActionMap> maps = new List<InputActionMap>();
+            foreach (InputActionReference reference in _actions)
+            {
+                InputActionMap map = reference != null && reference.action != null ? reference.action.actionMap : null;
+                if (map != null && !maps.Contains(map))
+                {
+                    maps.Add(map);
+                }
+            }
+            return maps.ToArray();
         }
 
         private static StateEffectSettings FindOwner(IReadOnlyList<StateSO> _stack, Func<StateEffectSettings, EffectSource> _sourceOf)

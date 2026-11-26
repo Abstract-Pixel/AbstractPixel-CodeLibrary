@@ -39,9 +39,9 @@ namespace AbstractPixel.GameManagement
             {
                 GameHud.SetVisible(_effects.HudVisible.Value);
             }
-            if (_effects.InputMapIds != null && InputSource != null)
+            if (_effects.InputMaps != null && InputSource != null)
             {
-                InputSource.EnableOnly(_effects.InputMapIds);
+                InputSource.EnableOnly(_effects.InputMaps);
             }
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace AbstractPixel.GameManagement
 {
@@ -12,7 +13,7 @@ namespace AbstractPixel.GameManagement
         public UnityEngine.AnimationCurve TimeScaleEaseCurve;
         public GameCursorMode? Cursor;
         public bool? HudVisible;
-        public IReadOnlyList<string> InputMapIds;
+        public IReadOnlyList<InputActionMap> InputMaps;
 
         public bool Equals(GameEffects _other)
         {
@@ -21,7 +22,7 @@ namespace AbstractPixel.GameManagement
                 && TimeScaleEaseCurve == _other.TimeScaleEaseCurve
                 && Cursor == _other.Cursor
                 && HudVisible == _other.HudVisible
-                && SameMaps(InputMapIds, _other.InputMapIds);
+                && SameMaps(InputMaps, _other.InputMaps);
         }
 
         public override bool Equals(object _other)
@@ -36,7 +37,7 @@ namespace AbstractPixel.GameManagement
 
         public override string ToString()
         {
-            string maps = InputMapIds == null ? "keep" : string.Join("+", InputMapIds);
+            string maps = InputMaps == null ? "keep" : string.Join("+", MapNames(InputMaps));
             return $"time {Show(TimeScale)}, cursor {Show(Cursor)}, HUD {Show(HudVisible)}, input {maps}";
         }
 
@@ -45,7 +46,15 @@ namespace AbstractPixel.GameManagement
             return _value.HasValue ? _value.Value.ToString() : "keep";
         }
 
-        private static bool SameMaps(IReadOnlyList<string> _first, IReadOnlyList<string> _second)
+        private static IEnumerable<string> MapNames(IReadOnlyList<InputActionMap> _maps)
+        {
+            foreach (InputActionMap map in _maps)
+            {
+                yield return map != null ? map.name : "none";
+            }
+        }
+
+        private static bool SameMaps(IReadOnlyList<InputActionMap> _first, IReadOnlyList<InputActionMap> _second)
         {
             if (_first == null || _second == null)
             {
