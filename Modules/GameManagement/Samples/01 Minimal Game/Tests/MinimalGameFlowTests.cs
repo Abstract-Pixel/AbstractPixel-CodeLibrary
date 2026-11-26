@@ -24,6 +24,7 @@ namespace AbstractPixel.GameManagement.Samples.Tests
 
         private Keyboard keyboard;
         private Gamepad gamepad;
+        private InputSettings.EditorInputBehaviorInPlayMode inputBehaviorBefore;
         private readonly List<MinimalGameFlowStep> steps = new List<MinimalGameFlowStep>();
 
         [UnityTest]
@@ -32,6 +33,10 @@ namespace AbstractPixel.GameManagement.Samples.Tests
             // The host project's own boot objects (Rally's save system, for example) can log while the sample scene
             // replaces theirs. Those logs are not the sample's; the recorded steps are what this test checks.
             LogAssert.ignoreFailingMessages = true;
+            // A player has the Game view focused; a test run from the command line does not, and newer Input System
+            // versions then drop keyboard input. Send all input to the Game view for the run, put back in TearDown.
+            inputBehaviorBefore = InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
             EditorSceneManager.LoadSceneInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             yield return Record("Boot");
             yield return Press("Main Menu", "Settings Button", "Main Menu > Settings");
@@ -111,6 +116,7 @@ namespace AbstractPixel.GameManagement.Samples.Tests
         [TearDown]
         public void RemoveTestDevices()
         {
+            InputSystem.settings.editorInputBehaviorInPlayMode = inputBehaviorBefore;
             if (gamepad != null)
             {
                 InputSystem.RemoveDevice(gamepad);
