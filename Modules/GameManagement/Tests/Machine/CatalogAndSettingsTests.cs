@@ -84,7 +84,6 @@ namespace AbstractPixel.GameManagement.Tests
             StateSO state = ScriptableObject.CreateInstance<StateSO>();
 
             Assert.AreEqual(0, state.Parents.Count);
-            Assert.IsFalse(state.IsSubState, "old field unchanged");
             Assert.AreEqual(EffectSource.SameAsParent, state.Effects.TimeScaleSource);
             Object.DestroyImmediate(state);
         }

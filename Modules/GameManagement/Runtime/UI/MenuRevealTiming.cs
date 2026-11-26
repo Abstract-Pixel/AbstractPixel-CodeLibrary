@@ -1,7 +1,7 @@
 namespace AbstractPixel.GameManagement
 {
     /// <summary>
-    /// When a GameStateMenu shows its content.
+    /// When a StateMenuReactor shows its content.
     /// </summary>
     public enum MenuRevealTiming
     {
