@@ -10,7 +10,7 @@ namespace AbstractPixel.SceneManagement.Editor
     /// or shared scene opened alone opens the start scene group; a sample scene opens its sample scene group.</item>
     /// <item>"Open a scene in no group with the default scene set": a scene in no group opens the default scene set's scenes.</item>
     /// </list>
-    /// They act in edit mode only. Play always loads what a scene needs, and start-up never reads them.
+    /// The first acts in edit mode only. The second also decides Play: off, a scene in no group plays with no manager or shared scenes.
     /// Shown in Preferences &gt; Abstract Pixel &gt; Scenes, the Tools menu, setup and the scene picker's footer.
     /// </summary>
     public static class SceneOpeningPreferences
@@ -19,7 +19,7 @@ namespace AbstractPixel.SceneManagement.Editor
         public const string NoGroupSceneWithDefaultSetLabel = "Open a scene in no group with the default scene set";
 
         public const string MainSceneWithGroupTooltip = "When you open a scene group's main scene on its own, also open its manager and shared scenes, so the Hierarchy shows what Play loads. A manager or shared scene opened alone opens the start scene group; a sample scene opens its sample scene group. Play always loads them. For you only, in this project.";
-        public const string NoGroupSceneWithDefaultSetTooltip = "When you open a scene in no group on its own, also open the default scene set's manager and shared scenes, so the Hierarchy shows what Play loads. Play always loads them. For you only, in this project.";
+        public const string NoGroupSceneWithDefaultSetTooltip = "When you open a scene in no group on its own, also open the default scene set's manager and shared scenes, and load them in Play. Off: the scene opens and plays on its own. For you only, in this project.";
 
         /// <summary>Raised after either preference changes, so every place that shows them can refresh.</summary>
         public static event Action Changed;

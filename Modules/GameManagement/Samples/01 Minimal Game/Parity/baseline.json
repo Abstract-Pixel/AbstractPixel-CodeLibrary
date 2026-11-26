@@ -1,0 +1,205 @@
+{
+    "UnityVersion": "6000.3.15f1",
+    "Steps": [
+        {
+            "Step": "Boot",
+            "TopState": "Main Menu",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Main Menu"
+            ]
+        },
+        {
+            "Step": "Main Menu > Settings",
+            "TopState": "Settings",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Settings"
+            ]
+        },
+        {
+            "Step": "Settings > Back",
+            "TopState": "Main Menu",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Main Menu"
+            ]
+        },
+        {
+            "Step": "Main Menu > Play",
+            "TopState": "Play",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "HUD"
+            ]
+        },
+        {
+            "Step": "Play > Pause",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Pause > Settings",
+            "TopState": "Settings",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Settings"
+            ]
+        },
+        {
+            "Step": "Pause Settings > Back",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Pause > Resume",
+            "TopState": "Play",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "HUD"
+            ]
+        },
+        {
+            "Step": "Play > Esc",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "None",
+            "CursorVisible": true,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Esc Pause > Settings",
+            "TopState": "Settings",
+            "TimeScale": 0.0,
+            "CursorLock": "None",
+            "CursorVisible": true,
+            "MenusShown": [
+                "Settings"
+            ]
+        },
+        {
+            "Step": "Settings > Backspace",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "None",
+            "CursorVisible": true,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Pause > Esc",
+            "TopState": "Play",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "HUD"
+            ]
+        },
+        {
+            "Step": "Play > Gamepad Select",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Gamepad Pause > Settings",
+            "TopState": "Settings",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Settings"
+            ]
+        },
+        {
+            "Step": "Settings > Gamepad East",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Pause > Gamepad East",
+            "TopState": "Play",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "HUD"
+            ]
+        },
+        {
+            "Step": "Play > Game Over",
+            "TopState": "Game Over",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Game Over"
+            ]
+        },
+        {
+            "Step": "Game Over > Retry",
+            "TopState": "Play",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "HUD"
+            ]
+        },
+        {
+            "Step": "Play > Game Win",
+            "TopState": "Game Win",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Game Win"
+            ]
+        },
+        {
+            "Step": "Game Win > Quit",
+            "TopState": "Main Menu",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Main Menu"
+            ]
+        }
+    ]
+}

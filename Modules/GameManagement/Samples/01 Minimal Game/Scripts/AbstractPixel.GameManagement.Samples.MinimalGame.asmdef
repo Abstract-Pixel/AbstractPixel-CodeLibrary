@@ -1,0 +1,20 @@
+{
+    "name": "AbstractPixel.GameManagement.Samples.MinimalGame",
+    "rootNamespace": "AbstractPixel.GameManagement.Samples",
+    "references": [
+        "AbstractPixel.GameManagement",
+        "Unity.InputSystem",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

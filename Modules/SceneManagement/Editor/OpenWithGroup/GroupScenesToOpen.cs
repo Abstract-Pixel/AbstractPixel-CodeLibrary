@@ -49,7 +49,8 @@ namespace AbstractPixel.SceneManagement.Editor
                     AddGroupScenes(scenes, choice.Group, true);
                     break;
                 case StartUpChoiceKind.TemporaryGroup:
-                    AddSetScenes(scenes, choice.SceneSet);
+                    // The preference was checked above, so edit mode always shows the default set here.
+                    AddSetScenes(scenes, _settings.DefaultSceneSet);
                     break;
                 default:
                     // The launch scene, or nothing start-up could do.

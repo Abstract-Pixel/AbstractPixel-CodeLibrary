@@ -1,5 +1,11 @@
 # Changelog
 
+**GameManagement: folder renamed, game state assets removed.**
+
+- **Rename:** `Modules/GameManagment` is now `Modules/GameManagement`, and the runtime asmdef file matches its assembly name. GUIDs are unchanged.
+- **Removed:** `Runtime/StateConfigurations/` held one game's state assets. A project that references them must copy them, with their `.meta` files, into its own `Assets` before it updates.
+- **Added:** module README, GLOSSARY and an EditMode test assembly.
+
 ## [Unreleased] - scene system 5B (2026-11-26)
 **Hardening.**
 - **Breaking:** `SceneManagment` is now `SceneManagement` (folder and assemblies), and the `Singltons`, `Utilties` and Addressables loader file typos are fixed. Replace `AbstractPixel.SceneManagment` in your scenes, prefabs and assets, or button events stop firing.

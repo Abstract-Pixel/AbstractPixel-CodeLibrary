@@ -1,0 +1,84 @@
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+
+namespace AbstractPixel.GameManagement.Editor
+{
+    /// <summary>Finds the game management settings asset wherever it lives and keeps it in Player Settings' Preloaded Assets,
+    /// so builds load it from any folder. Same method as the scene system's settings.</summary>
+    /// <remarks>The Project Settings page with the object field that picks the asset is Session 6.</remarks>
+    [InitializeOnLoad]
+    public static class GameManagementSettingsAssets
+    {
+        static GameManagementSettingsAssets()
+        {
+            GameManagementSettingsSource.EditorLookup = Find;
+        }
+
+        /// <summary>The settings in Preloaded Assets if any (the project's choice), otherwise the first found by type.</summary>
+        public static GameManagementSettings Find()
+        {
+            foreach (Object item in PlayerSettings.GetPreloadedAssets())
+            {
+                if (item is GameManagementSettings preloaded)
+                {
+                    return preloaded;
+                }
+            }
+
+            string[] guids = AssetDatabase.FindAssets("t:" + nameof(GameManagementSettings));
+            if (guids.Length == 0)
+            {
+                return null;
+            }
+            return AssetDatabase.LoadAssetAtPath<GameManagementSettings>(AssetDatabase.GUIDToAssetPath(guids[0]));
+        }
+
+        /// <summary>Makes this asset the project's settings: the only settings in Preloaded Assets.</summary>
+        public static void Use(GameManagementSettings _settings)
+        {
+            Object[] current = PlayerSettings.GetPreloadedAssets();
+            Object[] wanted = WithSettingsPreloaded(current, _settings);
+            PlayerSettings.SetPreloadedAssets(wanted);
+        }
+
+        /// <summary>The preloaded list with empty entries and other settings removed and these settings present once. Pure.</summary>
+        public static Object[] WithSettingsPreloaded(Object[] _preloaded, GameManagementSettings _settings)
+        {
+            List<Object> result = new List<Object>();
+            foreach (Object item in _preloaded)
+            {
+                if (item == null || item is GameManagementSettings)
+                {
+                    continue;
+                }
+                result.Add(item);
+            }
+            if (_settings != null)
+            {
+                result.Add(_settings);
+            }
+            return result.ToArray();
+        }
+
+        /// <summary>Before a build, puts the found settings into Preloaded Assets so the build can load them.</summary>
+        private class PreloadBeforeBuild : IPreprocessBuildWithReport
+        {
+            public int callbackOrder
+            {
+                get { return 0; }
+            }
+
+            public void OnPreprocessBuild(BuildReport _report)
+            {
+                GameManagementSettings settings = Find();
+                if (settings != null)
+                {
+                    Use(settings);
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "name": "AbstractPixel.GameManagement.Samples.MinimalGame.Tests",
+    "rootNamespace": "AbstractPixel.GameManagement.Samples.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "AbstractPixel.GameManagement",
+        "AbstractPixel.GameManagement.Samples.MinimalGame",
+        "UnityEngine.UI",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS",
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
