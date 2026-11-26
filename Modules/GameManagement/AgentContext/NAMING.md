@@ -33,21 +33,36 @@ Clarity beats length, but long is not the fix. Aim for two to four words.
 - Moving or renaming: `git mv` with the `.meta` (keeps the GUID), `[MovedFrom]` for types held by `[SerializeReference]`,
   `[FormerlySerializedAs]` for fields. Grep Rally's scenes and prefabs before and after.
 
-## Names flagged by the owner (2026-11-26)
+## Renames done in Session 4B (2026-11-26)
 
-What each does was checked in the code. Candidates are a starting point for Session 4B, not decisions; the owner
-approves the final table.
+The owner's three flagged names, plus every other name the audit found failing the read-alone test. No behaviour
+change; `[FormerlySerializedAs]`/`[MovedFrom]` were not needed because none of these types are referenced by
+field name or `[SerializeReference]` in scenes, prefabs or assets (`m_Script` GUIDs carried the rename). Rally's
+`GameManagment.prefab`, its menu scenes and `Samples/01 Minimal Game` had their `m_EditorClassIdentifier` and
+UnityEvent `m_TargetAssemblyTypeName` strings updated to match (grepped before and after).
 
-| Today | What it does (from the code) | Why it fails | Candidates |
-|---|---|---|---|
-| `WhenLeavesGoTo` (component, `Runtime/Adapters/`) | When one chosen state leaves, requests another, e.g. "when Intro leaves, go to Play". Wraps `FollowUpRule`. | Sentence fragment; no module word; does not say it is a component that makes requests. | `NextStateRequester` |
-| `FollowUpRule` (plain C#, `Runtime/Adapters/`) | The testable logic behind `WhenLeavesGoTo`: listens to `GameStates.Changed` and requests the next state when the watched one leaves. | "Follow up" does not say what follows what; no module word. | `NextStateRule` (pairs with `NextStateRequester`) |
-| `RisingEdge` (plain C#, `Runtime/Adapters/`) | True once when a condition turns from false to true, so `PollRequest` does not send a request every frame. Used only by `PollRequest` and one test. | Electronics term; no module word; nothing says it is about polling. | Nest it inside `PollRequest` (allowed small extra type), or `PollBecameTrueCheck` |
+| Today | Was | Why it failed |
+|---|---|---|
+| `SceneStartRequester` (`Runtime/Requesters/`) | `EnterOnSceneStart` | No module word, and every other `...Request` sibling became `...Requester`. |
+| `EventRequester` | `EventRequest` | `...Request` adapters become `...Requester` (role word; a scene component is never the request itself). |
+| `PollRequester` | `PollRequest` | Same. |
+| `InputToggleRequester` | `InputToggleRequest` | Same. |
+| `BackRequester` | `BackRequest` | Same. |
+| `StateButtonRequester` | `StateRequester` | Didn't say it was for UnityEvent buttons; also a near-twin of `StateRequestAdapter`/`StateRequestRules`. |
+| `NextStateRequester` (`Runtime/Requesters/`) | `WhenLeavesGoTo` | Sentence fragment; no module word; didn't say it makes requests. |
+| `NextStateRule` (`Runtime/Requesters/Shared/`) | `FollowUpRule` | "Follow up" didn't say what follows what. |
+| `PollBecameTrueCheck` (`Runtime/Requesters/Shared/`) | `RisingEdge` | Electronics term; no tie to polling. (Kept as its own class, not nested, because `Tests/Requesters/RequesterTests.cs` constructs it directly.) |
+| `StateRequesterBase` (`Runtime/Requesters/Shared/`) | `StateRequestAdapter` | "Adapter" isn't a glossary role word; renamed for the `...Requester` family it is the base of. |
+| `StateRequestRules` (`Runtime/Requesters/Shared/`) | `StateRequests` | Near-twin of `StateRequester`/`StateButtonRequester`. |
+| `StateEffectSource` (`Runtime/Machine/Effects/`) | `EffectSource` | No module word at all (unlike `GameEffects`, `StateEffectSettings`). |
+| `StateEffectResolver` (`Runtime/Machine/Effects/`) | `EffectResolver` | Same. |
 
-## Other names to audit in Session 4B
+Audited and left unchanged (already pass, or are `internal`-exempt / not worth the churn this session):
+`StateRequestKind`, `StateWatch`, `GameHud` (carries "Game"), `NoStateTimeScale`, `CursorModeRule` and
+`TimeScaleEase` (both tested directly by name from `Tests/`, so renaming them for internal-only exemption would
+have meant touching test assembly visibility, deferred), `IInputSource`, `InputSourceKind`, `ITimeScaleTarget`,
+`MenuRevealTiming`. `GameCursorController` stays, per Session 4's own note.
 
-Not flagged by the owner; the audit decides. Every `...Request` adapter (`BackRequest`, `EventRequest`,
-`PollRequest`, `InputToggleRequest`) becomes a `...Requester`, and `StateRequester` (the UnityEvent button script) needs
-a name that says it is for buttons. `StateRequests` / `StateRequester` / `StateRequestAdapter` (near-twins),
-`StateWatch`, `GameHud`, `NoStateTimeScale`, `CursorModeRule`, `EffectSource`, `EffectResolver`, `TimeScaleEase`,
-`EnterOnSceneStart`. The folder over the limit today is `Runtime/Adapters/` (12 scripts).
+The folder that was over the limit, `Runtime/Adapters/` (12 scripts), is now `Runtime/Requesters/` (7 scripts:
+the trigger components) and `Runtime/Requesters/Shared/` (5 scripts: the base class, the enum, the static rules
+and the two plain-C# helpers).
