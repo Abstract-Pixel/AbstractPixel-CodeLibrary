@@ -238,6 +238,22 @@ namespace AbstractPixel.GameManagement.Tests
         }
 
         [Test]
+        public void StateThatChangesNoEffectStillRaisesApplied()
+        {
+            machine.Request(rig.MainMenu);
+            rig.Sink.Applied.Clear();
+            StateSO appliedState = null;
+            machine.Applied += _state => appliedState = _state;
+
+            machine.Request(rig.Settings_);
+
+            Assert.AreEqual(rig.Settings_, appliedState, "menus that wait for Applied must still open");
+            Assert.AreEqual(0, rig.Sink.Applied.Count, "nothing changed, so nothing is sent to the sink");
+            TransitionRecord last = rig.Records[rig.Records.Count - 1];
+            Assert.AreEqual(TransitionKind.Applied, last.Kind, "the state watch reads Applied from the journal record");
+        }
+
+        [Test]
         public void EffectsWaitForTheDelayAndApplyWhenItEnds()
         {
             rig.GameOver.StateExecutionDelay = 1.4f;

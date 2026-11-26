@@ -1,0 +1,11 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Sample 01: Minimal Game</title>
+<style>body{font:15px/1.5 system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 16px}code{background:#f2f2f2;padding:0 3px}</style></head><body>
+<h1>Sample 01: Minimal Game</h1>
+<p>The smallest full game flow on the game management state machine: Main Menu, Play (a counter on scaled time), Pause (Esc or the HUD button), Game Over and Game Win (Retry reloads the scene, Quit returns to Main Menu), and one empty Settings menu opened from Main Menu and from Pause.</p>
+<h2>Open it</h2><p>Open <code>Scenes/Minimal Game.unity</code> and press Play. Editor only; never in a build.</p>
+<h2>How it is set up</h2><ul>
+<li><code>States/</code>: one asset per state, the catalog (top wins: Game Win, Game Over, Settings, Pause, Play, Main Menu) and the settings. Pause's parent is Play; Settings' parents are Main Menu and Pause.</li>
+<li><b>Game Management</b> object: <code>EnterOnSceneStart</code> (Main Menu), <code>InputToggleRequest</code> (Pause key, only while Play is active), <code>StateRequester</code> for the buttons, and <code>MinimalGameSceneFlow</code> (starts the machine with these settings; Retry and Quit).</li>
+<li>Each menu: a <code>StateMenuReactor</code> showing its panel. The HUD: <code>HudToggleReactor</code>. Settings: <code>BackRequest</code> (Back button, Backspace, gamepad East).</li></ul>
+<h2>Test</h2><p><code>MinimalGameFlowTests</code> (PlayMode) presses every button in turn and records the top state, time scale, cursor and shown menus, then compares with <code>Parity/baseline.json</code>. Delete the baseline to record a new one.</p>
+</body></html>

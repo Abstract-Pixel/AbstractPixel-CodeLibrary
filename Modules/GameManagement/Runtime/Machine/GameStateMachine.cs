@@ -64,6 +64,12 @@ namespace AbstractPixel.GameManagement
             get { return delayEndsAt >= 0; }
         }
 
+        /// <summary>True when this machine was built from the given settings asset.</summary>
+        public bool UsesSettings(GameManagementSettings _settings)
+        {
+            return settings == _settings;
+        }
+
         public bool IsActive(StateSO _state)
         {
             return stack.Contains(_state);
@@ -247,11 +253,17 @@ namespace AbstractPixel.GameManagement
                 return;
             }
 
-            // "Keep" fields take the last applied value, so a state that keeps everything applies nothing.
+            // "Keep" fields take the last applied value, so a state that keeps everything sends nothing to the sink,
+            // but it is still applied: menus that wait for Applied must open.
             GameEffects wanted = EffectResolver.Resolve(stack, settings.NoStateTimeScale);
             GameEffects result = WithKeptValues(wanted, lastApplied);
             if (result.Equals(lastApplied))
             {
+                if (Top != null)
+                {
+                    Record(TransitionKind.Applied, Top, _requester, "no effect changed", stack.ToArray(), lastApplied, lastApplied);
+                    Applied?.Invoke(Top);
+                }
                 return;
             }
 

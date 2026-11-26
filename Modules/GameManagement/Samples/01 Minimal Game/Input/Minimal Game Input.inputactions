@@ -1,0 +1,20 @@
+{
+    "name": "Minimal Game Input",
+    "maps": [
+        {
+            "name": "Menus",
+            "id": "6f1c2d1e-0b7a-4c55-9d34-1a2b3c4d5e01",
+            "actions": [
+                { "name": "Pause", "type": "Button", "id": "6f1c2d1e-0b7a-4c55-9d34-1a2b3c4d5e02", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false },
+                { "name": "Back", "type": "Button", "id": "6f1c2d1e-0b7a-4c55-9d34-1a2b3c4d5e03", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false }
+            ],
+            "bindings": [
+                { "name": "", "id": "6f1c2d1e-0b7a-4c55-9d34-1a2b3c4d5e11", "path": "<Keyboard>/escape", "interactions": "", "processors": "", "groups": "", "action": "Pause", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "6f1c2d1e-0b7a-4c55-9d34-1a2b3c4d5e12", "path": "<Gamepad>/start", "interactions": "", "processors": "", "groups": "", "action": "Pause", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "6f1c2d1e-0b7a-4c55-9d34-1a2b3c4d5e13", "path": "<Keyboard>/backspace", "interactions": "", "processors": "", "groups": "", "action": "Back", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "6f1c2d1e-0b7a-4c55-9d34-1a2b3c4d5e14", "path": "<Gamepad>/buttonEast", "interactions": "", "processors": "", "groups": "", "action": "Back", "isComposite": false, "isPartOfComposite": false }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

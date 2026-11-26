@@ -1,0 +1,127 @@
+{
+    "UnityVersion": "6000.3.15f1",
+    "Steps": [
+        {
+            "Step": "Boot",
+            "TopState": "Main Menu",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Main Menu"
+            ]
+        },
+        {
+            "Step": "Main Menu > Settings",
+            "TopState": "Settings",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Main Menu",
+                "Settings"
+            ]
+        },
+        {
+            "Step": "Settings > Back",
+            "TopState": "Main Menu",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Main Menu"
+            ]
+        },
+        {
+            "Step": "Main Menu > Play",
+            "TopState": "Play",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "HUD"
+            ]
+        },
+        {
+            "Step": "Play > Pause",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Pause > Settings",
+            "TopState": "Settings",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Settings",
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Pause Settings > Back",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Pause > Resume",
+            "TopState": "Play",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "HUD"
+            ]
+        },
+        {
+            "Step": "Play > Game Over",
+            "TopState": "Game Over",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Game Over"
+            ]
+        },
+        {
+            "Step": "Game Over > Retry",
+            "TopState": "Play",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "HUD"
+            ]
+        },
+        {
+            "Step": "Play > Game Win",
+            "TopState": "Game Win",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Game Win"
+            ]
+        },
+        {
+            "Step": "Game Win > Quit",
+            "TopState": "Main Menu",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Main Menu"
+            ]
+        }
+    ]
+}

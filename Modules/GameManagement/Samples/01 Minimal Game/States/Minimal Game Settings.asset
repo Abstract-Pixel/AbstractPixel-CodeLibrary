@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24f4837ebc6fe674f9263e616226c059, type: 3}
+  m_Name: Minimal Game Settings
+  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.GameManagementSettings
+  Catalog: {fileID: 11400000, guid: 60dfe4ada379d994a998de98e01f3415, type: 2}
+  NoStateTimeScale: 0
+  JournalSize: 128
+  InputSource: 0
+  InputActions: {fileID: 0}
