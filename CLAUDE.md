@@ -38,6 +38,11 @@ Folder typos (`SceneManagment`, `Singltons`, `Utilties`) are known. Rename one o
 
 ## How code is written here
 
+**Coding standards** (reviewed, not self-policed): priority order correctness > matches conventions >
+simplicity > maintainability. Minimum verification is a clean compile plus exercising the feature once
+as a developer/player would (no probe-script stand-ins) — hardening is a separate later task. No code
+crammed onto one line, including `if`. Full detail: `CODING_STANDARDS.md`.
+
 - **Tests first.** Write an EditMode test, see it fail, write the code, see it pass. Never weaken or delete a test to make it pass.
 - **Test as the developer and the player would.** A feature is not done until it was used in Play mode through real input (keys, gamepad, UI) with the project's real settings and preferences, and what the player sees was checked. Tests that only call methods or invoke buttons missed real bugs (Esc never paused Sample 01).
 - **Plain English.**
