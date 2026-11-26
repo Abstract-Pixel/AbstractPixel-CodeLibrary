@@ -13,6 +13,8 @@ namespace AbstractPixel.Core.Editor
             {
                 case SceneStatus.InBuild:
                     return new Color(0f, 1f, 0f, 0.5f);
+                case SceneStatus.NeverInBuild:
+                    return new Color(0.55f, 0.55f, 0.55f, 0.7f);
                 case SceneStatus.Addressable:
                     return new Color(0.2f, 0.6f, 1f, 0.7f);
                 default:

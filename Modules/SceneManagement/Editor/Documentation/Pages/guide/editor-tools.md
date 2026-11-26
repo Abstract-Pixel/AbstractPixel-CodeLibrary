@@ -1,0 +1,217 @@
+# Editor tools <!-- level 0 -->
+
+<!-- layout new -->
+
+Find, open and check scenes without the Project window: the [scene picker](term:scene-picker), the [Scene System page](term:scene-system-page), the setup window and the scene opening preferences.
+
+## Scene picker <!-- level 0 -->
+
+The scene picker sits on the main toolbar, just left of Play. Use it to open or select any scene or scene group.
+
+<!-- action open-picker "Open the scene picker" -->
+
+> [!NOTE]
+> Unity hides a new toolbar element until you tick it. On Unity 6.3, right-click an empty part of the toolbar and tick Scene picker.
+
+- **The toolbar button:** names the open scene group. With no group's main scene open, it shows the active scene's name followed by "(no group)". In Play it is greyed out and still names the open group.
+
+![The scene picker, Scenes tab](../../Images/scene-system-picker-scenes.png)
+<!-- marks 1@0.01,0.0,0.22,0.115 "Scenes tab: the game's scenes first, each with its group, or its scene set for a manager or shared scene. Scenes in no group follow under their own heading, sample scenes under Samples at the bottom. Unity's test runner scenes and other packages' scenes are left out"; 2@0.23,0.0,0.27,0.115 "Scene Groups tab: game groups with their main scene and scene set, then sample scene groups. A group with no main scene can be selected but not opened. Tab switches tabs"; 3@0.88,0.177 "Search: filters the rows as you type, every word must match the name, the folder or, on the Scenes tab, the group name"; 4@0.01,0.24,0.2,0.09 "Section heading: here Samples. Before you type, a Recent section comes first with what you last opened from the picker, numbered from 1, the last used"; 5@0.45,0.31 "Label button: names the scene's group, its scene set, Shared by X, or No group. A click selects what it names"; 6@0.895,0.31 "Status button: the scene's status colour. Its tooltip says the status and what a click does, a click never opens the row"; 7@0.965,0.31 "Folder button: selects the asset in the Project window without opening it"; 8@0.6,0.91 "Open with: the two scene opening preferences, as in Preferences > Abstract Pixel > Scenes" -->
+
+> [!NOTE]
+> This screenshot was not taken with Recent. Recent appears once you have opened multiple scenes from the picker, above the other rows before you type. It shows up to 5 scenes or scene groups, the last used first.
+
+![The scene picker, Scene Groups tab](../../Images/scene-system-picker-groups.png)
+<!-- marks 1@0.23,0.0,0.27,0.07 "Scene Groups tab: the tab this image shows"; 2@0.01,0.185,0.6,0.07 "Scene group: its ScriptableObject icon and name. On this tab the number before it is the group's number in the Scene Groups Debugger"; 3@0.72,0.163 "Scene set label: names the group's scene set, and the main scene moves into the row's tooltip. A click selects it"; 4@0.87,0.163 "Group check: green with no problems, red with the first problem and the count, yellow for an unused boot group, grey for a sample: Sample: never goes into a build" -->
+
+- **Right-click a row:** Open, Open additively, Select scene, Select scene group and Copy path. Entries that do not apply are greyed out.
+
+**What a status button click does**
+
+| Tab | Status | Click |
+|---|---|---|
+| Scenes | In build (green) | Build Profiles at the scene list in use (the active build profile's own list when it overrides) |
+| Scenes | Addressable (blue) | Addressables Groups window |
+| Scenes | Red, with a group | Selects the group; its group check shows the fix |
+| Scenes | Red, no group or a scene set label | Build Profiles' scene list, or the Addressables Groups window when new scenes go to Addressables |
+| Scenes | Red, new scenes to Addressables with no settings or no default group | Addressables Groups window |
+| Both | Sample (grey) | Selects its sample scene group |
+| Scene Groups | Green or blue | Scene System page at the Scene Groups Debugger, scrolled to the group's row, highlighted for a moment |
+| Scene Groups | Red | Selects the group (Addressables setup problems open the Addressables Groups window) |
+
+**Search, keys and clicks**
+
+Search filters as you type. Words are separated by spaces, case is ignored, and every word must appear in the name, the folder or, on the Scenes tab, the group name. Rows whose name holds every word come first, with the matched letters in bold.
+
+| Action | What it does |
+|---|---|
+| Click a row, or Enter | Opens it. A scene opens as a double-click in the Project window does; a group runs Open group. |
+| Folder button, or Shift+Enter | Selects the asset in the Project window and pings it. Nothing opens. |
+| Label or status button | See above; each closes the picker. |
+| Right-click a row | Open, Open additively, Select scene, Select scene group, Copy path. |
+| Up and Down | Move the highlight. |
+| Tab | Switches between the Scenes and Scene Groups tabs. |
+| Esc | Closes the picker. |
+
+- **Save prompt:** opening asks Unity's usual save prompt first; Cancel changes nothing.
+- **Footer:** reads "Open with: Group, Default set", the two [scene opening preferences](#scene-opening-preferences) (full names in the tooltips).
+- **Help:** the keys are in the search bar's tooltip.
+
+**What it never does**
+
+- **Build Settings:** never changed, and no scene is marked dirty.
+- **Renames and deletes:** it finds each asset again by GUID when you click, so a scene or group renamed while the picker is open still opens; a deleted one opens nothing and logs one warning.
+- **While Unity is busy:** a pick made while Unity compiles or imports waits until Unity is idle, and survives the script reload that follows.
+- **No setup needed:** it works with no scene system settings and with no scene groups.
+
+<details><summary>More: the code</summary>
+
+- **Folder:** `Editor/ScenePicker/`.
+- **Plain code, with tests:** `ScenePickerRows`, `ScenePickerSearch`, `ScenePickerLabel`, `ScenePickerRecent`, `ScenePickerTarget`, `ScenePickerStatusRules`, `ScenePickerLabelRules` and `ScenePickerRowMenu`, tested in `ScenePickerRowsTests` and `ScenePickerStatusRulesTests`.
+- **Windows:** `ScenePickerWindows` opens Build Profiles through `BuildPlayerWindow.ShowBuildPlayerWindow` (the scene list is picked by guarded reflection on Unity's window; nothing is logged if Unity renames it) and the Addressables Groups window through its menu item, `Window/Asset Management/Addressables/Groups` (`AddressablesSetup`).
+- **UI:** `ScenePickerToolbar` is the toolbar element, `ScenePickerPopup` the popup, `ScenePickerActions` the open and select calls, `ScenePickerProject` reads the project.
+- **Unity 7:** Unity 7-only code sits behind `#if UNITY_7000_0_OR_NEWER`; the 6.3 picker is complete without it.
+
+</details>
+
+## Scene opening preferences <!-- level 0 -->
+
+Opening a scene on its own also opens what Play would load with it, so the Hierarchy shows what Play loads. Two preferences decide it, per user and per project, both on by default.
+
+<!-- action open-preferences "Open Preferences" -->
+
+- **Open a main scene with its scene group:** a group's main scene opens its manager and shared scenes; a manager or shared scene opened alone opens the start scene group; a sample scene opens its sample scene group.
+- **Open a scene in no group with the default scene set:** a scene in no group opens the default scene set's manager and shared scenes.
+
+<details><summary>More: the full behaviour</summary>
+
+- **The launch scene:** opens nothing.
+- **First read:** each takes the value of the old "Open the group with its main scene" preference, so a project keeps its choice.
+- **Edit mode only:** Play always loads what a scene needs, and start-up never reads them.
+- **Active scene:** the opened scene stays active.
+- **Switching groups:** closes only scenes the tool opened that the new group does not need (unsaved ones get Unity's save prompt). Scenes you opened by hand are never closed.
+- **Off in:** Play mode, builds, prefab mode, test runs, "Open group", and while Unity restores scenes.
+- **Side effects:** none. Never marks a scene dirty or changes Build Settings.
+- **Where to change them:** Preferences > Abstract Pixel > Scenes, Tools > External Project Tools > Scene System (two toggles), setup's Opening Scenes step, or the scene picker's footer.
+- **Code:** `Editor/OpenWithGroup/` (`SceneOpeningPreferences`, `SceneOpeningPreferenceStore`, `GroupScenesToOpen`).
+
+</details>
+
+## Scene System page <!-- level 0 -->
+
+Project Settings > Abstract Pixel > Scene System. Names, values, status and problems are always visible; the explanations are in tooltips. Every edit has Undo.
+
+**Start-up**
+
+- **Start scene group:** required.
+- **Launch scene:** optional, with "Create a launch scene…".
+- **Build index 0:** the launch scene is kept there. Choosing it puts it there; the page warns with Fix now when Build Settings were reordered; a build from the Build Profiles window puts it back first; a scripted build that finds it moved puts it back and stops with a message, so build again.
+
+**Setup, scene sets and new scenes**
+
+- **Setup:** the settings asset path with Move…, and whether builds can read the settings.
+- **Scene sets:** numbered foldout cards with the name, a path that pings the asset, Make default or "Chosen default scene set", and the group count. Open a card for its manager scenes, shared scenes, Reset shared scenes and the scene groups using it.
+- **+ and −:** + makes "New Scene Set" and opens its name for typing. − is on while a set is selected: a set no group uses is removed after one question; a set in use, or the default, opens a window that asks what happens to its groups and which set becomes the default.
+- **Renaming:** the name turns link blue on hover; a double-click or F2 opens it as a text field. Enter or clicking away renames the asset file (GUID kept), Esc keeps the old name, and an empty, invalid or taken name shows a red line and keeps editing (`SceneSetNameField`, `SceneSetRename`, `SceneSetNames`).
+- **New scenes:** Build Settings or Addressables, and "Move all scenes of all groups to Addressables…".
+
+<details><summary>More: how edits are saved</summary>
+
+- **Written at once:** every edit is written to disk at once, and so is its Undo or Redo (`SceneSystemUndoSave`).
+- **Build Settings:** changes are saved through `SceneBuildSettingsWriter`, because setting `EditorBuildSettings.scenes` alone stays in memory until the next project save.
+- **Getting here:** "Open Scene System" in the scene group and scene set inspectors opens the page; a build stopped by the group check opens it at the Debugger.
+
+</details>
+
+## Scene Groups Debugger <!-- level 0 -->
+
+The Scene Groups Debugger on the Scene System page lists every [scene group](term:scene-group) with its problems and their fixes. Turn on the check before a build there.
+
+<!-- action open-settings "Scene Groups Debugger" "Open the Debugger" -->
+
+- **First:** the check-before-a-build toggle.
+- **Then, per group:** a name that selects it, main scene, a scene set dropdown that keeps overrides, problems with their fixes, and Open group.
+- **Header:** "Check again" and the summary.
+- **Migration:** Preview migration and Migrate, while groups have no scene set.
+
+<details><summary>More: the group check</summary>
+
+- **Problems:** no main scene, a Missing scene, a scene Not in build, the same scene listed twice. The inspector lists them only when there are some.
+- **Builds:** every problem stops a build when the check is on.
+- **Boot groups:** a group with no main scene and no scene set that lists boot scenes is a boot group from before scene sets, not a problem.
+
+</details>
+
+## Setup window <!-- level 0 -->
+
+Tools > External Project Tools > Scene System > Set Up Scene System opens setup. Once the project is set up, it shows only the Opening Scenes step, with Done.
+
+- **Opens by itself:** in a project with no scene system settings asset, once per Editor session, never in batch mode or test runs.
+- **Steps:** 1 Scene System, 2 Settings Folder, 3 New Scenes, 4 Launch Scene, 5 Loading Scene, 6 Scene Sets, 7 Opening Scenes, then Ready and All set.
+- **Also on the page:** the same wizard sits in the Scene System page's Setup section.
+- **"Don't show this again":** per project. The Setup section turns it back on.
+
+<details><summary>More: what each step does</summary>
+
+- **New words:** a step that brings in a new word explains it under a small "Terminology" heading: the word in bold italics and a one-sentence definition from `SceneSystemTerms`. Later steps carry the word's line as a tooltip.
+- **Launch Scene:** optional: none, a scene you have, or a new one.
+- **Scene Sets, Yes:** lists the scene sets to make. The first is the default, "Default Scene Set", which lists the starter Managers scene first (removable). Pick manager and shared scenes and Reset shared scenes; "Add another scene set" adds one.
+- **Scene Sets, Not now:** makes the Default Scene Set with the starter Managers scene: one empty manager scene holding a copy of the basic fade ([design decision 4](../../../../docs/adr/0004-ready-made-assets-are-cloned-at-setup.md)).
+- **Opening Scenes:** shows the two scene opening preferences.
+- **Existing groups:** setup does not sort them into scene sets. Ready points to the page's Preview migration when there are game groups to sort.
+
+</details>
+
+## Sample scene groups <!-- level 1 -->
+
+Tick Sample scene group on a group whose scenes are only for the Editor. Its scenes open in Play but never go into a build.
+
+<!-- action open-settings "Sample scene groups" "Open Sample scene groups" -->
+
+- **In Play:** they open from their path.
+- **In builds:** the Build Settings writer leaves them out, and a build that would include one stops and names it ([design decision 14](../../../../docs/adr/0014-sample-scene-groups-never-reach-a-build.md)).
+- **On the page:** the "Sample scene groups" section lists them.
+- **Sample launch scene:** "Launch scene (sample only)", shown once the box is ticked. Play started from that scene in the Editor runs the launch scene hold with the sample scene group as the start scene group. The project's own launch scene wins when both are open.
+
+## Behind the scenes <!-- level 3 -->
+
+What the Editor does for you, for when the sections above are not enough.
+
+<details><summary>More: settings, scene sets and migration</summary>
+
+- **Scene system settings:** one asset per project, in any folder. Found by type (its GUID is cached), kept in Player Settings > Preloaded Assets, and put back there before a build. It holds the scene sets and the default, where new scenes go, the pre-build check, and the list of scene groups, kept current by `SceneSystemAssetWatcher`.
+- **Scene sets fill scene groups:** ([design decision 8](../../../../docs/adr/0008-scene-sets-fill-groups-and-overrides-persist.md)) a group names its set and still stores its own lists, which the loader reads. Each of manager scenes, shared scenes and Reset shared scenes is either "From set" or an Override. Editing a part in the group inspector makes it an override, editing it back clears it, and Revert to set ends it. Changing a set fills every group that uses it, except its overrides.
+- **Migration:** one scene set per distinct (manager scenes, shared scenes, Reset shared scenes) among groups with a main scene; each group points at its set with no overrides. A Markdown report next to the settings asset lists every group before and after. Groups without a main scene are listed as unused, with the files that still reference them, and never deleted.
+
+</details>
+
+<details><summary>More: scene fields, groups and renames</summary>
+
+- **Scene field:** one status box per scene: In build, Addressable, Not in build or Missing. Not in build gets one fix button that follows where new scenes go ("Add to build" or "Make Addressable"). Right-click: Move to Addressables / Move to Build Settings. Each move removes the other entry.
+- **Core stays independent:** Core never references Addressables or this module. This module registers an `IAddressableSceneProvider` and sets `SceneStatusReader.ProjectDefaultPlace`.
+- **Create Scene Group:** right-click a scene, Create > Scene Group: a new group next to the scene, on the default scene set, its scenes placed where new scenes go.
+- **Saving a group:** places its scenes that are Not in build where new scenes go, with one Console line each.
+- **Rename tracking:** renaming or moving a scene re-saves every .asset, .prefab and .unity under Assets/ (up to 16 MB each) that holds its GUID, so stored names and paths follow. Scenes open with unsaved changes are skipped with a warning. In the Editor a scene field reads its scene's live name, so Play works before any re-save. Before a build, scene groups with stale names are re-saved.
+- **Deferred work:** asset postprocessors and save hooks run through `EditorIdleQueue` (Core), not `EditorApplication.delayCall`, which can wait until the Editor window is focused.
+
+</details>
+
+<details><summary>More: sample graphics</summary>
+
+- **The shader:** library samples use the library's own shader, `Abstract Pixel/Samples/Sample Lit` (`Core/Samples/SampleGraphics/SampleLit.shader`), and materials made from it (Sample Default, Sample Ground).
+- **Every pipeline:** its one pass has no LightMode tag, so the Built-in pipeline, URP and HDRP all draw it, in edit mode, Play and a player, with a simple diffuse light from a fixed direction. No scene lights needed.
+- **Checked by a test:** Unity's Default-Material and the Built-in Standard shader draw magenta outside the Built-in pipeline, so `LibrarySamplesReferenceOnlyTheLibraryTests` fails on them in any sample.
+
+</details>
+
+## Troubleshooting <!-- level 1 -->
+
+<details><summary>If it goes wrong</summary>
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| No scene picker on the toolbar | Unity hides new toolbar elements | Tick it once in the toolbar's menu |
+| The picker opens nothing | Unity is compiling | Wait; the pick runs once Unity is idle |
+| A group row is red | The group has a problem | Click its status button to select the group and see the fix |
+
+</details>

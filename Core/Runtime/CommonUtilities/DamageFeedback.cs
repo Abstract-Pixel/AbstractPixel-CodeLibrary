@@ -24,7 +24,10 @@ namespace AbstractPixel.Core
         [SerializeField] private Renderer[] targetRenderers;
 
         [Header("Settings")]
+        // Only the commented-out code below reads this; it stays so saved components keep their value.
+#pragma warning disable 0414
         [SerializeField] private bool useMultipleRenderers = false;
+#pragma warning restore 0414
         [SerializeField] private DamageFeedbackSettings settings = new DamageFeedbackSettings();
 
         // Scale animation state

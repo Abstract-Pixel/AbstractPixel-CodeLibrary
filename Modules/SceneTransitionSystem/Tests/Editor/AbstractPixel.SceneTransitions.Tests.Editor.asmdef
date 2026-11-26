@@ -3,7 +3,7 @@
     "rootNamespace": "AbstractPixel.SceneTransitions.Tests",
     "references": [
         "AbstractPixel.Core",
-        "AbstractPixel.SceneManagment",
+        "AbstractPixel.SceneManagement",
         "AbstractPixel.SceneTransitions",
         "UnityEngine.UI",
         "UnityEngine.TestRunner",

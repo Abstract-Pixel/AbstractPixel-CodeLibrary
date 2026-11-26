@@ -13,6 +13,8 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        { "name": "com.ami.broaudio", "expression": "", "define": "ABSTRACTPIXEL_BROAUDIO" }
+    ],
     "noEngineReferences": false
 }

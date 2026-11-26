@@ -1,0 +1,28 @@
+{
+    "name": "AbstractPixel.SceneManagement.Samples.10LaunchScene",
+    "rootNamespace": "AbstractPixel.SceneManagement.Samples",
+    "references": [
+        "AbstractPixel.Core",
+        "AbstractPixel.SceneManagement",
+        "AbstractPixel.SceneManagement.SceneScreens",
+        "AbstractPixel.SceneManagement.Samples.Shared",
+        "Unity.Timeline"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.timeline",
+            "expression": "",
+            "define": "ABSTRACTPIXEL_TIMELINE"
+        }
+    ],
+    "noEngineReferences": false
+}

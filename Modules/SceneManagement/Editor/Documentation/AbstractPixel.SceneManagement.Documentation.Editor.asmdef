@@ -1,0 +1,26 @@
+{
+    "name": "AbstractPixel.SceneManagement.Documentation.Editor",
+    "rootNamespace": "AbstractPixel.SceneManagement.Documentation",
+    "references": [
+        "AbstractPixel.EditorModules.Documentation",
+        "AbstractPixel.Core",
+        "AbstractPixel.Core.Editor",
+        "AbstractPixel.SceneManagement",
+        "AbstractPixel.SceneManagement.Editor",
+        "AbstractPixel.SceneManagement.Relocation",
+        "AbstractPixel.SceneManagement.Relocation.Editor",
+        "AbstractPixel.SceneManagement.SceneScreens",
+        "AbstractPixel.SceneTransitions"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

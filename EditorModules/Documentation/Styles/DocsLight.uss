@@ -1,0 +1,55 @@
+/* Our own colour tokens, light skin. Unity has no role for these. Muted to sit with Unity's palette; text contrast 4.5:1 or more. */
+.docs-pill { border-width: 1px; }
+.docs-pill-0 { background-color: rgba(60, 130, 75, 0.14); border-color: rgba(60, 130, 75, 0.45); color: rgb(36, 90, 48); }
+.docs-pill-1 { background-color: rgba(50, 100, 180, 0.14); border-color: rgba(50, 100, 180, 0.45); color: rgb(30, 66, 130); }
+.docs-pill-2 { background-color: rgba(110, 70, 160, 0.14); border-color: rgba(110, 70, 160, 0.45); color: rgb(80, 45, 120); }
+.docs-pill-3 { background-color: rgba(170, 100, 30, 0.14); border-color: rgba(170, 100, 30, 0.45); color: rgb(115, 62, 12); }
+.docs-callout-note { border-left-color: rgb(120, 120, 120); }
+.docs-callout-warning { border-left-color: rgb(170, 120, 20); }
+.docs-callout-tip { border-left-color: rgb(60, 130, 75); }
+.docs-callout-why, .docs-foldout-why { border-left-color: rgb(50, 100, 180); }
+.docs-step-circle { border-color: rgb(120, 120, 120); }
+.docs-step-done .docs-step-circle { background-color: rgb(60, 125, 72); border-color: rgb(60, 125, 72); color: rgb(255, 255, 255); }
+.docs-mark, .docs-mark-number { background-color: rgb(150, 100, 52); }
+/* Outlined areas on images: muted orange, so they stand apart from Unity's blue selection in the screenshots. */
+.docs-mark-area { border-top-color: rgb(150, 100, 52); border-right-color: rgb(150, 100, 52); border-bottom-color: rgb(150, 100, 52); border-left-color: rgb(150, 100, 52); }
+.docs-chip:hover, .docs-graph-box:hover { background-color: rgb(208, 208, 208); }
+.docs-step-current { background-color: rgba(0, 0, 0, 0.05); }
+/* New layout: member kinds, decision status, flows. */
+.docs-mrow.docs-kind-method { border-left-color: rgb(45, 95, 185); }
+.docs-mrow.docs-kind-property { border-left-color: rgb(50, 125, 70); }
+.docs-mrow.docs-kind-field { border-left-color: rgb(170, 115, 20); }
+.docs-mrow.docs-kind-event { border-left-color: rgb(175, 60, 120); }
+.docs-mrow.docs-kind-value { border-left-color: rgb(120, 120, 120); }
+.docs-heading-row.docs-kind-method { border-left-width: 4px; border-left-color: rgb(45, 95, 185); }
+.docs-heading-row.docs-kind-property { border-left-width: 4px; border-left-color: rgb(50, 125, 70); }
+.docs-heading-row.docs-kind-field { border-left-width: 4px; border-left-color: rgb(170, 115, 20); }
+.docs-heading-row.docs-kind-event { border-left-width: 4px; border-left-color: rgb(175, 60, 120); }
+.docs-heading-row.docs-kind-value { border-left-width: 4px; border-left-color: rgb(120, 120, 120); }
+.docs-status-accepted { background-color: rgba(60, 130, 75, 0.14); border-color: rgba(60, 130, 75, 0.45); color: rgb(36, 90, 48); }
+.docs-status-amended { background-color: rgba(170, 100, 30, 0.14); border-color: rgba(170, 100, 30, 0.45); color: rgb(115, 62, 12); }
+.docs-flow-number { border-color: rgb(50, 100, 180); color: rgb(30, 66, 130); background-color: rgba(50, 100, 180, 0.12); }
+.docs-flow-phase, .docs-flow .docs-flow-phase.docs-inner-box { border-left-color: rgb(50, 100, 180); }
+.docs-mrow:hover { background-color: rgba(0, 0, 0, 0.03); }
+/* New layout: part strips and the tinted group box. */
+.docs-part-strip, .docs-part-fold > .unity-foldout__toggle { background-color: rgba(255, 255, 255, 0.35); }
+.docs-action-fold, .docs-fold > .unity-foldout__content { background-color: rgba(0, 0, 0, 0.07); }
+/* Zebra rows. */
+.docs-facts-alt, .docs-mrow-alt { background-color: rgba(0, 0, 0, 0.04); }
+.docs-action-group-facts > .docs-facts-row, .docs-fold .docs-facts-row { background-color: rgba(255, 255, 255, 0.45); }
+.docs-action-group-facts > .docs-facts-alt, .docs-fold .docs-facts-alt { background-color: rgba(255, 255, 255, 0.75); }
+.docs-mrow-more > .unity-foldout__content { background-color: rgba(0, 0, 0, 0); }
+.docs-table-group { background-color: rgba(0, 0, 0, 0.06); }
+/* Table header rows: light grey, so a table reads as its own box. */
+.docs-layout-new .docs-table-header { background-color: rgba(0, 0, 0, 0.08); }
+/* The type page separator: white on the dark skin (DocsNewLayout.uss), dark grey here so it shows on a light page. */
+.docs-type-separator { background-color: rgb(90, 90, 90); }
+/* Code block header on the light skin: a darker band and line, and dark action text. */
+.docs-layout-new .docs-code-header { background-color: rgba(0, 0, 0, 0.08); border-bottom-color: rgb(165, 165, 165); }
+.docs-layout-new .docs-code-header > .docs-code-action,
+.docs-layout-new .docs-code-header > .docs-code-action .docs-code-action-label { color: rgb(70, 70, 70); }
+.docs-layout-new .docs-code-header > .docs-code-action:hover { background-color: rgba(0, 0, 0, 0.08); }
+.docs-layout-new .docs-code-header > .docs-code-action:hover,
+.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-code-action-label { color: rgb(20, 20, 20); }
+/* The C# language label: a muted purple that reads on a light page. */
+.docs-code-language { color: rgb(110, 70, 140); }

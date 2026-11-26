@@ -1,0 +1,27 @@
+{
+    "name": "AbstractPixel.SceneManagement.Samples.01ButtonChangesLevel.Tests",
+    "rootNamespace": "AbstractPixel.SceneManagement.Samples.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "AbstractPixel.SceneManagement.Samples.Shared",
+        "AbstractPixel.Core",
+        "AbstractPixel.SceneManagement",
+        "AbstractPixel.SceneTransitions",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS",
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

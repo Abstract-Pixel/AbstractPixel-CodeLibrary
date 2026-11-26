@@ -60,7 +60,7 @@ namespace AbstractPixel.Core.Editor
                     string[] folders = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (var folder in folders)
                     {
-#if UNITY_7000_0_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
                         var found = parent.childList.FirstOrDefault(c => c.name == folder);
 #else
                         var found = parent.children.FirstOrDefault(c => c.name == folder);

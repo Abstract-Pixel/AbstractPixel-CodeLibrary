@@ -1,0 +1,44 @@
+/* Our own colour tokens, dark skin. Unity has no role for these. Muted to sit with Unity's palette; text contrast 4.5:1 or more. */
+.docs-pill { border-width: 1px; }
+.docs-pill-0 { background-color: rgba(110, 170, 120, 0.18); border-color: rgba(110, 170, 120, 0.45); color: rgb(170, 210, 175); }
+.docs-pill-1 { background-color: rgba(110, 150, 210, 0.18); border-color: rgba(110, 150, 210, 0.45); color: rgb(175, 200, 235); }
+.docs-pill-2 { background-color: rgba(160, 130, 200, 0.18); border-color: rgba(160, 130, 200, 0.45); color: rgb(205, 190, 230); }
+.docs-pill-3 { background-color: rgba(210, 150, 90, 0.18); border-color: rgba(210, 150, 90, 0.45); color: rgb(230, 195, 160); }
+.docs-callout-note { border-left-color: rgb(130, 130, 130); }
+.docs-callout-warning { border-left-color: rgb(200, 165, 80); }
+.docs-callout-tip { border-left-color: rgb(110, 165, 115); }
+.docs-callout-why, .docs-foldout-why { border-left-color: rgb(110, 150, 210); }
+.docs-step-circle { border-color: rgb(140, 140, 140); }
+.docs-step-done .docs-step-circle { background-color: rgb(80, 135, 88); border-color: rgb(80, 135, 88); color: rgb(255, 255, 255); }
+.docs-mark, .docs-mark-number { background-color: rgb(166, 118, 70); }
+/* Outlined areas on images: muted orange, so they stand apart from Unity's blue selection in the screenshots. */
+.docs-mark-area { border-top-color: rgb(176, 130, 84); border-right-color: rgb(176, 130, 84); border-bottom-color: rgb(176, 130, 84); border-left-color: rgb(176, 130, 84); }
+.docs-chip:hover, .docs-graph-box:hover { background-color: rgb(78, 78, 78); }
+.docs-step-current { background-color: rgba(255, 255, 255, 0.05); }
+/* New layout: member kinds, decision status, flows. */
+.docs-mrow.docs-kind-method { border-left-color: rgb(100, 150, 230); }
+.docs-mrow.docs-kind-property { border-left-color: rgb(110, 180, 125); }
+.docs-mrow.docs-kind-field { border-left-color: rgb(215, 170, 80); }
+.docs-mrow.docs-kind-event { border-left-color: rgb(215, 120, 170); }
+.docs-mrow.docs-kind-value { border-left-color: rgb(150, 150, 150); }
+.docs-heading-row.docs-kind-method { border-left-width: 4px; border-left-color: rgb(100, 150, 230); }
+.docs-heading-row.docs-kind-property { border-left-width: 4px; border-left-color: rgb(110, 180, 125); }
+.docs-heading-row.docs-kind-field { border-left-width: 4px; border-left-color: rgb(215, 170, 80); }
+.docs-heading-row.docs-kind-event { border-left-width: 4px; border-left-color: rgb(215, 120, 170); }
+.docs-heading-row.docs-kind-value { border-left-width: 4px; border-left-color: rgb(150, 150, 150); }
+.docs-status-accepted { background-color: rgba(110, 170, 120, 0.18); border-color: rgba(110, 170, 120, 0.45); color: rgb(170, 210, 175); }
+.docs-status-amended { background-color: rgba(210, 150, 90, 0.18); border-color: rgba(210, 150, 90, 0.45); color: rgb(230, 195, 160); }
+.docs-flow-number { border-color: rgb(110, 150, 210); color: rgb(175, 200, 235); background-color: rgba(110, 150, 210, 0.15); }
+.docs-flow-phase, .docs-flow .docs-flow-phase.docs-inner-box { border-left-color: rgb(110, 150, 210); }
+.docs-mrow:hover { background-color: rgba(255, 255, 255, 0.03); }
+/* New layout: part strips and the tinted group box. */
+.docs-part-strip, .docs-part-fold > .unity-foldout__toggle { background-color: rgba(255, 255, 255, 0.04); }
+.docs-action-fold, .docs-fold > .unity-foldout__content { background-color: rgba(0, 0, 0, 0.22); }
+/* Zebra rows. */
+.docs-facts-alt, .docs-mrow-alt { background-color: rgba(255, 255, 255, 0.035); }
+.docs-action-group-facts > .docs-facts-row, .docs-fold .docs-facts-row { background-color: rgba(255, 255, 255, 0.03); }
+.docs-action-group-facts > .docs-facts-alt, .docs-fold .docs-facts-alt { background-color: rgba(255, 255, 255, 0.065); }
+.docs-mrow-more > .unity-foldout__content { background-color: rgba(0, 0, 0, 0); }
+.docs-table-group { background-color: rgba(255, 255, 255, 0.07); }
+/* Table header rows: light grey, so a table reads as its own box. */
+.docs-layout-new .docs-table-header { background-color: rgba(255, 255, 255, 0.10); }

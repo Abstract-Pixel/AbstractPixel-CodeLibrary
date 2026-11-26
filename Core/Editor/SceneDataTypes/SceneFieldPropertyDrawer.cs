@@ -79,14 +79,12 @@ namespace AbstractPixel.Core.Editor
             root.TrackPropertyValue(property, _changed => Refresh());
             root.RegisterCallback<AttachToPanelEvent>(_event =>
             {
-                EditorBuildSettings.sceneListChanged += OnProjectChanged;
-                SubscribeToAddressables(OnProjectChanged);
+                SubscribeToProject(OnProjectChanged);
                 Refresh();
             });
             root.RegisterCallback<DetachFromPanelEvent>(_event =>
             {
-                EditorBuildSettings.sceneListChanged -= OnProjectChanged;
-                UnsubscribeFromAddressables(OnProjectChanged);
+                UnsubscribeFromProject(OnProjectChanged);
             });
             Refresh();
             return root;
@@ -291,6 +289,22 @@ namespace AbstractPixel.Core.Editor
                 SceneStatusReader.MoveTo(_report, _place);
                 _afterMove();
             }, status);
+        }
+
+        /// <summary>Calls the action when the scene's status may have changed anywhere in the project.</summary>
+        public static void SubscribeToProject(System.Action _onChanged)
+        {
+            EditorBuildSettings.sceneListChanged += _onChanged;
+            // A deleted, moved or renamed scene changes no scene list, only the project.
+            EditorApplication.projectChanged += _onChanged;
+            SubscribeToAddressables(_onChanged);
+        }
+
+        public static void UnsubscribeFromProject(System.Action _onChanged)
+        {
+            EditorBuildSettings.sceneListChanged -= _onChanged;
+            EditorApplication.projectChanged -= _onChanged;
+            UnsubscribeFromAddressables(_onChanged);
         }
 
         private static void SubscribeToAddressables(System.Action _onChanged)

@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f376c00b5d210e54d9f6f50518eaa4dd, type: 3}
+  m_Name: Sample 04 LevelGroup
+  m_EditorClassIdentifier: AbstractPixel.SceneManagement::AbstractPixel.SceneManagement.SceneGroup
+  ManagerialBootScenesList:
+  - scene:
+      sceneName: Samples Managers
+      sceneGuid: ba2b83a56e6dd3544b5db98720e26e25
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/Shared/Scenes/Samples
+        Managers.unity
+      sceneAsset: {fileID: 102900000, guid: ba2b83a56e6dd3544b5db98720e26e25, type: 3}
+  ContextualBootScenesList:
+  - scene:
+      sceneName: Sample 04 Shared
+      sceneGuid: 82eda702c773de44084a40a772232deb
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/04
+        Play From Any Scene/Scenes/Sample 04 Shared.unity
+      sceneAsset: {fileID: 102900000, guid: 82eda702c773de44084a40a772232deb, type: 3}
+  MainScene:
+    scene:
+      sceneName: Sample 04 Level
+      sceneGuid: 4b5e4c21a1bc20042945e0108c041f33
+      scenePath: Packages/com.abstractpixel.library/Modules/SceneManagement/Samples/04
+        Play From Any Scene/Scenes/Sample 04 Level.unity
+      sceneAsset: {fileID: 102900000, guid: 4b5e4c21a1bc20042945e0108c041f33, type: 3}
+  ForceReloadContextualScenes: 0
+  showLoadingScene: 0
+  loadingScene:
+    scene:
+      sceneName: 
+      sceneGuid: 
+      scenePath: 
+      sceneAsset: {fileID: 0}
+  isSample: 1
+  sampleLaunchScene:
+    scene:
+      sceneName: 
+      sceneGuid: 
+      scenePath: 
+      sceneAsset: {fileID: 0}
+  sceneSet: {fileID: 0}
+  managerScenesOverride: 0
+  sharedScenesOverride: 0
+  resetSharedScenesOverride: 0
