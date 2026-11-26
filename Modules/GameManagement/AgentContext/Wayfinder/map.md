@@ -49,3 +49,5 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 
 - Settings menu commercial readiness (needs its own plan).
 - Asset Store packaging, demo art, translations, old Input Manager, audio backends other than BroAudio.
+
+- 2026-11-26 Session 4 (partial): S3 committed; Sample 01 on the new system, flow test passes in Rally; Lab blocked (branch behind main). Next: Session 4 continues from task 2. See Sessions/Session4/HANDOFF.html.

@@ -93,3 +93,7 @@ own commercial-ready plan).
    their own.
 7. **Commit by default,** per task, and push.
 8. **Requester** replaces "Condition" as the word for a scene script that makes requests.
+
+## 2026-11-26 (Session 4): sample on the new system only
+
+The owner decided Sample 01 Minimal Game is built on the new state machine only, not on the old components first. Its `Parity/baseline.json` is recorded on the new system in Rally (Unity 6.3) and the Unity 7 Lab run must match it. Session 4 task 4 (migrate the sample) is dropped.
