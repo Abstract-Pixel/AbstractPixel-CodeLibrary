@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 namespace AbstractPixel.GameManagement
 {
     /// <summary>Works out the wanted effects from a stack, top state first. Pure.</summary>
-    public static class EffectResolver
+    public static class StateEffectResolver
     {
         public static GameEffects Resolve(IReadOnlyList<StateSO> _stack, NoStateTimeScale _noStateTime)
         {
@@ -63,12 +63,12 @@ namespace AbstractPixel.GameManagement
             return maps.ToArray();
         }
 
-        private static StateEffectSettings FindOwner(IReadOnlyList<StateSO> _stack, Func<StateEffectSettings, EffectSource> _sourceOf)
+        private static StateEffectSettings FindOwner(IReadOnlyList<StateSO> _stack, Func<StateEffectSettings, StateEffectSource> _sourceOf)
         {
             for (int i = _stack.Count - 1; i >= 0; i--)
             {
                 StateEffectSettings effects = _stack[i].Effects;
-                if (_sourceOf(effects) == EffectSource.Own)
+                if (_sourceOf(effects) == StateEffectSource.Own)
                 {
                     return effects;
                 }

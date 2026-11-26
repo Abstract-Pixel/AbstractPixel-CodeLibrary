@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace AbstractPixel.GameManagement
 {
-    [CreateAssetMenu(fileName = "StateSO", menuName = "Utility/States/StateSO")]
+    [CreateAssetMenu(fileName = "StateSO", menuName = "Abstract Pixel/Game Management/State")]
     public class StateSO : ScriptableObject
     {
         [Tooltip("The delay in seconds before the state is executed.")]

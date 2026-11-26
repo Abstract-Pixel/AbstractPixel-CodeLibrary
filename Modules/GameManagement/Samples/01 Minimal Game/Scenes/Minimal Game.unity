@@ -203,7 +203,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1674881970}
-        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateRequester, AbstractPixel.GameManagement
+        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateButtonRequester, AbstractPixel.GameManagement
         m_MethodName: Enter
         m_Mode: 2
         m_Arguments:
@@ -416,7 +416,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1674881970}
-        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateRequester, AbstractPixel.GameManagement
+        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateButtonRequester, AbstractPixel.GameManagement
         m_MethodName: Enter
         m_Mode: 2
         m_Arguments:
@@ -866,7 +866,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1674881970}
-        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateRequester, AbstractPixel.GameManagement
+        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateButtonRequester, AbstractPixel.GameManagement
         m_MethodName: Enter
         m_Mode: 2
         m_Arguments:
@@ -1158,7 +1158,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1674881970}
-        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateRequester, AbstractPixel.GameManagement
+        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateButtonRequester, AbstractPixel.GameManagement
         m_MethodName: Leave
         m_Mode: 2
         m_Arguments:
@@ -1292,7 +1292,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1674881970}
-        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateRequester, AbstractPixel.GameManagement
+        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateButtonRequester, AbstractPixel.GameManagement
         m_MethodName: Enter
         m_Mode: 2
         m_Arguments:
@@ -1426,7 +1426,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1674881970}
-        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateRequester, AbstractPixel.GameManagement
+        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateButtonRequester, AbstractPixel.GameManagement
         m_MethodName: Enter
         m_Mode: 2
         m_Arguments:
@@ -2988,7 +2988,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1674881970}
-        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateRequester, AbstractPixel.GameManagement
+        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.StateButtonRequester, AbstractPixel.GameManagement
         m_MethodName: Enter
         m_Mode: 2
         m_Arguments:
@@ -3187,7 +3187,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e7666641a3747774d884c12fa987d7b3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.StateRequester
+  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.StateButtonRequester
 --- !u!114 &1674881971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3199,7 +3199,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 27f8f5096b0124a4abc6289452fe341d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.InputToggleRequest
+  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.InputToggleRequester
   state: {fileID: 11400000, guid: c1585c2184cfe1a45be770a7300e46f4, type: 2}
   kind: 2
   gate: {fileID: 11400000, guid: c0d4bd1d49fe00b44851b916c45875a2, type: 2}
@@ -3215,7 +3215,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 833651fae8547544cbd90c9a6a3518c8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.EnterOnSceneStart
+  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.SceneStartRequester
   state: {fileID: 11400000, guid: e18480a6aac00e141a7f2b643eca4ee0, type: 2}
   kind: 0
   gate: {fileID: 0}
@@ -3283,7 +3283,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b365c40d1eba2044da076f2f5b3b2ae2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.BackRequest
+  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.BackRequester
   state: {fileID: 11400000, guid: 93f62b1292678a34abd0fc62f0abf12e, type: 2}
   backAction: {fileID: -331597177986980539, guid: 11738e70f34209642bee08fc519241d1, type: 3}
   alsoLeave: []
@@ -4263,7 +4263,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1684100892}
-        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.BackRequest, AbstractPixel.GameManagement
+        m_TargetAssemblyTypeName: AbstractPixel.GameManagement.BackRequester, AbstractPixel.GameManagement
         m_MethodName: Back
         m_Mode: 1
         m_Arguments:
@@ -4456,7 +4456,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b365c40d1eba2044da076f2f5b3b2ae2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.BackRequest
+  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.BackRequester
   state: {fileID: 11400000, guid: c1585c2184cfe1a45be770a7300e46f4, type: 2}
   backAction: {fileID: -331597177986980539, guid: 11738e70f34209642bee08fc519241d1, type: 3}
   alsoLeave: []

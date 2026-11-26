@@ -35,7 +35,7 @@ namespace AbstractPixel.GameManagement.Tests
             Pause.Parents.Add(Play);
             Settings_.Parents.Add(MainMenu);
             Settings_.Parents.Add(Pause);
-            Settings_.Effects.TimeScaleSource = EffectSource.SameAsParent;
+            Settings_.Effects.TimeScaleSource = StateEffectSource.SameAsParent;
 
             Catalog = Track(ScriptableObject.CreateInstance<GameStateCatalog>());
             Catalog.States.AddRange(new[] { GameOver, GameWin, Settings_, Pause, MainMenu, Play });
@@ -57,7 +57,7 @@ namespace AbstractPixel.GameManagement.Tests
         {
             StateSO state = Track(ScriptableObject.CreateInstance<StateSO>());
             state.name = _name;
-            state.Effects.TimeScaleSource = EffectSource.Own;
+            state.Effects.TimeScaleSource = StateEffectSource.Own;
             state.Effects.TimeScale = _timeScale;
             return state;
         }

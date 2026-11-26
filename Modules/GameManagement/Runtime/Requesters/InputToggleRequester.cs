@@ -4,8 +4,8 @@ using UnityEngine.InputSystem;
 namespace AbstractPixel.GameManagement
 {
     /// <summary>Sends its request when an input action is pressed, for example the pause key toggling Pause while Play is active.</summary>
-    [AddComponentMenu("Abstract Pixel/Game Management/State Request On Input")]
-    public class InputToggleRequest : StateRequestAdapter
+    [AddComponentMenu("Abstract Pixel/Game Management/Input Toggle Requester")]
+    public class InputToggleRequester : StateRequesterBase
     {
         [SerializeField] private InputActionReference action;
 

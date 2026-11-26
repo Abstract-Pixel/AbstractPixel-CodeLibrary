@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace AbstractPixel.GameManagement.Tests
 {
-    public class RequestAdapterTests
+    public class RequesterTests
     {
         private MachineTestRig rig;
 
@@ -24,29 +24,29 @@ namespace AbstractPixel.GameManagement.Tests
         [Test]
         public void EnterAndLeaveReachTheMachine()
         {
-            StateRequests.Perform(rig.Play, StateRequestKind.Enter, "test");
+            StateRequestRules.Perform(rig.Play, StateRequestKind.Enter, "test");
             Assert.IsTrue(rig.Machine.IsActive(rig.Play));
-            StateRequests.Perform(rig.Play, StateRequestKind.Leave, "test");
+            StateRequestRules.Perform(rig.Play, StateRequestKind.Leave, "test");
             Assert.IsFalse(rig.Machine.IsActive(rig.Play));
         }
 
         [Test]
         public void ToggleEntersThenLeaves()
         {
-            StateRequests.Perform(rig.Play, StateRequestKind.Enter, "test");
-            StateRequests.Perform(rig.Pause, StateRequestKind.Toggle, "pause key");
+            StateRequestRules.Perform(rig.Play, StateRequestKind.Enter, "test");
+            StateRequestRules.Perform(rig.Pause, StateRequestKind.Toggle, "pause key");
             Assert.AreEqual(rig.Pause, rig.Machine.Top);
-            StateRequests.Perform(rig.Pause, StateRequestKind.Toggle, "pause key");
+            StateRequestRules.Perform(rig.Pause, StateRequestKind.Toggle, "pause key");
             Assert.AreEqual(rig.Play, rig.Machine.Top);
         }
 
         [Test]
         public void BackFromASubStateReturnsToItsParent()
         {
-            StateRequests.Perform(rig.Play, StateRequestKind.Enter, "test");
-            StateRequests.Perform(rig.Pause, StateRequestKind.Enter, "test");
-            StateRequests.Perform(rig.Settings_, StateRequestKind.Enter, "test");
-            bool handled = StateRequests.Back(rig.Settings_, new List<StateSO>(), "back key");
+            StateRequestRules.Perform(rig.Play, StateRequestKind.Enter, "test");
+            StateRequestRules.Perform(rig.Pause, StateRequestKind.Enter, "test");
+            StateRequestRules.Perform(rig.Settings_, StateRequestKind.Enter, "test");
+            bool handled = StateRequestRules.Back(rig.Settings_, new List<StateSO>(), "back key");
             Assert.IsTrue(handled);
             Assert.AreEqual(rig.Pause, rig.Machine.Top);
         }
@@ -54,10 +54,10 @@ namespace AbstractPixel.GameManagement.Tests
         [Test]
         public void BackCanAlsoLeaveTheParentToGoStraightToPlay()
         {
-            StateRequests.Perform(rig.Play, StateRequestKind.Enter, "test");
-            StateRequests.Perform(rig.Pause, StateRequestKind.Enter, "test");
-            StateRequests.Perform(rig.Settings_, StateRequestKind.Enter, "test");
-            StateRequests.Back(rig.Settings_, new List<StateSO> { rig.Pause }, "back key");
+            StateRequestRules.Perform(rig.Play, StateRequestKind.Enter, "test");
+            StateRequestRules.Perform(rig.Pause, StateRequestKind.Enter, "test");
+            StateRequestRules.Perform(rig.Settings_, StateRequestKind.Enter, "test");
+            StateRequestRules.Back(rig.Settings_, new List<StateSO> { rig.Pause }, "back key");
             Assert.AreEqual(rig.Play, rig.Machine.Top);
             Assert.IsFalse(rig.Machine.IsActive(rig.Pause));
         }
@@ -65,10 +65,10 @@ namespace AbstractPixel.GameManagement.Tests
         [Test]
         public void BackDoesNothingWhenItsStateIsNotOnTop()
         {
-            StateRequests.Perform(rig.Play, StateRequestKind.Enter, "test");
-            StateRequests.Perform(rig.Pause, StateRequestKind.Enter, "test");
-            StateRequests.Perform(rig.Settings_, StateRequestKind.Enter, "test");
-            bool handled = StateRequests.Back(rig.Pause, new List<StateSO>(), "back key");
+            StateRequestRules.Perform(rig.Play, StateRequestKind.Enter, "test");
+            StateRequestRules.Perform(rig.Pause, StateRequestKind.Enter, "test");
+            StateRequestRules.Perform(rig.Settings_, StateRequestKind.Enter, "test");
+            bool handled = StateRequestRules.Back(rig.Pause, new List<StateSO>(), "back key");
             Assert.IsFalse(handled);
             Assert.AreEqual(rig.Settings_, rig.Machine.Top);
         }
@@ -76,17 +76,17 @@ namespace AbstractPixel.GameManagement.Tests
         [Test]
         public void RequesterNameIsJournaled()
         {
-            StateRequests.Perform(rig.Play, StateRequestKind.Enter, "Start Button");
+            StateRequestRules.Perform(rig.Play, StateRequestKind.Enter, "Start Button");
             Assert.AreEqual("Start Button", rig.Records[rig.Records.Count - 1].Requester);
         }
 
         [Test]
         public void GateIsOpenOnlyWhileTheGateStateIsActive()
         {
-            Assert.IsTrue(StateRequests.IsGateOpen(null));
-            Assert.IsFalse(StateRequests.IsGateOpen(rig.Play));
+            Assert.IsTrue(StateRequestRules.IsGateOpen(null));
+            Assert.IsFalse(StateRequestRules.IsGateOpen(rig.Play));
             rig.Machine.Request(rig.Play);
-            Assert.IsTrue(StateRequests.IsGateOpen(rig.Play));
+            Assert.IsTrue(StateRequestRules.IsGateOpen(rig.Play));
         }
 
         [Test]
@@ -94,14 +94,14 @@ namespace AbstractPixel.GameManagement.Tests
         {
             rig.Machine.Request(rig.Play);
             rig.Machine.Request(rig.Pause);
-            Assert.IsFalse(StateRequests.IsOnTop(rig.Play));
-            Assert.IsTrue(StateRequests.IsOnTop(rig.Pause));
+            Assert.IsFalse(StateRequestRules.IsOnTop(rig.Play));
+            Assert.IsTrue(StateRequestRules.IsOnTop(rig.Pause));
         }
 
         [Test]
         public void WhenOneStateLeavesTheFollowUpIsRequested()
         {
-            FollowUpRule rule = new FollowUpRule(rig.MainMenu, rig.Play, "test");
+            NextStateRule rule = new NextStateRule(rig.MainMenu, rig.Play, "test");
             rule.Bind();
             try
             {
@@ -118,7 +118,7 @@ namespace AbstractPixel.GameManagement.Tests
         [Test]
         public void PollFiresOnceEachTimeTheConditionBecomesTrue()
         {
-            RisingEdge edge = new RisingEdge();
+            PollBecameTrueCheck edge = new PollBecameTrueCheck();
             Assert.IsFalse(edge.Check(false));
             Assert.IsTrue(edge.Check(true));
             Assert.IsFalse(edge.Check(true));
@@ -130,7 +130,7 @@ namespace AbstractPixel.GameManagement.Tests
         public void MissingStateIsIgnoredWithAWarning()
         {
             UnityEngine.TestTools.LogAssert.Expect(UnityEngine.LogType.Warning, new System.Text.RegularExpressions.Regex("has no state assigned"));
-            StateRequests.Perform(null, StateRequestKind.Enter, "Empty Button");
+            StateRequestRules.Perform(null, StateRequestKind.Enter, "Empty Button");
             Assert.IsNull(rig.Machine.Top);
         }
     }

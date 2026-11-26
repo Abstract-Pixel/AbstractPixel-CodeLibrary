@@ -6,7 +6,7 @@ namespace AbstractPixel.GameManagement.Samples
 {
     /// <summary>
     /// Sample 01: starts the state machine with the sample's own settings, and reloads the scene for Retry and Quit.
-    /// The scene change makes the machine leave every state marked to leave; the scene's EnterOnSceneStart then
+    /// The scene change makes the machine leave every state marked to leave; the scene's SceneStartRequester then
     /// enters Main Menu, and Retry asks for Play right after it.
     /// </summary>
     [DefaultExecutionOrder(-1000)]
