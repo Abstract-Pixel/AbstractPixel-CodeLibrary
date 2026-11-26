@@ -23,6 +23,8 @@ namespace AbstractPixel.GameManagement
         {
             if (backAction != null)
             {
+                // An action from an asset that is not project-wide starts disabled; enable it so the key works.
+                backAction.action.Enable();
                 backAction.action.performed += HandlePerformed;
             }
         }

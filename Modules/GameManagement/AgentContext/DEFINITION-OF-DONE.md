@@ -19,15 +19,23 @@ incomplete: the session adds one from its OVERVIEW before starting work.
 4. **Rally still behaves the same,** unless the task is meant to change behaviour. If the task touched an old runtime
    file, the parity scenarios it could affect were run and compared with `Parity/baseline/` (see `Parity/README.md`).
    Differences are either frame-rate noise or listed as intended.
-5. **Nothing of the owner's was disturbed.** `git status` and the hashes of their uncommitted files match before and after.
-6. **One type per script.** New or changed code keeps each class, struct, enum or interface in its own file, in
+5. **It works the way a developer and a player would use it** (owner, 2026-11-26). Tests that call methods or invoke
+   buttons are not enough: they missed that Esc never paused Sample 01 and that Settings left the Pause menu showing.
+   - Enter Play mode in the real scene with the project's real settings and preferences, and drive it with real input:
+     the keys and gamepad buttons a player presses (`InputSystem.QueueStateEvent` on a test device in PlayMode tests),
+     and the Inspector fields, menus and preferences a developer sets.
+   - Check what the player sees after every step (menus shown, time scale, cursor), not only the machine's state.
+   - A sample's flow test drives each feature through every input it offers (key, gamepad button, UI button).
+   - The handoff says which checks used real input and which did not.
+6. **Nothing of the owner's was disturbed.** `git status` and the hashes of their uncommitted files match before and after.
+7. **One type per script.** New or changed code keeps each class, struct, enum or interface in its own file, in
    folders by part (at most one extra small type when it belongs to the main one). No script holds a dump of several
    types, as the old `Runtime/Machine/Effects.cs` did.
-7. **Names and folders pass [NAMING.md](NAMING.md).** New or renamed types pass the read-alone test; no folder holds
+8. **Names and folders pass [NAMING.md](NAMING.md).** New or renamed types pass the read-alone test; no folder holds
    more than 8 scripts.
-8. **No strings configure anything.** No new field, setting or setup API takes a string ID, name or key
+9. **No strings configure anything.** No new field, setting or setup API takes a string ID, name or key
    (DECISIONS.md, 2026-11-26); references, typed values or enums instead.
-9. **Choices are written down.** Any decision not already in DECISIONS.md or DESIGN.md goes in the handoff's
+10. **Choices are written down.** Any decision not already in DECISIONS.md or DESIGN.md goes in the handoff's
    "Decisions made without you" table.
 
 Checked by running the commands, not by reading the code. "Should work" is not finished.

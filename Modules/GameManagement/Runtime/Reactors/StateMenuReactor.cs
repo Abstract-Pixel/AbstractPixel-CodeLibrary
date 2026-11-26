@@ -2,13 +2,15 @@ using UnityEngine;
 
 namespace AbstractPixel.GameManagement
 {
-    /// <summary>Shows a menu while its state is active: on enter or once effects apply, as chosen; hides it when the state leaves.</summary>
+    /// <summary>Shows a menu while its state is active: on enter or once effects apply, as chosen; hides it when the state leaves, and while a sub-state (Settings over Pause) is on top.</summary>
     [AddComponentMenu("Abstract Pixel/Game Management/State Menu")]
     public class StateMenuReactor : MonoBehaviour
     {
         [SerializeField] private StateSO state;
         [SerializeField] private GameObject content;
         [SerializeField] private MenuRevealTiming reveal = MenuRevealTiming.OnConfigurationsApplied;
+        [Tooltip("Hide this menu while another state is on top of its state, and show it again when that state leaves.")]
+        [SerializeField] private bool hideWhileCovered = true;
 
         private StateWatch watch;
 
@@ -18,6 +20,8 @@ namespace AbstractPixel.GameManagement
             watch.Entered += HandleEntered;
             watch.Applied += HandleApplied;
             watch.Left += Hide;
+            watch.Covered += HandleCovered;
+            watch.Uncovered += HandleUncovered;
             Hide();
         }
 
@@ -42,6 +46,22 @@ namespace AbstractPixel.GameManagement
         private void HandleApplied()
         {
             Show();
+        }
+
+        private void HandleCovered()
+        {
+            if (hideWhileCovered)
+            {
+                Hide();
+            }
+        }
+
+        private void HandleUncovered()
+        {
+            if (hideWhileCovered)
+            {
+                Show();
+            }
         }
 
         private void Show()

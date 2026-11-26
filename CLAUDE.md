@@ -39,6 +39,7 @@ Folder typos (`SceneManagment`, `Singltons`, `Utilties`) are known. Rename one o
 ## How code is written here
 
 - **Tests first.** Write an EditMode test, see it fail, write the code, see it pass. Never weaken or delete a test to make it pass.
+- **Test as the developer and the player would.** A feature is not done until it was used in Play mode through real input (keys, gamepad, UI) with the project's real settings and preferences, and what the player sees was checked. Tests that only call methods or invoke buttons missed real bugs (Esc never paused Sample 01).
 - **Plain English.**
   - No `var`, full words from the module's glossary, one idea per line.
   - Comments say why, not what.

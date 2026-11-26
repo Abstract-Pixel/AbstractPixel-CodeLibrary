@@ -21,6 +21,8 @@ namespace AbstractPixel.GameManagement
                 Debug.LogWarning($"[Game management] '{name}' has no input action, so it never sends a request. Assign one in its Action field.", this);
                 return;
             }
+            // An action from an asset that is not project-wide starts disabled; enable it so the key works. Never disabled here, since other code may share it.
+            action.action.Enable();
             action.action.performed += HandlePerformed;
         }
 

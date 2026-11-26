@@ -18,7 +18,6 @@
             "CursorLock": "Locked",
             "CursorVisible": false,
             "MenusShown": [
-                "Main Menu",
                 "Settings"
             ]
         },
@@ -59,8 +58,7 @@
             "CursorLock": "Locked",
             "CursorVisible": false,
             "MenusShown": [
-                "Settings",
-                "Pause"
+                "Settings"
             ]
         },
         {
@@ -84,11 +82,51 @@
             ]
         },
         {
+            "Step": "Play > Esc",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "None",
+            "CursorVisible": true,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Esc Pause > Settings",
+            "TopState": "Settings",
+            "TimeScale": 0.0,
+            "CursorLock": "None",
+            "CursorVisible": true,
+            "MenusShown": [
+                "Settings"
+            ]
+        },
+        {
+            "Step": "Settings > Backspace",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "None",
+            "CursorVisible": true,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Pause > Esc",
+            "TopState": "Play",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "HUD"
+            ]
+        },
+        {
             "Step": "Play > Game Over",
             "TopState": "Game Over",
             "TimeScale": 0.0,
-            "CursorLock": "Locked",
-            "CursorVisible": false,
+            "CursorLock": "None",
+            "CursorVisible": true,
             "MenusShown": [
                 "Game Over"
             ]
@@ -107,8 +145,8 @@
             "Step": "Play > Game Win",
             "TopState": "Game Win",
             "TimeScale": 0.0,
-            "CursorLock": "Locked",
-            "CursorVisible": false,
+            "CursorLock": "None",
+            "CursorVisible": true,
             "MenusShown": [
                 "Game Win"
             ]
@@ -117,8 +155,8 @@
             "Step": "Game Win > Quit",
             "TopState": "Main Menu",
             "TimeScale": 1.0,
-            "CursorLock": "Locked",
-            "CursorVisible": false,
+            "CursorLock": "None",
+            "CursorVisible": true,
             "MenusShown": [
                 "Main Menu"
             ]

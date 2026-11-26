@@ -29,6 +29,8 @@ namespace AbstractPixel.GameManagement.Tests
             watch.Entered += () => heard.Add("Entered");
             watch.Applied += () => heard.Add("Applied");
             watch.Left += () => heard.Add("Left");
+            watch.Covered += () => heard.Add("Covered");
+            watch.Uncovered += () => heard.Add("Uncovered");
             return watch;
         }
 
@@ -55,6 +57,34 @@ namespace AbstractPixel.GameManagement.Tests
             rig.Machine.Tick();
             CollectionAssert.AreEqual(new[] { "Entered", "Applied" }, heard);
             watch.Unbind();
+        }
+
+        [Test]
+        public void ASubStateOnTopCoversItsParentAndLeavingItUncoversIt()
+        {
+            rig.Machine.Request(rig.Play);
+            rig.Machine.Request(rig.Pause);
+            StateWatch watch = Watch(rig.Pause);
+            watch.Bind();
+            heard.Clear();
+            rig.Machine.Request(rig.Settings_);
+            CollectionAssert.AreEqual(new[] { "Covered" }, heard);
+            rig.Machine.Leave(rig.Settings_);
+            // Pause's effects apply again when Settings leaves, so an Applied may come too; the order of cover events is what counts.
+            CollectionAssert.AreEqual(new[] { "Covered", "Uncovered" }, heard.FindAll(_word => _word.EndsWith("overed")));
+            watch.Unbind();
+        }
+
+        [Test]
+        public void SyncOnBindUnderASubStateReportsCovered()
+        {
+            rig.Machine.Request(rig.Play);
+            rig.Machine.Request(rig.Pause);
+            rig.Machine.Request(rig.Settings_);
+            StateWatch watch = Watch(rig.Pause);
+            watch.Bind();
+            watch.Unbind();
+            CollectionAssert.AreEqual(new[] { "Entered", "Applied", "Covered" }, heard);
         }
 
         [Test]

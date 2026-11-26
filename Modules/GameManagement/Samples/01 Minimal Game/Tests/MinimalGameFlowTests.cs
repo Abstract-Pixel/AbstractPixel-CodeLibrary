@@ -4,6 +4,8 @@ using System.IO;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -20,6 +22,7 @@ namespace AbstractPixel.GameManagement.Samples.Tests
         private const string ScenePath = SampleFolder + "/Scenes/Minimal Game.unity";
         private const float SettleSeconds = 1.2f;
 
+        private Keyboard keyboard;
         private readonly List<MinimalGameFlowStep> steps = new List<MinimalGameFlowStep>();
 
         [UnityTest]
@@ -31,13 +34,26 @@ namespace AbstractPixel.GameManagement.Samples.Tests
             EditorSceneManager.LoadSceneInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             yield return Record("Boot");
             yield return Press("Main Menu", "Settings Button", "Main Menu > Settings");
+            Assert.IsFalse(IsMenuShown("Main Menu"), "Settings over Main Menu hides the Main Menu");
             yield return Press("Settings", "Back Button", "Settings > Back");
             yield return Press("Main Menu", "Play Button", "Main Menu > Play");
             Assert.Greater(Object.FindAnyObjectByType<MinimalGameCounter>().Seconds, 0f, "the counter runs in Play");
             yield return Press("HUD", "Pause Button", "Play > Pause");
             yield return Press("Pause", "Settings Button", "Pause > Settings");
+            Assert.IsFalse(IsMenuShown("Pause"), "Settings over Pause hides the Pause menu");
+            Assert.IsTrue(IsMenuShown("Settings"), "Settings is shown");
             yield return Press("Settings", "Back Button", "Pause Settings > Back");
+            Assert.IsTrue(IsMenuShown("Pause"), "closing Settings shows the Pause menu again");
             yield return Press("Pause", "Resume Button", "Pause > Resume");
+
+            // As a player would: the keyboard, not the buttons.
+            yield return PressKey(Key.Escape, "Play > Esc");
+            Assert.IsTrue(IsMenuShown("Pause"), "Esc in Play opens Pause");
+            yield return Press("Pause", "Settings Button", "Esc Pause > Settings");
+            yield return PressKey(Key.Backspace, "Settings > Backspace");
+            Assert.IsTrue(IsMenuShown("Pause"), "Backspace closes Settings back to Pause");
+            yield return PressKey(Key.Escape, "Pause > Esc");
+            Assert.IsTrue(IsMenuShown("HUD"), "Esc in Pause resumes Play");
             yield return Press("HUD", "Lose Button", "Play > Game Over");
 
             StateSO gameOver = GameStates.Top;
@@ -58,6 +74,28 @@ namespace AbstractPixel.GameManagement.Samples.Tests
             yield return Record(_stepName);
         }
 
+        private IEnumerator PressKey(Key _key, string _stepName)
+        {
+            if (keyboard == null)
+            {
+                keyboard = InputSystem.AddDevice<Keyboard>();
+            }
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(_key));
+            yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return Record(_stepName);
+        }
+
+        [TearDown]
+        public void RemoveKeyboard()
+        {
+            if (keyboard != null)
+            {
+                InputSystem.RemoveDevice(keyboard);
+                keyboard = null;
+            }
+        }
+
         private IEnumerator Record(string _stepName)
         {
             float end = Time.realtimeSinceStartup + SettleSeconds;
@@ -66,6 +104,12 @@ namespace AbstractPixel.GameManagement.Samples.Tests
                 yield return null;
             }
             steps.Add(MinimalGameFlowStep.Read(_stepName));
+        }
+
+        private static bool IsMenuShown(string _menuName)
+        {
+            GameObject menu = GameObject.Find(_menuName);
+            return menu != null && menu.activeInHierarchy;
         }
 
         private static string DescribeJournal()

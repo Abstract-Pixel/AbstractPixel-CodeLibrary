@@ -19,6 +19,12 @@ namespace AbstractPixel.GameManagement
         public event Action Entered;
         public event Action Applied;
         public event Action Left;
+        /// <summary>The state is still active but another state is now on top of it (a sub-state such as Settings over Pause).</summary>
+        public event Action Covered;
+        /// <summary>The state is on top again after being covered.</summary>
+        public event Action Uncovered;
+
+        private bool isCovered;
 
         public void Bind()
         {
@@ -30,6 +36,7 @@ namespace AbstractPixel.GameManagement
         public void Unbind()
         {
             GameStates.Changed -= HandleChanged;
+            isCovered = false;
         }
 
         private void Sync()
@@ -44,12 +51,32 @@ namespace AbstractPixel.GameManagement
             {
                 Applied?.Invoke();
             }
+            UpdateCovered();
+        }
+
+        private void UpdateCovered()
+        {
+            bool isNowCovered = state != null && GameStates.IsActive(state) && GameStates.Top != state;
+            if (isNowCovered == isCovered)
+            {
+                return;
+            }
+            isCovered = isNowCovered;
+            if (isCovered)
+            {
+                Covered?.Invoke();
+            }
+            else if (GameStates.IsActive(state))
+            {
+                Uncovered?.Invoke();
+            }
         }
 
         private void HandleChanged(TransitionRecord _record)
         {
             if (_record.State != state)
             {
+                UpdateCovered();
                 return;
             }
             switch (_record.Kind)
@@ -61,6 +88,7 @@ namespace AbstractPixel.GameManagement
                     Applied?.Invoke();
                     break;
                 case TransitionKind.Left:
+                    isCovered = false;
                     Left?.Invoke();
                     break;
             }
