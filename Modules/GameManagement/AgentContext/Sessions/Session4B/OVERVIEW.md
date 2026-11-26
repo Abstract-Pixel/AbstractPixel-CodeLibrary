@@ -19,7 +19,8 @@ the final words.
 
 ## Starting point (Session 4 updates this)
 
-- Old system deleted; Rally and `Samples/01 Minimal Game` on `GameStates`, adapters and reactors.
+- **Not yet (2026-11-26):** Session 4 is still open. Rally's asset migration, the Rally switch-over, the parity gate and the old system's deletion are not done; finish Session 4 (see its HANDOFF.html) before starting 4B. When it is done, the old system is deleted and Rally and `Samples/01 Minimal Game` run on `GameStates`, adapters and reactors.
+- Already built: Sample 01 on the new system (keyboard, controller and UI paths tested with real input in Rally 6.3 and the Lab 7); input maps by `InputActionReference`; `BackRequest.alsoLeave`; menus hide while covered. Library `main` holds the merge of `game-management-rework`.
 - `Runtime/Adapters/` holds 12 scripts; `...Request` adapters become `...Requester` (glossary, 2026-11-26). The owner flagged `WhenLeavesGoTo`, `FollowUpRule` and `RisingEdge` (see NAMING.md).
 
 ## Tasks

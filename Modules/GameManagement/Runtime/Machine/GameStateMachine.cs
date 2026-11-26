@@ -288,7 +288,7 @@ namespace AbstractPixel.GameManagement
             }
             result.Cursor = result.Cursor ?? _last.Cursor;
             result.HudVisible = result.HudVisible ?? _last.HudVisible;
-            result.InputMapIds = result.InputMapIds ?? _last.InputMapIds;
+            result.InputMaps = result.InputMaps ?? _last.InputMaps;
             return result;
         }
 

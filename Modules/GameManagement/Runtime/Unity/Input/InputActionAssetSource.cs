@@ -31,11 +31,11 @@ namespace AbstractPixel.GameManagement
             return new InputActionAssetSource(InputSystem.actions);
         }
 
-        public void EnableOnly(IReadOnlyList<string> _mapIds)
+        public void EnableOnly(IReadOnlyList<InputActionMap> _maps)
         {
             foreach (InputActionMap map in asset.actionMaps)
             {
-                if (IsListed(map, _mapIds))
+                if (Contains(_maps, map))
                 {
                     map.Enable();
                 }
@@ -46,13 +46,11 @@ namespace AbstractPixel.GameManagement
             }
         }
 
-        private static bool IsListed(InputActionMap _map, IReadOnlyList<string> _mapIds)
+        private static bool Contains(IReadOnlyList<InputActionMap> _maps, InputActionMap _map)
         {
-            string id = _map.id.ToString();
-            for (int i = 0; i < _mapIds.Count; i++)
+            for (int i = 0; i < _maps.Count; i++)
             {
-                bool isSameId = string.Equals(_mapIds[i], id, StringComparison.OrdinalIgnoreCase);
-                if (isSameId || _mapIds[i] == _map.name)
+                if (_maps[i] == _map)
                 {
                     return true;
                 }

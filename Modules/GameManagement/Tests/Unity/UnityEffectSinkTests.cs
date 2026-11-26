@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using UnityEngine.InputSystem;
 using UnityEngine;
 
 namespace AbstractPixel.GameManagement.Tests
@@ -123,16 +124,17 @@ namespace AbstractPixel.GameManagement.Tests
         [Test]
         public void InputMapsGoToTheSource()
         {
-            sink.Apply(new GameEffects { InputMapIds = new[] { "Driving" } });
+            InputActionMap driving = new InputActionMap("Driving");
+            sink.Apply(new GameEffects { InputMaps = new[] { driving } });
             Assert.AreEqual(1, input.Calls.Count);
-            Assert.AreEqual("Driving", input.Calls[0][0]);
+            Assert.AreSame(driving, input.Calls[0][0]);
         }
 
         [Test]
         public void NoInputSourceLeavesInputAlone()
         {
             UnityEffectSink noInput = new UnityEffectSink(time, null);
-            Assert.DoesNotThrow(() => noInput.Apply(new GameEffects { InputMapIds = new[] { "Driving" } }));
+            Assert.DoesNotThrow(() => noInput.Apply(new GameEffects { InputMaps = new[] { new InputActionMap("Driving") } }));
         }
     }
 }

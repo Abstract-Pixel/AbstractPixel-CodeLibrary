@@ -28,20 +28,33 @@ namespace AbstractPixel.GameManagement.Tests
         }
 
         [Test]
-        public void ChosenAssetEnablesOnlyTheListedMapsByName()
+        public void ChosenAssetEnablesOnlyTheListedMaps()
         {
-            new InputActionAssetSource(asset).EnableOnly(new[] { "Menu" });
+            new InputActionAssetSource(asset).EnableOnly(new[] { menu });
             Assert.IsTrue(menu.enabled);
             Assert.IsFalse(driving.enabled);
         }
 
         [Test]
-        public void MapsCanBeListedById()
+        public void AStateTurnsOnTheMapOfEachActionItLists()
         {
             menu.Enable();
-            new InputActionAssetSource(asset).EnableOnly(new[] { driving.id.ToString() });
-            Assert.IsTrue(driving.enabled);
-            Assert.IsFalse(menu.enabled);
+            StateSO play = ScriptableObject.CreateInstance<StateSO>();
+            InputActionReference steer = InputActionReference.Create(driving.FindAction("Steer"));
+            try
+            {
+                play.Effects = new StateEffectSettings { InputSource = EffectSource.Own };
+                play.Effects.InputMaps.Add(steer);
+                GameEffects effects = EffectResolver.Resolve(new[] { play }, NoStateTimeScale.KeepLast);
+                new InputActionAssetSource(asset).EnableOnly(effects.InputMaps);
+                Assert.IsTrue(driving.enabled, "the map of the listed action is on");
+                Assert.IsFalse(menu.enabled, "every other map is off");
+            }
+            finally
+            {
+                Object.DestroyImmediate(steer);
+                Object.DestroyImmediate(play);
+            }
         }
 
         [Test]
@@ -67,7 +80,7 @@ namespace AbstractPixel.GameManagement.Tests
                 settings.InputSource = InputSourceKind.ChosenAsset;
                 settings.InputActions = asset;
                 IInputSource source = InputSourceFactory.FromSettings(settings);
-                source.EnableOnly(new[] { "Driving" });
+                source.EnableOnly(new[] { driving });
                 Assert.IsTrue(driving.enabled);
             }
             finally
@@ -95,7 +108,7 @@ namespace AbstractPixel.GameManagement.Tests
             RecordingInputSource custom = new RecordingInputSource();
             UnityEffectSink sink = new UnityEffectSink(new FieldTimeScaleTarget(), null);
             sink.InputSource = custom;
-            sink.Apply(new GameEffects { InputMapIds = new[] { "Menu" } });
+            sink.Apply(new GameEffects { InputMaps = new[] { menu } });
             Assert.AreEqual(1, custom.Calls.Count);
         }
     }

@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace AbstractPixel.GameManagement
 {
+    /// <summary>Plays BroAudio sounds when a state enters or leaves; looping sounds stop on the next change.</summary>
     [AddComponentMenu("AbstractPixel/Game Management/Game State Audio Trigger")]
     public class GameStateAudioTrigger : MonoBehaviour
     {
@@ -26,10 +27,9 @@ namespace AbstractPixel.GameManagement
 
         private void OnEnable()
         {
-            GameStateRegistry.OnStateRegistered += HandleStateRegistered;
-            GameStateRegistry.OnStateUnregistered += HandleStateUnregistered;
+            GameStates.Changed += HandleGameStatesChanged;
 
-            StateSO currentState = GameStateRegistry.GetCurrentHighestState();
+            StateSO currentState = GameStates.Top;
             if (currentState != null)
             {
                 HandleStateRegistered(currentState);
@@ -38,15 +38,26 @@ namespace AbstractPixel.GameManagement
 
         private void OnDisable()
         {
-            GameStateRegistry.OnStateRegistered -= HandleStateRegistered;
-            GameStateRegistry.OnStateUnregistered -= HandleStateUnregistered;
+            GameStates.Changed -= HandleGameStatesChanged;
             StopLoopingSounds();
+        }
+
+        private void HandleGameStatesChanged(TransitionRecord _record)
+        {
+            if (_record.Kind == TransitionKind.Entered)
+            {
+                HandleStateRegistered(_record.State);
+            }
+            else if (_record.Kind == TransitionKind.Left)
+            {
+                HandleStateUnregistered(_record.State);
+            }
         }
 
         private void HandleStateRegistered(StateSO state)
         {
             // A nested state change can supersede this registration before our listener runs.
-            if (!GameStateRegistry.IsStateActive(state))
+            if (!GameStates.IsActive(state))
             {
                 return;
             }

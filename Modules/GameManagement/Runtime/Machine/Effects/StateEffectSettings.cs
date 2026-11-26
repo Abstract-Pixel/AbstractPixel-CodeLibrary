@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace AbstractPixel.GameManagement
 {
@@ -22,7 +23,7 @@ namespace AbstractPixel.GameManagement
         public bool HudVisible = false;
 
         public EffectSource InputSource = EffectSource.SameAsParent;
-        [Tooltip("IDs of the input action maps this state turns on. Every other map of the input source is turned off.")]
-        [InputMapId] public List<string> InputMapIds = new List<string>();
+        [Tooltip("Drag one action from each input action map this state turns on. Every other map of the input source is turned off.")]
+        public List<InputActionReference> InputMaps = new List<InputActionReference>();
     }
 }

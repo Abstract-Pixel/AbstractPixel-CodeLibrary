@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 namespace AbstractPixel.GameManagement
 {
@@ -6,6 +7,6 @@ namespace AbstractPixel.GameManagement
     public interface IInputSource
     {
         /// <summary>Turns on the maps whose ID or name is listed and turns off every other map of this source.</summary>
-        void EnableOnly(IReadOnlyList<string> _mapIds);
+        void EnableOnly(IReadOnlyList<InputActionMap> _maps);
     }
 }
