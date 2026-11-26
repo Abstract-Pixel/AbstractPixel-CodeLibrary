@@ -71,4 +71,19 @@
 <p id="rerun">RERUN: all 9 parity scenarios PASS with both KeepLast and SetToOne (18/18 after the rerun). They test through virtual devices, not a real mouse. The cursor check by hand is not done.</p>
 <h3>Lab (Unity 7000.0.0a16, main at 7d1700c)</h3><p>GameManagement EditMode 86/86; Sample 01 flow test 1/1.</p>
 <h3>Next</h3><ol><li>Check the cursor after unpausing by hand with a mouse.</li><li>Task 6: delete GameStateRegistry, StateConditionRegistry, Conditions/, GameStateComponent, GameStateEventTrigger, GameStateMenu, GameStateUIToggle, PauseState (change PauseStateSO.asset's m_Script to StateSO's GUID first), the old StateSO fields (after a migration check), and AgentScripts/GameManagementRework/OldSystemReport.cs. Then re-merge into the Lab's main and rerun the Lab tests.</li><li>Wayfinder/map.md, Session 4B docs, then commit the Rally and Lab submodule pointers.</li><li>Known: MenuRumbleProbes.cs did not compile before this run (DualSense API); unrelated.</li></ol>
+<h2>Run 4 (2026-11-26): old system deleted</h2>
+<p><b>Done:</b> task 6 (library <code>b696376</code>, Rally <code>17c76b52d</code>). <b>Not done yet:</b> merge into the library's main, Lab tests, Lab pointer commit, cursor check by hand.</p>
+<h3>Checks</h3>
+<ul><li>Migration check: the five Rally states with their own effects match their old time, ease, cursor and HUD values (ease curve not compared); Settings follows its parent, as intended.</li>
+<li>GUID grep of scenes, prefabs and assets: only <code>PauseStateSO.asset</code> used an old script; it is now a <code>StateSO</code>.</li>
+<li>Rally compiles clean; module EditMode 77/77 (was 86; the deleted tests covered deleted code).</li>
+<li>Parity: 9/9 scenarios PASS with KeepLast (Rally's setting), virtual devices. SetToOne was not rerun (task 6 does not touch it). The JSON was not compared with the baseline by hand in this run.</li>
+<li>The owner's modified files hash the same before and after the parity run.</li></ul>
+<h3>Effect on developers</h3><p>The old components, registries, conditions, <code>PauseStateSO</code> and old <code>StateSO</code> fields are gone. A project with old-format state assets can no longer migrate them with this version.</p>
+<h3>Decisions made without you</h3><table><tr><th>Decision</th><th>Why</th></tr>
+<tr><td>Deleted the migration tool, its tests, <code>StateTimeScaleTargetTests</code> and four one-off scripts in <code>AgentScripts/GameManagementRework</code>.</td><td>They read the deleted fields or types.</td></tr>
+<tr><td><code>GameCursorController</code> stays, without its old registry path.</td><td>The effect sink uses it.</td></tr>
+<tr><td><code>StateAudioVolumeController</code> treats a state with parents as a sub-state.</td><td>Replaces <code>IsSubState</code>.</td></tr>
+<tr><td>Module README rewritten for the new system.</td><td>It described the deleted one.</td></tr></table>
+<h3>Budget</h3><p>Given 5%, raised to 6.5%. The warn point fired (README and handoff kept short). The tool read about 8% after parity; the 5-hour window rose 4 points while parity ran, and how much of that was this session was not checked.</p>
 </body></html>
