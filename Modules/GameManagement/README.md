@@ -13,10 +13,10 @@ the `GameStates.Changed` event. From a scene, add components:
 
 | Component | What it is for |
 |---|---|
-| `EnterOnSceneStart` | Enters a state when the scene starts (Play in a level) |
-| `StateRequester` | UnityEvent buttons: Enter, Leave or Toggle a dragged state |
-| `InputToggleRequest`, `BackRequest` | Pause and Back from input actions |
-| `EventRequest`, `PollRequest`, `WhenLeavesGoTo` | Requests from events, from a condition you write, or after a state leaves |
+| `SceneStartRequester` | Enters a state when the scene starts (Play in a level) |
+| `StateButtonRequester` | UnityEvent buttons: Enter, Leave or Toggle a dragged state |
+| `InputToggleRequester`, `BackRequester` | Pause and Back from input actions |
+| `EventRequester`, `PollRequester`, `NextStateRequester` | Requests from events, from a condition you write, or after a state leaves |
 | `StateMenuReactor`, `HudToggleReactor`, `StateAudioReactor`, `GameStateAudioTrigger` | Menus, HUD and sounds that follow the states |
 
 ## Setup
