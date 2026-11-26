@@ -19,7 +19,7 @@ the final words.
 
 ## Starting point (Session 4 updates this)
 
-- **Session 4 is done (2026-11-26):** the old system, the old `StateSO` fields and the migration tool are deleted; Rally and `Samples/01 Minimal Game` run on `GameStates`, adapters and reactors. Module EditMode tests: 77. `GameCursorController` stays (now fed only by the effect sink; `UseMachineCursor` / `MachineCursor` are rename candidates). Task 0 below does not apply. Check the handoff for the hand cursor check.
+- **Session 4 is done (2026-11-26):** the old system, the old `StateSO` fields and the migration tool are deleted; Rally and `Samples/01 Minimal Game` run on `GameStates`, adapters and reactors. Module EditMode tests: 77. `GameCursorController` stays (now fed only by the effect sink; `UseMachineCursor` / `MachineCursor` are rename candidates). Task 0 below does not apply. The owner's hand cursor check passed.
 - Already built: Sample 01 on the new system (keyboard, controller and UI paths tested with real input in Rally 6.3 and the Lab 7); input maps by `InputActionReference`; `BackRequest.alsoLeave`; menus hide while covered. Library `main` holds the merge of `game-management-rework`.
 - `Runtime/Adapters/` holds 12 scripts; `...Request` adapters become `...Requester` (glossary, 2026-11-26). The owner flagged `WhenLeavesGoTo`, `FollowUpRule` and `RisingEdge` (see NAMING.md).
 
