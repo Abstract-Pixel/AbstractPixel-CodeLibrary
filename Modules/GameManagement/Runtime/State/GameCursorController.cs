@@ -7,7 +7,7 @@ namespace AbstractPixel.GameManagement
 {
     /// <summary>
     /// The one place that writes Cursor.visible and Cursor.lockState.
-    /// The cursor follows the highest active game state (its IsCursorVisible/LockedOnExecution settings),
+    /// The cursor follows the cursor effect of the top game state,
     /// except while a controller is the active device: then it stays hidden and locked in every state,
     /// so it never hovers buttons or sits in the middle of a menu.
     /// It is recomputed whenever a state applies or leaves, and whenever the active device family changes,
@@ -23,10 +23,9 @@ namespace AbstractPixel.GameManagement
         // cursor watches the mouse itself. Cleared when the tracker reports a new device.
         private static bool hasMouseBeenPickedUp = false;
 
-        // Set by the new machine's Unity sink. While set, it replaces the old registry's state lookup.
         private static GameCursorMode? machineCursor;
 
-        /// <summary>The cursor the new state machine asked for, or null while the old system drives the cursor.</summary>
+        /// <summary>The cursor the state machine asked for, or null before the first state applies one.</summary>
         public static GameCursorMode? MachineCursor
         {
             get { return machineCursor; }
@@ -39,7 +38,7 @@ namespace AbstractPixel.GameManagement
             Refresh();
         }
 
-        /// <summary>Hands the cursor back to the old state registry.</summary>
+        /// <summary>Forgets the requested cursor, leaving the cursor as it is.</summary>
         public static void StopUsingMachineCursor()
         {
             machineCursor = null;
@@ -48,12 +47,6 @@ namespace AbstractPixel.GameManagement
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Initialize()
         {
-            // The registry resets its events at SubsystemRegistration, which runs before this.
-            GameStateRegistry.OnStateConfigurationsApplied -= HandleStateChanged;
-            GameStateRegistry.OnStateConfigurationsApplied += HandleStateChanged;
-            GameStateRegistry.OnStateUnregistered -= HandleStateChanged;
-            GameStateRegistry.OnStateUnregistered += HandleStateChanged;
-
             InputDeviceTracker.OnDeviceFamilyChanged -= HandleDeviceFamilyChanged;
             InputDeviceTracker.OnDeviceFamilyChanged += HandleDeviceFamilyChanged;
 
@@ -78,33 +71,11 @@ namespace AbstractPixel.GameManagement
                 return;
             }
 
+            // With nothing requested yet, keep the cursor as it is.
             if (machineCursor.HasValue)
             {
                 ApplyCursor(CursorModeRule.IsVisible(machineCursor.Value), CursorModeRule.IsLocked(machineCursor.Value));
-                return;
             }
-
-            StateSO highestState = GameStateRegistry.GetCurrentHighestState();
-            if (highestState == null)
-            {
-                // Between scenes no state is active: keep whatever the last state set.
-                return;
-            }
-
-            bool hasStateApplied = GameStateRegistry.AreConfigurationsApplied(highestState);
-            if (!hasStateApplied)
-            {
-                // The state is still in its execution delay (e.g. Game Over waits for the explosion):
-                // the cursor changes together with the rest of its configuration, not before.
-                return;
-            }
-
-            ApplyCursor(highestState.IsCursorVisibleOnExecution, highestState.IsCursorLockedOnExecution);
-        }
-
-        private static void HandleStateChanged(StateSO _state)
-        {
-            Refresh();
         }
 
         private static void HandleDeviceFamilyChanged(DeviceFamily _deviceFamily)
