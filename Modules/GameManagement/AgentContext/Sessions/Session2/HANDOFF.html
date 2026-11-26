@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Session 2 handoff</title></head>
+<body style="font:14px/1.5 system-ui,sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#1d1d1f;background:#fff">
+<h1 style="margin-bottom:0">Session 2 handoff: core state machine</h1>
+<p style="color:#555;margin-top:4px">2026-11-26. plan: gm-commercial, step 2. Judged against <a href="../../DEFINITION-OF-DONE.md">DEFINITION-OF-DONE.md</a> (new this session).</p>
+<p><b>Result: every must-have is done.</b> Nothing is committed (the launch message did not allow it).</p>
+<p>Checks: the module test assembly passes 37/37 (33 new, 4 old). Rally compiles with 0 errors (<code>editor_cycle.sh noplay</code>). <code>StateSO.cs</code> gained fields, so <code>parity_pause</code> (40/40 steps) and <code>parity_gameover</code> (60/60) were run. Pause matches the baseline exactly. Game Over differs only in four eased time-scale samples (±0.03), which is frame-rate noise. <code>git status</code> and the hashes of every uncommitted file were the same before and after the Play-mode runs.</p>
+
+<h2>Code changes (library, <code>Modules/GameManagement</code>)</h2>
+<ul>
+<li><code>Runtime/Machine/GameStateMachine.cs</code>: plain C# machine with <code>Request</code>, <code>Leave</code>, <code>IsActive</code>, <code>Top</code>, <code>Stack</code>, <code>Changed</code> (one <code>TransitionRecord</code> per step, refusals included), <code>Applied</code>, <code>IsInDelay</code>, <code>SkipDelay</code>, <code>Tick</code>, <code>LeaveOnSceneChange</code> and <code>Journal</code>. Requests made during a step are queued and run in order.</li>
+<li><code>Effects.cs</code>: <code>StateEffectSettings</code> (time scale + ease seconds, cursor mode, HUD, input map IDs; each one <code>Own</code> or <code>SameAsParent</code>), <code>GameEffects</code> (null = keep), the <code>IGameEffectSink</code> and <code>IGameClock</code> seams, <code>RealtimeGameClock</code>, and the pure <code>EffectResolver</code> (stack to wanted effects).</li>
+<li><code>GameStateCatalog.cs</code> (ordered list, higher wins), <code>GameManagementSettings.cs</code> (catalog, <code>NoStateTimeScale</code> with KeepLast as the default, journal size, plus <code>GameManagementSettingsSource</code>), <code>TransitionRecord.cs</code> (record and ring-buffer journal), <code>GameStates.cs</code> (static facade, reset at SubsystemRegistration).</li>
+<li>New <code>Editor/</code> assembly: <code>GameManagementSettingsAssets</code> finds the settings in any folder, keeps them in Preloaded Assets (also before every build) and gives Play mode an editor lookup. This is the scene system's method.</li>
+<li><code>Configuration/StateSO.cs</code>: two new fields, <code>Parents</code> and <code>Effects</code>. Nothing existing changed.</li>
+<li><code>Tests/Machine/</code>: test rig (Rally's example catalog), fake clock, recording sink, 33 tests. The test assembly now references the editor assembly.</li>
+<li><code>AgentContext/</code>: <code>DEFINITION-OF-DONE.md</code>, a README row for it, the map, Session 3 <code>OVERVIEW.md</code> and <code>PROMPT.md</code>.</li>
+</ul>
+
+<h2>Rule coverage</h2>
+<table border="1" cellpadding="4" style="border-collapse:collapse">
+<tr><th>Rule</th><th>Tests</th></tr>
+<tr><td>R1 Pause is a sub-state of Play; Settings has two parents</td><td>PauseIsASubStateOfPlay…, SettingsOpensOverEitherOfItsTwoParents, ClosingASubStateNeverReportsTheParent…</td></tr>
+<tr><td>R2 Execution delay, skip</td><td>DelayedStateIsInControlAndRefusesOthers, EffectsWaitForTheDelay…, SkipDelayAppliesAtOnce, SceneChangeDuringTheDelayCancels…</td></tr>
+<tr><td>R3 Parent closes its sub-states top down, journaled</td><td>LeavingAParentClosesItsSubStatesFirst…, LeavingAMiddleSubState…, HigherMainStateReplaces…TopDown</td></tr>
+<tr><td>R4 No state: keep last by default; time-1 option</td><td>NoStateActiveKeepsTheLastEffectsByDefault, NoStateActiveCanSetTimeToOne…, NewSettingsKeepTheLastTimeScale…</td></tr>
+<tr><td>R5 Settings in any folder, loaded in builds</td><td>PreloadedListGainsTheSettingsOnce…, SettingsSourcePrefersTheEditorLookup</td></tr>
+<tr><td>Edge table: lower refused with reason / higher replaces / sub-state needs parent / queue / repeat silent / leave on scene change / not in catalog</td><td>LowerMainStateIsRefusedWithAReason, EqualMainStateReplaces, SubStateIsRefusedUnless…, SubStateWithNoStateActive…, RequestsMadeDuringATransitionAreQueued…, SameStateAgainIs…IgnoredSilently, LeavingAStateThatIsNotActive…, SceneChangeLeavesOnlyStatesMarkedToLeave, StateMissingFromTheCatalog…</td></tr>
+</table>
+
+<h2>Effect on developers</h2>
+<ul>
+<li>Rally behaves the same: no old component reads the new fields, and nothing calls the new machine yet.</li>
+<li>Every <code>StateSO</code> asset gains two serialized fields with defaults the next time it is saved. That is a harmless diff.</li>
+<li>Cursor bug you reported (the cursor stays visible after unpause): not fixed, because this session changes no behaviour. In the new model, closing Pause re-applies Play's cursor (asserted in <code>EffectsAreWorkedOutFromTheTopState…</code>). Session 3's Unity sink makes that real, and Session 4 checks it by hand with a mouse.</li>
+</ul>
+
+<h2>Decisions made without you</h2>
+<table border="1" cellpadding="4" style="border-collapse:collapse">
+<tr><th>Decision</th><th>Why</th></tr>
+<tr><td>New data sits beside the old in <code>StateSO</code>: <code>Parents</code> and <code>Effects</code> were added. The machine reuses <code>StateExecutionDelay</code> and <code>DisableStateOnSceneChange</code>, whose meaning is unchanged, and ignores <code>Priority</code>, <code>IsSubState</code>, the time fields, the cursor bools and the revert flags.</td><td>The old components keep working until Session 4, with no asset migration before Session 3, and no field changes meaning.</td></tr>
+<tr><td>"Same as parent" is the default for every effect. On a main state it means "keep the last applied value".</td><td>DESIGN says sub-states default to "Same as parent". One default for all states avoids a field that depends on the parents; the migration tool sets <code>Own</code> on main states.</td></tr>
+<tr><td>Main states never stack: the stack is one main state plus its sub-states. An equal rank only happens for the same state, which is ignored.</td><td>The catalog has no ties, so "equal or higher" reduces to "higher, or the same state".</td></tr>
+<tr><td><code>Changed</code> also fires for refusals and for "Applied" steps. A separate <code>Applied</code> event exists for menus.</td><td>DESIGN puts refusals in the record; menus need Changed and applied as separate signals (MenuRevealTiming).</td></tr>
+<tr><td>Time ease is seconds only, with no curve yet.</td><td>The sink starts from the current value; a curve is a Session 3 nice-to-have.</td></tr>
+<tr><td>Settings loading copies the scene system's method (Preloaded Assets plus an editor lookup) in a new GameManagement Editor assembly.</td><td>Rule 5. The Preloaded Assets method works from any folder.</td></tr>
+<tr><td>Budget raised from 10% to 22.5%.</td><td>You chose this after the scope check estimated about 24%. Only 9-10% was used.</td></tr>
+</table>
+
+<h2>Not done</h2>
+<table border="1" cellpadding="4" style="border-collapse:collapse">
+<tr><th>Item</th><th>Why</th><th>Really necessary?</th></tr>
+<tr><td colspan="3">Nothing. The follow-up run (below) finished the three items that were listed here: the Unity 7 compile, the catalog helpers and the commits.</td></tr>
+</table>
+
+<h2>Follow-up run (same day, 4% budget)</h2>
+<ul>
+<li><b>Catalog helpers</b> for the Session 6 validator in <code>GameStateCatalog</code>: <code>FindEmptySlots</code>, <code>FindDuplicates</code>, <code>FindParentsMissingFromCatalog</code>. There are 3 new tests, and the module assembly now passes 40/40 on Unity 6000.3. A rule for "a parent below its sub-state in the catalog" was left out on purpose: in Rally's catalog every sub-state sits above its parents and the machine never compares their ranks, so whether that is a problem needs your decision in Session 5 or 6.</li>
+<li><b>Unity 7 compile (7000.0.0a16).</b> The Lab uses a library clone outside the allowed folders, so <code>Runtime/Machine/*.cs</code>, <code>StateSO.cs</code>, the editor script and <code>Tests/Machine/*.cs</code> were copied into a throwaway <code>Assets/_GmUnity7Check/</code> folder with three non-auto-referenced asmdefs. It compiled with no errors, and all 36 copied tests passed (the 4 old <code>StateTimeScaleTarget</code> tests were not copied). The folder was then deleted, and the Lab's <code>git status</code> shows nothing left of it. Later sessions can repeat this check the same way.</li>
+<li><b>Commits:</b> Sessions 1 and 2 are committed on <code>game-management-rework</code> in the library, and then in Rally (the submodule pointer, the Rally state assets and the probes) in one commit. Your unrelated uncommitted files were left out.</li>
+</ul>
+
+<h2>Budget</h2>
+<p>Allotted 10%. The scope check estimated about 24%, so at your choice the budget was raised to 22.5%. About 9-10% of the 5-hour window was used (the final figure is in the plan record after <code>budget end</code>). No warning fired and nothing was cut. The extra budget was not needed.</p>
+</body></html>

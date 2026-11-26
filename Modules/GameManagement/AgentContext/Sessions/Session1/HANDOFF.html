@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Session 1 handoff</title></head>
+<body style="font:14px/1.5 system-ui,sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#1d1d1f;background:#fff">
+<h1 style="margin-bottom:0">Session 1 handoff: foundation and parity baseline</h1>
+<p style="color:#555;margin-top:4px">2026-11-26. plan: gm-commercial, step 1. Autonomous run, no questions asked.</p>
+<p><b>Result: all must-haves are done, with one gap: this branch was not compiled on Unity 7 (see Not done).</b> Nothing is committed.</p>
+<p>Checks: Rally compiles with 0 console errors. Module tests 4/4 passed. All 9 parity scenarios passed in the final batch, and their recordings are in <code>AgentContext/Parity/baseline/</code>. A scenario passing means it ran through; the recordings include the odd behaviour listed below.</p>
+
+<h2>Code changes</h2>
+<ul>
+<li><b>Branches.</b> <code>game-management-rework</code> in both repos. Neither <code>main</code> contains the scene-system tip, so the library branch starts at <code>scene-system-rework</code> (3658192) and Rally at <code>scene-system-rework-3c</code> (62ab5f7a7). No uncommitted file was touched by the switch.</li>
+<li><b>Library.</b> <code>Modules/GameManagment</code> is now <code>Modules/GameManagement</code>; the runtime asmdef file is renamed. Metas moved with them, so GUIDs are unchanged. The renames are staged with <code>git mv</code>. New: <code>README.md</code>, <code>GLOSSARY.md</code>, <code>Tests/</code> (4 test cases), <code>AgentContext/FLOWS.md</code> and <code>Parity/</code>, a CHANGELOG entry, tickets 01 and 03 and the map, Session 2 documents. The library <code>CLAUDE.md</code> (untracked) no longer lists the old typo.</li>
+<li><b>State assets.</b> The 7 assets and their metas are in Rally's <code>ProjectServices/GameManagment/States/</code> (byte-identical copies) and removed from the library. Reference counts per GUID match before and after. MainMenu, levels 2-4, GameBootScene and GameManagment.prefab show 0 missing scripts and 0 broken module references (<code>AgentScripts/GameManagementRework/ReferenceCheckProbe.cs</code>).</li>
+<li><b>Rally.</b> Path fixed in 4 <code>AgentScripts/ControllerHaptics</code> probes and the rally-review domain map; module name fixed in <code>CLAUDE.md</code>.</li>
+<li><b>Parity tooling.</b> <code>Probes/Runner/ParityRecorder.cs</code>, <code>ParityRecording.cs</code>, <code>ParityJsonWriter.cs</code>; new scenario steps <code>parityStart</code> and <code>reloadLevel</code> and condition <code>topState</code>; 9 <code>parity_*.json</code> scenarios.</li>
+</ul>
+
+<h2>Effect on developers</h2>
+<ul>
+<li>Use the path <code>Modules/GameManagement</code>. C# namespaces and the assembly name did not change.</li>
+<li>The library no longer ships state assets. Another project that used the library's 7 assets would lose them when it updates; it must copy them first, with metas. Check the Lab before its library moves to this branch.</li>
+<li>Commit the Rally state assets and the library deletion together. A library pointer without the Rally files breaks every state link.</li>
+<li>The game behaves the same: no runtime C#, scene or prefab was changed.</li>
+</ul>
+
+<h2>Findings (details in FLOWS.md)</h2>
+<ol>
+<li><b>After unpause, no state is active.</b> The Pause-to-Play trigger that DECISIONS assumes exists is in no scene or prefab, nor in HEAD. Gamepad play looks fine. By the code, mouse and keyboard players would keep Pause's free, visible cursor. <b>Please check this by hand on a mouse; it may be a bug on your current build.</b> It was not tested with a mouse.</li>
+<li>The state HUD toggle's <code>Container</code> stays hidden after unpause. Two stills in level 2 show no visible difference.</li>
+<li>Quit or Restart from pause sets time to 1 while the old level is still loaded; its bomb ticks 0.02-0.03 s.</li>
+<li>A scene change during Game Over's delay leaves time at about 0.6 for the whole change.</li>
+<li>GameWin leaves the Player input map on.</li>
+<li>By the code, Settings from pause replays the unpause and pause sounds.</li>
+<li><code>CarDeathSequence</code> also writes <code>Time.timeScale</code>, a second time owner the redesign must absorb.</li>
+<li>In every recorded scene change the new car was held and the new bomb did not tick until release. No soft-lock appeared.</li>
+<li><code>revert_probe_churn.sh</code> runs <code>git checkout</code> on files that held your uncommitted work tonight (the Exo2-Regular font asset at least). It was not run.</li>
+</ol>
+
+<h2>Decisions made without you</h2>
+<table style="border-collapse:collapse" border="1" cellpadding="5">
+<tr><th>Decision</th><th>Why</th></tr>
+<tr><td>Raised the budget from 8% to 22%</td><td>The scope check estimated about 24% from similar tasks, and your message allowed more.</td></tr>
+<tr><td>No commits</td><td>The task file allows them only if your launch message does; it did not.</td></tr>
+<tr><td>Used the branch fallback</td><td>Neither main holds the scene-system tip.</td></tr>
+<tr><td>Backed up your modified files to the scratchpad and compared them afterwards, instead of running the churn script</td><td>The script can discard uncommitted work.</td></tr>
+<tr><td>Every parity run uses the throwaway save</td><td>So no run writes your real save. Steam writes are blocked by SteamWriteGuard (toggle checked: off).</td></tr>
+<tr><td>Sped up the bomb wait with time scale 6, back to 1 before it ends</td><td>Saves minutes per run; the recorded end of the level runs at normal speed.</td></tr>
+<tr><td>Break scenario 5 calls Retry's API directly</td><td>No button can be pressed during the 1.4 s delay.</td></tr>
+<tr><td>Identical consecutive frames share one entry with a count</td><td>Every frame is still covered and the files stay readable.</td></tr>
+<tr><td>Wrote my own JSON writer</td><td>JsonUtility returns empty output for types compiled by run_script.</td></tr>
+<tr><td>Did not load or edit the separate library clone the Lab uses</td><td>It is outside the folders the task allows.</td></tr>
+</table>
+
+<h2>Editor crashes and pop-ups</h2>
+<ul>
+<li><b>No crashes and no modal dialogs</b> were seen; no button was pressed on your behalf.</li>
+<li><b>Folder lock (not a pop-up).</b> <code>git mv</code> of the module folder failed with "Permission denied" while the Editor was open. The process holding it was not identified. The files were moved one level down at a time, then one by one, all 27 context files arrived, and the empty old folders were removed.</li>
+<li><b>Save isolation.</b> In the final batch, the first run printed "save isolation End failed" after parity_menu had passed. The cause was not investigated. Later runs reset the flag, and it was checked at the end: <code>UseDebugPath</code> is 0 and <code>SaveSystemConfigSO.asset</code> is unchanged.</li>
+<li><b>Play-mode churn.</b> The runs rewrote 7 files that had your uncommitted changes (2 Exo2 fonts, the TWOFOLD font, 2 skybox and 2 transition materials). They were restored from a backup taken before any work, and match it byte for byte. <code>GameManagment.prefab</code> (one bridge ID line) and the Exo2-Black font, clean before, were restored from git. Only <code>ProjectRallyShift.slnx</code> differs from the backup, because Unity regenerated it for the renamed and new assemblies. Your open sample scenes were reopened; keyboard, mouse and gamepad are enabled. The Lab was only read.</li>
+<li>A command of mine hung on a stray <code>cat</code> waiting for input. I stopped it; the Editor was not involved.</li>
+<li>Console errors on every run, present independently of this work: Steam init failed, and BroAudio "Audio Clip is not assigned in MainMenuTrack". The second probably comes from your uncommitted deletion of the menu music files (not verified).</li>
+</ul>
+
+<h2>Not done, and whether it is needed</h2>
+<table style="border-collapse:collapse" border="1" cellpadding="5">
+<tr><th>Item</th><th>Why</th><th>Really necessary?</th></tr>
+<tr><td>Compile this branch on Unity 7</td><td>The Lab builds from <code>ExternalCodeAssets/AbstractPixel-CodeLibrary</code>, not this submodule, and that folder is out of bounds. Its pipeline package has no run_script. The Lab console showed 0 errors, which says nothing about this branch.</td><td><b>Yes, before merging to library main.</b> Low risk: no module C# changed, only paths, asset removal and one test.</td></tr>
+<tr><td>Commits</td><td>Not allowed by the launch message.</td><td><b>Yes.</b> Review and commit before Session 2.</td></tr>
+<tr><td>Mouse and keyboard recording (cursor values)</td><td>Probes use a virtual gamepad. Those FLOWS values come from code.</td><td><b>Yes, before Session 4's gate</b>, and finding 1 deserves a quick hand check now.</td></tr>
+<tr><td>Recordings for death by health, death by monster, device switching, blur, rumble, run timer, finish gate sounds, tablet lighting</td><td>Listed in FLOWS from code only. They are not in your must-record list.</td><td>No. Check blur, rumble and run timer by hand in Session 4, where their scripts change.</td></tr>
+<tr><td>Audio output check</td><td>Only the ducking state is recorded.</td><td>No for automation. Listen once in Session 4.</td></tr>
+<tr><td>Break scenarios with "set time to 1"</td><td>The option does not exist yet.</td><td>Yes, in Session 4 (DECISIONS round 3 item 7).</td></tr>
+<tr><td>Parity compare script (nice-to-have)</td><td>Skipped; the parity README gives a manual diff command, which has not been tried on a second run.</td><td>Probably worth 30 minutes in Session 4; not needed before.</td></tr>
+<tr><td>Second pass that checks baseline stability</td><td>Runs were not diffed against each other, so frame-dependent noise is not measured.</td><td>Yes, once, at the start of Session 4.</td></tr>
+<tr><td>LSP findReferences for the user list</td><td>grep was used, which also covers AgentScripts and YAML.</td><td>No.</td></tr>
+<tr><td>Fix <code>revert_probe_churn.sh</code></td><td>Out of scope.</td><td>Recommended: it can silently discard work.</td></tr>
+<tr><td>Rename Rally's own <code>GameManagment</code> folder</td><td>Deferred to you by the plan.</td><td>No. Cosmetic.</td></tr>
+</table>
+
+<h2>Rally folder reference count</h2>
+<p>Text references to <code>ProjectServices/GameManagment</code> in .cs, .md, .json, .sh, .ps1, .asset and .asmdef files: <b>20 lines in 16 files</b> (Assets/[1]Project 1, AgentScripts 14 in 13 files, .agents 4, .claude/skills 1). Six of the AgentScripts lines were added this session. Unity links by GUID are unaffected by a rename.</p>
+
+<h2>Improvement ideas</h2>
+<ul>
+<li>Session 4 should list findings 1, 2 and 3 of FLOWS.md as intended improvements, so they do not read as parity failures.</li>
+<li>Remove or commit your pending changes before Session 4; they make every churn check manual.</li>
+</ul>
+
+<h2>Budget</h2>
+<p>The task file allotted 8%. The scope check fired at the start (about 24% expected), and the budget was raised to 22%. <b>Final spend: 14% of the 5-hour window</b>, 6 points over the original 8%. No other warning fired (the warn point of the raised budget was 14.4%), so nothing was cut for budget. Most of the spend went on the flow inventory and the recorder. The budget was started without <code>plan: gm-commercial</code>, so step 1 is marked done in the plan but shows 0% spent; use 14%. The plan's 8% slack figure is wrong for the same reason: counting 14% for step 1, the total is 2 points over its 77%.</p>
+</body></html>
