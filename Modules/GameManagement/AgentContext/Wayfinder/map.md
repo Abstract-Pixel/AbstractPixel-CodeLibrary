@@ -51,3 +51,4 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 - Asset Store packaging, demo art, translations, old Input Manager, audio backends other than BroAudio.
 
 - 2026-11-26 Session 4 (partial): S3 committed; Sample 01 on the new system, flow test passes in Rally; Lab blocked (branch behind main). Next: Session 4 continues from task 2. See Sessions/Session4/HANDOFF.html.
+- 2026-11-26 Session 4 (second run): scene start-up preference fix; Esc/Back/controller and covered menus fixed in Sample 01; input maps by `InputActionReference` (task 2 code); merged into library main; sample and EditMode tests pass in Rally 6.3 and Lab 7. Rally asset migration, Rally switch-over, gate and old-system deletion not done. See Sessions/Session4/HANDOFF.html.

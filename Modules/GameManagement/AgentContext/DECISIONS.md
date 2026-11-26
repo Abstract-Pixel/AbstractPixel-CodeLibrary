@@ -97,3 +97,12 @@ own commercial-ready plan).
 ## 2026-11-26 (Session 4): sample on the new system only
 
 The owner decided Sample 01 Minimal Game is built on the new state machine only, not on the old components first. Its `Parity/baseline.json` is recorded on the new system in Rally (Unity 6.3) and the Unity 7 Lab run must match it. Session 4 task 4 (migrate the sample) is dropped.
+
+## 2026-11-26 (Session 4, second run): owner calls
+
+- **Test as the developer and the player would.** Added to DEFINITION-OF-DONE.md (item 5) and the library CLAUDE.md. Reason: the button-only flow test missed that Esc never paused Sample 01 and that Settings left the Pause menu showing.
+- **Input is configured, never hard-coded, like Rally's old system.** Each adapter takes one `InputActionReference`; each device is one binding on that action (Pause: Esc, Start, the left Share/Select button; Back: Backspace, the East button). Adapters enable their action.
+- **Back goes back one step by default; `BackRequest.alsoLeave` leaves more states** (Settings straight back to Play when Pause is listed). One press goes back once, so Settings > Back stops at Pause. Back on Pause resumes Play.
+- **A menu hides while a sub-state covers its state** (`StateMenuReactor.hideWhileCovered`, on by default) and shows again when the sub-state leaves.
+- **Scene system: the preference "Open a scene in no group with the default scene set" now also decides Play.** Off: a scene in no group plays alone, with no manager or shared scenes (replaces 4B Q5 "Play always loads them").
+- **`game-management-rework` is merged into library `main`, not the other way round.** Merging `main` into the branch would break Rally (it removes `[Savable]`/`SaveCategory`, so Rally would need the save-system V2 migration, which the owner does not want now). The Lab is on `main` with the merge commits; Rally stays on `game-management-rework`.

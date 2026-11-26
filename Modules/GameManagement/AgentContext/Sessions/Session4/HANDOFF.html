@@ -1,62 +1,61 @@
 <!doctype html><html><head><meta charset="utf-8"><title>Session 4 handoff</title>
 <style>body{font:15px/1.5 system-ui,sans-serif;max-width:900px;margin:24px auto;padding:0 16px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:4px 8px;text-align:left;vertical-align:top}code{background:#f2f2f2;padding:0 3px}</style></head><body>
-<h1>Session 4 handoff: Session 3 commit and Sample 01 on the new system</h1>
-<p>plan: gm-commercial, step 4. Date 2026-11-26. <b>Partly done.</b> Session 3 is committed, and Sample 01 runs on the new state machine and passes its flow test in Rally. Rally's migration, the parity gate and deleting the old system were not started. The Unity 7 Lab run is blocked (see below).</p>
+<h1>Session 4 handoff (two runs)</h1>
+<p>plan: gm-commercial, step 4. Date 2026-11-26. <b>Partly done.</b> Sample 01 works with keyboard, controller and UI in Rally (Unity 6.3) and the Lab (Unity 7). Input maps are set by action reference. Not done: Rally's asset migration, switching Rally over, the parity gate, and deleting the old system (tasks 2b, 3, 5 and 6). Next session: <b>Session 4, from "Next session" below</b>.</p>
 
-<h2>Owner decision this session</h2>
-<p><b>The sample is built on the new system only</b> (owner, 2026-11-26, mid-session): "the sample is intended to work with the new system so that you can test it on the Unity 7 version". So no old-system baseline and no sample migration (old tasks 1 and 4). <code>Parity/baseline.json</code> is recorded on the new system in Rally (Unity 6.3) and is the reference the Lab (Unity 7) run must match. This needs adding to DECISIONS.md.</p>
+<h2>Commits (library; nothing pushed in run 2)</h2>
+<table><tr><th>Hash</th><th>Branch</th><th>What</th></tr>
+<tr><td>393950b, 3245276, f91859a</td><td>game-management-rework (pushed in run 1)</td><td>Session 3 work; Sample 01; Applied fix; first handoff</td></tr>
+<tr><td>b555a38</td><td>game-management-rework</td><td>S4-B1: a scene in no group plays without the default scene set when the preference is off</td></tr>
+<tr><td>28b4bc6</td><td>game-management-rework</td><td>S4-B2: Esc and Back work (adapters enable their action); Settings hides the Pause menu; the sample scene no longer references a Rally plugin; definition-of-done rule "test as the developer and the player would"</td></tr>
+<tr><td>2de8e25</td><td>game-management-rework</td><td>S4-B3: <code>BackRequest.alsoLeave</code>; one press goes back one step; controller in the sample (Select pauses, East goes back and closes Pause)</td></tr>
+<tr><td>045aade</td><td>game-management-rework</td><td>S4-B4: flow test routes input to the Game view (Input System 7 drops keys when the Game view is not focused)</td></tr>
+<tr><td>60d10e8</td><td>game-management-rework</td><td>S4-T2: input maps by <code>InputActionReference</code>; string IDs, attribute, drawer and dropdown deleted</td></tr>
+<tr><td>aef5005, bc80a40</td><td>main (in the Lab checkout)</td><td>Merges of game-management-rework into main, up to 045aade. <b>60d10e8 and the docs commit are not merged into main yet.</b></td></tr></table>
+<p>Rally: the submodule pointer is committed (see the final commit). Rally's other modified files (two skybox materials, a font asset, <code>ProjectRallyShift.slnx</code>, and the reserialised <code>GameManagment.prefab</code> and <code>GameOverStateSO.asset</code>) were left alone.</p>
 
-<h2>Commits (library, <code>game-management-rework</code>, pushed)</h2>
-<table><tr><th>Hash</th><th>What</th></tr>
-<tr><td>393950b</td><td>S3: all of Session 3's work, plus the Session 4 and 4B docs</td></tr>
-<tr><td>3245276</td><td>S4: Sample 01 Minimal Game; a state that changes no effect still raises Applied (fix plus test)</td></tr></table>
-<p>Rally: nothing committed. The submodule pointer moved but is not committed, and the owner's 4 modified Rally assets were left alone. The library's untracked <code>CLAUDE.md</code> was left alone.</p>
+<h2>The two bugs you found</h2>
+<table><tr><th>Bug</th><th>Cause</th><th>Fix and test</th></tr>
+<tr><td>A scene in no group still loads shared and contextual scenes with the preferences off</td><td>Start-up rule 6 (<code>StartUpRule.ChooseTemporaryGroup</code>) always used the default scene set at Play. The preference "Open a scene in no group with the default scene set" (Preferences &gt; Abstract Pixel &gt; Scenes) only acted in edit mode. Its tooltip said so ("Play always loads them").</td><td><code>StartUpPreferenceBridge</code> (Editor) hands the preference to <code>StartUpRule</code> before Play. Off: the temporary group has no scene set. Test <code>ASceneInNoGroupOpensNoSceneSetWhenTheDefaultSetIsTurnedOff</code> failed first (got the "Level" set), then passed. 229/229 SceneManagement EditMode tests pass. <b>Not checked by hand</b> in Rally Play mode with a no-group scene (see "Not verified").</td></tr>
+<tr><td>Settings opened from Pause leaves the Pause menu showing</td><td><code>StateMenuReactor</code> only hid when its own state left</td><td><code>StateWatch</code> raises Covered/Uncovered; the reactor hides while covered (<code>hideWhileCovered</code>, on by default). The flow test asserts it from Main Menu and from Pause. The old baseline had recorded the bug (both menus shown); corrected.</td></tr>
+<tr><td>Esc never paused the sample (found by you)</td><td><code>InputToggleRequest</code> and <code>BackRequest</code> subscribed to <code>performed</code> but never enabled the action. Only project-wide actions start enabled.</td><td>Both enable their action. The flow test now presses real keys and gamepad buttons (<code>InputSystem.QueueStateEvent</code>) and failed first ("Esc in Play opens Pause").</td></tr></table>
 
 <h2>Checks run</h2>
-<table><tr><th>Check</th><th>Result</th></tr>
-<tr><td>EditMode <code>AbstractPixel.GameManagement.Tests</code> (6000.3.15f1)</td><td>83/83 pass (82 before plus 1 new)</td></tr>
-<tr><td><code>editor_cycle.sh noplay</code></td><td>Compiles clean</td></tr>
-<tr><td>PlayMode <code>AbstractPixel.GameManagement.Samples.MinimalGame.Tests</code> in Rally</td><td>1/1 pass. 12 steps recorded to <code>Parity/baseline.json</code>. Retry checks that the scene change left Game Over.</td></tr>
-<tr><td>Unity 7 Lab</td><td><b>Blocked.</b> After moving the Lab's submodule to 3245276, the Lab does not compile: <code>Assets/SaveSystemLab/Tests/PlayMode/PlayModeRestartCheck.cs(23,42): 'SaveActions' does not contain a definition for 'GameProfiles'</code>. That API is on library <code>main</code> (84 commits not in <code>game-management-rework</code>). No tests were run in the Lab.</td></tr>
-<tr><td>Parity scenarios</td><td>Not run. No old runtime file was changed. The machine fix touches only the new system, which Rally does not use yet.</td></tr></table>
+<table><tr><th>Check</th><th>Rally 6000.3.15f1</th><th>Lab 7000.0.0a16</th></tr>
+<tr><td>GameManagement EditMode</td><td>86/86 after task 2 (88/88 before it removed the two dropdown tests and the "by id" test)</td><td>88/88 (at bc80a40, before task 2)</td></tr>
+<tr><td>SceneManagement EditMode (<code>Tests.Editor</code>)</td><td>229/229</td><td>229/229</td></tr>
+<tr><td>SceneManagement <code>Editor.Tests</code></td><td>544/544 (after the sample scene fix)</td><td>not run</td></tr>
+<tr><td>Sample 01 flow test (PlayMode, real keys and gamepad)</td><td>1/1, run twice: once to record the baseline, once to compare</td><td>1/1, matches the baseline recorded in Rally</td></tr>
+<tr><td>Compile</td><td>clean</td><td>clean</td></tr></table>
+<p>Real input: Esc, Backspace, gamepad Select and East went through the Input System as queued device events. The UI buttons were invoked, not clicked with a pointer. Cursor: once a keyboard is used, the free states show it (None, visible) and Play locks and hides it. Before any keyboard or mouse input, the "no mouse in use, hide the cursor" rule applies, which explains run 1's "always locked".</p>
 
-<h2>Lab left in a changed state: owner action needed</h2>
-<p>The Lab's library checkout is now detached at <code>3245276</code> (it was on <code>main</code> at <code>4b13882</code>). Unity 7 reimported and rewrote 34 <code>.meta</code> files under <code>Modules/InputRebinding/Rebinding UI/Icons/</code>. Discarding those files was refused by the permission classifier, so I stopped there. To put the Lab back: in <code>Abstract_Pixel_Lab/LocalPackages/AbstractPixelLibrary</code>, run <code>git checkout -- "Modules/InputRebinding/Rebinding UI/Icons"</code> then <code>git checkout main</code>. Nothing was committed in the Lab.</p>
+<h2>Lab compile error and the merge</h2>
+<p>Error: <code>Assets/SaveSystemLab/Tests/PlayMode/PlayModeRestartCheck.cs(23,42): 'SaveActions' does not contain a definition for 'GameProfiles'</code>. The Lab is written against library <code>main</code>. Merging <code>main</code> into <code>game-management-rework</code> broke Rally: 1 library error on 6.3 (<code>SavableBridge</code> calls a 6.6+ <code>FindObjectsByType</code> overload) and about 20 Rally errors (<code>[Savable]</code> and <code>SaveCategory</code> are gone, so it needs the V2 migration). I aborted that merge. As you asked, I merged <code>game-management-rework</code> into <code>main</code> in the Lab checkout instead. It had no conflicts and is not pushed. The Lab is on <code>main</code>; its only change is your <code>DebugDataBase.asset</code>. The Unity 7 icon <code>.meta</code> churn from run 1 is in <code>git stash</code> ("s4 lab unity7 reimport churn"), not discarded.</p>
+<p><b>Bug on main to fix:</b> <code>SavableBridge.cs:86</code> doesn't compile on 6.3. Guard it with <code>#if UNITY_6000_6_OR_NEWER</code> (the fix was tried and works; it was dropped with the aborted merge).</p>
 
-<h2>Code changes</h2>
-<table><tr><th>Files</th><th>What and why</th></tr>
-<tr><td><code>Runtime/Machine/GameStateMachine.cs</code></td><td>Bug found by the sample: a state whose effects equal the current ones (Settings over Main Menu or Pause) never raised Applied, so a <code>StateMenuReactor</code> waiting for Applied never opened. It now records Applied ("no effect changed") and raises the event without calling the sink. Rally's merged Settings would have hit the same bug. Added <code>UsesSettings</code>.</td></tr>
-<tr><td><code>Tests/Machine/GameStateMachineTests.cs</code></td><td><code>StateThatChangesNoEffectStillRaisesApplied</code></td></tr>
-<tr><td><code>Samples/01 Minimal Game/</code></td><td>Scene, 6 state assets plus catalog plus settings, a small input actions asset (Pause: Esc or Start; Back: Backspace or East), 2 scripts (<code>MinimalGameCounter</code>, <code>MinimalGameSceneFlow</code>), and a tests assembly (<code>MinimalGameFlowTests</code>, <code>MinimalGameFlowStep</code>, <code>MinimalGameFlowRecording</code>). Both assemblies have the <code>UNITY_EDITOR</code> constraint and autoReferenced off. README.html.</td></tr></table>
-
-<h2>Effect on developers</h2>
-<p>A working reference setup: <code>EnterOnSceneStart</code>, <code>InputToggleRequest</code> gated on Play, <code>StateRequester</code> on buttons, <code>StateMenuReactor</code> per menu, <code>HudToggleReactor</code>, <code>BackRequest</code>. The scene was generated by a builder script that I ran once and did not keep.</p>
-
-<h2>Decisions made without you</h2>
-<table><tr><th>Decision</th><th>Why</th></tr>
-<tr><td><code>MinimalGameSceneFlow</code> starts the machine with the sample's own settings (and replaces a machine built from other settings)</td><td><code>GameStates</code> otherwise picks any settings asset it finds, and in Rally that is not the sample's</td></tr>
-<tr><td>Retry and Quit reload the one sample scene. Retry then asks for Play.</td><td>One scene keeps the sample small. Main Menu is lowest in the catalog, so Quit has to go through a scene change.</td></tr>
-<tr><td>The flow test sets <code>LogAssert.ignoreFailingMessages</code></td><td>Rally's SaveSystem logs a NullReference when the sample scene replaces Rally's boot scene. That is host noise; the recorded steps are what the test checks.</td></tr>
-<tr><td>Applied is also raised when no effect changes</td><td>Otherwise menus never open (bug above)</td></tr></table>
-
-<h2>Findings</h2>
-<ul><li>In the test run the cursor reads Locked/hidden at every step, even on Free states. This is probably the "controller hides the cursor" rule or the test environment. Check it by hand with a mouse before trusting the cursor column.</li>
-<li><code>game-management-rework</code> is 84 commits behind library <code>main</code>. The Lab cannot compile it until main is merged in (owner's call).</li></ul>
+<h2>Task 2b dry run on Rally's 7 state assets (nothing applied)</h2>
+<p>Catalog order: GameWin &gt; GameOver &gt; PauseSettings &gt; StartSettings &gt; Start &gt; Pause &gt; Play. Problems: PauseSettings and StartSettings share priority 3; both Settings sub-states have no parents. <b>New finding:</b> Rally has no GameManagement settings or catalog asset, so <code>GameStates</code> in Rally finds the sample's settings. Rally needs its own settings and catalog before switching over.</p>
 
 <h2>Not done</h2>
-<table><tr><th>Item</th><th>Why</th><th>Needed?</th></tr>
-<tr><td>Sample flow test and module EditMode tests in the Unity 7 Lab</td><td>Lab compile blocked (above)</td><td>Yes. Merge <code>main</code> into <code>game-management-rework</code> first, or decide otherwise.</td></tr>
-<tr><td>Task 2: input maps by <code>InputActionReference</code> (remove <code>InputMapId</code>), then migrate Rally's state assets</td><td>Budget</td><td>Yes</td></tr>
-<tr><td>Task 3: switch Rally's scripts and probes to <code>GameStates</code></td><td>Budget</td><td>Yes</td></tr>
-<tr><td>Task 5: parity and 9 transition-break gate; cursor after unpause by hand</td><td>Budget</td><td>Yes</td></tr>
-<tr><td>Task 6: delete the old system</td><td>Budget (moves on, per PROMPT)</td><td>Yes</td></tr>
-<tr><td>Rally submodule pointer commit; DECISIONS.md entry for the owner's sample decision; Session 4B docs update</td><td>Budget</td><td>Yes, small</td></tr></table>
+<table><tr><th>Item</th><th>Why</th></tr>
+<tr><td>Task 2b: Rally's settings and catalog, migration Apply, merged Settings (parents Start and Pause), Pause parent Play, input maps by reference on Rally's states</td><td>Stopped at a clean point. The session's context was very long, and a half-migrated Rally would be worse than none. Budget was raised from 7% to 25%; about 15% used.</td></tr>
+<tr><td>Task 3: switch Rally's prefab, scenes and AgentScripts probes to <code>GameStates</code>; set up Rally's Back like the sample (East and Backspace, Back on Pause, decide <code>alsoLeave</code> for Pause Settings)</td><td>Same</td></tr>
+<tr><td>Task 5: parity scenarios and the 9 transition-break scenarios; cursor after unpause by hand with a mouse</td><td>Needs task 3</td></tr>
+<tr><td>Task 6: delete the old system</td><td>Needs task 5</td></tr>
+<tr><td>Merge 60d10e8 and the docs commit into <code>main</code>, then rerun the Lab tests</td><td>Next session, after task 2b</td></tr>
+<tr><td>Push</td><td>You said never push</td></tr></table>
 
-<h2>Next session should pick up</h2>
-<ol><li>Restore the Lab checkout (command above), or let the owner do it.</li>
-<li>Owner decision: merge library <code>main</code> into <code>game-management-rework</code> so the Lab compiles. Then run the module EditMode tests and the sample flow test in the Lab. The run must match <code>Samples/01 Minimal Game/Parity/baseline.json</code>.</li>
-<li>Continue Session 4 from task 2 (input maps by reference), then tasks 3, 5 and 6, before Session 4B starts. Old task 4 (migrate the sample) is gone.</li></ol>
+<h2>Not verified</h2>
+<ul><li>The scene-loading fix was not checked by hand in Rally Play mode on a scene in no group. Only the start-up rule test and the bridge's effect on tests were checked (Rally's preference reads off).</li>
+<li>The Pause menu was not clicked with a real mouse. Buttons were invoked, keys and gamepad buttons were simulated.</li>
+<li>Lab EditMode after task 2 (60d10e8): not run; that commit isn't on main yet.</li></ul>
+
+<h2>Next session (Session 4 continued)</h2>
+<ol><li>Read DEFINITION-OF-DONE.md item 5: test in Play mode with real input and real preferences.</li>
+<li>Task 2b: create Rally's GameManagement settings and catalog, run the migration (dry run above), merge the two Settings states, set parents, set input maps by action reference.</li>
+<li>Task 3, then 5 (including the cursor after unpause, checked by hand), then 6.</li>
+<li>Fix <code>SavableBridge.cs:86</code> on main; merge the branch into main; run the Lab tests.</li></ol>
 
 <h2>Budget</h2>
-<p>Allotted 13%. The scope check estimated about 22.7%, so must-haves came first and no budget was added. The "close to budget" warning fired at 7.8% while debugging the sample. I dropped the remaining tasks and went straight to the handoff. Used about 10% of the 5-hour window (final figure in the plan record).</p>
+<p>Given 7%. The scope check estimated 25%. As you instructed, I added 18% (total 25%) when the first fixes passed 4%, rather than dropping tasks. About 15% used. No wrap-up warning fired.</p>
 </body></html>
