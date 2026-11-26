@@ -10,13 +10,30 @@ namespace AbstractPixel.SceneManagement
     /// - Rule 3: An open scene, the active one first, is the main scene of a scene group in the settings list: that group. Two such scenes open: an error, and the first one wins.
     /// - Rule 4: The active scene is a manager or shared scene of a sample scene group: that sample scene group.
     /// - Rule 5: The active scene is a manager or shared scene: the start scene group, with one line saying why.
-    /// - Rule 6: The active scene is in no scene group: a temporary scene group built from the default scene set, with one warning.
+    /// - Rule 6: The active scene is in no scene group: a temporary scene group built from the default scene set, with one warning. No scene set when the Editor preference turns it off.
     /// - One rule for builds and Play: a build is the case where only build index 0 is open.
     /// - Plain data in and out: it never calls Unity's scene API.
     /// </remarks>
     public static class StartUpRule
     {
         private const string LogPrefix = "[Scene system] Start-up: ";
+        private static bool opensDefaultSetForSceneInNoGroup = true;
+
+        /// <summary>Whether rule 6 gives a scene in no group the default scene set's manager and shared scenes. On by default and in builds.</summary>
+        /// <remarks>
+        /// - The Editor sets it from the preference "Open a scene in no group with the default scene set" before Play.
+        /// - Off: the temporary scene group holds only the scene itself.
+        /// </remarks>
+        /// <summary>See <see cref="SetOpensDefaultSetForSceneInNoGroup"/>.</summary>
+        public static bool OpensDefaultSetForSceneInNoGroup
+        {
+            get { return opensDefaultSetForSceneInNoGroup; }
+        }
+
+        public static void SetOpensDefaultSetForSceneInNoGroup(bool _isOn)
+        {
+            opensDefaultSetForSceneInNoGroup = _isOn;
+        }
 
         /// <param name="_settings">The scene system settings, or null when the project has none.</param>
         /// <param name="_openScenesActiveFirst">The scenes Unity opened, the active scene first.</param>
@@ -325,9 +342,13 @@ namespace AbstractPixel.SceneManagement
             StartUpChoice choice = new StartUpChoice();
             choice.Kind = StartUpChoiceKind.TemporaryGroup;
             choice.MainScene = _activeScene;
-            choice.SceneSet = _settings.DefaultSceneSet;
+            choice.SceneSet = opensDefaultSetForSceneInNoGroup ? _settings.DefaultSceneSet : null;
 
             string setText = "no scene set (the project has no default scene set)";
+            if (!opensDefaultSetForSceneInNoGroup)
+            {
+                setText = "no scene set (the preference 'Open a scene in no group with the default scene set' is off)";
+            }
             if (choice.SceneSet != null)
             {
                 setText = "the default scene set '" + choice.SceneSet.name + "'";

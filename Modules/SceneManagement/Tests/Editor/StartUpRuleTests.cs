@@ -19,10 +19,13 @@ namespace AbstractPixel.SceneManagement.Tests
         private readonly List<Object> createdObjects = new List<Object>();
         private SceneSystemSettings settings;
         private SceneSet levelSet;
+        private bool opensDefaultSetBefore;
 
         [SetUp]
         public void CreateSettings()
         {
+            opensDefaultSetBefore = StartUpRule.OpensDefaultSetForSceneInNoGroup;
+            StartUpRule.SetOpensDefaultSetForSceneInNoGroup(true);
             levelSet = ScriptableObject.CreateInstance<SceneSet>();
             levelSet.name = "Level";
             levelSet.ManagerScenes.Add(new SceneReference(ManagerScene));
@@ -43,6 +46,7 @@ namespace AbstractPixel.SceneManagement.Tests
         [TearDown]
         public void DestroyCreatedObjects()
         {
+            StartUpRule.SetOpensDefaultSetForSceneInNoGroup(opensDefaultSetBefore);
             foreach (Object createdObject in createdObjects)
             {
                 Object.DestroyImmediate(createdObject);
@@ -102,6 +106,18 @@ namespace AbstractPixel.SceneManagement.Tests
             Assert.AreSame(levelSet, choice.SceneSet);
             StringAssert.Contains("CarTest", choice.WarningMessage);
             StringAssert.Contains("Create Scene Group", choice.WarningMessage);
+        }
+
+        [Test]
+        public void ASceneInNoGroupOpensNoSceneSetWhenTheDefaultSetIsTurnedOff()
+        {
+            StartUpRule.SetOpensDefaultSetForSceneInNoGroup(false);
+
+            StartUpChoice choice = StartUpRule.Choose(settings, Scenes("CarTest"));
+
+            Assert.AreEqual(StartUpChoiceKind.TemporaryGroup, choice.Kind);
+            Assert.AreEqual("CarTest", choice.MainScene.SceneName);
+            Assert.IsNull(choice.SceneSet, "with the preference off, a scene in no group loads no manager or shared scenes");
         }
 
         [Test]
