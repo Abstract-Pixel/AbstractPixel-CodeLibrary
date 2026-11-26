@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 namespace AbstractPixel.GameManagement
@@ -13,6 +14,8 @@ namespace AbstractPixel.GameManagement
         [SerializeField] private InputActionReference backAction;
         [Tooltip("States to leave as well when this one goes back. Empty: back returns to the state underneath (Settings goes back to Pause). Add Pause to go from Settings straight back to Play.")]
         [SerializeField] private List<StateSO> alsoLeave = new List<StateSO>();
+        [Tooltip("Called after a back press or Back() leaves the state, for example to play a click sound.")]
+        [SerializeField] private UnityEvent wentBack = new UnityEvent();
 
         // One press goes back one step: when Settings leaves, Pause is on top, and Pause's own back must not act on the same press.
         private static double lastHandledPressTime = -1d;
@@ -26,7 +29,10 @@ namespace AbstractPixel.GameManagement
         /// <summary>Leaves the state if it is on top. Also callable from a Back button.</summary>
         public void Back()
         {
-            StateRequests.Back(state, alsoLeave, name);
+            if (StateRequests.Back(state, alsoLeave, name))
+            {
+                wentBack.Invoke();
+            }
         }
 
         private void OnEnable()
@@ -56,6 +62,7 @@ namespace AbstractPixel.GameManagement
             if (StateRequests.Back(state, alsoLeave, name))
             {
                 lastHandledPressTime = _context.time;
+                wentBack.Invoke();
             }
         }
     }
