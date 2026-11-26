@@ -1,0 +1,17 @@
+{
+    "name": "AbstractPixel.SceneManagement.Relocation",
+    "rootNamespace": "AbstractPixel.SceneManagement",
+    "references": [
+        "AbstractPixel.Core",
+        "AbstractPixel.SceneManagement"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

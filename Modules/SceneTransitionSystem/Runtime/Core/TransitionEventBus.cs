@@ -1,3 +1,4 @@
+using AbstractPixel.Core;
 using System;
 using UnityEngine;
 
@@ -23,20 +24,20 @@ namespace AbstractPixel.SceneTransitions
 
         internal static void RaiseScreenStateChanged(ScreenState _state)
         {
-            OnScreenStateChanged.Invoke(_state);
+            SafeInvoke.Each(OnScreenStateChanged, _state);
             switch (_state)
             {
                 case ScreenState.Hiding:
-                    OnStartHideScreenTransition.Invoke();
+                    SafeInvoke.Each(OnStartHideScreenTransition);
                     break;
                 case ScreenState.Hidden:
-                    OnEndHideScreenTransition.Invoke();
+                    SafeInvoke.Each(OnEndHideScreenTransition);
                     break;
                 case ScreenState.Showing:
-                    OnStartShowScreenTransition.Invoke();
+                    SafeInvoke.Each(OnStartShowScreenTransition);
                     break;
                 default:
-                    OnEndShowScreenTransition.Invoke();
+                    SafeInvoke.Each(OnEndShowScreenTransition);
                     break;
             }
         }

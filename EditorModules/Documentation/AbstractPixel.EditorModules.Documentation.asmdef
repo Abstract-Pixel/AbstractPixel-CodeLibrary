@@ -1,0 +1,19 @@
+{
+    "name": "AbstractPixel.EditorModules.Documentation",
+    "rootNamespace": "AbstractPixel.EditorModules.Documentation",
+    "references": [
+        "AbstractPixel.Core",
+        "AbstractPixel.Core.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

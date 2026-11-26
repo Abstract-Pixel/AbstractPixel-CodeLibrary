@@ -1,0 +1,1666 @@
+/* The new page layout, for pages with a "layout new" line. Colours for kinds and states are in DocsDark.uss and DocsLight.uss. */
+.docs-page.docs-layout-new {
+    max-width: 1279px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 16px;
+    padding-bottom: 32px;
+}
+
+.docs-layout-new .docs-title-row {
+    margin-bottom: 12px;
+}
+
+.docs-layout-new .docs-paragraph {
+    max-width: 990px;
+    margin-bottom: 12px;
+}
+
+/* A concept starts with a full-width heading bar and room above it. */
+.docs-layout-new .docs-h2 {
+    margin-top: 32px;
+    margin-bottom: 0;
+    padding: 6px 8px;
+    background-color: var(--unity-colors-inspector_titlebar-background);
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-layout-new .docs-h3 {
+    margin-top: 20px;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+}
+
+.docs-layout-new .docs-list {
+    margin-bottom: 12px;
+    max-width: 990px;
+}
+
+.docs-layout-new .docs-list-row {
+    margin-bottom: 6px;
+}
+
+.docs-layout-new .docs-callout {
+    padding: 10px 12px;
+    margin-top: 4px;
+    margin-bottom: 14px;
+    max-width: 990px;
+}
+
+.docs-layout-new .docs-code {
+    margin-top: 4px;
+    margin-bottom: 14px;
+}
+
+.docs-layout-new .docs-steps {
+    margin-bottom: 12px;
+}
+
+.docs-layout-new .docs-step {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.docs-layout-new .docs-action {
+    margin-bottom: 12px;
+}
+
+/* Tables: roomy cells, a divider under every row. */
+.docs-layout-new .docs-table {
+    margin-bottom: 14px;
+}
+
+.docs-layout-new .docs-table-row {
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+}
+
+.docs-layout-new .docs-table-cell {
+    padding: 6px 10px;
+}
+
+/* Fact rows: label column, value column, a divider between rows. */
+.docs-facts {
+    margin-bottom: 14px;
+    border-top-width: 1px;
+    border-top-color: var(--unity-colors-default-border);
+}
+
+.docs-facts-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+}
+
+.docs-facts-label {
+    width: 170px;
+    flex-shrink: 0;
+    padding: 0 12px 0 0;
+    margin: 0;
+    color: var(--unity-colors-label-text);
+    white-space: normal;
+}
+
+.docs-facts-value {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 200px;
+}
+
+/* Flow: numbered circles, steps grouped in phases. */
+.docs-flow {
+    margin-bottom: 14px;
+}
+
+.docs-flow-phase {
+    margin-bottom: 10px;
+    padding: 8px 10px 4px 10px;
+    border-left-width: 3px;
+    background-color: var(--unity-colors-alternated_rows-background);
+}
+
+.docs-flow-phase-title {
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.docs-flow-step {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.docs-flow-number {
+    width: 25px;
+    height: 25px;
+    border-radius: 12px;
+    border-width: 1px;
+    -unity-text-align: middle-center;
+    font-size: var(--unity-metrics-default-font_small_size);
+    margin: 0 10px 0 0;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.docs-flow-text {
+    flex-shrink: 1;
+    flex-grow: 1;
+}
+
+/* Foldouts: a quiet toggle, the inside indented behind a line. */
+.docs-fold {
+    margin-top: 4px;
+    margin-bottom: 12px;
+}
+
+.docs-fold .unity-foldout__text {
+    color: var(--unity-colors-label-text);
+}
+
+.docs-fold > .unity-foldout__content {
+    margin: 4px 0 0 0;
+    padding: 4px 10px 2px 10px;
+    border-radius: 3px;
+}
+
+.docs-fold > .unity-foldout__content > .docs-facts {
+    border-top-width: 0;
+}
+
+/* Type header */
+.docs-type-header {
+    margin-bottom: 14px;
+}
+
+.docs-type-declaration {
+    font-size: 16px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background-color: var(--unity-colors-default-background);
+    border-width: 1px;
+    border-color: var(--unity-colors-default-border);
+    white-space: normal;
+}
+
+/* Member tables: one box per kind, a coloured edge per row. */
+.docs-member-count {
+    font-size: var(--unity-metrics-default-font_small_size);
+    color: var(--unity-colors-label-text);
+    margin-right: 6px;
+    padding: 0 5px;
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: var(--unity-colors-default-border);
+}
+
+.docs-member-table {
+    border-width: 1px;
+    border-color: var(--unity-colors-default-border);
+    background-color: var(--unity-colors-default-background);
+    margin-bottom: 8px;
+}
+
+.docs-mrow {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 8px 10px;
+    border-left-width: 3px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+    transition-property: background-color;
+    transition-duration: 1s;
+}
+
+.docs-mrow-type {
+    width: 150px;
+    flex-shrink: 0;
+    padding: 0 12px 0 0;
+    white-space: normal;
+    -unity-text-align: upper-left;
+}
+
+.docs-mrow-main {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 260px;
+}
+
+.docs-mrow-signature {
+    white-space: normal;
+}
+
+.docs-mrow-summary {
+    margin-top: 3px;
+}
+
+.docs-mrow-more {
+    margin-top: 2px;
+    margin-bottom: 0;
+}
+
+.docs-narrow .docs-mrow-type {
+    -unity-text-align: upper-left;
+    width: 100%;
+}
+
+/* Design decisions */
+.docs-decision-list {
+    border-top-width: 1px;
+    border-top-color: var(--unity-colors-default-border);
+    margin-bottom: 14px;
+}
+
+.docs-decision-row {
+    flex-direction: row;
+    align-items: center;
+    margin: 0;
+    padding: 8px;
+    border-radius: 0;
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+    background-color: rgba(0, 0, 0, 0);
+    transition-property: background-color;
+    transition-duration: 0.1s;
+}
+
+.docs-decision-row:hover {
+    background-color: var(--unity-colors-button-background-hover);
+}
+
+.docs-decision-number {
+    width: 34px;
+    flex-shrink: 0;
+    color: var(--unity-colors-label-text);
+    -unity-text-align: middle-left;
+}
+
+.docs-decision-title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: normal;
+    -unity-text-align: middle-left;
+    color: var(--unity-colors-link-text);
+}
+
+.docs-decision-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.docs-decision-caption {
+    color: var(--unity-colors-label-text);
+    margin-right: 8px;
+}
+
+/* Pager cards: two equal halves that never overflow. */
+.docs-pager-cards {
+    flex-direction: row;
+    margin-top: 40px;
+    padding-top: 12px;
+    border-top-width: 1px;
+    border-top-color: var(--unity-colors-default-border);
+}
+
+.docs-pager-card,
+.docs-pager-card-space {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    margin: 0 4px;
+}
+
+.docs-pager-card {
+    align-items: flex-start;
+    padding: 8px 12px;
+    border-radius: 3px;
+}
+
+.docs-pager-card-next {
+    align-items: flex-end;
+}
+
+.docs-pager-card-caption {
+    font-size: var(--unity-metrics-default-font_small_size);
+    color: var(--unity-colors-label-text);
+    padding: 0;
+    margin: 0 0 2px 0;
+}
+
+.docs-pager-card-title {
+    white-space: normal;
+    padding: 0;
+    margin: 0;
+}
+
+.docs-pager-card-next .docs-pager-card-title,
+.docs-pager-card-next .docs-pager-card-caption {
+    -unity-text-align: upper-right;
+}
+
+.docs-narrow .docs-pager-cards {
+    flex-direction: column;
+}
+
+.docs-narrow .docs-pager-card {
+    margin-bottom: 6px;
+}
+
+.docs-layout-new .docs-table-first {
+    flex-grow: 0.6;
+}
+
+/* Sections: a numbered box with a header bar. The box ends where the section ends. */
+.docs-section {
+    margin-top: 28px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-layout-new .docs-section > .docs-h2 {
+    margin: 0;
+    border-top-width: 0;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.docs-section-body {
+    padding: 12px 14px 0 14px;
+}
+
+/* Parts: a numbered strip across the box. A part runs to the next strip or the box's end. */
+.docs-part-strip,
+.docs-part-fold > .unity-foldout__toggle {
+    margin: 14px -14px 10px -14px;
+    padding: 4px 14px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-part-strip {
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.docs-section-body > .docs-part-strip.docs-first,
+.docs-section-body > .docs-part-fold.docs-first > .unity-foldout__toggle {
+    margin-top: -12px;
+    border-top-width: 0;
+}
+
+.docs-part-body {
+    padding-bottom: 0;
+}
+
+/* The sample part: a Unity foldout strip with Open sample and the folder on it. */
+.docs-part-fold {
+    margin: 0;
+}
+
+.docs-part-fold > .unity-foldout__toggle {
+    padding: 2px 10px;
+    margin-bottom: 0;
+}
+
+.docs-part-fold > .unity-foldout__toggle .unity-toggle__input {
+    align-items: center;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.docs-part-fold > .unity-foldout__toggle .unity-toggle__text {
+    -unity-font-style: bold;
+    margin-right: 10px;
+    flex-grow: 0;
+}
+
+.docs-part-fold > .unity-foldout__content {
+    margin: 0;
+    padding: 10px 0 4px 0;
+}
+
+.docs-part-fold-action {
+    margin: 0 8px 0 0;
+}
+
+.docs-sample-path {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    color: var(--unity-colors-link-text);
+    font-size: var(--unity-metrics-default-font_small_size);
+    margin: 0;
+    padding: 2px 4px;
+}
+
+.docs-sample-path:hover {
+    -unity-font-style: bold;
+}
+
+/* A button and the rows that describe what it opens: one tinted box, darker than callouts. */
+.docs-action-group {
+    margin: 4px -14px 12px -14px;
+    padding: 0;
+    border-radius: 0;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+}
+
+.docs-action-group.docs-last {
+    border-bottom-width: 0;
+}
+
+.docs-action-group > .docs-action {
+    margin: 8px 14px 6px 14px;
+    align-self: flex-start;
+}
+
+.docs-action-group-facts {
+    margin: 0;
+    border-top-width: 0;
+}
+
+.docs-action-group-facts > .docs-facts-last {
+    border-bottom-width: 0;
+}
+
+/* Member tables are numbered section boxes; the rows run edge to edge. */
+.docs-member-section > .docs-member-table {
+    border-width: 0;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.docs-member-section .docs-mrow-last {
+    border-bottom-width: 0;
+}
+
+.docs-member-tables {
+    margin-top: 0;
+}
+
+/* Fact rows read as a table: a small gap between rows, every other row striped. */
+.docs-facts-row {
+    padding: 5px 8px;
+}
+
+.docs-action-group-facts > .docs-facts-row,
+.docs-fold .docs-facts-row {
+    margin-bottom: 2px;
+    border-bottom-width: 0;
+}
+
+.docs-fold > .unity-foldout__content > .docs-facts {
+    margin-bottom: 4px;
+}
+
+.docs-facts-label {
+    width: 160px;
+}
+
+/* Tables and fact rows run to the box's edges; their text lines up with the paragraphs. */
+.docs-section-body > .docs-facts,
+.docs-part-body > .docs-facts,
+.docs-part-fold > .unity-foldout__content > .docs-facts,
+.docs-section-body > .docs-table,
+.docs-part-body > .docs-table,
+.docs-part-fold > .unity-foldout__content > .docs-table {
+    margin-left: -14px;
+    margin-right: -14px;
+    border-left-width: 0;
+    border-right-width: 0;
+}
+
+.docs-section-body > .docs-facts > .docs-facts-row,
+.docs-part-body > .docs-facts > .docs-facts-row {
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.docs-section-body > .docs-table .docs-table-first,
+.docs-part-body > .docs-table .docs-table-first {
+    padding-left: 14px;
+}
+
+.docs-facts.docs-last,
+.docs-table.docs-last {
+    margin-bottom: 0;
+}
+
+.docs-table.docs-last,
+.docs-facts.docs-last > .docs-facts-last {
+    border-bottom-width: 0;
+}
+
+.docs-action-group.docs-last {
+    margin-bottom: 0;
+}
+
+.docs-action-group-facts > .docs-facts-row {
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+/* Group rows in a table: a bold title row, the rows under it indented. */
+.docs-table-group .docs-table-cell {
+    -unity-font-style: bold;
+    padding-left: 14px;
+}
+
+.docs-part-body > .docs-table .docs-table-in-group .docs-table-first,
+.docs-section-body > .docs-table .docs-table-in-group .docs-table-first {
+    padding-left: 30px;
+}
+
+/* A member's More: the remarks right under the summary, no box. */
+.docs-mrow-more > .unity-foldout__content {
+    margin: 2px 0 0 0;
+    padding: 0 0 0 16px;
+}
+
+.docs-mrow-more .docs-list-row {
+    margin-bottom: 2px;
+}
+
+/* The Open sample button and folder on the sample strip sit on the title's line. */
+.docs-layout-new .docs-part-fold .docs-part-fold-action {
+    margin: 0 8px 0 0;
+    align-self: center;
+}
+
+.docs-layout-new .docs-part-fold .docs-sample-path {
+    align-self: center;
+}
+
+/* ---- Boxes have no inner padding. Text keeps a 14px margin; tables, rows, code, callouts and strips meet the edges. ---- */
+.docs-section-body {
+    padding: 0;
+}
+
+.docs-part-fold > .unity-foldout__content,
+.docs-action-fold > .unity-foldout__content,
+.docs-fold > .unity-foldout__content {
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+}
+
+.docs-section-body > *,
+.docs-part-fold > .unity-foldout__content > *,
+.docs-fold > .unity-foldout__content > *,
+.docs-action-fold > .unity-foldout__content > * {
+    margin-left: 14px;
+    margin-right: 14px;
+}
+
+.docs-section-body > .docs-table,
+.docs-section-body > .docs-facts,
+.docs-section-body > .docs-code,
+.docs-section-body > .docs-callout,
+.docs-section-body > .docs-part-fold,
+.docs-section-body > .docs-action-fold,
+.docs-section-body > .docs-fold,
+.docs-section-body > .docs-locate,
+.docs-section-body > .docs-action-group-facts,
+.docs-part-fold > .unity-foldout__content > .docs-table,
+.docs-part-fold > .unity-foldout__content > .docs-facts,
+.docs-part-fold > .unity-foldout__content > .docs-code,
+.docs-part-fold > .unity-foldout__content > .docs-callout,
+.docs-part-fold > .unity-foldout__content > .docs-part-fold,
+.docs-part-fold > .unity-foldout__content > .docs-action-fold,
+.docs-part-fold > .unity-foldout__content > .docs-fold,
+.docs-part-fold > .unity-foldout__content > .docs-locate,
+.docs-part-fold > .unity-foldout__content > .docs-action-group-facts,
+.docs-fold > .unity-foldout__content > .docs-table,
+.docs-fold > .unity-foldout__content > .docs-facts,
+.docs-fold > .unity-foldout__content > .docs-code,
+.docs-fold > .unity-foldout__content > .docs-callout,
+.docs-fold > .unity-foldout__content > .docs-part-fold,
+.docs-fold > .unity-foldout__content > .docs-action-fold,
+.docs-fold > .unity-foldout__content > .docs-fold,
+.docs-fold > .unity-foldout__content > .docs-locate,
+.docs-fold > .unity-foldout__content > .docs-action-group-facts,
+.docs-action-fold > .unity-foldout__content > .docs-table,
+.docs-action-fold > .unity-foldout__content > .docs-facts,
+.docs-action-fold > .unity-foldout__content > .docs-code,
+.docs-action-fold > .unity-foldout__content > .docs-callout,
+.docs-action-fold > .unity-foldout__content > .docs-part-fold,
+.docs-action-fold > .unity-foldout__content > .docs-action-fold,
+.docs-action-fold > .unity-foldout__content > .docs-fold,
+.docs-action-fold > .unity-foldout__content > .docs-locate,
+.docs-action-fold > .unity-foldout__content > .docs-action-group-facts {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: none;
+    border-radius: 0;
+    border-right-width: 0;
+}
+
+.docs-section-body > .docs-table,
+.docs-section-body > .docs-facts,
+.docs-section-body > .docs-code,
+.docs-section-body > .docs-locate,
+.docs-section-body > .docs-action-group-facts,
+.docs-part-fold > .unity-foldout__content > .docs-table,
+.docs-part-fold > .unity-foldout__content > .docs-facts,
+.docs-part-fold > .unity-foldout__content > .docs-code,
+.docs-part-fold > .unity-foldout__content > .docs-locate,
+.docs-part-fold > .unity-foldout__content > .docs-action-group-facts,
+.docs-fold > .unity-foldout__content > .docs-table,
+.docs-fold > .unity-foldout__content > .docs-facts,
+.docs-fold > .unity-foldout__content > .docs-code,
+.docs-fold > .unity-foldout__content > .docs-locate,
+.docs-fold > .unity-foldout__content > .docs-action-group-facts,
+.docs-action-fold > .unity-foldout__content > .docs-table,
+.docs-action-fold > .unity-foldout__content > .docs-facts,
+.docs-action-fold > .unity-foldout__content > .docs-code,
+.docs-action-fold > .unity-foldout__content > .docs-locate,
+.docs-action-fold > .unity-foldout__content > .docs-action-group-facts {
+    border-left-width: 0;
+}
+
+.docs-section-body > .docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-first,
+.docs-fold > .unity-foldout__content > .docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-first {
+    margin-top: 10px;
+}
+
+.docs-section-body > .docs-table.docs-first,
+.docs-section-body > .docs-facts.docs-first,
+.docs-section-body > .docs-code.docs-first,
+.docs-section-body > .docs-callout.docs-first,
+.docs-section-body > .docs-flow.docs-first,
+.docs-section-body > .docs-part-fold.docs-first,
+.docs-section-body > .docs-action-fold.docs-first,
+.docs-section-body > .docs-fold.docs-first,
+.docs-section-body > .docs-locate.docs-first,
+.docs-section-body > .docs-action-group-facts.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-table.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-facts.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-code.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-callout.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-flow.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-part-fold.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-action-fold.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-fold.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-locate.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-action-group-facts.docs-first,
+.docs-fold > .unity-foldout__content > .docs-table.docs-first,
+.docs-fold > .unity-foldout__content > .docs-facts.docs-first,
+.docs-fold > .unity-foldout__content > .docs-code.docs-first,
+.docs-fold > .unity-foldout__content > .docs-callout.docs-first,
+.docs-fold > .unity-foldout__content > .docs-flow.docs-first,
+.docs-fold > .unity-foldout__content > .docs-part-fold.docs-first,
+.docs-fold > .unity-foldout__content > .docs-action-fold.docs-first,
+.docs-fold > .unity-foldout__content > .docs-fold.docs-first,
+.docs-fold > .unity-foldout__content > .docs-locate.docs-first,
+.docs-fold > .unity-foldout__content > .docs-action-group-facts.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-table.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-facts.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-code.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-callout.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-flow.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-part-fold.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-action-fold.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-fold.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-locate.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-action-group-facts.docs-first {
+    margin-top: 0;
+}
+
+.docs-section-body > .docs-table.docs-last,
+.docs-section-body > .docs-facts.docs-last,
+.docs-section-body > .docs-code.docs-last,
+.docs-section-body > .docs-callout.docs-last,
+.docs-section-body > .docs-flow.docs-last,
+.docs-section-body > .docs-part-fold.docs-last,
+.docs-section-body > .docs-action-fold.docs-last,
+.docs-section-body > .docs-fold.docs-last,
+.docs-section-body > .docs-locate.docs-last,
+.docs-section-body > .docs-action-group-facts.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-table.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-facts.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-code.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-callout.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-flow.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-part-fold.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-action-fold.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-fold.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-locate.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-action-group-facts.docs-last,
+.docs-fold > .unity-foldout__content > .docs-table.docs-last,
+.docs-fold > .unity-foldout__content > .docs-facts.docs-last,
+.docs-fold > .unity-foldout__content > .docs-code.docs-last,
+.docs-fold > .unity-foldout__content > .docs-callout.docs-last,
+.docs-fold > .unity-foldout__content > .docs-flow.docs-last,
+.docs-fold > .unity-foldout__content > .docs-part-fold.docs-last,
+.docs-fold > .unity-foldout__content > .docs-action-fold.docs-last,
+.docs-fold > .unity-foldout__content > .docs-fold.docs-last,
+.docs-fold > .unity-foldout__content > .docs-locate.docs-last,
+.docs-fold > .unity-foldout__content > .docs-action-group-facts.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-table.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-facts.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-code.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-callout.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-flow.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-part-fold.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-action-fold.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-fold.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-locate.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-action-group-facts.docs-last {
+    margin-bottom: 0;
+}
+
+/* Rows and table cells line their text up with the paragraphs. */
+.docs-facts-row {
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.docs-layout-new .docs-table .docs-table-first {
+    padding-left: 14px;
+}
+
+.docs-layout-new .docs-table .docs-table-in-group .docs-table-first {
+    padding-left: 30px;
+}
+
+.docs-layout-new .docs-code {
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+}
+
+.docs-layout-new .docs-callout {
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+}
+
+/* Part strips: one after another, closed by default. A line under a strip only while it is open. */
+.docs-part-fold > .unity-foldout__toggle,
+.docs-section-body > .docs-part-fold.docs-first > .unity-foldout__toggle {
+    margin: 0;
+    padding: 3px 10px;
+    border-top-width: 1px;
+    border-bottom-width: 0;
+}
+
+.docs-part-fold > .unity-foldout__toggle:checked {
+    border-bottom-width: 1px;
+}
+
+.docs-section-body > .docs-part-fold.docs-first > .unity-foldout__toggle {
+    border-top-width: 0;
+}
+
+/* The button box: the button on its strip, the rows inside. */
+.docs-action-fold {
+    margin-top: 2px;
+    margin-bottom: 12px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-action-fold.docs-last {
+    border-bottom-width: 0;
+}
+
+.docs-action-fold > .unity-foldout__toggle {
+    margin: 0;
+    padding: 3px 10px;
+}
+
+.docs-action-fold > .unity-foldout__toggle .unity-toggle__input {
+    align-items: center;
+}
+
+.docs-action-fold > .unity-foldout__toggle .unity-toggle__text {
+    display: none;
+}
+
+.docs-action-fold > .unity-foldout__toggle:checked {
+    border-bottom-width: 1px;
+    border-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-layout-new .docs-strip-action {
+    margin: 0 8px 0 0;
+    align-self: center;
+}
+
+.docs-action-fold .docs-facts-row {
+    margin-bottom: 0;
+}
+
+/* More foldouts inside a box: a strip whose title lines up with the text. */
+.docs-section-body > .docs-fold,
+.docs-part-fold > .unity-foldout__content > .docs-fold {
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
+.docs-section-body > .docs-fold > .unity-foldout__toggle,
+.docs-part-fold > .unity-foldout__content > .docs-fold > .unity-foldout__toggle {
+    margin: 0;
+    padding: 3px 10px;
+}
+
+.docs-fold > .unity-foldout__content > .docs-paragraph.docs-first {
+    margin-top: 8px;
+}
+
+/* A member's More keeps its bullets right under the summary. */
+.docs-mrow-more > .unity-foldout__content > * {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Where a component lives: a Unity toolbar across the box. */
+.docs-locate {
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    margin-bottom: 12px;
+    padding-left: 10px;
+    align-items: center;
+}
+
+.docs-locate-lead {
+    color: var(--unity-colors-label-text);
+    margin-right: 6px;
+    -unity-text-align: middle-left;
+}
+
+.docs-locate-item {
+    flex-direction: row;
+    align-items: center;
+}
+
+.docs-locate-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 3px;
+}
+
+.docs-locate-text {
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+}
+
+.docs-locate-separator {
+    padding: 0 6px;
+    opacity: 0.6;
+    -unity-text-align: middle-left;
+}
+
+.docs-locate-select {
+    -unity-font-style: bold;
+}
+
+/* Code meets the box's edges; its title and lines start where the text does. */
+.docs-layout-new .docs-code-header,
+.docs-layout-new .docs-code-scroll {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+/* Phases of a flow run to the box's edges; plain numbered steps keep the text margin. */
+.docs-section-body > .docs-flow .docs-flow-phase,
+.docs-part-fold > .unity-foldout__content > .docs-flow .docs-flow-phase {
+    margin-left: -14px;
+    margin-right: -14px;
+    padding-left: 24px;
+}
+
+.docs-layout-new .docs-callout {
+    margin-top: 0;
+}
+
+.docs-fold > .unity-foldout__content > .docs-first {
+    margin-top: 8px;
+}
+
+.docs-fold > .unity-foldout__content > .docs-facts.docs-first {
+    margin-top: 0;
+}
+
+/* ---- A box inside a box: inset from the outer box on every side, its own outline, a header row, and its
+   rows right against its edges (no padding inside). Callouts are inset the same way. ---- */
+.docs-section-body > .docs-inner-box,
+.docs-section-body > .docs-callout,
+.docs-part-fold > .unity-foldout__content > .docs-inner-box,
+.docs-part-fold > .unity-foldout__content > .docs-callout,
+.docs-fold > .unity-foldout__content > .docs-inner-box,
+.docs-fold > .unity-foldout__content > .docs-callout,
+.docs-action-fold > .unity-foldout__content > .docs-inner-box,
+.docs-action-fold > .unity-foldout__content > .docs-callout {
+    margin: 0 10px 12px 10px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+    max-width: none;
+}
+
+.docs-section-body > .docs-inner-box.docs-first,
+.docs-section-body > .docs-callout.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-inner-box.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-callout.docs-first,
+.docs-fold > .unity-foldout__content > .docs-inner-box.docs-first,
+.docs-fold > .unity-foldout__content > .docs-callout.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-inner-box.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-callout.docs-first {
+    margin-top: 10px;
+}
+
+.docs-section-body > .docs-inner-box.docs-last,
+.docs-section-body > .docs-callout.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-inner-box.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-callout.docs-last,
+.docs-fold > .unity-foldout__content > .docs-inner-box.docs-last,
+.docs-fold > .unity-foldout__content > .docs-callout.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-inner-box.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-callout.docs-last {
+    margin-bottom: 10px;
+}
+
+.docs-section-body > .docs-callout,
+.docs-part-fold > .unity-foldout__content > .docs-callout,
+.docs-fold > .unity-foldout__content > .docs-callout,
+.docs-action-fold > .unity-foldout__content > .docs-callout {
+    border-left-width: 3px;
+}
+
+.docs-inner-box > .unity-foldout__toggle {
+    margin: 0;
+    padding: 3px 8px;
+    border-width: 0;
+}
+
+.docs-inner-box > .unity-foldout__toggle:checked {
+    border-bottom-width: 1px;
+    border-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-inner-box > .unity-foldout__content {
+    margin: 0;
+    padding: 0;
+}
+
+/* Rows inside an inner box start at its edge, their text a little in. */
+.docs-inner-box .docs-facts-row {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* Flow phases are inner boxes too, with their accent edge; steps sit inside with a small margin. */
+.docs-flow .docs-flow-phase.docs-inner-box {
+    margin: 0 -4px 8px -4px;
+    padding: 0;
+    border-width: 1px;
+    border-left-width: 3px;
+    border-radius: 3px;
+    border-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+}
+
+.docs-flow-phase.docs-inner-box > .unity-foldout__toggle .unity-toggle__text {
+    -unity-font-style: bold;
+}
+
+.docs-flow-phase.docs-inner-box > .unity-foldout__content {
+    padding: 6px 10px 2px 10px;
+}
+
+.docs-flow-number {
+    width: auto;
+    min-width: 20px;
+    padding: 0 4px;
+}
+
+/* Callouts keep their coloured left edge; only the other three sides take the outline colour. */
+.docs-section-body > .docs-callout,
+.docs-part-fold > .unity-foldout__content > .docs-callout,
+.docs-fold > .unity-foldout__content > .docs-callout,
+.docs-action-fold > .unity-foldout__content > .docs-callout {
+    border-left-width: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-flow-number {
+    min-width: 32px;
+}
+
+/* Inner boxes take the outline colour on their left side too (callouts keep their coloured edge). */
+.docs-section-body > .docs-inner-box,
+.docs-part-fold > .unity-foldout__content > .docs-inner-box,
+.docs-fold > .unity-foldout__content > .docs-inner-box,
+.docs-action-fold > .unity-foldout__content > .docs-inner-box {
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-type-declaration {
+    border-left-width: 1px;
+    border-left-color: var(--unity-colors-default-border);
+}
+
+/* Buttons on the page grow with the text; Unity's button style would keep them at its own size. */
+.docs-page-area .unity-button,
+.docs-page-area .unity-button .unity-label,
+.docs-page-area .unity-toolbar-button {
+    font-size: var(--unity-metrics-default-font_normal_size);
+}
+
+.docs-facts-label {
+    width: 210px;
+}
+
+.docs-page-area .docs-locate Label {
+    font-size: var(--unity-metrics-default-font_normal_size);
+}
+
+.docs-page-area .docs-locate {
+    height: 28px;
+}
+
+/* Body text is 20% smaller than the page's normal size (15 -> 12 px); headings, titles and buttons keep theirs. */
+.docs-layout-new .docs-text,
+.docs-layout-new .docs-facts-label,
+.docs-layout-new .docs-facts-value {
+    font-size: 12px;
+}
+
+/* Numbered steps keep the same gap from the strip or header above and the box edge below as text does. */
+.docs-section-body > .docs-flow.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-flow.docs-first,
+.docs-fold > .unity-foldout__content > .docs-flow.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-flow.docs-first {
+    margin-top: 10px;
+}
+
+.docs-section-body > .docs-flow.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-flow.docs-last,
+.docs-fold > .unity-foldout__content > .docs-flow.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-flow.docs-last {
+    margin-bottom: 10px;
+}
+
+/* "Select the script" and "Open script in IDE" side by side, 6 px apart. */
+.docs-action-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.docs-action-row > Button {
+    margin: 0 6px 0 0;
+}
+
+/* Callouts hug their text: a small even padding and no paragraph gap after the last line. */
+.docs-layout-new .docs-callout {
+    padding: 8px 12px 8px 12px;
+}
+
+.docs-layout-new .docs-callout .docs-paragraph {
+    margin-bottom: 0;
+}
+
+/* ---- Tables are boxes of their own, like the "More" boxes: inset 10 px from the outer box, a 1 px outline on all
+   four sides, rounded corners, and a light grey header row. ---- */
+.docs-section-body > .docs-table,
+.docs-part-body > .docs-table,
+.docs-part-fold > .unity-foldout__content > .docs-table,
+.docs-fold > .unity-foldout__content > .docs-table,
+.docs-action-fold > .unity-foldout__content > .docs-table {
+    margin: 0 10px 12px 10px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+}
+
+.docs-section-body > .docs-table.docs-first,
+.docs-part-body > .docs-table.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-table.docs-first,
+.docs-fold > .unity-foldout__content > .docs-table.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-table.docs-first {
+    margin-top: 10px;
+}
+
+.docs-section-body > .docs-table.docs-last,
+.docs-part-body > .docs-table.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-table.docs-last,
+.docs-fold > .unity-foldout__content > .docs-table.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-table.docs-last {
+    margin-bottom: 10px;
+    border-bottom-width: 1px;
+}
+
+.docs-layout-new .docs-table .docs-table-first {
+    padding-left: 10px;
+}
+
+.docs-layout-new .docs-table .docs-table-in-group .docs-table-first {
+    padding-left: 26px;
+}
+
+/* ---- Code blocks are boxes too, inset and outlined like tables, never edge to edge. ---- */
+.docs-section-body > .docs-code,
+.docs-part-body > .docs-code,
+.docs-part-fold > .unity-foldout__content > .docs-code,
+.docs-fold > .unity-foldout__content > .docs-code,
+.docs-action-fold > .unity-foldout__content > .docs-code {
+    margin: 0 10px 12px 10px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+}
+
+.docs-section-body > .docs-code.docs-first,
+.docs-part-body > .docs-code.docs-first,
+.docs-part-fold > .unity-foldout__content > .docs-code.docs-first,
+.docs-fold > .unity-foldout__content > .docs-code.docs-first,
+.docs-action-fold > .unity-foldout__content > .docs-code.docs-first {
+    margin-top: 10px;
+}
+
+.docs-section-body > .docs-code.docs-last,
+.docs-part-body > .docs-code.docs-last,
+.docs-part-fold > .unity-foldout__content > .docs-code.docs-last,
+.docs-fold > .unity-foldout__content > .docs-code.docs-last,
+.docs-action-fold > .unity-foldout__content > .docs-code.docs-last {
+    margin-bottom: 10px;
+    border-bottom-width: 1px;
+}
+
+/* On type pages: a wide rule between the brief part (declaration, script buttons, Read more) and the detail. */
+.docs-type-separator {
+    height: 3px;
+    margin: 18px 0 6px 0;
+    background-color: rgb(235, 235, 235);
+    border-radius: 2px;
+}
+
+/* Screenshots: the image on the left, its numbered labels and caption beside it; they wrap underneath on a narrow page. */
+.docs-figure-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.docs-figure-row > .docs-image-frame {
+    flex-shrink: 1;
+    flex-grow: 0;
+}
+
+.docs-figure-side {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 260px;
+    min-width: 220px;
+    margin-left: 16px;
+    padding-top: 4px;
+}
+
+.docs-figure-side > .docs-mark-list {
+    margin-top: 0;
+}
+
+.docs-layout-new .docs-figure {
+    margin-bottom: 12px;
+}
+
+/* Code map boxes: the second line wraps to two lines instead of ending in "...". */
+.docs-graph-box > .docs-graph-line {
+    white-space: normal;
+    text-overflow: clip;
+    overflow: hidden;
+    max-height: 36px;
+}
+
+/* Enum values: the value on the left, one line of meaning beside it. */
+.docs-mrow-value {
+    align-items: center;
+}
+
+.docs-mrow-value-name {
+    width: 300px;
+    flex-shrink: 0;
+    padding-right: 12px;
+}
+
+/* Image marks: a box of rows, number | name | what it is, outlined on all four sides like the other inner boxes. */
+.docs-mark-table {
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.docs-mark-table > .docs-mark-row {
+    align-items: flex-start;
+    padding: 6px 10px;
+    margin-bottom: 0;
+}
+
+.docs-mark-table > .docs-mark-row-alt {
+    background-color: rgba(128, 128, 128, 0.08);
+}
+
+.docs-mark-table .docs-mark-number {
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.docs-mark-name {
+    width: 150px;
+    flex-shrink: 0;
+    -unity-font-style: bold;
+    padding-right: 10px;
+}
+
+.docs-mark-meaning {
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: normal;
+}
+
+/* The scene status demo: state buttons in a row, the real status box, one line on what the state means. */
+.docs-status-demo {
+    margin: 10px 14px 12px 14px;
+}
+
+.docs-status-demo-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.docs-status-demo-button {
+    margin: 0 6px 6px 0;
+}
+
+.docs-status-demo-meaning {
+    margin-top: 2px;
+}
+
+/* ---- Code block header: its own darker band with a clear line under it, a C# badge, and flat actions that belong
+   to the block instead of Unity buttons. ---- */
+.docs-layout-new .docs-code-header {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(78, 78, 78);
+    background-color: rgba(0, 0, 0, 0.32);
+}
+
+.docs-code-language {
+    -unity-font-style: bold;
+    color: rgb(170, 140, 200);
+    margin: 0 8px 0 0;
+    padding: 0;
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 3px;
+    margin: 0 0 0 4px;
+    padding: 2px 8px;
+    align-self: center;
+}
+
+/* Icon first; the text slides out on hover. */
+.docs-layout-new .docs-code-header > .docs-code-action {
+    flex-direction: row;
+    align-items: center;
+    color: rgb(170, 170, 170);
+}
+
+.docs-code-icon {
+    flex-shrink: 0;
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action .docs-code-action-label {
+    color: rgb(170, 170, 170);
+    font-size: 12px;
+    max-width: 0;
+    margin-left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0;
+    transition-property: max-width, margin-left;
+    transition-duration: 0.18s;
+    transition-timing-function: ease-out;
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-code-action-label {
+    max-width: 90px;
+    margin-left: 5px;
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action:hover {
+    background-color: rgba(255, 255, 255, 0.09);
+}
+
+.docs-layout-new .docs-code-header > .docs-code-action:hover,
+.docs-layout-new .docs-code-header > .docs-code-action:hover .docs-code-action-label {
+    color: rgb(235, 235, 235);
+}
+
+/* "On this page": the part being read is marked, and its section keeps a quieter mark. */
+.docs-rail-current-parent .docs-rail-text,
+.docs-rail-current-parent .docs-rail-number {
+    color: var(--unity-colors-highlight-background);
+    -unity-font-style: bold;
+}
+
+/* The heading or part strip a rail click jumped to lights up for a moment. */
+.docs-layout-new .docs-section .docs-heading-row.docs-rail-target,
+.docs-layout-new .docs-section-body .docs-part-fold > .unity-foldout__toggle.docs-rail-target,
+.docs-layout-new .docs-section-body .docs-part-fold > .unity-foldout__toggle.docs-rail-target:checked {
+    background-color: rgba(58, 121, 187, 0.45);
+    transition-property: background-color;
+    transition-duration: 0.4s;
+}
+
+/* Member sections (Properties, Methods, Values...) fold from their header, closed by default. */
+.docs-member-heading {
+    cursor: link;
+}
+
+.docs-member-arrow {
+    width: 14px;
+    margin-right: 4px;
+    -unity-text-align: middle-center;
+    color: var(--unity-colors-label-text);
+}
+
+/* "More" on a member: one inset box, its toggle the box's header row, the remarks inside. Never full width. */
+.docs-layout-new .docs-mrow-more {
+    margin: 6px 10px 2px 0;
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+    overflow: hidden;
+    align-self: flex-start;
+    min-width: 320px;
+    max-width: 900px;
+}
+
+.docs-layout-new .docs-mrow-more > .unity-foldout__toggle {
+    margin: 0;
+    padding: 3px 8px;
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.docs-layout-new .docs-mrow-more > .unity-foldout__toggle:checked {
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-layout-new .docs-mrow-more > .unity-foldout__content {
+    margin: 0;
+    padding: 6px 10px 6px 6px;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* Member rows: one line of arrow, number, return type and signature; the summary under it, indented to the text. */
+.docs-layout-new .docs-mrow-line-layout {
+    flex-direction: column;
+    padding: 6px 10px 6px 8px;
+}
+
+.docs-mrow-line {
+    flex-direction: row;
+    align-items: center;
+}
+
+.docs-mrow-line-foldable {
+    cursor: link;
+}
+
+.docs-mrow-arrow {
+    width: 14px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+    color: var(--unity-colors-label-text);
+}
+
+.docs-mrow-number {
+    min-width: 26px;
+    -unity-text-align: middle-right;
+    padding-right: 4px;
+    flex-shrink: 0;
+    margin-right: 4px;
+    color: var(--unity-colors-label-text);
+    opacity: 0.7;
+}
+
+.docs-layout-new .docs-mrow-line-layout > .docs-mrow-summary {
+    margin-left: 48px;
+    margin-top: 2px;
+}
+
+/* The remarks box: inset, outlined, a More header row, never full width. */
+.docs-mrow-morebox {
+    margin: 6px 10px 2px 48px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-top-color: var(--unity-colors-inspector_titlebar-border);
+    border-right-color: var(--unity-colors-inspector_titlebar-border);
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+    border-left-color: var(--unity-colors-inspector_titlebar-border);
+    align-self: flex-start;
+    min-width: 320px;
+    max-width: 900px;
+    overflow: hidden;
+}
+
+.docs-mrow-morebox-header {
+    padding: 3px 8px;
+    -unity-font-style: bold;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-mrow-morebox-body {
+    padding: 6px 10px 6px 6px;
+}
+
+/* "Find it in": each step is a flat toolbar button; a divider sets Select in Hierarchy apart. */
+.docs-locate .docs-locate-item {
+    flex-direction: row;
+    align-items: center;
+    border-width: 0;
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0);
+    padding: 0 6px;
+    margin: 0;
+}
+
+.docs-locate .docs-locate-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.docs-locate-divider {
+    width: 1px;
+    align-self: stretch;
+    margin: 3px 6px;
+    background-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+/* Code map script boxes: a muted left edge per kind of script, and a legend for it. */
+.docs-graph-box.docs-graph-cat-api,
+.docs-graph-box.docs-graph-cat-interface,
+.docs-graph-box.docs-graph-cat-enum,
+.docs-graph-box.docs-graph-cat-editor,
+.docs-graph-box.docs-graph-cat-other {
+    border-left-width: 4px;
+}
+
+/* Two classes, so these win over the skin sheet's grey box border; the outline takes a softer tint of the edge. */
+.docs-graph-box.docs-graph-cat-api,
+.docs-graph-swatch.docs-graph-cat-api {
+    border-left-color: rgb(96, 140, 196);
+    border-top-color: rgba(96, 140, 196, 0.45);
+    border-right-color: rgba(96, 140, 196, 0.45);
+    border-bottom-color: rgba(96, 140, 196, 0.45);
+    background-color: rgba(96, 140, 196, 0.08);
+}
+
+.docs-graph-box.docs-graph-cat-interface,
+.docs-graph-swatch.docs-graph-cat-interface {
+    border-left-color: rgb(196, 168, 110);
+    border-top-color: rgba(196, 168, 110, 0.45);
+    border-right-color: rgba(196, 168, 110, 0.45);
+    border-bottom-color: rgba(196, 168, 110, 0.45);
+    background-color: rgba(196, 168, 110, 0.08);
+}
+
+.docs-graph-box.docs-graph-cat-enum,
+.docs-graph-swatch.docs-graph-cat-enum {
+    border-left-color: rgb(150, 180, 130);
+    border-top-color: rgba(150, 180, 130, 0.45);
+    border-right-color: rgba(150, 180, 130, 0.45);
+    border-bottom-color: rgba(150, 180, 130, 0.45);
+    background-color: rgba(150, 180, 130, 0.08);
+}
+
+.docs-graph-box.docs-graph-cat-editor,
+.docs-graph-swatch.docs-graph-cat-editor {
+    border-left-color: rgb(160, 136, 192);
+    border-top-color: rgba(160, 136, 192, 0.45);
+    border-right-color: rgba(160, 136, 192, 0.45);
+    border-bottom-color: rgba(160, 136, 192, 0.45);
+    background-color: rgba(160, 136, 192, 0.08);
+}
+
+.docs-graph-box.docs-graph-cat-other,
+.docs-graph-swatch.docs-graph-cat-other {
+    border-left-color: rgb(128, 128, 128);
+}
+
+.docs-graph-legend {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.docs-graph-swatch {
+    width: 10px;
+    height: 10px;
+    border-left-width: 4px;
+    border-radius: 2px;
+    margin: 0 4px 0 10px;
+}
+
+/* The Visual Studio icon in a script box's corner, shown on hover: the box opens the script outside the docs. */
+.docs-graph-open-icon {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    opacity: 0;
+    color: rgb(200, 200, 200);
+}
+
+.docs-graph-box:hover > .docs-graph-open-icon {
+    opacity: 1;
+}
+
+/* Tool anatomy: the numbered list under a header row, and outlined areas on the image. */
+.docs-mark-table-header {
+    padding: 4px 10px;
+    -unity-font-style: bold;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-mark-area {
+    position: absolute;
+    border-width: 2px;
+    border-radius: 3px;
+}
+
+.docs-mark-table-header-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 10px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-inspector_titlebar-border);
+}
+
+.docs-mark-table-header-row > .docs-mark-table-header {
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-bottom-width: 0;
+}
+
+/* Which image this anatomy belongs to, as a small tag beside the header. */
+.docs-mark-table-tag {
+    margin-left: 8px;
+    padding: 0 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--unity-colors-label-text);
+}
+
+/* Where a settings button opens: a quiet path that slides out beside the button on hover, like Copy and Open in IDE. */
+.docs-action-place {
+    margin-left: 0;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 11px;
+    color: var(--unity-colors-label-text);
+    opacity: 0;
+    -unity-text-align: middle-left;
+    transition-property: max-width, margin-left, opacity;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+}
+
+.docs-action-row:hover > .docs-action-place {
+    max-width: 640px;
+    margin-left: 6px;
+    opacity: 0.75;
+}

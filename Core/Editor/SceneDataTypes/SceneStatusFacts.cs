@@ -12,6 +12,9 @@ namespace AbstractPixel.Core.Editor
         /// <summary>The scene is listed in Build Settings and switched on.</summary>
         public bool IsInBuild;
 
+        /// <summary>The scene may never go into a build (a sample scene).</summary>
+        public bool IsNeverInBuild;
+
         /// <summary>The scene has an Addressables entry.</summary>
         public bool IsAddressable;
     }

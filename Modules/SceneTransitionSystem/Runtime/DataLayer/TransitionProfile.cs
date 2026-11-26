@@ -6,7 +6,6 @@ namespace AbstractPixel.SceneTransitions
     /// <remarks>
     /// - Abstract: make an asset of a profile that derives from it, such as <see cref="ImageFadeProfile"/>.
     /// </remarks>
-    [CreateAssetMenu(fileName = "TransitionProfile", menuName = "Utility/SceneRelated/TransitionProfile", order = 1)]
     public abstract class TransitionProfile : ScriptableObject
     {
         /// <summary>The prefab whose controller plays the effect.</summary>

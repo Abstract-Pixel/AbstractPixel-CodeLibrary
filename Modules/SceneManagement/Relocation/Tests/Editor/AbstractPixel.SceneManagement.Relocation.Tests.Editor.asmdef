@@ -1,0 +1,29 @@
+{
+    "name": "AbstractPixel.SceneManagement.Relocation.Tests.Editor",
+    "rootNamespace": "AbstractPixel.SceneManagement.Relocation.Tests",
+    "references": [
+        "AbstractPixel.SceneManagement.Relocation",
+        "AbstractPixel.SceneManagement",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "AbstractPixel.SceneManagement.Relocation.Tests.Support",
+        "AbstractPixel.SceneManagement.Relocation.Editor",
+        "AbstractPixel.SceneManagement.Editor",
+        "AbstractPixel.Core"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

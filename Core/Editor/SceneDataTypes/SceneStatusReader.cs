@@ -49,13 +49,20 @@ namespace AbstractPixel.Core.Editor
             SceneStatusFacts facts = new SceneStatusFacts();
             facts.HasSceneAsset = hasSceneAsset;
             facts.HasStoredScene = !string.IsNullOrEmpty(_storedName) || !string.IsNullOrEmpty(_storedGuid) || !string.IsNullOrEmpty(_storedPath);
-            facts.IsInBuild = hasSceneAsset && SceneBuildSettingsList.IsSwitchedOn(EditorBuildSettings.scenes, scenePath);
+            facts.IsInBuild = hasSceneAsset && SceneBuildSettingsList.IsSwitchedOn(ActiveSceneList.Read(), scenePath);
             facts.IsAddressable = hasSceneAsset && addressablesInstalled && provider.IsAddressable(sceneGuid);
+
+            facts.IsNeverInBuild = hasSceneAsset && IsNeverInBuild(scenePath);
 
             SceneStatus status = SceneStatusRules.Decide(facts);
             SceneFix fix = SceneStatusRules.FixFor(status, ProjectDefaultPlace, addressablesInstalled);
             string message = SceneStatusRules.Message(status, sceneName, scenePath, addressablesInstalled);
             return new SceneStatusReport(status, fix, sceneName, scenePath, sceneGuid, message);
+        }
+
+        private static bool IsNeverInBuild(string _scenePath)
+        {
+            return SceneBuildSettingsWriter.ScenePathsNeverInBuild != null && SceneBuildSettingsWriter.ScenePathsNeverInBuild().Contains(_scenePath);
         }
 
         /// <summary>Applies the report's fix to the project, with one console line naming the scene.</summary>
@@ -77,7 +84,7 @@ namespace AbstractPixel.Core.Editor
                 return false;
             }
             bool hasAsset = _report.Status != SceneStatus.Missing && _report.Status != SceneStatus.NoScene;
-            if (!hasAsset)
+            if (!hasAsset || _report.Status == SceneStatus.NeverInBuild)
             {
                 return false;
             }
@@ -114,7 +121,7 @@ namespace AbstractPixel.Core.Editor
             IAddressableSceneProvider provider = AddressableScenes.Provider;
             bool wasAddressable = provider != null && provider.IsAddressable(_report.SceneGuid);
 
-            SceneBuildSettingsWriter.Write(SceneBuildSettingsList.WithSceneSwitchedOn(EditorBuildSettings.scenes, _report.ScenePath));
+            ActiveSceneList.Write(SceneBuildSettingsList.WithSceneSwitchedOn(ActiveSceneList.Read(), _report.ScenePath));
 
             string line = LogPrefix + " Added '" + _report.SceneName + "' to Build Settings.";
             if (wasAddressable)
@@ -146,10 +153,10 @@ namespace AbstractPixel.Core.Editor
             }
 
             string line = LogPrefix + " Made '" + _report.SceneName + "' Addressable.";
-            bool wasListed = SceneBuildSettingsList.IsListed(EditorBuildSettings.scenes, _report.ScenePath);
+            bool wasListed = SceneBuildSettingsList.IsListed(ActiveSceneList.Read(), _report.ScenePath);
             if (wasListed)
             {
-                SceneBuildSettingsWriter.Write(SceneBuildSettingsList.WithoutScene(EditorBuildSettings.scenes, _report.ScenePath));
+                ActiveSceneList.Write(SceneBuildSettingsList.WithoutScene(ActiveSceneList.Read(), _report.ScenePath));
                 line += " Removed it from Build Settings, so it loads from one place.";
             }
             Debug.Log(line);
