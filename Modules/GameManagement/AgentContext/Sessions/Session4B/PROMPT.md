@@ -16,7 +16,7 @@ in the handoff's "Not done" table.
 - **Names pass:** every public type in `Runtime/` and `Editor/` passes NAMING.md's read-alone test. A grep for each old
   name finds only `[MovedFrom]` / `[FormerlySerializedAs]` attributes and the handoff.
 - **Folders pass:** `find Runtime Editor Tests -name '*.cs' | xargs -n1 dirname | sort | uniq -c` shows no folder above 8.
-- **No behaviour change:** full `AbstractPixel.GameManagement.Tests` passes with the same count as Session 4 (renamed
+- **No behaviour change:** full `AbstractPixel.GameManagement.Tests` passes with the same count as Session 4, 77 (renamed
   tests allowed); the sample's flow test matches its baseline in Rally and in the Lab (Unity 7, submodule moved to the
   pushed commit, full module tests too); parity scenarios
   `parity_pause`, `parity_gameover`, `parity_win`, `parity_menu` pass against `Parity/baseline/`.
@@ -24,6 +24,13 @@ in the handoff's "Not done" table.
   GUIDs before and after); `editor_cycle.sh noplay` clean.
 - **Docs in step:** GLOSSARY, README, DESIGN mapping and NAMING.md use the new names.
 - Every new or touched script keeps one type per script.
+
+## Starting point
+
+Session 4 is done: the old system is deleted. Read "Starting point" in `OVERVIEW.md` for what is built, what was last
+checked and what was not. Nothing is pushed. Push only if the owner says so in this session; without a push, update the
+Lab with `git fetch <Rally's library folder> game-management-rework` and merge `FETCH_HEAD` into its `main`. This
+replaces the push steps below.
 
 ## Read first
 
@@ -48,7 +55,12 @@ own. If something is not covered, stop and ask the owner rather than deciding it
 - First tool call: `budget start` with `plan: "gm-commercial"`, `step: 4`, `kind: "refactor"`, `budgetPct: 5`,
   `wrapReservePct: 1`, phases `audit 1, folders 0.75, renames 1.25, readability 1, handoff 1`. If the scope check fires,
   do the must-haves first and spend what is left on the rest.
-- Check `unity command editor_status`, `git status` in both repos; hash the owner's uncommitted files.
+- Check `unity command editor_status`, `git status` in both repos; hash the owner's uncommitted files (the Lab has
+  `Core/Runtime/SuperLogger/DebugDataBase.asset`).
+- The Lab's Editor uses other command names, run from the Lab folder: `unity command editor status`,
+  `unity command script recompile`, `unity command test run --mode editor --filter <assembly> --filter-type Assembly`;
+  for Play mode add `--mode playmode --async-tests true`, then `unity command test status --detail summary`.
+- Keep the Editor's focus alone while parity or Play-mode tests run; run one Editor's tests at a time.
 - Do the audit first and ask the owner to approve the table in **one** question round; rename nothing before that.
 
 ## Check

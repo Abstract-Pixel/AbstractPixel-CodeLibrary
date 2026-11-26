@@ -1,6 +1,8 @@
 <!doctype html><html><head><meta charset="utf-8"><title>Session 4 handoff</title>
 <style>body{font:15px/1.5 system-ui,sans-serif;max-width:900px;margin:24px auto;padding:0 16px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:4px 8px;text-align:left;vertical-align:top}code{background:#f2f2f2;padding:0 3px}</style></head><body>
-<h1>Session 4 handoff (two runs)</h1>
+<h1>Session 4 handoff (four runs)</h1>
+<p><b>Final state: Session 4's tasks are done.</b> Rally runs on the new system and the old one is deleted. See "Run 4" at the end. The summary and the "Not done", "Not verified" and "Next" sections before Run 4 are history from earlier runs. Next session: <b>Session 4B</b>.</p>
+<h2>History: summary after run 2</h2>
 <p>plan: gm-commercial, step 4. Date 2026-11-26. <b>Partly done.</b> Sample 01 works with keyboard, controller and UI in Rally (Unity 6.3) and the Lab (Unity 7). Input maps are set by action reference. Not done: Rally's asset migration, switching Rally over, the parity gate, and deleting the old system (tasks 2b, 3, 5 and 6). Next session: <b>Session 4, from "Next session" below</b>.</p>
 
 <h2>Commits (library; nothing pushed in run 2)</h2>
@@ -89,6 +91,11 @@
 <p>Merged from Rally's local library (nothing pushed). GameManagement EditMode 77/77; Sample 01 flow test 1/1. The owner's <code>DebugDataBase.asset</code> hashes the same before and after the merge. The Lab pointer is committed after this handoff, by path. This replaces "Not done yet" above for the merge, Lab tests and Lab pointer.</p>
 <h3>Cursor check by hand: PASS</h3>
 <p>The owner reported "cursor pass" for the check in Rally with a mouse (steps: Play and click the Game view, Esc to pause, click Resume, then Pause, Settings, Back, Resume). This closes every earlier "pending" or "not done" note about it. <b>Not done:</b> the still of it that the prompt asks for; the owner's report is the evidence.</p>
-<p>Session 4's tasks are done. Nothing is pushed, as instructed for this run. Next: Session 4B.</p>
+<h3>Not done or not verified at the end of run 4</h3><table><tr><th>Item</th><th>Why, and is it needed</th></tr>
+<tr><td>Push (library, Rally, Lab)</td><td>The owner said never to push. Needed when the owner chooses.</td></tr>
+<tr><td>Still of the cursor check</td><td>Not taken; the owner reported the pass.</td></tr>
+<tr><td>SetToOne parity after the deletion</td><td>Passed in run 3; task 6 did not touch that setting's code. Optional.</td></tr>
+<tr><td>Parity JSON compared with the baseline by hand after the deletion</td><td>Only the scenarios' PASS results were checked. 4B runs four of them against the baseline.</td></tr>
+<tr><td>Sample flow test in Rally after the deletion</td><td>Run in the Lab only (1/1). Worth running at the start of 4B.</td></tr></table>
 <h3>Budget</h3><p>Given 5%, raised to 6.5%. The warn point fired (README and handoff kept short). The tool read about 8% after parity; the 5-hour window rose 4 points while parity ran, and how much of that was this session was not checked. The owner then added 2% (8.5%); the tool read about 11.3% after the Lab tests and about 11.9% when the budget was closed.</p>
 </body></html>
