@@ -39,4 +39,5 @@ using the old system: the old components keep working until Session 4 switches R
 ## Done when
 
 DEFINITION-OF-DONE.md holds for every task and for the session. Rally behaves as before (parity runs if any old
-runtime file is touched).
+runtime file is touched). PROMPT.md's "Done and verified (this session)" section lists the exact end state and checks;
+both must hold. New and touched code keeps one type per script.

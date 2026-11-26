@@ -37,8 +37,9 @@ _Avoid_: register, activate, unregister, deactivate
 **Refusal**:
 A request the state machine turned down, with a reason.
 
-**Condition**:
-A scene script that makes requests when something happens.
+**Requester**:
+A scene script that asks for a state to be entered or left when something happens, such as a key press or a button.
+_Avoid_: condition, trigger
 
 **Reactor**:
 A scene script that responds to state changes, such as a menu, audio or HUD.

@@ -6,7 +6,7 @@ namespace AbstractPixel.GameManagement
     /// <summary>The game's state machine, reachable from anywhere. Daily calls: Request, Leave, IsActive, Top, Changed.</summary>
     /// <remarks>
     /// - Builds its machine from the project's settings on first use, or uses the one given to <see cref="Use"/>.
-    /// - Until Session 3 adds the Unity effect sink, the built machine applies no effects (it only decides states).
+    /// - The built machine applies effects through the Unity sink, and <see cref="GameStateDriver"/> runs it each frame.
     /// - Resets at the start of every Play session, so Enter Play Mode without a domain reload starts clean.
     /// </remarks>
     public static class GameStates
@@ -33,7 +33,7 @@ namespace AbstractPixel.GameManagement
                         Debug.LogWarning("[Game management] No GameManagementSettings asset found; state requests are ignored.");
                         return null;
                     }
-                    Use(new GameStateMachine(settings, new RealtimeGameClock(), new NoEffectSink()));
+                    Use(GameStateDriver.CreateMachine(settings));
                 }
                 return machine;
             }
@@ -82,13 +82,6 @@ namespace AbstractPixel.GameManagement
         private static void RaiseChanged(TransitionRecord _record)
         {
             Changed?.Invoke(_record);
-        }
-
-        private class NoEffectSink : IGameEffectSink
-        {
-            public void Apply(GameEffects _effects)
-            {
-            }
         }
     }
 }

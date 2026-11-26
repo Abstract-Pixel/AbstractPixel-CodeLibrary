@@ -4,6 +4,7 @@
     "references": [
         "AbstractPixel.GameManagement",
         "AbstractPixel.GameManagement.Editor",
+        "Unity.InputSystem",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

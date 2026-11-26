@@ -74,3 +74,22 @@ own commercial-ready plan).
 9. **Settings asset location:** a default location, and **the user can choose where it lives** (object field on the
    Project Settings page). It must load in builds wherever it is: copy the scene system's loading method if it is
    location-independent, otherwise use Player Settings > Preloaded Assets.
+
+## 2026-11-26: grill round 1 and follow-up
+
+1. **No strings configure anything.** Typing a string to configure something is error-prone for any developer or agent:
+   a typo or a rename fails silently. So no inspector field, settings asset or setup API takes a string ID, name or key.
+   Use dragged asset references, typed values or enums. Strings remain only for labels, logs and messages.
+2. **Input maps are chosen by action reference.** A state's Input effect lists `InputActionReference`s; each turns on
+   the map that holds the referenced action. This replaces the string map IDs and their dropdown (Session 3), uses the
+   same kind of reference the requesters already use for keys, and survives map renames. Replaced in Session 4,
+   before Rally's assets are migrated, so the migration writes references.
+3. **Session 4 has 18%** in two parts: Session 4 (13%) and Session 4B, naming, folders and core cleanup (5%), run as
+   a fresh session after it. If Session 4 runs short after the parity gate, deleting the old system moves to 4B.
+4. **Keep the given budget** even when the scope check asks for more; do the must-haves first.
+5. **Unity 7 checks run full tests in the Lab,** which has the library as a git submodule used as a local package:
+   move its submodule to the pushed commit and run the module tests and the sample's flow test there.
+6. **Each prompt says what to read before each stage,** so agents follow decisions already made instead of making
+   their own.
+7. **Commit by default,** per task, and push.
+8. **Requester** replaces "Condition" as the word for a scene script that makes requests.

@@ -23,6 +23,28 @@ namespace AbstractPixel.GameManagement
         // cursor watches the mouse itself. Cleared when the tracker reports a new device.
         private static bool hasMouseBeenPickedUp = false;
 
+        // Set by the new machine's Unity sink. While set, it replaces the old registry's state lookup.
+        private static GameCursorMode? machineCursor;
+
+        /// <summary>The cursor the new state machine asked for, or null while the old system drives the cursor.</summary>
+        public static GameCursorMode? MachineCursor
+        {
+            get { return machineCursor; }
+        }
+
+        /// <summary>Called by the Unity effect sink. A controller still hides the cursor until the mouse is picked up.</summary>
+        public static void UseMachineCursor(GameCursorMode _mode)
+        {
+            machineCursor = _mode;
+            Refresh();
+        }
+
+        /// <summary>Hands the cursor back to the old state registry.</summary>
+        public static void StopUsingMachineCursor()
+        {
+            machineCursor = null;
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Initialize()
         {
@@ -36,6 +58,7 @@ namespace AbstractPixel.GameManagement
             InputDeviceTracker.OnDeviceFamilyChanged += HandleDeviceFamilyChanged;
 
             hasMouseBeenPickedUp = false;
+            machineCursor = null;
 
             Refresh();
         }
@@ -52,6 +75,12 @@ namespace AbstractPixel.GameManagement
             if (isCursorHiddenForController)
             {
                 ApplyCursor(false, true);
+                return;
+            }
+
+            if (machineCursor.HasValue)
+            {
+                ApplyCursor(CursorModeRule.IsVisible(machineCursor.Value), CursorModeRule.IsLocked(machineCursor.Value));
                 return;
             }
 

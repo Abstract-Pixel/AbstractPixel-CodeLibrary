@@ -8,6 +8,34 @@ management module. plan: gm-commercial, step 3. Budget 10% of the 5-hour window.
 Read `LocalPackages/AbstractPixelLibrary/Modules/GameManagement/AgentContext/DEFINITION-OF-DONE.md` before you start.
 A task, and the session, is finished only when every point there holds. Anything cut goes in the handoff's "Not done" table.
 
+## Done and verified (this session)
+
+DEFINITION-OF-DONE.md is the general guideline. For Session 3, finished and verified means all of this holds:
+
+- **Types split first.** `Runtime/Machine/Effects.cs` is split into one type per script (`EffectSource`,
+  `GameCursorMode`, `StateEffectSettings`, `GameEffects`, `IGameEffectSink`, `IGameClock`, `RealtimeGameClock`,
+  `EffectResolver`) in sub-folders such as `Machine/Effects/` and `Machine/Clock/`, with `.meta` GUIDs kept
+  (`git mv` the original to the type that keeps its GUID). Same for other multi-type files in `Machine/`
+  (`TransitionJournal`, `GameManagementSettingsSource`, `NoStateTimeScale`, `TransitionKind`). Every existing test
+  still passes, and every serialized `StateSO`/settings asset still loads (no missing-script or lost-field warnings).
+- **Sink and driver.** A Unity sink implements `IGameEffectSink`; a driver MonoBehaviour calls `Tick` each frame and
+  `LeaveOnSceneChange` on scene changes and hands the facade a machine with the real sink. Verified by EditMode tests
+  for: time eases from its value at apply time with unscaled time; cursor written through `GameCursorController`
+  (unpause re-applies Play's cursor); HUD and input maps applied; scene change leaves states marked to leave.
+- **Input source.** Project-wide actions, a chosen `InputActionAsset` and a custom source all work, and "none set" leaves
+  input alone. One EditMode test per case.
+- **Adapters.** Enter on scene start, input toggle with gate, back/cancel, event, poll, "when X leaves go to Y", and the
+  requester component exist, each with an EditMode test that the right `Request`/`Leave` reaches the machine.
+- **State watch and reactors.** One state-watch helper (Entered, Applied, Left, sync on enable) with tests; menu, HUD
+  toggle and audio reactors built on it.
+- **Migration tool.** Dry run reports the planned changes and priority ties; tested on asset copies made in the test,
+  never on Rally's assets.
+- **Checks run, with numbers in the handoff:** full `AbstractPixel.GameManagement.Tests` assembly passes;
+  `editor_cycle.sh noplay` shows no errors or new warnings; the Unity 7 throwaway compile and test run passes;
+  `parity_pause` and `parity_gameover` match the baseline if any old runtime file changed; owner's file hashes match;
+  Rally's live flow is unchanged.
+- Every new script follows the one-type-per-script rule.
+
 ## Read first
 
 1. `Modules/GameManagement/AgentContext/`: `PLAN-OVERVIEW.md`, `DECISIONS.md` (source of truth), `DESIGN.md`,
@@ -63,5 +91,8 @@ user's launch message allows it.
 ## Rules
 
 - Stay inside ProjectRallyShift, `../Abstract_Pixel_Lab` and the session scratchpad; put this rule in any subagent brief.
+- One type per script: each class, struct, enum or interface in its own file, in folders by part; at most one extra
+  small type when it belongs to the main one. Never dump several types in one script (the old `Effects.cs` is the
+  example to avoid).
 - No game behaviour changes this session. Never touch live Steam leaderboards or stats.
 - If the budget runs low: finish the must-haves, keep Rally working, and list the rest in the handoff.

@@ -20,7 +20,15 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 
 - [Session 2 core state machine](../Sessions/Session2/HANDOFF.html): plain C# `GameStateMachine` in `Runtime/Machine/`
   with 33 new tests; new `StateSO` fields (`Parents`, `Effects`) beside the old ones; settings asset kept in Preloaded Assets.
+- [Session 3 adapters and sink](../Sessions/Session3/HANDOFF.html): Unity sink and driver, input source seam,
+  request adapters, state watch and reactors, migration tool; `Runtime/Machine/` split to one type per script. 74 tests.
+- Workflow rules (2026-11-26): every session prompt has its own "Done and verified" section; one type per script.
 - [Definition of done](../DEFINITION-OF-DONE.md): what finishing a task and a session means. Every prompt links it.
+- Plan change (2026-11-26): Session 4 gets a sample game copying Rally's flows for parity in both Editors; Session 4B
+  (names, folders, core cleanup) is its second part; together 18%. Naming rules in [../NAMING.md](../NAMING.md). Grill round 1:
+  Unity 7 checks run full tests in the Lab via its library submodule; prompts name what to read before each stage;
+  commits by default; scene scripts that make requests are called requesters. Follow-up: **no strings configure
+  anything**; input maps are chosen by `InputActionReference` (DECISIONS.md, 2026-11-26).
 
 ## Open tickets
 
@@ -30,10 +38,9 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 
 ## Not yet specified
 
-- Ease curve for the time effect (Session 2 has seconds only; a Session 3 nice-to-have).
+- Ease curve for the time effect (seconds only so far; skipped in Session 3 as a nice-to-have).
 - Exact shape of the transition record and the debugger's timeline view (settled in ticket 02).
-- How the migration orders states whose old priorities tie (needs the inventory; Rally's only tie, the two Settings
-  states, disappears when they merge).
+- Migration ties: resolved in Session 3 (ordered by name and reported as problems).
 - Whether Rally's own folder `Assets/[1]Project/ProjectServices/GameManagment` is also renamed (Session 1 reports the
   reference count; the user decides).
 - Docs topic list for the documentation engine (after Session 8).

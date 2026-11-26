@@ -2,7 +2,8 @@
     "name": "AbstractPixel.GameManagement.Editor",
     "rootNamespace": "AbstractPixel.GameManagement.Editor",
     "references": [
-        "AbstractPixel.GameManagement"
+        "AbstractPixel.GameManagement",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

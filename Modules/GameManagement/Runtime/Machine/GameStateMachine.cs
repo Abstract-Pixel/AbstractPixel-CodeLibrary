@@ -272,6 +272,7 @@ namespace AbstractPixel.GameManagement
             {
                 result.TimeScale = _last.TimeScale;
                 result.TimeScaleEaseSeconds = _last.TimeScaleEaseSeconds;
+                result.TimeScaleEaseCurve = _last.TimeScaleEaseCurve;
             }
             result.Cursor = result.Cursor ?? _last.Cursor;
             result.HudVisible = result.HudVisible ?? _last.HudVisible;

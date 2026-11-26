@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Session 3 handoff</title>
+<style>body{font:15px/1.5 system-ui,sans-serif;max-width:900px;margin:24px auto;padding:0 16px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:4px 8px;text-align:left;vertical-align:top}code{background:#f2f2f2;padding:0 3px}</style></head><body>
+<h1>Session 3 handoff: adapters, conditions, reactors, input source</h1>
+<p><code>plan: gm-commercial, step 3</code>. Date 2026-11-26. Nothing committed (the launch message did not allow commits).</p>
+
+<h2>Result</h2>
+<p>The plain C# machine now reaches Unity: a Unity effect sink, a driver, an input source seam, request adapters, a state watch with three reactors, and a dry-run-first migration tool. Rally still runs the old system; nothing in Rally calls <code>GameStates</code>, so no driver is created and Rally's flow is unchanged. Before the work, the workflow docs gained two rules (below), and <code>Runtime/Machine/</code> was split to one type per script.</p>
+
+<h2>Workflow rule changes (asked by the user this run)</h2>
+<ul>
+<li><b>Session-specific "Done and verified".</b> PLAN-OVERVIEW.md, DEFINITION-OF-DONE.md (which stays a general guideline) and the AgentContext README now require every session PROMPT.md to carry its own "Done and verified" section. Session 3's prompt and overview gained one.</li>
+<li><b>One type per script.</b> Added to the library CLAUDE.md, PLAN-OVERVIEW.md code style, DEFINITION-OF-DONE.md task point 6 and every prompt's Rules. The old <code>Effects.cs</code> is the named example to avoid.</li>
+</ul>
+
+<h2>Checks run</h2>
+<table><tr><th>Check</th><th>Result</th></tr>
+<tr><td>EditMode, <code>AbstractPixel.GameManagement.Tests</code> (Unity 6000.3.15f1)</td><td>74/74 pass (40 before, 34 new)</td></tr>
+<tr><td><code>editor_cycle.sh noplay</code></td><td>No errors or C# warnings</td></tr>
+<tr><td>Unity 7 (Lab, throwaway <code>Assets/_GmUnity7Check/</code>, three non-auto-referenced asmdefs)</td><td>Compiled; 70/70 copied tests pass (the 4 old StateTimeScaleTarget tests not copied). Folder deleted; Lab <code>git status</code> clean.</td></tr>
+<tr><td><code>parity_pause</code> (old file <code>GameCursorController.cs</code> changed)</td><td>PASS 40/40 steps; stripped diff with baseline: 0 lines. The runner reported "save isolation End failed" afterwards; <code>git status</code> showed nothing changed.</td></tr>
+<tr><td><code>parity_gameover</code></td><td>Same flow. 3 differing lines, all frame-rate noise: the "bomb ran out" sample was taken one frame before GameOver registered, and two ease samples differ by 0.01.</td></tr>
+<tr><td>Owner's files</td><td>Rally and library <code>git status</code> as at start, apart from this session's files. Play/compile churn in <code>GameManagment.prefab</code> (bridge ID) and <code>ProjectRallyShift.slnx</code> was reverted.</td></tr>
+</table>
+
+<h2>Code changes</h2>
+<table><tr><th>Files</th><th>What and why</th></tr>
+<tr><td><code>Runtime/Machine/{Effects,Clock,Settings,Journal}/</code></td><td>Split the multi-type files into one type per script (git mv kept GUIDs of the original files). <code>GameManagementSettings</code> gained <code>InputSource</code> and <code>InputActions</code>.</td></tr>
+<tr><td><code>Runtime/Unity/Sink/</code></td><td><code>UnityEffectSink</code> (time eased in realtime from its value at apply time, cursor, HUD, input maps), <code>TimeScaleEase</code>, <code>ITimeScaleTarget</code>/<code>UnityTimeScaleTarget</code>, <code>GameHud</code>, <code>CursorModeRule</code>.</td></tr>
+<tr><td><code>Runtime/Unity/Driver/GameStateDriver.cs</code></td><td>Hidden DontDestroyOnLoad MonoBehaviour made when the facade first builds its machine; calls <code>Tick</code>, steps the ease, calls <code>LeaveOnSceneChange</code> on <code>activeSceneChanged</code>. <code>GameStates</code> now builds its machine through it.</td></tr>
+<tr><td><code>Runtime/Unity/Input/</code></td><td><code>IInputSource</code>, <code>InputActionAssetSource</code> (chosen asset or project-wide; maps by ID or name), <code>InputSourceKind</code>, <code>InputSourceFactory</code>. A custom source goes to <code>GameStateDriver.UseInputSource</code>. None set leaves input alone.</td></tr>
+<tr><td><code>Runtime/State/GameCursorController.cs</code></td><td>Added <code>UseMachineCursor</code>/<code>MachineCursor</code>. While set it replaces the registry lookup; the controller-hides-cursor rule still applies. Unset in Rally, so the old path is unchanged.</td></tr>
+<tr><td><code>Runtime/Adapters/</code></td><td><code>StateRequests</code> (shared rules), <code>StateRequestAdapter</code> base, <code>EnterOnSceneStart</code>, <code>InputToggleRequest</code> (optional gate), <code>BackRequest</code> (top only), <code>EventRequest</code>, <code>PollRequest</code> + <code>RisingEdge</code>, <code>FollowUpRule</code> + <code>WhenLeavesGoTo</code>, <code>StateRequester</code> for UnityEvent buttons.</td></tr>
+<tr><td><code>Runtime/Reactors/</code></td><td><code>StateWatch</code> (Entered, Applied, Left, sync on bind) and <code>StateMenuReactor</code>, <code>HudToggleReactor</code>, <code>StateAudioReactor</code> (plain AudioSource).</td></tr>
+<tr><td><code>Editor/Migration/</code></td><td><code>StateMigrator</code> (Plan = dry run; Apply with Undo), <code>StateMigrationPlan</code>, menu items under Tools &gt; Abstract Pixel &gt; Game Management. Not run on Rally's assets.</td></tr>
+<tr><td><code>Tests/</code></td><td><code>TestSeams.cs</code> split into <code>FakeGameClock</code>/<code>RecordingEffectSink</code>; new <code>Unity/</code>, <code>Adapters/</code>, <code>Reactors/</code>, <code>Migration/</code> tests. Test asmdef references <code>Unity.InputSystem</code>.</td></tr>
+</table>
+
+<h2>Effect on developers</h2>
+<p>Calling <code>GameStates.Request</code> now really changes time, cursor, HUD and input. Daily setup: put an <code>EnterOnSceneStart</code> in each scene, a <code>StateMenuReactor</code> on each menu, and <code>StateRequester</code> on buttons. Input switching is off until the settings choose a source.</p>
+
+<h2>Decisions made without you</h2>
+<table><tr><th>Decision</th><th>Why</th></tr>
+<tr><td>Split <code>Runtime/Machine/</code> to one type per script inside this session</td><td>The new rule, and the sink task touched those types.</td></tr>
+<tr><td>Driver is made on demand by the facade, not by a scene component</td><td>A game that never calls <code>GameStates</code> (Rally today) pays nothing and does not change.</td></tr>
+<tr><td>Scene change = <code>SceneManager.activeSceneChanged</code></td><td>Generic. Session 4 should check it against Rally's loading screen order in the transition-break scenarios.</td></tr>
+<tr><td>HUD effect goes through a static <code>GameHud</code> plus <code>HudToggleReactor</code></td><td>Keeps the sink free of scene references.</td></tr>
+<tr><td>Migration leaves sub-state parents to a person (reported as problems)</td><td>The old fields do not say which states a sub-state opens over.</td></tr>
+<tr><td>Audio reactor uses a plain <code>AudioSource</code></td><td>Generic; BroAudio users can hook the state watch. <code>StateAudioVolumeController</code> stays in Rally (deferred list).</td></tr>
+</table>
+
+<h2>Extra pass (after the session)</h2>
+<table><tr><th>Item</th><th>Result</th><th>How verified</th></tr>
+<tr><td>Ease curve</td><td>Done. <code>StateEffectSettings.TimeScaleEaseCurve</code> (<code>AnimationCurve</code>, as on <code>StateSO</code>); empty = straight line, so existing assets are unchanged. Carried through resolver, kept values and sink into <code>TimeScaleEase</code>. Migration copies the old curve.</td><td><code>Tests/Unity/TimeScaleEaseTests</code> (3 new) and a migration assert; 77/77 EditMode tests pass on Unity 6.3.</td></tr>
+<tr><td>Migration on copies of Rally's assets</td><td>Done. 7 state assets copied to <code>Assets/_GmMigrationCopies</code>, Plan + Apply on copies, folder deleted. Order: GameWin &gt; GameOver &gt; PauseSettings &gt; StartSettings &gt; Start &gt; Pause &gt; Play. Problems: PauseSettings/StartSettings tie at priority 3; both Settings sub-states have no parents.</td><td><code>unity command eval_file</code>; <code>git status</code> shows no state asset changed.</td></tr>
+<tr><td>Input map dropdown by ID</td><td>Done. <code>InputMapIdAttribute</code> on <code>StateEffectSettings.InputMapIds</code>; <code>Editor/Inspector/InputMapIdDrawer</code> shows map names from the settings' input source and stores the map ID; unknown IDs show as "Missing (id)"; no input source falls back to a text field.</td><td><code>Tests/Unity/InputMapChoicesTests</code> (value stored is <code>map.id</code>). Drawer not opened in the Inspector.</td></tr>
+<tr><td>Test for <code>GameStateDriver</code></td><td>Done. Update now calls a public <code>Step</code>; tests cover ticking (delay ends), easing, and stepping before Drive. Scene-change hook not unit-tested.</td><td><code>Tests/Unity/GameStateDriverTests</code>; 82/82 EditMode tests pass on Unity 6.3.</td></tr>
+</table>
+
+<h2>Findings</h2>
+<ul><li><code>parity_pause</code>'s save isolation End step reported a failure even though the run passed and nothing changed; worth a look before Session 4's gate.</li></ul>
+
+<h2>Budget</h2>
+<p>Allotted 10%; the scope check estimated about 24%, so per your launch message the budget was raised by 35% to 13.5%. Used about 9% of the 5-hour window (final figure in the plan record after <code>budget end</code>). The 8% "close to budget" warning fired during the Unity 7 check; nice-to-haves were dropped and the handoff kept short.</p>
+</body></html>

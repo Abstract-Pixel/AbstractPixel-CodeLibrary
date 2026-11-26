@@ -58,8 +58,8 @@ and time has many owners. The redesign puts all decisions in one module with a s
 
 ### Input without a global class
 
-Each state has an Input effect: the action maps it turns on. Maps are picked from a dropdown read from the game's
-actions asset and stored by map ID, never typed. Where the live asset comes from is chosen once in
+Each state has an Input effect: the action maps it turns on. Maps are picked by dragging an `InputActionReference` to any
+action in the map (that action's map is turned on), never typed or stored as a string (DECISIONS.md, 2026-11-26). Where the live asset comes from is chosen once in
 Project Settings > Abstract Pixel > Game Management:
 
 1. Project-wide actions (Unity 6 `InputSystem.actions`), the default.
