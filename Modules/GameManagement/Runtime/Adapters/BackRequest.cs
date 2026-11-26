@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,15 +9,24 @@ namespace AbstractPixel.GameManagement
     public class BackRequest : MonoBehaviour
     {
         [SerializeField] private StateSO state;
+        [Tooltip("The back input. Give the action one binding per device (Backspace, Escape, the gamepad's East button) in the input actions asset.")]
         [SerializeField] private InputActionReference backAction;
+        [Tooltip("States to leave as well when this one goes back. Empty: back returns to the state underneath (Settings goes back to Pause). Add Pause to go from Settings straight back to Play.")]
+        [SerializeField] private List<StateSO> alsoLeave = new List<StateSO>();
+
+        // One press goes back one step: when Settings leaves, Pause is on top, and Pause's own back must not act on the same press.
+        private static double lastHandledPressTime = -1d;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetForNewPlaySession()
+        {
+            lastHandledPressTime = -1d;
+        }
 
         /// <summary>Leaves the state if it is on top. Also callable from a Back button.</summary>
         public void Back()
         {
-            if (StateRequests.IsOnTop(state))
-            {
-                GameStates.Leave(state, name);
-            }
+            StateRequests.Back(state, alsoLeave, name);
         }
 
         private void OnEnable()
@@ -39,7 +49,14 @@ namespace AbstractPixel.GameManagement
 
         private void HandlePerformed(InputAction.CallbackContext _context)
         {
-            Back();
+            if (_context.time == lastHandledPressTime)
+            {
+                return;
+            }
+            if (StateRequests.Back(state, alsoLeave, name))
+            {
+                lastHandledPressTime = _context.time;
+            }
         }
     }
 }

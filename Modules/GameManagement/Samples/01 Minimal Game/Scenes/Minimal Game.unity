@@ -608,7 +608,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 64
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -766,7 +766,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 64
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -2243,6 +2243,7 @@ MonoBehaviour:
   state: {fileID: 11400000, guid: f8ab3bd4446539d42b4486b1dae20f62, type: 2}
   content: {fileID: 755372341}
   reveal: 1
+  hideWhileCovered: 1
 --- !u!1 &1011802469
 GameObject:
   m_ObjectHideFlags: 0
@@ -2637,6 +2638,7 @@ MonoBehaviour:
   state: {fileID: 11400000, guid: 80c0f0b15b4ef0444844be0db9ff4e99, type: 2}
   content: {fileID: 1116895735}
   reveal: 1
+  hideWhileCovered: 1
 --- !u!1 &1335843532
 GameObject:
   m_ObjectHideFlags: 0
@@ -2700,7 +2702,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 64
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -3284,6 +3286,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.BackRequest
   state: {fileID: 11400000, guid: 93f62b1292678a34abd0fc62f0abf12e, type: 2}
   backAction: {fileID: -331597177986980539, guid: 11738e70f34209642bee08fc519241d1, type: 3}
+  alsoLeave: []
 --- !u!114 &1684100893
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3299,6 +3302,7 @@ MonoBehaviour:
   state: {fileID: 11400000, guid: 93f62b1292678a34abd0fc62f0abf12e, type: 2}
   content: {fileID: 1614090023}
   reveal: 1
+  hideWhileCovered: 1
 --- !u!1 &1684482554
 GameObject:
   m_ObjectHideFlags: 0
@@ -3496,7 +3500,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 64
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -3787,7 +3791,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 64
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -3855,6 +3859,7 @@ MonoBehaviour:
   state: {fileID: 11400000, guid: e18480a6aac00e141a7f2b643eca4ee0, type: 2}
   content: {fileID: 925668430}
   reveal: 1
+  hideWhileCovered: 1
 --- !u!1 &1954382290
 GameObject:
   m_ObjectHideFlags: 0
@@ -4396,6 +4401,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2129611954}
   - component: {fileID: 2129611955}
+  - component: {fileID: 2129611956}
   m_Layer: 0
   m_Name: Pause Reactor
   m_TagString: Untagged
@@ -4438,6 +4444,22 @@ MonoBehaviour:
   state: {fileID: 11400000, guid: c1585c2184cfe1a45be770a7300e46f4, type: 2}
   content: {fileID: 1986398680}
   reveal: 1
+  hideWhileCovered: 1
+--- !u!114 &2129611956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129611953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b365c40d1eba2044da076f2f5b3b2ae2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AbstractPixel.GameManagement::AbstractPixel.GameManagement.BackRequest
+  state: {fileID: 11400000, guid: c1585c2184cfe1a45be770a7300e46f4, type: 2}
+  backAction: {fileID: -331597177986980539, guid: 11738e70f34209642bee08fc519241d1, type: 3}
+  alsoLeave: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

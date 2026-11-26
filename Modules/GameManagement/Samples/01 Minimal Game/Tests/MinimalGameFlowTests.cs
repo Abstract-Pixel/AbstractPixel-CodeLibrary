@@ -23,6 +23,7 @@ namespace AbstractPixel.GameManagement.Samples.Tests
         private const float SettleSeconds = 1.2f;
 
         private Keyboard keyboard;
+        private Gamepad gamepad;
         private readonly List<MinimalGameFlowStep> steps = new List<MinimalGameFlowStep>();
 
         [UnityTest]
@@ -54,6 +55,15 @@ namespace AbstractPixel.GameManagement.Samples.Tests
             Assert.IsTrue(IsMenuShown("Pause"), "Backspace closes Settings back to Pause");
             yield return PressKey(Key.Escape, "Pause > Esc");
             Assert.IsTrue(IsMenuShown("HUD"), "Esc in Pause resumes Play");
+
+            // A controller: the left small button (Share, Select) pauses, the East button (Circle, B) goes back one step.
+            yield return PressButton(GamepadButton.Select, "Play > Gamepad Select");
+            Assert.IsTrue(IsMenuShown("Pause"), "Select in Play opens Pause");
+            yield return Press("Pause", "Settings Button", "Gamepad Pause > Settings");
+            yield return PressButton(GamepadButton.East, "Settings > Gamepad East");
+            Assert.IsTrue(IsMenuShown("Pause"), "East in Settings goes back to Pause, not further");
+            yield return PressButton(GamepadButton.East, "Pause > Gamepad East");
+            Assert.IsTrue(IsMenuShown("HUD"), "East in Pause resumes Play");
             yield return Press("HUD", "Lose Button", "Play > Game Over");
 
             StateSO gameOver = GameStates.Top;
@@ -86,9 +96,26 @@ namespace AbstractPixel.GameManagement.Samples.Tests
             yield return Record(_stepName);
         }
 
-        [TearDown]
-        public void RemoveKeyboard()
+        private IEnumerator PressButton(GamepadButton _button, string _stepName)
         {
+            if (gamepad == null)
+            {
+                gamepad = InputSystem.AddDevice<Gamepad>();
+            }
+            InputSystem.QueueStateEvent(gamepad, new GamepadState(_button));
+            yield return null;
+            InputSystem.QueueStateEvent(gamepad, new GamepadState());
+            yield return Record(_stepName);
+        }
+
+        [TearDown]
+        public void RemoveTestDevices()
+        {
+            if (gamepad != null)
+            {
+                InputSystem.RemoveDevice(gamepad);
+                gamepad = null;
+            }
             if (keyboard != null)
             {
                 InputSystem.RemoveDevice(keyboard);

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace AbstractPixel.GameManagement.Tests
@@ -37,6 +38,39 @@ namespace AbstractPixel.GameManagement.Tests
             Assert.AreEqual(rig.Pause, rig.Machine.Top);
             StateRequests.Perform(rig.Pause, StateRequestKind.Toggle, "pause key");
             Assert.AreEqual(rig.Play, rig.Machine.Top);
+        }
+
+        [Test]
+        public void BackFromASubStateReturnsToItsParent()
+        {
+            StateRequests.Perform(rig.Play, StateRequestKind.Enter, "test");
+            StateRequests.Perform(rig.Pause, StateRequestKind.Enter, "test");
+            StateRequests.Perform(rig.Settings_, StateRequestKind.Enter, "test");
+            bool handled = StateRequests.Back(rig.Settings_, new List<StateSO>(), "back key");
+            Assert.IsTrue(handled);
+            Assert.AreEqual(rig.Pause, rig.Machine.Top);
+        }
+
+        [Test]
+        public void BackCanAlsoLeaveTheParentToGoStraightToPlay()
+        {
+            StateRequests.Perform(rig.Play, StateRequestKind.Enter, "test");
+            StateRequests.Perform(rig.Pause, StateRequestKind.Enter, "test");
+            StateRequests.Perform(rig.Settings_, StateRequestKind.Enter, "test");
+            StateRequests.Back(rig.Settings_, new List<StateSO> { rig.Pause }, "back key");
+            Assert.AreEqual(rig.Play, rig.Machine.Top);
+            Assert.IsFalse(rig.Machine.IsActive(rig.Pause));
+        }
+
+        [Test]
+        public void BackDoesNothingWhenItsStateIsNotOnTop()
+        {
+            StateRequests.Perform(rig.Play, StateRequestKind.Enter, "test");
+            StateRequests.Perform(rig.Pause, StateRequestKind.Enter, "test");
+            StateRequests.Perform(rig.Settings_, StateRequestKind.Enter, "test");
+            bool handled = StateRequests.Back(rig.Pause, new List<StateSO>(), "back key");
+            Assert.IsFalse(handled);
+            Assert.AreEqual(rig.Settings_, rig.Machine.Top);
         }
 
         [Test]

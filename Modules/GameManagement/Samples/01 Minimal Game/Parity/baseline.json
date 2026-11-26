@@ -122,11 +122,51 @@
             ]
         },
         {
+            "Step": "Play > Gamepad Select",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Gamepad Pause > Settings",
+            "TopState": "Settings",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Settings"
+            ]
+        },
+        {
+            "Step": "Settings > Gamepad East",
+            "TopState": "Pause",
+            "TimeScale": 0.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "Pause"
+            ]
+        },
+        {
+            "Step": "Pause > Gamepad East",
+            "TopState": "Play",
+            "TimeScale": 1.0,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
+            "MenusShown": [
+                "HUD"
+            ]
+        },
+        {
             "Step": "Play > Game Over",
             "TopState": "Game Over",
             "TimeScale": 0.0,
-            "CursorLock": "None",
-            "CursorVisible": true,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
             "MenusShown": [
                 "Game Over"
             ]
@@ -145,8 +185,8 @@
             "Step": "Play > Game Win",
             "TopState": "Game Win",
             "TimeScale": 0.0,
-            "CursorLock": "None",
-            "CursorVisible": true,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
             "MenusShown": [
                 "Game Win"
             ]
@@ -155,8 +195,8 @@
             "Step": "Game Win > Quit",
             "TopState": "Main Menu",
             "TimeScale": 1.0,
-            "CursorLock": "None",
-            "CursorVisible": true,
+            "CursorLock": "Locked",
+            "CursorVisible": false,
             "MenusShown": [
                 "Main Menu"
             ]
