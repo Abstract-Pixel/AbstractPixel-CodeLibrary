@@ -43,9 +43,9 @@ namespace AbstractPixel.GameManagement.Tests
             InputActionReference steer = InputActionReference.Create(driving.FindAction("Steer"));
             try
             {
-                play.Effects = new StateEffectSettings { InputSource = EffectSource.Own };
+                play.Effects = new StateEffectSettings { InputSource = StateEffectSource.Own };
                 play.Effects.InputMaps.Add(steer);
-                GameEffects effects = EffectResolver.Resolve(new[] { play }, NoStateTimeScale.KeepLast);
+                GameEffects effects = StateEffectResolver.Resolve(new[] { play }, NoStateTimeScale.KeepLast);
                 new InputActionAssetSource(asset).EnableOnly(effects.InputMaps);
                 Assert.IsTrue(driving.enabled, "the map of the listed action is on");
                 Assert.IsFalse(menu.enabled, "every other map is off");

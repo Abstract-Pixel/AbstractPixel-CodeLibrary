@@ -1,7 +1,7 @@
 namespace AbstractPixel.GameManagement
 {
     /// <summary>True once when a condition turns from false to true, so a poll does not send a request every frame.</summary>
-    public class RisingEdge
+    public class PollBecameTrueCheck
     {
         private bool wasMet;
 

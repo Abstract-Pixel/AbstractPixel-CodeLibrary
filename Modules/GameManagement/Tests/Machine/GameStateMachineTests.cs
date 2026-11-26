@@ -329,9 +329,9 @@ namespace AbstractPixel.GameManagement.Tests
         [Test]
         public void EffectsAreWorkedOutFromTheTopStateAndSubStatesCanUseTheirParents()
         {
-            rig.Pause.Effects.CursorSource = EffectSource.Own;
+            rig.Pause.Effects.CursorSource = StateEffectSource.Own;
             rig.Pause.Effects.Cursor = GameCursorMode.Free;
-            rig.Play.Effects.CursorSource = EffectSource.Own;
+            rig.Play.Effects.CursorSource = StateEffectSource.Own;
             rig.Play.Effects.Cursor = GameCursorMode.LockedHidden;
             machine.Request(rig.Play);
             Assert.AreEqual(GameCursorMode.LockedHidden, rig.Sink.Last.Cursor);
@@ -376,7 +376,7 @@ namespace AbstractPixel.GameManagement.Tests
         [Test]
         public void SameAsParentOnAMainStateKeepsTheLastValue()
         {
-            rig.MainMenu.Effects.HudSource = EffectSource.SameAsParent;
+            rig.MainMenu.Effects.HudSource = StateEffectSource.SameAsParent;
             machine.Request(rig.MainMenu);
 
             Assert.IsNull(rig.Sink.Last.HudVisible);

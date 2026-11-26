@@ -6,8 +6,8 @@ using UnityEngine.InputSystem;
 namespace AbstractPixel.GameManagement
 {
     /// <summary>Leaves its state on back or cancel, but only while that state is on top.</summary>
-    [AddComponentMenu("Abstract Pixel/Game Management/Leave State On Back")]
-    public class BackRequest : MonoBehaviour
+    [AddComponentMenu("Abstract Pixel/Game Management/Back Requester")]
+    public class BackRequester : MonoBehaviour
     {
         [SerializeField] private StateSO state;
         [Tooltip("The back input. Give the action one binding per device (Backspace, Escape, the gamepad's East button) in the input actions asset.")]
@@ -29,7 +29,7 @@ namespace AbstractPixel.GameManagement
         /// <summary>Leaves the state if it is on top. Also callable from a Back button.</summary>
         public void Back()
         {
-            if (StateRequests.Back(state, alsoLeave, name))
+            if (StateRequestRules.Back(state, alsoLeave, name))
             {
                 wentBack.Invoke();
             }
@@ -59,7 +59,7 @@ namespace AbstractPixel.GameManagement
             {
                 return;
             }
-            if (StateRequests.Back(state, alsoLeave, name))
+            if (StateRequestRules.Back(state, alsoLeave, name))
             {
                 lastHandledPressTime = _context.time;
                 wentBack.Invoke();

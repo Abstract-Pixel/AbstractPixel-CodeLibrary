@@ -255,7 +255,7 @@ namespace AbstractPixel.GameManagement
 
             // "Keep" fields take the last applied value, so a state that keeps everything sends nothing to the sink,
             // but it is still applied: menus that wait for Applied must open.
-            GameEffects wanted = EffectResolver.Resolve(stack, settings.NoStateTimeScale);
+            GameEffects wanted = StateEffectResolver.Resolve(stack, settings.NoStateTimeScale);
             GameEffects result = WithKeptValues(wanted, lastApplied);
             if (result.Equals(lastApplied))
             {

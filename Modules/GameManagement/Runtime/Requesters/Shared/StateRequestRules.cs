@@ -1,7 +1,7 @@
 namespace AbstractPixel.GameManagement
 {
-    /// <summary>The rules every request adapter shares: what a kind of request does, and when a gate is open.</summary>
-    public static class StateRequests
+    /// <summary>The rules every state requester shares: what a kind of request does, and when a gate is open.</summary>
+    public static class StateRequestRules
     {
         /// <summary>Sends the request to <see cref="GameStates"/>. Toggle leaves an active state and enters an inactive one.</summary>
         public static void Perform(StateSO _state, StateRequestKind _kind, string _requester)

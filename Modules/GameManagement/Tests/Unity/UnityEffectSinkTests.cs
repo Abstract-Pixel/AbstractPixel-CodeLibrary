@@ -89,9 +89,9 @@ namespace AbstractPixel.GameManagement.Tests
             MachineTestRig rig = new MachineTestRig();
             try
             {
-                rig.Play.Effects.CursorSource = EffectSource.Own;
+                rig.Play.Effects.CursorSource = StateEffectSource.Own;
                 rig.Play.Effects.Cursor = GameCursorMode.LockedHidden;
-                rig.Pause.Effects.CursorSource = EffectSource.Own;
+                rig.Pause.Effects.CursorSource = StateEffectSource.Own;
                 rig.Pause.Effects.Cursor = GameCursorMode.Free;
                 GameStateMachine machine = new GameStateMachine(rig.Settings, rig.Clock, sink);
 

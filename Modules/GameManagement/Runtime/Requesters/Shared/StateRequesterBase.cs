@@ -2,10 +2,10 @@ using UnityEngine;
 
 namespace AbstractPixel.GameManagement
 {
-    /// <summary>Base of the request adapters: a state, what to do with it, and an optional gate state that must be active.</summary>
-    public abstract class StateRequestAdapter : MonoBehaviour
+    /// <summary>Base of the state requesters: a state, what to do with it, and an optional gate state that must be active.</summary>
+    public abstract class StateRequesterBase : MonoBehaviour
     {
-        [Tooltip("The state this adapter enters, leaves or toggles.")]
+        [Tooltip("The state this requester enters, leaves or toggles.")]
         [SerializeField] protected StateSO state;
 
         [SerializeField] protected StateRequestKind kind = StateRequestKind.Enter;
@@ -21,11 +21,11 @@ namespace AbstractPixel.GameManagement
         /// <summary>Sends the request if the gate is open.</summary>
         public void Fire()
         {
-            if (!StateRequests.IsGateOpen(gate))
+            if (!StateRequestRules.IsGateOpen(gate))
             {
                 return;
             }
-            StateRequests.Perform(state, kind, name);
+            StateRequestRules.Perform(state, kind, name);
         }
     }
 }
