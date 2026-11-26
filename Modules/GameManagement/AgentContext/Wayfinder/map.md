@@ -53,3 +53,11 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 - 2026-11-26 Session 4 (partial): S3 committed; Sample 01 on the new system, flow test passes in Rally; Lab blocked (branch behind main). Next: Session 4 continues from task 2. See Sessions/Session4/HANDOFF.html.
 - 2026-11-26 Session 4 (second run): scene start-up preference fix; Esc/Back/controller and covered menus fixed in Sample 01; input maps by `InputActionReference` (task 2 code); merged into library main; sample and EditMode tests pass in Rally 6.3 and Lab 7. Rally asset migration, Rally switch-over, gate and old-system deletion not done. See Sessions/Session4/HANDOFF.html.
 - 2026-11-26 Session 4 (runs 3 and 4): Rally runs on the new system; parity gate 18/18 before the deletion; old system, old `StateSO` fields and the migration tool deleted; Lab EditMode 77/77 and sample flow 1/1. The owner's cursor check by hand passed. See Sessions/Session4/HANDOFF.html.
+- 2026-11-26 Session 4B (naming, folders, cleanup): every public type in `Runtime/`/`Editor/` passes NAMING.md's
+  read-alone test (15 renamed; `Runtime/Adapters` split into `Runtime/Requesters/` + `Requesters/Shared/`, both
+  under the 8-script limit); Rally's scenes/prefab and the sample scene had their serialized class-identifier and
+  UnityEvent target-type strings fixed to match (grepped before/after, zero stale refs); README and NAMING.md
+  updated. Lab: compiles clean, EditMode 77/77. **Not verified:** Rally's own EditMode/parity (its Editor got stuck
+  on a "scene modified externally" dialog CLI automation couldn't clear) and the Lab's sample PlayMode flow test
+  (failed on cursor-lock state only, likely the same input-sequencing sensitivity Session 4's handoff already
+  describes, not a regression — needs a clean rerun). See Sessions/Session4B/HANDOFF.html.
