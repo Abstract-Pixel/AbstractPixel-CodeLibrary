@@ -204,6 +204,58 @@ Approved 2026-11-28 in Session 8A-look, owner review in chat on captured stills 
 - Unchanged from GRILL-RESULTS §5: the stack with suspended states dimmed, `EFFECTS` as stacked key/value rows,
   `LAST REFUSAL` as an icon plus one sentence, the `F8 hide` key hint, unscaled time, top-right placement.
 
+## Game State Debugger window
+
+Approved 2026-11-28 in Session 8B-look, owner review in chat on captured stills (not a formal grill round, like
+7A-look and 8A-look). This session also built a working proof of concept, not just a look, at the owner's explicit
+request, overriding the ticket's own "no product code" / look-only scope — see that session's handoff. Exact values:
+the Lab prototype's `Assets/GameManagementUIPrototype/UI/DebuggerWindow.uss` and `.uxml`, plus the shared
+`Debugger.uss` (also used by the overlay).
+
+- **Journal list**: columns Index, Time, Event, State, Requester, Reason, fixed pixel widths (not percentage) so
+  columns don't drift when the index column was added. `gm-c-time` 48px, `gm-c-event` 80px, `gm-c-state` 96px,
+  `gm-c-req` 104px, 10px gaps between columns.
+- **Row index**: reuses the overlay's own `gm-j-index` badge (flat grey, `rgba(255,255,255,0.1)`) unchanged — a
+  second, different-looking badge for the same information was tried and rejected by the owner as not reading as
+  native Unity UI. The badge shows the row's position in the full, unfiltered journal (1 = most recent), stable
+  across filtering and sorting, so a row keeps its number regardless of what's currently shown.
+- **Outcome filter**: a multi-select `EnumFlagsField` (`[Flags] enum` of Entered/Applied/Refused/Left), not a
+  single-choice dropdown — any combination can be shown at once. Its reserved label area is hidden
+  (`.gm-flags-filter > .unity-base-field__label { display: none; }`) so it sits flush with the rest of the toolbar,
+  since `BaseField` reserves label width even with an empty label string.
+- **Sort order**: a two-segment toggle button group (`gm-sort-group` / `gm-sort-option` / `gm-sort-option-active`),
+  styled after this module's own Tab headers (`SettingsPage.uxml`'s `gm-tabs`) and Unity's own toolbar button groups
+  (the Game view's top-right bar) rather than a single cycling button.
+- **Footer is resizable**: a vertical `TwoPaneSplitView`, the footer as its fixed pane (initial height 110px, drag
+  handle between the journal list and the footer). Replaces a fixed-height footer.
+- **Footer "Input" line**: the Input effect (`IInputSource.EnableOnly(IReadOnlyList<InputActionMap>)` — an Input
+  Action Map, not an Action or the whole Asset) shown as two pill chips joined by an arrow, reading
+  "Player map off → UI map on" (`gm-chip`, `gm-chip-add` green, `gm-chip-remove` red). A tooltip on the row spells out
+  `EnableOnly`'s actual behaviour (only the named map(s) turn on; every other map that was on turns off). The arrow
+  between the two chips uses a tighter, dedicated margin (`gm-chip-arrow`, 3px each side) matching the plain-text
+  arrow spacing on the Time/Cursor lines above it, not the wider `gm-sep` spacing used by the Stack breadcrumb.
+- **Footer "Stack" line**: state-chip rows reusing the overlay's own `gm-state-chip` / `gm-state-dot-N` classes
+  (coloured dot + name) instead of a plain arrow-joined string, so a state reads the same colour here as everywhere
+  else on the module's debug UI.
+- **Footer vertical rhythm**: `gm-d-line` is `align-items: center` (previously unset, default `stretch`, which put the
+  key label out of vertical line with a pill-chip or dot-chip value) and `margin-top: 2.3px` between rows (the
+  owner's 15% increase over the original 2px).
+- **Click-to-navigate** (state and requester columns): a proof of concept, not real data. It routes to the
+  GameManagement sample's own assets — `FindSampleState` looks up a `StateSO` by name under
+  `Packages/com.abstractpixel.library/Modules/GameManagement/Samples/01 Minimal Game/States`; `FindRequesterGameObject`
+  searches the currently loaded scene(s) by name. A match pings/selects it (`Selection.activeObject` +
+  `EditorGUIUtility.PingObject`); no match disables the link (`gm-j-link:disabled`, 0.5 opacity) and logs a warning,
+  rather than doing nothing silently. Hover feedback on both links: `gm-j-link:hover` (blue, bold).
+
+**Open items for ticket 09 (the real build) to settle, not decided here:**
+- Click-to-navigate must route to the journal entry's real recorded `StateSO`/GameObject reference, once the real
+  `GameStateMachine.Journal` carries one, instead of this prototype's name-based lookup into the sample project.
+- The outcome flags filter and sort toggle are UI only here; the real build reads the real journal, not the
+  hardcoded 8-row sample array in `GameManagementPrototypeRows.cs`.
+- The footer is resizable but its content is still the same static placeholder text used since Session 5 — it is
+  not wired to the selected row. Ticket 09 needs a real per-row changed-fields model (what GRILL-RESULTS §5 and the
+  original footer sketch call "changed-only" details) before the footer can show the selected row's own data.
+
 ## How a look gets approved
 
 Capture the window at 480, 760 and 1200 px with `Sessions/Session5/capture-tools/` (never `capture editor_window`),

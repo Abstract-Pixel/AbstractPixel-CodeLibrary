@@ -24,7 +24,7 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 |---|---|---|---|---|
 | 01 | [Onboarding window look (7A-look)](tickets/01-onboarding-look.md) | prototype, HITL | none | done |
 | 02 | [Debugger overlay look (8A-look)](tickets/02-debugger-overlay-look.md) | prototype, HITL | 01 | done |
-| 03 | [Game State Debugger window look (8B-look)](tickets/03-debugger-window-look.md) | prototype, HITL | 02 | open |
+| 03 | [Game State Debugger window look (8B-look)](tickets/03-debugger-window-look.md) | prototype, HITL | 02 | done |
 | 04 | [Stability gate before any build](tickets/04-stability-gate.md) | task | none (before 05) | open |
 | 05 | [Project Settings page build (6A-build)](tickets/05-settings-page-build.md) | implement | 01-04 | open |
 | 06 | [State inspector and drawer build (6B-build)](tickets/06-state-inspector-build.md) | implement | 05 | open |
@@ -62,6 +62,11 @@ ticket's goal or the order here is the owner's call.
   indexed transitions with event icons, plus a per-state colour dot shared with the stack row; style rules added to
   UI-STYLE.md. Ticket 08 (build) still needs a real deterministic state-colour assignment and a decision on long
   state names on the overlay.
+- [Session 8B-look debugger window look](../Sessions/8B-look/HANDOFF.md): approved; also a working proof of concept
+  (resizable footer, multi-select outcome filter, sort toggle, click-to-navigate to the GameManagement sample's own
+  assets) built at the owner's request, beyond the ticket's look-only scope; style rules added to UI-STYLE.md. Ticket
+  09 (build) still needs real journal data, real click-to-navigate targets and a real per-row changed-fields model
+  for the footer.
 
 ## Not yet specified
 
