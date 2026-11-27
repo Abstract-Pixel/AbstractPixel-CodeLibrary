@@ -37,7 +37,9 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 
 Ticket 04 runs no UI and needs Unity, so it may run beside the look tickets in its own session.
 When a ticket closes: set its status here to `done`, add one line to "Decisions so far", and save its handoff in
-`../Sessions/<ticket id>/HANDOFF.md`.
+`../Sessions/<ticket id>/HANDOFF.md`. Anything a later ticket needs goes into that ticket's file under
+`## From ticket NN` (see PLAN-OVERVIEW, "Carry forward"). Those notes add must-haves or checks only; changing a
+ticket's goal or the order here is the owner's call.
 
 ## Decisions so far
 

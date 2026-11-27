@@ -65,3 +65,9 @@ soft-locks. Compare with `Parity/baseline/` (see `Parity/README.md`).
   developer using the module, what was not done, findings, budget used and whether a warning fired. Then mark the
   ticket `done` on the map and add one line to its "Decisions so far". Don't write prompts for other tickets; the map's
   tickets are the prompts.
+- **Carry forward into later tickets.** When a session learns something a later ticket needs (a new rule, a bug, a
+  changed file or type name, a decision the owner made, a requirement that must not be lost), it adds a note at the
+  end of that ticket's file under a `## From ticket NN` heading: what it is, why it matters, and where the detail is
+  (handoff section, file path). Notes may add must-haves or checks. They never change the ticket's goal, its "Blocked
+  by" or the map's order; propose those in the handoff for the owner to decide. The session working a ticket reads its
+  "From ticket" notes before starting.

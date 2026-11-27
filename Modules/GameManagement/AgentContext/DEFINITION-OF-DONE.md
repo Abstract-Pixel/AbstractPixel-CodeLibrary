@@ -50,6 +50,7 @@ Checked by running the commands, not by reading the code. "Should work" is not f
    effect on developers, decisions made without the user, not done, and budget.
 4. **The map is up to date:** the ticket is marked `done` in `Wayfinder/map.md` with one line in "Decisions so far".
    Anything new goes in as a ticket or as fog. No prompts for other sessions: the map's tickets are the prompts.
+   Anything a later ticket needs is added to that ticket's file under `## From ticket NN` (PLAN-OVERVIEW, "Carry forward").
 5. **The budget is closed:** `budget end` called, and the handoff says what was allotted, what was used and whether a
    warning fired.
 6. **Committed.** Work is committed per task; the handoff lists the commits. Pushing follows ticket 04's decision.
