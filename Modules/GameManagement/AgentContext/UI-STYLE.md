@@ -120,6 +120,62 @@ Test before calling the build done, at 275, 480, 760 and 1200 px, reading every 
 characters with spaces; one of 40 or more without spaces; an input action map name of 40 or more; three or more maps
 in one table cell; six or more parents; and a problem message and fix button that name a long state.
 
+## Onboarding window
+
+Approved 2026-11-28 in Session 7A-look, owner review in the live combined prototype window (not a formal
+stills-and-grill round; see that session's handoff for what this means for ticket 07). Exact values: the Lab
+prototype's `Assets/GameManagementUIPrototype/UI/Onboarding.uss` and the seven `Onboarding*.uxml` files.
+
+- **Seven pages**, Back/Next, matching GRILL-RESULTS §4 exactly: Welcome, Settings folder, Which menus?, How to set
+  up each menu, Input, Ready, All set. Step label reads "Step N of 7" on every page, including the two that carry no
+  box index (see below).
+- **Page body is capped at 640 px and centered**, with 6% side padding inside that cap. This never changes with
+  window width; only the two separators (below) break out of it.
+- **Both separators (the one under the pill, and the footer's top border line) span the full window width**, however
+  wide the window is resized, in a dimmed white (`rgba(255,255,255,0.35)`, not solid white or the default border
+  colour). The footer's own buttons row stays capped at 640 px inside that full-width line — implemented as an outer
+  full-width `.gm-footer` (border + padding) holding an inner capped `.gm-footer-inner` (the actual row).
+- **Footer**: `padding-top: 22px` above the button row, so the buttons never crowd the line above them.
+- **Welcome page reads much larger than the rest**: logo 325×75 (vs the normal 160×36), pill padding 5px 20/14px with
+  16 px text (vs the normal 10 px), header 30 px (vs 20 px). The four terms (state, sub-state, Requester, Reactor)
+  sit in a **Foldout titled "Terminology", collapsed by default**.
+- **The "Game Management" pill**: a capsule with a 1 px tinted-blue outline, a tinted-blue fill, tinted-blue bold
+  text, and a small flat white gear icon on the left. The icon is drawn procedurally at runtime
+  (`GameManagementOnboardingPillIcon.cs`, an 18×18 texture, cached) — there is no image asset. An earlier round tried
+  combining the gear with a tiny controller glyph; the owner asked for the gear alone, since the controller reads as
+  noise at that size.
+- **Box indexing**: every choice card gets a small numbered badge in its top-left corner (`gm-box-index`, absolute
+  position, the card's padding-left makes room for it) — *except* a page with only one box on it (Settings folder,
+  Input), which carries no index and keeps the card's normal padding (`gm-card-flat`). The Ready page also carries no
+  per-card index; its points are numbered individually instead (see below).
+- **Settings folder page**: one un-indexed card, a `Folder` text field next to a **Choose...** button
+  (`EditorUtility.OpenFolderPanel`, converted to an Assets-relative path), and a live green/red status row ("Looks
+  good." / "Must be inside Assets/.") that re-checks as the field is edited or browsed to.
+- **How to set up each menu**: each menu's card keeps its existing Copy/Use-my-own radio row, and the Main Menu and
+  Pause cards additionally carry an **"Include a Settings screen" toggle** with a note hint under it. This is new
+  since the original GRILL spec (which had Pause always bring Settings with no choice) — the owner asked for it as a
+  real per-menu choice, decided it belongs on this page (not "Which menus?") because this is already where every
+  other per-menu setup decision lives. A subtext under any settings control on this page is prefixed **`NOTE:`** in
+  bold, then the sentence — the only page this convention has been applied to so far.
+- **Ready page**: numbered points (`1.`, `2.`, ...) in bold green instead of a per-row dot, roomier spacing between
+  points (9 px) than within a point's own wrapped text, generated from the owner's actual choices (which menus,
+  which path, which have a Settings screen) rather than static sample text.
+- **All set page**: a green circle with a check mark sits beside the "All set" header. Each menu still needing setup
+  (the ones set to "Use my own") gets its own card with a 3 px amber left border and a small bold amber "TO DO" tag
+  above its name — so the page reads as a checklist of what is still left, not a report of what is already done. If
+  every chosen menu is "copy the library's menu", one plain card says so instead.
+
+**Open items for ticket 07 (the real build) to settle, not decided here:**
+- Whether the per-menu "Include a Settings screen" toggle changes the Settings-page validator (a shared Settings
+  sub-state opening over whichever menus asked for it) — this prototype only shows the resulting state list and menu
+  line, never the real catalog or validator.
+- The library ships `StartMenu.prefab`, `Pause Menu.prefab`, `Game Over Menu .prefab` (note the trailing space in
+  the asset name) and `Game Win Menu.prefab` in `Modules/GameManagement/Runtime/MenuPrefabs/` — GRILL-RESULTS Q21's
+  open fact is answered: **yes**, base prefabs already exist for every menu named in "Which menus?". There is **no**
+  Settings menu prefab yet; a menu set to "Include a Settings screen" has nothing to copy for that sub-screen, so
+  ticket 07 needs either a Settings menu prefab added to that folder or a decision that Settings always starts from
+  "Use my own".
+
 ## How a look gets approved
 
 Capture the window at 480, 760 and 1200 px with `Sessions/Session5/capture-tools/` (never `capture editor_window`),

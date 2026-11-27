@@ -22,7 +22,7 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 
 | # | Ticket | Type | Blocked by | Status |
 |---|---|---|---|---|
-| 01 | [Onboarding window look (7A-look)](tickets/01-onboarding-look.md) | prototype, HITL | none | open |
+| 01 | [Onboarding window look (7A-look)](tickets/01-onboarding-look.md) | prototype, HITL | none | done |
 | 02 | [Debugger overlay look (8A-look)](tickets/02-debugger-overlay-look.md) | prototype, HITL | 01 | open |
 | 03 | [Game State Debugger window look (8B-look)](tickets/03-debugger-window-look.md) | prototype, HITL | 02 | open |
 | 04 | [Stability gate before any build](tickets/04-stability-gate.md) | task | none (before 05) | open |
@@ -55,6 +55,9 @@ ticket's goal or the order here is the owner's call.
 - Replan (2026-11-27, owner): every look first (01-03), then a stability gate, then every build in order, then the
   watchdog, a hardening walk and docs. This map is the only source of the route. Old `gm-commercial` budget plan
   closed (127% spent of 77%); `gm-finish` covers the rest.
+- [Session 7A-look onboarding window look](../Sessions/7A-look/HANDOFF.md): approved, all 7 pages (not just 06-08);
+  adds a per-menu "Settings screen" choice on step 4; style rules added to UI-STYLE.md. Q21 resolved: base menu
+  prefabs exist, a Settings menu prefab does not yet.
 
 ## Not yet specified
 
