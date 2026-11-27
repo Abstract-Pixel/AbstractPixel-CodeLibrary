@@ -61,3 +61,4 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
   on a "scene modified externally" dialog CLI automation couldn't clear) and the Lab's sample PlayMode flow test
   (failed on cursor-lock state only, likely the same input-sequencing sensitivity Session 4's handoff already
   describes, not a regression — needs a clean rerun). See Sessions/Session4B/HANDOFF.html.
+- 2026-11-27 Session 6B (look only): state inspector design approved; drawer look review dropped; no product code. **For the build: the inspector must handle long names** (../UI-STYLE.md, "Long names"), and its Input comparison is still sample data. Next: 6C watchdog. 6A-build and 6B-build are still to do. See ../Sessions/Session6B/HANDOFF.md.

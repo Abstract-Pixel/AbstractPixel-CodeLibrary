@@ -64,6 +64,62 @@ owner changes it. Approved 2026-11-27 in Session 6A on the Project Settings page
 - Warning vs error: a sub-state with some parents missing is a Warning ("…It still opens over Main Menu."); with all
   parents missing it is an Error ("…so Credits can never open.").
 
+## State inspector (`StateSO`)
+
+Approved in Session 6B (stills: `Sessions/Session6B/stills/`). Exact values: the Lab prototype's
+`Assets/GameManagementUIPrototype/UI/StateInspector.uss` and `.uxml`.
+
+- It sits under Unity's own ScriptableObject header. No custom header. A sub-state has a 4 px teal line
+  (`rgb(70,140,150)`) as the first thing under that header, edge to edge.
+- Order: general info, then **Problems**, **Software Effects**, **Advanced**. All foldouts start collapsed.
+- General info: a type tag (teal "Sub-state" or grey "Main state") with an **Open in Project Settings** button at the
+  top right; "Opens over" (small muted caption, then one teal-outlined chip per parent, or muted "nothing" /
+  "no parent yet"); the "Is sub-state" checkbox; then, for sub-states only, two panels 8 px apart: **Parents** and
+  **What this state does over each parent**.
+- Problems, Software Effects, Advanced and the two panels use component-style header bars with a foldout. Panel
+  contents have 12 px above and below.
+- Parent rows: handle, index pill joined to the object field (grey, as main rows), 18 px tall, 6 px apart.
+- Over-each-parent panel: a `NOTE:` line (NOTE in bold capitals), then a bordered table with a shaded head,
+  alternating rows, 1 px column separators and numbered pills joined to the parent names.
+- A table value is a teal tag only when what this state uses differs from what that parent uses. Being set to Own is
+  not enough. Compare the real values, never the displayed text.
+- Until the developer has chosen an Own value, switching to Own starts from parent 1's value.
+- Each effect's value shows only on Own (Input: its "Input actions" foldout). On "Same as parent" (main states:
+  "Keep last") only the muted inherited line shows.
+- Input action rows carry a chip with the action map's name.
+- Sub-states use teal for selected and clicked colours. Main states keep Unity's own.
+
+## Long names (required in the build)
+
+Real names can be far longer than the prototype's samples. **The real state inspector must handle them everywhere in
+the view.** Added at the owner's request when the 6B design was approved. The owner asked for the requirement; the
+handling below was written by the agent, and **no screen has been checked with long names**. The prototype was left
+unchanged on purpose.
+
+General rules:
+
+1. From 275 px to 1200 px wide: no sideways scrolling, no overlap, and no button, checkbox, picker, handle, pill or
+   count field pushed off, covered or squeezed.
+2. A **name** stays on one line and is cut at the end with "…". Whenever it can be cut, hovering shows all of it.
+3. A **sentence** (notes, inherited lines, problem messages, section and panel titles) wraps. It is never cut.
+4. Layout never changes data: compare, save and match on object references and real values, never on shown text.
+
+| Place | Handling |
+|---|---|
+| "Opens over" chips | Chips wrap onto new lines. One chip is never wider than the line; its name is cut, with a tooltip. |
+| Parent rows (object fields) | The field shrinks. Handle, pill and picker button keep their size. Tooltip: the full state name. |
+| Table, Parent column | The widest column. The name is cut with a tooltip; the pill never shrinks. |
+| Table, value cells | Cut inside the cell, teal tag included. Column lines stay aligned. Tooltip: the full value. A changed cell's tooltip gives both full values (this state's and the parent's) and the parent's full name. |
+| Table, Input column | Map names joined with ", ", each map once, cut at the end. The tooltip lists every map, one per line. Teal is decided by which maps are on, so name length and order make no difference. |
+| Input action rows | The map chip takes at most about a third of the row, is cut, and has a tooltip. The object field keeps the rest, with its picker button; its tooltip gives the full action name. |
+| Inherited lines, `NOTE:` line | Wrap. With many parents they grow downward. |
+| Section and panel titles | Wrap. A title never runs under the Parents count field. |
+| Problem box | The message wraps. A fix button with a long name ("Add …") is cut with a tooltip and moves to its own line when narrow. "Learn more" stays visible. |
+
+Test before calling the build done, at 275, 480, 760 and 1200 px, reading every still: a parent name of 60 or more
+characters with spaces; one of 40 or more without spaces; an input action map name of 40 or more; three or more maps
+in one table cell; six or more parents; and a problem message and fix button that name a long state.
+
 ## How a look gets approved
 
 Capture the window at 480, 760 and 1200 px with `Sessions/Session5/capture-tools/` (never `capture editor_window`),

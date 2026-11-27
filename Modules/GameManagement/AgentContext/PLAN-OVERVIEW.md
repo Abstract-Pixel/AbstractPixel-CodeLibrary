@@ -22,7 +22,7 @@ transition. Rally Shift runs on it with every flow behaving as it does on Steam 
 | 4B | Naming, folders and core cleanup (second part of Session 4) | refactor | 5% of Session 4's 18% | none | Every name passes NAMING.md's read-alone test (owner approves the rename table), no folder above 8 scripts, readability pass with no behaviour change, docs in step |
 | 5 | UI design grill | grill | 4% | **is the precursor** for 6, 7, 8 | Detailed UI spec and prototypes for the settings page, inspectors, onboarding, debugger |
 | 6A | Project Settings page (UI sub-session) | implement | per sub-session | Session 5 | Owner finalizes the look from prototype 01/02, then the real Project Settings > Abstract Pixel > Game Management page with its problem list |
-| 6B | State inspector and state field drawer (UI sub-session) | implement | per sub-session | 6A | Look from prototypes 03-05, then the real inspector and drawer |
+| 6B | State inspector and state field drawer (UI sub-session) | implement | per sub-session | 6A | Look from prototypes 03-04 (approved 2026-11-27; the drawer has no separate look review). Then the real inspector and drawer (6B-build, still to do), which must handle long names (UI-STYLE.md) |
 | 6C | Play-mode watchdog | implement | per sub-session | 6A | The watchdog from the old Session 6 row |
 | 7A | Onboarding window and menus (UI sub-session) | implement | per sub-session | 6B | Look from prototypes 06-08, then the window, menu choice page and both setup paths |
 | 8A | Debugger overlay (UI sub-session) | implement | per sub-session | 7A | Look from prototype 09, then the in-game overlay; Editor and Development Builds; release opt-in |
