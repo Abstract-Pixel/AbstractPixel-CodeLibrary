@@ -176,6 +176,34 @@ prototype's `Assets/GameManagementUIPrototype/UI/Onboarding.uss` and the seven `
   ticket 07 needs either a Settings menu prefab added to that folder or a decision that Settings always starts from
   "Use my own".
 
+## Debugger overlay
+
+Approved 2026-11-28 in Session 8A-look, owner review in chat on captured stills (not a formal grill round, like
+7A-look). Exact values: the Lab prototype's `Assets/GameManagementUIPrototype/UI/DebuggerOverlay.uxml` and
+`Debugger.uss`.
+
+- Fixed-width panel, top-right, semi-opaque dark background, independent of Game view size: `GAME STATE`, `EFFECTS`,
+  `LAST REFUSAL` (shown only when there is one), `JOURNAL`, matching GRILL-RESULTS §5.
+- **Per-state colour dot**: a small 7 px dot, shared between the stack row and the journal, so the same state reads
+  the same colour everywhere on the overlay. The colour comes from a small fixed palette (`gm-state-dot-0` through
+  `gm-state-dot-5`); nothing about the palette or the mechanism names a game or a specific state. A real build picks
+  the class deterministically from the state's identity, so any game's states get stable, consistent colours with no
+  per-game configuration.
+- **Journal, grouped and indexed**: lines that share one timestamp (for example Entered + Applied from the same
+  request) collapse into one numbered group instead of repeating the time on separate rows. Each group has:
+  - a small numbered index badge (1 = most recent, counting down), grey, in the same style as the state-list row
+    badges;
+  - the time, shown once;
+  - one line per state involved in that transition, each with its colour dot, the state name, and its event icon(s).
+  - A `newest first` label sits at the top right of the `JOURNAL` title, matching the Game State Debugger window's
+    own wording, since both order newest first.
+- **Event icons**, shared with the Game State Debugger window (`gm-event-icon` plus `-entered` / `-applied` /
+  `-left` / `-refused`): ▶ entered (green), ◆ applied (blue), ◀ left (grey), ! refused (yellow, bold). A refusal in
+  the journal shows only the icon and "Refused"; its full reason stays in the `LAST REFUSAL` block above it, so it is
+  never shown twice.
+- Unchanged from GRILL-RESULTS §5: the stack with suspended states dimmed, `EFFECTS` as stacked key/value rows,
+  `LAST REFUSAL` as an icon plus one sentence, the `F8 hide` key hint, unscaled time, top-right placement.
+
 ## How a look gets approved
 
 Capture the window at 480, 760 and 1200 px with `Sessions/Session5/capture-tools/` (never `capture editor_window`),
