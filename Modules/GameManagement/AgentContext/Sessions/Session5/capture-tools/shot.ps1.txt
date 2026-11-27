@@ -1,0 +1,15 @@
+param([string]$Type, [int]$W, [int]$H, [string]$Out, [string]$Menu)
+$sp = $PSScriptRoot  # folder holding ProtoShot.cs (copy both files to your scratchpad and drop the .txt)
+Set-Location "C:\Users\avig7\Desktop\AllUnity\ActiveProjects\Abstract_Pixel_Lab"
+Add-Type @"
+using System; using System.Runtime.InteropServices;
+public static class Fg { [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c); }
+"@
+$a1 = '[\"' + $Type + '\", ' + $W + ', ' + $H + ', \"Tools/External Project Tools/Game Management/UI Prototype/' + $Menu + '\"]'
+$a2 = '[\"' + $Type + '\", \"' + ($Out -replace '\\','/') + '\"]'
+unity command script run --file "$sp\ProtoShot.cs" --entry ProtoShot.Place --args $a1 | Select-Object -First 1
+$p = Get-Process Unity | Where-Object { $_.MainWindowTitle -like "*Abstract_Pixel_Lab*" } | Select-Object -First 1
+[Fg]::ShowWindow($p.MainWindowHandle, 9) | Out-Null
+[Fg]::SetForegroundWindow($p.MainWindowHandle) | Out-Null
+Start-Sleep -Milliseconds 900
+unity command script run --file "$sp\ProtoShot.cs" --entry ProtoShot.Grab --args $a2 | Select-Object -First 1

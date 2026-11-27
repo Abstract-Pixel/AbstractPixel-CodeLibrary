@@ -1,0 +1,42 @@
+using System.Text;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+public static class Dump
+{
+    public static string Run(string typeName, string elementName, int depth)
+    {
+        foreach (EditorWindow window in Resources.FindObjectsOfTypeAll<EditorWindow>())
+        {
+            if (window.GetType().Name != typeName)
+            {
+                continue;
+            }
+            VisualElement start = window.rootVisualElement.Q(elementName);
+            StringBuilder builder = new StringBuilder();
+            Walk(start, 0, depth, builder);
+            System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "uitk-dump.txt"), builder.ToString());
+            return "ok";
+        }
+        return "no window";
+    }
+
+    private static void Walk(VisualElement element, int level, int depth, StringBuilder builder)
+    {
+        if (element == null || level > depth)
+        {
+            return;
+        }
+        IResolvedStyle style = element.resolvedStyle;
+        builder.Append(new string(' ', level * 2)).Append(element.GetType().Name).Append(" #").Append(element.name)
+            .Append(" .").Append(string.Join(".", element.GetClasses()))
+            .Append(" rect=").Append(element.layout)
+            .Append(" dir=").Append(style.flexDirection).Append(" ai=").Append(style.alignItems).Append(" as=").Append(style.alignSelf)
+            .Append(" grow=").Append(style.flexGrow).Append(" jc=").Append(style.justifyContent).Append('\n');
+        foreach (VisualElement child in element.hierarchy.Children())
+        {
+            Walk(child, level + 1, depth, builder);
+        }
+    }
+}

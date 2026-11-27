@@ -106,3 +106,15 @@ The owner decided Sample 01 Minimal Game is built on the new state machine only,
 - **A menu hides while a sub-state covers its state** (`StateMenuReactor.hideWhileCovered`, on by default) and shows again when the sub-state leaves.
 - **Scene system: the preference "Open a scene in no group with the default scene set" now also decides Play.** Off: a scene in no group plays alone, with no manager or shared scenes (replaces 4B Q5 "Play always loads them").
 - **`game-management-rework` is merged into library `main`, not the other way round.** Merging `main` into the branch would break Rally (it removes `[Savable]`/`SaveCategory`, so Rally would need the save-system V2 migration, which the owner does not want now). The Lab is on `main` with the merge commits; Rally stays on `game-management-rework`.
+
+## 2026-11-27 (Session 5): UI design grill
+
+Full answers (Q1-Q25): [Sessions/Session5/GRILL-RESULTS.md](Sessions/Session5/GRILL-RESULTS.md). The calls that change earlier decisions or need remembering:
+
+- **Multi-parent conflict is not a problem.** A sub-state that follows each parent's effects behaving differently per parent is intended. The state Inspector shows a read-only "What this state does over each parent" table. The only multi-parent problems are self-parent or loop (error), an empty parent slot and the same parent twice (warnings). Severity: error = can never work, warning = messy; no info level.
+- **Settings-asset picker** (round 3 Q9): the scene page's Setup card (status dot + object field, asset path + Move…, Create settings, Fix now). **No multi-asset "Keep this one" list**: other settings assets are ignored silently.
+- **Debugger diff view in scope** as changed-only lines in the Editor debugger window's row details; a full side-by-side compare is a Session 8 nice-to-have. The in-game overlay is read-only and shown by an InputActionReference (no hard-coded key).
+- **Shared editor look:** `SceneSystemUI`'s generic helpers move to a shared `AbstractPixel.Core.Editor.UI` assembly at the start of Session 6; both modules use it.
+- **Onboarding is the one place that asks which states and menus exist.** Each menu row chooses "Copy the library's menu" or "Use my own" (extra setup, Learn more). The Settings page's empty States card links to it.
+- **Setup windows get a system pill header** under the Abstract Pixel logo ("Game Management"; the scene setup window gets "Scene System").
+- Requesters and Reactors keep stock inspectors; one shared state field drawer flags states not in the list.

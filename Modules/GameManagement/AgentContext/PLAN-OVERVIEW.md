@@ -21,14 +21,19 @@ transition. Rally Shift runs on it with every flow behaving as it does on Steam 
 | 4 | Sample game, Rally migration, parity gate, delete old system | implement | 13% of Session 4's 18% | none | A small sample game copying Rally's flows (menus reusable as a setup template) built on the old system first, with a Play-mode flow test that records a baseline in Unity 6.3 and the Unity 7 Lab, then migrated and passing the same test in both; Rally on the new system, Pause as sub-state of Play, merged Settings state, every Rally script and probe on `GameStates`, parity and transition break scenarios pass, old code deleted |
 | 4B | Naming, folders and core cleanup (second part of Session 4) | refactor | 5% of Session 4's 18% | none | Every name passes NAMING.md's read-alone test (owner approves the rename table), no folder above 8 scripts, readability pass with no behaviour change, docs in step |
 | 5 | UI design grill | grill | 4% | **is the precursor** for 6, 7, 8 | Detailed UI spec and prototypes for the settings page, inspectors, onboarding, debugger |
-| 6 | Settings page, validator UI, watchdog | implement | 10% | Session 5 | Project Settings > Abstract Pixel > Game Management, inspector problems with fixes, play-mode watchdog |
-| 7 | Onboarding window and menus | implement | 10% | Session 5 | Menu choice page, duplicate-or-attach paths (both tested), base menus with Settings button and back |
-| 8 | Runtime debugger | implement | 7% | Session 5 | UI Toolkit overlay on the journal; Editor and Development Builds; release opt-in |
+| 6A | Project Settings page (UI sub-session) | implement | per sub-session | Session 5 | Owner finalizes the look from prototype 01/02, then the real Project Settings > Abstract Pixel > Game Management page with its problem list |
+| 6B | State inspector and state field drawer (UI sub-session) | implement | per sub-session | 6A | Look from prototypes 03-05, then the real inspector and drawer |
+| 6C | Play-mode watchdog | implement | per sub-session | 6A | The watchdog from the old Session 6 row |
+| 7A | Onboarding window and menus (UI sub-session) | implement | per sub-session | 6B | Look from prototypes 06-08, then the window, menu choice page and both setup paths |
+| 8A | Debugger overlay (UI sub-session) | implement | per sub-session | 7A | Look from prototype 09, then the in-game overlay; Editor and Development Builds; release opt-in |
+| 8B | Game State Debugger window (UI sub-session) | implement | per sub-session | 8A | Look from prototype 10, then the window with changed-only diff lines |
 | 9 | In-Editor docs, samples, final review | docs | 8% | none | Documentation-engine topics, graphics-free samples, code review, final handoff |
 
 **Branches.** Library and Rally work on `game-management-rework`, made from `main`. If the merge into `main` has not
 landed when Session 1 starts, branch from `scene-system-rework` (library) and the current Rally branch, and say so in
 the handoff.
+
+**2026-11-27 change:** Sessions 6, 7 and 8 are split into one sub-session per UI piece (6A-8B above). In each one the owner finalizes the look from captured, agent-checked stills before the real UI is built. Why and how: [Sessions/Session5/HANDOFF.md](Sessions/Session5/HANDOFF.md). The old 10%/10%/7% budgets are shared out per sub-session at its start.
 
 ## Priorities and deferred work
 

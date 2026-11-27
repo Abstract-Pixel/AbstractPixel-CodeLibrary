@@ -1,0 +1,59 @@
+using System.IO;
+using UnityEditor;
+using UnityEditorInternal;
+using UnityEngine;
+
+public static class ProtoShot
+{
+    private static EditorWindow Find(string typeName)
+    {
+        foreach (EditorWindow window in Resources.FindObjectsOfTypeAll<EditorWindow>())
+        {
+            if (window.GetType().Name == typeName)
+            {
+                return window;
+            }
+        }
+        return null;
+    }
+
+    public static string Place(string typeName, int width, int height, string menuPath)
+    {
+        EditorWindow window = Find(typeName);
+        if (window != null)
+        {
+            window.Close();
+        }
+        AssetDatabase.Refresh();
+        EditorApplication.ExecuteMenuItem(menuPath);
+        window = Find(typeName);
+        if (window == null)
+        {
+            return "not open: " + typeName;
+        }
+        window.position = new Rect(60, 80, width, height);
+        window.Focus();
+        window.Repaint();
+        return "placed " + window.position + " ppp=" + EditorGUIUtility.pixelsPerPoint;
+    }
+
+    public static string Grab(string typeName, string outPath)
+    {
+        EditorWindow window = Find(typeName);
+        if (window == null)
+        {
+            return "not open: " + typeName;
+        }
+        float scale = EditorGUIUtility.pixelsPerPoint;
+        Rect rect = window.position;
+        int width = Mathf.RoundToInt(rect.width * scale);
+        int height = Mathf.RoundToInt(rect.height * scale);
+        Color[] pixels = InternalEditorUtility.ReadScreenPixel(new Vector2(rect.x * scale, rect.y * scale), width, height);
+        Texture2D texture = new Texture2D(width, height, TextureFormat.RGB24, false);
+        texture.SetPixels(pixels);
+        texture.Apply();
+        File.WriteAllBytes(outPath, texture.EncodeToPNG());
+        Object.DestroyImmediate(texture);
+        return "saved " + outPath + " " + width + "x" + height;
+    }
+}

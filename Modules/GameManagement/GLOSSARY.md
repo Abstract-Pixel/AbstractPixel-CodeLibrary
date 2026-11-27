@@ -12,6 +12,10 @@ One named situation of the game, such as Main Menu, Play, Pause or Game Over. It
 The ordered list of every state. Higher in the list wins.
 _Avoid_: priority number
 
+**Rank**:
+A main state's place in the state catalog. Sub-states have no rank: they open over any parent, whatever their place.
+_Avoid_: priority
+
 **Top state**:
 The state currently in control. Its effects apply.
 _Avoid_: highest state, current state
