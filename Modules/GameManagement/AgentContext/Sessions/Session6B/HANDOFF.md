@@ -98,9 +98,8 @@ Learned on the way:
 
 ## 7. Next session
 
-**6C, the Play-mode watchdog** (the plan's order; no UI): `../Session6C/OVERVIEW.md` and `PROMPT.md`. It does not build
-the inspector. Its prompt tells it to carry the long-name requirement and section 2 into its own handoff and into the
-6B-build prompt, whenever that is written.
+**Superseded (2026-11-27 replan).** The route is in `../../Wayfinder/map.md`. The watchdog moved after every UI build
+(ticket 10). The long-name requirement and the real Input comparison are must-haves in ticket 06 (6B-build).
 
 ## 8. Budget
 

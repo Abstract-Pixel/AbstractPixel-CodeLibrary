@@ -1,12 +1,11 @@
 # Definition of done
 
-What "finished" means for a task and for a session in the gm-commercial plan. Every session prompt points here. If a
-session's OVERVIEW says more for a task, follow both.
+What "finished" means for a task and for a session on the game management map. Every ticket points here. If a
+ticket says more for a task, follow both.
 
-This file is a **guideline for every session**, not a per-session checklist. Each session's `PROMPT.md` has its own
-**"Done and verified"** section that says what finished and verified mean for that session (end state and the exact
-checks). A session is finished only when this guideline and its own section both hold. A prompt without that section is
-incomplete: the session adds one from its OVERVIEW before starting work.
+This file is a **guideline for every session**, not a per-session checklist. Each ticket in `Wayfinder/tickets/` has
+its own **"Done and verified"** section that says what finished and verified mean for that ticket (end state and the
+exact checks). A session is finished only when this guideline and its ticket's section both hold.
 
 ## A task is finished when
 
@@ -47,13 +46,13 @@ Checked by running the commands, not by reading the code. "Should work" is not f
 2. **Final checks pass on the end state:** full test assembly, clean compile, parity (when old runtime files changed),
    owner's files untouched, and the full tests in the Unity 7 Lab with its library submodule moved to this session's
    commit (PLAN-OVERVIEW.md, "Both Editors").
-3. **The handoff exists:** `Sessions/SessionN/HANDOFF.html` with result, checks run (with numbers), code changes,
+3. **The handoff exists:** `Sessions/<ticket id>/HANDOFF.md` with result, checks run (with numbers), code changes,
    effect on developers, decisions made without the user, not done, and budget.
-4. **The next session is ready:** `Wayfinder/map.md` updated, `Sessions/SessionN+1/OVERVIEW.md` and `PROMPT.md`
-   written, the prompt links to this file and has its own "Done and verified" section and the one-type-per-script rule.
+4. **The map is up to date:** the ticket is marked `done` in `Wayfinder/map.md` with one line in "Decisions so far".
+   Anything new goes in as a ticket or as fog. No prompts for other sessions: the map's tickets are the prompts.
 5. **The budget is closed:** `budget end` called, and the handoff says what was allotted, what was used and whether a
    warning fired.
-6. **Committed and pushed.** Work is committed per task by default and pushed; the handoff lists the commits.
+6. **Committed.** Work is committed per task; the handoff lists the commits. Pushing follows ticket 04's decision.
 
 A session that ran out of budget is finished only once points 3 to 5 are done. Save budget for them: they are the
 wrap reserve.

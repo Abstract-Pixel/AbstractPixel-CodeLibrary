@@ -1,64 +1,67 @@
 # Wayfinder map: game management, commercial-ready
 
+**This file alone decides what runs next and in what order** (owner, 2026-11-27). Handoffs report what happened and may
+suggest changes; they never pick the next session. If the owner asks for something else, do that and update this map.
+
 ## Destination
 
 A game management module about 90% ready for the Unity Asset Store: deep state machine, validated setup, onboarding,
-runtime debugger, in-Editor docs, Rally migrated with every flow matching today's behaviour.
+runtime debugger, in-Editor docs, Rally migrated with every flow matching today's behaviour, code stable in Unity 6.3,
+6.7 and 7.
 
 ## Notes
 
-- Domain: Unity runtime and editor tooling, in AbstractPixelLibrary. Rally Shift is the dogfood project.
-- Skills: codebase-design for code shape; grilling + domain-modeling for decision tickets; ui-uitk for editor tooling;
-  ui-ugui for menus; unity-pipeline and unity-cli for the Editor.
-- Standing preferences: easy setup over features, minimal code, no strings in setup, plain wording, verbose readable code,
-  max three parameters, composition over flags.
+- This map carries execution: tickets 04-12 build things, not only decide them.
+- Domain: Unity runtime and editor tooling in AbstractPixelLibrary. Rally Shift is the dogfood project.
+- Skills: prototype for looks; ui-uitk for editor UI; ui-ugui for menus; grilling + domain-modeling for owner
+  questions; codebase-design for code shape; unity-pipeline and unity-cli for the Editor.
+- Rules for every session: [../PLAN-OVERVIEW.md](../PLAN-OVERVIEW.md) and [../DEFINITION-OF-DONE.md](../DEFINITION-OF-DONE.md).
+- Budget plan: `gm-finish`; ticket N is `plan: gm-finish, step N`.
+
+## Route (work top to bottom; take the first open, unblocked ticket)
+
+| # | Ticket | Type | Blocked by | Status |
+|---|---|---|---|---|
+| 01 | [Onboarding window look (7A-look)](tickets/01-onboarding-look.md) | prototype, HITL | none | open |
+| 02 | [Debugger overlay look (8A-look)](tickets/02-debugger-overlay-look.md) | prototype, HITL | 01 | open |
+| 03 | [Game State Debugger window look (8B-look)](tickets/03-debugger-window-look.md) | prototype, HITL | 02 | open |
+| 04 | [Stability gate before any build](tickets/04-stability-gate.md) | task | none (before 05) | open |
+| 05 | [Project Settings page build (6A-build)](tickets/05-settings-page-build.md) | implement | 01-04 | open |
+| 06 | [State inspector and drawer build (6B-build)](tickets/06-state-inspector-build.md) | implement | 05 | open |
+| 07 | [Onboarding window build (7A-build)](tickets/07-onboarding-build.md) | implement | 06 | open |
+| 08 | [Debugger overlay build (8A-build)](tickets/08-debugger-overlay-build.md) | implement | 07 | open |
+| 09 | [Game State Debugger window build (8B-build)](tickets/09-debugger-window-build.md) | implement | 08 | open |
+| 10 | [Play-mode watchdog (was 6C)](tickets/10-watchdog.md) | implement | 09 | open |
+| 11 | [Hardening walk](tickets/11-hardening-walk.md) | implement | 10 | open |
+| 12 | [In-Editor docs, samples, final review](tickets/12-docs-and-final-review.md) | docs | 11 | open |
+
+Ticket 04 runs no UI and needs Unity, so it may run beside the look tickets in its own session.
+When a ticket closes: set its status here to `done`, add one line to "Decisions so far", and save its handoff in
+`../Sessions/<ticket id>/HANDOFF.md`.
 
 ## Decisions so far
 
-- [Planning grill, rounds 1-3](../DECISIONS.md): architecture, edge-case rules, branches, asset locations, transition time; see DESIGN.md.
-- [Session 1 flow inventory and helper audit](../FLOWS.md) (tickets 01, 03): after unpause no state is active today, because no Pause-to-Play trigger is serialized anywhere. Parity baseline in [../Parity/](../Parity/README.md).
-
-- [Session 2 core state machine](../Sessions/Session2/HANDOFF.html): plain C# `GameStateMachine` in `Runtime/Machine/`
-  with 33 new tests; new `StateSO` fields (`Parents`, `Effects`) beside the old ones; settings asset kept in Preloaded Assets.
-- [Session 3 adapters and sink](../Sessions/Session3/HANDOFF.html): Unity sink and driver, input source seam,
-  request adapters, state watch and reactors, migration tool; `Runtime/Machine/` split to one type per script. 74 tests.
-- Workflow rules (2026-11-26): every session prompt has its own "Done and verified" section; one type per script.
-- [Definition of done](../DEFINITION-OF-DONE.md): what finishing a task and a session means. Every prompt links it.
-- Plan change (2026-11-26): Session 4 gets a sample game copying Rally's flows for parity in both Editors; Session 4B
-  (names, folders, core cleanup) is its second part; together 18%. Naming rules in [../NAMING.md](../NAMING.md). Grill round 1:
-  Unity 7 checks run full tests in the Lab via its library submodule; prompts name what to read before each stage;
-  commits by default; scene scripts that make requests are called requesters. Follow-up: **no strings configure
-  anything**; input maps are chosen by `InputActionReference` (DECISIONS.md, 2026-11-26).
-
-## Open tickets
-
-- [01 Flow inventory](issues/01-flow-inventory.md) (task, AFK): resolved in Session 1.
-- [02 Editor and onboarding UI design](issues/02-ui-design-grill.md) (grilling, HITL): precursor Session 5. Blocked by 01.
-- [03 Rally helper script audit](issues/03-rally-helper-audit.md) (task, AFK): resolved in Session 1, part of the inventory.
+- [Planning grill, rounds 1-3](../DECISIONS.md): architecture, edge cases, branches, asset locations; see DESIGN.md.
+- [Session 1 flow inventory and helper audit](../FLOWS.md): parity baseline in [../Parity/](../Parity/README.md).
+- [Session 2 core state machine](../Sessions/Session2/HANDOFF.html): plain C# `GameStateMachine`, 33 tests.
+- [Session 3 adapters and sink](../Sessions/Session3/HANDOFF.html): Unity sink and driver, input source, requesters, reactors; 74 tests.
+- [Session 4 Rally migration](../Sessions/Session4/HANDOFF.html): Rally on the new system, parity gate 18/18, old system deleted.
+- [Session 4B names and folders](../Sessions/Session4B/HANDOFF.html): 15 renames per [../NAMING.md](../NAMING.md). Its Rally checks and Lab flow-test rerun were never run; now ticket 04.
+- [Session 5 UI grill](../Sessions/Session5/HANDOFF.md): spec in GRILL-RESULTS.md; one UI piece per session, look first.
+- [Session 6A settings page look](../Sessions/Session6A/HANDOFF.md): approved; style rules in [../UI-STYLE.md](../UI-STYLE.md).
+- [Session 6B state inspector look](../Sessions/Session6B/HANDOFF.md): approved; long names and real Input comparison required in the build.
+- Replan (2026-11-27, owner): every look first (01-03), then a stability gate, then every build in order, then the
+  watchdog, a hardening walk and docs. This map is the only source of the route. Old `gm-commercial` budget plan
+  closed (127% spent of 77%); `gm-finish` covers the rest.
 
 ## Not yet specified
 
-- Ease curve for the time effect (seconds only so far; skipped in Session 3 as a nice-to-have).
-- Exact shape of the transition record and the debugger's timeline view (settled in ticket 02).
-- Migration ties: resolved in Session 3 (ordered by name and reported as problems).
-- Whether Rally's own folder `Assets/[1]Project/ProjectServices/GameManagment` is also renamed (Session 1 reports the
-  reference count; the user decides).
-- Docs topic list for the documentation engine (after Session 8).
+- Ease curve for the time effect (seconds only so far).
+- Whether Rally's own folder `Assets/[1]Project/ProjectServices/GameManagment` is renamed (owner decides).
+- Docs topic list for the documentation engine (settled in ticket 12).
 
 ## Out of scope
 
 - Settings menu commercial readiness (needs its own plan).
 - Asset Store packaging, demo art, translations, old Input Manager, audio backends other than BroAudio.
-
-- 2026-11-26 Session 4 (partial): S3 committed; Sample 01 on the new system, flow test passes in Rally; Lab blocked (branch behind main). Next: Session 4 continues from task 2. See Sessions/Session4/HANDOFF.html.
-- 2026-11-26 Session 4 (second run): scene start-up preference fix; Esc/Back/controller and covered menus fixed in Sample 01; input maps by `InputActionReference` (task 2 code); merged into library main; sample and EditMode tests pass in Rally 6.3 and Lab 7. Rally asset migration, Rally switch-over, gate and old-system deletion not done. See Sessions/Session4/HANDOFF.html.
-- 2026-11-26 Session 4 (runs 3 and 4): Rally runs on the new system; parity gate 18/18 before the deletion; old system, old `StateSO` fields and the migration tool deleted; Lab EditMode 77/77 and sample flow 1/1. The owner's cursor check by hand passed. See Sessions/Session4/HANDOFF.html.
-- 2026-11-26 Session 4B (naming, folders, cleanup): every public type in `Runtime/`/`Editor/` passes NAMING.md's
-  read-alone test (15 renamed; `Runtime/Adapters` split into `Runtime/Requesters/` + `Requesters/Shared/`, both
-  under the 8-script limit); Rally's scenes/prefab and the sample scene had their serialized class-identifier and
-  UnityEvent target-type strings fixed to match (grepped before/after, zero stale refs); README and NAMING.md
-  updated. Lab: compiles clean, EditMode 77/77. **Not verified:** Rally's own EditMode/parity (its Editor got stuck
-  on a "scene modified externally" dialog CLI automation couldn't clear) and the Lab's sample PlayMode flow test
-  (failed on cursor-lock state only, likely the same input-sequencing sensitivity Session 4's handoff already
-  describes, not a regression — needs a clean rerun). See Sessions/Session4B/HANDOFF.html.
-- 2026-11-27 Session 6B (look only): state inspector design approved; drawer look review dropped; no product code. **For the build: the inspector must handle long names** (../UI-STYLE.md, "Long names"), and its Input comparison is still sample data. Next: 6C watchdog. 6A-build and 6B-build are still to do. See ../Sessions/Session6B/HANDOFF.md.
+- Full side-by-side effect compare in the debugger (nice-to-have only if ticket 09 has budget left).

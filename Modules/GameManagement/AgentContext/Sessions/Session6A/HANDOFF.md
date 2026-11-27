@@ -52,5 +52,4 @@ the shared state field drawer** (prototype windows 03, 04, 05; GRILL-RESULTS.md 
 
 ## 6. Prompt for Session 6B
 
-In `Sessions/Session6B/OVERVIEW.md` and `Sessions/Session6B/PROMPT.md`. They point back to this handoff and to
-`AgentContext/UI-STYLE.md`.
+Done (6B ran). The route is now in `../../Wayfinder/map.md`; the settings-page build is ticket 05.
