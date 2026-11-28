@@ -56,6 +56,18 @@ Budget allowed only a partial pass; ticket 05 stays open.
   row moves it (catalog and page), sub-state onto a main row and release outside do nothing, Undo
   reverts. Sub-state box now starts at the main row's badge (x 209 at 760 and 480, right edge 701/409
   unchanged, no sideways scroll); "no listed parent" group not in the sample, not checked.
+- Pass 4: Rally (6.3) with game-management-rework at 370c517: compiles, GameManagement tests 86/86, page
+  opens its settings (6 rows, 0 problems), settings and catalog files byte-identical, Rally git status
+  unchanged; clone put back on f65c236. The 11 SceneManagement* failures are not from T05 (cause
+  analysis, no baseline run): 10 are SaveSystem sample scenes in `LibrarySamplesReferenceOnlyTheLibraryTests`
+  and T05 touches no SaveSystem or Samples file; 1 is a 30 s Play-mode hold in
+  `Sample10LaunchSceneTests` that uses no changed editor code.
+- Standards findings left open: `StateListEdits`, `StateListValidator`, `StateProblem` and
+  `GameManagementSettingsProvider` are public though game code does not need them (tests sit in another
+  assembly, so making them internal needs `InternalsVisibleTo`). No `var`; files under 400 lines.
+- Still not checked: + menu, - button, fix buttons + Undo, no-asset view, problem-row stills, 1200 px
+  review, Scene System page look, drops on empty list / Sub-states tab / sub-state group, two-sub-state
+  reorder. Ticket 05 stays open; prototype window not removed.
 - Earlier open item resolved: the page row list read in the same call still showed the old rows (rebuild looks deferred; not
   confirmed by a still), empty list, Sub-states tab, dropped sub-state's group, handle reorder by pointer,
   whether the 11 SceneManagement* failures existed before T05. Baseline for the 11 older SceneManagement failures not compared.
