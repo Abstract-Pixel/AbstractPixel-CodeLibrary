@@ -252,7 +252,7 @@ namespace AbstractPixel.GameManagement.Editor
                 verb = " isn't";
                 label = "Add " + names;
             }
-            string message = _state.name + " only opens over " + names + ", which" + verb + " in the state list, so " + _state.name + " can never open.";
+            string message = _state.name + " only opens over " + names + ", which" + verb + " in the state list, so it can never open.";
             if (listed.Count > 0)
             {
                 // Past two, a count reads better than a list of names; the Parents list shows which they are.

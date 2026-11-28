@@ -167,7 +167,7 @@ namespace AbstractPixel.GameManagement.Tests
             State("Credits", true, pause);
             StateProblem problem = Only();
             Assert.IsTrue(problem.IsError);
-            Assert.AreEqual("Credits only opens over Pause, which isn't in the state list, so Credits can never open.", problem.Message);
+            Assert.AreEqual("Credits only opens over Pause, which isn't in the state list, so it can never open.", problem.Message);
         }
 
         [Test]

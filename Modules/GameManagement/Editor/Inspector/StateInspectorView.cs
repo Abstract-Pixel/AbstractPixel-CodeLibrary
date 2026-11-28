@@ -62,7 +62,7 @@ namespace AbstractPixel.GameManagement.Editor
 
             Foldout advanced = Section("Advanced", "advanced", "When the state applies and when it leaves.");
             advanced.Add(StateEffectFields.Property(_data, nameof(StateSO.StateExecutionDelay), "Execution delay"));
-            advanced.Add(StateEffectFields.Property(_data, nameof(StateSO.DisableStateOnSceneChange), "Leave on scene change"));
+            advanced.Add(StateEffectFields.WrappingToggle(_data, nameof(StateSO.DisableStateOnSceneChange), "Leave on scene change"));
 
             watcher = new StateAssetWatcher(QueueRefresh);
             Add(watcher);
