@@ -34,6 +34,19 @@ namespace AbstractPixel.GameManagement.Editor
             return null;
         }
 
+        /// <summary>The listed state this menu already has, under whatever name the project gave it, or null.</summary>
+        internal static StateSO FindMenuState(GameStateCatalog _catalog, OnboardingMenuKind _kind)
+        {
+            foreach (StateSO state in _catalog.States)
+            {
+                if (state != null && OnboardingMenuInfo.IsStateNameOf(_kind, state.name))
+                {
+                    return state;
+                }
+            }
+            return null;
+        }
+
         /// <summary>Makes the state, fills in its effects and parents, and lists it at the place its rank gives.</summary>
         internal StateSO Make(string _name, List<StateSO> _parents)
         {
