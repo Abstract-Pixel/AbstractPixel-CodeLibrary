@@ -40,3 +40,9 @@ the text above, this section wins. Session folder: `../../Sessions/08-debugger-o
    builds": dev build flows P1-P8 and release checks B1-B2, plus R1, R6, R7. This is how "checked in a real build"
    is met. The verifier drives the built dev player itself (at least P1, P4, P6, P7) and repeats the B1-B2 searches
    on the built files; it does not rebuild unless a later fix changed runtime code or the build probe.
+
+## From ticket 07
+
+- `SystemPill`, `EditorUI` and `Onboarding.uss` are reusable for any new window. Close old Project Settings and Properties windows before a screen-pixel probe; focus Rally with `AgentScripts/Tools/focus_unity_project.ps1` or the chief's own window can cover the still.
+- Rally's Editor Pipeline uses the old command names (`run_script`); helpers in `Sessions/07-onboarding-build/tools/` show both styles.
+- `EditorApplication.delayCall` does not fire while the Editor is in the background: foreground it before checking anything started from a static constructor.

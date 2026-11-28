@@ -31,7 +31,7 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 | 04 | [Stability gate before any build](tickets/04-stability-gate.md) | task | none (before 05) | done |
 | 05 | [Project Settings page build (6A-build)](tickets/05-settings-page-build.md) | implement | 01-04 | done |
 | 06 | [State inspector and drawer build (6B-build)](tickets/06-state-inspector-build.md) | implement | 05 | done |
-| 07 | [Onboarding window build (7A-build)](tickets/07-onboarding-build.md) | implement | 06 | open |
+| 07 | [Onboarding window build (7A-build)](tickets/07-onboarding-build.md) | implement | 06 | done |
 | 08 | [Debugger overlay build (8A-build)](tickets/08-debugger-overlay-build.md) | implement | 07 | open |
 | 09 | [Game State Debugger window build (8B-build)](tickets/09-debugger-window-build.md) | implement | 08 | open |
 | 10 | [Play-mode watchdog (was 6C)](tickets/10-watchdog.md) | implement | 09 | open |
@@ -81,6 +81,9 @@ section saying what to do next; it follows this map's order and never changes it
 - [Ticket 06 state inspector build](../Sessions/06-state-inspector-build/HANDOFF.md): inspector and state field drawer
   committed and merged (`96ebe07`), pushed; Rally on it (R1-R4 pass, 6.3). No verifier verdict: the owner skipped it as
   already verified. Mouse checks and a few re-checks go to ticket 11. Notes carried to tickets 07 and 11.
+- [Ticket 07 onboarding window build](../Sessions/07-onboarding-build/HANDOFF.md): window, builder, Settings Menu prefab,
+  package settings read-only, SystemPill committed and merged (`68c65b1` on gmr), pushed; Rally on it (R1, R4, R5 pass, 6.3).
+  No verifier, skipped by the owner. Unchecked items go to ticket 11. Notes carried to tickets 08, 09 and 11.
 
 ## Not yet specified
 

@@ -36,3 +36,7 @@ the text above, this section wins. Session folder: `../../Sessions/09-debugger-w
 2. A full journal at the configured size (and the minimum, 8) updates live without lag or lost selection.
 3. Stills at 480, 760 and 1200 px: empty, full, filtered to nothing, row selected, long names.
 4. Runtime files changed: parity scenarios in Rally. Rally: R1, R6, R7, R8 on a real Rally run.
+
+## From ticket 07
+
+- Same notes as ticket 08 (pill, focus, delayCall). Rally state assets are named `PauseStateSO`, `StartStateSO`: match names loosely (see `OnboardingMenuInfo.Normalize`).

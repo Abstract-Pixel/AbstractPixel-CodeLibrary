@@ -173,16 +173,19 @@ prototype's `Assets/GameManagementUIPrototype/UI/Onboarding.uss` and the seven `
   above its name — so the page reads as a checklist of what is still left, not a report of what is already done. If
   every chosen menu is "copy the library's menu", one plain card says so instead.
 
-**Open items for ticket 07 (the real build) to settle, not decided here:**
-- Whether the per-menu "Include a Settings screen" toggle changes the Settings-page validator (a shared Settings
-  sub-state opening over whichever menus asked for it) — this prototype only shows the resulting state list and menu
-  line, never the real catalog or validator.
-- The library ships `StartMenu.prefab`, `Pause Menu.prefab`, `Game Over Menu .prefab` (note the trailing space in
-  the asset name) and `Game Win Menu.prefab` in `Modules/GameManagement/Runtime/MenuPrefabs/` — GRILL-RESULTS Q21's
-  open fact is answered: **yes**, base prefabs already exist for every menu named in "Which menus?". There is **no**
-  Settings menu prefab yet; a menu set to "Include a Settings screen" has nothing to copy for that sub-screen, so
-  ticket 07 needs either a Settings menu prefab added to that folder or a decision that Settings always starts from
-  "Use my own".
+**Built in S1 (ticket 07), where the real window differs from the prototype:**
+- The pages are the library's `Editor/Onboarding/Window/Pages/*.uxml` and `Onboarding.uss` (prototype values copied; the
+  gear pill is the shared `SystemPill` in `AbstractPixel.Core.Editor.UI`, also used by the scene setup window).
+- A project that already has settings sees four pages (Which menus?, How to set up each menu, Ready, All set), "Step N of 4".
+  Existing menus are ticked, greyed and locked; only new menus get a card.
+- "How to set up each menu" lists exactly the ticked new menus, Game Win included, plus one **Settings** card (same
+  Copy / Use my own row, no Include toggle) while a new menu asks for a Settings screen.
+- Ready lists a yellow note for every name that is already taken ("... will be saved as 'Pause 1.asset'") and for an own
+  prefab that already has a State Menu Reactor. All set repeats what was renamed or skipped, since only then is it known.
+- Narrow windows (330 px): the Folder row wraps its Choose... button under the field and prints the full path below;
+  radio choices, the NOTE line and card descriptions wrap instead of being cut; the prefab field keeps ellipsis.
+- Own-prefab object fields accept prefab assets only; anything else shows a red line and is cleared.
+- "Don't show again" sits on the Welcome page; the Project Settings Setup card has the matching switch and "Set up states...".
 
 ## Debugger overlay
 

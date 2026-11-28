@@ -57,3 +57,6 @@ Steam, hearing audio, Unity 6.7) land here. Each step lists its own under "Not d
 told to fix the 375 px cut above and to check the table after renames and Settings focus: read its handoff for the
 result. Plan: [../mega-07-09/MEGA-TICKET.md](../mega-07-09/MEGA-TICKET.md).
 
+## From ticket 07 (S1, no verifier)
+
+Not checked, carried here: keyboard arrows on Main Menu pick the second button first (Core `AutoSpatialNavigation` behaviour, not changed); real OS mouse and keyboard typing in the window (folder field, object picker, drag onto the prefab field); the Choose... folder dialog; a copied menu in a real scene with the owner's input actions; Unity 6.7; the settings page with an enabled-but-package object field ("Set up" can still pick a package asset); batch-mode auto-open (rule is unit-tested, not run in a batch Editor); Lab trials of every own-prefab combination beyond the mix; the Settings menu in the Lab's own Preloaded flow; 6.3 module tests (only compile in Rally).
