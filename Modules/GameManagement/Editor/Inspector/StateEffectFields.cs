@@ -31,6 +31,21 @@ namespace AbstractPixel.GameManagement.Editor
             return Property(_data, Effects + nameof(StateEffectSettings.HudVisible), "HUD visible");
         }
 
+        /// <summary>A tick box whose label wraps onto a second line when the Inspector is narrow. Unity fixes the width
+        /// of a field's own label, so the label sits beside an unlabelled box instead.</summary>
+        public static VisualElement WrappingToggle(SerializedObject _data, string _path, string _label)
+        {
+            VisualElement row = new VisualElement();
+            row.AddToClassList("si-wrap-toggle");
+            PropertyField box = Property(_data, _path, string.Empty);
+            Label label = new Label(_label);
+            label.AddToClassList("si-wrap-toggle-label");
+            label.tooltip = box.tooltip;
+            row.Add(label);
+            row.Add(box);
+            return row;
+        }
+
         public static PropertyField Property(SerializedObject _data, string _path, string _label)
         {
             SerializedProperty property = _data.FindProperty(_path);

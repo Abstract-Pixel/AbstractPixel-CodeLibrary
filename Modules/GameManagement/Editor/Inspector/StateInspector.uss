@@ -167,3 +167,6 @@
 .si-substate .unity-toggle:focus .unity-toggle__checkmark { border-color: rgb(70, 140, 150); }
 .si-substate .unity-base-slider:focus .unity-base-slider__dragger, .si-substate .unity-base-slider__dragger:active { border-color: rgb(70, 140, 150); }
 .si-substate .unity-text-element { --unity-selection-color: rgba(70, 140, 150, 0.7); }
+.si-wrap-toggle { flex-direction: row; align-items: flex-start; margin: 2px 0 0 0; }
+.si-wrap-toggle-label { flex-grow: 1; flex-shrink: 1; flex-basis: 0; white-space: normal; padding: 2px 8px 2px 3px; }
+.si-wrap-toggle > .si-property { flex-shrink: 0; margin: 0; }
