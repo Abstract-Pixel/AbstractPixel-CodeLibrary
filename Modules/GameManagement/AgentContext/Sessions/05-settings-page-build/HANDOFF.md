@@ -45,7 +45,14 @@ Budget allowed only a partial pass; ticket 05 stays open.
 - Drag test (simulated `EditorWindow.SendEvent` drag events, not an OS drag): overlay shows on footer and
   after a rebuild, not for non-State drags, hides on drop, leaving and exit; drop adds A and B, no duplicate,
   non-State ignored, one Undo removes both. Bug fixed: overlay stuck over a row's object field (field stops
-  the event; box now listens on TrickleDown). Not checked: overlay still, field-drop replace, sub-state boxes, Sub-states tab. Baseline for the 11 older SceneManagement failures not compared.
+  the event; box now listens on TrickleDown).
+- Drag pass 2 (same simulated events): overlay shows over a sub-state box; dropping B on the first
+  row's field replaced only that row (no overlay, no extra row); overlay hides after Esc + exit. Overlay
+  look checked in a still by setting its class (the simulated hover is cleared by the Editor before a
+  separate capture call). Catalog on disk after a drop of A+B: B then A, appended after existing entries.
+- Open: the page row list read in the same call still showed the old rows (rebuild looks deferred; not
+  confirmed by a still), empty list, Sub-states tab, dropped sub-state's group, handle reorder by pointer,
+  whether the 11 SceneManagement* failures existed before T05. Baseline for the 11 older SceneManagement failures not compared.
 - Still unverified: every real-input interaction (hover +, + menu, drag, drop, fold, fix buttons, Undo),
   edge cases, 1200 px and no-asset view review, Rally compile/data, scene pages' look, coding-standards
   review (`GameManagementSettingsProvider.cs` is 398 lines, at the limit), prototype window removal.

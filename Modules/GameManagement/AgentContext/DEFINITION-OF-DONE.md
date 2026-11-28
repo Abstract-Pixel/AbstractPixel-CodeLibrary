@@ -57,3 +57,10 @@ Checked by running the commands, not by reading the code. "Should work" is not f
 
 A session that ran out of budget is finished only once points 3 to 5 are done. Save budget for them: they are the
 wrap reserve.
+
+## Remove each UI's prototype entry once the real UI is confirmed (owner, 2026-11-28)
+
+For every UI that is built: after verification confirms the real one works, remove the menu entry that opens its
+prototype window (Lab `Assets/GameManagementUIPrototype/Editor/`, under Tools > External Project Tools > Game
+Management > UI Prototype). Remove only that entry and its window class. Keep the prototype USS/UXML: UI-STYLE.md
+points to them for exact values. Say in the handoff what was removed. Applies to tickets 05-09.
