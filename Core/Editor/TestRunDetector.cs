@@ -1,11 +1,11 @@
 using System;
 using System.Reflection;
 
-namespace AbstractPixel.SceneManagement.Editor
+namespace AbstractPixel.Core.Editor
 {
     /// <summary>
     /// Says whether the Test Runner is running tests. TestRunnerApi.IsRunActive exists in recent Test Framework
-    /// versions; it is read through reflection so the scene module does not reference the test runner.
+    /// versions; it is read through reflection so the editor modules do not reference the test runner.
     /// </summary>
     public static class TestRunDetector
     {

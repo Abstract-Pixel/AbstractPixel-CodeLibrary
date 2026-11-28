@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AbstractPixel.Core.Editor.UI;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -141,6 +142,7 @@ namespace AbstractPixel.GameManagement.Editor
                 int rank = StateListEdits.PageRank(catalog, i);
                 // A sub-state shows once, under the first main state on the page that it opens over.
                 List<int> children = subStates.Where(_index => !grouped.Contains(_index) && catalog.States[_index].Parents.Contains(state)).ToList();
+                AddSubStatesOverThese(subStates, grouped, children);
                 grouped.UnionWith(children);
                 bool open = !folded.Contains(state);
                 Toggle arrow = children.Count > 0 ? Arrow(state, open) : null;
@@ -169,7 +171,33 @@ namespace AbstractPixel.GameManagement.Editor
                 none.AddToClassList("gm-hint");
                 none.AddToClassList("gm-empty");
                 _rows.Add(none);
+                Button setUp = EditorUI.Button("Set up states...", "Opens the setup window at Which menus?", OnboardingWindow.Open);
+                setUp.AddToClassList("gm-left-button");
+                _rows.Add(setUp);
             }
+        }
+
+        // A sub-state that opens over another sub-state (Settings over Pause) shows under the same main state as that parent.
+        private void AddSubStatesOverThese(List<int> _subStates, HashSet<int> _grouped, List<int> _children)
+        {
+            bool added = true;
+            while (added)
+            {
+                added = false;
+                foreach (int index in _subStates)
+                {
+                    if (_grouped.Contains(index) || _children.Contains(index))
+                    {
+                        continue;
+                    }
+                    if (catalog.States[index].Parents.Any(_parent => _children.Any(_child => catalog.States[_child] == _parent)))
+                    {
+                        _children.Add(index);
+                        added = true;
+                    }
+                }
+            }
+            _children.Sort((_first, _second) => _second.CompareTo(_first));
         }
 
         private bool OpensOverListedMain(StateSO _state)

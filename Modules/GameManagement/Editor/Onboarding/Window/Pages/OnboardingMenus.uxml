@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="Onboarding.uss" />
+    <ui:VisualElement class="gm-root gm-onboarding">
+<ui:ScrollView horizontal-scroller-visibility="Hidden" class="gm-onboarding-scroll">
+<ui:VisualElement class="gm-logo-row"><ui:Image name="logo" class="gm-logo" /></ui:VisualElement>
+<ui:VisualElement class="gm-pill-row" name="pillHost" />
+<ui:VisualElement class="gm-separator" />
+<ui:VisualElement class="gm-content-inner">
+<ui:Label text="Which menus?" class="gm-page-header" />
+<ui:Label text="Each one you pick gets a state with the sample&apos;s defaults." class="gm-page-line" />
+<ui:VisualElement class="gm-choice-card gm-selected" enabled="false"><ui:Label text="1" class="gm-box-index" /><ui:Toggle text="Play" value="true" name="toggle-play" class="gm-choice-title" /><ui:Label text="Always made" class="gm-choice-line" /></ui:VisualElement>
+<ui:VisualElement class="gm-choice-card gm-selected"><ui:Label text="2" class="gm-box-index" /><ui:Toggle text="Main Menu" value="true" name="toggle-mainmenu" class="gm-choice-title" /><ui:Label text="The first screen. Play starts the game from here." class="gm-choice-line" /></ui:VisualElement>
+<ui:VisualElement class="gm-choice-card gm-selected"><ui:Label text="3" class="gm-box-index" /><ui:Toggle text="Pause" value="true" name="toggle-pause" class="gm-choice-title" /><ui:Label text="Stops the game. Can bring a Settings screen." class="gm-choice-line" /></ui:VisualElement>
+<ui:VisualElement class="gm-choice-card gm-selected"><ui:Label text="4" class="gm-box-index" /><ui:Toggle text="Game Over" value="true" name="toggle-gameover" class="gm-choice-title" /><ui:Label text="Shown when the player loses." class="gm-choice-line" /></ui:VisualElement>
+<ui:VisualElement class="gm-choice-card"><ui:Label text="5" class="gm-box-index" /><ui:Toggle text="Game Win" value="false" name="toggle-gamewin" class="gm-choice-title" /><ui:Label text="Shown when the player wins." class="gm-choice-line" /></ui:VisualElement>
+</ui:VisualElement>
+</ui:ScrollView>
+<ui:VisualElement class="gm-footer"><ui:VisualElement class="gm-footer-inner"><ui:Button text="Back" name="backButton" class="gm-footer-button" /><ui:Label text="" name="stepLabel" class="gm-step" /><ui:Button text="Next" name="nextButton" class="gm-footer-button gm-primary-button" /></ui:VisualElement></ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

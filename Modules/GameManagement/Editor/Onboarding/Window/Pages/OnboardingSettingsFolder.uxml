@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="Onboarding.uss" />
+    <ui:VisualElement class="gm-root gm-onboarding">
+<ui:ScrollView horizontal-scroller-visibility="Hidden" class="gm-onboarding-scroll">
+<ui:VisualElement class="gm-logo-row"><ui:Image name="logo" class="gm-logo" /></ui:VisualElement>
+<ui:VisualElement class="gm-pill-row" name="pillHost" />
+<ui:VisualElement class="gm-separator" />
+<ui:VisualElement class="gm-content-inner">
+<ui:Label text="Settings folder" class="gm-page-header" />
+<ui:Label text="Where should Game Management keep its settings?" class="gm-page-line" />
+<ui:VisualElement class="gm-card gm-card-flat"><ui:VisualElement class="gm-row gm-folder-row"><ui:TextField name="folderPath" label="Folder" value="Assets/GameManagement" /><ui:Button name="browseFolderButton" text="Choose..." /></ui:VisualElement><ui:VisualElement name="folderStatus" class="gm-status gm-folder-status"><ui:VisualElement name="folderStatusDot" class="gm-dot gm-dot-green" /><ui:Label name="folderStatusLabel" text="Looks good." /></ui:VisualElement><ui:Label name="folderFull" class="gm-hint gm-path-text" /></ui:VisualElement>
+</ui:VisualElement>
+</ui:ScrollView>
+<ui:VisualElement class="gm-footer"><ui:VisualElement class="gm-footer-inner"><ui:Button text="Back" name="backButton" class="gm-footer-button" /><ui:Label text="" name="stepLabel" class="gm-step" /><ui:Button text="Next" name="nextButton" class="gm-footer-button gm-primary-button" /></ui:VisualElement></ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

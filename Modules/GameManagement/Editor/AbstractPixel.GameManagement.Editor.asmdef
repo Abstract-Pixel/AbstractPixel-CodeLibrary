@@ -3,8 +3,12 @@
     "rootNamespace": "AbstractPixel.GameManagement.Editor",
     "references": [
         "AbstractPixel.GameManagement",
+        "AbstractPixel.Core",
+        "AbstractPixel.Core.Editor",
         "AbstractPixel.Core.Editor.UI",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"
