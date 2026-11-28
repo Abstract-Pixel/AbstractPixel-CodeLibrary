@@ -61,7 +61,6 @@ namespace AbstractPixel.GameManagement.Editor
             {
                 result.Renamed.Add("A file named '" + System.IO.Path.GetFileName(wanted) + "' was already there, so the state was saved as '" + System.IO.Path.GetFileName(path) + "'.");
             }
-            result.NewStates.Add(state);
             Undo.RecordObject(catalog, "Set up game management");
             int rank = OnboardingMenuInfo.ListRank(_name);
             ranks[state] = rank;

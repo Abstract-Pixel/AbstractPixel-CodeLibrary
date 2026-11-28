@@ -29,6 +29,21 @@ the `GameStates.Changed` event. From a scene, add components:
 
 `GameCursorController` is the only writer of the cursor. It hides it while a gamepad is in use.
 
+### Setup window
+
+`Tools > External Project Tools > Game Management > Set Up Game Management` opens by itself once per Editor session while
+the project has no settings of its own (never in batch mode, Play mode or tests; "Don't show again" is per project).
+
+- It makes the settings, the state list, the states you tick (Play always) and, for each, either a copy of the library's menu
+  (`Runtime/MenuPrefabs`, with a State Menu Reactor, wired buttons and gamepad selection) or, for "Use my own", a reactor
+  on your prefab. Nothing existing is written over: a taken name gets a new one and the Ready page says so.
+- A settings asset inside a package (a sample's) is not the project's: the Settings page shows it read-only with a warning
+  and **Create settings**, and nothing writes into it.
+- Run it again from the Settings page ("Set up states...") to add a menu you skipped; the menus you have are locked.
+- Copied menus: Restart and Main Menu leave the end state first (Game Over and Game Win outrank Play and Main Menu).
+  Buttons that need your scenes (Restart from Pause, Next Scene) are removed. A key to open Pause (Input Toggle Requester)
+  and a Back key (Back Requester) are yours to add.
+
 ## How Rally Shift uses it
 
 State assets are in `Assets/[1]Project/ProjectServices/GameManagment/States/`, with a persistent setup in

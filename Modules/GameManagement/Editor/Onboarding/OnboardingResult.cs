@@ -13,6 +13,5 @@ namespace AbstractPixel.GameManagement.Editor
         /// <summary>Things that were skipped, with the reason and what to do.</summary>
         public readonly List<string> Skipped = new List<string>();
         public readonly List<OnboardingToDo> ToDo = new List<OnboardingToDo>();
-        public readonly List<StateSO> NewStates = new List<StateSO>();
     }
 }

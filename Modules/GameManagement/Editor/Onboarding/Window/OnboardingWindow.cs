@@ -47,7 +47,6 @@ namespace AbstractPixel.GameManagement.Editor
             context.Folder = settingsExist ? System.IO.Path.GetDirectoryName(AssetDatabase.GetAssetPath(settings)).Replace('\\', '/') : OnboardingChoices.CleanFolder(context.Choices.SettingsFolder);
             context.PlayExists = settingsExist && OnboardingStateMaker.FindListed(settings.Catalog, OnboardingMenuInfo.PlayStateName) != null;
             context.Changed = RefreshFooter;
-            context.Close = Close;
             pages = new List<OnboardingPage>();
             if (!settingsExist)
             {
