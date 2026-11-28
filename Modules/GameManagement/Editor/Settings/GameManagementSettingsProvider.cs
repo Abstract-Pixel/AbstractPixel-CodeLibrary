@@ -425,7 +425,12 @@ namespace AbstractPixel.GameManagement.Editor
             SerializedObject data = new SerializedObject(_settings);
             body.Add(Property(data, nameof(GameManagementSettings.JournalSize), "Journal size", false));
             body.Add(Property(data, nameof(GameManagementSettings.DebuggerToggleAction), "Show or hide debugger", false));
-            body.Add(Property(data, nameof(GameManagementSettings.IncludeDebuggerInReleaseBuilds), "Include the debugger in release builds", false));
+            // A bound Toggle, not a PropertyField: that one draws a bool without wrapping, so this long label would be cut.
+            Toggle release = new Toggle("Include the debugger in release builds");
+            SerializedProperty releaseProperty = data.FindProperty(nameof(GameManagementSettings.IncludeDebuggerInReleaseBuilds));
+            release.tooltip = releaseProperty.tooltip;
+            release.BindProperty(releaseProperty);
+            body.Add(release);
         }
     }
 }
