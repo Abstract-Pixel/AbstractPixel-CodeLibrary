@@ -59,8 +59,8 @@
 .gm-dragged { opacity: 0.5; }
 .gm-drop-target { background-color: rgba(43, 133, 235, 0.4); }
 
-/* one teal box per parent; it ends where a main row's field ends (26 px stay free for the hover +) */
-.gm-sub-group { margin: 2px 26px 2px 0; padding: 3px; border-width: 1px; border-radius: 3px; border-color: rgba(70, 140, 150, 0.7); background-color: rgba(70, 140, 150, 0.07); }
+/* one teal box per parent; it starts at the main row's rank badge (13 px past the handle) and ends where its field ends (26 px stay free for the hover +) */
+.gm-sub-group { margin: 2px 26px 2px 13px;padding: 3px; border-width: 1px; border-radius: 3px; border-color: rgba(70, 140, 150, 0.7); background-color: rgba(70, 140, 150, 0.07); }
 .gm-sub-header { font-size: 11px; -unity-font-style: bold; opacity: 0.65; margin: 0 0 1px 1px; padding: 0; }
 
 /* problems: the help box starts at the badge; the buttons wrap below the text when narrow */
