@@ -31,5 +31,21 @@ Earlier tickets do only a basic real-use check (CODING_STANDARDS.md); deliberate
 
 - Not verified (owner dropped them): + menu (both entries, cancel on save dialog), - button, hover + sub-state, each problem kind's fix button with Undo/redo, no-asset view and Create settings, Fix now, Move..., input source warnings, pre-build check in a real build, stills at 480/1200 with problem rows, the 'no listed parent' group and its indent, long names, many states, read-only package asset, Scene System page look after the EditorUI move, drops on empty list / Sub-states tab / sub-state group, reorder of two sub-states in one group, flicker sweep, Unity 6.7.
 - The 11 SceneManagement* failures were judged pre-existing by cause only; no baseline run.
+- Added after the owner's two fixes: New state through the real + menu and the hover + (only the save window's folder was checked, by calling the code); the empty-row rank wording on the page; settings inside a package being editable (owner undecided, see the 05 handoff).
 - Scripted UI checks: turn on `set_auto_tick` first, or delayed page rebuilds never run.
 - Detail: `../../Sessions/05-settings-page-build/HANDOFF.md`.
+
+## From ticket 06
+
+By mouse: drag-reorder parents and input actions, drag and drop onto fields, the object picker. Also: the table after
+renaming a state or input map; Project Settings keeping focus while typing with its new asset watcher; "Leave on scene
+change" is cut below about 375 px. Detail: `../../Sessions/06-state-inspector-build/HANDOFF.md`.
+
+## From the mega run (tickets 06-09)
+
+Checks no unattended run can do (physical mouse drag and drop and object picker, physical gamepad, rumble, real
+Steam, hearing audio, Unity 6.7) land here. Each step lists its own under "Not done / not verified" in
+`../../Sessions/<ticket id>/HANDOFF.md`; the final list is `../../Sessions/mega-07-09/FINAL-REPORT.md`. Step S0 is
+told to fix the 375 px cut above and to check the table after renames and Settings focus: read its handoff for the
+result. Plan: [../mega-07-09/MEGA-TICKET.md](../mega-07-09/MEGA-TICKET.md).
+

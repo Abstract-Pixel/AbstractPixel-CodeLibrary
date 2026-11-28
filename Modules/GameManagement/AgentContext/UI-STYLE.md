@@ -85,9 +85,12 @@ Approved in Session 6B (stills: `Sessions/Session6B/stills/`). Exact values: the
 - A table value is a teal tag only when what this state uses differs from what that parent uses. Being set to Own is
   not enough. Compare the real values, never the displayed text.
 - Until the developer has chosen an Own value, switching to Own starts from parent 1's value.
-- Each effect's value shows only on Own (Input: its "Input actions" foldout). On "Same as parent" (main states:
-  "Keep last") only the muted inherited line shows.
-- Input action rows carry a chip with the action map's name.
+- Each effect's value shows only on Own (Input: its "Input actions" panel). On "Same as parent" (main states:
+  "Keep last") the muted inherited line sits in a foldout, "What it uses over each parent" ("What this means"), closed
+  by default and opened when the developer switches away from Own (owner, 2026-11-28).
+- Input actions is a panel like Parents. Each numbered entry has an "Action" line (the object field, showing only the
+  action's name) and a "Map" line (the full map name, wrapping). The number is centred on the whole entry. No chip and
+  no letter codes (owner, 2026-11-28).
 - Sub-states use teal for selected and clicked colours. Main states keep Unity's own.
 
 ## Long names (required in the build)
@@ -111,8 +114,12 @@ General rules:
 | Parent rows (object fields) | The field shrinks. Handle, pill and picker button keep their size. Tooltip: the full state name. |
 | Table, Parent column | The widest column. The name is cut with a tooltip; the pill never shrinks. |
 | Table, value cells | Cut inside the cell, teal tag included. Column lines stay aligned. Tooltip: the full value. A changed cell's tooltip gives both full values (this state's and the parent's) and the parent's full name. |
-| Table, Input column | Map names joined with ", ", each map once, cut at the end. The tooltip lists every map, one per line. Teal is decided by which maps are on, so name length and order make no difference. |
-| Input action rows | The map chip takes at most about a third of the row, is cut, and has a tooltip. The object field keeps the rest, with its picker button; its tooltip gives the full action name. |
+| Table, Input column | Up to 12 characters: map names joined with ", ". Longer: "4 maps", with every map listed once, numbered and in full, under the table. Teal is decided by which maps are on, so name length and order make no difference. |
+| Input action entries | Action and map are named once each. The map name wraps and is never cut; a long action name is cut with a tooltip. |
+| Table column widths | Each value column (Time, Cursor, HUD, Input) is exactly as wide as its longest content, measured with the teal tag's bold and padding. Parent takes all the rest, so widening never feeds Parent while a value is cut (owner, 2026-11-28). |
+| Narrow inspector | The table stacks, two values per line and wrapping, when the values would leave Parent under 120 px (or less than its longest name, if shorter). Under 340 px inspector width, "Action" and "Map" captions move above their values and the longer switch choice takes more of the switch. |
+| Empty Parents or Input actions | One line: muted text ("No parents added yet." / "No actions listed, so every action map is turned off.") with + and − beside it. Never Unity's "List is empty" (owner, 2026-11-28). |
+| No parents, over-each-parent panel | A warning box instead of the note and table: "No parents have been added, so there is no real difference between this sub-state and a parent." (owner, 2026-11-28). |
 | Inherited lines, `NOTE:` line | Wrap. With many parents they grow downward. |
 | Section and panel titles | Wrap. A title never runs under the Parents count field. |
 | Problem box | The message wraps. A fix button with a long name ("Add …") is cut with a tooltip and moves to its own line when narrow. "Learn more" stays visible. |

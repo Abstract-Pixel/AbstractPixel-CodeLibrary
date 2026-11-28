@@ -17,6 +17,9 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
   questions; codebase-design for code shape; unity-pipeline and unity-cli for the Editor.
 - Rules for every session: [../PLAN-OVERVIEW.md](../PLAN-OVERVIEW.md) and [../DEFINITION-OF-DONE.md](../DEFINITION-OF-DONE.md).
 - Budget plan: `gm-finish`; ticket N is `plan: gm-finish, step N`.
+- **Mega run (06 close-out, then 07-09, unattended):** [mega-07-09/MEGA-TICKET.md](mega-07-09/MEGA-TICKET.md). It
+  follows this route and stops before ticket 10. Inside it, its files win over the ticket text and these notes on
+  asking the owner, budgets and handoffs. Do not pass `plan: gm-finish` in any of its prompts.
 
 ## Route (work top to bottom; take the first open, unblocked ticket)
 
@@ -39,7 +42,8 @@ Ticket 04 runs no UI and needs Unity, so it may run beside the look tickets in i
 When a ticket closes: set its status here to `done`, add one line to "Decisions so far", and save its handoff in
 `../Sessions/<ticket id>/HANDOFF.md`. Anything a later ticket needs goes into that ticket's file under
 `## From ticket NN` (see PLAN-OVERVIEW, "Carry forward"). Those notes add must-haves or checks only; changing a
-ticket's goal or the order here is the owner's call.
+ticket's goal or the order here is the owner's call. In the mega run every handoff also has a **Next session**
+section saying what to do next; it follows this map's order and never changes it.
 
 ## Decisions so far
 
@@ -70,6 +74,10 @@ ticket's goal or the order here is the owner's call.
 - [Ticket 04 stability gate](../Sessions/04-stability-gate/HANDOFF.md): green in Rally and the Lab, 0 errors on Unity
   6.7 (25 warnings outside GameManagement, carried to ticket 11). Code on `game-management-rework` merged into `main`,
   docs on `main`; push per ticket.
+- [Ticket 05 settings page build](../Sessions/05-settings-page-build/HANDOFF.md): page live in the Lab and Rally (6.3);
+  shared editor look moved to `AbstractPixel.Core.Editor.UI`; sub-state boxes start at the rank badge (owner). Drop,
+  reorder and Rally data checked; the owner dropped the other hand checks (ticket 11). Open: sample settings inside a
+  package are editable. Notes carried to tickets 06, 07, 11 and 12.
 
 ## Not yet specified
 
@@ -82,6 +90,3 @@ ticket's goal or the order here is the owner's call.
 - Settings menu commercial readiness (needs its own plan).
 - Asset Store packaging, demo art, translations, old Input Manager, audio backends other than BroAudio.
 - Full side-by-side effect compare in the debugger (nice-to-have only if ticket 09 has budget left).
-- [Ticket 05 settings page build](../Sessions/05-settings-page-build/HANDOFF.md): page live in the Lab and Rally (6.3);
-  drop, reorder and Rally data checked; owner dropped the remaining hand checks (carried to ticket 11). Prototype
-  settings-page windows removed.

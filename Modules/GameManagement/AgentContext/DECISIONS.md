@@ -123,3 +123,21 @@ Full answers (Q1-Q25): [Sessions/Session5/GRILL-RESULTS.md](Sessions/Session5/GR
 
 - **Branch:** game management code is committed on `game-management-rework` and merged into `main`, never the other way. Docs and the Wayfinder map are committed on `main` only. Code that exists only on `main` (save system v2) is committed on `main`.
 - **Push:** push per ticket. A closed ticket whose tests pass pushes the library branches it changed. Nothing else pushes. This replaces "never push" in the library CLAUDE.md.
+
+## 2026-11-28: mega run for tickets 07-09
+
+Plan: [Wayfinder/mega-07-09/MEGA-TICKET.md](Wayfinder/mega-07-09/MEGA-TICKET.md). It closes ticket 06 first, then
+builds 07, 08 and 09, then checks everything in Rally.
+
+- **One autonomous run.** It never asks the owner for anything.
+- **Roles:** a chief of staff (Sonnet, medium) starts one nested session per step (Sonnet, medium); each is verified
+  by a verifier subagent (Sonnet, high) until it passes: no bugs, works as a designer or developer uses it, good code,
+  good UI.
+- **Budget:** the run takes what its must-haves and next-step blockers need; budgets are extended, not obeyed as
+  limits. It replaces "keep the given budget" for this run only.
+- **Handoffs:** every nested session writes one that says what to do next. The map still decides the route.
+- **Rally is the dogfood project:** the overlay is checked in a one-level Mono development build (main menu, play,
+  win, game over), and every editor UI change must work in Rally.
+- The "Decided in advance" lists in tickets 06-09 and the choice not to use the budget tool's `start` (its wrap-up
+  dialog waits for a person) are **agent defaults written during planning**, not owner decisions. The owner may change
+  them before a run.

@@ -35,6 +35,11 @@ soft-locks. Compare with `Parity/baseline/` (see `Parity/README.md`).
 
 ## Rules for every session
 
+**Mega run (06 close-out and tickets 07-09):** read [Wayfinder/mega-07-09/](Wayfinder/mega-07-09/MEGA-TICKET.md).
+Inside that run it replaces these rules: never ask the owner anything; no `budget start` and no `plan:` budget in
+prompts (the chief of staff meters sessions with cost caps and extends them); every handoff uses the session brief's
+template, including **Next session**; every step needs a verifier PASS. All other rules here still apply.
+
 - Follow Rally's `CLAUDE.md`, the library's `CLAUDE.md` and `CODING_STANDARDS.md`, and the owner's memory notes. Stay
   inside ProjectRallyShift, `../Abstract_Pixel_Lab` and the session scratchpad. Put this rule in every subagent brief.
 - **The owner's request wins.** If the owner asks for a different ticket than the map's next one, do what they asked
@@ -65,7 +70,8 @@ soft-locks. Compare with `Parity/baseline/` (see `Parity/README.md`).
 - **Handoff.** Every ticket ends with `Sessions/<ticket id>/HANDOFF.md`: what changed and why, how it affects a
   developer using the module, what was not done, findings, budget used and whether a warning fired. Then mark the
   ticket `done` on the map and add one line to its "Decisions so far". Don't write prompts for other tickets; the map's
-  tickets are the prompts.
+  tickets are the prompts. (A mega run handoff's **Next session** section says what state the next session starts from
+  and what to do first; it is not a replacement prompt.)
 - **Carry forward into later tickets.** When a session learns something a later ticket needs (a new rule, a bug, a
   changed file or type name, a decision the owner made, a requirement that must not be lost), it adds a note at the
   end of that ticket's file under a `## From ticket NN` heading: what it is, why it matters, and where the detail is

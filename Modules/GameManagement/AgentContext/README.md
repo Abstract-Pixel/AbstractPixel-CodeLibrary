@@ -7,6 +7,7 @@ Planning documents for making the game management module about 90% commercial-re
 |---|---|
 | [Wayfinder/map.md](Wayfinder/map.md) | The route: destination, ordered tickets with status, decisions so far, fog, out of scope. |
 | [Wayfinder/tickets/](Wayfinder/tickets/) | One file per ticket: goal, what to read, must-haves, done and verified. The ticket is the session prompt. |
+| [Wayfinder/mega-07-09/](Wayfinder/mega-07-09/MEGA-TICKET.md) | The unattended run for the 06 close-out and tickets 07-09: [chief's ticket](Wayfinder/mega-07-09/MEGA-TICKET.md) (owner steps and launch prompt), [session brief](Wayfinder/mega-07-09/SESSION-BRIEF.md), [verifier brief](Wayfinder/mega-07-09/VERIFIER-BRIEF.md), [Rally dogfood](Wayfinder/mega-07-09/RALLY-DOGFOOD.md), [final acceptance](Wayfinder/mega-07-09/S4-RALLY-ACCEPTANCE.md), `gm-verifier.json`. |
 | [PLAN-OVERVIEW.md](PLAN-OVERVIEW.md) | Rules every session follows, must-haves, Rally parity scenarios. |
 | [DEFINITION-OF-DONE.md](DEFINITION-OF-DONE.md) | What "finished" means for any task. |
 | [DECISIONS.md](DECISIONS.md) | Every decision the owner made. The source of truth when documents disagree. |

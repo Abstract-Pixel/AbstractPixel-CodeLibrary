@@ -1,81 +1,97 @@
 # Ticket 05 handoff: Project Settings page build
 
-`plan: gm-finish, step 5`. 2026-11-28. **Done (owner closed it with the remaining checks dropped; see ticket 11).**
+`plan: gm-finish, step 5`. 2026-11-28. **Done.** The owner dropped the remaining checks (carried to ticket 11), then
+reported two problems; both are fixed, and the owner called the work done.
+
+## What a developer gets
+
+Project Settings > Abstract Pixel > Game Management: five cards (Setup, States, Between scenes, Input, Debugger),
+Main states / Sub-states tabs, the state list with its problems and fix buttons, drag and drop, drag-to-reorder,
+`+` / `-`, Create settings, Fix now, Move..., and "Check states before a build" (errors stop a build).
 
 ## Built
 
-- `Core/Editor/UI` (`AbstractPixel.Core.Editor.UI`, class `EditorUI`): the generic helpers moved out of `SceneSystemUI`.
-  `SystemPill` was not made (ticket 07 needs it).
-- `Editor/Problems/`: validator, fixes, state list edits, pre-build check. New setting `CheckStatesBeforeBuild` (on).
-- `Editor/Settings/`: the page, state list, rows, handle drag, drop box, + menu, USS.
-- `GameManagementSettingsAssets.Create` / `IsPreloaded`.
+- `Core/Editor/UI` (assembly `AbstractPixel.Core.Editor.UI`, class `EditorUI`): the generic helpers moved out of
+  `SceneSystemUI`. The topic-help overloads stayed in the scene module.
+- `Editor/Problems/`: `StateListValidator`, `StateProblem`, `StateListEdits`, `StateBuildCheck`. All internal; tests
+  reach them through `Editor/AssemblyInfo.cs`.
+- `Editor/Settings/`: provider, `StateListView`, `StateRowView`, `StateRowDrag`, `StateListDropBox`, `NewStateMenu`, USS.
+- `GameManagementSettingsAssets.Create`, `IsPreloaded`, `EnsureFolder`.
+- New setting `GameManagementSettings.CheckStatesBeforeBuild` (on by default).
 - The list is plain VisualElements, not a TreeView.
-- The catalog is highest priority first; the page lists main states in reverse, so rank 1 is the lowest.
+- The catalog is highest priority first. The page lists main states in reverse, so rank 1 is the lowest priority and a
+  newly added state goes to the page's bottom (catalog index 0).
+
+## Bugs fixed
+
+| Bug | Fix |
+|---|---|
+| The drop overlay stayed on when a drag moved onto a row's object field | The box listens on TrickleDown, because the field stops the event |
+| Under the list, the note spoke of "the sample's defaults" in a real game | It now only says how to change a state |
+| Emptying a row (owner's report): the message named a catalog slot, such as "Slot 5" | The empty row keeps its page rank and the message says "Rank N in the state list is empty" (`StateListEdits.PageRank`) |
+| New state (owner's report): with settings inside a package, the save window started outside `Assets`, then failed or fell back to Windows' last folder | `NewStateMenu.FolderForNewStates` uses `Assets/GameManagement/States` then; cancelling removes folders it made |
+
+Owner look change: each sub-state box starts at the main row's rank badge, not its handle (UI-STYLE.md updated).
 
 ## Checked
+
+All UI events below were simulated through the real Project Settings window or run by code. No real OS drag or mouse.
 
 | Check | Result |
 |---|---|
 | Lab compile | clean |
-| Lab `AbstractPixel.GameManagement.Tests` EditMode | 86/86 |
-| Lab `AbstractPixel.SceneManagement*` EditMode | 1082 pass, 11 fail (10 `LibrarySamplesReferenceOnlyTheLibraryTests` on SaveSystem samples, 1 `Sample10LaunchSceneTests`); not compared with a baseline |
-| Captures | 760 and 480 px with the sample's settings, in `stills/`; rank hint no longer clipped |
-| Sample assets | unchanged after opening the page |
+| Lab `AbstractPixel.GameManagement.Tests` EditMode | 90/90 with the two owner fixes |
+| Drops | overlay shows and hides (footer, sub-state box, non-State drag, leave, Esc, over a field); adds several, no duplicate, ignores non-States, one Undo; a drop on a row's field replaces only that row |
+| Add order | dropped states land at the page's bottom |
+| Reorder | main row onto main row works; sub-state onto main row and release outside change nothing; Undo (by code) reverts |
+| Stills | 760 and 480 px in the Lab; 760 px in Rally matches by eye |
+| Rally (6.3) at `89a97d7` | compiles; page loads. At `370c517`: GameManagement tests 86/86, settings and catalog byte-identical after opening |
+| New state save window | opened by calling `NewStateMenu.Create`; its address bar read `...\Abstract_Pixel_Lab\Assets\GameManagement\States`; cancel left no folder |
+| Scene tests | 1082 pass, 11 fail on the first run; `AbstractPixel.SceneManagement.Tests` alone 229/229. The 11 (10 SaveSystem sample references, 1 `Sample10LaunchSceneTests` timing) were judged unrelated by cause; no baseline run |
 
-Validator tests were written before the validator, but a failing run was not recorded.
+The first validator tests were written before the validator, and the two owner-fix tests before their final code, but
+no failing run was recorded for either. Unity 6.3 was not rerun for the two owner fixes (owner: not needed; they use no
+new Unity API). The empty-row wording is proven by test only.
+
+Not verified: see ticket 11, "From ticket 05".
 
 ## Differences from the approved stills
 
-- "?" and "Learn more" open the module README (no in-Editor GM docs yet; ticket 12).
-- "+ Add existing state" is a submenu of unlisted states, and the menu opens below the button, not upwards.
-- Debugger card's two new fields are shown disabled.
-- "Set up states..." is not shown (empty list shows "No states yet."); ticket 07.
+- "?" and "Learn more" open the module README (no in-Editor docs yet; ticket 12).
+- "Add existing state" is a submenu of unlisted states, and the `+` menu opens below the button.
+- The Debugger card's two new fields are shown disabled.
+- "Set up states..." is not shown; an empty list says "No states yet." (ticket 07).
+- `SystemPill` and the scene setup window's pill were not made (ticket 07).
 
-## Not checked yet
+## Open: sample settings are editable (owner has not decided)
 
-1200 px, no-asset view, problem rows, every hand interaction, Rally compile and data, scene pages' look,
-pre-build check in a real build, 6.7.
+With no settings of its own, a project's page shows whichever settings `Find` gets first, which in the Lab are Sample
+01's, inside the library. Adding a state then writes a project reference into the library's sample catalog, Move...
+would move the sample's settings out of the library, and "Create settings" is not offered. Recommended: show package
+settings read-only with a warning and a Create settings button.
 
-## Verification pass (Opus, 6% budget)
+## Findings for later sessions
 
-Budget allowed only a partial pass; ticket 05 stays open.
+- `recompile_status: completed` can be stale while a modal window blocks the Editor. This session reported "compiles"
+  wrongly and the owner tested old code. Check the assembly in `Library/ScriptAssemblies` is newer than the source.
+- Delayed page rebuilds only run while the Editor ticks: turn on `set_auto_tick` before scripted UI checks.
+- Leave Rally's library on the commit you tested, or say the feature is not there. Moving it back made the page vanish.
+- The Lab's `Assets/GameManagementUIPrototype/` is tracked by Git (earlier notes said untracked).
 
-- Lab compile clean; `AbstractPixel.GameManagement.Tests` 86/86; `AbstractPixel.SceneManagement.Tests` 229/229.
-- 480 px still taken again: rows aligned, no sideways scroll.
-- Drag test (simulated `EditorWindow.SendEvent` drag events, not an OS drag): overlay shows on footer and
-  after a rebuild, not for non-State drags, hides on drop, leaving and exit; drop adds A and B, no duplicate,
-  non-State ignored, one Undo removes both. Bug fixed: overlay stuck over a row's object field (field stops
-  the event; box now listens on TrickleDown).
-- Drag pass 2 (same simulated events): overlay shows over a sub-state box; dropping B on the first
-  row's field replaced only that row (no overlay, no extra row); overlay hides after Esc + exit. Overlay
-  look checked in a still by setting its class (the simulated hover is cleared by the Editor before a
-  separate capture call). Catalog on disk after a drop of A+B: B then A, appended after existing entries.
-- Pass 3: dropped states land at the catalog start = page bottom (A then B on the page), confirmed after
-  the rebuild. Note: delayed rebuilds only run while the Editor ticks; turn on `set_auto_tick` before
-  scripted checks or the page looks stale. Handle reorder by simulated mouse events: main row onto main
-  row moves it (catalog and page), sub-state onto a main row and release outside do nothing, Undo
-  reverts. Sub-state box now starts at the main row's badge (x 209 at 760 and 480, right edge 701/409
-  unchanged, no sideways scroll); "no listed parent" group not in the sample, not checked.
-- Pass 4: Rally (6.3) with game-management-rework at 370c517: compiles, GameManagement tests 86/86, page
-  opens its settings (6 rows, 0 problems), settings and catalog files byte-identical, Rally git status
-  unchanged; clone put back on f65c236. The 11 SceneManagement* failures are not from T05 (cause
-  analysis, no baseline run): 10 are SaveSystem sample scenes in `LibrarySamplesReferenceOnlyTheLibraryTests`
-  and T05 touches no SaveSystem or Samples file; 1 is a 30 s Play-mode hold in
-  `Sample10LaunchSceneTests` that uses no changed editor code.
-- Standards findings left open: `StateListEdits`, `StateListValidator`, `StateProblem` and
-  `GameManagementSettingsProvider` are public though game code does not need them (tests sit in another
-  assembly, so making them internal needs `InternalsVisibleTo`). No `var`; files under 400 lines.
-- Still not checked: + menu, - button, fix buttons + Undo, no-asset view, problem-row stills, 1200 px
-  review, Scene System page look, drops on empty list / Sub-states tab / sub-state group, two-sub-state
-  reorder. Ticket 05 stays open; prototype window not removed.
-- Pass 5: Rally still at 760 matches the Lab look (only the Editor's own sidebar differs). Fixed: page note no longer says 'the sample's defaults' in a game. StateListEdits, StateListValidator, StateProblem(Kind) and the provider are internal, tests via InternalsVisibleTo. Prototype settings-page and no-asset windows and their 'Open all' calls removed from the Lab. Lab GM tests 86/86, Rally compiles clean on 89a97d7.
-- Earlier open item resolved: the page row list read in the same call still showed the old rows (rebuild looks deferred; not
-  confirmed by a still), empty list, Sub-states tab, dropped sub-state's group, handle reorder by pointer,
-  whether the 11 SceneManagement* failures existed before T05. Baseline for the 11 older SceneManagement failures not compared.
-- Still unverified: every real-input interaction (hover +, + menu, drag, drop, fold, fix buttons, Undo),
-  edge cases, 1200 px and no-asset view review, Rally compile/data, scene pages' look, coding-standards
-  review (`GameManagementSettingsProvider.cs` is 398 lines, at the limit), prototype window removal.
+## State of the repos at handoff
 
-## Budget
+- Pushed: `game-management-rework` `89a97d7`; `main` `121adbe`.
+- **Not committed:** the two owner fixes with their tests, and these doc updates.
+- Rally's library clone is at `89a97d7`, so it lacks the two owner fixes. Its submodule pointer is not committed.
+- Lab: the removed settings-page prototype windows, the menu change and the submodule pointer are not committed.
+- Sample 01's catalog shows as modified for line endings only; its contents match the commit.
+- Lab: `Assets/GameManagement/States/New State.asset` (new, untracked) was left in place; New state saved it inside the
+  project, and no library catalog refers to it.
+- History: the first T05 commit was made on `main` by mistake and then copied to `game-management-rework`, so `main`
+  holds the change twice. Nothing was force-pushed. One code push went out before the 11 scene failures were examined.
 
-7% planned, raised to 9% by the owner.
+## Process and budget
+
+Built in this session, then checked and fixed by an Opus (low effort) agent over several passes. Budget: 7% planned,
+raised to 9% for the build (6.6% used, warnings fired, so hand testing moved to the agent). The owner then added
+verification budget in rounds (6%, 5%, 5%, 8%); the agent reported about 13.3% used in all.
