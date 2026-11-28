@@ -50,7 +50,13 @@ Budget allowed only a partial pass; ticket 05 stays open.
   row's field replaced only that row (no overlay, no extra row); overlay hides after Esc + exit. Overlay
   look checked in a still by setting its class (the simulated hover is cleared by the Editor before a
   separate capture call). Catalog on disk after a drop of A+B: B then A, appended after existing entries.
-- Open: the page row list read in the same call still showed the old rows (rebuild looks deferred; not
+- Pass 3: dropped states land at the catalog start = page bottom (A then B on the page), confirmed after
+  the rebuild. Note: delayed rebuilds only run while the Editor ticks; turn on `set_auto_tick` before
+  scripted checks or the page looks stale. Handle reorder by simulated mouse events: main row onto main
+  row moves it (catalog and page), sub-state onto a main row and release outside do nothing, Undo
+  reverts. Sub-state box now starts at the main row's badge (x 209 at 760 and 480, right edge 701/409
+  unchanged, no sideways scroll); "no listed parent" group not in the sample, not checked.
+- Earlier open item resolved: the page row list read in the same call still showed the old rows (rebuild looks deferred; not
   confirmed by a still), empty list, Sub-states tab, dropped sub-state's group, handle reorder by pointer,
   whether the 11 SceneManagement* failures existed before T05. Baseline for the 11 older SceneManagement failures not compared.
 - Still unverified: every real-input interaction (hover +, + menu, drag, drop, fold, fix buttons, Undo),

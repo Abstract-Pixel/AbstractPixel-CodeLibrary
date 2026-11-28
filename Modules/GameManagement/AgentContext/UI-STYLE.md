@@ -40,8 +40,9 @@ owner changes it. Approved 2026-11-27 in Session 6A on the Project Settings page
 - 4 px between rows, split as 2 px above and 2 px below. This keeps the tree's foldout arrow on the same vertical
   centre as the row content (measured within 0.5 px). A gap only below the row puts the arrow off-centre.
 - Main-row badge: grey (`rgba(255,255,255,0.08)`), the rank number.
-- Tree indent is 0. Sub-state boxes line up with the main row's handle on the left, and on the right with the end of
-  the main-row field (26 px kept for the hover `+`).
+- Tree indent is 0. Sub-state boxes line up with the main row's rank badge on the left, not its handle (owner,
+  2026-11-28; replaces the Session 6A look), and on the right with the end of the main-row field (26 px kept for the
+  hover `+`).
 - Group header rows (for example "Sub-states with no listed parent"): bold muted 11 px text, 18 px line, centred
   on the foldout arrow.
 
