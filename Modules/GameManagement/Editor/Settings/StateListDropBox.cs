@@ -29,7 +29,7 @@ namespace AbstractPixel.GameManagement.Editor
                 }
                 DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
                 overlay.AddToClassList("gm-shown");
-            });
+            }, TrickleDown.TrickleDown); // The object field stops the drag event, so the box must see it on the way down or the overlay sticks over a field.
             _box.RegisterCallback<DragPerformEvent>(_event =>
             {
                 overlay.RemoveFromClassList("gm-shown");
