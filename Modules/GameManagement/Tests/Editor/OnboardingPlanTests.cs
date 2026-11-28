@@ -105,6 +105,34 @@ namespace AbstractPixel.GameManagement.Tests
         }
 
         [Test]
+        public void ExistingMenus_AreRecognisedByTheNamesAProjectGivesItsStates()
+        {
+            GameStateCatalog catalog = UnityEngine.ScriptableObject.CreateInstance<GameStateCatalog>();
+            GameManagementSettings settings = UnityEngine.ScriptableObject.CreateInstance<GameManagementSettings>();
+            settings.Catalog = catalog;
+            foreach (string name in new[] { "PauseStateSO", "StartStateSO", "GameOverStateSO", "PlayStateSO" })
+            {
+                StateSO state = UnityEngine.ScriptableObject.CreateInstance<StateSO>();
+                state.name = name;
+                catalog.States.Add(state);
+            }
+
+            OnboardingChoices choices = OnboardingChoices.ForExistingSettings(settings);
+
+            Assert.IsTrue(choices.Get(OnboardingMenuKind.MainMenu).Locked, "StartStateSO is the main menu.");
+            Assert.IsTrue(choices.Get(OnboardingMenuKind.Pause).Locked);
+            Assert.IsTrue(choices.Get(OnboardingMenuKind.GameOver).Locked);
+            Assert.IsFalse(choices.Get(OnboardingMenuKind.GameWin).Locked);
+            Assert.IsFalse(choices.SettingsStateExists);
+            foreach (StateSO state in catalog.States)
+            {
+                UnityEngine.Object.DestroyImmediate(state);
+            }
+            UnityEngine.Object.DestroyImmediate(catalog);
+            UnityEngine.Object.DestroyImmediate(settings);
+        }
+
+        [Test]
         public void ReadyLines_ListTheChoicesInPlainWords()
         {
             OnboardingChoices choices = new OnboardingChoices();

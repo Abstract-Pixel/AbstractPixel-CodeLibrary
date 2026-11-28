@@ -57,7 +57,7 @@ namespace AbstractPixel.GameManagement.Editor
             return _kind == OnboardingMenuKind.MainMenu || _kind == OnboardingMenuKind.Pause;
         }
 
-        /// <summary>The name without spaces, dashes or capitals, so "MainMenu" and "Main menu" count as the same state name.
+        /// <summary>The name without spaces, dashes, capitals or a "State" ending, so "MainMenu", "Main menu" and "PauseStateSO" are compared fairly.
         /// Projects name their states their own way, and a run later must still know which menus they already have.</summary>
         public static string Normalize(string _name)
         {
@@ -65,13 +65,36 @@ namespace AbstractPixel.GameManagement.Editor
             {
                 return "";
             }
-            return _name.Replace(" ", "").Replace("_", "").Replace("-", "").ToLowerInvariant();
+            string name = _name.Replace(" ", "").Replace("_", "").Replace("-", "").ToLowerInvariant();
+            foreach (string suffix in new[] { "stateso", "state" })
+            {
+                if (name.Length > suffix.Length && name.EndsWith(suffix))
+                {
+                    return name.Substring(0, name.Length - suffix.Length);
+                }
+            }
+            return name;
+        }
+
+        /// <summary>True when a state name (spacing, capitals and a "State" ending ignored) is one this menu is usually called.</summary>
+        public static bool IsStateNameOf(OnboardingMenuKind _kind, string _stateName)
+        {
+            string name = Normalize(_stateName);
+            if (_kind == OnboardingMenuKind.MainMenu)
+            {
+                return name == "mainmenu" || name == "start" || name == "startmenu";
+            }
+            return name == Normalize(StateName(_kind));
         }
 
         /// <summary>Where a state sits in the list; lower is higher up, so it wins. Sub-states sit above their parents.
         /// Names the setup window does not know have no rank (-1).</summary>
         public static int ListRank(string _stateName)
         {
+            if (IsStateNameOf(OnboardingMenuKind.MainMenu, _stateName))
+            {
+                return 5;
+            }
             switch (Normalize(_stateName))
             {
                 case "gamewin":
@@ -84,8 +107,6 @@ namespace AbstractPixel.GameManagement.Editor
                     return 3;
                 case "play":
                     return 4;
-                case "mainmenu":
-                    return 5;
                 default:
                     return -1;
             }

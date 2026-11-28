@@ -109,7 +109,7 @@ namespace AbstractPixel.GameManagement.Editor
                 string name = OnboardingMenuInfo.StateName(menu.Kind);
                 if (menu.Locked)
                 {
-                    menuStates[menu.Kind] = OnboardingStateMaker.FindListed(_catalog, name);
+                    menuStates[menu.Kind] = OnboardingStateMaker.FindMenuState(_catalog, menu.Kind);
                     continue;
                 }
                 List<StateSO> parents = new List<StateSO>();

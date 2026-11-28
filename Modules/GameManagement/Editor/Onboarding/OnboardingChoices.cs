@@ -40,7 +40,7 @@ namespace AbstractPixel.GameManagement.Editor
             foreach (OnboardingMenuKind kind in System.Enum.GetValues(typeof(OnboardingMenuKind)))
             {
                 OnboardingMenuChoice menu = choices.Get(kind);
-                bool exists = _settings.Catalog != null && OnboardingStateMaker.FindListed(_settings.Catalog, OnboardingMenuInfo.StateName(kind)) != null;
+                bool exists = _settings.Catalog != null && OnboardingStateMaker.FindMenuState(_settings.Catalog, kind) != null;
                 menu.Ticked = exists;
                 menu.Locked = exists;
             }
