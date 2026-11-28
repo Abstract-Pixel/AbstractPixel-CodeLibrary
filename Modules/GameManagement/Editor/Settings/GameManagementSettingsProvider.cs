@@ -11,7 +11,7 @@ namespace AbstractPixel.GameManagement.Editor
 {
     /// <summary>The Project Settings &gt; Abstract Pixel &gt; Game Management page: five numbered cards.
     /// It rebuilds after every change, Undo and project change.</summary>
-    public static class GameManagementSettingsProvider
+    internal static class GameManagementSettingsProvider
     {
         public const string PagePath = "Project/Abstract Pixel/Game Management";
         private const string StyleSheetPath = "Packages/com.abstractpixel.library/Modules/GameManagement/Editor/Settings/GameManagementSettingsPage.uss";
@@ -268,7 +268,7 @@ namespace AbstractPixel.GameManagement.Editor
                 return;
             }
             body.Add(stateList.Build(_settings, problems));
-            body.Add(Hint("NOTE: States use the sample's defaults. To change what a state does, select it and edit it in the Inspector."));
+            body.Add(Hint("NOTE: To change what a state does, select it and edit it in the Inspector."));
         }
 
         private static Color StatusColour(List<StateProblem> _problems)

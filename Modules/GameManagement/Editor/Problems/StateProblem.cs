@@ -1,6 +1,6 @@
 namespace AbstractPixel.GameManagement.Editor
 {
-    public enum StateProblemKind
+    internal enum StateProblemKind
     {
         EmptySlot,
         Duplicate,
@@ -11,7 +11,7 @@ namespace AbstractPixel.GameManagement.Editor
     }
 
     /// <summary>One thing wrong in the state list, with the words for its help box and its fix button.</summary>
-    public class StateProblem
+    internal class StateProblem
     {
         public StateProblemKind Kind;
         /// <summary>True when the setup can never work as written.</summary>
