@@ -47,7 +47,7 @@ namespace AbstractPixel.SaveSystem.Editor
                 {
                     case ObjectChangeKind.ChangeGameObjectStructure:
                         stream.GetChangeGameObjectStructureEvent(index, out ChangeGameObjectStructureEventArgs structureArgs);
-#if UNITY_7000_0_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
                         AddGameObjectIfValid(structureArgs.entityId, changedObjects);
 #else
                         AddGameObjectIfValid(structureArgs.instanceId, changedObjects);
@@ -55,7 +55,7 @@ namespace AbstractPixel.SaveSystem.Editor
                         break;
                     case ObjectChangeKind.ChangeGameObjectStructureHierarchy:
                         stream.GetChangeGameObjectStructureHierarchyEvent(index, out ChangeGameObjectStructureHierarchyEventArgs hierarchyArgs);
-#if UNITY_7000_0_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
                         AddHierarchyIfValid(hierarchyArgs.entityId, changedObjects);
 #else
                         AddHierarchyIfValid(hierarchyArgs.instanceId, changedObjects);
@@ -63,7 +63,7 @@ namespace AbstractPixel.SaveSystem.Editor
                         break;
                     case ObjectChangeKind.CreateGameObjectHierarchy:
                         stream.GetCreateGameObjectHierarchyEvent(index, out CreateGameObjectHierarchyEventArgs createArgs);
-#if UNITY_7000_0_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
                         AddHierarchyIfValid(createArgs.entityId, changedObjects);
 #else
                         AddHierarchyIfValid(createArgs.instanceId, changedObjects);
@@ -78,7 +78,7 @@ namespace AbstractPixel.SaveSystem.Editor
             }
         }
 
-#if UNITY_7000_0_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
         static void AddGameObjectIfValid(EntityId entityId, List<GameObject> changedObjects)
         {
             if (EditorUtility.EntityIdToObject(entityId) is GameObject gameObject)

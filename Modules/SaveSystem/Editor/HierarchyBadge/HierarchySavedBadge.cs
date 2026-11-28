@@ -30,9 +30,9 @@ namespace AbstractPixel.SaveSystem.Editor
 
         static HierarchySavedBadge()
         {
-            // Unity 7's Hierarchy hands out an EntityId. Unity 6.7 hands out an int, which is only turned
+            // Unity 6.7 and newer hand out an EntityId. Older versions hand out an int, which is only turned
             // into an object here, never created from an object.
-#if UNITY_7000_0_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
             EditorApplication.hierarchyWindowItemByEntityIdOnGUI += DrawRowByEntityId;
 #else
             EditorApplication.hierarchyWindowItemOnGUI += DrawRowByInstanceId;
@@ -70,7 +70,7 @@ namespace AbstractPixel.SaveSystem.Editor
 #endif
         }
 
-#if UNITY_7000_0_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
         static void DrawRowByEntityId(EntityId entityId, Rect rowRect)
         {
             DrawBadge(EditorUtility.EntityIdToObject(entityId) as GameObject, rowRect);
