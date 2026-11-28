@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -25,7 +26,7 @@ namespace AbstractPixel.SceneManagement.Editor
             selectedPositionShown = null;
             VisualElement root = new VisualElement();
             root.Add(SceneSystemHelp.HelpRow("Where relocatables with this label go in this scene group. Its own transform is Instance 1.", SceneSystemDocTopics.SpawnPointInspector));
-            VisualElement card = SceneSystemUI.Card();
+            VisualElement card = EditorUI.Card();
             card.Add(RelocationLabelField.Create(serializedObject.FindProperty("label")));
             status = new VisualElement();
             card.Add(status);
@@ -33,7 +34,7 @@ namespace AbstractPixel.SceneManagement.Editor
             card.Add(selectedPosition);
             root.Add(card);
 
-            VisualElement controls = SceneSystemUI.Card();
+            VisualElement controls = EditorUI.Card();
             controls.style.marginTop = 8;
             controls.Add(new RelocationShortcutList(150f));
             root.Add(controls);
@@ -106,13 +107,13 @@ namespace AbstractPixel.SceneManagement.Editor
                     reached++;
                 }
             }
-            VisualElement line = SceneSystemUI.Row();
+            VisualElement line = EditorUI.Row();
             line.style.marginTop = 6;
             Label count = new Label(_positions.Count + " " + Plural(_positions.Count, "position", "positions"));
             count.style.fontSize = 15;
             count.style.unityFontStyleAndWeight = FontStyle.Bold;
             line.Add(count);
-            Label reachedText = SceneSystemUI.Hint(" · " + reached + " reached by relocatables");
+            Label reachedText = EditorUI.Hint(" · " + reached + " reached by relocatables");
             reachedText.style.marginLeft = 4;
             line.Add(reachedText);
             return line;
@@ -120,12 +121,12 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static VisualElement ProblemRow(RelocationEditorModel.Problem _problem)
         {
-            Color colour = SceneSystemUI.Yellow;
+            Color colour = EditorUI.Yellow;
             if (_problem.IsError)
             {
-                colour = SceneSystemUI.Red;
+                colour = EditorUI.Red;
             }
-            return SceneSystemUI.StatusRow(colour, _problem.Message, string.Empty);
+            return EditorUI.StatusRow(colour, _problem.Message, string.Empty);
         }
 
         private void RefreshSelectedPosition(SpawnPoint _spawnPoint, List<RelocationEditorModel.Position> _positions)
@@ -153,7 +154,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 return;
             }
             RelocationEditorModel.Position position = _positions[number];
-            VisualElement row = SceneSystemUI.Row();
+            VisualElement row = EditorUI.Row();
             row.style.marginTop = 6;
             IntegerField instance = new IntegerField("Selected: Instance");
             instance.tooltip = "The instance of the selected position. A relocatable with this instance set goes here.";
@@ -169,7 +170,7 @@ namespace AbstractPixel.SceneManagement.Editor
             row.Add(instance);
             if (position.HasGround)
             {
-                Label slope = SceneSystemUI.Hint(Mathf.RoundToInt(position.Slope) + "°");
+                Label slope = EditorUI.Hint(Mathf.RoundToInt(position.Slope) + "°");
                 slope.style.marginLeft = 6;
                 row.Add(slope);
             }

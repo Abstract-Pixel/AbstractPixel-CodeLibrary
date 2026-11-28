@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -22,7 +23,7 @@ namespace AbstractPixel.SceneManagement.Editor
             goesToShown = null;
             VisualElement root = new VisualElement();
             root.Add(SceneSystemHelp.HelpRow("Moves this object to a spawn point position with the same label on every scene change.", SceneSystemDocTopics.RelocatableInspector));
-            VisualElement card = SceneSystemUI.Card();
+            VisualElement card = EditorUI.Card();
             card.Add(RelocationLabelField.Create(serializedObject.FindProperty("label")));
 
             PropertyField instance = new PropertyField(serializedObject.FindProperty("instance"), "Instance");
@@ -36,7 +37,7 @@ namespace AbstractPixel.SceneManagement.Editor
             goesTo.style.marginTop = 6;
             card.Add(goesTo);
 
-            Button addSpawnPoint = SceneSystemUI.Button("Add spawn point to this scene group", "Adds a spawn point with this label at the Scene view pivot, in the open main scene.", AddSpawnPoint);
+            Button addSpawnPoint = EditorUI.Button("Add spawn point to this scene group", "Adds a spawn point with this label at the Scene view pivot, in the open main scene.", AddSpawnPoint);
             addSpawnPoint.style.marginTop = 6;
             addSpawnPoint.style.alignSelf = Align.FlexStart;
             card.Add(addSpawnPoint);
@@ -75,13 +76,13 @@ namespace AbstractPixel.SceneManagement.Editor
 
             if (model.GoesTo.TryGetValue(relocatable, out RelocationEditorModel.Position position))
             {
-                VisualElement row = SceneSystemUI.StatusRow(SceneSystemUI.Green, shownNow, "Where Relocate puts it in the open main scene, worked out like Play.");
-                row.Add(SceneSystemUI.Spacer());
-                row.Add(SceneSystemUI.Button("Frame", "Selects the spawn point and frames this position.", () => FramePosition(position)));
+                VisualElement row = EditorUI.StatusRow(EditorUI.Green, shownNow, "Where Relocate puts it in the open main scene, worked out like Play.");
+                row.Add(EditorUI.Spacer());
+                row.Add(EditorUI.Button("Frame", "Selects the spawn point and frames this position.", () => FramePosition(position)));
                 goesTo.Add(row);
                 return;
             }
-            goesTo.Add(SceneSystemUI.StatusRow(SceneSystemUI.Red, shownNow, "Relocate would leave it held, with an error, in the open main scene."));
+            goesTo.Add(EditorUI.StatusRow(EditorUI.Red, shownNow, "Relocate would leave it held, with an error, in the open main scene."));
         }
 
         private static string Describe(RelocationEditorModel _model, Relocatable _relocatable)

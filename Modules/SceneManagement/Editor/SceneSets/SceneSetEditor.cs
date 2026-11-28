@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using UnityEditor;
 using UnityEngine.UIElements;
 
@@ -17,11 +18,11 @@ namespace AbstractPixel.SceneManagement.Editor
             root.Add(SceneSystemHelp.HelpRow("The manager scenes, shared scenes and Reset shared scenes for every scene group using this set.", SceneSystemDocTopics.SceneSetInspector));
             VisualElement buttons = new VisualElement();
             buttons.style.marginBottom = 6;
-            buttons.Add(SceneSystemUI.PrimaryButton("Open Scene System", OpenSceneSystemTooltip, () => SceneSystemSettingsProvider.OpenAt(SceneSystemSettingsProvider.SceneSetsSection)));
+            buttons.Add(EditorUI.PrimaryButton("Open Scene System", OpenSceneSystemTooltip, () => SceneSystemSettingsProvider.OpenAt(SceneSystemSettingsProvider.SceneSetsSection)));
             root.Add(buttons);
 
             int users = SceneSetSync.GroupsUsing(set).Count;
-            Label usage = SceneSystemUI.Hint("Used by " + users + " scene group(s).");
+            Label usage = EditorUI.Hint("Used by " + users + " scene group(s).");
             usage.tooltip = "Changes fill each of them, except the parts a group overrides.";
             usage.style.marginBottom = 4;
             root.Add(usage);

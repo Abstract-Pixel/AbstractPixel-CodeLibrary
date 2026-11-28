@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System.Collections.Generic;
 using AbstractPixel.Core;
 using UnityEditor;
@@ -27,7 +28,7 @@ namespace AbstractPixel.SceneManagement.Editor
             _card.Clear();
             if (_settings == null)
             {
-                _card.Add(SceneSystemUI.Hint("Available once the scene system is set up."));
+                _card.Add(EditorUI.Hint("Available once the scene system is set up."));
                 return;
             }
 
@@ -46,7 +47,7 @@ namespace AbstractPixel.SceneManagement.Editor
             _card.Add(fields);
             if (_settings.LoadingScenes.Count == 0)
             {
-                _card.Add(SceneSystemUI.Hint("No loading scene yet: the setup clones a ready-made one, or add your own with +."));
+                _card.Add(EditorUI.Hint("No loading scene yet: the setup clones a ready-made one, or add your own with +."));
             }
         }
 

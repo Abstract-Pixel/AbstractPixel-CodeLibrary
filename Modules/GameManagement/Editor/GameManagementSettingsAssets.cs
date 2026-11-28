@@ -8,7 +8,6 @@ namespace AbstractPixel.GameManagement.Editor
 {
     /// <summary>Finds the game management settings asset wherever it lives and keeps it in Player Settings' Preloaded Assets,
     /// so builds load it from any folder. Same method as the scene system's settings.</summary>
-    /// <remarks>The Project Settings page with the object field that picks the asset is Session 6.</remarks>
     [InitializeOnLoad]
     public static class GameManagementSettingsAssets
     {
@@ -34,6 +33,35 @@ namespace AbstractPixel.GameManagement.Editor
                 return null;
             }
             return AssetDatabase.LoadAssetAtPath<GameManagementSettings>(AssetDatabase.GUIDToAssetPath(guids[0]));
+        }
+
+        /// <summary>True when builds will load these settings.</summary>
+        public static bool IsPreloaded(GameManagementSettings _settings)
+        {
+            return System.Array.IndexOf(PlayerSettings.GetPreloadedAssets(), _settings) >= 0;
+        }
+
+        /// <summary>Makes the settings and an empty state list in this folder and uses them. Existing assets are never written over.</summary>
+        public static GameManagementSettings Create(string _folder)
+        {
+            string parent = "Assets";
+            foreach (string part in _folder.Substring("Assets".Length).Split(new[] { '/' }, System.StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (!AssetDatabase.IsValidFolder(parent + "/" + part))
+                {
+                    AssetDatabase.CreateFolder(parent, part);
+                }
+                parent += "/" + part;
+            }
+            GameStateCatalog catalog = ScriptableObject.CreateInstance<GameStateCatalog>();
+            AssetDatabase.CreateAsset(catalog, AssetDatabase.GenerateUniqueAssetPath(parent + "/GameStateCatalog.asset"));
+            GameManagementSettings settings = ScriptableObject.CreateInstance<GameManagementSettings>();
+            settings.Catalog = catalog;
+            AssetDatabase.CreateAsset(settings, AssetDatabase.GenerateUniqueAssetPath(parent + "/GameManagementSettings.asset"));
+            AssetDatabase.SaveAssets();
+            Use(settings);
+            Debug.Log("[Game management] Created the settings in " + parent + ".", settings);
+            return settings;
         }
 
         /// <summary>Makes this asset the project's settings: the only settings in Preloaded Assets.</summary>

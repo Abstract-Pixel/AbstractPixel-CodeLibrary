@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using UnityEngine.UIElements;
 #if UNITY_7000_0_OR_NEWER
 using UnityEditor.Toolbars;
@@ -43,11 +44,11 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             if (CanOpenToolbarPicker)
             {
-                UnityEngine.UIElements.Button button = SceneSystemUI.Button(ButtonText, "Opens Unity's toolbar picker at the scene picker, so one tick shows it left of Play.", OpenToolbarPicker);
+                UnityEngine.UIElements.Button button = EditorUI.Button(ButtonText, "Opens Unity's toolbar picker at the scene picker, so one tick shows it left of Play.", OpenToolbarPicker);
                 button.style.alignSelf = Align.Center;
                 return button;
             }
-            Label hint = SceneSystemUI.Hint(Unity6CenteredHint);
+            Label hint = EditorUI.Hint(Unity6CenteredHint);
             hint.style.whiteSpace = WhiteSpace.Normal;
             hint.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter;
             hint.style.alignSelf = Align.Center;
@@ -58,7 +59,7 @@ namespace AbstractPixel.SceneManagement.Editor
         /// <summary>"Scene picker   [Show the scene picker in the toolbar]" on Unity 7, or the one-line hint on 6.3.</summary>
         public static VisualElement Row()
         {
-            VisualElement row = SceneSystemUI.Row();
+            VisualElement row = EditorUI.Row();
             row.style.marginTop = 2;
             row.style.marginBottom = 2;
             Label label = new Label("Scene picker");
@@ -68,10 +69,10 @@ namespace AbstractPixel.SceneManagement.Editor
             row.Add(label);
             if (CanOpenToolbarPicker)
             {
-                row.Add(SceneSystemUI.Button(ButtonText, "Opens Unity's toolbar picker at the scene picker, so one tick shows it left of Play.", OpenToolbarPicker));
+                row.Add(EditorUI.Button(ButtonText, "Opens Unity's toolbar picker at the scene picker, so one tick shows it left of Play.", OpenToolbarPicker));
                 return row;
             }
-            Label hint = SceneSystemUI.Hint(Unity6Hint);
+            Label hint = EditorUI.Hint(Unity6Hint);
             hint.style.flexShrink = 1;
             hint.style.whiteSpace = WhiteSpace.Normal;
             hint.tooltip = "Unity hides a new toolbar element until you tick it. Unity 7 adds a button here that does it for you.";

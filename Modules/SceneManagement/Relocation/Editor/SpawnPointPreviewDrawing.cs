@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -21,9 +22,9 @@ namespace AbstractPixel.SceneManagement.Editor
         private static Material material;
         private static GUIStyle tagStyle;
 
-        public static readonly Color Allowed = SceneSystemUI.Green;
-        public static readonly Color TooSteep = SceneSystemUI.Red;
-        public static readonly Color Warning = SceneSystemUI.Yellow;
+        public static readonly Color Allowed = EditorUI.Green;
+        public static readonly Color TooSteep = EditorUI.Red;
+        public static readonly Color Warning = EditorUI.Yellow;
 
         public static void DrawShape(PreviewShape _shape, Pose _pose, Color _colour)
         {

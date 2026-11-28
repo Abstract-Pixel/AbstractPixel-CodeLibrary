@@ -2,6 +2,7 @@
     "name": "AbstractPixel.SceneManagement.Relocation.Editor",
     "rootNamespace": "AbstractPixel.SceneManagement.Editor",
     "references": [
+        "AbstractPixel.Core.Editor.UI",
         "AbstractPixel.SceneManagement.Relocation",
         "AbstractPixel.SceneManagement",
         "AbstractPixel.SceneManagement.Editor",

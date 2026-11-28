@@ -16,6 +16,9 @@ namespace AbstractPixel.GameManagement
         [Tooltip("The ordered list of every state.")]
         public GameStateCatalog Catalog;
 
+        [Tooltip("Errors in the state list stop a build. Warnings never do.")]
+        public bool CheckStatesBeforeBuild = true;
+
         [Tooltip("Time scale while no state is active. Keep last is the default: a scene change then cannot let loaded shared scenes run early.")]
         public NoStateTimeScale NoStateTimeScale = NoStateTimeScale.KeepLast;
 

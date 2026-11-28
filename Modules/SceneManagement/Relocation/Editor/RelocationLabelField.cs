@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System.IO;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -18,12 +19,12 @@ namespace AbstractPixel.SceneManagement.Editor
 
         public static VisualElement Create(SerializedProperty _labelProperty)
         {
-            VisualElement row = SceneSystemUI.Row();
+            VisualElement row = EditorUI.Row();
             PropertyField field = new PropertyField(_labelProperty, "Label");
             field.tooltip = Tooltip;
             field.style.flexGrow = 1;
             row.Add(field);
-            Button newLabel = SceneSystemUI.Button("New label", "Asks where to save a new relocation label named after this object, and puts it here.", () => CreateInto(_labelProperty));
+            Button newLabel = EditorUI.Button("New label", "Asks where to save a new relocation label named after this object, and puts it here.", () => CreateInto(_labelProperty));
             newLabel.style.flexShrink = 0;
             row.Add(newLabel);
             return row;

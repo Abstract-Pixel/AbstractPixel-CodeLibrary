@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System.Collections.Generic;
 using AbstractPixel.Core;
 using AbstractPixel.Core.Editor;
@@ -68,7 +69,7 @@ namespace AbstractPixel.SceneManagement.Editor
             SceneSystemSettings settings = SceneSystemSettingsAssets.Find();
             if (settings == null)
             {
-                container.Add(SceneSystemUI.HelpBoxWithButton("Scene sets need the scene system to be set up.", HelpBoxMessageType.Info, "Open Scene System", "Opens Project Settings > Abstract Pixel > Scene System, where the setup is.", SceneSystemSettingsProvider.Open));
+                container.Add(EditorUI.HelpBoxWithButton("Scene sets need the scene system to be set up.", HelpBoxMessageType.Info, "Open Scene System", "Opens Project Settings > Abstract Pixel > Scene System, where the setup is.", SceneSystemSettingsProvider.Open));
                 return container;
             }
 
@@ -293,16 +294,16 @@ namespace AbstractPixel.SceneManagement.Editor
         // "Manager scenes   [From set 'Level']" or "Manager scenes   [Override] [Revert to set]".
         private VisualElement MakePartHeader(SceneSetPart _part, string _title, string _tooltip)
         {
-            VisualElement header = SceneSystemUI.Row();
+            VisualElement header = EditorUI.Row();
             header.style.marginTop = 8;
             header.style.marginBottom = 2;
             Label title = new Label(_title);
             title.tooltip = _tooltip;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            SceneSystemUI.AddHoverTint(title);
+            EditorUI.AddHoverTint(title);
             header.Add(title);
-            header.Add(SceneSystemUI.Spacer());
-            VisualElement state = SceneSystemUI.Row();
+            header.Add(EditorUI.Spacer());
+            VisualElement state = EditorUI.Row();
             header.Add(state);
             partHeaders[_part] = state;
             return header;
@@ -313,12 +314,12 @@ namespace AbstractPixel.SceneManagement.Editor
             VisualElement buttons = new VisualElement();
             buttons.style.marginTop = 10;
 
-            addToBuildButton = SceneSystemUI.Button("Add scenes to Build Settings", AddToBuildTooltip, AddScenesToBuildSettings);
+            addToBuildButton = EditorUI.Button("Add scenes to Build Settings", AddToBuildTooltip, AddScenesToBuildSettings);
             buttons.Add(addToBuildButton);
 
             bool addressablesInstalled = AddressableScenes.IsInstalled;
             string moveTooltip = addressablesInstalled ? MoveToAddressablesTooltip : SceneMoves.NeedsAddressablesTooltip;
-            Button moveToAddressables = SceneSystemUI.Button("Move this group's scenes to Addressables", moveTooltip, () =>
+            Button moveToAddressables = EditorUI.Button("Move this group's scenes to Addressables", moveTooltip, () =>
             {
                 SceneMoves.MoveGroupToAddressables((SceneGroup)target);
                 RefreshGroupState();
@@ -326,12 +327,12 @@ namespace AbstractPixel.SceneManagement.Editor
             moveToAddressables.SetEnabled(addressablesInstalled);
             buttons.Add(moveToAddressables);
 
-            buttons.Add(SceneSystemUI.Button("Open group", SceneSystemUI.OpenGroupTooltip, () => SceneGroupOpener.Open((SceneGroup)target)));
+            buttons.Add(EditorUI.Button("Open group", SceneSystemUI.OpenGroupTooltip, () => SceneGroupOpener.Open((SceneGroup)target)));
 
             // Its own row under the three group buttons.
             VisualElement pageRow = new VisualElement();
             pageRow.style.marginTop = 6;
-            pageRow.Add(SceneSystemUI.PrimaryButton("Open Scene System", OpenSceneSystemTooltip, SceneSystemSettingsProvider.OpenAtDebugger));
+            pageRow.Add(EditorUI.PrimaryButton("Open Scene System", OpenSceneSystemTooltip, SceneSystemSettingsProvider.OpenAtDebugger));
             buttons.Add(pageRow);
             return buttons;
         }
@@ -372,17 +373,17 @@ namespace AbstractPixel.SceneManagement.Editor
                 state.Clear();
                 if (group.SceneSet == null)
                 {
-                    state.Add(SceneSystemUI.Badge("Own value", false, "This group has no scene set, so every part is its own."));
+                    state.Add(EditorUI.Badge("Own value", false, "This group has no scene set, so every part is its own."));
                     continue;
                 }
                 if (!group.IsOverride(part))
                 {
-                    state.Add(SceneSystemUI.Badge("From set '" + group.SceneSet.name + "'", false, SceneSystemUI.FromSetTooltip));
+                    state.Add(EditorUI.Badge("From set '" + group.SceneSet.name + "'", false, SceneSystemUI.FromSetTooltip));
                     continue;
                 }
-                state.Add(SceneSystemUI.Badge("Override", true, SceneSystemUI.OverrideTooltip));
+                state.Add(EditorUI.Badge("Override", true, SceneSystemUI.OverrideTooltip));
                 SceneSetPart revertedPart = part;
-                Button revert = SceneSystemUI.Button("Revert to set", SceneSystemUI.RevertTooltip, () => RevertToSet(revertedPart));
+                Button revert = EditorUI.Button("Revert to set", SceneSystemUI.RevertTooltip, () => RevertToSet(revertedPart));
                 revert.style.marginLeft = 4;
                 state.Add(revert);
             }

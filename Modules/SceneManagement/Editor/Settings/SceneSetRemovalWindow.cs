@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
@@ -119,7 +120,7 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             else
             {
-                root.Add(SceneSystemUI.Hint("No scene group uses this scene set."));
+                root.Add(EditorUI.Hint("No scene group uses this scene set."));
             }
 
             if (IsDefault)
@@ -130,18 +131,18 @@ namespace AbstractPixel.SceneManagement.Editor
             problemArea = new VisualElement();
             problemArea.style.marginTop = 6;
             root.Add(problemArea);
-            root.Add(SceneSystemUI.Spacer());
+            root.Add(EditorUI.Spacer());
 
-            Label warning = SceneSystemUI.Hint("This can't be undone: the set moves to your system's trash.");
+            Label warning = EditorUI.Hint("This can't be undone: the set moves to your system's trash.");
             warning.style.marginTop = 8;
             root.Add(warning);
-            VisualElement buttons = SceneSystemUI.Row();
+            VisualElement buttons = EditorUI.Row();
             buttons.style.marginTop = 8;
             buttons.style.justifyContent = Justify.FlexEnd;
-            Button cancel = SceneSystemUI.Button("Cancel", "Closes this window and changes nothing.", Close);
+            Button cancel = EditorUI.Button("Cancel", "Closes this window and changes nothing.", Close);
             cancel.style.width = 90;
             buttons.Add(cancel);
-            Button remove = SceneSystemUI.PrimaryButton("Remove scene set", "Applies the choice above to the scene groups, then moves the set to the trash.", RemoveSet);
+            Button remove = EditorUI.PrimaryButton("Remove scene set", "Applies the choice above to the scene groups, then moves the set to the trash.", RemoveSet);
             remove.style.marginLeft = 6;
             buttons.Add(remove);
             root.Add(buttons);
@@ -168,7 +169,7 @@ namespace AbstractPixel.SceneManagement.Editor
             List<SceneSet> others = OtherSets();
             bool canMove = others.Count > 0;
             string moveLine = canMove ? "Each group takes the scenes of the set you pick. Parts a group overrides stay as they are." : "There is no other scene set to move them to.";
-            choices.Add(SceneSystemUI.ChoiceCard("Move them to another scene set", moveLine, mode == SceneSetRemovalMode.MoveToAnotherSet, canMove,
+            choices.Add(EditorUI.ChoiceCard("Move them to another scene set", moveLine, mode == SceneSetRemovalMode.MoveToAnotherSet, canMove,
                 "The scene groups point at the scene set picked below instead.", () => PickMode(SceneSetRemovalMode.MoveToAnotherSet)));
             if (canMove && mode == SceneSetRemovalMode.MoveToAnotherSet)
             {
@@ -179,7 +180,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 target.RegisterValueChangedCallback(_change => PickReplacement(_change.newValue));
                 choices.Add(target);
             }
-            choices.Add(SceneSystemUI.ChoiceCard("Convert to override", "Each group keeps the scenes it gets now as its own, and its scene set becomes None.", mode == SceneSetRemovalMode.ConvertToOverride, true,
+            choices.Add(EditorUI.ChoiceCard("Convert to override", "Each group keeps the scenes it gets now as its own, and its scene set becomes None.", mode == SceneSetRemovalMode.ConvertToOverride, true,
                 "Nothing in the scene groups' scenes changes; they just stop following a scene set.", () => PickMode(SceneSetRemovalMode.ConvertToOverride)));
         }
 

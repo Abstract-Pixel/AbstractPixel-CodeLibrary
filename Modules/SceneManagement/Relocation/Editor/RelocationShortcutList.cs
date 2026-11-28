@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -48,7 +49,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
             Add(StrictNote());
 
-            VisualElement separator = SceneSystemUI.Separator();
+            VisualElement separator = EditorUI.Separator();
             separator.style.width = Length.Percent(100);
             separator.style.height = 1;
             separator.style.marginTop = 6;
@@ -89,7 +90,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static VisualElement Line(int _number, SpawnPointShortcuts.Row _row, float _keysWidth)
         {
-            VisualElement line = SceneSystemUI.Row();
+            VisualElement line = EditorUI.Row();
             line.style.paddingTop = 1;
             line.style.paddingBottom = 1;
             line.style.paddingLeft = 4;
@@ -126,7 +127,7 @@ namespace AbstractPixel.SceneManagement.Editor
             note.style.paddingTop = 3;
             note.style.paddingBottom = 3;
             note.style.borderLeftWidth = 3;
-            note.style.borderLeftColor = SceneSystemUI.Yellow;
+            note.style.borderLeftColor = EditorUI.Yellow;
             note.style.backgroundColor = EditorGUIUtility.isProSkin ? new Color(0.96f, 0.74f, 0.19f, 0.10f) : new Color(0.96f, 0.74f, 0.19f, 0.18f);
             return note;
         }
