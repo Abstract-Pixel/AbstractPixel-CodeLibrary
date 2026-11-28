@@ -12,7 +12,5 @@ namespace AbstractPixel.GameManagement.Editor
         internal bool CanContinue = true;
         /// <summary>A page calls this after it changes CanContinue.</summary>
         internal System.Action Changed;
-        /// <summary>Closes the window.</summary>
-        internal System.Action Close;
     }
 }
