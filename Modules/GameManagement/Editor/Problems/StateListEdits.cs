@@ -3,7 +3,7 @@ using UnityEditor;
 namespace AbstractPixel.GameManagement.Editor
 {
     /// <summary>Changes to the state list. The page shows main states lowest priority first, so the catalog's start is the page's end.</summary>
-    public static class StateListEdits
+    internal static class StateListEdits
     {
         /// <summary>Adds a state at the page's end (the lowest priority). A listed state is left where it is.</summary>
         public static void Add(GameStateCatalog _catalog, StateSO _state)

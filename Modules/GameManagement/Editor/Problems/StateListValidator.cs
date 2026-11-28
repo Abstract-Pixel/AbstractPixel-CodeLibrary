@@ -6,7 +6,7 @@ using UnityEngine;
 namespace AbstractPixel.GameManagement.Editor
 {
     /// <summary>The one source of state list problems: the settings page and the build check both read it.</summary>
-    public static class StateListValidator
+    internal static class StateListValidator
     {
         public static List<StateProblem> Find(GameStateCatalog _catalog)
         {
