@@ -1,6 +1,6 @@
 # Ticket 05 handoff: Project Settings page build
 
-`plan: gm-finish, step 5`. 2026-11-28. **Built; verification pending (Opus, low effort).**
+`plan: gm-finish, step 5`. 2026-11-28. **Done (owner closed it with the remaining checks dropped; see ticket 11).**
 
 ## Built
 
@@ -68,6 +68,7 @@ Budget allowed only a partial pass; ticket 05 stays open.
 - Still not checked: + menu, - button, fix buttons + Undo, no-asset view, problem-row stills, 1200 px
   review, Scene System page look, drops on empty list / Sub-states tab / sub-state group, two-sub-state
   reorder. Ticket 05 stays open; prototype window not removed.
+- Pass 5: Rally still at 760 matches the Lab look (only the Editor's own sidebar differs). Fixed: page note no longer says 'the sample's defaults' in a game. StateListEdits, StateListValidator, StateProblem(Kind) and the provider are internal, tests via InternalsVisibleTo. Prototype settings-page and no-asset windows and their 'Open all' calls removed from the Lab. Lab GM tests 86/86, Rally compiles clean on 89a97d7.
 - Earlier open item resolved: the page row list read in the same call still showed the old rows (rebuild looks deferred; not
   confirmed by a still), empty list, Sub-states tab, dropped sub-state's group, handle reorder by pointer,
   whether the 11 SceneManagement* failures existed before T05. Baseline for the 11 older SceneManagement failures not compared.

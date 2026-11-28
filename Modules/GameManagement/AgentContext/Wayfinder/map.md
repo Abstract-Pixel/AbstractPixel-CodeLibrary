@@ -26,7 +26,7 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 | 02 | [Debugger overlay look (8A-look)](tickets/02-debugger-overlay-look.md) | prototype, HITL | 01 | done |
 | 03 | [Game State Debugger window look (8B-look)](tickets/03-debugger-window-look.md) | prototype, HITL | 02 | done |
 | 04 | [Stability gate before any build](tickets/04-stability-gate.md) | task | none (before 05) | done |
-| 05 | [Project Settings page build (6A-build)](tickets/05-settings-page-build.md) | implement | 01-04 | open |
+| 05 | [Project Settings page build (6A-build)](tickets/05-settings-page-build.md) | implement | 01-04 | done |
 | 06 | [State inspector and drawer build (6B-build)](tickets/06-state-inspector-build.md) | implement | 05 | open |
 | 07 | [Onboarding window build (7A-build)](tickets/07-onboarding-build.md) | implement | 06 | open |
 | 08 | [Debugger overlay build (8A-build)](tickets/08-debugger-overlay-build.md) | implement | 07 | open |
@@ -82,3 +82,6 @@ ticket's goal or the order here is the owner's call.
 - Settings menu commercial readiness (needs its own plan).
 - Asset Store packaging, demo art, translations, old Input Manager, audio backends other than BroAudio.
 - Full side-by-side effect compare in the debugger (nice-to-have only if ticket 09 has budget left).
+- [Ticket 05 settings page build](../Sessions/05-settings-page-build/HANDOFF.md): page live in the Lab and Rally (6.3);
+  drop, reorder and Rally data checked; owner dropped the remaining hand checks (carried to ticket 11). Prototype
+  settings-page windows removed.
