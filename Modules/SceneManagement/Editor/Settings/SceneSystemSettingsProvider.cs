@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -141,11 +142,11 @@ namespace AbstractPixel.SceneManagement.Editor
             setsCard = AddSection(page, SceneSetsSection, "Scenes that come with every scene group using the set. Click a scene set to select it; the + and − under the list add and delete scene sets.", SceneSystemDocTopics.SceneSetsSection);
             loadingScenesCard = AddSection(page, SceneSystemLoadingScenesSection.Title, SceneSystemLoadingScenesSection.Tooltip, SceneSystemDocTopics.LoadingScenesSection);
             newScenesCard = AddSection(page, NewScenesSection, "Where scenes go so they load in a build.", SceneSystemDocTopics.NewScenesSection);
-            debuggerCard = SceneSystemUI.Section(page, NumberedTitle(DebuggerSection), SceneGroupsDebugger.Tooltip, out VisualElement debuggerHeader);
+            debuggerCard = EditorUI.Section(page, NumberedTitle(DebuggerSection), SceneGroupsDebugger.Tooltip, out VisualElement debuggerHeader);
             sections[DebuggerSection] = debuggerCard.parent;
             debuggerSummary = new VisualElement();
             debuggerHeader.Add(debuggerSummary);
-            debuggerHeader.Add(SceneSystemUI.Button("Check again", "Checks every scene group in the project again.", Refresh));
+            debuggerHeader.Add(EditorUI.Button("Check again", "Checks every scene group in the project again.", Refresh));
             debuggerHeader.Add(SceneSystemHelp.Button(SceneSystemDocTopics.DebuggerSection, "Opens the scene documentation about " + DebuggerSection));
             samplesCard = AddSection(page, SceneSystemSampleGroupsSection.Title, SceneSystemSampleGroupsSection.Tooltip, SceneSystemDocTopics.SampleGroupsSection);
             relocationCard = AddSection(page, SceneSystemRelocationSection.Title, SceneSystemRelocationSection.Tooltip, SceneSystemDocTopics.RelocationSection);
@@ -310,7 +311,7 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             if (_settings == null)
             {
-                setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Yellow, "Not set up yet", string.Empty));
+                setupCard.Add(EditorUI.StatusRow(EditorUI.Yellow, "Not set up yet", string.Empty));
                 HelpBox missing = new HelpBox("Settings asset missing: this project has no scene system settings asset, so scene sets and checks are off. Click Get started below to create one.", HelpBoxMessageType.Warning);
                 missing.style.marginTop = 4;
                 missing.style.marginBottom = 8;
@@ -318,7 +319,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 setupCard.Add(new SceneSystemSetupView(_created => Refresh()));
                 if (SceneSystemOnboardingWindow.IsTurnedOff)
                 {
-                    HelpBox turnedOff = SceneSystemUI.HelpBoxWithButton("The setup window is turned off for this project.", HelpBoxMessageType.Info, "Turn it back on", "The setup window opens by itself again while the project has no scene system settings asset.", () =>
+                    HelpBox turnedOff = EditorUI.HelpBoxWithButton("The setup window is turned off for this project.", HelpBoxMessageType.Info, "Turn it back on", "The setup window opens by itself again while the project has no scene system settings asset.", () =>
                     {
                         SceneSystemOnboardingWindow.IsTurnedOff = false;
                         Refresh();
@@ -333,20 +334,20 @@ namespace AbstractPixel.SceneManagement.Editor
             setupCard.Add(SettingsAssetRow(_settings));
             if (!string.IsNullOrEmpty(settingsError))
             {
-                setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Red, settingsError, string.Empty));
+                setupCard.Add(EditorUI.StatusRow(EditorUI.Red, settingsError, string.Empty));
             }
             if (!string.IsNullOrEmpty(moveError))
             {
-                setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Red, moveError, string.Empty));
+                setupCard.Add(EditorUI.StatusRow(EditorUI.Red, moveError, string.Empty));
             }
 
             if (SceneSystemSettingsAssets.IsPreloaded(_settings))
             {
-                setupCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Green, "Builds can read these settings", PreloadedTooltip));
+                setupCard.Add(EditorUI.StatusRow(EditorUI.Green, "Builds can read these settings", PreloadedTooltip));
                 setupCard.Add(ScenePickerToolbarHint.Row());
                 return;
             }
-            setupCard.Add(SceneSystemUI.HelpBoxWithButton("Builds can't read these settings yet: the settings asset is missing from Player Settings > Preloaded Assets, the list a build loads before its first scene. The next build adds it back, or fix it now.", HelpBoxMessageType.Warning, "Fix now", "Adds the settings asset to Player Settings > Preloaded Assets and drops empty entries there.", () =>
+            setupCard.Add(EditorUI.HelpBoxWithButton("Builds can't read these settings yet: the settings asset is missing from Player Settings > Preloaded Assets, the list a build loads before its first scene. The next build adds it back, or fix it now.", HelpBoxMessageType.Warning, "Fix now", "Adds the settings asset to Player Settings > Preloaded Assets and drops empty entries there.", () =>
             {
                 SceneSystemSettingsAssets.EnsurePreloaded(_settings);
                 Refresh();
@@ -357,7 +358,7 @@ namespace AbstractPixel.SceneManagement.Editor
         // "● Set up   [SceneSystemSettings (Scene System Settings)]"
         private static VisualElement SetUpRow(SceneSystemSettings _settings)
         {
-            VisualElement row = SceneSystemUI.StatusRow(SceneSystemUI.Green, "Set up", string.Empty);
+            VisualElement row = EditorUI.StatusRow(EditorUI.Green, "Set up", string.Empty);
             row.Q<Label>().style.width = 106;
             row.Q<Label>().style.flexShrink = 0;
             ObjectField reference = new ObjectField();
@@ -392,7 +393,7 @@ namespace AbstractPixel.SceneManagement.Editor
         // "Asset path  [Assets/…/SceneSystemSettings.asset]  [Move…]"
         private static VisualElement SettingsAssetRow(SceneSystemSettings _settings)
         {
-            VisualElement row = SceneSystemUI.Row();
+            VisualElement row = EditorUI.Row();
             row.style.marginTop = 2;
             row.style.marginBottom = 2;
             Label label = new Label("Asset path");
@@ -406,7 +407,7 @@ namespace AbstractPixel.SceneManagement.Editor
             path.style.minWidth = 60;
             path.style.marginRight = 4;
             row.Add(path);
-            row.Add(SceneSystemUI.Button("Move…", "Moves the settings asset to another folder inside Assets/. New scene sets are made next to it.", () => PickFolderAndMove(_settings)));
+            row.Add(EditorUI.Button("Move…", "Moves the settings asset to another folder inside Assets/. New scene sets are made next to it.", () => PickFolderAndMove(_settings)));
             return row;
         }
 
@@ -436,13 +437,13 @@ namespace AbstractPixel.SceneManagement.Editor
             box.Add(new HelpBox("This project has " + _paths.Count + " scene system settings assets; the scene system uses one. Keep the right one: the others go to your system's trash.", HelpBoxMessageType.Warning));
             foreach (string path in _paths)
             {
-                VisualElement row = SceneSystemUI.Row();
+                VisualElement row = EditorUI.Row();
                 Label label = new Label(path);
                 label.style.flexGrow = 1;
                 label.style.flexShrink = 1;
                 row.Add(label);
                 string keptPath = path;
-                row.Add(SceneSystemUI.Button("Keep this one", "Moves every other scene system settings asset to the trash.", () => KeepOnly(keptPath, _paths)));
+                row.Add(EditorUI.Button("Keep this one", "Moves every other scene system settings asset to the trash.", () => KeepOnly(keptPath, _paths)));
                 box.Add(row);
             }
             return box;
@@ -488,18 +489,18 @@ namespace AbstractPixel.SceneManagement.Editor
             removeSetButton = null;
             if (_settings == null)
             {
-                setsCard.Add(SceneSystemUI.Hint("Available once the scene system is set up."));
+                setsCard.Add(EditorUI.Hint("Available once the scene system is set up."));
                 return;
             }
 
             List<SceneSet> sets = ListedSets(_settings);
             if (sets.Count == 0)
             {
-                setsCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Yellow, "No scene sets yet. Click + to make one.", string.Empty));
+                setsCard.Add(EditorUI.StatusRow(EditorUI.Yellow, "No scene sets yet. Click + to make one.", string.Empty));
             }
             else if (_settings.DefaultSceneSet == null)
             {
-                setsCard.Add(SceneSystemUI.StatusRow(SceneSystemUI.Yellow, "No default scene set: a new scene group starts without one. Click Make default on a scene set.", string.Empty));
+                setsCard.Add(EditorUI.StatusRow(EditorUI.Yellow, "No default scene set: a new scene group starts without one. Click Make default on a scene set.", string.Empty));
             }
 
             bool selectionStillListed = false;
@@ -586,7 +587,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 FillSetBody(body, _set, users);
             }
 
-            VisualElement header = SceneSystemUI.Row();
+            VisualElement header = EditorUI.Row();
             Foldout foldout = new Foldout();
             foldout.text = _number + ".";
             foldout.value = isOpen;
@@ -606,7 +607,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 foldoutText.style.textOverflow = TextOverflow.Ellipsis;
                 foldoutText.style.flexShrink = 1;
             }
-            SceneSystemUI.AddHoverTint(foldout.Q<Toggle>());
+            EditorUI.AddHoverTint(foldout.Q<Toggle>());
             foldout.RegisterValueChangedCallback(_change =>
             {
                 if (_change.target != foldout)
@@ -618,7 +619,7 @@ namespace AbstractPixel.SceneManagement.Editor
             header.Add(foldout);
 
             // The name: blue on hover, a click folds the card, a double-click or F2 renames the asset.
-            Color nameColour = isDefault ? SceneSystemUI.DefaultAccent : SceneSystemUI.TextColour;
+            Color nameColour = isDefault ? SceneSystemUI.DefaultAccent : EditorUI.TextColour;
             SceneSetNameField nameField = new SceneSetNameField(_set, nameColour, () => foldout.value = !foldout.value);
             nameField.style.width = SetNameWidth;
             nameField.style.flexShrink = 1;
@@ -643,7 +644,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
             header.Add(DefaultCell(_settings, _set, isDefault));
 
-            Label usage = SceneSystemUI.Hint(users.Count + " groups");
+            Label usage = EditorUI.Hint(users.Count + " groups");
             usage.tooltip = "How many scene groups use this scene set. Open the card to list them.";
             usage.style.width = 62;
             usage.style.flexShrink = 0;
@@ -691,7 +692,7 @@ namespace AbstractPixel.SceneManagement.Editor
         // "Chosen default scene set" in the default accent, above the default card's name.
         private static VisualElement DefaultTag()
         {
-            Label chosen = SceneSystemUI.Badge("Chosen default scene set", false, "New scene groups start with this scene set.");
+            Label chosen = EditorUI.Badge("Chosen default scene set", false, "New scene groups start with this scene set.");
             Color accent = SceneSystemUI.DefaultAccent;
             chosen.style.color = accent;
             chosen.style.borderTopColor = accent;
@@ -719,7 +720,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 // The default set's tag sits above its name instead; the empty cell keeps the columns lined up.
                 return cell;
             }
-            Button makeDefault = SceneSystemUI.Button("Make default", "New scene groups will start with this scene set.", () =>
+            Button makeDefault = EditorUI.Button("Make default", "New scene groups will start with this scene set.", () =>
             {
                 MakeDefault(_settings, _set);
             });
@@ -761,7 +762,7 @@ namespace AbstractPixel.SceneManagement.Editor
             usersFoldout.style.marginTop = 6;
             if (_users.Count == 0)
             {
-                usersFoldout.Add(SceneSystemUI.Hint("No scene group uses this set."));
+                usersFoldout.Add(EditorUI.Hint("No scene group uses this set."));
             }
             foreach (SceneGroup group in _users)
             {
@@ -816,7 +817,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static VisualElement SetsFooter(SceneSystemSettings _settings)
         {
-            VisualElement footer = SceneSystemUI.Row();
+            VisualElement footer = EditorUI.Row();
             footer.style.marginTop = 2;
             footer.style.justifyContent = Justify.FlexEnd;
             VisualElement buttons = SceneSystemUI.AddRemoveFooter(
@@ -936,7 +937,7 @@ namespace AbstractPixel.SceneManagement.Editor
             newScenesCard.Clear();
             if (_settings == null)
             {
-                newScenesCard.Add(SceneSystemUI.Hint("Available once the scene system is set up."));
+                newScenesCard.Add(EditorUI.Hint("Available once the scene system is set up."));
                 return;
             }
             bool addressablesInstalled = AddressableScenes.IsInstalled;
@@ -963,7 +964,7 @@ namespace AbstractPixel.SceneManagement.Editor
             string fixName = _settings.NewScenesAreAddressable && addressablesInstalled ? "Make Addressable" : "Add to build";
             place.tooltip = "A scene that is Not in build gets a '" + fixName + "' button. Right-click a scene field to move one scene.";
 
-            Button moveAll = SceneSystemUI.Button("Move all scenes of all groups to Addressables…", addressablesInstalled ? "Lists the scenes first and asks before it moves them. Each scene leaves Build Settings." : SceneMoves.NeedsAddressablesTooltip, SceneMoves.MoveAllGroupsToAddressablesAfterConfirmation);
+            Button moveAll = EditorUI.Button("Move all scenes of all groups to Addressables…", addressablesInstalled ? "Lists the scenes first and asks before it moves them. Each scene leaves Build Settings." : SceneMoves.NeedsAddressablesTooltip, SceneMoves.MoveAllGroupsToAddressablesAfterConfirmation);
             moveAll.SetEnabled(addressablesInstalled);
             moveAll.style.marginTop = 6;
             moveAll.style.alignSelf = Align.FlexStart;

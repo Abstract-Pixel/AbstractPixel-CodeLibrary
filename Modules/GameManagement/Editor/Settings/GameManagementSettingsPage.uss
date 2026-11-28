@@ -1,0 +1,72 @@
+/* Game management settings page. The approved look is in AgentContext/UI-STYLE.md. */
+.gm-page { flex-grow: 1; min-width: 0; padding: 8px 14px 14px 14px; }
+
+/* one shared label column: every field on the page starts at the same x */
+.gm-page .unity-base-field__label { width: 40%; min-width: 110px; max-width: 180px; flex-shrink: 0; white-space: normal; }
+.gm-page .unity-base-field { margin: 2px 0 0 0; flex-grow: 1; min-width: 0; }
+
+.gm-page-title > Label { flex-grow: 1; font-size: var(--unity-metrics-default-font_very_big_size); -unity-font-style: bold; }
+.gm-help-button { width: 18px; height: 18px; margin: 0 0 0 6px; padding: 0; border-radius: 9px; font-size: 10px; -unity-font-style: bold; flex-shrink: 0; }
+.gm-section-header { margin-top: 14px; margin-bottom: 5px; min-height: 20px; }
+.gm-section-title { flex-grow: 1; flex-shrink: 0; margin-right: 8px; font-size: var(--unity-metrics-default-font_big_size); -unity-font-style: bold; }
+.gm-section-header > Button { flex-shrink: 0; }
+.gm-status { flex-shrink: 1; min-width: 0; overflow: hidden; margin-right: 8px; }
+.gm-status > Label { flex-shrink: 1; min-width: 0; margin-left: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gm-card { background-color: rgba(0, 0, 0, 0.14); border-width: 1px; border-color: var(--unity-colors-default-border); border-radius: 5px; padding: 8px 10px; }
+.gm-hint { font-size: 11px; opacity: 0.65; margin-top: 4px; white-space: normal; }
+.gm-grow { flex-grow: 1; flex-shrink: 1; min-width: 0; }
+.gm-left-button { align-self: flex-start; margin-left: 0; }
+.gm-label-dot { position: absolute; left: 0; top: 7px; }
+.gm-page .gm-dot-field .unity-base-field__label { padding-left: 16px; }
+
+/* tabs and list */
+.gm-tab-bar { flex-direction: row; align-items: center; margin-top: 8px; background-color: rgba(0, 0, 0, 0.12); }
+.gm-tab { margin: 0 4px 0 0; padding: 3px 14px; border-width: 0 0 2px 0; border-color: rgba(0, 0, 0, 0); border-radius: 3px 3px 0 0; background-color: rgba(255, 255, 255, 0.1); flex-shrink: 0; }
+.gm-tab-open { border-bottom-color: rgb(43, 133, 235); }
+/* The hint takes the rest of the bar; when that is under 190 px it wraps to its own line instead of being clipped. */
+.gm-tab-bar { flex-wrap: wrap; }
+.gm-tab-hint { flex-grow: 1; flex-basis: 190px; margin: 0 0 0 4px; padding: 3px 0; font-size: 11px; opacity: 0.65; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gm-drop-box { background-color: rgba(0, 0, 0, 0.12); }
+.gm-list { padding: 4px 4px 4px 0; }
+.gm-empty { margin: 2px 0 2px 16px; }
+.gm-list-footer { flex-direction: row; align-items: center; padding: 3px 4px; background-color: rgba(255, 255, 255, 0.1); }
+.gm-drop-hint { flex-grow: 1; flex-shrink: 1; min-width: 0; margin: 0 6px 0 2px; font-size: 11px; opacity: 0.65; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gm-small-button { width: 22px; margin: 0 0 0 4px; padding: 0; flex-shrink: 0; }
+.gm-drop-overlay { display: none; position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(43, 133, 235, 0.22); border-width: 2px; border-color: rgb(43, 133, 235); border-radius: 3px; }
+.gm-drop-overlay.gm-shown { display: flex; }
+.gm-drop-overlay > Label { padding: 4px 10px; border-radius: 3px; background-color: rgba(20, 20, 20, 0.85); color: white; -unity-font-style: bold; }
+
+/* a tree line: foldout arrow slot, then the row or the sub-state box */
+.gm-line { flex-direction: row; align-items: flex-start; }
+.gm-arrow-slot { width: 16px; height: 22px; flex-shrink: 0; align-items: center; justify-content: center; }
+.gm-page .gm-arrow-slot > .unity-base-field { flex-grow: 0; margin: 0; width: 14px; min-width: 14px; }
+.gm-group-header { height: 18px; margin: 2px 0; -unity-text-align: middle-left; -unity-font-style: bold; font-size: 11px; opacity: 0.65; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* rows: handle, badge, field and hover + are 18 px tall and share one top edge */
+.gm-state-row { margin: 2px 0; min-width: 0; border-radius: 3px; }
+.gm-state-line { flex-direction: row; align-items: flex-start; }
+.gm-handle { width: 12px; height: 18px; margin: 0 1px 0 0; padding: 0; -unity-text-align: middle-center; opacity: 0.65; flex-shrink: 0; cursor: move-arrow; }
+.gm-rank { min-width: 22px; height: 18px; margin: 0; padding: 0 4px; -unity-text-align: middle-center; background-color: rgba(255, 255, 255, 0.08); border-radius: 3px 0 0 3px; flex-shrink: 0; }
+.gm-rank-sub { background-color: rgba(70, 140, 150, 0.55); color: white; }
+.gm-state-body { flex-grow: 1; flex-shrink: 1; min-width: 0; }
+.gm-page .gm-state-field { margin: 0; min-width: 60px; }
+.gm-state-field .unity-object-field__input { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.gm-opens-over { font-size: 10px; opacity: 0.65; margin: 0; padding: 1px 4px 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gm-add-sub-button { opacity: 0; width: 22px; height: 18px; margin: 0 0 0 4px; padding: 0; -unity-font-style: bold; flex-shrink: 0; }
+.gm-state-line:hover .gm-add-sub-button { opacity: 1; }
+.gm-add-sub-space { width: 26px; flex-shrink: 0; }
+.gm-selected { background-color: rgba(43, 133, 235, 0.18); }
+.gm-dragged { opacity: 0.5; }
+.gm-drop-target { background-color: rgba(43, 133, 235, 0.4); }
+
+/* one teal box per parent; it ends where a main row's field ends (26 px stay free for the hover +) */
+.gm-sub-group { margin: 2px 26px 2px 0; padding: 3px; border-width: 1px; border-radius: 3px; border-color: rgba(70, 140, 150, 0.7); background-color: rgba(70, 140, 150, 0.07); }
+.gm-sub-header { font-size: 11px; -unity-font-style: bold; opacity: 0.65; margin: 0 0 1px 1px; padding: 0; }
+
+/* problems: the help box starts at the badge; the buttons wrap below the text when narrow */
+.gm-problem { flex-direction: row; flex-wrap: wrap; align-items: center; margin: 3px 4px 1px 13px; min-width: 0; }
+.gm-page .gm-problem > .unity-help-box__label { flex-grow: 1; flex-shrink: 1; flex-basis: 200px; min-width: 0; white-space: normal; }
+.gm-help-actions { flex-direction: row; align-items: center; flex-shrink: 1; min-width: 0; margin: 2px 0 2px 6px; }
+.gm-help-actions > Button { margin-left: 0; }
+.gm-fix-button { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gm-link { flex-shrink: 0; margin-left: 10px; background-color: rgba(0, 0, 0, 0); border-width: 0; color: var(--unity-colors-link-text); }

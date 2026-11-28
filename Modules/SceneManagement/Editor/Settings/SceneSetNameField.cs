@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System;
 using UnityEditor;
 using UnityEngine;
@@ -41,7 +42,7 @@ namespace AbstractPixel.SceneManagement.Editor
             nameLabel.style.textOverflow = TextOverflow.Ellipsis;
             nameLabel.style.whiteSpace = WhiteSpace.NoWrap;
             nameLabel.style.paddingLeft = 2;
-            nameLabel.RegisterCallback<PointerEnterEvent>(_event => nameLabel.style.color = SceneSystemUI.LinkBlue);
+            nameLabel.RegisterCallback<PointerEnterEvent>(_event => nameLabel.style.color = EditorUI.LinkBlue);
             nameLabel.RegisterCallback<PointerLeaveEvent>(_event => nameLabel.style.color = restColour);
             nameLabel.RegisterCallback<ClickEvent>(OnNameClicked);
             Add(nameLabel);
@@ -57,7 +58,7 @@ namespace AbstractPixel.SceneManagement.Editor
             Add(editor);
 
             problemLine = new Label();
-            problemLine.style.color = SceneSystemUI.Red;
+            problemLine.style.color = EditorUI.Red;
             problemLine.style.fontSize = 11;
             problemLine.style.whiteSpace = WhiteSpace.Normal;
             problemLine.style.display = DisplayStyle.None;

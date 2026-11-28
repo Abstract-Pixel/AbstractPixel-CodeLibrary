@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
@@ -19,7 +20,7 @@ namespace AbstractPixel.SceneManagement.Editor
             _card.Clear();
             if (_settings == null)
             {
-                _card.Add(SceneSystemUI.Hint("Available once the scene system is set up."));
+                _card.Add(EditorUI.Hint("Available once the scene system is set up."));
                 return;
             }
 

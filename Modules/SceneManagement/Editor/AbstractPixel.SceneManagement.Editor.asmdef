@@ -2,6 +2,7 @@
     "name": "AbstractPixel.SceneManagement.Editor",
     "rootNamespace": "AbstractPixel.SceneManagement.Editor",
     "references": [
+        "AbstractPixel.Core.Editor.UI",
         "AbstractPixel.EditorModules.Documentation",
         "AbstractPixel.Core",
         "AbstractPixel.Core.Editor",

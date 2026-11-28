@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -64,10 +65,10 @@ namespace AbstractPixel.SceneManagement.Editor
             style.flexGrow = 1;
             style.minHeight = 340;
             style.paddingTop = 18;
-            VisualElement logo = SceneSystemUI.Logo(LogoHeight);
+            VisualElement logo = EditorUI.Logo(LogoHeight);
             logo.style.marginBottom = 14;
             Add(logo);
-            VisualElement separator = SceneSystemUI.Separator();
+            VisualElement separator = EditorUI.Separator();
             separator.style.marginBottom = 18;
             Add(separator);
             content = new VisualElement();
@@ -86,12 +87,12 @@ namespace AbstractPixel.SceneManagement.Editor
             stepLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
             stepLabel.style.marginBottom = 6;
             footer.Add(stepLabel);
-            VisualElement buttons = SceneSystemUI.Row();
-            backButton = SceneSystemUI.Button("Back", string.Empty, () => Go(-1));
+            VisualElement buttons = EditorUI.Row();
+            backButton = EditorUI.Button("Back", string.Empty, () => Go(-1));
             backButton.style.width = 100;
             buttons.Add(backButton);
-            buttons.Add(SceneSystemUI.Spacer());
-            nextButton = SceneSystemUI.Button("Next", string.Empty, OnNext);
+            buttons.Add(EditorUI.Spacer());
+            nextButton = EditorUI.Button("Next", string.Empty, OnNext);
             nextButton.style.width = 120;
             nextButton.style.height = 24;
             nextButton.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -257,7 +258,7 @@ namespace AbstractPixel.SceneManagement.Editor
         // The page title, its line, then the Terminology lines for the step's new words.
         private void AddHeader(string _title, string _line)
         {
-            content.Add(SceneSystemUI.PageHeader(_title, _line));
+            content.Add(EditorUI.PageHeader(_title, _line));
             int step = (int)Current;
             bool hasWords = step < SceneSystemTerms.WordsPerStep.Length && SceneSystemTerms.WordsPerStep[step].Length > 0;
             if (hasWords)
@@ -293,7 +294,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private void ShowWelcome()
         {
             AddHeader("Scene System", "Let's set up scenes for this project.<br>It takes a minute.");
-            Label steps = SceneSystemUI.Hint("You can change everything later in Project Settings.");
+            Label steps = EditorUI.Hint("You can change everything later in Project Settings.");
             steps.style.unityTextAlign = TextAnchor.MiddleCenter;
             content.Add(steps);
         }
@@ -301,7 +302,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private void ShowFolder()
         {
             AddHeader("Settings Folder", "Where to keep the scene system's settings.");
-            VisualElement row = SceneSystemUI.Row();
+            VisualElement row = EditorUI.Row();
             TextField folder = new TextField();
             folder.value = choices.Folder;
             folder.tooltip = "Any folder inside Assets/. You can move the settings later; the scene system finds them by type.";
@@ -314,7 +315,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 RefreshFooter();
             });
             row.Add(folder);
-            row.Add(SceneSystemUI.Button("Browse…", "Pick a folder inside this project's Assets folder.", () =>
+            row.Add(EditorUI.Button("Browse…", "Pick a folder inside this project's Assets folder.", () =>
             {
                 string picked = EditorUtility.OpenFolderPanel("Settings folder", Application.dataPath, string.Empty);
                 if (!string.IsNullOrEmpty(picked))
@@ -339,20 +340,20 @@ namespace AbstractPixel.SceneManagement.Editor
             string problem = SceneSystemSetup.FolderProblemInProject(choices.Folder);
             if (string.IsNullOrEmpty(problem))
             {
-                folderStatus.Add(SceneSystemUI.StatusRow(SceneSystemUI.Green, "Looks good.", string.Empty));
+                folderStatus.Add(EditorUI.StatusRow(EditorUI.Green, "Looks good.", string.Empty));
                 return;
             }
-            folderStatus.Add(SceneSystemUI.StatusRow(SceneSystemUI.Red, problem, string.Empty));
+            folderStatus.Add(EditorUI.StatusRow(EditorUI.Red, problem, string.Empty));
         }
 
         private void ShowNewScenes()
         {
             AddHeader("New Scenes", "Where scenes go so they load in a build.");
             bool addressablesInstalled = AddressableScenes.IsInstalled;
-            content.Add(SceneSystemUI.ChoiceCard("Build Settings", "New scenes are added to the build's scene list.", !choices.NewScenesAreAddressable, true,
+            content.Add(EditorUI.ChoiceCard("Build Settings", "New scenes are added to the build's scene list.", !choices.NewScenesAreAddressable, true,
                 "Scenes are added to File > Build Profiles > Scene List. Simple, and right for most games.", () => PickPlace(false)));
             string addressablesLine = addressablesInstalled ? "New scenes get an Addressables entry and load on demand." : "Needs the Addressables package.";
-            content.Add(SceneSystemUI.ChoiceCard("Addressables", addressablesLine, choices.NewScenesAreAddressable, addressablesInstalled,
+            content.Add(EditorUI.ChoiceCard("Addressables", addressablesLine, choices.NewScenesAreAddressable, addressablesInstalled,
                 addressablesInstalled ? "Scenes get an entry in Addressables' default group instead of a place in the scene list." : SceneMoves.NeedsAddressablesTooltip, () => PickPlace(true)));
         }
 
@@ -366,11 +367,11 @@ namespace AbstractPixel.SceneManagement.Editor
         private void ShowLaunchScene()
         {
             AddHeader("Launch Scene", "Optional: a splash or intro the game opens first.");
-            content.Add(SceneSystemUI.ChoiceCard("No launch scene", "The game opens the start scene group right away.", choices.LaunchScene == LaunchSceneChoice.None, true,
+            content.Add(EditorUI.ChoiceCard("No launch scene", "The game opens the start scene group right away.", choices.LaunchScene == LaunchSceneChoice.None, true,
                 "You can add one later in Project Settings > Abstract Pixel > Scene System > Start-up.", () => PickLaunchScene(LaunchSceneChoice.None)));
-            content.Add(SceneSystemUI.ChoiceCard("Use a scene I have", "The scene you pick opens first, then the start scene group.", choices.LaunchScene == LaunchSceneChoice.Existing, true,
+            content.Add(EditorUI.ChoiceCard("Use a scene I have", "The scene you pick opens first, then the start scene group.", choices.LaunchScene == LaunchSceneChoice.Existing, true,
                 "It becomes the launch scene and moves to build index 0, the scene a build opens first.", () => PickLaunchScene(LaunchSceneChoice.Existing)));
-            content.Add(SceneSystemUI.ChoiceCard("Create one", "Setup makes a new scene with a camera and a light, and opens it first.", choices.LaunchScene == LaunchSceneChoice.CreateNew, true,
+            content.Add(EditorUI.ChoiceCard("Create one", "Setup makes a new scene with a camera and a light, and opens it first.", choices.LaunchScene == LaunchSceneChoice.CreateNew, true,
                 "Setup saves a new scene where you choose, makes it the launch scene and puts it at build index 0.", () => PickLaunchScene(LaunchSceneChoice.CreateNew)));
 
             if (choices.LaunchScene == LaunchSceneChoice.Existing)
@@ -390,7 +391,7 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             if (choices.LaunchScene == LaunchSceneChoice.CreateNew)
             {
-                VisualElement row = SceneSystemUI.Row();
+                VisualElement row = EditorUI.Row();
                 row.style.marginTop = 6;
                 TextField path = new TextField("Save as");
                 path.value = choices.NewLaunchScenePath;
@@ -402,7 +403,7 @@ namespace AbstractPixel.SceneManagement.Editor
                     RefreshFooter();
                 });
                 row.Add(path);
-                row.Add(SceneSystemUI.Button("Choose…", "Pick where to save the launch scene.", () =>
+                row.Add(EditorUI.Button("Choose…", "Pick where to save the launch scene.", () =>
                 {
                     string picked = LaunchSceneCreation.AskForPath(Path.GetDirectoryName(choices.NewLaunchScenePath));
                     if (!string.IsNullOrEmpty(picked))
@@ -427,11 +428,11 @@ namespace AbstractPixel.SceneManagement.Editor
             bool readyMadeExists = SceneSystemSetup.LibraryLoadingSceneExists();
             string readyMadeLine = readyMadeExists ? "Setup copies a loading scene with a progress bar for you to restyle." : "Not in this project.";
             string groupTerm = SceneSystemTerms.Tooltip(SceneSystemTerms.SceneGroup);
-            content.Add(SceneSystemUI.ChoiceCard("Ready-made loading scene", readyMadeLine, choices.LoadingScene == LoadingSceneChoice.ReadyMade, readyMadeExists,
+            content.Add(EditorUI.ChoiceCard("Ready-made loading scene", readyMadeLine, choices.LoadingScene == LoadingSceneChoice.ReadyMade, readyMadeExists,
                 SceneSystemTerms.WithTerms("Setup copies the library's loading scene next to the settings and makes it the default loading scene. The library's original stays untouched.", SceneSystemTerms.SceneGroup), () => PickLoadingScene(LoadingSceneChoice.ReadyMade)));
-            content.Add(SceneSystemUI.ChoiceCard("Use a scene I have", "The scene you pick shows while the next place loads.", choices.LoadingScene == LoadingSceneChoice.Existing, true,
+            content.Add(EditorUI.ChoiceCard("Use a scene I have", "The scene you pick shows while the next place loads.", choices.LoadingScene == LoadingSceneChoice.Existing, true,
                 "It becomes the default loading scene and goes where new scenes go, so it loads in a build.", () => PickLoadingScene(LoadingSceneChoice.Existing)));
-            content.Add(SceneSystemUI.ChoiceCard("No loading scene", "Scene changes show only the screen effect, such as a fade.", choices.LoadingScene == LoadingSceneChoice.None, true,
+            content.Add(EditorUI.ChoiceCard("No loading scene", "Scene changes show only the screen effect, such as a fade.", choices.LoadingScene == LoadingSceneChoice.None, true,
                 "You can add one later in Project Settings > Abstract Pixel > Scene System > Loading scenes.", () => PickLoadingScene(LoadingSceneChoice.None)));
 
             if (choices.LoadingScene == LoadingSceneChoice.Existing)
@@ -462,9 +463,9 @@ namespace AbstractPixel.SceneManagement.Editor
         {
             AddHeader("Scene Sets", "Set up your scene sets now?");
             string fade = SceneSystemSetup.LibraryFadeExists() ? ", holding a copy of the fade" : string.Empty;
-            content.Add(SceneSystemUI.ChoiceCard("Yes", "Pick the manager and shared scenes for each scene set now.", choices.SetUpSceneSetsNow, true,
+            content.Add(EditorUI.ChoiceCard("Yes", "Pick the manager and shared scenes for each scene set now.", choices.SetUpSceneSetsNow, true,
                 SceneSystemTerms.WithTerms("The first scene set is the default one. You can change every scene set later on the Scene System page.", SceneSystemTerms.SceneGroup), () => PickSetUpSets(true)));
-            content.Add(SceneSystemUI.ChoiceCard("Not now", "Setup makes the Default Scene Set with a new Managers scene" + fade + ".", !choices.SetUpSceneSetsNow, true,
+            content.Add(EditorUI.ChoiceCard("Not now", "Setup makes the Default Scene Set with a new Managers scene" + fade + ".", !choices.SetUpSceneSetsNow, true,
                 "Add scenes to it later on the Scene System page, in Scene sets.", () => PickSetUpSets(false)));
             if (!choices.SetUpSceneSetsNow)
             {
@@ -479,7 +480,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 scroll.Add(DraftCard(index));
             }
-            Button addSet = SceneSystemUI.Button("Add another scene set", "Adds an empty scene set. Scene groups pick their scene set on the Scene System page.", () =>
+            Button addSet = EditorUI.Button("Add another scene set", "Adds an empty scene set. Scene groups pick their scene set on the Scene System page.", () =>
             {
                 choices.SceneSets.Add(SceneSetDraft.Another(choices.SceneSets));
                 Show();
@@ -500,10 +501,10 @@ namespace AbstractPixel.SceneManagement.Editor
         private VisualElement DraftCard(int _index)
         {
             SceneSetDraft draft = choices.SceneSets[_index];
-            VisualElement card = SceneSystemUI.Card();
+            VisualElement card = EditorUI.Card();
             card.style.marginBottom = 6;
 
-            VisualElement nameRow = SceneSystemUI.Row();
+            VisualElement nameRow = EditorUI.Row();
             TextField name = new TextField("Name");
             name.value = draft.Name;
             name.tooltip = "The scene set's asset name.";
@@ -512,11 +513,11 @@ namespace AbstractPixel.SceneManagement.Editor
             nameRow.Add(name);
             if (_index == 0)
             {
-                nameRow.Add(SceneSystemUI.Badge("Default", false, "The first scene set is the default: scene groups use it unless they pick another."));
+                nameRow.Add(EditorUI.Badge("Default", false, "The first scene set is the default: scene groups use it unless they pick another."));
             }
             else
             {
-                nameRow.Add(SceneSystemUI.Button("Remove", "Removes this scene set from the list. Nothing is made for it.", () =>
+                nameRow.Add(EditorUI.Button("Remove", "Removes this scene set from the list. Nothing is made for it.", () =>
                 {
                     choices.SceneSets.RemoveAt(_index);
                     Show();
@@ -524,7 +525,7 @@ namespace AbstractPixel.SceneManagement.Editor
             }
             card.Add(nameRow);
             Label nameProblem = new Label();
-            nameProblem.style.color = SceneSystemUI.Red;
+            nameProblem.style.color = EditorUI.Red;
             nameProblem.style.fontSize = 11;
             nameProblem.style.whiteSpace = WhiteSpace.Normal;
             card.Add(nameProblem);
@@ -578,20 +579,20 @@ namespace AbstractPixel.SceneManagement.Editor
             list.Add(title);
             if (_withStarter)
             {
-                VisualElement starterRow = SceneSystemUI.Row();
+                VisualElement starterRow = EditorUI.Row();
                 Label starter = new Label("Managers (new, made by setup)");
                 starter.tooltip = "An empty manager scene setup makes in the settings folder, holding a copy of the library's basic fade. Remove it if your own manager scenes are enough.";
                 starter.style.flexGrow = 1;
                 starter.style.paddingLeft = 3;
                 starterRow.Add(starter);
-                starterRow.Add(SceneSystemUI.Button("Remove", "Setup will not make the starter Managers scene for this scene set.", _removeStarter));
+                starterRow.Add(EditorUI.Button("Remove", "Setup will not make the starter Managers scene for this scene set.", _removeStarter));
                 list.Add(starterRow);
             }
             for (int index = 0; index < _scenes.Count; index++)
             {
                 list.Add(SceneRow(_scenes, index));
             }
-            Button add = SceneSystemUI.Button("Add scene", "Adds a row to pick a scene from this project.", () =>
+            Button add = EditorUI.Button("Add scene", "Adds a row to pick a scene from this project.", () =>
             {
                 _scenes.Add(null);
                 Show();
@@ -603,7 +604,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private VisualElement SceneRow(List<SceneAsset> _scenes, int _index)
         {
-            VisualElement row = SceneSystemUI.Row();
+            VisualElement row = EditorUI.Row();
             ObjectField field = new ObjectField();
             field.objectType = typeof(SceneAsset);
             field.allowSceneObjects = false;
@@ -616,7 +617,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 RefreshFooter();
             });
             row.Add(field);
-            row.Add(SceneSystemUI.Button("Remove", "Removes this scene from the list.", () =>
+            row.Add(EditorUI.Button("Remove", "Removes this scene from the list.", () =>
             {
                 _scenes.RemoveAt(_index);
                 Show();
@@ -634,10 +635,10 @@ namespace AbstractPixel.SceneManagement.Editor
             content.Add(OpeningToggle(SceneOpeningPreferences.NoGroupSceneWithDefaultSetLabel,
                 SceneSystemTerms.WithTerms(SceneOpeningPreferences.NoGroupSceneWithDefaultSetTooltip, SceneSystemTerms.SceneSet),
                 SceneOpeningPreferences.NoGroupSceneWithDefaultSet, _value => SceneOpeningPreferences.NoGroupSceneWithDefaultSet = _value));
-            Label play = SceneSystemUI.Hint(SceneOpeningPreferencesProvider.PlayNote);
+            Label play = EditorUI.Hint(SceneOpeningPreferencesProvider.PlayNote);
             play.style.marginTop = 8;
             content.Add(play);
-            Label later = SceneSystemUI.Hint(ChangeLaterText);
+            Label later = EditorUI.Hint(ChangeLaterText);
             later.style.marginTop = 6;
             content.Add(later);
         }
@@ -659,7 +660,7 @@ namespace AbstractPixel.SceneManagement.Editor
             string folder = SceneSystemSetup.NormalizeFolder(choices.Folder);
             string place = choices.NewScenesAreAddressable && AddressableScenes.IsInstalled ? "Addressables" : "Build Settings";
             bool hasFade = SceneSystemSetup.LibraryFadeExists();
-            VisualElement list = SceneSystemUI.Card();
+            VisualElement list = EditorUI.Card();
             list.Add(Check("Settings in " + folder));
             foreach (string setLine in SceneSystemSetup.SceneSetLines(choices, hasFade))
             {
@@ -682,7 +683,7 @@ namespace AbstractPixel.SceneManagement.Editor
             string migrationHint = SceneSystemSetup.MigrationHint(plan);
             if (!string.IsNullOrEmpty(migrationHint))
             {
-                Label hint = SceneSystemUI.Hint(migrationHint);
+                Label hint = EditorUI.Hint(migrationHint);
                 hint.style.marginTop = 8;
                 content.Add(hint);
             }
@@ -698,7 +699,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static VisualElement Check(string _text)
         {
-            VisualElement row = SceneSystemUI.StatusRow(SceneSystemUI.Green, _text, string.Empty);
+            VisualElement row = EditorUI.StatusRow(EditorUI.Green, _text, string.Empty);
             row.style.marginTop = 4;
             row.style.marginBottom = 4;
             return row;
@@ -707,7 +708,7 @@ namespace AbstractPixel.SceneManagement.Editor
         private void ShowDone()
         {
             AddHeader("All set", "The scene system is ready.");
-            VisualElement dot = SceneSystemUI.Dot(SceneSystemUI.Green);
+            VisualElement dot = EditorUI.Dot(EditorUI.Green);
             dot.style.width = 36;
             dot.style.height = 36;
             dot.style.alignSelf = Align.Center;
@@ -719,7 +720,7 @@ namespace AbstractPixel.SceneManagement.Editor
             VisualElement pickerRow = ScenePickerToolbarHint.Centered();
             pickerRow.style.marginTop = 12;
             content.Add(pickerRow);
-            Button docs = SceneSystemUI.Button("Open Scene Documentation", "Opens the scene documentation at its Home page", () => SceneSystemDocs.Open(SceneSystemDocTopics.Home));
+            Button docs = EditorUI.Button("Open Scene Documentation", "Opens the scene documentation at its Home page", () => SceneSystemDocs.Open(SceneSystemDocTopics.Home));
             docs.AddToClassList(SceneSystemHelp.ButtonClass);
             docs.userData = SceneSystemDocTopics.Home;
             docs.style.alignSelf = Align.Center;

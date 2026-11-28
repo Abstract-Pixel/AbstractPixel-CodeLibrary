@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using AbstractPixel.EditorModules.Documentation;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -22,12 +23,12 @@ namespace AbstractPixel.SceneManagement.Editor
 
         public static Button LearnMore(string _topicId)
         {
-            return Buttons.LearnMore(_topicId, SceneSystemUI.LinkBlue);
+            return Buttons.LearnMore(_topicId, EditorUI.LinkBlue);
         }
 
         public static VisualElement HelpRow(string _summary, string _topicId)
         {
-            return Buttons.HelpRow(_summary, _topicId, SceneSystemUI.TextColour);
+            return Buttons.HelpRow(_summary, _topicId, EditorUI.TextColour);
         }
 
         public static void TabBarButton(Rect _position, string _topicId)

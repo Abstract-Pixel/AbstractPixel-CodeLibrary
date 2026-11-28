@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -24,7 +25,7 @@ namespace AbstractPixel.SceneManagement.Editor
             List<SceneGroup> samples = SampleSceneGroups.All();
             if (samples.Count == 0)
             {
-                _card.Add(SceneSystemUI.Hint("None. Tick Sample scene group on a scene group to keep its scenes out of builds."));
+                _card.Add(EditorUI.Hint("None. Tick Sample scene group on a scene group to keep its scenes out of builds."));
                 return;
             }
 
@@ -43,7 +44,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static VisualElement SampleRow(int _number, SceneGroup _sample)
         {
-            VisualElement row = SceneSystemUI.Row();
+            VisualElement row = EditorUI.Row();
             row.style.marginBottom = 2;
             Label index = new Label(_number + ".");
             index.style.width = 22;
@@ -67,7 +68,7 @@ namespace AbstractPixel.SceneManagement.Editor
             _field.RegisterCallback<PointerLeaveEvent>(_event => tinted.style.backgroundColor = normal);
             _field.RegisterCallback<PointerDownEvent>(_event =>
             {
-                SceneSystemUI.PingAndSelect(_asset);
+                EditorUI.PingAndSelect(_asset);
                 _event.StopPropagation();
             }, TrickleDown.TrickleDown);
         }
@@ -81,10 +82,10 @@ namespace AbstractPixel.SceneManagement.Editor
                 Label note = new Label("<b>Note:</b> none of their scenes are in the build.");
                 note.enableRichText = true;
                 note.style.marginTop = 6;
-                note.style.color = SceneSystemUI.Yellow;
+                note.style.color = EditorUI.Yellow;
                 return note;
             }
-            return SceneSystemUI.HelpBoxWithButton("Sample scenes are in the build, so a build would stop.", HelpBoxMessageType.Error, "Remove sample scenes from the build", message, () =>
+            return EditorUI.HelpBoxWithButton("Sample scenes are in the build, so a build would stop.", HelpBoxMessageType.Error, "Remove sample scenes from the build", message, () =>
             {
                 SampleSceneBuildCheck.RemoveSampleScenesFromBuild();
                 SceneSystemSettingsProvider.Open();

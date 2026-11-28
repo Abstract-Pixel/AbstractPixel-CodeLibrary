@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -130,7 +131,7 @@ namespace AbstractPixel.SceneManagement.Editor
                 case ScenePickerChip.Sample:
                     return SampleGrey;
                 case ScenePickerChip.Unused:
-                    return SceneSystemUI.Yellow;
+                    return EditorUI.Yellow;
                 default:
                     return AbstractPixel.Core.Editor.SceneStatusColours.For(AbstractPixel.Core.Editor.SceneStatus.NotInBuild);
             }

@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
@@ -137,7 +138,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
             if (groups.Count == 0)
             {
-                _card.Add(SceneSystemUI.Hint("No scene groups yet. Right-click a scene in the Project window and pick Create Scene Group."));
+                _card.Add(EditorUI.Hint("No scene groups yet. Right-click a scene in the Project window and pick Create Scene Group."));
             }
             else
             {
@@ -227,20 +228,20 @@ namespace AbstractPixel.SceneManagement.Editor
         private static void FillSummary(VisualElement _summary, int _groupCount, int _problemCount)
         {
             _summary.Clear();
-            Color colour = SceneSystemUI.Green;
+            Color colour = EditorUI.Green;
             if (_problemCount > 0)
             {
-                colour = SceneSystemUI.Red;
+                colour = EditorUI.Red;
             }
             string text = _groupCount + " groups, " + _problemCount + " problems";
-            VisualElement status = SceneSystemUI.StatusRow(colour, text, string.Empty);
+            VisualElement status = EditorUI.StatusRow(colour, text, string.Empty);
             status.style.marginRight = 6;
             _summary.Add(status);
         }
 
         private static VisualElement HeaderRow()
         {
-            VisualElement row = SceneSystemUI.Row();
+            VisualElement row = EditorUI.Row();
             row.style.marginBottom = 3;
             Label number = HeaderCell("#", IndexWidth, 0, IndexWidth, IndexWidth, "The scene group's number in this list.");
             number.style.unityTextAlign = TextAnchor.MiddleRight;
@@ -296,9 +297,9 @@ namespace AbstractPixel.SceneManagement.Editor
             problemsView.style.marginBottom = 2;
             int problemCount = problemsView.Refresh(_group, _requestRefresh);
 
-            VisualElement row = SceneSystemUI.Row();
+            VisualElement row = EditorUI.Row();
             row.name = RowName;
-            Label index = SceneSystemUI.Hint(_number + ".");
+            Label index = EditorUI.Hint(_number + ".");
             index.style.unityTextAlign = TextAnchor.MiddleRight;
             Column(index, IndexWidth, 0, IndexWidth, IndexWidth);
             row.Add(index);
@@ -309,10 +310,10 @@ namespace AbstractPixel.SceneManagement.Editor
             row.Add(MainSceneField(_group, _requestRefresh));
             row.Add(SetField(_group, _settings, _requestRefresh));
             row.Add(StatusCell(_group, problemCount));
-            VisualElement buttons = SceneSystemUI.Row();
+            VisualElement buttons = EditorUI.Row();
             buttons.name = ButtonsName;
             buttons.style.flexShrink = 0;
-            buttons.Add(RowButton("Select group", "Selects this scene group in the Project window and shows it in the Inspector.", () => SceneSystemUI.PingAndSelect(_group)));
+            buttons.Add(RowButton("Select group", "Selects this scene group in the Project window and shows it in the Inspector.", () => EditorUI.PingAndSelect(_group)));
             Button open = RowButton("Open group", SceneSystemUI.OpenGroupTooltip, () => SceneGroupOpener.Open(_group));
             open.style.marginLeft = ButtonGap;
             buttons.Add(open);
@@ -326,7 +327,7 @@ namespace AbstractPixel.SceneManagement.Editor
 
         private static Button RowButton(string _text, string _tooltip, Action _clicked)
         {
-            Button button = SceneSystemUI.Button(_text, _tooltip, _clicked);
+            Button button = EditorUI.Button(_text, _tooltip, _clicked);
             button.style.width = ButtonWidth;
             button.style.flexShrink = 0;
             button.style.marginLeft = 0;
@@ -394,19 +395,19 @@ namespace AbstractPixel.SceneManagement.Editor
         private static VisualElement StatusCell(SceneGroup _group, int _problemCount)
         {
             bool isBootGroup = SceneGroupCheck.IsBootGroup(_group);
-            Color colour = SceneSystemUI.Green;
+            Color colour = EditorUI.Green;
             string text = "No problems";
             if (_problemCount > 0)
             {
-                colour = SceneSystemUI.Red;
+                colour = EditorUI.Red;
                 text = _problemCount + " problem(s)";
             }
             else if (isBootGroup)
             {
-                colour = SceneSystemUI.Yellow;
+                colour = EditorUI.Yellow;
                 text = "Boot group, unused";
             }
-            VisualElement cell = SceneSystemUI.StatusRow(colour, text, text);
+            VisualElement cell = EditorUI.StatusRow(colour, text, text);
             Column(cell, StatusWidth, StatusGrow, StatusMinWidth, StatusMaxWidth);
             Label label = cell.Q<Label>();
             if (label != null)
@@ -429,9 +430,9 @@ namespace AbstractPixel.SceneManagement.Editor
             box.style.marginBottom = 8;
             string message = _plan.GroupsToMigrateCount + " scene groups have no scene set yet. Organize them into: " + string.Join(", ", _plan.SetNames) + ".";
             box.Add(new HelpBox(message, HelpBoxMessageType.Info));
-            VisualElement buttons = SceneSystemUI.Row();
-            buttons.Add(SceneSystemUI.Button("Preview migration", "Writes the migration report next to the settings asset without changing anything.", () => RunMigration(_settings, true)));
-            buttons.Add(SceneSystemUI.Button("Migrate", "Makes the scene sets and points each scene group at its set. Every group keeps every scene. A report lists each group before and after.", () => RunMigration(_settings, false)));
+            VisualElement buttons = EditorUI.Row();
+            buttons.Add(EditorUI.Button("Preview migration", "Writes the migration report next to the settings asset without changing anything.", () => RunMigration(_settings, true)));
+            buttons.Add(EditorUI.Button("Migrate", "Makes the scene sets and points each scene group at its set. Every group keeps every scene. A report lists each group before and after.", () => RunMigration(_settings, false)));
             box.Add(buttons);
             return box;
         }

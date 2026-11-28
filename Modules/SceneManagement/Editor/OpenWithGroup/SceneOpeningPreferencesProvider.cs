@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine.UIElements;
@@ -32,7 +33,7 @@ namespace AbstractPixel.SceneManagement.Editor
             page.Add(SceneSystemUI.PageTitleWithHelp("Scenes", "Scene tools for you, in this project.", SceneSystemDocTopics.ScenesPreferences));
             page.Add(PreferenceToggle(SceneOpeningPreferences.MainSceneWithGroupLabel, SceneOpeningPreferences.MainSceneWithGroupTooltip, true));
             page.Add(PreferenceToggle(SceneOpeningPreferences.NoGroupSceneWithDefaultSetLabel, SceneOpeningPreferences.NoGroupSceneWithDefaultSetTooltip, false));
-            page.Add(SceneSystemUI.Hint(PlayNote));
+            page.Add(EditorUI.Hint(PlayNote));
             Toggle follow = new Toggle(SceneDocsFollowPreference.Label);
             follow.tooltip = SceneDocsFollowPreference.Tooltip;
             follow.labelElement.style.minWidth = LabelWidth;

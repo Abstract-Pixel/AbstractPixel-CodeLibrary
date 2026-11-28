@@ -1,3 +1,4 @@
+using AbstractPixel.Core.Editor.UI;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -30,7 +31,7 @@ namespace AbstractPixel.SceneManagement.Editor
             _card.Clear();
             if (_settings == null)
             {
-                _card.Add(SceneSystemUI.Hint("Available once the scene system is set up."));
+                _card.Add(EditorUI.Hint("Available once the scene system is set up."));
                 return;
             }
 
@@ -68,7 +69,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 text = "Empty: a failed scene change goes to the start scene group, '" + _settings.StartSceneGroup.name + "'.";
             }
-            Label hint = SceneSystemUI.Hint(text);
+            Label hint = EditorUI.Hint(text);
             hint.style.marginLeft = 160;
             return hint;
         }
@@ -76,7 +77,7 @@ namespace AbstractPixel.SceneManagement.Editor
         // "Label        [field]" with the same label width as the Setup section's rows, so the fields line up.
         private static VisualElement LabelledRow(string _label, string _tooltip, VisualElement _field)
         {
-            VisualElement row = SceneSystemUI.Row();
+            VisualElement row = EditorUI.Row();
             row.style.alignItems = Align.FlexStart;
             Label label = new Label(_label);
             label.tooltip = _tooltip;
@@ -98,19 +99,19 @@ namespace AbstractPixel.SceneManagement.Editor
             row.style.marginTop = 4;
             if (!_settings.HasLaunchScene)
             {
-                Button create = SceneSystemUI.Button("Create a launch scene…", CreateLaunchSceneTooltip, () => CreateLaunchScene(_settings));
+                Button create = EditorUI.Button("Create a launch scene…", CreateLaunchSceneTooltip, () => CreateLaunchScene(_settings));
                 create.style.alignSelf = Align.FlexStart;
                 row.Add(create);
                 return row;
             }
             if (LaunchSceneBuildOrder.IsInPlace(_settings))
             {
-                row.Add(SceneSystemUI.StatusRow(SceneSystemUI.Green, "'" + _settings.LaunchScene.SceneName + "' is build index 0, so a build opens it first", BuildIndexTooltip));
+                row.Add(EditorUI.StatusRow(EditorUI.Green, "'" + _settings.LaunchScene.SceneName + "' is build index 0, so a build opens it first", BuildIndexTooltip));
                 return row;
             }
             string first = System.IO.Path.GetFileNameWithoutExtension(LaunchSceneBuildOrder.FirstScenePath());
             string message = "'" + _settings.LaunchScene.SceneName + "' is not build index 0: a build would open '" + first + "' first. The next build puts it back, or fix it now.";
-            row.Add(SceneSystemUI.HelpBoxWithButton(message, HelpBoxMessageType.Warning, "Fix now", "Moves the launch scene to build index 0 in Build Settings.", () =>
+            row.Add(EditorUI.HelpBoxWithButton(message, HelpBoxMessageType.Warning, "Fix now", "Moves the launch scene to build index 0 in Build Settings.", () =>
             {
                 LaunchSceneBuildOrder.EnsureFirst(_settings);
                 SceneSystemSettingsAssets.NotifyChanged();
@@ -172,7 +173,7 @@ namespace AbstractPixel.SceneManagement.Editor
             SceneGroup startGroup = _settings.StartSceneGroup;
             if (startGroup == null)
             {
-                return SceneSystemUI.StatusRow(SceneSystemUI.Red, MissingStartSceneGroup, StartSceneGroupTooltip);
+                return EditorUI.StatusRow(EditorUI.Red, MissingStartSceneGroup, StartSceneGroupTooltip);
             }
 
             string text = "Opens '" + startGroup.name + "'";
@@ -180,7 +181,7 @@ namespace AbstractPixel.SceneManagement.Editor
             {
                 text += " behind '" + _settings.LaunchScene.SceneName + "'";
             }
-            return SceneSystemUI.StatusRow(SceneSystemUI.Green, text, Tooltip);
+            return EditorUI.StatusRow(EditorUI.Green, text, Tooltip);
         }
     }
 }

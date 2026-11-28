@@ -1,0 +1,9 @@
+{
+    "name": "AbstractPixel.Core.Editor.UI",
+    "rootNamespace": "AbstractPixel.Core.Editor.UI",
+    "references": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "autoReferenced": true
+}
