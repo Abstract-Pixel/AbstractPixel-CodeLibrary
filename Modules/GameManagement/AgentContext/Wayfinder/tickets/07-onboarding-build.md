@@ -26,6 +26,13 @@ running it again to add a skipped menu.
 - `Find` returns any settings asset, including a sample's inside a package (the Lab does). "No settings asset exists" would
   then be false and the window would not open. Settle with the owner; see the 05 handoff, "Open: sample settings are editable".
 
+## From ticket 06
+
+- The state inspector, drawer and `StateProblemBox` are committed; Rally's library is on `96ebe07` and stays there.
+- A probe that reads screen pixels must not run while another window covers the Editor; close old Settings and
+  Properties windows first (one in the Lab was left open and showed up in a Rally still).
+- Detail: `../../Sessions/06-state-inspector-build/HANDOFF.md`.
+
 ## Mega run: step S1
 
 Added 2026-11-28 for [../mega-07-09/MEGA-TICKET.md](../mega-07-09/MEGA-TICKET.md). Where this section differs from

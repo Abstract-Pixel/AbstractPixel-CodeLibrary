@@ -41,6 +41,14 @@ By mouse: drag-reorder parents and input actions, drag and drop onto fields, the
 renaming a state or input map; Project Settings keeping focus while typing with its new asset watcher; "Leave on scene
 change" is cut below about 375 px. Detail: `../../Sessions/06-state-inspector-build/HANDOFF.md`.
 
+## From ticket 06 (S0 close-out)
+
+"Leave on scene change" now wraps (fixed in S0, still seen at 275 px only). Not done, no verifier, owner skipped: Project
+Settings focus while typing under real input (the page has no editable text field, so the risk looks nil); narrow-table
+"Locked Hidden" wrap re-capture in the Lab; drawer stills re-captured in both Editors; Unity 6.7; the table after a real
+rename in the Project window (state rename checked by script, input map rename only showed "All off" because the probe's
+JSON edit broke the reference).
+
 ## From the mega run (tickets 06-09)
 
 Checks no unattended run can do (physical mouse drag and drop and object picker, physical gamepad, rumble, real

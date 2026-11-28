@@ -30,7 +30,7 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 | 03 | [Game State Debugger window look (8B-look)](tickets/03-debugger-window-look.md) | prototype, HITL | 02 | done |
 | 04 | [Stability gate before any build](tickets/04-stability-gate.md) | task | none (before 05) | done |
 | 05 | [Project Settings page build (6A-build)](tickets/05-settings-page-build.md) | implement | 01-04 | done |
-| 06 | [State inspector and drawer build (6B-build)](tickets/06-state-inspector-build.md) | implement | 05 | open |
+| 06 | [State inspector and drawer build (6B-build)](tickets/06-state-inspector-build.md) | implement | 05 | done |
 | 07 | [Onboarding window build (7A-build)](tickets/07-onboarding-build.md) | implement | 06 | open |
 | 08 | [Debugger overlay build (8A-build)](tickets/08-debugger-overlay-build.md) | implement | 07 | open |
 | 09 | [Game State Debugger window build (8B-build)](tickets/09-debugger-window-build.md) | implement | 08 | open |
@@ -78,6 +78,9 @@ section saying what to do next; it follows this map's order and never changes it
   shared editor look moved to `AbstractPixel.Core.Editor.UI`; sub-state boxes start at the rank badge (owner). Drop,
   reorder and Rally data checked; the owner dropped the other hand checks (ticket 11). Open: sample settings inside a
   package are editable. Notes carried to tickets 06, 07, 11 and 12.
+- [Ticket 06 state inspector build](../Sessions/06-state-inspector-build/HANDOFF.md): inspector and state field drawer
+  committed and merged (`96ebe07`), pushed; Rally on it (R1-R4 pass, 6.3). No verifier verdict: the owner skipped it as
+  already verified. Mouse checks and a few re-checks go to ticket 11. Notes carried to tickets 07 and 11.
 
 ## Not yet specified
 
