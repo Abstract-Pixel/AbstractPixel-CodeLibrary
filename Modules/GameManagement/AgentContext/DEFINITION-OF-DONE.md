@@ -8,8 +8,12 @@ its own **"Done and verified"** section that says what finished and verified mea
 exact checks). A session is finished only when this guideline and its ticket's section both hold.
 
 **In the mega run** (06 close-out and tickets 07-09, [Wayfinder/mega-07-09/](Wayfinder/mega-07-09/MEGA-TICKET.md)),
-this guideline holds with these changes: a task also needs a verifier `VERDICT: PASS`; no must-have may be left in
-"Not done" (the budget is extended instead); only checks that cannot be done unattended (verifier brief) are carried
+this guideline holds with these changes. A **builder** session and a separate **verifier** session share each step
+(owner, 2026-11-28). The builder writes tests first, builds, gets tests and compile green, checks the feature once as a
+developer or player would, fixes what breaks and commits; point 5 asks no more of it, and "A session is finished" does
+not apply to it. The verifier does the thorough checks, fixes, code review, ticket close and handoff. A step is
+finished only with the verifier's `VERDICT: PASS`; no must-have may be left in "Not done" (the budget is extended
+instead); only checks that cannot be done unattended (verifier brief) are carried
 to ticket 11; point 5 below is the chief of staff's ledger, so sessions never call the budget tool; the handoff uses
 the session brief's template with a **Next session** section.
 

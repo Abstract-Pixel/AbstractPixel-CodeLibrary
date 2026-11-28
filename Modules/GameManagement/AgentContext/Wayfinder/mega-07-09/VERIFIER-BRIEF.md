@@ -1,64 +1,51 @@
-# Verifier brief: game management mega run
+# Verifier session brief (mega run)
 
-You are the last check before the next session builds on this work. If you pass something broken, nobody else catches
-it. Assume it is broken until you have used it. A report, a green test run or "it compiles" proves nothing about how
-it behaves or looks.
+You are the **verifier session** for one step. A builder session wrote the feature and checked it once. You do the
+thorough checking, fix what breaks, review the code, close the ticket and write the handoff. You are the last check
+before the next session builds on this work. Assume it is broken until you have used it. A report, a green test run or
+"it compiles" proves nothing about how it behaves or looks.
 
-**PASS means all four:** no bugs; it works as a designer, developer or player would use it; the code is good; the UI
-looks good. One open finding means FAIL.
+You are your own session with a fresh context, started by the chief of staff. Changed 2026-11-28 by the owner.
 
-If your task says `SETUP PROBE`, do only what it asks and stop.
+## Read
 
-## Limits
+1. Your spec: all of it. Its "Mega run" section wins, and its must-have list is **your** checklist.
+2. `<session folder>/BUILD-NOTES.md`, then the previous handoff's **Next session** section.
+3. [SESSION-BRIEF.md](SESSION-BRIEF.md), sections "Never ask" and "Editor rules" (pop-ups included) only.
+4. The spec's "Read first" design sources that define behaviour and look, `LIB/CODING_STANDARDS.md`, `LIB/CLAUDE.md`,
+   `CONTEXT/DEFINITION-OF-DONE.md`, the changed files. For Rally: Rally's `CLAUDE.md` and
+   [RALLY-DOGFOOD.md](RALLY-DOGFOOD.md), including its save, Steam and owner-file rules.
 
-- **Judge, never fix.** Do not change product code, tests, docs or commits. You may write only
-  `<session folder>/VERIFY-<round>.md`, stills under `<session folder>/verify-stills/`, and throwaway probes or temp
-  assets that you delete or restore before reporting.
-- Never ask anything. No subagents. A denied call is recorded, not worked around.
-- You are the only one driving the Editors while you run. Follow SESSION-BRIEF.md "Editor rules" (read that section
-  only). For Rally, follow [RALLY-DOGFOOD.md](RALLY-DOGFOOD.md), including its save, Steam and owner-file rules.
+No subagents. Open other files only as needed. Do not read session history or other tickets.
 
 ## Stay focused
 
-- Your scope is the **spec** in your packet, the **diff** in your packet, and what that diff can break. Nothing else.
-- Read: the spec, its "Read first" design sources that define expected behaviour and look (UI-STYLE.md section,
-  GRILL-RESULTS section, approved stills), `CODING_STANDARDS.md`, the changed files. Do not read session history,
-  other tickets or whole folders.
-- Treat the session's evidence as claims. Reuse a test count only if you can see it was run on the verify commit;
-  behaviour and looks you always see yourself.
-- **Never repeat a passed check** listed under "Skip", unless a later change touched what it covers.
-- Round 2+: re-check each listed finding with its own reproduction, then check only what the fixes touched. Look for
-  new breakage there. Do not restart the full pass.
-- One still per state and width is enough. One run per check, unless it is flaky; a flaky result is a finding.
+- Your scope is the spec, the builder's diff, and what that diff can break. Nothing else.
+- Treat BUILD-NOTES as claims. Behaviour and looks you always see yourself.
+- Keep `<session folder>/PROGRESS-VERIFY.md` (one row per check, ticked as you go). It is what survives a stop.
 - No style opinions, redesigns or features beyond the spec and the standards.
 
-## Order of work
+## 1. State, compile, tests
 
-Gates A and B are cheap: if one fails, report FAIL at once. From C on, **finish the whole pass and report every
-finding together**, so one fix round can close them all.
+Lab library `HEAD` matches the builder's commit. Code is on `game-management-rework`, merged into `main`, never the
+reverse. Rally's library is on the stated commit. No unintended asset churn in the diff (sample catalogs,
+`GameManagment.prefab`, fonts, `SaveSystemConfigSO.asset`, `SceneSystemSettings.asset`, ProjectSettings). Clean compile
+with the assembly newer than the source, no new console errors or C# warnings, the whole
+`AbstractPixel.GameManagement.Tests` EditMode assembly passes. Lab also: Sample 01's PlayMode flow test. Runtime files
+changed: the affected parity scenarios, compared with `Parity/baseline/`.
 
-First write your check list (one row per must-have in the spec, plus the rows below that apply), then work it.
-
-### A. State
-
-Verify commit matches the Lab library `HEAD` for code. Branches follow the rules (code on `game-management-rework`,
-merged into `main`; never the reverse). Rally's library is on the stated commit. No unintended asset churn in the
-diff (`git diff --stat`): sample catalogs, `GameManagment.prefab`, fonts, `SaveSystemConfigSO.asset`,
-`SceneSystemSettings.asset`, ProjectSettings.
-
-### B. Compile and tests (Lab, then Rally)
-
-Clean compile with the assembly newer than the source; no new console errors or C# warnings; the whole
-`AbstractPixel.GameManagement.Tests` EditMode assembly passes. Lab also: Sample 01's PlayMode flow test. Runtime
-files changed: the parity scenarios that can be affected, compared with `Parity/baseline/`.
-
-### C. Use it
+## 2. Thorough use: several passes
 
 Use the real UI, menus, Inspector fields and input, from the entry point a stranger would find. Set values through the
-visible controls (UI events or queued Input System device events), not by calling the method behind them. Check what
-is seen after every step, not only internal state.
+visible controls (UI events or queued Input System device events), not by calling the method behind them. Check what is
+seen after every step.
 
-For every must-have: the happy path, end to end. Then these, where they apply:
+Run **more than two passes**. You decide how many suit the task (for example, five). Each pass takes a different angle
+or scenario, for example: first-time developer, returning developer with existing data, player with each input device,
+interrupting and breaking things, long names and window sizes, Rally's real project. Write your pass list in
+PROGRESS-VERIFY.md before you start, and why that number.
+
+Cover every must-have end to end. Then these, where they apply:
 
 | Id | Try | Expect |
 |---|---|---|
@@ -75,80 +62,104 @@ For every must-have: the happy path, end to end. Then these, where they apply:
 | C11 | Player input through keys, gamepad and mouse, each separately | Every path the spec lists works on its own |
 | C12 | A developer reading only the UI text and tooltips | Knows what it does and how to fix a problem; plain English |
 
-### D. UI look
+**UI look.** Capture your own stills under `<session folder>/verify-stills/` and open and read every one.
 
-Capture your own stills and **open and read every one**. An unread or unpainted still is not evidence.
+- Editor windows: narrow (275 px for Inspectors, else the spec's smallest), middle and 1200 px, each non-trivial state
+  (empty, filled, problem, selected). In-game UI: 1280x720, 1920x1080 and 1280x800.
+- Compare with the approved stills and UI-STYLE.md: layout, order, wording, spacing, colours, icons, badges.
+- Long names (the UI-STYLE "Long names" set and longer, with and without spaces): nothing overlaps, scrolls sideways,
+  pushes a control off or hides a row. Each name is shown once; no letter codes.
+- Measure element bounds while resizing live in both directions. Do not judge alignment by eye only.
+- At a glance: can you tell what matters, what is wrong and what to click?
 
-- Editor windows: a narrow (275 px for Inspectors, the spec's smallest otherwise), a middle and a wide (1200 px)
-  width, each non-trivial state (empty, filled, problem, selected). In-game UI: 1280x720, 1920x1080 and 1280x800.
-- Compare with the approved stills and the UI-STYLE.md section: layout, order, wording, spacing, colours, icons,
-  badges. A difference not explained by the spec is a finding.
-- Long names (the UI-STYLE "Long names" set, and longer, with and without spaces): nothing overlaps, scrolls
-  sideways, pushes a control off or hides a row. Each name is shown once; no letter codes.
-- Measure while resizing live in both directions: row alignment, every row visible, footer clear, no value cut when
-  there is room for it. Measure element bounds; do not judge alignment by eye only.
-- Readability: at a glance, can you tell what matters, what is wrong and what to click? Crowded, repetitive or
-  unclear counts as a finding even when everything fits.
+**Rally.** Every editor UI and feature in the spec exists and works in Rally on the stated commit
+(RALLY-DOGFOOD.md). "It works in the Lab" is not a Rally result. Rally's data and the owner's uncommitted files stay
+unchanged except as listed.
 
-### E. Code (changed files only)
+## 3. Fix what breaks
+
+You fix it. Reproduce, add a failing test when it is logic, fix, rerun that check and what the fix touched. Commit per
+SESSION-BRIEF "Commit". Do not downgrade a finding to avoid fixing it, and do not invent one to seem thorough. A check
+that already passed is not repeated unless a later change touched what it covers. If a test setup fails twice, change
+the method or record the check as not done.
+
+## 4. Code review (changed files, against the standards)
 
 - `CODING_STANDARDS.md` and the library `CLAUDE.md`: no `var`; plain readable names from the glossary; one type per
   file; files about 400 lines or less; NAMING.md folders (at most 8 scripts); no one-line `if`; comments say why.
 - No string-configured settings. No second version of something the library already has (search before judging).
 - No dead code, debug logs, commented-out code or speculative options. `internal` for what game code does not need.
-- Correctness: null and destroyed objects, event unsubscribe, Undo and dirty marking on asset edits, per-frame
-  allocations in runtime code, statics reset, Unity 7-only APIs guarded, no `GetInstanceID`, no editor reference
-  from runtime asmdefs, release stripping as the spec says.
-- Serialized data survives renames and moves (`.meta` kept, `FormerlySerializedAs`).
+- Null and destroyed objects, event unsubscribe, Undo and dirty marking, per-frame allocations in runtime code,
+  statics reset, Unity 7-only APIs guarded, no `GetInstanceID`, no editor reference from runtime asmdefs, release
+  stripping as the spec says. Serialized data survives renames and moves.
 - Tests: each new rule has one that would fail without the code. No test weakened, skipped or deleted to pass.
 
-### F. Rally
+Fix what the review finds, then compile and run the tests again.
 
-Every editor UI and feature in your spec **exists and works in Rally on the stated commit** (RALLY-DOGFOOD.md,
-"Editor UI in Rally", and the step's dogfood section). "It works in the Lab" is not a Rally result. Rally's data and
-the owner's uncommitted files are unchanged except as listed in the packet.
+## 5. Close the ticket
 
-### G. Clean up
-
-Delete your temp assets and probes, restore settings and Play state, and confirm `git status` of all four repos shows
-nothing new from you except your report and stills.
+Only when every must-have passes and no finding is open:
+1. Clean up temp assets and probes; restore settings and Play state.
+2. Remove the verified UI's prototype menu entry and window class (DEFINITION-OF-DONE, last section; keep USS/UXML).
+   Recompile the Lab clean. Leave that Lab change uncommitted.
+3. Push the library branches (tests green), keep Rally's library on the final `game-management-rework` commit and
+   **leave it there**, and commit the Lab and Rally submodule pointers only. A denied push is recorded.
+4. Mark the ticket `done` in `Wayfinder/map.md`, add one line to "Decisions so far", add `## From ticket NN` notes to
+   later tickets.
+5. Write `VERIFY-1.md`, then the handoff; commit docs on `main` by path. `Sessions/mega-07-09/LEDGER.md` is the
+   chief's. S4 has no ticket: it skips steps 2 and 4.
 
 ## What cannot be done unattended
 
 Only these may stay unverified without failing: physical mouse or OS drag-and-drop gestures, physical gamepad
-hardware, rumble, real Steam services, hearing audio, Unity 6.7. Simulate what you can (UI events, virtual devices,
-the same data change), say exactly how, and list the rest as `NOT POSSIBLE UNATTENDED`. Everything else you could
-not check is `NOT CHECKED`, and any `NOT CHECKED` must-have means FAIL.
+hardware, rumble, real Steam services, hearing audio, Unity 6.7. Simulate what you can, say exactly how, and list the
+rest as `NOT POSSIBLE UNATTENDED`. Everything else you could not check is `NOT CHECKED`, and any `NOT CHECKED`
+must-have means `BLOCKED`.
 
-## Findings
-
-Report only what you reproduced or measured.
-
-| Severity | Meaning | Blocks PASS |
-|---|---|---|
-| BLOCKER | A must-have fails, data loss, crash, soft lock, compile or test failure | yes |
-| BUG | Wrong behaviour, error or warning, wrong or confusing text | yes |
-| UI | Differs from the approved look, cut or overlapping or crowded, hard to read | yes |
-| CODE | Breaks a written standard, duplication, dead code, missing or weak test | yes |
-| NOTE | A preference with no spec or standard behind it, or an older problem outside the diff | no |
-
-An older problem that breaks one of the spec's must-haves is not a NOTE: report it as BUG or BLOCKER.
-Do not downgrade a finding to reach PASS, and do not invent one to seem thorough.
-
-## Report
-
-Write `<session folder>/VERIFY-<round>.md` and return the same text, short. Last line exactly `VERDICT: PASS` or
-`VERDICT: FAIL`.
+## VERIFY-1.md
 
 ```markdown
-# Verify <step>, round <n>, commit <sha>
+# Verify <step>, final commit <sha>
+## Passes        (how many, why, what each tried)
 ## Checks
-| Id | Check | Result (PASS/FAIL/SKIPPED/NOT POSSIBLE UNATTENDED/NOT CHECKED) | Evidence |
-## Findings
-| Id | Severity | What | Steps to reproduce | Expected vs actual | Where (file:line or still) |
-## Passed, skip next round
-<check ids>
-## Left as I found it
-<repo status after clean up>
+| Id | Check | Result (PASS/FAIL/NOT POSSIBLE UNATTENDED/NOT CHECKED) | Evidence |
+## Found and fixed
+| Id | What | How reproduced | Fix commit | Rechecked |
+## Code review
+## Still open
 VERDICT: PASS|FAIL
+```
+
+## Handoff: `<session folder>/HANDOFF.md`
+
+Every heading is required. Write "none" rather than leaving one out. Keep it under 120 lines.
+
+```markdown
+# <step> handoff
+## Result
+## Verification      (passes, final VERDICT, verified commit, VERIFY file)
+## Checks run        (what, numbers, real or simulated input)
+## What changed      (code, assets, developer-facing effect)
+## Repo and Editor state   (branch and HEAD of all four repos, uncommitted paths and why, temporary things restored)
+## Decisions made without you
+## Not done / not verified   (reason, where it is carried)
+## Traps found
+## Next session
+(Which step comes next per MEGA-TICKET's order and Wayfinder/map.md; what it must do first; what it must not redo;
+files and commits it needs; anything half-set-up. It must make sense to someone who has seen no conversation.)
+```
+
+## Report (your last message, nothing after it)
+
+It tells the chief whether the next session can start.
+
+```text
+STATUS: DONE | BLOCKED
+STEP: <S#> verify
+HANDOFF: <path>
+VERIFY: <passes> passes, VERDICT: PASS | FAIL (<path>)
+FIXED: <count>, one line each
+COMMITS: LIB gmr <sha>, main <sha> ; LAB <sha> ; RALLY <sha> ; pushed: yes | no (<why>)
+RALLY LIBRARY ON: <sha>
+NEXT SESSION CAN START: yes | no (<blocker>)
 ```

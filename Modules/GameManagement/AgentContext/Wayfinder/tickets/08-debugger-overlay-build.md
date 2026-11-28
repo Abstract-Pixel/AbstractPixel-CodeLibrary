@@ -29,7 +29,12 @@ the text above, this section wins. Session folder: `../../Sessions/08-debugger-o
 - "Built into a release only with the opt-in" covers code and UI assets.
 - The two Debugger card fields, shown disabled today, become live.
 
-**Must-have, besides "Done and verified"**
+**Who does what** ([../mega-07-09/MEGA-TICKET.md](../mega-07-09/MEGA-TICKET.md), "Roles"). The **builder** builds
+everything "Done and verified", "Decided in advance" and the list below require, with tests first, and checks the
+feature once ([../mega-07-09/SESSION-BRIEF.md](../mega-07-09/SESSION-BRIEF.md)). Proving the list below is the
+**verifier's** job, not the builder's.
+
+**Verifier's checklist** (must-haves, besides "Done and verified")
 1. The overlay takes no input: with it shown, mouse clicks, gamepad navigation and key presses behave exactly as with
    it hidden, in every state.
 2. The toggle action works in every state, including ones whose input effect disables other maps, and at time 0.
@@ -38,8 +43,8 @@ the text above, this section wins. Session folder: `../../Sessions/08-debugger-o
 4. Sample 01 (Lab) and Rally played through with it on; all parity scenarios in Rally; Sample 01's flow test in the Lab.
 5. **The Rally dogfood:** [../mega-07-09/RALLY-DOGFOOD.md](../mega-07-09/RALLY-DOGFOOD.md), "One-level Mono player
    builds": dev build flows P1-P8 and release checks B1-B2, plus R1, R6, R7. This is how "checked in a real build"
-   is met. The verifier drives the built dev player itself (at least P1, P4, P6, P7) and repeats the B1-B2 searches
-   on the built files; it does not rebuild unless a later fix changed runtime code or the build probe.
+   is met. The verifier makes the builds, drives the dev player (P1-P8) and runs the B1-B2 searches on the built
+   files; it rebuilds only if a later fix changes runtime code or the build probe.
 
 ## From ticket 07
 

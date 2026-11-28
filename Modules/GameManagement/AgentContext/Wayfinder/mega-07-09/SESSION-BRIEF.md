@@ -1,44 +1,60 @@
-# Nested session brief (mega run)
+# Builder session brief (mega run)
 
-You do **one step** of [MEGA-TICKET.md](MEGA-TICKET.md). You do not need to read that file.
+You are the **builder session** for **one step** of [MEGA-TICKET.md](MEGA-TICKET.md). You do not need to read that file.
+You build the feature and check it **once**. A separate **verifier session** then does the thorough checking, the code
+review, the ticket close and the handoff. Do not do its job (owner, 2026-11-28).
 `CONTEXT` is `LocalPackages/AbstractPixelLibrary/Modules/GameManagement/AgentContext`. Your working directory is the
 Lab. Project Rally Shift is `C:\Users\avig7\Desktop\AllUnity\ActiveProjects\ProjectRallyShift`.
 
 ## Never ask
 
 Nobody can answer you. Never ask a question or end your turn waiting for an answer.
-- Unwritten choice: take the option closest to DECISIONS.md, UI-STYLE.md and your spec; record it in the handoff.
+- Unwritten choice: take the option closest to DECISIONS.md, UI-STYLE.md and your spec; record it in your notes or handoff.
 - Permission denial: no unchanged retry (unless the denial text says to send it once more) and no workaround. Use an
-  allowed way, or record it. If it blocks a must-have, report `BLOCKED`.
+  allowed way, or record it. If it blocks required work, report `BLOCKED`.
 - No `AskUserQuestion`, computer-use, advisor tool, `budget start`, or "settle with the owner". Ignore `Budget:`
   lines in tickets. The chief meters you with a hard cost cap. If you stop at it, you will be resumed.
 
 ## Read
 
-1. Your spec (ticket or S4 file), the previous handoff's **Next session** section first, then what the spec names.
-2. `LIB/CLAUDE.md`, `LIB/CODING_STANDARDS.md`, `CONTEXT/PLAN-OVERVIEW.md`, `CONTEXT/DEFINITION-OF-DONE.md`.
-3. When you touch Rally or run its checks: Rally's `CLAUDE.md` and [RALLY-DOGFOOD.md](RALLY-DOGFOOD.md).
+1. Your spec (the ticket), the previous handoff's **Next session** section first, then what the spec names.
+2. `LIB/CLAUDE.md`, `LIB/CODING_STANDARDS.md`, `CONTEXT/PLAN-OVERVIEW.md`.
+3. When you touch Rally: Rally's `CLAUDE.md` and [RALLY-DOGFOOD.md](RALLY-DOGFOOD.md).
 
-Where an older document disagrees with the spec's "Mega run" section or this brief, these win.
-Open source files only as needed. Do not spawn explore or helper agents; the only subagent is the verifier.
+Where an older document (`DEFINITION-OF-DONE.md` included) asks you for more checking, this brief wins.
+Open source files only as needed. Spawn no agents of any kind.
 
-## Work
+## Work, in this order
 
-1. **Preflight.** Both Editors answer `unity command editor_status`. `git status` and branch in all four repos match
-   the previous handoff. If the previous step left something broken, fix it first and say so in your handoff.
-2. **Progress file.** Create `<session folder>/PROGRESS.md`: one checkbox per must-have, plus Verify, Commits,
-   Handoff. Tick and note the commit as you go. Update it before any long operation: it is what survives a stop.
-3. **Build.** Tests first (see them fail). Look matches the approved stills and UI-STYLE.md. Reuse before writing.
-4. **Check it yourself** the way a designer, developer or player would, in both Editors where the spec says. Run
-   RALLY-DOGFOOD.md for your step.
-5. **Commit** per task on `game-management-rework`, merge into `main` (the Lab runs `main`), and put Rally's library
-   on the `game-management-rework` commit (RALLY-DOGFOOD.md, no push needed). Verify what you committed. Repeat
-   this after each fix round.
+0. **Preflight.** Both Editors answer (Lab: `unity command editor status`; Rally: `unity command editor_status`).
+   `git status` and branch in all four repos match the previous handoff. If something is broken, fix it first and say so.
+   Create `<session folder>/PROGRESS.md`: one checkbox per step below. Update it before any long operation: it is what
+   survives a stop.
+1. **Tests first.** Write them and see them fail.
+2. **Just enough code** to make them pass.
+3. **The rest of the code** the ticket needs. The look matches the approved stills and UI-STYLE.md. Reuse before writing.
+4. **All tests pass and all code compiles.**
+5. **Check the feature once**, in the Editor or in Play mode, whichever fits, as a developer or user would. Confirm that
+   everything the ticket specifies and you implemented works as intended.
+6. **Fix what breaks**, including evident UI problems such as clipping or overlap. Recheck only what you fixed.
+7. **Commit and hand to the verifier.**
+
+**Do not do the verifier's job.** No second or third pass; no separate runs per input device, window width or scenario
+beyond what your one check naturally covers; no long-name or stress matrices; no full Rally dogfood, parity runs or
+player-build flows; no sets of stills; no code review. The ticket's "Verifier's checklist" tells you what to build, not
+what to prove. If a test setup fails twice, change the method or write the check in BUILD-NOTES as not done.
+
+**Rally.** Your commit must compile in Rally. Open a feature there only if the ticket needs Rally to build it.
+
+## Commit
+
+Per task on `game-management-rework`, merge into `main` (the Lab runs `main`), and put Rally's library on the
+`game-management-rework` commit (RALLY-DOGFOOD.md, no push needed). Stage by path. You do not push, mark the ticket
+done or commit Lab or Rally pointers: the verifier does.
 
 ## Editor rules
 
-- One agent drives an Editor at a time. While your verifier runs, you do nothing in Unity: call it in the foreground
-  and wait.
+- One agent drives an Editor at a time. Builder and verifier sessions never run at the same time.
 - Never `capture editor_window` on the Lab (it crashes Unity 7 alpha). No Windows or desktop screenshots. Use
   `CONTEXT/Sessions/Session5/capture-tools/` or `InternalEditorUtility.ReadScreenPixel` (wait 5 s after
   foregrounding), and read every still before using it as evidence.
@@ -46,14 +62,14 @@ Open source files only as needed. Do not spawn explore or helper agents; the onl
 - Never close or kill an Editor. Answer every pop-up yourself (below).
 - Long jobs (builds, scenario batches): start in the background and wait with foreground waits under 10 minutes each.
   **Never end your turn while a job is running**; your process exits with your turn.
-- Temporary assets, probes and settings changes are removed or restored before verification.
+- Temporary assets, probes and settings changes are removed or restored before you report.
 
 ### Pop-ups: nobody else will click them
 
 A modal pop-up blocks every Unity command, and the owner is away. Answer it yourself; never wait or ask.
 
 **Notice it.** Put a timeout on every `unity` command. On a timeout, a hang, no progress in a long job, or
-`editor_status` showing `blocked_by_dialog`, look for a pop-up before anything else, in both Editors. Also look after
+`editor status` showing `blocked_by_dialog`, look for a pop-up before anything else, in both Editors. Also look after
 a recompile, a scene or asset change on disk, a branch switch, a build and a player launch.
 
 **Handle it,** with the scripts in `../ProjectRallyShift/AgentScripts/Tools/`:
@@ -86,73 +102,34 @@ Never press a button that deletes or discards the owner's work, accepts terms, u
 system setting. Log each pop-up in PROGRESS.md (project, text, button, result) and repeat them in the handoff under
 "Traps found". If the same one returns, fix its cause (for example, save your scene edit at once).
 
-## Verify
+## Build notes: `<session folder>/BUILD-NOTES.md`
 
-Start the verifier with `Agent`, `subagent_type: "gm-verifier"`. **Pass no `model` and no `effort`** (its definition
-sets Sonnet High). Never use another agent type to verify. Send only this packet:
-
-```text
-Step: <S#>. Round: <n>. Spec: <path>. Session folder: <path>.
-Diff: LIB <base>..<head> ; RALLY <base>..<head or "working tree: paths">.
-Verify commit: <library sha>. Rally library is on: <sha>.
-Changed on purpose: <repo files that may differ from the start state>.
-Evidence I have: <stills, test counts, logs: paths>.
-Skip (already passed, untouched since): <check ids, or none>.
-Re-check (round 2+): <finding ids and the areas my fixes touched>.
-```
-
-Do not tell it what to conclude, and do not argue a finding away. For each finding: reproduce, add a failing test
-when it is logic, fix, commit. Then start a **new** verifier with the next round's packet. You may dispute a finding
-only with evidence, in the next packet; the new verifier decides.
-
-Repeat until `VERDICT: PASS`. Any code change after a PASS needs another round. If the same finding survives three
-rounds, change your approach and write why in PROGRESS.md.
-
-## Finish
-
-Only after PASS:
-1. Remove the verified UI's prototype menu entry and window class (DEFINITION-OF-DONE, last section; keep USS/UXML).
-   This Lab-only prototype change needs no new verifier round: recompile the Lab clean and say what you removed.
-   Leave it uncommitted in the Lab.
-2. Push the library branches (tests green), confirm Rally's library is still on the verified
-   `game-management-rework` commit and **leave it there**, and commit the Lab and Rally submodule pointers only.
-   If a push is denied, record it and continue.
-3. Mark the ticket `done` in `Wayfinder/map.md`, add one line to "Decisions so far", add `## From ticket NN` notes to
-   later tickets.
-4. Write the handoff, commit docs on `main` by path. `Sessions/mega-07-09/LEDGER.md` is the chief's: leave it alone.
-   S4 has no ticket: it skips steps 1 and 3.
-
-## Handoff: `<session folder>/HANDOFF.md`
-
-Every heading is required. Write "none" rather than leaving one out. Keep it under 120 lines.
+For the verifier. Keep it under 60 lines.
 
 ```markdown
-# <step> handoff
-## Result
-## Verification      (rounds, final VERDICT, verified commit, VERIFY file)
-## Checks run        (what, numbers, real or simulated input)
-## What changed      (code, assets, developer-facing effect)
-## Repo and Editor state   (branch and HEAD of all four repos, uncommitted paths and why, temporary things restored)
+# <step> build notes
+## Built            (files, developer-facing effect)
+## Commits          (LIB base..head; Rally library commit)
+## My one check     (what you did, where, what worked; real or simulated input)
+## Known gaps       (not built, not checked, unsure about)
 ## Decisions made without you
-## Not done / not verified   (reason, where it is carried)
-## Traps found
-## Next session
-(Which step comes next per MEGA-TICKET's order and Wayfinder/map.md; what it must do first; what it must not redo;
-files and commits it needs; anything half-set-up. It must make sense to someone who has seen no conversation.)
+## Repo and Editor state   (uncommitted paths and why, temporary things restored)
+## Traps found      (pop-ups included)
 ```
 
 ## Report (your last message, nothing after it)
 
 ```text
-STATUS: DONE | BLOCKED
-STEP: <S#>
-HANDOFF: <path>
-VERIFY: <rounds> rounds, last = PASS | FAIL (<path>)
-COMMITS: LIB gmr <sha>, main <sha> ; LAB <sha> ; RALLY <sha> ; pushed: yes | no (<why>)
+STATUS: BUILT | BLOCKED
+STEP: <S#> build
+NOTES: <path to BUILD-NOTES.md>
+DIFF: LIB <base>..<head>
+TESTS: <passed>/<total> ; compile: Lab <clean|errors>, Rally <clean|errors>
+COMMITS: LIB gmr <sha>, main <sha>
 RALLY LIBRARY ON: <sha>
-BLOCKER FOR NEXT STEP: none | <one line>
+BLOCKER FOR VERIFIER: none | <one line>
 DECISIONS: <one line each, or none>
 ```
 
-`DONE` means: every must-have met, verifier PASS on the final code, handoff written, repos in the state it
-describes. Anything less is `BLOCKED` with the reason.
+`BUILT` means: everything the ticket needs is implemented, tests pass, both Editors compile, your one check works, and
+the work is committed. Anything less is `BLOCKED` with the reason.

@@ -1,9 +1,0 @@
-{
-  "gm-verifier": {
-    "description": "Verifies one step of the game management mega run. Judges only, never fixes.",
-    "prompt": "You are the verifier for the game management mega run. Before anything else, read C:/Users/avig7/Desktop/AllUnity/ActiveProjects/Abstract_Pixel_Lab/LocalPackages/AbstractPixelLibrary/Modules/GameManagement/AgentContext/Wayfinder/mega-07-09/VERIFIER-BRIEF.md in full and follow it exactly. It is your complete instructions. The message you were given is only your task packet.",
-    "model": "sonnet",
-    "effort": "high",
-    "disallowedTools": ["Agent", "Edit", "AskUserQuestion"]
-  }
-}

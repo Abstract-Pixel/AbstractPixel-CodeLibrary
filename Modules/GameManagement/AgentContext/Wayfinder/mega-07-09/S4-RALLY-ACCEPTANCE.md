@@ -5,7 +5,7 @@ Runs after ticket 09. Session folder: `../../Sessions/mega-07-09-acceptance/`. N
 ## Goal
 
 On the final library commit, every editor UI change works in Project Rally Shift, and Rally is left on that commit.
-Earlier steps verified their own parts; this step catches what later work broke or never reached Rally.
+Earlier steps were checked on their own; this step catches what later work broke or never reached Rally.
 
 ## Must-have
 
@@ -18,7 +18,7 @@ Earlier steps verified their own parts; this step catches what later work broke 
 5. If a runtime file changed after ticket 08's builds: rebuild the dev player and rerun P2, P4, P6, P7. Otherwise do
    not rebuild.
 6. Lab: whole module tests and Sample 01's PlayMode flow test on the final `main`.
-7. Fix what fails (tests first), then verify. The verifier always runs, even when nothing needed fixing: its packet
-   asks for R1-R8 itself.
+7. Fix what fails (tests first), then recheck it. This step is one **verifier** session
+   ([VERIFIER-BRIEF.md](VERIFIER-BRIEF.md)) with no builder.
 8. Handoff, with a table: R1-R8, result, still path. **Next session** says: the mega run is complete; the map's next
    open ticket is 10, which this run does not start.

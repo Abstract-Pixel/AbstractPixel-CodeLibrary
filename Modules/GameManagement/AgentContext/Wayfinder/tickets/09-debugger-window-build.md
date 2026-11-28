@@ -30,7 +30,12 @@ the text above, this section wins. Session folder: `../../Sessions/09-debugger-w
 - Long names: one line, cut with "…", full name on hover. Colours match the overlay's.
 - The side-by-side effect compare is a nice-to-have.
 
-**Must-have, besides "Done and verified"**
+**Who does what** ([../mega-07-09/MEGA-TICKET.md](../mega-07-09/MEGA-TICKET.md), "Roles"). The **builder** builds
+everything "Done and verified", "Decided in advance" and the list below require, with tests first, and checks the
+feature once ([../mega-07-09/SESSION-BRIEF.md](../mega-07-09/SESSION-BRIEF.md)). Proving the list below, and its
+stills, is the **verifier's** job, not the builder's.
+
+**Verifier's checklist** (must-haves, besides "Done and verified")
 1. The menu entry opens a dockable window. It works opened before, during and after Play, across a recompile, and
    with domain reload off over two Play sessions.
 2. A full journal at the configured size (and the minimum, 8) updates live without lag or lost selection.
