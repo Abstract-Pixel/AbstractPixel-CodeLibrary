@@ -15,7 +15,8 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 - Domain: Unity runtime and editor tooling in AbstractPixelLibrary. Rally Shift is the dogfood project.
 - Skills: prototype for looks; ui-uitk for editor UI; ui-ugui for menus; grilling + domain-modeling for owner
   questions; codebase-design for code shape; unity-pipeline and unity-cli for the Editor.
-- Rules for every session: [../PLAN-OVERVIEW.md](../PLAN-OVERVIEW.md) and [../DEFINITION-OF-DONE.md](../DEFINITION-OF-DONE.md).
+- Rules for single-ticket sessions: [../PLAN-OVERVIEW.md](../PLAN-OVERVIEW.md), [../ENGINEERING-RULES.md](../ENGINEERING-RULES.md)
+  and [../DEFINITION-OF-DONE.md](../DEFINITION-OF-DONE.md). Mega run sessions follow their role brief.
 - Budget plan: `gm-finish`; ticket N is `plan: gm-finish, step N`.
 - **Mega run (06 close-out, then 07-09, unattended):** [mega-07-09/MEGA-TICKET.md](mega-07-09/MEGA-TICKET.md). It
   follows this route and stops before ticket 10. Inside it, its files win over the ticket text and these notes on

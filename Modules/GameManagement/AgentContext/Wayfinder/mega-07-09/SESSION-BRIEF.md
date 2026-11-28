@@ -18,18 +18,21 @@ Nobody can answer you. Never ask a question or end your turn waiting for an answ
 ## Read
 
 1. Your spec (the ticket), the previous handoff's **Next session** section first, then what the spec names.
-2. `LIB/CLAUDE.md`, `LIB/CODING_STANDARDS.md`, `CONTEXT/PLAN-OVERVIEW.md`.
+2. `CONTEXT/ENGINEERING-RULES.md` (code, repos, commits, context limit, check record), `CONTEXT/Tools/TRAPS.md`,
+   `LIB/CLAUDE.md` and `LIB/CODING_STANDARDS.md`.
 3. When you touch Rally: Rally's `CLAUDE.md` and [RALLY-DOGFOOD.md](RALLY-DOGFOOD.md).
 
-Where an older document (`DEFINITION-OF-DONE.md` included) asks you for more checking, this brief wins.
+This brief and ENGINEERING-RULES.md are your whole rule set. Do not read PLAN-OVERVIEW.md (except the parity section
+ENGINEERING-RULES points to), DEFINITION-OF-DONE.md or MEGA-TICKET.md. If a ticket's text asks you for more checking
+than this brief, this brief wins.
 Open source files only as needed. Spawn no agents of any kind.
 
 ## Work, in this order
 
-0. **Preflight.** Both Editors answer (Lab: `unity command editor status`; Rally: `unity command editor_status`).
-   `git status` and branch in all four repos match the previous handoff. If something is broken, fix it first and say so.
-   Create `<session folder>/PROGRESS.md`: one checkbox per step below. Update it before any long operation: it is what
-   survives a stop.
+0. **Preflight.** `bash CONTEXT/Tools/repo_status.sh`. Both Editors answer, and the repos match the previous handoff.
+   If something is broken, fix it first and say so. Create `<session folder>/PROGRESS.md`: one checkbox per step below.
+   Update it before any long operation: it is what survives a stop. If it already has a `## Handover` section, you are
+   continuing: start at its next item.
 1. **Tests first.** Write them and see them fail.
 2. **Just enough code** to make them pass.
 3. **The rest of the code** the ticket needs. The look matches the approved stills and UI-STYLE.md. Reuse before writing.
@@ -38,6 +41,10 @@ Open source files only as needed. Spawn no agents of any kind.
    everything the ticket specifies and you implemented works as intended.
 6. **Fix what breaks**, including evident UI problems such as clipping or overlap. Recheck only what you fixed.
 7. **Commit and hand to the verifier.**
+
+**Your stop point.** "One check" is one pass over the ticket's "Done and verified" list, for what you implemented.
+Record each item in `CHECKS.md`; what you did not check goes in as `UNVERIFIED`. After step 7, report and stop, with
+no further looks in Rally or anywhere else. Anything else you wonder about goes in BUILD-NOTES, "Known gaps".
 
 **Do not do the verifier's job.** No second or third pass; no separate runs per input device, window width or scenario
 beyond what your one check naturally covers; no long-name or stress matrices; no full Rally dogfood, parity runs or
@@ -58,7 +65,8 @@ done or commit Lab or Rally pointers: the verifier does.
 - Never `capture editor_window` on the Lab (it crashes Unity 7 alpha). No Windows or desktop screenshots. Use
   `CONTEXT/Sessions/Session5/capture-tools/` or `InternalEditorUtility.ReadScreenPixel` (wait 5 s after
   foregrounding), and read every still before using it as evidence.
-- `recompile_status` can be stale: the DLL in `Library/ScriptAssemblies` must be newer than your source.
+- Wait for a recompile with `CONTEXT/Tools/wait_compile.sh`, not with repeated status calls. Then read the console.
+- Use the shared tools in `CONTEXT/Tools/` before writing a probe. TRAPS.md lists them.
 - Never close or kill an Editor. Answer every pop-up yourself (below).
 - Long jobs (builds, scenario batches): start in the background and wait with foreground waits under 10 minutes each.
   **Never end your turn while a job is running**; your process exits with your turn.
@@ -104,7 +112,9 @@ system setting. Log each pop-up in PROGRESS.md (project, text, button, result) a
 
 ## Build notes: `<session folder>/BUILD-NOTES.md`
 
-For the verifier. Keep it under 60 lines.
+For the verifier. Keep it under 60 lines. "Repo and Editor state" holds the real output of `repo_status.sh` (`.meta`
+lines may be left out), with a reason for every uncommitted path in all four repos. No path in your notes or in a
+saved tool may point at a scratchpad.
 
 ```markdown
 # <step> build notes
@@ -120,7 +130,7 @@ For the verifier. Keep it under 60 lines.
 ## Report (your last message, nothing after it)
 
 ```text
-STATUS: BUILT | BLOCKED
+STATUS: BUILT | CONTINUE | BLOCKED
 STEP: <S#> build
 NOTES: <path to BUILD-NOTES.md>
 DIFF: LIB <base>..<head>
@@ -132,4 +142,5 @@ DECISIONS: <one line each, or none>
 ```
 
 `BUILT` means: everything the ticket needs is implemented, tests pass, both Editors compile, your one check works, and
-the work is committed. Anything less is `BLOCKED` with the reason.
+the work is committed. `CONTINUE` means you reached the context limit and wrote the handover (ENGINEERING-RULES.md,
+"Context limit"). Anything else short of `BUILT` is `BLOCKED` with the reason.

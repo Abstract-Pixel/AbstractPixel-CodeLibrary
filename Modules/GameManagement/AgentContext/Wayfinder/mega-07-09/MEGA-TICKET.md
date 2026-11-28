@@ -4,6 +4,11 @@ Type: orchestration. Covers map tickets 07, 08 and 09, after closing 06 (07 is b
 Written 2026-11-28. **This file is for the chief of staff only.** Nested sessions read
 [SESSION-BRIEF.md](SESSION-BRIEF.md); verifiers read [VERIFIER-BRIEF.md](VERIFIER-BRIEF.md).
 
+> **Rules changed 2026-11-28, partway through the run.** Re-read this file and your brief before the next launch.
+> S2's builder finished before `CHECKS.md` and `repo_status.sh` existed and already passed its gate: do not send it
+> back. S2's Part A creates `CHECKS.md` (BUILD-NOTES claims start as `UNVERIFIED`) and accounts for Rally's
+> uncommitted `DebuggerOverlayPanel.asset`.
+
 ## Goal
 
 One run, from start to a finished Game State Debugger window build, with every UI working in Project Rally Shift.
@@ -33,9 +38,11 @@ the owner.
 |---|---|---|---|
 | Chief of staff (orchestrator) | The desktop Code session the owner starts in the Lab | Sonnet | Medium |
 | Builder (one per step) | Its own session, started by the chief | Sonnet | Medium |
-| Verifier (one per step) | Its own session, started by the chief after the builder reports | Sonnet | High |
+| Verifier Part A, test (one per step) | Its own session, started by the chief after the builder reports | Sonnet | High |
+| Verifier Part B, close (one per step) | Its own session, started after Part A's gate | Sonnet | High |
 
-**Builder and verifier are separate sessions** (owner, 2026-11-28). One session doing both filled its context, which
+**Builder and verifier are separate sessions** (owner, 2026-11-28). The verifier is split in two, Part A (test and
+fix) and Part B (code review and close), so neither carries the other's context. One session doing both filled its context, which
 made it slower and likelier to miss things. S1 spent most of about 2 hours checking its own work.
 
 | Builder ([SESSION-BRIEF.md](SESSION-BRIEF.md)) | Verifier ([VERIFIER-BRIEF.md](VERIFIER-BRIEF.md)) |
@@ -53,15 +60,17 @@ made it slower and likelier to miss things. S1 spent most of about 2 hours check
   One exception: if an Editor is blocked by a pop-up while no session is running (preflight, gate, between launches),
   the chief clears it by [SESSION-BRIEF.md](SESSION-BRIEF.md), "Pop-ups". While a session runs, its pop-ups are its own.
 - Never add the ticket's check list or other thorough checks to a builder's prompt.
-- **S4** is checking only: it is one verifier session, with no builder.
+- **S4** is checking only, with no builder: Part A, then Part B without a ticket close.
+- **A session that reports `STATUS: CONTINUE`** reached the context limit. Check that its handover exists, then start a
+  fresh session of the same role and part, with `Continues: <progress file>` in its prompt. This is not a failure.
 - **Owner exceptions:** S0 and S1 ran with no verifier. Both skips apply only to those steps.
 - **Communication:** chief to session = the launch or resume prompt. Session to chief = its final STATUS block.
-  Session to session = `BUILD-NOTES.md` and handoffs only. Sessions never run in parallel (one agent drives the
+  Session to session = `CHECKS.md`, `BUILD-NOTES.md`, progress files, `VERIFY-1.md` and handoffs only. Sessions never run in parallel (one agent drives the
   Editors).
 
-**Visible sessions first** (owner, 2026-11-28): start each session with `start_session` (`user_asked`, `fresh`,
+**Visible sessions** (owner, 2026-11-28): start each session with `start_session` (`user_asked`, `fresh`,
 `use_worktree` false, model Sonnet 5.5, effort as above, permission mode `auto`, `wake_when_done` true), so the owner
-can open and message it. If the app refuses, tell the owner and use the headless "Mechanism" below. Never use the
+can open and message it. If the app refuses, tell the owner and use [HEADLESS-FALLBACK.md](HEADLESS-FALLBACK.md). Never use the
 `Agent` tool or workflows for builder or verifier sessions.
 
 ## Paths
@@ -130,7 +139,7 @@ Stop with a final report if a **stop** row fails.
 |---|---|---|---|
 | 1 | Chief's model, effort, mode | `get_session` `self`: Sonnet, `medium`, `auto` | Record in the ledger, continue (it cannot change itself) |
 | 2 | CLI | `claude --version` (verified on 2.1.329) | stop |
-| 3 | Both Editors answer | `unity command editor_status` from LAB and from RALLY | Try `unity open <project>` (unity-cli skill) once; else stop |
+| 3 | Both Editors answer | `bash <CONTEXT>/Tools/repo_status.sh` | Try `unity open <project>` (unity-cli skill) once; else stop |
 | 4 | Plan limits | `get_usage` | Apply "Usage limits" |
 | 5 | Owner's files | Save `git status --porcelain` and a hash of every modified or untracked file in LAB, LIB, RALLY, RALLY LIB to `LOGS\start-state.txt` | stop |
 
@@ -151,39 +160,10 @@ Each cap and percentage covers a whole step. For the headless fallback give the 
 The caps and percentages are estimates, not limits on the work. Record real numbers in the ledger and correct later
 caps from them. Run the steps in order; start one only after the previous step passes the gate.
 
-## Mechanism
+## Effort check
 
-The headless fallback. All commands run in the chief's Bash tool (Git Bash) from LAB.
-
-**Launch.** `mkdir -p Logs/mega-07-09` once. Write the prompt to `LOGS\<step>.prompt.md`. Make a UUID, write it to the ledger first, then run this with
-`run_in_background: true` (the app wakes the chief when it exits; do not poll):
-
-```bash
-# EFFORT: medium for a builder, high for a verifier
-claude -p --model sonnet --effort "$EFFORT" --permission-mode auto \
-  --disallowedTools AskUserQuestion Agent \
-  --add-dir "C:/Users/avig7/Desktop/AllUnity/ActiveProjects/ProjectRallyShift" \
-  --session-id "$SESSION_ID" \
-  --max-budget-usd "$CAP" \
-  --output-format json < "Logs/mega-07-09/$STEP.prompt.md" > "Logs/mega-07-09/$STEP.$N.json" 2> "Logs/mega-07-09/$STEP.$N.err"
-```
-
-**Resume** (extension, follow-up or gate failure): the same command with `--resume "$SESSION_ID"` in place of
-`--session-id`, a new `$N`, and a short prompt on stdin. Pass every other flag again; they are not remembered by
-design. Never use `--dangerously-skip-permissions` or `bypassPermissions`.
-
-**Read the result.** From the JSON take only `subtype`, `is_error`, `result`, `total_cost_usd`, `permission_denials`.
-(If the file holds a list, use its last item.) `total_cost_usd` is cumulative for the session across resumes.
-
-| `subtype` | Meaning | Action |
-|---|---|---|
-| `success` | The session ended its turn | Read the STATUS block, then run the gate |
-| `error_max_budget_usd` | Cap reached | "Budgets" |
-| anything else, or no JSON | Crash, kill or usage limit | Read the `.err` file; handle limits per "Usage limits"; else resume once. A second identical failure: new session for the same step |
-
-**Effort audit** (after every headless step). In the result JSON, `modelUsage` lists no model but Sonnet 5.5. In the
-transcript, count assistant messages only (model and `perTurnEffort`): builder Medium, verifier High. No subagents.
-For a visible session, check its model and effort with `get_session`. Sessions never call the advisor tool.
+For every session, check its model and effort with `get_session`: builder Sonnet Medium, both verifier parts Sonnet
+High. No subagents. Sessions never call the advisor tool.
 
 ## Session prompt template
 
@@ -191,26 +171,32 @@ Keep it this short. The session reads the files itself.
 
 ```text
 You are the <builder | verifier> session for step <S#> of the game management mega ticket.
-Read, in order: <RUN>/<SESSION-BRIEF.md | VERIFIER-BRIEF.md>, then <spec file> (for a ticket, all of it; its "Mega run" section wins).
+Read, in order: <RUN>/<SESSION-BRIEF.md | VERIFIER-BRIEF.md, part A or B>, then <spec file> (for a ticket, all of it; its "Mega run" section wins).
 Previous handoff: <path, or "none">.
 Session folder: <path>. Report with the STATUS block from your brief.
+<only for a continuation: Continues: path to the progress file>
 <only if needed: facts from the chief, three lines at most>
 ```
 
-A verifier prompt adds the diff: `LIB <base>..<head> ; RALLY <sha>`, taken from the builder's STATUS block.
+Both verifier parts' prompts add the diff (Part B's runs to Part A's last commit): `LIB <base>..<head> ; RALLY <sha>`, taken from the builder's STATUS block.
 
 ## Gate between sessions (chief)
 
 Check by file and git output, not by trusting the report.
 
-**Builder to verifier:** STATUS is `BUILT`; `BUILD-NOTES.md` exists; LIB has no uncommitted code of this step; RALLY
+**Builder to Part A:** STATUS is `BUILT`; `BUILD-NOTES.md` and `CHECKS.md` exist; the notes explain every
+uncommitted path that `repo_status.sh` shows; LIB has no uncommitted code of this step; RALLY
 LIB is on the commit the report names; both Editors answer, not compiling, not blocked.
 
+**Part A to Part B:** STATUS is `TESTED`; `CHECKS.md` has no `NOT CHECKED` row for a must-have; `VERIFY-1.md` lists
+the passes; fixes are committed.
+
 **Step to next step**, all must hold:
-1. The verifier's STATUS is `DONE` and `NEXT SESSION CAN START: yes`.
+1. Part B's STATUS is `DONE` and `NEXT SESSION CAN START: yes`.
 2. `HANDOFF.md` in the session folder has every heading in the verifier brief's template, including **Next session**.
 3. `VERIFY-1.md` ends with `VERDICT: PASS`, and no later commit changed code (docs, pointer or map commits only).
-4. Effort audit passes.
+4. The effort check passes, and `check_stale.sh` on the step's `CHECKS.md` shows no must-have row left `STALE`
+   without a rerun.
 5. LIB is on `main` with no uncommitted change of this step; RALLY LIB is on `game-management-rework` at the commit
    the handoff names, and `SaveableAttribute.cs` exists in it.
 6. Files in `start-state.txt` (LOGS) that the handoff does not list as changed on purpose still have the same hash.

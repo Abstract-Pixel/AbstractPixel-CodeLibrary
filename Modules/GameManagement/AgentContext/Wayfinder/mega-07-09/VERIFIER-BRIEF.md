@@ -7,14 +7,32 @@ before the next session builds on this work. Assume it is broken until you have 
 
 You are your own session with a fresh context, started by the chief of staff. Changed 2026-11-28 by the owner.
 
+## Your part
+
+Verification runs as two sessions, one after the other. Your launch prompt names your part. Do only that part.
+
+| Part | Does | Sections | Ends with |
+|---|---|---|---|
+| **A: test** | State, compile, tests, thorough use, fixes | 1, 2, 3 | `STATUS: TESTED` |
+| **B: close** | Code review, fixes, rerun of what is stale, ticket close, handoff | 4, 5 | `STATUS: DONE` |
+
+Part A writes VERIFY-1.md's "Passes", "Found and fixed" and "Still open", without a verdict. Part B does not repeat
+Part A's passes: it trusts Part A's `PASS` rows in `CHECKS.md` unless `check_stale.sh` or ENGINEERING-RULES.md says
+otherwise. It adds "Code review", completes the file and gives the verdict.
+
 ## Read
 
 1. Your spec: all of it. Its "Mega run" section wins, and its must-have list is **your** checklist.
 2. `<session folder>/BUILD-NOTES.md`, then the previous handoff's **Next session** section.
 3. [SESSION-BRIEF.md](SESSION-BRIEF.md), sections "Never ask" and "Editor rules" (pop-ups included) only.
-4. The spec's "Read first" design sources that define behaviour and look, `LIB/CODING_STANDARDS.md`, `LIB/CLAUDE.md`,
-   `CONTEXT/DEFINITION-OF-DONE.md`, the changed files. For Rally: Rally's `CLAUDE.md` and
-   [RALLY-DOGFOOD.md](RALLY-DOGFOOD.md), including its save, Steam and owner-file rules.
+4. `CONTEXT/ENGINEERING-RULES.md` (code, repos, commits, context limit, check record), `CONTEXT/Tools/TRAPS.md`,
+   `LIB/CODING_STANDARDS.md`, `LIB/CLAUDE.md`, the spec's "Read first" design sources that define behaviour and look,
+   and the changed files. For Rally: Rally's `CLAUDE.md` and [RALLY-DOGFOOD.md](RALLY-DOGFOOD.md), including its save,
+   Steam and owner-file rules.
+5. `<session folder>/CHECKS.md`, and in Part B also `VERIFY-1.md`.
+
+This brief and ENGINEERING-RULES.md are your whole rule set. Do not read PLAN-OVERVIEW.md (except the parity section
+ENGINEERING-RULES points to), DEFINITION-OF-DONE.md or MEGA-TICKET.md.
 
 No subagents. Open other files only as needed. Do not read session history or other tickets.
 
@@ -22,10 +40,17 @@ No subagents. Open other files only as needed. Do not read session history or ot
 
 - Your scope is the spec, the builder's diff, and what that diff can break. Nothing else.
 - Treat BUILD-NOTES as claims. Behaviour and looks you always see yourself.
-- Keep `<session folder>/PROGRESS-VERIFY.md` (one row per check, ticked as you go). It is what survives a stop.
+- Keep `<session folder>/PROGRESS-VERIFY.md` (your pass list, open findings and any handover) and record every check
+  in `<session folder>/CHECKS.md` as you go. Together they are what survives a stop.
+- A `VALID` `PASS` row in the same Unity version is not rerun, including the builder's rows that used real or
+  simulated-device input. A row from a code call does not count as a check of what a user does.
 - No style opinions, redesigns or features beyond the spec and the standards.
 
 ## 1. State, compile, tests
+
+Start with `bash CONTEXT/Tools/repo_status.sh`. Hash the owner's uncommitted files before you change anything; they
+must match at the end. Calling a method or invoking a button is not a user check: look at what the user sees (menus,
+time scale, cursor) and record which input each check used.
 
 Lab library `HEAD` matches the builder's commit. Code is on `game-management-rework`, merged into `main`, never the
 reverse. Rally's library is on the stated commit. No unintended asset churn in the diff (sample catalogs,
@@ -72,7 +97,8 @@ Cover every must-have end to end. Then these, where they apply:
 - Measure element bounds while resizing live in both directions. Do not judge alignment by eye only.
 - At a glance: can you tell what matters, what is wrong and what to click?
 
-**Rally.** Every editor UI and feature in the spec exists and works in Rally on the stated commit
+**Rally.** Before any "works in Rally" result, the library is on the stated commit and its DLL is newer than the
+source. Every editor UI and feature in the spec exists and works in Rally on the stated commit
 (RALLY-DOGFOOD.md). "It works in the Lab" is not a Rally result. Rally's data and the owner's uncommitted files stay
 unchanged except as listed.
 
@@ -80,7 +106,8 @@ unchanged except as listed.
 
 You fix it. Reproduce, add a failing test when it is logic, fix, rerun that check and what the fix touched. Commit per
 SESSION-BRIEF "Commit". Do not downgrade a finding to avoid fixing it, and do not invent one to seem thorough. A check
-that already passed is not repeated unless a later change touched what it covers. If a test setup fails twice, change
+that already passed is not repeated unless `check_stale.sh` or ENGINEERING-RULES.md says it is stale. Part B reruns
+stale rows after its own fixes, including Part A's. If a test setup fails twice, change
 the method or record the check as not done.
 
 ## 4. Code review (changed files, against the standards)
@@ -98,9 +125,12 @@ Fix what the review finds, then compile and run the tests again.
 
 ## 5. Close the ticket
 
-Only when every must-have passes and no finding is open:
+Part B only, and only when no finding is open and every must-have has a `VALID` `PASS` row (or
+`NOT POSSIBLE UNATTENDED` where allowed below). First run the "Always rerun at ticket close" checks in
+ENGINEERING-RULES.md. Then:
 1. Clean up temp assets and probes; restore settings and Play state.
-2. Remove the verified UI's prototype menu entry and window class (DEFINITION-OF-DONE, last section; keep USS/UXML).
+2. Remove the verified UI's prototype menu entry and window class (Lab `Assets/GameManagementUIPrototype/Editor/`; keep USS/UXML, because
+   UI-STYLE.md points to them).
    Recompile the Lab clean. Leave that Lab change uncommitted.
 3. Push the library branches (tests green), keep Rally's library on the final `game-management-rework` commit and
    **leave it there**, and commit the Lab and Rally submodule pointers only. A denied push is recorded.
@@ -121,8 +151,7 @@ must-have means `BLOCKED`.
 ```markdown
 # Verify <step>, final commit <sha>
 ## Passes        (how many, why, what each tried)
-## Checks
-| Id | Check | Result (PASS/FAIL/NOT POSSIBLE UNATTENDED/NOT CHECKED) | Evidence |
+## Checks        (rows live in CHECKS.md; give the count by result)
 ## Found and fixed
 | Id | What | How reproduced | Fix commit | Rechecked |
 ## Code review
@@ -151,11 +180,12 @@ files and commits it needs; anything half-set-up. It must make sense to someone 
 
 ## Report (your last message, nothing after it)
 
-It tells the chief whether the next session can start.
+It tells the chief whether the next session can start. Part A writes "Part B" for `HANDOFF` and
+`NEXT SESSION CAN START`. `CONTINUE` means you reached the context limit and wrote the handover.
 
 ```text
-STATUS: DONE | BLOCKED
-STEP: <S#> verify
+STATUS: TESTED | DONE | CONTINUE | BLOCKED
+STEP: <S#> verify, part <A|B>
 HANDOFF: <path>
 VERIFY: <passes> passes, VERDICT: PASS | FAIL (<path>)
 FIXED: <count>, one line each
