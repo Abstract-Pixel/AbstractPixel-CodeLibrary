@@ -7,7 +7,8 @@ namespace AbstractPixel.GameManagement.Editor
         ParentLoop,
         EmptyParentSlot,
         SameParentTwice,
-        MissingParents
+        MissingParents,
+        NotInList
     }
 
     /// <summary>One thing wrong in the state list, with the words for its help box and its fix button.</summary>

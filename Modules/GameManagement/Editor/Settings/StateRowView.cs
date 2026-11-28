@@ -81,18 +81,7 @@ namespace AbstractPixel.GameManagement.Editor
 
         public void AddProblem(StateProblem _problem, Action _fix)
         {
-            HelpBox box = new HelpBox(_problem.Message, _problem.IsError ? HelpBoxMessageType.Error : HelpBoxMessageType.Warning);
-            box.AddToClassList("gm-problem");
-            VisualElement actions = new VisualElement();
-            actions.AddToClassList("gm-help-actions");
-            Button fix = EditorUI.Button(_problem.FixLabel, _problem.FixTooltip, _fix);
-            fix.AddToClassList("gm-fix-button");
-            actions.Add(fix);
-            Button learnMore = EditorUI.Button("Learn more", "Opens the Game Management read-me", GameManagementSettingsProvider.OpenReadMe);
-            learnMore.AddToClassList("gm-link");
-            actions.Add(learnMore);
-            box.Add(actions);
-            Add(box);
+            Add(StateProblemBox.Create(_problem, _fix));
         }
     }
 }

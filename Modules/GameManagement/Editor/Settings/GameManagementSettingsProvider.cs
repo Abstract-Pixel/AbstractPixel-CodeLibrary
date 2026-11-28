@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using AbstractPixel.Core.Editor.UI;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -268,6 +269,9 @@ namespace AbstractPixel.GameManagement.Editor
                 return;
             }
             body.Add(stateList.Build(_settings, problems));
+            StateAssetWatcher watcher = new StateAssetWatcher(QueueRebuild);
+            body.Add(watcher);
+            watcher.Watch(catalog.States.Cast<Object>().Append(catalog));
             body.Add(Hint("NOTE: To change what a state does, select it and edit it in the Inspector."));
         }
 
