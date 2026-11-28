@@ -57,23 +57,34 @@ namespace AbstractPixel.GameManagement.Editor
             return _kind == OnboardingMenuKind.MainMenu || _kind == OnboardingMenuKind.Pause;
         }
 
+        /// <summary>The name without spaces, dashes or capitals, so "MainMenu" and "Main menu" count as the same state name.
+        /// Projects name their states their own way, and a run later must still know which menus they already have.</summary>
+        public static string Normalize(string _name)
+        {
+            if (string.IsNullOrEmpty(_name))
+            {
+                return "";
+            }
+            return _name.Replace(" ", "").Replace("_", "").Replace("-", "").ToLowerInvariant();
+        }
+
         /// <summary>Where a state sits in the list; lower is higher up, so it wins. Sub-states sit above their parents.
         /// Names the setup window does not know have no rank (-1).</summary>
         public static int ListRank(string _stateName)
         {
-            switch (_stateName)
+            switch (Normalize(_stateName))
             {
-                case "Game Win":
+                case "gamewin":
                     return 0;
-                case "Game Over":
+                case "gameover":
                     return 1;
-                case SettingsStateName:
+                case "settings":
                     return 2;
-                case "Pause":
+                case "pause":
                     return 3;
-                case PlayStateName:
+                case "play":
                     return 4;
-                case "Main Menu":
+                case "mainmenu":
                     return 5;
                 default:
                     return -1;

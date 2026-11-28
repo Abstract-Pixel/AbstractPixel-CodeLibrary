@@ -20,12 +20,13 @@ namespace AbstractPixel.GameManagement.Editor
             result = _result;
         }
 
-        /// <summary>The listed state with exactly this name, or null.</summary>
+        /// <summary>The listed state with this name (spacing and capitals ignored), or null.</summary>
         internal static StateSO FindListed(GameStateCatalog _catalog, string _name)
         {
+            string wanted = OnboardingMenuInfo.Normalize(_name);
             foreach (StateSO state in _catalog.States)
             {
-                if (state != null && state.name == _name)
+                if (state != null && OnboardingMenuInfo.Normalize(state.name) == wanted)
                 {
                     return state;
                 }
