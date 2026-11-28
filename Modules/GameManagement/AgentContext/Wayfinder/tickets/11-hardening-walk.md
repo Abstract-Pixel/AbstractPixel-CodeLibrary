@@ -20,3 +20,9 @@ Earlier tickets do only a basic real-use check (CODING_STANDARDS.md); deliberate
 
 - Every bug found gets a failing test first, then the fix.
 - The handoff lists what was walked and the result of each.
+
+## From ticket 04
+
+- Unity 6.7.0b4 compiles the library with 0 errors but 25 warnings, none in GameManagement: UAC1002 x10, UAC1009 x2, UAC1015 x4 (serialization rules; check saved data before changing Settings types), CS0618 x8 (deprecated Find calls; keep 6.3 compiling), CS0414 x1. Clear them or record why not.
+- Without BroAudio the GameManagement and Settings assemblies are skipped whole, and their samples and tests then fail with CS0246. The library CLAUDE.md asks for a clean compile plus one error naming the missing package.
+- Detail: `../../Sessions/04-stability-gate/HANDOFF.md`.

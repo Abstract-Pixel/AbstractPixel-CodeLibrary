@@ -25,7 +25,7 @@ runtime debugger, in-Editor docs, Rally migrated with every flow matching today'
 | 01 | [Onboarding window look (7A-look)](tickets/01-onboarding-look.md) | prototype, HITL | none | done |
 | 02 | [Debugger overlay look (8A-look)](tickets/02-debugger-overlay-look.md) | prototype, HITL | 01 | done |
 | 03 | [Game State Debugger window look (8B-look)](tickets/03-debugger-window-look.md) | prototype, HITL | 02 | done |
-| 04 | [Stability gate before any build](tickets/04-stability-gate.md) | task | none (before 05) | open |
+| 04 | [Stability gate before any build](tickets/04-stability-gate.md) | task | none (before 05) | done |
 | 05 | [Project Settings page build (6A-build)](tickets/05-settings-page-build.md) | implement | 01-04 | open |
 | 06 | [State inspector and drawer build (6B-build)](tickets/06-state-inspector-build.md) | implement | 05 | open |
 | 07 | [Onboarding window build (7A-build)](tickets/07-onboarding-build.md) | implement | 06 | open |
@@ -67,6 +67,9 @@ ticket's goal or the order here is the owner's call.
   assets) built at the owner's request, beyond the ticket's look-only scope; style rules added to UI-STYLE.md. Ticket
   09 (build) still needs real journal data, real click-to-navigate targets and a real per-row changed-fields model
   for the footer.
+- [Ticket 04 stability gate](../Sessions/04-stability-gate/HANDOFF.md): green in Rally and the Lab, 0 errors on Unity
+  6.7 (25 warnings outside GameManagement, carried to ticket 11). Code on `game-management-rework` merged into `main`,
+  docs on `main`; push per ticket.
 
 ## Not yet specified
 

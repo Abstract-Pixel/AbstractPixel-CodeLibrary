@@ -68,7 +68,7 @@ crammed onto one line, including `if`. Full detail: `CODING_STANDARDS.md`.
 
 ## Git
 
-- Commit only what your task changed: stage by path, one commit per task, with the task ID first in the message. Never push.
+- Commit only what your task changed: stage by path, one commit per task, with the task ID first in the message. Never push, except when a ticket closes and its tests pass: then push the library branches it changed.
 - Never stage `Modules/InputRebinding/Rebinding UI/Icons/*.png.meta`.
 - Library commits go in this repo. The Lab never commits library files. Rally commits only the new submodule pointer.
 - After a Play session, revert churn you didn't mean to make, such as a `SceneSystemSettings.asset` rewrite or font assets.

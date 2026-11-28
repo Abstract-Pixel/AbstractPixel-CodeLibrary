@@ -58,8 +58,9 @@ soft-locks. Compare with `Parity/baseline/` (see `Parity/README.md`).
   Sample 01's PlayMode flow test there for every ticket that changes code. Keep the owner's uncommitted
   `Core/Runtime/SuperLogger/DebugDataBase.asset`. In the Lab, commit only the submodule pointer, by path.
 - **Commits.** One commit per task, staged by path, task ID first (`T05: …`). Check `git branch --show-current` before
-  every library commit (see the owner's branch rules). Branch and push rules are settled in ticket 04; until then,
-  don't push. Never commit the owner's unrelated changes or `Modules/InputRebinding/Rebinding UI/Icons/*.png.meta`.
+  every library commit. Game management code goes on `game-management-rework` and is merged into `main`, never the other
+  way; docs and the map go on `main` only. When a ticket closes and its tests pass, push the library branches it
+  changed (DECISIONS.md, 2026-11-28). Never commit the owner's unrelated changes or `Modules/InputRebinding/Rebinding UI/Icons/*.png.meta`.
   The UI prototype in the Lab (`Assets/GameManagementUIPrototype/`) stays untracked and is never deleted.
 - **Handoff.** Every ticket ends with `Sessions/<ticket id>/HANDOFF.md`: what changed and why, how it affects a
   developer using the module, what was not done, findings, budget used and whether a warning fired. Then mark the

@@ -118,3 +118,8 @@ Full answers (Q1-Q25): [Sessions/Session5/GRILL-RESULTS.md](Sessions/Session5/GR
 - **Onboarding is the one place that asks which states and menus exist.** Each menu row chooses "Copy the library's menu" or "Use my own" (extra setup, Learn more). The Settings page's empty States card links to it.
 - **Setup windows get a system pill header** under the Abstract Pixel logo ("Game Management"; the scene setup window gets "Scene System").
 - Requesters and Reactors keep stock inspectors; one shared state field drawer flags states not in the list.
+
+## 2026-11-28 (ticket 04): branches and push
+
+- **Branch:** game management code is committed on `game-management-rework` and merged into `main`, never the other way. Docs and the Wayfinder map are committed on `main` only. Code that exists only on `main` (save system v2) is committed on `main`.
+- **Push:** push per ticket. A closed ticket whose tests pass pushes the library branches it changed. Nothing else pushes. This replaces "never push" in the library CLAUDE.md.
