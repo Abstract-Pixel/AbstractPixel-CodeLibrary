@@ -16,23 +16,61 @@ namespace AbstractPixel.GameManagement.Editor
             GameManagementSettingsSource.EditorLookup = Find;
         }
 
-        /// <summary>The settings in Preloaded Assets if any (the project's choice), otherwise the first found by type.</summary>
+        /// <summary>The project's settings if it has any, otherwise whatever settings exist in a package (a sample's). A project's own
+        /// settings always win over a package's. Read-only for a package one: check <see cref="IsProjectPath"/> before writing.</summary>
         public static GameManagementSettings Find()
+        {
+            GameManagementSettings project = FindProjectSettings();
+            if (project != null)
+            {
+                return project;
+            }
+            return FindInPreloadedOrAnywhere(false);
+        }
+
+        /// <summary>The settings inside this project's Assets folder: the one in Preloaded Assets if any, otherwise the first found by
+        /// type. Null when the project has none, even if a package ships some.</summary>
+        public static GameManagementSettings FindProjectSettings()
+        {
+            return FindInPreloadedOrAnywhere(true);
+        }
+
+        private static GameManagementSettings FindInPreloadedOrAnywhere(bool _projectOnly)
         {
             foreach (Object item in PlayerSettings.GetPreloadedAssets())
             {
-                if (item is GameManagementSettings preloaded)
+                if (item is GameManagementSettings preloaded && IsWanted(preloaded, _projectOnly))
                 {
                     return preloaded;
                 }
             }
 
-            string[] guids = AssetDatabase.FindAssets("t:" + nameof(GameManagementSettings));
-            if (guids.Length == 0)
+            foreach (string guid in AssetDatabase.FindAssets("t:" + nameof(GameManagementSettings)))
             {
-                return null;
+                GameManagementSettings found = AssetDatabase.LoadAssetAtPath<GameManagementSettings>(AssetDatabase.GUIDToAssetPath(guid));
+                if (found != null && IsWanted(found, _projectOnly))
+                {
+                    return found;
+                }
             }
-            return AssetDatabase.LoadAssetAtPath<GameManagementSettings>(AssetDatabase.GUIDToAssetPath(guids[0]));
+            return null;
+        }
+
+        private static bool IsWanted(GameManagementSettings _settings, bool _projectOnly)
+        {
+            return !_projectOnly || IsProjectPath(AssetDatabase.GetAssetPath(_settings));
+        }
+
+        /// <summary>True for a path inside this project's Assets folder. Anything else (a package) is not the project's to edit.</summary>
+        public static bool IsProjectPath(string _path)
+        {
+            return _path == "Assets" || (_path != null && _path.StartsWith("Assets/"));
+        }
+
+        /// <summary>True when these settings live outside Assets, for example a sample's inside the library package.</summary>
+        public static bool IsPackageAsset(GameManagementSettings _settings)
+        {
+            return _settings != null && !IsProjectPath(AssetDatabase.GetAssetPath(_settings));
         }
 
         /// <summary>True when builds will load these settings.</summary>

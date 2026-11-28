@@ -1,4 +1,5 @@
 using UnityEditor;
+using UnityEngine;
 
 namespace AbstractPixel.GameManagement.Editor
 {
@@ -8,6 +9,10 @@ namespace AbstractPixel.GameManagement.Editor
         /// <summary>Adds a state at the page's end (the lowest priority). A listed state is left where it is.</summary>
         public static void Add(GameStateCatalog _catalog, StateSO _state)
         {
+            if (!CanWrite(_catalog))
+            {
+                return;
+            }
             if (_state == null || _catalog.Contains(_state))
             {
                 return;
@@ -19,6 +24,10 @@ namespace AbstractPixel.GameManagement.Editor
 
         public static void RemoveAt(GameStateCatalog _catalog, int _index)
         {
+            if (!CanWrite(_catalog))
+            {
+                return;
+            }
             Undo.RecordObject(_catalog, "Remove state from list");
             _catalog.States.RemoveAt(_index);
             Save(_catalog);
@@ -27,7 +36,7 @@ namespace AbstractPixel.GameManagement.Editor
         /// <summary>Puts the state at one catalog position into another.</summary>
         public static void Move(GameStateCatalog _catalog, int _from, int _to)
         {
-            if (_from == _to)
+            if (!CanWrite(_catalog) || _from == _to)
             {
                 return;
             }
@@ -40,9 +49,25 @@ namespace AbstractPixel.GameManagement.Editor
 
         public static void Replace(GameStateCatalog _catalog, int _index, StateSO _state)
         {
+            if (!CanWrite(_catalog))
+            {
+                return;
+            }
             Undo.RecordObject(_catalog, "Change listed state");
             _catalog.States[_index] = _state;
             Save(_catalog);
+        }
+
+        /// <summary>False for a state list inside a package (a sample's): the library's own assets are never written to from a project.</summary>
+        public static bool CanWrite(GameStateCatalog _catalog)
+        {
+            string path = AssetDatabase.GetAssetPath(_catalog);
+            if (path != null && path.StartsWith("Packages/"))
+            {
+                Debug.LogWarning("[Game management] The state list '" + _catalog.name + "' is inside a package, so it is read-only. Create settings of your own in Project Settings > Abstract Pixel > Game Management first.", _catalog);
+                return false;
+            }
+            return true;
         }
 
         /// <summary>The rank number the page shows beside a main state or an empty row. Messages use it, because the

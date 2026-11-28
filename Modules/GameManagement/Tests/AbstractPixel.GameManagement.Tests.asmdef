@@ -3,8 +3,10 @@
     "rootNamespace": "AbstractPixel.GameManagement.Tests",
     "references": [
         "AbstractPixel.GameManagement",
+        "AbstractPixel.Core",
         "AbstractPixel.GameManagement.Editor",
         "Unity.InputSystem",
+        "UnityEngine.UI",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

@@ -1,0 +1,107 @@
+/* Look of the Game Management setup window (approved in Session 7A-look, see UI-STYLE.md "Onboarding window"). */
+:root {
+    --gm-green: rgb(77, 191, 92);
+    --gm-yellow: rgb(245, 189, 48);
+    --gm-red: rgb(227, 74, 61);
+    --gm-blue: rgb(43, 133, 235);
+    --gm-card: rgba(0, 0, 0, 0.14);
+    --gm-muted: rgba(210, 210, 210, 0.62);
+}
+.gm-root { flex-grow: 1; padding: 8px 12px 12px 12px; background-color: var(--unity-colors-window-background); color: var(--unity-colors-default-text); }
+.gm-muted { color: var(--gm-muted); -unity-font-style: normal; }
+.gm-hint { font-size: 11px; color: var(--gm-muted); margin-top: 4px; white-space: normal; }
+.gm-bold { -unity-font-style: bold; }
+.gm-link { color: var(--unity-colors-link-text); }
+.gm-hidden { display: none; }
+.gm-card { background-color: var(--gm-card); border-width: 1px; border-color: var(--unity-colors-default-border); border-radius: 5px; padding: 8px 10px; }
+.gm-status { flex-direction: row; align-items: center; }
+.gm-dot { width: 10px; height: 10px; border-radius: 5px; margin-right: 6px; background-color: var(--gm-muted); }
+.gm-dot-green { background-color: var(--gm-green); }
+.gm-dot-yellow { background-color: var(--gm-yellow); }
+.gm-dot-red { background-color: var(--gm-red); }
+.gm-row { flex-direction: row; align-items: center; margin-top: 2px; }
+.gm-row > .unity-base-field { flex-grow: 1; flex-shrink: 1; min-width: 0; margin: 0; overflow: hidden; }
+.gm-row > Button { margin: 0 0 0 4px; }
+.gm-primary-button { background-color: rgb(69, 89, 115); border-color: rgb(49, 70, 94); -unity-font-style: bold; }
+.gm-radio-row .unity-radio-button-group__container { flex-direction: row; flex-grow: 1; flex-wrap: wrap; }
+.gm-radio-row .unity-radio-button { flex-grow: 1; }
+
+.gm-onboarding { padding: 0 0 14px 0; }
+.gm-onboarding-scroll { flex-grow: 1; padding: 10px 6% 0 6%; }
+/* everything below a separator stays capped and centered; the separators themselves span the full window width */
+.gm-content-inner { max-width: 640px; width: 100%; align-self: center; }
+.gm-footer-inner { flex-direction: row; align-items: center; padding-left: 6%; padding-right: 6%; max-width: 640px; width: 100%; align-self: center; }
+.gm-logo-row { align-items: center; margin-top: 6px; }
+.gm-logo { width: 160px; max-width: 100%; height: 36px; -unity-background-scale-mode: scale-to-fit; }
+.gm-logo-welcome { width: 325px; height: 75px; }
+.gm-separator { height: 1px; align-self: stretch; margin: 12px 0; background-color: rgba(255, 255, 255, 0.35); }
+.gm-page-header { font-size: 20px; -unity-font-style: bold; -unity-text-align: middle-center; margin-top: 2px; }
+.gm-page-line { font-size: 11px; color: var(--gm-muted); -unity-text-align: middle-center; margin-bottom: 10px; white-space: normal; }
+
+/* Welcome page: the logo and pill are the first thing a new owner sees, so they read much larger here. */
+.gm-page-header-welcome { font-size: 30px; margin-top: 6px; }
+.gm-page-line-welcome { font-size: 13px; margin-bottom: 14px; }
+.gm-terminology-foldout { margin-top: 4px; }
+.gm-terminology-foldout > Toggle { -unity-font-style: bold; font-size: 13px; }
+.gm-term-card { margin-top: 8px; }
+.gm-term-name { -unity-font-style: bold; font-size: 13px; margin-bottom: 2px; }
+.gm-term-line { font-size: 11px; color: var(--gm-muted); white-space: normal; }
+
+/* every card/section in the flow gets a small numbered badge in its top-left corner */
+.gm-choice-card, .gm-card, .gm-term-card { position: relative; }
+.gm-choice-card, .gm-term-card { padding-left: 32px; }
+.gm-card { padding-left: 34px; }
+.gm-box-index { position: absolute; left: 8px; top: 8px; width: 18px; height: 18px; border-radius: 9px; background-color: rgba(255, 255, 255, 0.1); color: var(--unity-colors-default-text); font-size: 10px; -unity-font-style: bold; -unity-text-align: middle-center; }
+/* a page with only one box on it carries no index badge, so it keeps the card's normal padding */
+.gm-card.gm-card-flat { padding-left: 10px; }
+
+.gm-choice-card { margin-top: 8px; padding-top: 8px; padding-bottom: 8px; padding-right: 10px; background-color: var(--gm-card); border-width: 2px; border-color: var(--unity-colors-default-border); border-radius: 8px; }
+.gm-choice-card.gm-selected { border-color: var(--gm-blue); }
+.gm-choice-title { -unity-font-style: bold; margin: 0; }
+.gm-choice-line { font-size: 11px; color: var(--gm-muted); margin-left: 18px; white-space: normal; }
+.gm-choice-name { -unity-font-style: bold; margin-bottom: 4px; }
+.gm-own-extra { margin-top: 6px; padding-top: 6px; border-top-width: 1px; border-color: var(--unity-colors-default-border); }
+.gm-inline-link { background-color: transparent; border-width: 0; margin: 4px 0 0 4px; padding: 0; }
+.gm-settings-toggle { margin-top: 6px; }
+.gm-settings-hint { margin-left: 18px; margin-top: 0; }
+.gm-folder-status { margin-top: 8px; }
+.gm-later { -unity-text-align: middle-center; margin-top: 12px; white-space: normal; }
+.gm-footer { margin-top: 16px; padding-top: 22px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.35); }
+.gm-step { flex-grow: 1; font-size: 10px; color: var(--gm-muted); -unity-text-align: middle-center; }
+.gm-footer-button { width: 22%; min-width: 56px; max-width: 120px; height: 26px; margin: 0; }
+
+/* Ready page: a numbered, slightly roomier list instead of a wall of same-weight lines */
+.gm-ready-row { flex-direction: row; margin-top: 9px; align-items: flex-start; }
+.gm-ready-index { width: 18px; flex-shrink: 0; -unity-font-style: bold; color: var(--gm-green); }
+.gm-ready-text { flex-grow: 1; flex-shrink: 1; white-space: normal; }
+
+/* All set page: a clearly amber, "still to do" look so it reads as a checklist, not a done-report */
+.gm-all-set-card { margin-top: 8px; border-left-width: 3px; border-left-color: var(--gm-yellow); }
+.gm-all-set-tag-row { flex-direction: row; align-items: center; margin-bottom: 4px; }
+.gm-all-set-tag-dot { width: 8px; height: 8px; border-radius: 4px; background-color: var(--gm-yellow); margin-right: 6px; }
+.gm-all-set-tag { font-size: 10px; -unity-font-style: bold; color: var(--gm-yellow); letter-spacing: 1px; }
+.gm-all-set-name { -unity-font-style: bold; margin-bottom: 4px; }
+.gm-header-row-centered { flex-direction: row; align-items: center; justify-content: center; }
+.gm-tick-circle { width: 22px; height: 22px; border-radius: 11px; background-color: var(--gm-green); align-items: center; justify-content: center; margin-left: 8px; }
+.gm-tick-mark { color: white; font-size: 13px; -unity-font-style: bold; -unity-text-align: middle-center; }
+
+
+/* things the real window adds to the approved look */
+.gm-problem-text { color: var(--gm-red); display: none; }
+.gm-problem-text.gm-shown { display: flex; }
+.gm-choice-card.gm-locked { opacity: 0.6; }
+.gm-note-text { white-space: normal; }
+.gm-warning-row { margin-top: 8px; padding: 6px 8px; border-left-width: 3px; border-left-color: var(--gm-yellow); background-color: var(--gm-card); border-radius: 3px; }
+.gm-warning-row > Label { white-space: normal; }
+.gm-path-text { white-space: normal; -unity-text-align: middle-left; }
+/* the folder row wraps its button below the field on a narrow window, so a long path keeps room to be read */
+.gm-row.gm-folder-row { flex-wrap: wrap; }
+.gm-row.gm-folder-row > .unity-base-field { min-width: 230px; flex-basis: 230px; }
+.gm-row.gm-folder-row .unity-base-field__label { min-width: 48px; width: 48px; }
+.gm-row.gm-folder-row > Button { margin: 4px 0 0 0; }
+.gm-all-set-card .gm-inline-link { align-self: flex-start; }
+
+/* a narrow window: the radio choices and the NOTE line wrap instead of being cut, and the prefab field gets more of the row */
+.gm-own-extra .gm-row { flex-wrap: wrap; }
+.gm-own-extra .unity-base-field__label { min-width: 115px; width: 115px; }
+.gm-radio-row .unity-radio-button { min-width: 120px; }

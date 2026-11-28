@@ -138,6 +138,11 @@ namespace AbstractPixel.GameManagement.Editor
                 _card.Add(Hint("Create settings first"));
                 body.SetEnabled(false);
             }
+            else if (GameManagementSettingsAssets.IsPackageAsset(_settings))
+            {
+                _card.Add(Hint("These settings are in a package, so they are read-only. Create settings first."));
+                body.SetEnabled(false);
+            }
             _card.Add(body);
             return body;
         }
@@ -173,16 +178,9 @@ namespace AbstractPixel.GameManagement.Editor
             dotRow.Add(dot);
             card.Add(dotRow);
 
-            if (_settings == null)
+            if (_settings == null || GameManagementSettingsAssets.IsPackageAsset(_settings))
             {
-                card.Add(new HelpBox("No game management settings asset: states and checks are off.", HelpBoxMessageType.Warning));
-                Button create = EditorUI.PrimaryButton("Create settings", "Makes the settings and an empty state list in " + GameManagementSettings.DefaultFolder, () =>
-                {
-                    GameManagementSettingsAssets.Create(GameManagementSettings.DefaultFolder);
-                    QueueRebuild();
-                });
-                create.AddToClassList("gm-left-button");
-                card.Add(create);
+                BuildNoProjectSettings(card, _settings);
                 return;
             }
 
@@ -206,6 +204,41 @@ namespace AbstractPixel.GameManagement.Editor
                         QueueRebuild();
                     }));
             }
+            AddSetupWindowControls(card);
+        }
+
+        // No settings of the project's own: either none at all, or only a package's (a sample's), which is never edited.
+        private static void BuildNoProjectSettings(VisualElement _card, GameManagementSettings _packageSettings)
+        {
+            if (_packageSettings == null)
+            {
+                _card.Add(new HelpBox("No game management settings asset: states and checks are off.", HelpBoxMessageType.Warning));
+            }
+            else
+            {
+                _card.Add(new HelpBox("This project has no settings of its own. These ones belong to a package (" + AssetDatabase.GetAssetPath(_packageSettings) + ") and cannot be edited here.", HelpBoxMessageType.Warning));
+            }
+            Button create = EditorUI.PrimaryButton("Create settings", "Makes the settings and an empty state list in " + GameManagementSettings.DefaultFolder, () =>
+            {
+                GameManagementSettingsAssets.Create(GameManagementSettings.DefaultFolder);
+                QueueRebuild();
+            });
+            create.AddToClassList("gm-left-button");
+            _card.Add(create);
+            AddSetupWindowControls(_card);
+        }
+
+        private static void AddSetupWindowControls(VisualElement _card)
+        {
+            Toggle autoOpen = new Toggle("Show the setup window in a new project");
+            autoOpen.name = "autoOpenToggle";
+            autoOpen.tooltip = "For this project: opens the setup window once per Editor session while the project has no settings of its own.";
+            autoOpen.SetValueWithoutNotify(!OnboardingAutoOpen.IsTurnedOff);
+            autoOpen.RegisterValueChangedCallback(_change => OnboardingAutoOpen.IsTurnedOff = !_change.newValue);
+            _card.Add(autoOpen);
+            Button run = EditorUI.Button("Set up states...", "Opens the setup window: new projects start at the welcome page, projects with settings at Which menus?", OnboardingWindow.Open);
+            run.AddToClassList("gm-left-button");
+            _card.Add(run);
         }
 
         private static void Move(GameManagementSettings _settings)

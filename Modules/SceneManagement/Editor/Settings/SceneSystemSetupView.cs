@@ -66,8 +66,11 @@ namespace AbstractPixel.SceneManagement.Editor
             style.minHeight = 340;
             style.paddingTop = 18;
             VisualElement logo = EditorUI.Logo(LogoHeight);
-            logo.style.marginBottom = 14;
+            logo.style.marginBottom = 8;
             Add(logo);
+            VisualElement pill = SystemPill.Create("Scene System", false);
+            pill.style.marginBottom = 14;
+            Add(pill);
             VisualElement separator = EditorUI.Separator();
             separator.style.marginBottom = 18;
             Add(separator);

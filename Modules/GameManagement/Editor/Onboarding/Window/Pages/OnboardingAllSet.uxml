@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="Onboarding.uss" />
+    <ui:VisualElement class="gm-root gm-onboarding">
+<ui:ScrollView horizontal-scroller-visibility="Hidden" class="gm-onboarding-scroll">
+<ui:VisualElement class="gm-logo-row"><ui:Image name="logo" class="gm-logo" /></ui:VisualElement>
+<ui:VisualElement class="gm-pill-row" name="pillHost" />
+<ui:VisualElement class="gm-separator" />
+<ui:VisualElement class="gm-content-inner">
+<ui:VisualElement class="gm-header-row-centered"><ui:Label text="All set" class="gm-page-header" /><ui:VisualElement class="gm-tick-circle"><ui:Label text="&#10003;" class="gm-tick-mark" /></ui:VisualElement></ui:VisualElement>
+<ui:Label text="Everything above is ready. A few things below still need your hands before Game Management can run." class="gm-page-line" />
+<ui:VisualElement name="allSetContainer" />
+</ui:VisualElement>
+</ui:ScrollView>
+<ui:VisualElement class="gm-footer"><ui:VisualElement class="gm-footer-inner"><ui:Button text="Back" name="backButton" class="gm-footer-button" /><ui:Label text="" name="stepLabel" class="gm-step" /><ui:Button text="Finish" name="nextButton" class="gm-footer-button gm-primary-button" /></ui:VisualElement></ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
