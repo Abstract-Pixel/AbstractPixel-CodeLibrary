@@ -5,6 +5,7 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "AbstractPixel.GameManagement",
+        "AbstractPixel.Core",
         "AbstractPixel.GameManagement.Samples.MinimalGame",
         "UnityEngine.UI",
         "Unity.InputSystem"

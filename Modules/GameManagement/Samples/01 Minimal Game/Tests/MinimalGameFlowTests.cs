@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using AbstractPixel.Core;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -25,6 +26,7 @@ namespace AbstractPixel.GameManagement.Samples.Tests
         private Keyboard keyboard;
         private Gamepad gamepad;
         private InputSettings.EditorInputBehaviorInPlayMode inputBehaviorBefore;
+        private InputSettings.BackgroundBehavior backgroundBehaviorBefore;
         private readonly List<MinimalGameFlowStep> steps = new List<MinimalGameFlowStep>();
 
         [UnityTest]
@@ -37,6 +39,13 @@ namespace AbstractPixel.GameManagement.Samples.Tests
             // versions then drop keyboard input. Send all input to the Game view for the run, put back in TearDown.
             inputBehaviorBefore = InputSystem.settings.editorInputBehaviorInPlayMode;
             InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            // An unfocused Editor also resets and disables devices, so the test keyboard would never reach the game.
+            backgroundBehaviorBefore = InputSystem.settings.backgroundBehavior;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            // The baseline was recorded with a controller as the active device, which decides the cursor. Left to
+            // the machine running the test, it depends on which devices are plugged in.
+            gamepad = InputSystem.AddDevice<Gamepad>();
+            InputDeviceTracker.SetActiveDevice(gamepad);
             EditorSceneManager.LoadSceneInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             yield return Record("Boot");
             yield return Press("Main Menu", "Settings Button", "Main Menu > Settings");
@@ -103,10 +112,6 @@ namespace AbstractPixel.GameManagement.Samples.Tests
 
         private IEnumerator PressButton(GamepadButton _button, string _stepName)
         {
-            if (gamepad == null)
-            {
-                gamepad = InputSystem.AddDevice<Gamepad>();
-            }
             InputSystem.QueueStateEvent(gamepad, new GamepadState(_button));
             yield return null;
             InputSystem.QueueStateEvent(gamepad, new GamepadState());
@@ -117,6 +122,7 @@ namespace AbstractPixel.GameManagement.Samples.Tests
         public void RemoveTestDevices()
         {
             InputSystem.settings.editorInputBehaviorInPlayMode = inputBehaviorBefore;
+            InputSystem.settings.backgroundBehavior = backgroundBehaviorBefore;
             if (gamepad != null)
             {
                 InputSystem.RemoveDevice(gamepad);
