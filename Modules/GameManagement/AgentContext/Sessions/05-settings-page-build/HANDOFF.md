@@ -42,7 +42,10 @@ Budget allowed only a partial pass; ticket 05 stays open.
 
 - Lab compile clean; `AbstractPixel.GameManagement.Tests` 86/86; `AbstractPixel.SceneManagement.Tests` 229/229.
 - 480 px still taken again: rows aligned, no sideways scroll.
-- No bugs found, no code changed. Baseline for the 11 older SceneManagement failures not compared.
+- Drag test (simulated `EditorWindow.SendEvent` drag events, not an OS drag): overlay shows on footer and
+  after a rebuild, not for non-State drags, hides on drop, leaving and exit; drop adds A and B, no duplicate,
+  non-State ignored, one Undo removes both. Bug fixed: overlay stuck over a row's object field (field stops
+  the event; box now listens on TrickleDown). Not checked: overlay still, field-drop replace, sub-state boxes, Sub-states tab. Baseline for the 11 older SceneManagement failures not compared.
 - Still unverified: every real-input interaction (hover +, + menu, drag, drop, fold, fix buttons, Undo),
   edge cases, 1200 px and no-asset view review, Rally compile/data, scene pages' look, coding-standards
   review (`GameManagementSettingsProvider.cs` is 398 lines, at the limit), prototype window removal.
