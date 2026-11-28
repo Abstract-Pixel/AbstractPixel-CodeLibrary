@@ -51,10 +51,10 @@ namespace AbstractPixel.GameManagement.Editor
             bar.AddToClassList("gm-tab-bar");
             bar.Add(TabButton("Main states", "States with no parent. Higher rank wins.", 0));
             bar.Add(TabButton("Sub-states", "States that open over a parent.", 1));
-            int mainCount = catalog.States.Count(_state => IsMain(_state));
-            if (mainCount > 1)
+            int rankCount = catalog.States.Count(StateListEdits.HasRank);
+            if (rankCount > 1)
             {
-                Label hint = new Label("Higher rank wins, so rank " + mainCount + " beats rank 1.");
+                Label hint = new Label("Higher rank wins, so rank " + rankCount + " beats rank 1.");
                 hint.tooltip = hint.text;
                 hint.AddToClassList("gm-tab-hint");
                 bar.Add(hint);
@@ -125,21 +125,20 @@ namespace AbstractPixel.GameManagement.Editor
                 }
             }
 
-            int rank = 0;
             HashSet<int> grouped = new HashSet<int>();
             for (int i = catalog.States.Count - 1; i >= 0; i--)
             {
                 StateSO state = catalog.States[i];
                 if (state == null)
                 {
-                    _rows.Add(Line(null, Row(i, "-", StateRowKind.Empty, false)));
+                    _rows.Add(Line(null, Row(i, StateListEdits.PageRank(catalog, i).ToString(), StateRowKind.Empty, false)));
                     continue;
                 }
                 if (state.Parents.Count > 0)
                 {
                     continue;
                 }
-                rank++;
+                int rank = StateListEdits.PageRank(catalog, i);
                 // A sub-state shows once, under the first main state on the page that it opens over.
                 List<int> children = subStates.Where(_index => !grouped.Contains(_index) && catalog.States[_index].Parents.Contains(state)).ToList();
                 grouped.UnionWith(children);

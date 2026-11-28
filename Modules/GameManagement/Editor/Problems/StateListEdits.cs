@@ -45,6 +45,27 @@ namespace AbstractPixel.GameManagement.Editor
             Save(_catalog);
         }
 
+        /// <summary>The rank number the page shows beside a main state or an empty row. Messages use it, because the
+        /// catalog position counts the other way and includes sub-states.</summary>
+        public static int PageRank(GameStateCatalog _catalog, int _index)
+        {
+            int rank = 0;
+            for (int i = _catalog.States.Count - 1; i >= _index; i--)
+            {
+                if (HasRank(_catalog.States[i]))
+                {
+                    rank++;
+                }
+            }
+            return rank;
+        }
+
+        /// <summary>An empty row keeps a rank, so removing a state from its field does not renumber the page under the designer.</summary>
+        public static bool HasRank(StateSO _state)
+        {
+            return _state == null || _state.Parents.Count == 0;
+        }
+
         private static void Save(GameStateCatalog _catalog)
         {
             EditorUtility.SetDirty(_catalog);
