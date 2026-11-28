@@ -58,6 +58,12 @@ namespace AbstractPixel.GameManagement
             get { return stack; }
         }
 
+        /// <summary>The effects in force now. A null field was never set.</summary>
+        internal GameEffects AppliedEffects
+        {
+            get { return lastApplied; }
+        }
+
         /// <summary>True while the top state waits for its execution delay before applying effects.</summary>
         public bool IsInDelay
         {

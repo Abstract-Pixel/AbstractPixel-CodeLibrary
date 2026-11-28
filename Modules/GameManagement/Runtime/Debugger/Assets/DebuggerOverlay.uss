@@ -1,0 +1,59 @@
+/* The in-game debugger overlay. Values: AgentContext/UI-STYLE.md, "Debugger overlay". */
+.gm-game-top { position: absolute; top: 0; right: 0; bottom: 0; flex-direction: row; align-items: flex-start; padding: 14px; max-width: 100%; }
+.gm-overlay { width: 316px; max-width: 100%; max-height: 100%; flex-shrink: 1; overflow: hidden; padding: 10px 12px; background-color: rgba(14, 14, 16, 0.85); border-width: 1px; border-color: rgba(255, 255, 255, 0.14); border-radius: 5px; color: rgb(237, 237, 237); font-size: 12px; }
+.gm-overlay > * { flex-shrink: 0; }
+.gm-overlay > .gm-journal { flex-shrink: 1; overflow: hidden; }
+.gm-overlay Label { margin: 0; padding: 0; }
+.gm-o-title { font-size: 10px; -unity-font-style: bold; color: rgb(168, 168, 168); margin-bottom: 2px; }
+.gm-overlay .gm-o-title { margin-bottom: 2px; } /* wins over the label reset below */
+
+/* Long names stay on one line and end in an ellipsis; dots and icons never shrink. */
+.gm-overlay .gm-name { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.gm-stack { flex-direction: row; align-items: center; }
+.gm-stack > Label { font-size: 14px; }
+/* The view gives each stack name its width, so nothing here shrinks. */
+.gm-state-chip { flex-direction: row; align-items: center; flex-shrink: 0; }
+.gm-overlay .gm-stack .gm-name { flex-shrink: 0; }
+.gm-stack .gm-state-chip > Label { font-size: 14px; }
+.gm-dim { color: rgb(124, 124, 124); }
+.gm-overlay .gm-sep { margin: 0 6px; flex-shrink: 0; color: rgb(124, 124, 124); }
+.gm-top-state { -unity-font-style: bold; }
+
+.gm-o-block { margin-top: 8px; padding-top: 6px; border-top-width: 1px; border-color: rgba(255, 255, 255, 0.12); }
+.gm-kv { flex-direction: row; }
+.gm-overlay .gm-k { width: 70px; flex-shrink: 0; color: rgb(168, 168, 168); }
+
+.gm-refusal { flex-direction: row; align-items: flex-start; }
+.gm-refusal-icon { width: 16px; height: 14px; margin-right: 6px; margin-top: 1px; flex-shrink: 0; color: rgb(245, 189, 48); }
+.gm-overlay .gm-refusal-mark { position: absolute; left: 0; right: 0; bottom: -1px; font-size: 10px; -unity-font-style: bold; -unity-text-align: lower-center; color: rgb(14, 14, 16); }
+.gm-overlay .gm-refusal-text { flex-shrink: 1; color: rgb(245, 189, 48); white-space: normal; }
+
+.gm-j-section-head { flex-direction: row; flex-shrink: 0; justify-content: space-between; align-items: flex-end; }
+.gm-j-subtitle { font-size: 9px; color: rgba(210, 210, 210, 0.62); }
+.gm-j-empty { color: rgb(168, 168, 168); }
+.gm-j-group { margin-top: 6px; padding-top: 5px; border-top-width: 1px; border-color: rgba(255, 255, 255, 0.08); flex-shrink: 0; }
+.gm-j-group-first { margin-top: 0; padding-top: 0; border-top-width: 0; }
+.gm-j-head-row { flex-direction: row; align-items: center; }
+.gm-overlay .gm-j-index { width: 14px; height: 14px; margin-right: 6px; border-radius: 3px; background-color: rgba(255, 255, 255, 0.1); font-size: 9px; color: rgb(190, 190, 190); -unity-text-align: middle-center; -unity-font-style: bold; }
+.gm-overlay .gm-j-time { width: 52px; -unity-text-align: middle-right; margin-right: 8px; color: rgb(168, 168, 168); font-size: 11px; }
+.gm-j-state-row { flex-direction: row; align-items: center; margin-top: 2px; margin-left: 20px; }
+.gm-overlay .gm-j-state { font-size: 11px; margin-right: 6px; }
+.gm-overlay .gm-j-refused { color: rgb(245, 189, 48); -unity-font-style: bold; flex-shrink: 0; }
+
+.gm-event-icon { width: 9px; height: 9px; margin-right: 8px; flex-shrink: 0; }
+.gm-overlay .gm-event-mark { width: 14px; margin-right: 4px; font-size: 11px; -unity-text-align: middle-center; flex-shrink: 0; }
+.gm-event-entered { color: rgb(77, 191, 92); }
+.gm-event-applied { color: rgb(111, 168, 232); }
+.gm-event-left { color: rgb(154, 154, 154); }
+.gm-overlay .gm-event-refused { color: rgb(245, 189, 48); -unity-font-style: bold; }
+
+.gm-state-dot { width: 7px; height: 7px; border-radius: 4px; margin-right: 5px; flex-shrink: 0; background-color: rgb(124, 124, 124); }
+.gm-state-dot-0 { background-color: rgb(94, 163, 224); }
+.gm-state-dot-1 { background-color: rgb(176, 120, 224); }
+.gm-state-dot-2 { background-color: rgb(94, 200, 184); }
+.gm-state-dot-3 { background-color: rgb(224, 140, 94); }
+.gm-state-dot-4 { background-color: rgb(224, 94, 163); }
+.gm-state-dot-5 { background-color: rgb(140, 160, 224); }
+
+.gm-overlay .gm-keyhint { align-self: flex-end; margin-top: 6px; font-size: 10px; color: rgb(168, 168, 168); }

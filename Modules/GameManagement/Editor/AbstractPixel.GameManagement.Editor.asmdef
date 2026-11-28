@@ -3,6 +3,7 @@
     "rootNamespace": "AbstractPixel.GameManagement.Editor",
     "references": [
         "AbstractPixel.GameManagement",
+        "AbstractPixel.GameManagement.Debugger",
         "AbstractPixel.Core",
         "AbstractPixel.Core.Editor",
         "AbstractPixel.Core.Editor.UI",

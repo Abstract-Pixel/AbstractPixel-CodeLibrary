@@ -5,6 +5,7 @@
         "AbstractPixel.GameManagement",
         "AbstractPixel.Core",
         "AbstractPixel.GameManagement.Editor",
+        "AbstractPixel.GameManagement.Debugger",
         "Unity.InputSystem",
         "UnityEngine.UI",
         "UnityEngine.TestRunner",

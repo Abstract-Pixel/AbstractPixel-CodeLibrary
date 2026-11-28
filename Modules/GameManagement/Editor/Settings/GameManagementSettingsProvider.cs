@@ -412,24 +412,20 @@ namespace AbstractPixel.GameManagement.Editor
         private static void BuildDebugger(GameManagementSettings _settings)
         {
             VisualElement body = Body(Card("5. Debugger", out VisualElement _), _settings);
-            if (_settings != null)
+            if (_settings == null)
             {
-                body.Add(Property(new SerializedObject(_settings), nameof(GameManagementSettings.JournalSize), "Journal size", false));
-            }
-            else
-            {
+                // No settings: the same three fields, empty and disabled with the card.
+                ObjectField emptyAction = new ObjectField("Show or hide debugger");
+                emptyAction.objectType = typeof(InputActionReference);
                 body.Add(new IntegerField("Journal size"));
+                body.Add(emptyAction);
+                body.Add(new Toggle("Include the debugger in release builds"));
+                return;
             }
-            // These two are saved and read from the debugger session on; until then they show what is coming.
-            ObjectField toggleAction = new ObjectField("Show or hide debugger");
-            toggleAction.objectType = typeof(InputActionReference);
-            toggleAction.tooltip = "Not available yet: it arrives with the in-game debugger.";
-            toggleAction.SetEnabled(false);
-            body.Add(toggleAction);
-            Toggle release = new Toggle("Include the debugger in release builds");
-            release.tooltip = toggleAction.tooltip;
-            release.SetEnabled(false);
-            body.Add(release);
+            SerializedObject data = new SerializedObject(_settings);
+            body.Add(Property(data, nameof(GameManagementSettings.JournalSize), "Journal size", false));
+            body.Add(Property(data, nameof(GameManagementSettings.DebuggerToggleAction), "Show or hide debugger", false));
+            body.Add(Property(data, nameof(GameManagementSettings.IncludeDebuggerInReleaseBuilds), "Include the debugger in release builds", false));
         }
     }
 }
