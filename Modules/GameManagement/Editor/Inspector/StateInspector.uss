@@ -1,0 +1,169 @@
+/* State inspector, inside Unity's own Inspector. The look approved in Session 6B (UI-STYLE.md, "State inspector"). */
+.si-root { --gm-muted: rgba(210, 210, 210, 0.62); padding-bottom: 8px; }
+
+/* sub-state line, directly under Unity's ScriptableObject header, edge to edge */
+.si-sub-line { display: none; height: 4px; margin: 0 -6px 0 -15px; background-color: rgb(70, 140, 150); }
+.si-substate .si-sub-line { display: flex; }
+
+/* section headers drawn like Unity's component headers */
+.si-section { margin: 0 -6px 0 -15px; }
+.si-section > .unity-foldout__toggle { margin: 0; min-height: 22px; padding: 0 6px 0 3px; background-color: var(--unity-colors-inspector_titlebar-background); border-top-width: 1px; border-color: var(--unity-colors-inspector_titlebar-border); }
+.si-section > .unity-foldout__toggle:hover { background-color: var(--unity-colors-inspector_titlebar-background-hover); }
+.si-section > .unity-foldout__toggle .unity-foldout__text { -unity-font-style: bold; }
+.si-section > .unity-foldout__content { margin: 0; padding: 4px 6px 8px 15px; }
+
+/* one label column; a long label is cut, never pushed into its value */
+.si-field > .unity-base-field__label, .si-property > .unity-base-field > .unity-base-field__label { width: 40%; min-width: 110px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+.si-field, .si-property > .unity-base-field { margin: 2px 0 0 0; }
+
+/* nothing may push past the edge: every field shrinks, and a long name inside an object field is cut */
+.si-root .unity-base-field { min-width: 0; }
+.si-root .unity-base-field__input { min-width: 0; flex-shrink: 1; }
+.si-root .unity-object-field-display { min-width: 0; flex-shrink: 1; overflow: hidden; }
+.si-root .unity-object-field-display__label { min-width: 0; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.si-root .unity-object-field__selector { flex-shrink: 0; }
+
+/* problem boxes */
+.si-section .gm-problem { flex-direction: row; flex-wrap: wrap; align-items: center; margin: 0 0 4px 0; }
+.si-section .gm-problem .unity-help-box__label { flex-grow: 1; flex-shrink: 1; flex-basis: 200px; min-width: 0; white-space: normal; }
+.si-section .unity-help-box { flex-wrap: wrap; }
+.gm-help-actions { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-end; flex-grow: 1; max-width: 100%; margin: 2px 0 2px 6px; }
+.gm-help-actions > .gm-fix-button { flex-shrink: 1; min-width: 0; max-width: 100%; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gm-help-actions > .gm-link { flex-shrink: 0; background-color: transparent; border-width: 0; margin: 0 0 0 10px; padding: 0; color: var(--unity-colors-link-text); }
+
+/* general info: everything above Problems */
+.si-info { padding: 8px 0 12px 0; }
+.si-title-row { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+/* tag colours are the Project Settings badge colours */
+.si-tag { height: 18px; margin: 0 8px 0 0; padding: 0 8px; border-radius: 3px; font-size: 11px; -unity-font-style: bold; -unity-text-align: middle-center; background-color: rgba(255, 255, 255, 0.08); }
+.si-substate .si-tag { background-color: rgba(70, 140, 150, 0.55); color: white; }
+.si-open-button { margin: 0 0 0 auto; flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* "Opens over": a quiet caption, then one chip per parent in the Project Settings sub-state outline */
+.si-opens-over { flex-direction: row; flex-wrap: wrap; align-items: center; margin: 6px 0 6px 0; }
+.si-opens-caption { margin: 0 6px 0 0; padding: 0; font-size: 11px; color: var(--gm-muted); }
+.si-opens-chip { height: 18px; max-width: 100%; flex-shrink: 1; min-width: 0; margin: 1px 4px 1px 0; padding: 0 7px; font-size: 11px; -unity-text-align: middle-left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-width: 1px; border-radius: 3px; border-color: rgba(70, 140, 150, 0.7); background-color: rgba(70, 140, 150, 0.07); }
+.si-opens-none { margin: 0; padding: 0; font-size: 11px; color: var(--gm-muted); }
+.si-info > .si-field { margin-bottom: 2px; }
+
+/* Parents and "over each parent": two panels with component-style headers */
+.si-panel { position: relative; margin-top: 8px; border-width: 1px; border-color: var(--unity-colors-default-border); border-radius: 3px; background-color: rgba(0, 0, 0, 0.12); overflow: hidden; }
+.si-panel-foldout { margin: 0; }
+.si-panel-foldout > .unity-foldout__toggle { margin: 0; min-height: 22px; padding: 0 4px; background-color: var(--unity-colors-inspector_titlebar-background); }
+.si-panel-foldout > .unity-foldout__toggle:hover { background-color: var(--unity-colors-inspector_titlebar-background-hover); }
+.si-panel-foldout > .unity-foldout__toggle .unity-foldout__text { -unity-font-style: bold; white-space: normal; flex-shrink: 1; min-width: 0; }
+.si-panel-foldout > .unity-foldout__toggle > .unity-toggle__input { flex-shrink: 1; min-width: 0; }
+.si-panel-foldout > .unity-foldout__content { margin: 0; padding: 12px 8px; }
+.si-count { position: absolute; right: 4px; top: 2px; width: 40px; margin: 0; }
+
+.si-reference-list { margin: 0; }
+.si-reference-list .unity-collection-view__item { padding: 0; }
+.si-reference-list .unity-scroll-view__content-viewport { overflow: hidden; }
+.si-reference-row { flex-direction: row; align-items: center; flex-grow: 1; height: 24px; }
+.si-handle { flex-shrink: 0; width: 12px; height: 18px; margin: 0 1px 0 0; padding: 0; -unity-text-align: middle-center; color: var(--gm-muted); }
+.si-rank { min-width: 22px; height: 18px; min-height: 18px; margin: 0; padding: 0 4px; -unity-text-align: middle-center; background-color: rgba(255, 255, 255, 0.08); border-radius: 3px 0 0 3px; flex-shrink: 0; }
+/* the field sits in a column (the row's body), so its height is fixed there; only a captioned line stretches it sideways */
+.si-reference-body > .si-reference-field { flex-grow: 0; flex-shrink: 0; flex-basis: auto; height: 18px; margin: 0; }
+.si-name-line > .si-reference-field { flex-grow: 1; flex-shrink: 1; flex-basis: 0; height: 18px; margin: 0; }
+.si-reference-field .unity-object-field__input { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+
+.si-list-footer { flex-direction: row; justify-content: flex-end; margin-top: 6px; }
+.si-list-footer > Button { flex-shrink: 0; width: 22px; height: 18px; margin: 0 0 0 4px; padding: 0; -unity-font-style: bold; }
+
+/* an empty list is one line: what that means, with + and − beside it */
+.si-list-footer > .si-list-empty { flex-grow: 1; flex-shrink: 1; min-width: 0; margin: 0 4px 0 0; padding: 0; font-size: 11px; color: var(--gm-muted); -unity-text-align: middle-left; white-space: normal; }
+.si-panel-empty > .si-panel-foldout > .unity-foldout__content { padding: 4px 8px; }
+.si-panel-empty .si-list-footer { align-items: center; margin-top: 0; }
+.si-no-parents { margin: 0; }
+.si-no-parents .unity-help-box__label { flex-shrink: 1; min-width: 0; white-space: normal; }
+
+/* the bordered table (shaded head, alternating rows) with the numbered pills joined to the names */
+.si-table-hint { font-size: 11px; color: var(--gm-muted); margin: 0 0 8px 0; padding: 0; white-space: normal; }
+.si-table { border-width: 1px; border-color: var(--unity-colors-default-border); border-radius: 3px; overflow: hidden; }
+/* cells stretch to the row height, so the column separators run unbroken from the head to the last row */
+.si-table-row { flex-direction: row; align-items: stretch; min-height: 26px; padding: 0 6px; }
+.si-table-head { min-height: 22px; font-size: 11px; color: var(--gm-muted); background-color: var(--unity-colors-inspector_titlebar-background); border-bottom-width: 1px; border-color: var(--unity-colors-default-border); }
+.si-table-alt { background-color: var(--unity-colors-alternated_rows-background); }
+.si-col-parent { flex-direction: row; align-items: center; flex-grow: 2.2; flex-shrink: 1; flex-basis: 0; min-width: 60px; overflow: hidden; }
+.si-parent-name { flex-grow: 1; flex-shrink: 1; min-width: 0; height: 18px; margin: 0 6px 0 0; padding: 0 4px; -unity-text-align: middle-left; background-color: rgba(0, 0, 0, 0.18); border-radius: 0 3px 3px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.si-parent-head { flex-grow: 1; margin: 0; padding: 0; -unity-text-align: middle-left; }
+.si-col { flex-direction: row; align-items: center; flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 28px; padding: 0 2px 0 6px; overflow: hidden; border-left-width: 1px; border-left-color: rgba(255, 255, 255, 0.09); }
+/* StateParentTable gives each value column the width its longest content needs; Parent takes all the rest */
+.si-table-row > .si-col { flex-grow: 0; flex-shrink: 0; flex-basis: 40px; }
+.si-table-row > .si-col-parent { flex-grow: 1; }
+.si-value-text { flex-shrink: 1; min-width: 0; height: 18px; margin: 0; padding: 0; -unity-text-align: middle-left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* a value this state changes: the Project Settings sub-state badge */
+.si-value-changed { padding: 0 6px; margin-left: -2px; border-radius: 3px; background-color: rgba(70, 140, 150, 0.55); color: white; -unity-font-style: bold; }
+
+/* narrow Inspector: one block per parent, its four values two to a line */
+.si-cell-caption { display: none; flex-shrink: 0; width: 38px; margin: 0; padding: 0; font-size: 10px; color: var(--gm-muted); }
+.si-table-narrow .si-table-head { display: none; }
+.si-table-narrow .si-table-row { flex-direction: row; flex-wrap: wrap; padding: 3px 6px 4px 6px; }
+.si-table-narrow .si-col-parent { flex-grow: 0; flex-basis: auto; width: 100%; height: 22px; }
+.si-table-narrow .si-parent-name { margin-right: 0; }
+.si-table-narrow .si-table-row > .si-col { flex-grow: 0; flex-basis: auto; width: 50%; height: 20px; padding: 0 0 0 2px; border-left-width: 0; }
+.si-table-narrow .si-cell-caption { display: flex; -unity-text-align: middle-left; }
+/* half a narrow block can be thinner than "Locked Hidden", so a value wraps onto a second line instead of being cut */
+.si-table-narrow .si-table-row > .si-col { height: auto; min-height: 20px; }
+.si-table-narrow .si-value-text { height: auto; min-height: 18px; white-space: normal; text-overflow: clip; }
+
+/* the two-way switch */
+.si-switch > .unity-base-field__input { border-width: 1px; border-color: var(--unity-colors-default-border); border-radius: 3px; overflow: hidden; }
+.si-switch .unity-radio-button-group__container { flex-direction: row; flex-grow: 1; min-width: 0; }
+.si-switch .unity-radio-button { flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 0; margin: 0; padding: 0 2px; background-color: rgba(255, 255, 255, 0.06); }
+.si-switch .unity-radio-button__checkmark-background { display: none; }
+.si-switch .unity-radio-button__input { justify-content: center; min-width: 0; margin: 0; padding: 0; }
+.si-switch .unity-radio-button__text { flex-shrink: 1; min-width: 0; margin: 0; padding: 0; font-size: 11px; overflow: hidden; text-overflow: ellipsis; }
+.si-switch .unity-radio-button:checked { background-color: var(--unity-colors-highlight-background); }
+.si-switch .unity-radio-button:checked .unity-radio-button__text { -unity-font-style: bold; color: white; }
+
+.si-effect { margin-bottom: 6px; }
+.si-inherited { font-size: 11px; color: var(--gm-muted); margin: 2px 0 0 3px; padding: 0; white-space: normal; }
+.si-nested { margin-top: 2px; }
+.si-details { margin-top: 1px; }
+.si-details > .unity-foldout__toggle { margin: 0; }
+.si-details > .unity-foldout__toggle .unity-foldout__text { font-size: 11px; color: var(--gm-muted); }
+.si-details > .unity-foldout__content { margin-left: 15px; }
+/* one numbered entry per input action: two captioned lines, entries divided so each reads as one thing */
+.si-reference-body { flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 0; justify-content: center; }
+/* a bordered table inside the panel, like the one over each parent: shaded rows divided by lines */
+.si-action-list > .unity-scroll-view, .si-action-list .unity-scroll-view { border-width: 1px; border-color: var(--unity-colors-default-border); border-radius: 3px; }
+.si-action-list .unity-collection-view__item--alternative-background { background-color: var(--unity-colors-alternated_rows-background); }
+/* the list overrides a row's own padding, so the space sits on what is inside: even above and below keeps the number centred */
+.si-action-list .si-reference-body { padding: 5px 4px 5px 0; }
+.si-action-list .si-handle { margin-left: 4px; }
+.si-action-list .si-reference-row { height: auto; align-items: center; border-bottom-width: 1px; border-color: rgba(255, 255, 255, 0.08); }
+.si-name-line { flex-direction: row; align-items: center; }
+.si-name-caption { flex-shrink: 0; width: 46px; margin: 0; padding: 0 0 0 5px; font-size: 11px; color: var(--gm-muted); }
+.si-map-line { align-items: flex-start; margin-top: 3px; }
+.si-map-name { flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 0; margin: 0; padding: 0 0 0 3px; font-size: 11px; white-space: normal; }
+.si-action-list .si-rank { border-radius: 3px; margin-right: 2px; }
+
+.si-narrow .si-action-list .si-name-line { flex-direction: column; align-items: stretch; }
+.si-narrow .si-action-list .si-name-caption { width: auto; height: 14px; padding: 0; font-size: 10px; }
+.si-narrow .si-action-list .si-name-line > .si-reference-field { flex-grow: 0; flex-shrink: 0; flex-basis: auto; }
+.si-narrow .si-action-list .si-map-name { flex-grow: 0; flex-basis: auto; padding: 0; }
+.si-narrow .si-switch > .unity-base-field__label { width: 30%; min-width: 66px; }
+/* when narrow, the longer choice takes the room the short "Own" does not need */
+.si-narrow .si-switch .unity-radio-button { flex-basis: auto; }
+
+/* under the table: long input map names in full, numbered */
+.si-maps { margin-top: 6px; padding: 4px 6px 5px 6px; border-radius: 3px; border-left-width: 3px; border-color: rgba(255, 255, 255, 0.15); background-color: rgba(0, 0, 0, 0.18); }
+.si-maps-changed { border-color: rgb(70, 140, 150); }
+.si-maps-title { margin: 0 0 1px 0; padding: 0; font-size: 11px; -unity-font-style: bold; white-space: normal; }
+.si-maps-line { flex-direction: row; align-items: flex-start; margin-top: 3px; }
+.si-maps-number { flex-shrink: 0; width: 20px; margin: 0; padding: 0; font-size: 11px; color: var(--gm-muted); }
+.si-maps-name { flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 0; margin: 0; padding: 0; font-size: 11px; white-space: normal; }
+
+/* Sub-states only: every clicked or selected colour turns teal. Main states keep Unity's own colours. */
+.si-substate .si-switch .unity-radio-button:checked { background-color: rgba(70, 140, 150, 0.85); }
+.si-substate .unity-button:active { background-color: rgba(70, 140, 150, 0.85); border-color: rgb(70, 140, 150); color: white; }
+.si-substate .gm-link:active { background-color: transparent; color: rgb(70, 140, 150); }
+.si-substate .unity-collection-view__item--selected { background-color: rgba(70, 140, 150, 0.55); }
+.si-substate .unity-foldout__toggle:focus .unity-foldout__text { color: rgb(110, 190, 200); }
+.si-substate .unity-foldout__toggle:focus .unity-toggle__checkmark { -unity-background-image-tint-color: rgb(110, 190, 200); }
+.si-substate .unity-base-field:focus > .unity-base-field__label { color: rgb(110, 190, 200); }
+.si-substate .unity-base-text-field__input:focus, .si-substate .unity-base-text-field:focus > .unity-base-text-field__input { border-color: rgb(70, 140, 150); }
+.si-substate .unity-object-field:focus > .unity-object-field__input, .si-substate .unity-base-popup-field:focus > .unity-base-popup-field__input { border-color: rgb(70, 140, 150); }
+.si-substate .unity-toggle:focus .unity-toggle__checkmark { border-color: rgb(70, 140, 150); }
+.si-substate .unity-base-slider:focus .unity-base-slider__dragger, .si-substate .unity-base-slider__dragger:active { border-color: rgb(70, 140, 150); }
+.si-substate .unity-text-element { --unity-selection-color: rgba(70, 140, 150, 0.7); }

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -19,16 +19,14 @@ namespace AbstractPixel.GameManagement.Editor
             foreach (int slot in _catalog.FindEmptySlots())
             {
                 StateProblem empty = Make(StateProblemKind.EmptySlot, false, null, null,
-                    "Slot " + (slot + 1) + " in the state list is empty. It does nothing.", "Remove slot", "Removes the empty slot from the list");
+                    "Rank " + StateListEdits.PageRank(_catalog, slot) + " in the state list is empty. It does nothing.", "Remove slot", "Removes the empty slot from the list");
                 empty.Slot = slot;
                 problems.Add(empty);
             }
 
             foreach (StateSO state in _catalog.FindDuplicates())
             {
-                problems.Add(Make(StateProblemKind.Duplicate, false, state, null,
-                    state.name + " is listed twice. Only its higher place counts.", "Remove lower copy",
-                    "Keeps the place that counts and removes the other copies"));
+                problems.Add(Duplicate(state));
             }
 
             HashSet<StateSO> inReportedLoop = new HashSet<StateSO>();
@@ -43,6 +41,40 @@ namespace AbstractPixel.GameManagement.Editor
                 FindMissingParents(_catalog, state, problems);
             }
             return problems;
+        }
+
+        /// <summary>The problems the state's Inspector shows, whether or not the state is in the list.</summary>
+        public static List<StateProblem> FindForState(GameStateCatalog _catalog, StateSO _state)
+        {
+            List<StateProblem> problems = new List<StateProblem>();
+            if (_catalog == null || _state == null)
+            {
+                return problems;
+            }
+            bool isListed = _catalog.Contains(_state);
+            if (!isListed)
+            {
+                problems.Add(Make(StateProblemKind.NotInList, true, _state, null,
+                    "Not in the state list, so every request for it is refused.", "Add to list", "Adds " + _state.name + " to the state list"));
+            }
+            if (_catalog.FindDuplicates().Contains(_state))
+            {
+                problems.Add(Duplicate(_state));
+            }
+            FindLoop(_state, new HashSet<StateSO>(), problems);
+            FindParentSlotProblems(_state, problems);
+            if (isListed)
+            {
+                FindMissingParents(_catalog, _state, problems);
+            }
+            return problems;
+        }
+
+        private static StateProblem Duplicate(StateSO _state)
+        {
+            return Make(StateProblemKind.Duplicate, false, _state, null,
+                _state.name + " is listed twice. Only its higher place counts.", "Remove lower copy",
+                "Keeps the place that counts and removes the other copies");
         }
 
         /// <summary>Applies the problem's fix with Undo, saves, and writes one log line.</summary>
@@ -72,6 +104,9 @@ namespace AbstractPixel.GameManagement.Editor
                     break;
                 case StateProblemKind.SameParentTwice:
                     RemoveLaterCopies(_problem.State.Parents, _problem.Parent);
+                    break;
+                case StateProblemKind.NotInList:
+                    StateListEdits.Add(_catalog, _problem.State);
                     break;
                 case StateProblemKind.MissingParents:
                     foreach (StateSO parent in MissingParents(_catalog, _problem.State))
@@ -172,7 +207,14 @@ namespace AbstractPixel.GameManagement.Editor
 
         private static void FindParentSlotProblems(StateSO _state, List<StateProblem> _problems)
         {
-            if (_state.Parents.Any(_parent => _parent == null))
+            if (_state.Parents.Count > 0 && _state.Parents.All(_parent => _parent == null))
+            {
+                // The machine counts any parent slot as "this is a sub-state", so with none filled it can never open.
+                _problems.Add(Make(StateProblemKind.EmptyParentSlot, true, _state, null,
+                    _state.name + " has only empty parent slots, so it can never open.", "Remove slot",
+                    "Removes the empty parent slots, which makes " + _state.name + " a main state"));
+            }
+            else if (_state.Parents.Any(_parent => _parent == null))
             {
                 _problems.Add(Make(StateProblemKind.EmptyParentSlot, false, _state, null,
                     _state.name + " has an empty parent slot. It does nothing.", "Remove slot",
@@ -213,7 +255,9 @@ namespace AbstractPixel.GameManagement.Editor
             string message = _state.name + " only opens over " + names + ", which" + verb + " in the state list, so " + _state.name + " can never open.";
             if (listed.Count > 0)
             {
-                message = _state.name + " opens over " + names + ", but " + names + verb + " in the state list. It still opens over " + JoinNames(listed) + ".";
+                // Past two, a count reads better than a list of names; the Parents list shows which they are.
+                string stillOver = listed.Count > 2 ? "its " + listed.Count + " other parents" : JoinNames(listed);
+                message = _state.name + " opens over " + names + ", but " + names + verb + " in the state list. It still opens over " + stillOver + ".";
             }
             _problems.Add(Make(StateProblemKind.MissingParents, listed.Count == 0, _state, missing[0], message, label,
                 "Adds " + names + " at the bottom of the main states"));

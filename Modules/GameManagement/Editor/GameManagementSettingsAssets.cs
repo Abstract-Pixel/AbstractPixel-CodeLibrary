@@ -41,18 +41,32 @@ namespace AbstractPixel.GameManagement.Editor
             return System.Array.IndexOf(PlayerSettings.GetPreloadedAssets(), _settings) >= 0;
         }
 
-        /// <summary>Makes the settings and an empty state list in this folder and uses them. Existing assets are never written over.</summary>
-        public static GameManagementSettings Create(string _folder)
+        /// <summary>Makes every missing folder of a path under Assets. Returns the outermost one it made, or null.</summary>
+        internal static string EnsureFolder(string _folder)
         {
+            string outermostMade = null;
             string parent = "Assets";
             foreach (string part in _folder.Substring("Assets".Length).Split(new[] { '/' }, System.StringSplitOptions.RemoveEmptyEntries))
             {
-                if (!AssetDatabase.IsValidFolder(parent + "/" + part))
+                string child = parent + "/" + part;
+                if (!AssetDatabase.IsValidFolder(child))
                 {
                     AssetDatabase.CreateFolder(parent, part);
+                    if (outermostMade == null)
+                    {
+                        outermostMade = child;
+                    }
                 }
-                parent += "/" + part;
+                parent = child;
             }
+            return outermostMade;
+        }
+
+        /// <summary>Makes the settings and an empty state list in this folder and uses them. Existing assets are never written over.</summary>
+        public static GameManagementSettings Create(string _folder)
+        {
+            EnsureFolder(_folder);
+            string parent = _folder;
             GameStateCatalog catalog = ScriptableObject.CreateInstance<GameStateCatalog>();
             AssetDatabase.CreateAsset(catalog, AssetDatabase.GenerateUniqueAssetPath(parent + "/GameStateCatalog.asset"));
             GameManagementSettings settings = ScriptableObject.CreateInstance<GameManagementSettings>();

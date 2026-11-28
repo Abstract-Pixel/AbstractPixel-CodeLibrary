@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AbstractPixel.GameManagement.Editor;
 using NUnit.Framework;
 using UnityEngine;
@@ -61,9 +61,29 @@ namespace AbstractPixel.GameManagement.Tests
             catalog.States.Add(null);
             StateProblem problem = Only();
             Assert.IsFalse(problem.IsError);
-            Assert.AreEqual("Slot 1 in the state list is empty. It does nothing.", problem.Message);
+            Assert.AreEqual("Rank 1 in the state list is empty. It does nothing.", problem.Message);
             StateListValidator.Fix(catalog, problem);
             Assert.IsEmpty(catalog.States);
+        }
+
+        [Test]
+        public void EmptySlotIsNamedByTheRankThePageShows()
+        {
+            State("Game Win", true);
+            State("Game Over", true);
+            catalog.States.Add(null);
+            StateSO menu = State("Main Menu", true);
+            State("Settings", true, menu);
+            // The page counts from the list's end and skips sub-states: Main Menu is 1, the empty row is 2.
+            Assert.AreEqual("Rank 2 in the state list is empty. It does nothing.", Only().Message);
+        }
+
+        [TestCase("Assets/Game/Settings.asset", "Assets/Game/States")]
+        [TestCase("Assets/Settings.asset", "Assets/States")]
+        [TestCase("Packages/com.abstractpixel.library/Modules/Sample/Settings.asset", "Assets/GameManagement/States")]
+        public void NewStatesAreSavedInsideTheProject(string _settingsPath, string _expected)
+        {
+            Assert.AreEqual(_expected, NewStateMenu.FolderForNewStates(_settingsPath));
         }
 
         [Test]
@@ -148,6 +168,51 @@ namespace AbstractPixel.GameManagement.Tests
             StateProblem problem = Only();
             Assert.IsTrue(problem.IsError);
             Assert.AreEqual("Credits only opens over Pause, which isn't in the state list, so Credits can never open.", problem.Message);
+        }
+
+        [Test]
+        public void AStateOutsideTheListIsAnErrorAndTheFixAddsIt()
+        {
+            StateSO pause = State("Pause", false);
+
+            List<StateProblem> problems = StateListValidator.FindForState(catalog, pause);
+
+            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual(StateProblemKind.NotInList, problems[0].Kind);
+            Assert.IsTrue(problems[0].IsError);
+            StateListValidator.Fix(catalog, problems[0]);
+            Assert.IsTrue(catalog.Contains(pause));
+        }
+
+        [Test]
+        public void AStateSeesOnlyItsOwnProblems()
+        {
+            StateSO play = State("Play", true);
+            StateSO other = State("Other", false);
+            State("Pause", true, other);
+
+            Assert.IsEmpty(StateListValidator.FindForState(catalog, play));
+        }
+
+        [Test]
+        public void EveryMemberOfAParentLoopSeesTheLoop()
+        {
+            StateSO first = State("First", true);
+            StateSO second = State("Second", true, first);
+            first.Parents.Add(second);
+
+            Assert.AreEqual(StateProblemKind.ParentLoop, StateListValidator.FindForState(catalog, second)[0].Kind);
+        }
+
+        [Test]
+        public void OnlyEmptyParentSlotsIsAnErrorBecauseTheStateCanNeverOpen()
+        {
+            State("Pause", true, new StateSO[] { null });
+
+            StateProblem problem = Only();
+
+            Assert.IsTrue(problem.IsError);
+            StringAssert.Contains("can never open", problem.Message);
         }
     }
 }

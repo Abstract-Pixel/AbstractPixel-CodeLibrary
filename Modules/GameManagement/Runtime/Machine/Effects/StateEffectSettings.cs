@@ -25,5 +25,8 @@ namespace AbstractPixel.GameManagement
         public StateEffectSource InputSource = StateEffectSource.SameAsParent;
         [Tooltip("Drag one action from each input action map this state turns on. Every other map of the input source is turned off.")]
         public List<InputActionReference> InputMaps = new List<InputActionReference>();
+
+        // Editor only: one bit per effect whose Own value the developer picked, so switching to Own never writes over it.
+        [HideInInspector, SerializeField] internal int PickedOwnValues;
     }
 }
