@@ -1,0 +1,25 @@
+{
+    "name": "AbstractPixel.GameManagement.Debugger",
+    "rootNamespace": "AbstractPixel.GameManagement.Debugging",
+    "references": [
+        "AbstractPixel.GameManagement",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "ABSTRACTPIXEL_BROAUDIO"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.ami.broaudio",
+            "expression": "",
+            "define": "ABSTRACTPIXEL_BROAUDIO"
+        }
+    ],
+    "noEngineReferences": false
+}

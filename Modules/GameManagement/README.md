@@ -44,6 +44,16 @@ the project has no settings of its own (never in batch mode, Play mode or tests;
   Buttons that need your scenes (Restart from Pause, Next Scene) are removed. A key to open Pause (Input Toggle Requester)
   and a Back key (Back Requester) are yours to add.
 
+## In-game debugger
+
+A read-only panel, top right: the state stack, the effects in force, the last refusal and the newest journal lines.
+It never takes input or the cursor, and works at time scale 0. It starts closed.
+
+- Editor: F8 (change it in Edit > Shortcuts).
+- Any build, and the Editor: set **Show or hide debugger** in the Debugger card. Input maps a state switches off do not silence it.
+- Builds: Development Builds hold it. A release build holds its code and UI assets only with **Include the debugger in release builds** on.
+- A state's colour follows its place in the state list. The first six differ.
+
 ## How Rally Shift uses it
 
 State assets are in `Assets/[1]Project/ProjectServices/GameManagment/States/`, with a persistent setup in

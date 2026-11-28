@@ -9,6 +9,9 @@ namespace AbstractPixel.GameManagement
         private int next;
         private int count;
 
+        /// <summary>Goes up with every record, also once the journal is full.</summary>
+        internal int Version { get; private set; }
+
         public TransitionJournal(int _capacity)
         {
             slots = new TransitionRecord[_capacity];
@@ -16,6 +19,7 @@ namespace AbstractPixel.GameManagement
 
         public void Add(TransitionRecord _record)
         {
+            Version++;
             slots[next] = _record;
             next = (next + 1) % slots.Length;
             if (count < slots.Length)

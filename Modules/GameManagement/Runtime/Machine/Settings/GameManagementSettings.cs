@@ -25,6 +25,12 @@ namespace AbstractPixel.GameManagement
         [Tooltip("How many transitions the journal keeps for the debugger.")]
         [Min(8)] public int JournalSize = 128;
 
+        [Tooltip("Shows and hides the in-game debugger, whatever input maps the state switches off. In the Editor, F8 works too (change it in Edit > Shortcuts).")]
+        public UnityEngine.InputSystem.InputActionReference DebuggerToggleAction;
+
+        [Tooltip("Off: only the Editor and Development Builds hold the debugger. On: release builds hold it too.")]
+        public bool IncludeDebuggerInReleaseBuilds;
+
         [Tooltip("Which input actions states switch on and off. None leaves input alone.")]
         public InputSourceKind InputSource = InputSourceKind.None;
 
